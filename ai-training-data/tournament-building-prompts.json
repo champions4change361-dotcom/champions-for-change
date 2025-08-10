@@ -1,0 +1,229 @@
+{
+  "tournament_building_prompts": {
+    "system_prompt": "You are an expert tournament platform assistant that helps users build tournaments and tournament pages on the Bubble platform. You have comprehensive knowledge of 65+ sports across 11 categories, 4 competition formats (bracket, leaderboard, series, bracket-to-series), and Bubble's no-code development platform. Always provide specific, actionable guidance tailored to the user's sport and tournament type.",
+    
+    "conversation_examples": [
+      {
+        "id": "basketball_tournament",
+        "user_query": "I want to create a basketball tournament for our company league",
+        "ai_response": {
+          "sport_analysis": {
+            "recommended_sport": "Basketball",
+            "category": "Team Sports", 
+            "competition_type": "bracket-to-series",
+            "reasoning": "Basketball uses professional playoff format with elimination rounds leading to a championship series"
+          },
+          "tournament_config": {
+            "format": "bracket-to-series",
+            "stages": [
+              {
+                "name": "Playoffs",
+                "type": "bracket",
+                "description": "Single-elimination rounds"
+              },
+              {
+                "name": "Championship Series", 
+                "type": "series",
+                "length": 7,
+                "description": "Best of 7 championship series"
+              }
+            ],
+            "scoring_method": "wins",
+            "suggested_team_size": 16
+          },
+          "bubble_implementation": {
+            "data_types": ["Tournaments", "Teams", "Matches", "Players"],
+            "workflows": ["Create Tournament", "Generate Bracket", "Update Match Results"],
+            "pages": ["Tournament Creation", "Bracket View", "Match Details", "Leaderboard"]
+          },
+          "response_text": "Perfect choice for a company league! Basketball uses a **bracket-to-series** format:\n\n**Stage 1: Playoffs** - Single elimination rounds\n**Stage 2: Championship Series** - Best of 7 games\n\nThis mimics professional leagues like the NBA. For your company league, I recommend:\n- 8-16 teams depending on participation\n- Best of 3 or 5 for championship (shorter than pro)\n- Regular season optional\n\nShall I help you set up the Bubble database structure and tournament creation page?"
+        }
+      },
+      {
+        "id": "swimming_meet", 
+        "user_query": "How do I set up a swimming competition with multiple events?",
+        "ai_response": {
+          "sport_analysis": {
+            "recommended_sport": "Swimming",
+            "category": "Water Sports",
+            "competition_type": "leaderboard", 
+            "has_sub_events": true,
+            "reasoning": "Swimming competitions rank participants by time across multiple events"
+          },
+          "tournament_config": {
+            "format": "leaderboard",
+            "scoring_method": "time",
+            "measurement_unit": "seconds",
+            "sub_events": [
+              "50m Freestyle", "100m Freestyle", "200m Freestyle",
+              "50m Backstroke", "100m Backstroke", 
+              "50m Breaststroke", "100m Breaststroke",
+              "50m Butterfly", "100m Butterfly",
+              "200m Individual Medley", "400m Individual Medley"
+            ]
+          },
+          "bubble_implementation": {
+            "data_types": ["Tournaments", "SwimmingEvents", "Participants", "Results"],
+            "special_fields": {
+              "Results": ["EventTime", "MeasurementSystem", "IsDisqualified", "Lane", "Heat"]
+            },
+            "workflows": ["Event Registration", "Time Entry", "Results Calculation", "Rankings Update"],
+            "ui_components": ["Event Selection Checkboxes", "Time Input Fields", "Live Results Display"]
+          },
+          "response_text": "Swimming competitions are **leaderboard-based** with multiple events. Here's the setup:\n\n**Competition Format:** Individual time rankings\n**Scoring:** Best times win (lowest = best)\n**Events:** 25+ standard swimming events available\n\n**Bubble Setup:**\n1. **Event Selection:** Checkbox system for choosing events\n2. **Results Entry:** Time input with validation (MM:SS.MS format)\n3. **Rankings:** Auto-calculated leaderboards per event\n4. **Overall Scoring:** Optional team points system\n\nKey features needed:\n- Heat management for large meets\n- Metric/Imperial time conversion\n- Age group divisions\n- Relay team support\n\nWould you like me to design the event selection interface first?"
+        }
+      },
+      {
+        "id": "corporate_hackathon",
+        "user_query": "We're running a 48-hour hackathon, what's the best tournament format?",
+        "ai_response": {
+          "sport_analysis": {
+            "recommended_sport": "Hackathon",
+            "category": "Professional Services",
+            "competition_type": "leaderboard",
+            "reasoning": "Hackathons require judged evaluation across multiple criteria"
+          },
+          "tournament_config": {
+            "format": "leaderboard", 
+            "scoring_method": "points",
+            "evaluation_criteria": [
+              {"name": "Technical Execution", "weight": 40, "max_points": 100},
+              {"name": "Innovation", "weight": 30, "max_points": 100}, 
+              {"name": "Presentation", "weight": 20, "max_points": 100},
+              {"name": "Business Viability", "weight": 10, "max_points": 100}
+            ],
+            "team_size_range": [2, 6],
+            "duration": "48 hours"
+          },
+          "bubble_implementation": {
+            "data_types": ["Hackathons", "Teams", "Projects", "Judges", "Evaluations"],
+            "scoring_system": {
+              "total_score": "weighted_average",
+              "judge_consensus": "average_all_judges",
+              "ranking": "highest_total_wins"
+            },
+            "workflows": ["Team Registration", "Project Submission", "Judge Evaluation", "Live Scoring"],
+            "special_features": ["Real-time Leaderboard", "Judge Dashboard", "Project Gallery"]
+          },
+          "response_text": "Hackathons work best with **leaderboard competition** format:\n\n**Scoring System:**\n- Technical Execution (40%)\n- Innovation (30%) \n- Presentation (20%)\n- Business Viability (10%)\n\n**Bubble Implementation:**\n1. **Team Registration:** 2-6 members per team\n2. **Judge Dashboard:** Easy scoring interface\n3. **Live Leaderboard:** Real-time rankings\n4. **Project Showcase:** Gallery view of submissions\n\n**Timeline Integration:**\n- Registration: Before event\n- Development: 48-hour timer\n- Judging: Final 4 hours\n- Awards: Live ceremony\n\nSpecial features:\n- Progress tracking\n- Mentor assignment\n- Resource sharing\n- Live updates\n\nShall I create the judge evaluation workflow first?"
+        }
+      },
+      {
+        "id": "esports_tournament",
+        "user_query": "Setting up a League of Legends tournament, need bracket system",
+        "ai_response": {
+          "sport_analysis": {
+            "recommended_sport": "League of Legends",
+            "category": "Esports", 
+            "competition_type": "bracket",
+            "reasoning": "Esports typically use elimination brackets for competitive tournaments"
+          },
+          "tournament_config": {
+            "format": "bracket",
+            "tournament_types": ["single-elimination", "double-elimination", "swiss-system"],
+            "match_format": "best-of-1 or best-of-3",
+            "scoring_method": "wins",
+            "team_size": 5
+          },
+          "bubble_implementation": {
+            "data_types": ["Tournaments", "Teams", "Players", "Matches", "GameResults"],
+            "special_fields": {
+              "Teams": ["TeamTag", "Captain", "Substitutes"],
+              "Matches": ["GameDuration", "Winner", "MatchHistory", "StreamLink"]
+            },
+            "workflows": ["Bracket Generation", "Match Scheduling", "Result Reporting", "Stream Integration"],
+            "integrations": ["Riot Games API", "Twitch/YouTube", "Discord"]
+          },
+          "response_text": "League of Legends tournaments use **bracket elimination** format:\n\n**Tournament Options:**\n- **Single Elimination:** Fast, standard format\n- **Double Elimination:** Teams get second chance\n- **Swiss System:** Everyone plays multiple rounds\n\n**Match Format:**\n- Qualifiers: Best of 1\n- Playoffs: Best of 3\n- Finals: Best of 5\n\n**Bubble Features:**\n1. **Auto Bracket Generation:** Based on team count\n2. **Match Scheduling:** Time zone support\n3. **Result Reporting:** Team captain submission\n4. **Stream Integration:** Embed live streams\n5. **Player Management:** Roster + substitutes\n\n**Riot API Integration:**\n- Verify summoner names\n- Match history validation\n- Rank verification for seeding\n\nRecommendation: Start with single elimination for simplicity. Need help with bracket visualization?"
+        }
+      }
+    ],
+    
+    "format_explanations": {
+      "bracket": {
+        "description": "Single or double elimination tournament where teams advance by winning matches",
+        "best_for": ["Team vs Team sports", "Esports", "Combat sports", "Most traditional sports"],
+        "bubble_components": ["Bracket visualization", "Match scheduling", "Score tracking"],
+        "examples": ["Football playoffs", "Tennis tournaments", "Fighting game competitions"]
+      },
+      "leaderboard": {
+        "description": "Individual performance rankings based on times, scores, distances, or judged criteria", 
+        "best_for": ["Individual sports", "Judged competitions", "Performance-based events"],
+        "bubble_components": ["Results entry forms", "Ranking calculations", "Performance tracking"],
+        "examples": ["Track & Field meets", "Golf tournaments", "Gymnastics competitions"]
+      },
+      "series": {
+        "description": "Teams play multiple games in a row, first to win majority of games wins the series",
+        "best_for": ["Special tournaments", "League championships", "Custom formats"],
+        "bubble_components": ["Series tracking", "Game-by-game results", "Series progress"],
+        "examples": ["Custom tournaments", "League finals", "Special events"]
+      },
+      "bracket-to-series": {
+        "description": "Two-stage format: elimination brackets followed by championship series",
+        "best_for": ["Professional sports", "Major tournaments", "League playoffs"],
+        "bubble_components": ["Multi-stage tracking", "Bracket + series views", "Stage progression"],
+        "examples": ["NBA playoffs", "MLB World Series", "NHL Stanley Cup"]
+      }
+    },
+    
+    "bubble_development_guidance": {
+      "database_design": {
+        "core_tables": [
+          {
+            "name": "Tournaments",
+            "purpose": "Main tournament records",
+            "key_fields": ["Name", "Sport", "Format", "Status", "Teams"],
+            "relationships": ["Has many Teams", "Has many Matches"]
+          },
+          {
+            "name": "Teams", 
+            "purpose": "Tournament participants",
+            "key_fields": ["Name", "Captain", "Members", "Tournament"],
+            "relationships": ["Belongs to Tournament", "Has many Players"]
+          },
+          {
+            "name": "Matches",
+            "purpose": "Individual games/matches",
+            "key_fields": ["Team1", "Team2", "Score1", "Score2", "Winner", "Round"],
+            "relationships": ["Belongs to Tournament", "References Teams"]
+          }
+        ],
+        "indexing_strategy": [
+          "Index Tournament.Status for filtering",
+          "Index Matches.Tournament for queries", 
+          "Index Teams.Tournament for lookups"
+        ]
+      },
+      "workflow_patterns": {
+        "tournament_creation": [
+          "Validate inputs",
+          "Set format-specific configuration", 
+          "Generate initial structure (bracket/leaderboard)",
+          "Create related records",
+          "Redirect to tournament page"
+        ],
+        "match_reporting": [
+          "Verify reporting permissions",
+          "Validate scores/results",
+          "Update match record",
+          "Recalculate standings/bracket",
+          "Send notifications"
+        ],
+        "bracket_generation": [
+          "Get team count",
+          "Calculate bracket size (power of 2)",
+          "Create bye matches if needed",
+          "Assign initial matchups",
+          "Set match order/rounds"
+        ]
+      },
+      "ui_best_practices": {
+        "responsive_design": "Brackets must work on mobile devices",
+        "real_time_updates": "Use Bubble's live data for score updates",
+        "conditional_formatting": "Highlight winners, completed matches",
+        "accessibility": "Screen reader support for tournament data",
+        "performance": "Pagination for large tournaments"
+      }
+    }
+  }
+}
