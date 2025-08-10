@@ -42,6 +42,7 @@ export default function TournamentCreationForm() {
 
   const selectedSport = sports.find(sport => sport.sportName === form.watch("sport"));
   const isLeaderboardSport = selectedSport?.competitionType === "leaderboard";
+  const isTrackAndField = selectedSport?.sportName?.includes("Track & Field");
   const selectedTournamentType = form.watch("tournamentType");
   const isMultiStage = ["pool-play", "round-robin", "swiss-system"].includes(selectedTournamentType);
 
@@ -301,6 +302,24 @@ export default function TournamentCreationForm() {
             </Select>
           </div>
         )}
+
+        {isTrackAndField && (
+          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+            <h3 className="font-semibold text-blue-900 mb-2">Track & Field Events</h3>
+            <p className="text-sm text-blue-700 mb-3">
+              After creating your tournament, you'll be able to select specific track and field events like:
+            </p>
+            <div className="grid grid-cols-2 gap-2 text-xs text-blue-600">
+              <div>• 100m, 200m, 400m Dash</div>
+              <div>• High Jump, Long Jump</div>
+              <div>• Shot Put, Discus Throw</div>
+              <div>• Relay Events</div>
+            </div>
+            <p className="text-xs text-blue-600 mt-2">
+              Choose between metric (meters) or imperial (feet) measurements for field events.
+            </p>
+          </div>
+        )}
         
         <Button 
           type="submit" 
@@ -316,7 +335,7 @@ export default function TournamentCreationForm() {
           ) : (
             <>
               <i className="fas fa-trophy mr-2"></i>
-              Create Tournament
+              {isTrackAndField ? "Create Track & Field Meet" : "Create Tournament"}
             </>
           )}
         </Button>

@@ -296,8 +296,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sportCategory: "1753907759981x546774752330226900", 
           sportSubcategory: "", 
           sortOrder: 1,
-          competitionType: "bracket",
-          scoringMethod: "wins"
+          competitionType: "bracket" as const,
+          scoringMethod: "wins" as const
         },
         { 
           id: "1754180977955x395946833660146800", 
@@ -305,8 +305,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sportCategory: "1753907759981x546774752330226900", 
           sportSubcategory: "", 
           sortOrder: 2,
-          competitionType: "bracket",
-          scoringMethod: "wins"
+          competitionType: "bracket" as const,
+          scoringMethod: "wins" as const
         },
         { 
           id: "1754181015919x333498357441713860", 
@@ -563,6 +563,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     for (const sport of sportOptionsData) {
       await storage.createSportOption(sport);
     }
+
+    // Import Track & Field events
+    if (sportOptionsData.find(s => s.sportName.includes("Track & Field"))) {
+      const trackFieldEvents = [
+        // Running Events - Sprints
+        { id: "tf-100m", eventName: "100 Meter Dash", sportId: "1754181255196x388986311669203840", eventType: "running", scoringMethod: "time", measurementUnit: "seconds", supportsMetric: true, supportsImperial: false, sortOrder: 1 },
+        { id: "tf-200m", eventName: "200 Meter Dash", sportId: "1754181255196x388986311669203840", eventType: "running", scoringMethod: "time", measurementUnit: "seconds", supportsMetric: true, supportsImperial: false, sortOrder: 2 },
+        { id: "tf-400m", eventName: "400 Meter Dash", sportId: "1754181255196x388986311669203840", eventType: "running", scoringMethod: "time", measurementUnit: "seconds", supportsMetric: true, supportsImperial: false, sortOrder: 3 },
+        
+        // Running Events - Middle Distance
+        { id: "tf-800m", eventName: "800 Meter Run", sportId: "1754181255196x388986311669203840", eventType: "running", scoringMethod: "time", measurementUnit: "seconds", supportsMetric: true, supportsImperial: false, sortOrder: 4 },
+        { id: "tf-1600m", eventName: "1600 Meter Run", sportId: "1754181255196x388986311669203840", eventType: "running", scoringMethod: "time", measurementUnit: "seconds", supportsMetric: true, supportsImperial: false, sortOrder: 5 },
+        
+        // Running Events - Long Distance  
+        { id: "tf-3200m", eventName: "3200 Meter Run", sportId: "1754181255196x388986311669203840", eventType: "running", scoringMethod: "time", measurementUnit: "seconds", supportsMetric: true, supportsImperial: false, sortOrder: 6 },
+        
+        // Hurdles
+        { id: "tf-110h", eventName: "110 Meter Hurdles", sportId: "1754181255196x388986311669203840", eventType: "running", scoringMethod: "time", measurementUnit: "seconds", supportsMetric: true, supportsImperial: false, gender: "male", sortOrder: 7 },
+        { id: "tf-100h", eventName: "100 Meter Hurdles", sportId: "1754181255196x388986311669203840", eventType: "running", scoringMethod: "time", measurementUnit: "seconds", supportsMetric: true, supportsImperial: false, gender: "female", sortOrder: 8 },
+        { id: "tf-300h", eventName: "300 Meter Hurdles", sportId: "1754181255196x388986311669203840", eventType: "running", scoringMethod: "time", measurementUnit: "seconds", supportsMetric: true, supportsImperial: false, sortOrder: 9 },
+        
+        // Jumping Events
+        { id: "tf-hj", eventName: "High Jump", sportId: "1754181255196x388986311669203840", eventType: "jumping", scoringMethod: "height", measurementUnit: "meters", supportsMetric: true, supportsImperial: true, sortOrder: 10 },
+        { id: "tf-pv", eventName: "Pole Vault", sportId: "1754181255196x388986311669203840", eventType: "jumping", scoringMethod: "height", measurementUnit: "meters", supportsMetric: true, supportsImperial: true, sortOrder: 11 },
+        { id: "tf-lj", eventName: "Long Jump", sportId: "1754181255196x388986311669203840", eventType: "jumping", scoringMethod: "distance", measurementUnit: "meters", supportsMetric: true, supportsImperial: true, sortOrder: 12 },
+        { id: "tf-tj", eventName: "Triple Jump", sportId: "1754181255196x388986311669203840", eventType: "jumping", scoringMethod: "distance", measurementUnit: "meters", supportsMetric: true, supportsImperial: true, sortOrder: 13 },
+        
+        // Throwing Events
+        { id: "tf-shot", eventName: "Shot Put", sportId: "1754181255196x388986311669203840", eventType: "throwing", scoringMethod: "distance", measurementUnit: "meters", supportsMetric: true, supportsImperial: true, sortOrder: 14 },
+        { id: "tf-discus", eventName: "Discus Throw", sportId: "1754181255196x388986311669203840", eventType: "throwing", scoringMethod: "distance", measurementUnit: "meters", supportsMetric: true, supportsImperial: true, sortOrder: 15 },
+        { id: "tf-hammer", eventName: "Hammer Throw", sportId: "1754181255196x388986311669203840", eventType: "throwing", scoringMethod: "distance", measurementUnit: "meters", supportsMetric: true, supportsImperial: true, sortOrder: 16 },
+        { id: "tf-javelin", eventName: "Javelin Throw", sportId: "1754181255196x388986311669203840", eventType: "throwing", scoringMethod: "distance", measurementUnit: "meters", supportsMetric: true, supportsImperial: true, sortOrder: 17 },
+        
+        // Relays
+        { id: "tf-4x100", eventName: "4x100 Meter Relay", sportId: "1754181255196x388986311669203840", eventType: "running", scoringMethod: "time", measurementUnit: "seconds", supportsMetric: true, supportsImperial: false, sortOrder: 18 },
+        { id: "tf-4x400", eventName: "4x400 Meter Relay", sportId: "1754181255196x388986311669203840", eventType: "running", scoringMethod: "time", measurementUnit: "seconds", supportsMetric: true, supportsImperial: false, sortOrder: 19 },
+      ];
+
+      for (const event of trackFieldEvents) {
+        await storage.createSportEvent(event);
+      }
+    }
   }
 
   async function advanceWinner(tournamentId: string, round: number, position: number, winner: string) {
@@ -587,7 +629,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if tournament should be in progress
       const hasStartedMatches = allMatches.some(m => m.status === "in-progress" || m.status === "completed");
       if (hasStartedMatches) {
-        await storage.updateTournament(tournamentId, { status: "in-progress" });
+        await storage.updateTournament(tournamentId, { status: "stage-1" });
       }
     }
   }

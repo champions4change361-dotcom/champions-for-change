@@ -34,6 +34,19 @@ export interface IStorage {
   getSportOptions(): Promise<SportOption[]>;
   getTournamentStructures(): Promise<TournamentStructure[]>;
   getTrackEvents(): Promise<TrackEvent[]>;
+
+  // Sport Events methods
+  createSportEvent(event: any): Promise<any>;
+  getSportEventsBySport(sportId: string): Promise<any[]>;
+  getSportEvents(): Promise<any[]>;
+
+  // Tournament Events methods
+  createTournamentEvent(event: any): Promise<any>;
+  getTournamentEventsByTournament(tournamentId: string): Promise<any[]>;
+
+  // Participant Events methods
+  createParticipantEvent(event: any): Promise<any>;
+  getParticipantEventsByTournament(tournamentEventId: string): Promise<any[]>;
   
   // Leaderboard methods
   createLeaderboardEntry(entry: any): Promise<any>;
