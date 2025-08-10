@@ -48,6 +48,19 @@ export interface IStorage {
   createParticipantEvent(event: any): Promise<any>;
   getParticipantEventsByTournament(tournamentEventId: string): Promise<any[]>;
   
+  // Sport Events methods
+  createSportEvent(event: any): Promise<any>;
+  getSportEventsBySport(sportId: string): Promise<any[]>;
+  getSportEvents(): Promise<any[]>;
+
+  // Tournament Events methods
+  createTournamentEvent(event: any): Promise<any>;
+  getTournamentEventsByTournament(tournamentId: string): Promise<any[]>;
+
+  // Participant Events methods
+  createParticipantEvent(event: any): Promise<any>;
+  getParticipantEventsByTournament(tournamentEventId: string): Promise<any[]>;
+  
   // Leaderboard methods
   createLeaderboardEntry(entry: any): Promise<any>;
   getLeaderboardEntries(tournamentId: string): Promise<any[]>;
@@ -459,6 +472,47 @@ export class MemStorage implements IStorage {
 
   async getTrackEvents(): Promise<TrackEvent[]> {
     return Array.from(this.trackEvents.values()).sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+  }
+
+  // Sport Events methods
+  private sportEvents: Map<string, any> = new Map();
+  private tournamentEvents: Map<string, any> = new Map();
+  private participantEvents: Map<string, any> = new Map();
+
+  async createSportEvent(event: any): Promise<any> {
+    const created = { ...event, createdAt: new Date() };
+    this.sportEvents.set(event.id, created);
+    return created;
+  }
+
+  async getSportEventsBySport(sportId: string): Promise<any[]> {
+    return Array.from(this.sportEvents.values()).filter(e => e.sportId === sportId);
+  }
+
+  async getSportEvents(): Promise<any[]> {
+    return Array.from(this.sportEvents.values());
+  }
+
+  async createTournamentEvent(event: any): Promise<any> {
+    const id = randomUUID();
+    const created = { ...event, id, createdAt: new Date() };
+    this.tournamentEvents.set(id, created);
+    return created;
+  }
+
+  async getTournamentEventsByTournament(tournamentId: string): Promise<any[]> {
+    return Array.from(this.tournamentEvents.values()).filter(e => e.tournamentId === tournamentId);
+  }
+
+  async createParticipantEvent(event: any): Promise<any> {
+    const id = randomUUID();
+    const created = { ...event, id, createdAt: new Date() };
+    this.participantEvents.set(id, created);
+    return created;
+  }
+
+  async getParticipantEventsByTournament(tournamentEventId: string): Promise<any[]> {
+    return Array.from(this.participantEvents.values()).filter(e => e.tournamentEventId === tournamentEventId);
   }
 }
 

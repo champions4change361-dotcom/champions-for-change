@@ -4,7 +4,7 @@
 
 This is a full-stack tournament bracket management application that allows users to create and manage single-elimination tournaments with interactive bracket visualization and real-time match updates. The application features a React frontend with a Node.js/Express backend, using PostgreSQL for data persistence and in-memory storage as a fallback.
 
-**Status**: Fully functional with comprehensive Bubble database integration. System includes import functionality for 59+ sports, 30+ tournament formats, and track events. Features interactive bracket management with team name editing and complete tournament lifecycle management.
+**Status**: Fully functional with comprehensive Track & Field event management system. Features individual event leaderboards with time/distance/height scoring, metric/imperial measurements, team championship standings, and participant management with stakes tracking for throwing events.
 
 ## User Preferences
 

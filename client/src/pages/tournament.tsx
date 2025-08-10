@@ -4,6 +4,7 @@ import { ArrowLeft, RefreshCw } from "lucide-react";
 import BracketVisualization from "@/components/bracket-visualization";
 import LeaderboardView from "@/components/leaderboard-view";
 import MultiStageTournament from "@/components/multi-stage-tournament";
+import TrackFieldTournament from "@/components/track-field-tournament";
 import { type Tournament, type Match } from "@shared/schema";
 
 interface TournamentData {
@@ -158,7 +159,9 @@ export default function Tournament() {
           </div>
           
           {/* Render appropriate tournament view based on format */}
-          {tournament.competitionFormat === "multi-stage" ? (
+          {tournament.sport?.includes("Track & Field") ? (
+            <TrackFieldTournament tournamentId={tournament.id} tournamentName={tournament.name} />
+          ) : tournament.competitionFormat === "multi-stage" ? (
             <MultiStageTournament tournament={tournament} />
           ) : tournament.competitionFormat === "leaderboard" ? (
             <LeaderboardView tournament={tournament} />
