@@ -4,6 +4,8 @@
 
 This is a full-stack tournament bracket management application that allows users to create and manage single-elimination tournaments with interactive bracket visualization and real-time match updates. The application features a React frontend with a Node.js/Express backend, using PostgreSQL for data persistence and in-memory storage as a fallback.
 
+**Status**: Fully functional and ready for use. The system automatically connects to Supabase database when available, with graceful fallback to in-memory storage.
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.

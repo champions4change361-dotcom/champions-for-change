@@ -23,8 +23,8 @@ export default function Home() {
               <h1 className="text-xl font-bold text-neutral">Tournament Manager</h1>
             </div>
             <nav className="flex items-center space-x-6">
-              <Link href="/" data-testid="link-tournaments">
-                <a className="text-neutral hover:text-tournament-primary transition-colors">Tournaments</a>
+              <Link href="/" data-testid="link-tournaments" className="text-neutral hover:text-tournament-primary transition-colors">
+                Tournaments
               </Link>
               <span className="text-neutral">Create</span>
             </nav>
