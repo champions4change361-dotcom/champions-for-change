@@ -48,7 +48,7 @@ export default function TournamentCreationForm() {
   const isTrackAndField = selectedSport?.sportName?.includes("Track & Field");
   const isSwimming = selectedSport?.sportName?.includes("Swimming");
   const isGolf = selectedSport?.sportName?.includes("Golf");
-  const isFishingHunting = selectedSport?.sportName?.includes("Fishing") || selectedSport?.sportName?.includes("Hunting");
+  const isFishingHunting = selectedSport?.sportName?.includes("Fishing") || selectedSport?.sportName?.includes("Hunting") || selectedSport?.sportName?.includes("Angling") || selectedSport?.sportName?.includes("Wildlife");
   const needsEventSelection = isTrackAndField || isSwimming || isGolf || isFishingHunting;
   const selectedTournamentType = form.watch("tournamentType");
   const isMultiStage = ["pool-play", "round-robin", "swiss-system"].includes(selectedTournamentType);

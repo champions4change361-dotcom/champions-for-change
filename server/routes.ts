@@ -383,6 +383,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
           competitionType: "bracket",
           scoringMethod: "wins"
         },
+        { 
+          id: "1754808200000x123456789012345600", 
+          sportName: "Fishing & Angling", 
+          sportCategory: "1753907823621x983678515921424100", 
+          sportSubcategory: "", 
+          sortOrder: 9,
+          competitionType: "leaderboard",
+          scoringMethod: "points",
+          measurementUnit: "weight"
+        },
+        { 
+          id: "1754808300000x987654321098765400", 
+          sportName: "Hunting & Wildlife", 
+          sportCategory: "1753907823621x983678515921424100", 
+          sportSubcategory: "", 
+          sortOrder: 10,
+          competitionType: "leaderboard",
+          scoringMethod: "points",
+          measurementUnit: "points"
+        }
       ];
 
       for (const sport of sportOptionsData) {
@@ -558,6 +578,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         competitionType: "bracket",
         scoringMethod: "wins"
       },
+      { 
+        id: "1754808200000x123456789012345600", 
+        sportName: "Fishing & Angling", 
+        sportCategory: "1753907823621x983678515921424100", 
+        sportSubcategory: "", 
+        sortOrder: 9,
+        competitionType: "leaderboard",
+        scoringMethod: "points",
+        measurementUnit: "weight"
+      },
+      { 
+        id: "1754808300000x987654321098765400", 
+        sportName: "Hunting & Wildlife", 
+        sportCategory: "1753907823621x983678515921424100", 
+        sportSubcategory: "", 
+        sortOrder: 10,
+        competitionType: "leaderboard",
+        scoringMethod: "points",
+        measurementUnit: "points"
+      }
     ];
 
     for (const sport of sportOptionsData) {
