@@ -5,7 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Timer, Ruler, TrendingUp, Waves, Users, Target } from "lucide-react";
+import { Timer, Ruler, TrendingUp, Waves, Users, Target, Trophy } from "lucide-react";
 
 interface EventSelectionModalProps {
   isOpen: boolean;
@@ -73,6 +73,61 @@ const TRACK_FIELD_EVENTS: SportEvent[] = [
   { id: "pentathlon", name: "Pentathlon", category: "combined", scoringMethod: "points", measurementUnit: "points", description: "5 events combined scoring" }
 ];
 
+const GOLF_EVENTS: SportEvent[] = [
+  // Tournament Formats
+  { id: "stroke-play", name: "Stroke Play", category: "tournament", scoringMethod: "points", measurementUnit: "strokes", description: "Lowest total score wins" },
+  { id: "match-play", name: "Match Play", category: "tournament", scoringMethod: "points", measurementUnit: "holes", description: "Head-to-head hole by hole" },
+  { id: "scramble", name: "Scramble", category: "tournament", scoringMethod: "points", measurementUnit: "strokes", description: "Team format, best ball" },
+  { id: "best-ball", name: "Best Ball", category: "tournament", scoringMethod: "points", measurementUnit: "strokes", description: "Team format, lowest score counts" },
+  { id: "alternate-shot", name: "Alternate Shot", category: "tournament", scoringMethod: "points", measurementUnit: "strokes", description: "Partners alternate shots" },
+  { id: "skins", name: "Skins Game", category: "tournament", scoringMethod: "points", measurementUnit: "points", description: "Win holes for points" },
+  
+  // Skills Competitions (for youth/middle school)
+  { id: "driving-accuracy", name: "Driving Accuracy", category: "skills", scoringMethod: "points", measurementUnit: "points", description: "Hit targets from tee" },
+  { id: "driving-distance", name: "Driving Distance", category: "skills", scoringMethod: "distance", measurementUnit: "yards", description: "Longest drive wins" },
+  { id: "putting-contest", name: "Putting Contest", category: "skills", scoringMethod: "points", measurementUnit: "points", description: "Sink putts from various distances" },
+  { id: "chipping-accuracy", name: "Chipping Accuracy", category: "skills", scoringMethod: "points", measurementUnit: "points", description: "Chip closest to pin" },
+  { id: "iron-play", name: "Iron Play Accuracy", category: "skills", scoringMethod: "points", measurementUnit: "points", description: "Hit targets with irons" },
+  { id: "bunker-play", name: "Bunker Play", category: "skills", scoringMethod: "points", measurementUnit: "points", description: "Get out of sand traps" },
+  { id: "longest-putt", name: "Longest Putt", category: "skills", scoringMethod: "distance", measurementUnit: "feet", description: "Sink the longest putt" },
+  { id: "straightest-drive", name: "Straightest Drive", category: "skills", scoringMethod: "points", measurementUnit: "points", description: "Most accurate drive" },
+  { id: "closest-to-pin", name: "Closest to Pin", category: "skills", scoringMethod: "distance", measurementUnit: "inches", description: "Get closest to flagstick" },
+  
+  // Age Group Competitions
+  { id: "par-3-challenge", name: "Par 3 Challenge", category: "youth", scoringMethod: "points", measurementUnit: "strokes", description: "Short course competition" },
+  { id: "pitch-putt", name: "Pitch & Putt", category: "youth", scoringMethod: "points", measurementUnit: "strokes", description: "Short game focus" },
+  { id: "target-golf", name: "Target Golf", category: "youth", scoringMethod: "points", measurementUnit: "points", description: "Hit various targets" }
+];
+
+const FISHING_HUNTING_EVENTS: SportEvent[] = [
+  // Fishing Events
+  { id: "bass-tournament", name: "Bass Tournament", category: "fishing", scoringMethod: "points", measurementUnit: "pounds", description: "Heaviest bass wins" },
+  { id: "multi-species", name: "Multi-Species", category: "fishing", scoringMethod: "points", measurementUnit: "points", description: "Catch different fish species" },
+  { id: "fly-fishing", name: "Fly Fishing", category: "fishing", scoringMethod: "points", measurementUnit: "fish", description: "Catch using flies only" },
+  { id: "ice-fishing", name: "Ice Fishing", category: "fishing", scoringMethod: "points", measurementUnit: "pounds", description: "Winter fishing competition" },
+  { id: "catch-release", name: "Catch & Release", category: "fishing", scoringMethod: "points", measurementUnit: "fish", description: "Count and release" },
+  { id: "biggest-fish", name: "Biggest Fish", category: "fishing", scoringMethod: "points", measurementUnit: "pounds", description: "Single heaviest fish" },
+  { id: "most-fish", name: "Most Fish", category: "fishing", scoringMethod: "points", measurementUnit: "fish", description: "Highest fish count" },
+  { id: "kids-fishing", name: "Kids Fishing Derby", category: "fishing", scoringMethod: "points", measurementUnit: "fish", description: "Youth fishing event" },
+  { id: "team-fishing", name: "Team Fishing", category: "fishing", scoringMethod: "points", measurementUnit: "pounds", description: "Team combined weight" },
+  
+  // Hunting Events
+  { id: "archery-hunt", name: "Archery Hunt", category: "hunting", scoringMethod: "points", measurementUnit: "points", description: "Bow hunting competition" },
+  { id: "turkey-calling", name: "Turkey Calling", category: "hunting", scoringMethod: "points", measurementUnit: "points", description: "Best turkey call contest" },
+  { id: "duck-calling", name: "Duck Calling", category: "hunting", scoringMethod: "points", measurementUnit: "points", description: "Waterfowl calling contest" },
+  { id: "big-game", name: "Big Game Hunt", category: "hunting", scoringMethod: "points", measurementUnit: "points", description: "Deer, elk hunting" },
+  { id: "small-game", name: "Small Game Hunt", category: "hunting", scoringMethod: "points", measurementUnit: "animals", description: "Rabbit, squirrel hunting" },
+  { id: "predator-hunt", name: "Predator Hunt", category: "hunting", scoringMethod: "points", measurementUnit: "animals", description: "Coyote, fox hunting" },
+  { id: "youth-hunt", name: "Youth Hunt", category: "hunting", scoringMethod: "points", measurementUnit: "points", description: "Young hunter events" },
+  
+  // Skills Competitions
+  { id: "target-practice", name: "Target Practice", category: "skills", scoringMethod: "points", measurementUnit: "points", description: "Shooting accuracy contest" },
+  { id: "clay-shooting", name: "Clay Shooting", category: "skills", scoringMethod: "points", measurementUnit: "targets", description: "Trap and skeet shooting" },
+  { id: "bow-accuracy", name: "Bow Accuracy", category: "skills", scoringMethod: "points", measurementUnit: "points", description: "Archery target practice" },
+  { id: "hunting-safety", name: "Hunting Safety", category: "skills", scoringMethod: "points", measurementUnit: "points", description: "Safety knowledge test" },
+  { id: "wildlife-id", name: "Wildlife Identification", category: "skills", scoringMethod: "points", measurementUnit: "points", description: "Identify animals/tracks" }
+];
+
 const SWIMMING_EVENTS: SportEvent[] = [
   // Freestyle
   { id: "50m-freestyle", name: "50m Freestyle", category: "freestyle", scoringMethod: "time", measurementUnit: "seconds", description: "Fastest time wins" },
@@ -116,7 +171,9 @@ export default function EventSelectionModal({ isOpen, onClose, sportType, onEven
   const [selectedEvents, setSelectedEvents] = useState<Set<string>>(new Set());
   
   const events = sportType.includes("Track & Field") ? TRACK_FIELD_EVENTS : 
-                 sportType.includes("Swimming") ? SWIMMING_EVENTS : [];
+                 sportType.includes("Swimming") ? SWIMMING_EVENTS : 
+                 sportType.includes("Golf") ? GOLF_EVENTS :
+                 sportType.includes("Fishing") || sportType.includes("Hunting") ? FISHING_HUNTING_EVENTS : [];
   
   const categories = [...new Set(events.map(event => event.category))];
   
@@ -143,6 +200,16 @@ export default function EventSelectionModal({ isOpen, onClose, sportType, onEven
         return <Waves className="w-4 h-4 text-blue-600" />;
       case "diving":
         return <TrendingUp className="w-4 h-4 text-cyan-600" />;
+      case "tournament":
+        return <Trophy className="w-4 h-4 text-yellow-600" />;
+      case "skills":
+        return <Target className="w-4 h-4 text-orange-600" />;
+      case "youth":
+        return <Users className="w-4 h-4 text-pink-600" />;
+      case "fishing":
+        return <Waves className="w-4 h-4 text-teal-600" />;
+      case "hunting":
+        return <Target className="w-4 h-4 text-brown-600" />;
       default:
         return <Timer className="w-4 h-4" />;
     }

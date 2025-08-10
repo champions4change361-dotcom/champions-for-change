@@ -47,7 +47,9 @@ export default function TournamentCreationForm() {
   const isLeaderboardSport = selectedSport?.competitionType === "leaderboard";
   const isTrackAndField = selectedSport?.sportName?.includes("Track & Field");
   const isSwimming = selectedSport?.sportName?.includes("Swimming");
-  const needsEventSelection = isTrackAndField || isSwimming;
+  const isGolf = selectedSport?.sportName?.includes("Golf");
+  const isFishingHunting = selectedSport?.sportName?.includes("Fishing") || selectedSport?.sportName?.includes("Hunting");
+  const needsEventSelection = isTrackAndField || isSwimming || isGolf || isFishingHunting;
   const selectedTournamentType = form.watch("tournamentType");
   const isMultiStage = ["pool-play", "round-robin", "swiss-system"].includes(selectedTournamentType);
 
@@ -312,7 +314,10 @@ export default function TournamentCreationForm() {
           <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-semibold text-blue-900">
-                {isTrackAndField ? "Track & Field Events" : "Swimming Events"}
+                {isTrackAndField ? "Track & Field Events" : 
+                 isSwimming ? "Swimming & Diving Events" :
+                 isGolf ? "Golf Events" :
+                 isFishingHunting ? "Fishing & Hunting Events" : "Event Selection"}
               </h3>
               <Button
                 type="button"
@@ -344,7 +349,12 @@ export default function TournamentCreationForm() {
             ) : (
               <div>
                 <p className="text-sm text-blue-700 mb-2">
-                  Select from {isTrackAndField ? "30+ track and field" : "25+ swimming and diving"} events:
+                  Select from {
+                    isTrackAndField ? "30+ track and field" : 
+                    isSwimming ? "25+ swimming and diving" :
+                    isGolf ? "20+ golf tournament and skills" :
+                    isFishingHunting ? "20+ fishing and hunting" : "available"
+                  } events:
                 </p>
                 <div className="grid grid-cols-2 gap-2 text-xs text-blue-600">
                   {isTrackAndField ? (
@@ -354,13 +364,29 @@ export default function TournamentCreationForm() {
                       <div>• Throwing Events</div>
                       <div>• Relay & Combined Events</div>
                     </>
-                  ) : (
+                  ) : isSwimming ? (
                     <>
                       <div>• Freestyle, Backstroke</div>
                       <div>• Breaststroke, Butterfly</div>
                       <div>• Individual Medley</div>
                       <div>• Relay & Diving Events</div>
                     </>
+                  ) : isGolf ? (
+                    <>
+                      <div>• Stroke Play, Match Play</div>
+                      <div>• Scramble, Best Ball</div>
+                      <div>• Skills Competitions</div>
+                      <div>• Youth Events</div>
+                    </>
+                  ) : isFishingHunting ? (
+                    <>
+                      <div>• Bass, Multi-Species</div>
+                      <div>• Archery, Big Game</div>
+                      <div>• Skills Competitions</div>
+                      <div>• Youth Events</div>
+                    </>
+                  ) : (
+                    <div>• Various event types</div>
                   )}
                 </div>
               </div>

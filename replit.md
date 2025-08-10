@@ -4,7 +4,7 @@
 
 This is a full-stack tournament bracket management application that allows users to create and manage single-elimination tournaments with interactive bracket visualization and real-time match updates. The application features a React frontend with a Node.js/Express backend, using PostgreSQL for data persistence and in-memory storage as a fallback.
 
-**Status**: Fully functional with comprehensive Track & Field event management system. Features individual event leaderboards with time/distance/height scoring, metric/imperial measurements, team championship standings, and participant management with stakes tracking for throwing events.
+**Status**: Fully functional multi-sport tournament management system with comprehensive event selection for Track & Field, Swimming & Diving, Golf, and Fishing & Hunting. Features 70+ sport-specific events with checkbox selection system, category-based organization, and specialized scoring methods for each discipline.
 
 ## User Preferences
 
@@ -54,5 +54,7 @@ Preferred communication style: Simple, everyday language.
 - **Component Composition**: Reusable UI components with consistent styling and behavior
 - **Type Safety**: End-to-end TypeScript with runtime validation using Zod
 - **Progressive Enhancement**: Fallback storage system ensures application works without database connection
-- **Data Integration**: Bubble database import system with comprehensive sports and tournament structure support
-- **Interactive Bracket Management**: Real-time team name editing and match progression with visual feedback
+- **Multi-Sport Event Management**: Comprehensive event selection system covering Track & Field (30+ events), Swimming & Diving (25+ events), Golf (20+ events including youth skills), and Fishing & Hunting (20+ events)
+- **Advanced Event Selection**: Checkbox-based interface with category grouping, "Select All" functionality, and real-time event counters
+- **Sport-Specific Scoring**: Time-based (running/swimming), distance-based (throwing/jumping), stroke-based (golf), weight-based (fishing), and point-based (skills competitions) scoring systems
+- **Youth Program Support**: Specialized events for middle school programs including golf skills competitions and youth hunting/fishing derbies
