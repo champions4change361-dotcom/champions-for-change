@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { insertTournamentSchema } from "@shared/schema";
+import EventSelectionModal from "@/components/event-selection-modal";
 
 const formSchema = insertTournamentSchema.extend({
   teamSize: z.number().min(4).max(32),
@@ -24,6 +25,8 @@ type FormData = z.infer<typeof formSchema>;
 export default function TournamentCreationForm() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [showEventModal, setShowEventModal] = useState(false);
+  const [selectedEvents, setSelectedEvents] = useState<any[]>([]);
 
   const { data: sports = [] } = useQuery<any[]>({
     queryKey: ["/api/sports"],
@@ -43,6 +46,8 @@ export default function TournamentCreationForm() {
   const selectedSport = sports.find(sport => sport.sportName === form.watch("sport"));
   const isLeaderboardSport = selectedSport?.competitionType === "leaderboard";
   const isTrackAndField = selectedSport?.sportName?.includes("Track & Field");
+  const isSwimming = selectedSport?.sportName?.includes("Swimming");
+  const needsEventSelection = isTrackAndField || isSwimming;
   const selectedTournamentType = form.watch("tournamentType");
   const isMultiStage = ["pool-play", "round-robin", "swiss-system"].includes(selectedTournamentType);
 
@@ -303,21 +308,63 @@ export default function TournamentCreationForm() {
           </div>
         )}
 
-        {isTrackAndField && (
+        {needsEventSelection && (
           <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-            <h3 className="font-semibold text-blue-900 mb-2">Track & Field Events</h3>
-            <p className="text-sm text-blue-700 mb-3">
-              After creating your tournament, you'll be able to select specific track and field events like:
-            </p>
-            <div className="grid grid-cols-2 gap-2 text-xs text-blue-600">
-              <div>• 100m, 200m, 400m Dash</div>
-              <div>• High Jump, Long Jump</div>
-              <div>• Shot Put, Discus Throw</div>
-              <div>• Relay Events</div>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-blue-900">
+                {isTrackAndField ? "Track & Field Events" : "Swimming Events"}
+              </h3>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShowEventModal(true)}
+                data-testid="button-select-events"
+              >
+                Select Events ({selectedEvents.length})
+              </Button>
             </div>
-            <p className="text-xs text-blue-600 mt-2">
-              Choose between metric (meters) or imperial (feet) measurements for field events.
-            </p>
+            
+            {selectedEvents.length > 0 ? (
+              <div className="space-y-2">
+                <p className="text-sm text-blue-700 font-medium">Selected Events:</p>
+                <div className="flex flex-wrap gap-1">
+                  {selectedEvents.slice(0, 6).map((event) => (
+                    <Badge key={event.id} variant="secondary" className="text-xs">
+                      {event.name}
+                    </Badge>
+                  ))}
+                  {selectedEvents.length > 6 && (
+                    <Badge variant="secondary" className="text-xs">
+                      +{selectedEvents.length - 6} more
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div>
+                <p className="text-sm text-blue-700 mb-2">
+                  Select from {isTrackAndField ? "30+ track and field" : "25+ swimming and diving"} events:
+                </p>
+                <div className="grid grid-cols-2 gap-2 text-xs text-blue-600">
+                  {isTrackAndField ? (
+                    <>
+                      <div>• Sprint, Distance, Hurdles</div>
+                      <div>• Jump & Field Events</div>
+                      <div>• Throwing Events</div>
+                      <div>• Relay & Combined Events</div>
+                    </>
+                  ) : (
+                    <>
+                      <div>• Freestyle, Backstroke</div>
+                      <div>• Breaststroke, Butterfly</div>
+                      <div>• Individual Medley</div>
+                      <div>• Relay & Diving Events</div>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
         
@@ -340,6 +387,19 @@ export default function TournamentCreationForm() {
           )}
         </Button>
       </form>
+
+      <EventSelectionModal
+        isOpen={showEventModal}
+        onClose={() => setShowEventModal(false)}
+        sportType={selectedSport?.sportName || ""}
+        onEventsSelected={(events) => {
+          setSelectedEvents(events);
+          toast({
+            title: "Events Selected",
+            description: `${events.length} events added to your tournament`,
+          });
+        }}
+      />
     </div>
   );
 }
