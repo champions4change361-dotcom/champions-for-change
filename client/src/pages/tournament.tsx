@@ -29,11 +29,9 @@ export default function Tournament() {
                 <i className="fas fa-trophy text-tournament-primary text-2xl"></i>
                 <h1 className="text-xl font-bold text-neutral">Tournament Manager</h1>
               </div>
-              <Link href="/" data-testid="link-back-home">
-                <a className="flex items-center text-neutral hover:text-tournament-primary transition-colors">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Home
-                </a>
+              <Link href="/" data-testid="link-back-home" className="flex items-center text-neutral hover:text-tournament-primary transition-colors">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Home
               </Link>
             </div>
           </div>
@@ -60,11 +58,9 @@ export default function Tournament() {
                 <i className="fas fa-trophy text-tournament-primary text-2xl"></i>
                 <h1 className="text-xl font-bold text-neutral">Tournament Manager</h1>
               </div>
-              <Link href="/" data-testid="link-back-home">
-                <a className="flex items-center text-neutral hover:text-tournament-primary transition-colors">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Home
-                </a>
+              <Link href="/" data-testid="link-back-home" className="flex items-center text-neutral hover:text-tournament-primary transition-colors">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Home
               </Link>
             </div>
           </div>
@@ -75,11 +71,9 @@ export default function Tournament() {
               <i className="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
               <h2 className="text-xl font-bold text-gray-900 mb-2">Tournament Not Found</h2>
               <p className="text-gray-600 mb-4">The tournament you're looking for doesn't exist or has been deleted.</p>
-              <Link href="/" data-testid="link-back-home-error">
-                <a className="inline-flex items-center px-4 py-2 bg-tournament-primary text-white rounded-lg hover:bg-blue-700 transition-colors">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Home
-                </a>
+              <Link href="/" data-testid="link-back-home-error" className="inline-flex items-center px-4 py-2 bg-tournament-primary text-white rounded-lg hover:bg-blue-700 transition-colors">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Home
               </Link>
             </div>
           </div>
@@ -124,11 +118,9 @@ export default function Tournament() {
               <i className="fas fa-trophy text-tournament-primary text-2xl"></i>
               <h1 className="text-xl font-bold text-neutral">Tournament Manager</h1>
             </div>
-            <Link href="/" data-testid="link-back-home">
-              <a className="flex items-center text-neutral hover:text-tournament-primary transition-colors">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Home
-              </a>
+            <Link href="/" data-testid="link-back-home" className="flex items-center text-neutral hover:text-tournament-primary transition-colors">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Home
             </Link>
           </div>
         </div>

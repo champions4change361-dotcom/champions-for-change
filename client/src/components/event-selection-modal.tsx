@@ -175,7 +175,7 @@ export default function EventSelectionModal({ isOpen, onClose, sportType, onEven
                  sportType.includes("Golf") ? GOLF_EVENTS :
                  sportType.includes("Fishing") || sportType.includes("Hunting") ? FISHING_HUNTING_EVENTS : [];
   
-  const categories = [...new Set(events.map(event => event.category))];
+  const categories = Array.from(new Set(events.map(event => event.category)));
   
   const getEventIcon = (category: string) => {
     switch (category) {
