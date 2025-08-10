@@ -10,8 +10,45 @@ export const tournaments = pgTable("tournaments", {
   tournamentType: text("tournament_type", { enum: ["single", "double"] }).notNull().default("single"),
   status: text("status", { enum: ["upcoming", "in-progress", "completed"] }).notNull().default("upcoming"),
   bracket: jsonb("bracket").notNull(),
+  sport: text("sport"), // From Bubble SportOptions
+  sportCategory: text("sport_category"), // From Bubble SportCategories
+  tournamentStructure: text("tournament_structure"), // From Bubble TournamentStructures
+  ageGroup: text("age_group").default("All Ages"),
+  genderDivision: text("gender_division").default("Mixed"),
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
   updatedAt: timestamp("updated_at").notNull().default(sql`now()`),
+});
+
+// Bubble data tables
+export const sportOptions = pgTable("sport_options", {
+  id: varchar("id").primaryKey(),
+  sportName: text("sport_name").notNull(),
+  sportCategory: text("sport_category").notNull(),
+  sportSubcategory: text("sport_subcategory"),
+  sortOrder: integer("sport_sort_order"),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+export const tournamentStructures = pgTable("tournament_structures", {
+  id: varchar("id").primaryKey(),
+  formatName: text("format_name").notNull(),
+  formatDescription: text("format_description"),
+  formatType: text("format_type"),
+  applicableSports: text("applicable_sports"),
+  sortOrder: integer("format_sort_order"),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+export const trackEvents = pgTable("track_events", {
+  id: varchar("id").primaryKey(),
+  eventName: text("event_name").notNull(),
+  eventCategory: text("event_category"),
+  measurementType: text("measurement_type"),
+  maxAttempts: integer("max_attempt"),
+  ribbonPlaces: integer("ribbon_places"),
+  usesStakes: text("uses_stakes"),
+  sortOrder: integer("event_sort_order"),
+  createdAt: timestamp("created_at").default(sql`now()`),
 });
 
 export const matches = pgTable("matches", {
@@ -35,6 +72,18 @@ export const insertTournamentSchema = createInsertSchema(tournaments).omit({
   updatedAt: true,
 });
 
+export const insertSportOptionSchema = createInsertSchema(sportOptions).omit({
+  createdAt: true,
+});
+
+export const insertTournamentStructureSchema = createInsertSchema(tournamentStructures).omit({
+  createdAt: true,
+});
+
+export const insertTrackEventSchema = createInsertSchema(trackEvents).omit({
+  createdAt: true,
+});
+
 export const insertMatchSchema = createInsertSchema(matches).omit({
   id: true,
   createdAt: true,
@@ -53,3 +102,10 @@ export type InsertTournament = z.infer<typeof insertTournamentSchema>;
 export type Match = typeof matches.$inferSelect;
 export type InsertMatch = z.infer<typeof insertMatchSchema>;
 export type UpdateMatch = z.infer<typeof updateMatchSchema>;
+
+export type SportOption = typeof sportOptions.$inferSelect;
+export type InsertSportOption = z.infer<typeof insertSportOptionSchema>;
+export type TournamentStructure = typeof tournamentStructures.$inferSelect;
+export type InsertTournamentStructure = z.infer<typeof insertTournamentStructureSchema>;
+export type TrackEvent = typeof trackEvents.$inferSelect;
+export type InsertTrackEvent = z.infer<typeof insertTrackEventSchema>;

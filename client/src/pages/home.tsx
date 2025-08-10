@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import TournamentCreationForm from "@/components/tournament-creation-form";
+import DataImport from "@/components/data-import";
 import TournamentList from "@/components/tournament-list";
 import { type Tournament } from "@shared/schema";
 
@@ -37,6 +38,7 @@ export default function Home() {
           
           {/* Left Panel: Tournament Creation & Management */}
           <div className="lg:col-span-1 space-y-6">
+            <DataImport />
             <TournamentCreationForm />
             <TournamentList 
               tournaments={tournaments}

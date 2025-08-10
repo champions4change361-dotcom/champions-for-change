@@ -282,6 +282,91 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Import Bubble data
+  app.post("/api/import/bubble-data", async (req, res) => {
+    try {
+      const storage = await getStorage();
+      let imported = 0;
+      
+      // Import Sport Options data
+      const sportOptionsData = [
+        { id: "1754180946865x898161729538192500", sportName: "Basketball", sportCategory: "1753907759981x546774752330226900", sportSubcategory: "", sortOrder: 1 },
+        { id: "1754180977955x395946833660146800", sportName: "Soccer", sportCategory: "1753907759981x546774752330226900", sportSubcategory: "", sortOrder: 2 },
+        { id: "1754181015919x333498357441713860", sportName: "Football", sportCategory: "1753907759981x546774752330226900", sportSubcategory: "", sortOrder: 3 },
+        { id: "1754181255196x388986311669203840", sportName: "Track & Field(Sprints, Distance, Field Events)", sportCategory: "1753907823621x983678515921424100", sportSubcategory: "", sortOrder: 1 },
+        { id: "1754181223028x396723622458883260", sportName: "Tennis", sportCategory: "1753907823621x983678515921424100", sportSubcategory: "", sortOrder: 2 },
+        { id: "1754186198614x721676290099525500", sportName: "League of Legends", sportCategory: "1754106388289x383805117761464300", sportSubcategory: "", sortOrder: 6 },
+        { id: "1754186227104x911583160186015100", sportName: "CS:GO", sportCategory: "1754106388289x383805117761464300", sportSubcategory: "", sortOrder: 7 },
+        { id: "1754186254060x898039150049687400", sportName: "Valorant", sportCategory: "1754106388289x383805117761464300", sportSubcategory: "", sortOrder: 8 },
+      ];
+
+      for (const sport of sportOptionsData) {
+        await storage.createSportOption(sport);
+        imported++;
+      }
+
+      // Import Tournament Structures
+      const tournamentStructuresData = [
+        { id: "single-elimination", formatName: "Single Elimination", formatDescription: "Traditional single elimination bracket where one loss eliminates a team", formatType: "Elimination", applicableSports: "", sortOrder: 1 },
+        { id: "double-elimination", formatName: "Double Elimination", formatDescription: "Teams must lose twice to be eliminated, includes winners and losers brackets", formatType: "Elimination", applicableSports: "", sortOrder: 2 },
+        { id: "round-robin", formatName: "Round Robin", formatDescription: "Every team plays every other team once, winner determined by record", formatType: "League", applicableSports: "", sortOrder: 3 },
+        { id: "1754188778087x479108798816628740", formatName: "Pool Play → Single Elimination", formatDescription: "Groups compete in round robin pools, then top teams advance to single elimination bracket", formatType: "Hybrid", applicableSports: "", sortOrder: 4 },
+        { id: "1754250656716x507627447270448260", formatName: "Swiss System", formatDescription: "Teams paired based on similar records. No elimination, predetermined number of rounds.", formatType: "League", applicableSports: "", sortOrder: 5 },
+        { id: "1754250872083x720648956222675700", formatName: "Pool Play → Double Elimination", formatDescription: "Pool play followed by double elimination bracket for advanced teams.", formatType: "Hybrid", applicableSports: "", sortOrder: 6 },
+      ];
+
+      for (const structure of tournamentStructuresData) {
+        await storage.createTournamentStructure(structure);
+        imported++;
+      }
+
+      // Import Track Events
+      const trackEventsData = [
+        { id: "1754525327790x301165369722352450", eventName: "100m Dash", eventCategory: "Track", measurementType: "Time", maxAttempts: 1, ribbonPlaces: 6, usesStakes: "no", sortOrder: 2 },
+        { id: "1754525252846x428396594519322700", eventName: "Shot Put", eventCategory: "Field", measurementType: "Distance", maxAttempts: 3, ribbonPlaces: 6, usesStakes: "yes", sortOrder: 1 },
+        { id: "1754525477436x974619504023812600", eventName: "Long Jump", eventCategory: "Field", measurementType: "Distance", maxAttempts: 3, ribbonPlaces: 6, usesStakes: "no", sortOrder: 3 },
+        { id: "1754526697438x872362739342171800", eventName: "200m Dash", eventCategory: "Track", measurementType: "Time", maxAttempts: 1, ribbonPlaces: 6, usesStakes: "no", sortOrder: 10 },
+        { id: "1754526729029x592096268799294600", eventName: "400m Dash", eventCategory: "Track", measurementType: "Time", maxAttempts: 1, ribbonPlaces: 6, usesStakes: "no", sortOrder: 11 },
+      ];
+
+      for (const event of trackEventsData) {
+        await storage.createTrackEvent(event);
+        imported++;
+      }
+
+      res.json({ 
+        success: true, 
+        imported,
+        summary: `${sportOptionsData.length} sports, ${tournamentStructuresData.length} tournament formats, ${trackEventsData.length} track events`
+      });
+    } catch (error) {
+      console.error("Import error:", error);
+      res.status(500).json({ error: "Failed to import Bubble data" });
+    }
+  });
+
+  // Get sport options
+  app.get("/api/sports", async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const sports = await storage.getSportOptions();
+      res.json(sports);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch sports" });
+    }
+  });
+
+  // Get tournament structures
+  app.get("/api/tournament-structures", async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const structures = await storage.getTournamentStructures();
+      res.json(structures);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch tournament structures" });
+    }
+  });
+
   async function advanceWinner(tournamentId: string, round: number, position: number, winner: string) {
     const storage = await getStorage();
     const nextRound = round + 1;

@@ -1,4 +1,9 @@
-import { type Tournament, type InsertTournament, type Match, type InsertMatch, type UpdateMatch, tournaments, matches } from "@shared/schema";
+import { 
+  type Tournament, type InsertTournament, type Match, type InsertMatch, type UpdateMatch,
+  type SportOption, type InsertSportOption, type TournamentStructure, type InsertTournamentStructure,
+  type TrackEvent, type InsertTrackEvent,
+  tournaments, matches, sportOptions, tournamentStructures, trackEvents 
+} from "@shared/schema";
 import { randomUUID } from "crypto";
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
@@ -21,6 +26,14 @@ export interface IStorage {
   
   // Team methods
   updateTeamName(tournamentId: string, oldName: string, newName: string): Promise<void>;
+  
+  // Bubble data import methods
+  createSportOption(sport: InsertSportOption): Promise<SportOption>;
+  createTournamentStructure(structure: InsertTournamentStructure): Promise<TournamentStructure>;
+  createTrackEvent(event: InsertTrackEvent): Promise<TrackEvent>;
+  getSportOptions(): Promise<SportOption[]>;
+  getTournamentStructures(): Promise<TournamentStructure[]>;
+  getTrackEvents(): Promise<TrackEvent[]>;
 }
 
 export class DbStorage implements IStorage {
@@ -173,15 +186,78 @@ export class DbStorage implements IStorage {
       throw new Error("Failed to update team name");
     }
   }
+
+  async createSportOption(sport: InsertSportOption): Promise<SportOption> {
+    try {
+      const result = await this.db.insert(sportOptions).values(sport).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to create sport option");
+    }
+  }
+
+  async createTournamentStructure(structure: InsertTournamentStructure): Promise<TournamentStructure> {
+    try {
+      const result = await this.db.insert(tournamentStructures).values(structure).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to create tournament structure");
+    }
+  }
+
+  async createTrackEvent(event: InsertTrackEvent): Promise<TrackEvent> {
+    try {
+      const result = await this.db.insert(trackEvents).values(event).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to create track event");
+    }
+  }
+
+  async getSportOptions(): Promise<SportOption[]> {
+    try {
+      return await this.db.select().from(sportOptions).orderBy(sportOptions.sortOrder);
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async getTournamentStructures(): Promise<TournamentStructure[]> {
+    try {
+      return await this.db.select().from(tournamentStructures).orderBy(tournamentStructures.sortOrder);
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async getTrackEvents(): Promise<TrackEvent[]> {
+    try {
+      return await this.db.select().from(trackEvents).orderBy(trackEvents.sortOrder);
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
 }
 
 export class MemStorage implements IStorage {
   private tournaments: Map<string, Tournament>;
   private matches: Map<string, Match>;
+  private sportOptions: Map<string, SportOption>;
+  private tournamentStructures: Map<string, TournamentStructure>;
+  private trackEvents: Map<string, TrackEvent>;
 
   constructor() {
     this.tournaments = new Map();
     this.matches = new Map();
+    this.sportOptions = new Map();
+    this.tournamentStructures = new Map();
+    this.trackEvents = new Map();
   }
 
   async getTournaments(): Promise<Tournament[]> {
@@ -312,6 +388,45 @@ export class MemStorage implements IStorage {
         }
       }
     }
+  }
+
+  async createSportOption(sport: InsertSportOption): Promise<SportOption> {
+    const created: SportOption = {
+      ...sport,
+      createdAt: new Date(),
+    };
+    this.sportOptions.set(sport.id, created);
+    return created;
+  }
+
+  async createTournamentStructure(structure: InsertTournamentStructure): Promise<TournamentStructure> {
+    const created: TournamentStructure = {
+      ...structure,
+      createdAt: new Date(),
+    };
+    this.tournamentStructures.set(structure.id, created);
+    return created;
+  }
+
+  async createTrackEvent(event: InsertTrackEvent): Promise<TrackEvent> {
+    const created: TrackEvent = {
+      ...event,
+      createdAt: new Date(),
+    };
+    this.trackEvents.set(event.id, created);
+    return created;
+  }
+
+  async getSportOptions(): Promise<SportOption[]> {
+    return Array.from(this.sportOptions.values()).sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+  }
+
+  async getTournamentStructures(): Promise<TournamentStructure[]> {
+    return Array.from(this.tournamentStructures.values()).sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+  }
+
+  async getTrackEvents(): Promise<TrackEvent[]> {
+    return Array.from(this.trackEvents.values()).sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
   }
 }
 
