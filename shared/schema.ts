@@ -8,11 +8,12 @@ export const tournaments = pgTable("tournaments", {
   name: text("name").notNull(),
   teamSize: integer("team_size").notNull(),
   tournamentType: text("tournament_type", { enum: ["single", "double", "pool-play", "round-robin", "swiss-system"] }).notNull().default("single"),
-  competitionFormat: text("competition_format", { enum: ["bracket", "leaderboard", "series", "multi-stage"] }).notNull().default("bracket"),
+  competitionFormat: text("competition_format", { enum: ["bracket", "leaderboard", "series", "bracket-to-series", "multi-stage"] }).notNull().default("bracket"),
   status: text("status", { enum: ["upcoming", "stage-1", "stage-2", "stage-3", "completed"] }).notNull().default("upcoming"),
   currentStage: integer("current_stage").default(1),
   totalStages: integer("total_stages").default(1),
   stageConfiguration: jsonb("stage_configuration"), // Defines each stage structure
+  seriesLength: integer("series_length").default(7), // For series and bracket-to-series formats
   bracket: jsonb("bracket").notNull(),
   sport: text("sport"), // From Bubble SportOptions
   sportCategory: text("sport_category"), // From Bubble SportCategories
@@ -40,7 +41,7 @@ export const sportOptions = pgTable("sport_options", {
   sportCategory: text("sport_category").notNull(),
   sportSubcategory: text("sport_subcategory"),
   sortOrder: integer("sport_sort_order"),
-  competitionType: text("competition_type", { enum: ["bracket", "leaderboard", "series", "both"] }).notNull().default("bracket"),
+  competitionType: text("competition_type", { enum: ["bracket", "leaderboard", "series", "bracket-to-series", "both"] }).notNull().default("bracket"),
   scoringMethod: text("scoring_method", { enum: ["wins", "time", "distance", "points", "placement"] }).default("wins"),
   measurementUnit: text("measurement_unit"), // seconds, meters, points, etc.
   hasSubEvents: boolean("has_sub_events").default(false), // Track & Field, Swimming have sub-events

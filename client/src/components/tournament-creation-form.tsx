@@ -16,9 +16,9 @@ import EventSelectionModal from "@/components/event-selection-modal";
 const formSchema = insertTournamentSchema.extend({
   teamSize: z.number().min(4).max(32),
   tournamentType: z.enum(["single", "double", "pool-play", "round-robin", "swiss-system"]).default("single"),
-  competitionFormat: z.enum(["bracket", "leaderboard", "series", "multi-stage"]).default("bracket"),
+  competitionFormat: z.enum(["bracket", "leaderboard", "series", "bracket-to-series", "multi-stage"]).default("bracket"),
   totalStages: z.number().min(1).max(5).default(1),
-  seriesLength: z.number().min(1).max(7).default(1).optional(),
+  seriesLength: z.number().min(1).max(7).default(7).optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -47,6 +47,7 @@ export default function TournamentCreationForm() {
   const selectedSport = sports.find(sport => sport.sportName === form.watch("sport"));
   const isLeaderboardSport = selectedSport?.competitionType === "leaderboard";
   const isSeriesSport = selectedSport?.competitionType === "series";
+  const isBracketToSeriesSport = selectedSport?.competitionType === "bracket-to-series";
   const isBothSport = selectedSport?.competitionType === "both";
   const isTrackAndField = selectedSport?.sportName?.includes("Track & Field");
   const isSwimming = selectedSport?.sportName?.includes("Swimming");
@@ -56,7 +57,7 @@ export default function TournamentCreationForm() {
   const selectedTournamentType = form.watch("tournamentType");
   const selectedCompetitionFormat = form.watch("competitionFormat");
   const isMultiStage = ["pool-play", "round-robin", "swiss-system"].includes(selectedTournamentType);
-  const showSeriesOptions = selectedCompetitionFormat === "series" || isSeriesSport;
+  const showSeriesOptions = selectedCompetitionFormat === "series" || selectedCompetitionFormat === "bracket-to-series" || isSeriesSport || isBracketToSeriesSport;
 
   const createTournamentMutation = useMutation({
     mutationFn: async (data: FormData) => {
@@ -87,6 +88,8 @@ export default function TournamentCreationForm() {
       competitionFormat = "leaderboard";
     } else if (isSeriesSport && !data.competitionFormat) {
       competitionFormat = "series";
+    } else if (isBracketToSeriesSport && !data.competitionFormat) {
+      competitionFormat = "bracket-to-series";
     } else if (isMultiStage) {
       competitionFormat = "multi-stage";
     }
@@ -214,9 +217,11 @@ export default function TournamentCreationForm() {
                     {sport.sportName}
                     <Badge variant={sport.competitionType === "leaderboard" ? "outline" : 
                                    sport.competitionType === "series" ? "destructive" :
-                                   sport.competitionType === "both" ? "default" : "secondary"}>
+                                   sport.competitionType === "bracket-to-series" ? "default" :
+                                   sport.competitionType === "both" ? "secondary" : "default"}>
                       {sport.competitionType === "leaderboard" ? "Leaderboard" : 
                        sport.competitionType === "series" ? "Series" :
+                       sport.competitionType === "bracket-to-series" ? "Bracket + Series" :
                        sport.competitionType === "both" ? "Both" : "Bracket"}
                     </Badge>
                   </div>
@@ -230,6 +235,8 @@ export default function TournamentCreationForm() {
                 ? "Individual performance rankings - best times/scores/distances"
                 : selectedSport.competitionType === "series"
                 ? "Best-of series format (best of 3, 5, or 7 games/matches)"
+                : selectedSport.competitionType === "bracket-to-series"
+                ? "Playoff brackets leading to championship series (like NBA/MLB/NHL playoffs)"
                 : selectedSport.competitionType === "both"
                 ? "Supports multiple competition formats - choose below"
                 : "Head-to-head elimination tournament brackets"
@@ -262,12 +269,16 @@ export default function TournamentCreationForm() {
                 {(!selectedSport || selectedSport.competitionType === "series" || selectedSport.competitionType === "both") && (
                   <SelectItem value="series">Best-of Series</SelectItem>
                 )}
+                {(!selectedSport || selectedSport.competitionType === "bracket-to-series" || selectedSport.competitionType === "both") && (
+                  <SelectItem value="bracket-to-series">Bracket + Championship Series</SelectItem>
+                )}
               </SelectContent>
             </Select>
             <p className="text-sm text-gray-600 mt-1">
               {selectedCompetitionFormat === "bracket" && "Elimination tournament with winners advancing"}
               {selectedCompetitionFormat === "leaderboard" && "Individual performance rankings"}
               {selectedCompetitionFormat === "series" && "Teams play multiple games, first to win majority wins"}
+              {selectedCompetitionFormat === "bracket-to-series" && "Playoff brackets leading to championship series (2 stages)"}
             </p>
           </div>
         )}
@@ -293,7 +304,10 @@ export default function TournamentCreationForm() {
               </SelectContent>
             </Select>
             <p className="text-sm text-gray-600 mt-1">
-              Teams will play up to {form.watch("seriesLength") || 3} games. First team to win {Math.ceil((form.watch("seriesLength") || 3) / 2)} games advances.
+              {selectedCompetitionFormat === "bracket-to-series" 
+                ? `Championship series will be best of ${form.watch("seriesLength") || 7}. First to win ${Math.ceil((form.watch("seriesLength") || 7) / 2)} games wins.`
+                : `Teams will play up to ${form.watch("seriesLength") || 3} games. First team to win ${Math.ceil((form.watch("seriesLength") || 3) / 2)} games advances.`
+              }
             </p>
           </div>
         )}

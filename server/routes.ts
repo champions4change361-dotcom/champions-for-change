@@ -644,7 +644,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1753907759981x546774752330226900", 
         sportSubcategory: "", 
         sortOrder: 1,
-        competitionType: "bracket",
+        competitionType: "bracket-to-series",
         scoringMethod: "wins"
       },
       { 
@@ -750,6 +750,108 @@ export async function registerRoutes(app: Express): Promise<Server> {
         competitionType: "leaderboard",
         scoringMethod: "points",
         measurementUnit: "points"
+      },
+      // Professional sports with bracket-to-series format
+      { 
+        id: "1754809100000x111111111111111100", 
+        sportName: "Baseball", 
+        sportCategory: "1753907759981x546774752330226900", 
+        sportSubcategory: "", 
+        sortOrder: 11,
+        competitionType: "bracket-to-series",
+        scoringMethod: "wins"
+      },
+      { 
+        id: "1754809200000x222222222222222200", 
+        sportName: "Hockey", 
+        sportCategory: "1753907759981x546774752330226900", 
+        sportSubcategory: "", 
+        sortOrder: 12,
+        competitionType: "bracket-to-series",
+        scoringMethod: "wins"
+      },
+      { 
+        id: "1754809300000x333333333333333300", 
+        sportName: "Softball", 
+        sportCategory: "1753907759981x546774752330226900", 
+        sportSubcategory: "", 
+        sortOrder: 13,
+        competitionType: "both",
+        scoringMethod: "wins"
+      },
+      // Culinary competitions
+      { 
+        id: "1754809400000x444444444444444400", 
+        sportName: "BBQ Cook-Off", 
+        sportCategory: "1754808800000x555555555555555500", 
+        sportSubcategory: "", 
+        sortOrder: 14,
+        competitionType: "leaderboard",
+        scoringMethod: "points"
+      },
+      { 
+        id: "1754809600000x666666666666666600", 
+        sportName: "Cooking Competition", 
+        sportCategory: "1754808800000x555555555555555500", 
+        sportSubcategory: "", 
+        sortOrder: 15,
+        competitionType: "leaderboard",
+        scoringMethod: "points"
+      },
+      { 
+        id: "1754809700000x777777777777777700", 
+        sportName: "Eating Competition", 
+        sportCategory: "1754808800000x555555555555555500", 
+        sportSubcategory: "", 
+        sortOrder: 16,
+        competitionType: "leaderboard",
+        scoringMethod: "points"
+      },
+      // Academic competitions
+      { 
+        id: "1754809800000x888888888888888800", 
+        sportName: "Spelling Bee", 
+        sportCategory: "1754808810000x777777777777777700", 
+        sportSubcategory: "", 
+        sortOrder: 17,
+        competitionType: "bracket",
+        scoringMethod: "wins"
+      },
+      { 
+        id: "1754810000000x100000000000000000", 
+        sportName: "Math Bowl", 
+        sportCategory: "1754808810000x777777777777777700", 
+        sportSubcategory: "", 
+        sortOrder: 18,
+        competitionType: "leaderboard",
+        scoringMethod: "points"
+      },
+      { 
+        id: "1754810100000x110000000000000000", 
+        sportName: "Science Bowl", 
+        sportCategory: "1754808810000x777777777777777700", 
+        sportSubcategory: "", 
+        sortOrder: 19,
+        competitionType: "leaderboard",
+        scoringMethod: "points"
+      },
+      { 
+        id: "1754810200000x120000000000000000", 
+        sportName: "Quiz Bowl", 
+        sportCategory: "1754808810000x777777777777777700", 
+        sportSubcategory: "", 
+        sortOrder: 20,
+        competitionType: "bracket",
+        scoringMethod: "points"
+      },
+      { 
+        id: "1754810300000x130000000000000000", 
+        sportName: "Debate Tournament", 
+        sportCategory: "1754808810000x777777777777777700", 
+        sportSubcategory: "", 
+        sortOrder: 21,
+        competitionType: "bracket",
+        scoringMethod: "wins"
       }
     ];
 
