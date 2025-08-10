@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { insertTournamentSchema } from "@shared/schema";
 
 const formSchema = insertTournamentSchema.extend({
@@ -22,6 +23,10 @@ export default function TournamentCreationForm() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  const { data: sports = [] } = useQuery<any[]>({
+    queryKey: ["/api/sports"],
+  });
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -32,6 +37,9 @@ export default function TournamentCreationForm() {
       bracket: {},
     },
   });
+
+  const selectedSport = sports.find(sport => sport.sportName === form.watch("sport"));
+  const isLeaderboardSport = selectedSport?.competitionType === "leaderboard";
 
   const createTournamentMutation = useMutation({
     mutationFn: async (data: FormData) => {
@@ -68,6 +76,37 @@ export default function TournamentCreationForm() {
       
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" data-testid="form-create-tournament">
         <div>
+          <Label htmlFor="sport" className="block text-sm font-medium text-gray-700 mb-2">
+            Sport
+          </Label>
+          <Select onValueChange={(value) => form.setValue("sport", value)}>
+            <SelectTrigger data-testid="select-sport">
+              <SelectValue placeholder="Choose a sport" />
+            </SelectTrigger>
+            <SelectContent>
+              {sports.map((sport) => (
+                <SelectItem key={sport.id} value={sport.sportName} data-testid={`option-sport-${sport.id}`}>
+                  <div className="flex items-center gap-2">
+                    {sport.sportName}
+                    <Badge variant={sport.competitionType === "leaderboard" ? "outline" : "secondary"}>
+                      {sport.competitionType === "leaderboard" ? "Leaderboard" : "Bracket"}
+                    </Badge>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {selectedSport && (
+            <p className="text-sm text-gray-600 mt-1">
+              {selectedSport.competitionType === "leaderboard" 
+                ? "Individual performance rankings - best times/scores/distances" 
+                : "Head-to-head elimination tournament brackets"
+              }
+            </p>
+          )}
+        </div>
+
+        <div>
           <Label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
             Tournament Name
           </Label>
@@ -87,7 +126,7 @@ export default function TournamentCreationForm() {
         
         <div>
           <Label htmlFor="teamSize" className="block text-sm font-medium text-gray-700 mb-2">
-            Number of Teams
+            {isLeaderboardSport ? "Number of Participants" : "Number of Teams"}
           </Label>
           <Select
             value={form.watch("teamSize")?.toString()}

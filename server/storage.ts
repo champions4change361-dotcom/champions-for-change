@@ -34,6 +34,11 @@ export interface IStorage {
   getSportOptions(): Promise<SportOption[]>;
   getTournamentStructures(): Promise<TournamentStructure[]>;
   getTrackEvents(): Promise<TrackEvent[]>;
+  
+  // Leaderboard methods
+  createLeaderboardEntry(entry: any): Promise<any>;
+  getLeaderboardEntries(tournamentId: string): Promise<any[]>;
+  updateLeaderboardEntry(id: string, updates: any): Promise<any>;
 }
 
 export class DbStorage implements IStorage {
@@ -243,6 +248,18 @@ export class DbStorage implements IStorage {
       return [];
     }
   }
+  
+  async createLeaderboardEntry(entry: any): Promise<any> {
+    return { id: randomUUID(), ...entry };
+  }
+  
+  async getLeaderboardEntries(tournamentId: string): Promise<any[]> {
+    return [];
+  }
+  
+  async updateLeaderboardEntry(id: string, updates: any): Promise<any> {
+    return { id, ...updates };
+  }
 }
 
 export class MemStorage implements IStorage {
@@ -277,7 +294,9 @@ export class MemStorage implements IStorage {
       ...insertTournament,
       id,
       tournamentType: insertTournament.tournamentType || "single",
+      competitionFormat: insertTournament.competitionFormat || "bracket",
       status: insertTournament.status || "upcoming",
+      scoringMethod: insertTournament.scoringMethod || "wins",
       createdAt: now,
       updatedAt: now,
     };

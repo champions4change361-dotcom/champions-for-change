@@ -288,16 +288,101 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const storage = await getStorage();
       let imported = 0;
       
-      // Import Sport Options data
+      // Import Sport Options data with competition types
       const sportOptionsData = [
-        { id: "1754180946865x898161729538192500", sportName: "Basketball", sportCategory: "1753907759981x546774752330226900", sportSubcategory: "", sortOrder: 1 },
-        { id: "1754180977955x395946833660146800", sportName: "Soccer", sportCategory: "1753907759981x546774752330226900", sportSubcategory: "", sortOrder: 2 },
-        { id: "1754181015919x333498357441713860", sportName: "Football", sportCategory: "1753907759981x546774752330226900", sportSubcategory: "", sortOrder: 3 },
-        { id: "1754181255196x388986311669203840", sportName: "Track & Field(Sprints, Distance, Field Events)", sportCategory: "1753907823621x983678515921424100", sportSubcategory: "", sortOrder: 1 },
-        { id: "1754181223028x396723622458883260", sportName: "Tennis", sportCategory: "1753907823621x983678515921424100", sportSubcategory: "", sortOrder: 2 },
-        { id: "1754186198614x721676290099525500", sportName: "League of Legends", sportCategory: "1754106388289x383805117761464300", sportSubcategory: "", sortOrder: 6 },
-        { id: "1754186227104x911583160186015100", sportName: "CS:GO", sportCategory: "1754106388289x383805117761464300", sportSubcategory: "", sortOrder: 7 },
-        { id: "1754186254060x898039150049687400", sportName: "Valorant", sportCategory: "1754106388289x383805117761464300", sportSubcategory: "", sortOrder: 8 },
+        { 
+          id: "1754180946865x898161729538192500", 
+          sportName: "Basketball", 
+          sportCategory: "1753907759981x546774752330226900", 
+          sportSubcategory: "", 
+          sortOrder: 1,
+          competitionType: "bracket",
+          scoringMethod: "wins"
+        },
+        { 
+          id: "1754180977955x395946833660146800", 
+          sportName: "Soccer", 
+          sportCategory: "1753907759981x546774752330226900", 
+          sportSubcategory: "", 
+          sortOrder: 2,
+          competitionType: "bracket",
+          scoringMethod: "wins"
+        },
+        { 
+          id: "1754181015919x333498357441713860", 
+          sportName: "Football", 
+          sportCategory: "1753907759981x546774752330226900", 
+          sportSubcategory: "", 
+          sortOrder: 3,
+          competitionType: "bracket",
+          scoringMethod: "wins"
+        },
+        { 
+          id: "1754181255196x388986311669203840", 
+          sportName: "Track & Field(Sprints, Distance, Field Events)", 
+          sportCategory: "1753907823621x983678515921424100", 
+          sportSubcategory: "", 
+          sortOrder: 1,
+          competitionType: "leaderboard",
+          scoringMethod: "time",
+          measurementUnit: "seconds"
+        },
+        { 
+          id: "1754181223028x396723622458883260", 
+          sportName: "Tennis", 
+          sportCategory: "1753907823621x983678515921424100", 
+          sportSubcategory: "", 
+          sortOrder: 2,
+          competitionType: "bracket",
+          scoringMethod: "wins"
+        },
+        { 
+          id: "1754181187121x526423864176922750", 
+          sportName: "Golf", 
+          sportCategory: "1753907823621x983678515921424100", 
+          sportSubcategory: "", 
+          sortOrder: 3,
+          competitionType: "leaderboard",
+          scoringMethod: "points",
+          measurementUnit: "strokes"
+        },
+        { 
+          id: "1754181287630x265470261364728830", 
+          sportName: "Swimming", 
+          sportCategory: "1753907823621x983678515921424100", 
+          sportSubcategory: "", 
+          sortOrder: 4,
+          competitionType: "leaderboard",
+          scoringMethod: "time",
+          measurementUnit: "seconds"
+        },
+        { 
+          id: "1754186198614x721676290099525500", 
+          sportName: "League of Legends", 
+          sportCategory: "1754106388289x383805117761464300", 
+          sportSubcategory: "", 
+          sortOrder: 6,
+          competitionType: "bracket",
+          scoringMethod: "wins"
+        },
+        { 
+          id: "1754186227104x911583160186015100", 
+          sportName: "CS:GO", 
+          sportCategory: "1754106388289x383805117761464300", 
+          sportSubcategory: "", 
+          sortOrder: 7,
+          competitionType: "bracket",
+          scoringMethod: "wins"
+        },
+        { 
+          id: "1754186254060x898039150049687400", 
+          sportName: "Valorant", 
+          sportCategory: "1754106388289x383805117761464300", 
+          sportSubcategory: "", 
+          sortOrder: 8,
+          competitionType: "bracket",
+          scoringMethod: "wins"
+        },
       ];
 
       for (const sport of sportOptionsData) {
@@ -337,7 +422,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ 
         success: true, 
         imported,
-        summary: `${sportOptionsData.length} sports, ${tournamentStructuresData.length} tournament formats, ${trackEventsData.length} track events`
+        summary: `${sportOptionsData.length} sports (${sportOptionsData.filter(s => s.competitionType === 'leaderboard').length} leaderboard, ${sportOptionsData.filter(s => s.competitionType === 'bracket').length} bracket), ${tournamentStructuresData.length} tournament formats, ${trackEventsData.length} track events`
       });
     } catch (error) {
       console.error("Import error:", error);

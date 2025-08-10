@@ -8,6 +8,7 @@ export const tournaments = pgTable("tournaments", {
   name: text("name").notNull(),
   teamSize: integer("team_size").notNull(),
   tournamentType: text("tournament_type", { enum: ["single", "double"] }).notNull().default("single"),
+  competitionFormat: text("competition_format", { enum: ["bracket", "leaderboard"] }).notNull().default("bracket"),
   status: text("status", { enum: ["upcoming", "in-progress", "completed"] }).notNull().default("upcoming"),
   bracket: jsonb("bracket").notNull(),
   sport: text("sport"), // From Bubble SportOptions
@@ -15,6 +16,7 @@ export const tournaments = pgTable("tournaments", {
   tournamentStructure: text("tournament_structure"), // From Bubble TournamentStructures
   ageGroup: text("age_group").default("All Ages"),
   genderDivision: text("gender_division").default("Mixed"),
+  scoringMethod: text("scoring_method").default("wins"),
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
   updatedAt: timestamp("updated_at").notNull().default(sql`now()`),
 });
@@ -26,6 +28,9 @@ export const sportOptions = pgTable("sport_options", {
   sportCategory: text("sport_category").notNull(),
   sportSubcategory: text("sport_subcategory"),
   sortOrder: integer("sport_sort_order"),
+  competitionType: text("competition_type", { enum: ["bracket", "leaderboard", "both"] }).notNull().default("bracket"),
+  scoringMethod: text("scoring_method", { enum: ["wins", "time", "distance", "points", "placement"] }).default("wins"),
+  measurementUnit: text("measurement_unit"), // seconds, meters, points, etc.
   createdAt: timestamp("created_at").default(sql`now()`),
 });
 
