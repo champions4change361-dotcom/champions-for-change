@@ -630,6 +630,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
         categoryName: "Academic Competitions",
         categoryDescription: "Educational and intellectual competitions",
         sortOrder: 5
+      },
+      {
+        id: "1754810400000x800000000000000000",
+        categoryName: "Combat Sports",
+        categoryDescription: "Martial arts, boxing, wrestling, and fighting sports",
+        sortOrder: 6
+      },
+      {
+        id: "1754810500000x900000000000000000",
+        categoryName: "Water Sports",
+        categoryDescription: "Swimming, diving, water polo, and aquatic sports",
+        sortOrder: 7
+      },
+      {
+        id: "1754810600000x111111111111111111",
+        categoryName: "Winter Sports",
+        categoryDescription: "Ice and snow sports competitions",
+        sortOrder: 8
+      },
+      {
+        id: "1754810700000x222222222222222222",
+        categoryName: "Extreme Sports",
+        categoryDescription: "High-risk and adventure sports",
+        sortOrder: 9
+      },
+      {
+        id: "1754810800000x333333333333333333",
+        categoryName: "Professional Services",
+        categoryDescription: "Business and professional skill competitions",
+        sortOrder: 10
+      },
+      {
+        id: "1754810900000x444444444444444444",
+        categoryName: "Creative Arts",
+        categoryDescription: "Art, music, dance, and creative competitions",
+        sortOrder: 11
       }
     ];
 
@@ -852,6 +888,392 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sortOrder: 21,
         competitionType: "bracket",
         scoringMethod: "wins"
+      },
+      // Major missing team sports
+      { 
+        id: "1754811000000x140000000000000000", 
+        sportName: "Volleyball", 
+        sportCategory: "1753907759981x546774752330226900", 
+        sportSubcategory: "", 
+        sortOrder: 22,
+        competitionType: "bracket-to-series",
+        scoringMethod: "wins"
+      },
+      { 
+        id: "1754811100000x150000000000000000", 
+        sportName: "Rugby", 
+        sportCategory: "1753907759981x546774752330226900", 
+        sportSubcategory: "", 
+        sortOrder: 23,
+        competitionType: "bracket",
+        scoringMethod: "wins"
+      },
+      { 
+        id: "1754811200000x160000000000000000", 
+        sportName: "Cricket", 
+        sportCategory: "1753907759981x546774752330226900", 
+        sportSubcategory: "", 
+        sortOrder: 24,
+        competitionType: "bracket",
+        scoringMethod: "wins"
+      },
+      { 
+        id: "1754811300000x170000000000000000", 
+        sportName: "Lacrosse", 
+        sportCategory: "1753907759981x546774752330226900", 
+        sportSubcategory: "", 
+        sortOrder: 25,
+        competitionType: "bracket",
+        scoringMethod: "wins"
+      },
+      { 
+        id: "1754811400000x180000000000000000", 
+        sportName: "Field Hockey", 
+        sportCategory: "1753907759981x546774752330226900", 
+        sportSubcategory: "", 
+        sortOrder: 26,
+        competitionType: "bracket",
+        scoringMethod: "wins"
+      },
+      // Combat Sports
+      { 
+        id: "1754811500000x190000000000000000", 
+        sportName: "Boxing", 
+        sportCategory: "1754810400000x800000000000000000", 
+        sportSubcategory: "", 
+        sortOrder: 27,
+        competitionType: "bracket",
+        scoringMethod: "points"
+      },
+      { 
+        id: "1754811600000x200000000000000000", 
+        sportName: "Wrestling", 
+        sportCategory: "1754810400000x800000000000000000", 
+        sportSubcategory: "", 
+        sortOrder: 28,
+        competitionType: "bracket",
+        scoringMethod: "points"
+      },
+      { 
+        id: "1754811700000x210000000000000000", 
+        sportName: "Martial Arts (Karate)", 
+        sportCategory: "1754810400000x800000000000000000", 
+        sportSubcategory: "", 
+        sortOrder: 29,
+        competitionType: "bracket",
+        scoringMethod: "points"
+      },
+      { 
+        id: "1754811800000x220000000000000000", 
+        sportName: "Judo", 
+        sportCategory: "1754810400000x800000000000000000", 
+        sportSubcategory: "", 
+        sortOrder: 30,
+        competitionType: "bracket",
+        scoringMethod: "points"
+      },
+      { 
+        id: "1754811900000x230000000000000000", 
+        sportName: "Taekwondo", 
+        sportCategory: "1754810400000x800000000000000000", 
+        sportSubcategory: "", 
+        sortOrder: 31,
+        competitionType: "bracket",
+        scoringMethod: "points"
+      },
+      { 
+        id: "1754812000000x240000000000000000", 
+        sportName: "MMA", 
+        sportCategory: "1754810400000x800000000000000000", 
+        sportSubcategory: "", 
+        sortOrder: 32,
+        competitionType: "bracket",
+        scoringMethod: "wins"
+      },
+      // Water Sports
+      { 
+        id: "1754812100000x250000000000000000", 
+        sportName: "Water Polo", 
+        sportCategory: "1754810500000x900000000000000000", 
+        sportSubcategory: "", 
+        sortOrder: 33,
+        competitionType: "bracket",
+        scoringMethod: "wins"
+      },
+      { 
+        id: "1754812200000x260000000000000000", 
+        sportName: "Diving", 
+        sportCategory: "1754810500000x900000000000000000", 
+        sportSubcategory: "", 
+        sortOrder: 34,
+        competitionType: "leaderboard",
+        scoringMethod: "points"
+      },
+      { 
+        id: "1754812300000x270000000000000000", 
+        sportName: "Synchronized Swimming", 
+        sportCategory: "1754810500000x900000000000000000", 
+        sportSubcategory: "", 
+        sortOrder: 35,
+        competitionType: "leaderboard",
+        scoringMethod: "points"
+      },
+      { 
+        id: "1754812400000x280000000000000000", 
+        sportName: "Surfing", 
+        sportCategory: "1754810500000x900000000000000000", 
+        sportSubcategory: "", 
+        sortOrder: 36,
+        competitionType: "leaderboard",
+        scoringMethod: "points"
+      },
+      // Winter Sports
+      { 
+        id: "1754812500000x290000000000000000", 
+        sportName: "Ice Hockey", 
+        sportCategory: "1754810600000x111111111111111111", 
+        sportSubcategory: "", 
+        sortOrder: 37,
+        competitionType: "bracket-to-series",
+        scoringMethod: "wins"
+      },
+      { 
+        id: "1754812600000x300000000000000000", 
+        sportName: "Figure Skating", 
+        sportCategory: "1754810600000x111111111111111111", 
+        sportSubcategory: "", 
+        sortOrder: 38,
+        competitionType: "leaderboard",
+        scoringMethod: "points"
+      },
+      { 
+        id: "1754812700000x310000000000000000", 
+        sportName: "Skiing", 
+        sportCategory: "1754810600000x111111111111111111", 
+        sportSubcategory: "", 
+        sortOrder: 39,
+        competitionType: "leaderboard",
+        scoringMethod: "time"
+      },
+      { 
+        id: "1754812800000x320000000000000000", 
+        sportName: "Snowboarding", 
+        sportCategory: "1754810600000x111111111111111111", 
+        sportSubcategory: "", 
+        sortOrder: 40,
+        competitionType: "leaderboard",
+        scoringMethod: "points"
+      },
+      { 
+        id: "1754812900000x330000000000000000", 
+        sportName: "Curling", 
+        sportCategory: "1754810600000x111111111111111111", 
+        sportSubcategory: "", 
+        sortOrder: 41,
+        competitionType: "bracket",
+        scoringMethod: "wins"
+      },
+      // Individual Sports expansions
+      { 
+        id: "1754813000000x340000000000000000", 
+        sportName: "Badminton", 
+        sportCategory: "1753907823621x983678515921424100", 
+        sportSubcategory: "", 
+        sortOrder: 42,
+        competitionType: "bracket",
+        scoringMethod: "wins"
+      },
+      { 
+        id: "1754813100000x350000000000000000", 
+        sportName: "Table Tennis", 
+        sportCategory: "1753907823621x983678515921424100", 
+        sportSubcategory: "", 
+        sortOrder: 43,
+        competitionType: "bracket",
+        scoringMethod: "wins"
+      },
+      { 
+        id: "1754813200000x360000000000000000", 
+        sportName: "Archery", 
+        sportCategory: "1753907823621x983678515921424100", 
+        sportSubcategory: "", 
+        sortOrder: 44,
+        competitionType: "leaderboard",
+        scoringMethod: "points"
+      },
+      { 
+        id: "1754813300000x370000000000000000", 
+        sportName: "Cycling", 
+        sportCategory: "1753907823621x983678515921424100", 
+        sportSubcategory: "", 
+        sortOrder: 45,
+        competitionType: "leaderboard",
+        scoringMethod: "time"
+      },
+      { 
+        id: "1754813400000x380000000000000000", 
+        sportName: "Gymnastics", 
+        sportCategory: "1753907823621x983678515921424100", 
+        sportSubcategory: "", 
+        sortOrder: 46,
+        competitionType: "leaderboard",
+        scoringMethod: "points"
+      },
+      { 
+        id: "1754813500000x390000000000000000", 
+        sportName: "Weightlifting", 
+        sportCategory: "1753907823621x983678515921424100", 
+        sportSubcategory: "", 
+        sortOrder: 47,
+        competitionType: "leaderboard",
+        scoringMethod: "weight"
+      },
+      { 
+        id: "1754813600000x400000000000000000", 
+        sportName: "Rock Climbing", 
+        sportCategory: "1754810700000x222222222222222222", 
+        sportSubcategory: "", 
+        sortOrder: 48,
+        competitionType: "leaderboard",
+        scoringMethod: "time"
+      },
+      { 
+        id: "1754813700000x410000000000000000", 
+        sportName: "Skateboarding", 
+        sportCategory: "1754810700000x222222222222222222", 
+        sportSubcategory: "", 
+        sortOrder: 49,
+        competitionType: "leaderboard",
+        scoringMethod: "points"
+      },
+      { 
+        id: "1754813800000x420000000000000000", 
+        sportName: "BMX", 
+        sportCategory: "1754810700000x222222222222222222", 
+        sportSubcategory: "", 
+        sortOrder: 50,
+        competitionType: "leaderboard",
+        scoringMethod: "time"
+      },
+      // Esports expansions
+      { 
+        id: "1754813900000x430000000000000000", 
+        sportName: "Dota 2", 
+        sportCategory: "1754106388289x383805117761464300", 
+        sportSubcategory: "", 
+        sortOrder: 51,
+        competitionType: "bracket",
+        scoringMethod: "wins"
+      },
+      { 
+        id: "1754814000000x440000000000000000", 
+        sportName: "Overwatch", 
+        sportCategory: "1754106388289x383805117761464300", 
+        sportSubcategory: "", 
+        sortOrder: 52,
+        competitionType: "bracket",
+        scoringMethod: "wins"
+      },
+      { 
+        id: "1754814100000x450000000000000000", 
+        sportName: "Rocket League", 
+        sportCategory: "1754106388289x383805117761464300", 
+        sportSubcategory: "", 
+        sortOrder: 53,
+        competitionType: "bracket",
+        scoringMethod: "wins"
+      },
+      { 
+        id: "1754814200000x460000000000000000", 
+        sportName: "Fortnite", 
+        sportCategory: "1754106388289x383805117761464300", 
+        sportSubcategory: "", 
+        sortOrder: 54,
+        competitionType: "leaderboard",
+        scoringMethod: "points"
+      },
+      { 
+        id: "1754814300000x470000000000000000", 
+        sportName: "FIFA", 
+        sportCategory: "1754106388289x383805117761464300", 
+        sportSubcategory: "", 
+        sortOrder: 55,
+        competitionType: "bracket",
+        scoringMethod: "wins"
+      },
+      // Creative Arts
+      { 
+        id: "1754814400000x480000000000000000", 
+        sportName: "Dance Competition", 
+        sportCategory: "1754810900000x444444444444444444", 
+        sportSubcategory: "", 
+        sortOrder: 56,
+        competitionType: "leaderboard",
+        scoringMethod: "points"
+      },
+      { 
+        id: "1754814500000x490000000000000000", 
+        sportName: "Art Competition", 
+        sportCategory: "1754810900000x444444444444444444", 
+        sportSubcategory: "", 
+        sortOrder: 57,
+        competitionType: "leaderboard",
+        scoringMethod: "points"
+      },
+      { 
+        id: "1754814600000x500000000000000000", 
+        sportName: "Music Competition", 
+        sportCategory: "1754810900000x444444444444444444", 
+        sportSubcategory: "", 
+        sortOrder: 58,
+        competitionType: "leaderboard",
+        scoringMethod: "points"
+      },
+      { 
+        id: "1754814700000x510000000000000000", 
+        sportName: "Photography Contest", 
+        sportCategory: "1754810900000x444444444444444444", 
+        sportSubcategory: "", 
+        sortOrder: 59,
+        competitionType: "leaderboard",
+        scoringMethod: "points"
+      },
+      // Professional Services
+      { 
+        id: "1754814800000x520000000000000000", 
+        sportName: "Sales Competition", 
+        sportCategory: "1754810800000x333333333333333333", 
+        sportSubcategory: "", 
+        sortOrder: 60,
+        competitionType: "leaderboard",
+        scoringMethod: "points"
+      },
+      { 
+        id: "1754814900000x530000000000000000", 
+        sportName: "Coding Competition", 
+        sportCategory: "1754810800000x333333333333333333", 
+        sportSubcategory: "", 
+        sortOrder: 61,
+        competitionType: "leaderboard",
+        scoringMethod: "points"
+      },
+      { 
+        id: "1754815000000x540000000000000000", 
+        sportName: "Hackathon", 
+        sportCategory: "1754810800000x333333333333333333", 
+        sportSubcategory: "", 
+        sortOrder: 62,
+        competitionType: "leaderboard",
+        scoringMethod: "points"
+      },
+      { 
+        id: "1754815100000x550000000000000000", 
+        sportName: "Business Case Competition", 
+        sportCategory: "1754810800000x333333333333333333", 
+        sportSubcategory: "", 
+        sortOrder: 63,
+        competitionType: "bracket",
+        scoringMethod: "points"
       }
     ];
 
