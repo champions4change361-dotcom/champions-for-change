@@ -7,9 +7,12 @@ export const tournaments = pgTable("tournaments", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
   teamSize: integer("team_size").notNull(),
-  tournamentType: text("tournament_type", { enum: ["single", "double"] }).notNull().default("single"),
-  competitionFormat: text("competition_format", { enum: ["bracket", "leaderboard"] }).notNull().default("bracket"),
-  status: text("status", { enum: ["upcoming", "in-progress", "completed"] }).notNull().default("upcoming"),
+  tournamentType: text("tournament_type", { enum: ["single", "double", "pool-play", "round-robin", "swiss-system"] }).notNull().default("single"),
+  competitionFormat: text("competition_format", { enum: ["bracket", "leaderboard", "multi-stage"] }).notNull().default("bracket"),
+  status: text("status", { enum: ["upcoming", "stage-1", "stage-2", "stage-3", "completed"] }).notNull().default("upcoming"),
+  currentStage: integer("current_stage").default(1),
+  totalStages: integer("total_stages").default(1),
+  stageConfiguration: jsonb("stage_configuration"), // Defines each stage structure
   bracket: jsonb("bracket").notNull(),
   sport: text("sport"), // From Bubble SportOptions
   sportCategory: text("sport_category"), // From Bubble SportCategories

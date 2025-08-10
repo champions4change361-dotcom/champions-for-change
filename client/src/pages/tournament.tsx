@@ -2,6 +2,8 @@ import { useParams, Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, RefreshCw } from "lucide-react";
 import BracketVisualization from "@/components/bracket-visualization";
+import LeaderboardView from "@/components/leaderboard-view";
+import MultiStageTournament from "@/components/multi-stage-tournament";
 import { type Tournament, type Match } from "@shared/schema";
 
 interface TournamentData {
@@ -155,7 +157,14 @@ export default function Tournament() {
             </div>
           </div>
           
-          <BracketVisualization tournament={tournament} matches={matches} />
+          {/* Render appropriate tournament view based on format */}
+          {tournament.competitionFormat === "multi-stage" ? (
+            <MultiStageTournament tournament={tournament} />
+          ) : tournament.competitionFormat === "leaderboard" ? (
+            <LeaderboardView tournament={tournament} />
+          ) : (
+            <BracketVisualization tournament={tournament} matches={matches} />
+          )}
         </div>
       </main>
     </div>

@@ -14,7 +14,9 @@ import { insertTournamentSchema } from "@shared/schema";
 
 const formSchema = insertTournamentSchema.extend({
   teamSize: z.number().min(4).max(32),
-  tournamentType: z.enum(["single", "double"]).default("single"),
+  tournamentType: z.enum(["single", "double", "pool-play", "round-robin", "swiss-system"]).default("single"),
+  competitionFormat: z.enum(["bracket", "leaderboard", "multi-stage"]).default("bracket"),
+  totalStages: z.number().min(1).max(5).default(1),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -40,6 +42,8 @@ export default function TournamentCreationForm() {
 
   const selectedSport = sports.find(sport => sport.sportName === form.watch("sport"));
   const isLeaderboardSport = selectedSport?.competitionType === "leaderboard";
+  const selectedTournamentType = form.watch("tournamentType");
+  const isMultiStage = ["pool-play", "round-robin", "swiss-system"].includes(selectedTournamentType);
 
   const createTournamentMutation = useMutation({
     mutationFn: async (data: FormData) => {
@@ -64,7 +68,112 @@ export default function TournamentCreationForm() {
   });
 
   const onSubmit = (data: FormData) => {
-    createTournamentMutation.mutate(data);
+    // Set competition format based on tournament type and sport
+    let competitionFormat = "bracket";
+    if (isLeaderboardSport) {
+      competitionFormat = "leaderboard";
+    } else if (isMultiStage) {
+      competitionFormat = "multi-stage";
+    }
+    
+    // Generate stage configuration for multi-stage tournaments
+    let stageConfiguration = null;
+    if (isMultiStage) {
+      stageConfiguration = {
+        stages: generateStageConfig(selectedTournamentType, data.totalStages || 2),
+        overallFormat: getOverallFormat(selectedTournamentType),
+      };
+    }
+    
+    const tournamentData = {
+      ...data,
+      competitionFormat: competitionFormat as any,
+      stageConfiguration,
+      scoringMethod: selectedSport?.scoringMethod || "wins",
+    };
+    
+    createTournamentMutation.mutate(tournamentData);
+  };
+
+  const generateStageConfig = (tournamentType: string, totalStages: number) => {
+    switch (tournamentType) {
+      case "pool-play":
+        return [
+          {
+            stageNumber: 1,
+            stageName: "Pool Play",
+            stageType: "round-robin",
+            groupCount: Math.ceil(form.watch("teamSize") / 4),
+            groupSize: 4,
+            advancementRules: {
+              teamsAdvancing: 2,
+              advancementCriteria: "top-n",
+            },
+            scoringMethod: "wins",
+          },
+          {
+            stageNumber: 2,
+            stageName: "Elimination Bracket",
+            stageType: "single-elimination",
+            advancementRules: {
+              teamsAdvancing: 1,
+              advancementCriteria: "top-n",
+            },
+            scoringMethod: "wins",
+          },
+        ];
+      case "round-robin":
+        return [
+          {
+            stageNumber: 1,
+            stageName: "Round Robin",
+            stageType: "round-robin",
+            advancementRules: {
+              teamsAdvancing: form.watch("teamSize"),
+              advancementCriteria: "all",
+            },
+            scoringMethod: "wins",
+          },
+        ];
+      case "swiss-system":
+        return [
+          {
+            stageNumber: 1,
+            stageName: "Swiss Rounds",
+            stageType: "swiss-system",
+            advancementRules: {
+              teamsAdvancing: 8,
+              advancementCriteria: "top-n",
+            },
+            scoringMethod: "wins",
+          },
+          {
+            stageNumber: 2,
+            stageName: "Top 8 Bracket",
+            stageType: "single-elimination",
+            advancementRules: {
+              teamsAdvancing: 1,
+              advancementCriteria: "top-n",
+            },
+            scoringMethod: "wins",
+          },
+        ];
+      default:
+        return [];
+    }
+  };
+
+  const getOverallFormat = (tournamentType: string) => {
+    switch (tournamentType) {
+      case "pool-play":
+        return "pool-to-bracket";
+      case "round-robin":
+        return "round-robin-to-leaderboard";
+      case "swiss-system":
+        return "swiss-to-elimination";
+      default:
+        return "multi-pool-championship";
+    }
   };
 
   return (
@@ -150,33 +259,48 @@ export default function TournamentCreationForm() {
           )}
         </div>
         
-        <div>
-          <Label className="block text-sm font-medium text-gray-700 mb-2">Tournament Type</Label>
-          <div className="flex space-x-3">
-            <label className="flex items-center">
-              <input 
-                type="radio" 
-                value="single" 
-                checked={form.watch("tournamentType") === "single"}
-                onChange={() => form.setValue("tournamentType", "single")}
-                className="text-tournament-primary focus:ring-tournament-primary"
-                data-testid="radio-single-elimination"
-              />
-              <span className="ml-2 text-sm text-gray-700">Single Elimination</span>
-            </label>
-            <label className="flex items-center">
-              <input 
-                type="radio" 
-                value="double" 
-                checked={form.watch("tournamentType") === "double"}
-                onChange={() => form.setValue("tournamentType", "double")}
-                className="text-tournament-primary focus:ring-tournament-primary"
-                data-testid="radio-double-elimination"
-              />
-              <span className="ml-2 text-sm text-gray-700">Double Elimination</span>
-            </label>
+        {!isLeaderboardSport && (
+          <div>
+            <Label htmlFor="tournamentType" className="block text-sm font-medium text-gray-700 mb-2">
+              Tournament Format
+            </Label>
+            <Select onValueChange={(value) => form.setValue("tournamentType", value as any)}>
+              <SelectTrigger data-testid="select-tournament-type">
+                <SelectValue placeholder="Select tournament format" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="single" data-testid="option-single">Single Elimination</SelectItem>
+                <SelectItem value="double" data-testid="option-double">Double Elimination</SelectItem>
+                <SelectItem value="pool-play" data-testid="option-pool-play">Pool Play → Bracket</SelectItem>
+                <SelectItem value="round-robin" data-testid="option-round-robin">Round Robin</SelectItem>
+                <SelectItem value="swiss-system" data-testid="option-swiss">Swiss System</SelectItem>
+              </SelectContent>
+            </Select>
+            {isMultiStage && (
+              <p className="text-sm text-gray-600 mt-1">
+                Multi-stage tournament with preliminary rounds followed by elimination or ranking
+              </p>
+            )}
           </div>
-        </div>
+        )}
+
+        {isMultiStage && (
+          <div>
+            <Label htmlFor="totalStages" className="block text-sm font-medium text-gray-700 mb-2">
+              Number of Stages
+            </Label>
+            <Select onValueChange={(value) => form.setValue("totalStages", parseInt(value))}>
+              <SelectTrigger data-testid="select-total-stages">
+                <SelectValue placeholder="Select number of stages" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="2" data-testid="option-stages-2">2 Stages</SelectItem>
+                <SelectItem value="3" data-testid="option-stages-3">3 Stages</SelectItem>
+                <SelectItem value="4" data-testid="option-stages-4">4 Stages</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        )}
         
         <Button 
           type="submit" 
