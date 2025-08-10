@@ -402,6 +402,109 @@ export async function registerRoutes(app: Express): Promise<Server> {
           competitionType: "leaderboard",
           scoringMethod: "points",
           measurementUnit: "points"
+        },
+        // Missing Team Sports
+        { 
+          id: "1754808400000x111111111111111100", 
+          sportName: "Baseball", 
+          sportCategory: "1753907759981x546774752330226900", 
+          sportSubcategory: "", 
+          sortOrder: 4,
+          competitionType: "series",
+          scoringMethod: "wins"
+        },
+        { 
+          id: "1754808500000x222222222222222200", 
+          sportName: "Softball", 
+          sportCategory: "1753907759981x546774752330226900", 
+          sportSubcategory: "", 
+          sortOrder: 5,
+          competitionType: "both",
+          scoringMethod: "wins"
+        },
+        { 
+          id: "1754808600000x333333333333333300", 
+          sportName: "Hockey", 
+          sportCategory: "1753907759981x546774752330226900", 
+          sportSubcategory: "", 
+          sortOrder: 6,
+          competitionType: "series",
+          scoringMethod: "wins"
+        },
+        // Culinary Competitions
+        { 
+          id: "1754808700000x444444444444444400", 
+          sportName: "BBQ Cook-Off", 
+          sportCategory: "1754808800000x555555555555555500", 
+          sportSubcategory: "", 
+          sortOrder: 1,
+          competitionType: "both",
+          scoringMethod: "points"
+        },
+        { 
+          id: "1754808710000x444444444444444500", 
+          sportName: "Cooking Competition", 
+          sportCategory: "1754808800000x555555555555555500", 
+          sportSubcategory: "", 
+          sortOrder: 2,
+          competitionType: "both",
+          scoringMethod: "points"
+        },
+        { 
+          id: "1754808720000x444444444444444600", 
+          sportName: "Eating Competition", 
+          sportCategory: "1754808800000x555555555555555500", 
+          sportSubcategory: "", 
+          sortOrder: 3,
+          competitionType: "leaderboard",
+          scoringMethod: "points",
+          measurementUnit: "amount"
+        },
+        // Academic Competitions
+        { 
+          id: "1754808730000x666666666666666600", 
+          sportName: "Spelling Bee", 
+          sportCategory: "1754808810000x777777777777777700", 
+          sportSubcategory: "", 
+          sortOrder: 1,
+          competitionType: "bracket",
+          scoringMethod: "wins"
+        },
+        { 
+          id: "1754808740000x666666666666666700", 
+          sportName: "Math Bowl", 
+          sportCategory: "1754808810000x777777777777777700", 
+          sportSubcategory: "", 
+          sortOrder: 2,
+          competitionType: "both",
+          scoringMethod: "points"
+        },
+        { 
+          id: "1754808750000x666666666666666800", 
+          sportName: "Science Bowl", 
+          sportCategory: "1754808810000x777777777777777700", 
+          sportSubcategory: "", 
+          sortOrder: 3,
+          competitionType: "both",
+          scoringMethod: "points"
+        },
+        { 
+          id: "1754808760000x666666666666666900", 
+          sportName: "Quiz Bowl", 
+          sportCategory: "1754808810000x777777777777777700", 
+          sportSubcategory: "", 
+          sortOrder: 4,
+          competitionType: "both",
+          scoringMethod: "points"
+        },
+        { 
+          id: "1754808770000x666666666666667000", 
+          sportName: "Debate Tournament", 
+          sportCategory: "1754808810000x777777777777777700", 
+          sportSubcategory: "", 
+          sortOrder: 5,
+          competitionType: "bracket",
+          scoringMethod: "wins"
         }
       ];
 
@@ -450,6 +553,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get sport categories
+  app.get("/api/sport-categories", async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const categories = await storage.getSportCategories();
+      res.json(categories);
+    } catch (error) {
+      console.error("Error fetching sport categories:", error);
+      res.status(500).json({ error: "Failed to fetch sport categories" });
+    }
+  });
+
   // Get sport options (auto-import if empty)
   app.get("/api/sports", async (req, res) => {
     try {
@@ -484,6 +599,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Helper function to import default sports data
   async function importDefaultSportsData(storage: any) {
+    // First import sport categories
+    const sportCategoriesData = [
+      {
+        id: "1753907759981x546774752330226900",
+        categoryName: "Team Sports",
+        categoryDescription: "Sports played in teams",
+        sortOrder: 1
+      },
+      {
+        id: "1753907823621x983678515921424100", 
+        categoryName: "Individual Sports",
+        categoryDescription: "Sports played individually",
+        sortOrder: 2
+      },
+      {
+        id: "1754106388289x383805117761464300",
+        categoryName: "Esports",
+        categoryDescription: "Electronic sports and gaming competitions",
+        sortOrder: 3
+      },
+      {
+        id: "1754808800000x555555555555555500",
+        categoryName: "Culinary Competitions",
+        categoryDescription: "Cooking, BBQ, and eating competitions",
+        sortOrder: 4
+      },
+      {
+        id: "1754808810000x777777777777777700",
+        categoryName: "Academic Competitions",
+        categoryDescription: "Educational and intellectual competitions",
+        sortOrder: 5
+      }
+    ];
+
+    for (const category of sportCategoriesData) {
+      await storage.createSportCategory(category);
+    }
+
     const sportOptionsData = [
       { 
         id: "1754180946865x898161729538192500", 

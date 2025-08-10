@@ -2,8 +2,11 @@ import {
   type Tournament, type InsertTournament, type Match, type InsertMatch, type UpdateMatch,
   type SportOption, type InsertSportOption, type TournamentStructure, type InsertTournamentStructure,
   type TrackEvent, type InsertTrackEvent,
-  tournaments, matches, sportOptions, tournamentStructures, trackEvents 
+  tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents 
 } from "@shared/schema";
+
+type SportCategory = typeof sportCategories.$inferSelect;
+type InsertSportCategory = typeof sportCategories.$inferInsert;
 import { randomUUID } from "crypto";
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
@@ -28,9 +31,11 @@ export interface IStorage {
   updateTeamName(tournamentId: string, oldName: string, newName: string): Promise<void>;
   
   // Bubble data import methods
+  createSportCategory(category: InsertSportCategory): Promise<SportCategory>;
   createSportOption(sport: InsertSportOption): Promise<SportOption>;
   createTournamentStructure(structure: InsertTournamentStructure): Promise<TournamentStructure>;
   createTrackEvent(event: InsertTrackEvent): Promise<TrackEvent>;
+  getSportCategories(): Promise<SportCategory[]>;
   getSportOptions(): Promise<SportOption[]>;
   getTournamentStructures(): Promise<TournamentStructure[]>;
   getTrackEvents(): Promise<TrackEvent[]>;
@@ -218,6 +223,16 @@ export class DbStorage implements IStorage {
     }
   }
 
+  async createSportCategory(category: InsertSportCategory): Promise<SportCategory> {
+    try {
+      const result = await this.db.insert(sportCategories).values(category).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to create sport category");
+    }
+  }
+
   async createSportOption(sport: InsertSportOption): Promise<SportOption> {
     try {
       const result = await this.db.insert(sportOptions).values(sport).returning();
@@ -248,6 +263,15 @@ export class DbStorage implements IStorage {
     }
   }
 
+  async getSportCategories(): Promise<SportCategory[]> {
+    try {
+      return await this.db.select().from(sportCategories).orderBy(sportCategories.sortOrder);
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
   async getSportOptions(): Promise<SportOption[]> {
     try {
       return await this.db.select().from(sportOptions).orderBy(sportOptions.sortOrder);
@@ -275,6 +299,52 @@ export class DbStorage implements IStorage {
     }
   }
   
+  async createSportEvent(event: any): Promise<any> {
+    try {
+      const result = await this.db.insert(sportEvents).values(event).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to create sport event");
+    }
+  }
+
+  async getSportEventsBySport(sportId: string): Promise<any[]> {
+    try {
+      return await this.db.select().from(sportEvents).where(eq(sportEvents.sportId, sportId));
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async getSportEvents(): Promise<any[]> {
+    try {
+      return await this.db.select().from(sportEvents);
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async createTournamentEvent(event: any): Promise<any> {
+    // Tournament events would need to be implemented with proper schema
+    return { id: randomUUID(), ...event };
+  }
+
+  async getTournamentEventsByTournament(tournamentId: string): Promise<any[]> {
+    return [];
+  }
+
+  async createParticipantEvent(event: any): Promise<any> {
+    // Participant events would need to be implemented with proper schema
+    return { id: randomUUID(), ...event };
+  }
+
+  async getParticipantEventsByTournament(tournamentEventId: string): Promise<any[]> {
+    return [];
+  }
+
   async createLeaderboardEntry(entry: any): Promise<any> {
     return { id: randomUUID(), ...entry };
   }
@@ -291,6 +361,7 @@ export class DbStorage implements IStorage {
 export class MemStorage implements IStorage {
   private tournaments: Map<string, Tournament>;
   private matches: Map<string, Match>;
+  private sportCategories: Map<string, SportCategory>;
   private sportOptions: Map<string, SportOption>;
   private tournamentStructures: Map<string, TournamentStructure>;
   private trackEvents: Map<string, TrackEvent>;
@@ -298,6 +369,7 @@ export class MemStorage implements IStorage {
   constructor() {
     this.tournaments = new Map();
     this.matches = new Map();
+    this.sportCategories = new Map();
     this.sportOptions = new Map();
     this.tournamentStructures = new Map();
     this.trackEvents = new Map();
@@ -435,6 +507,15 @@ export class MemStorage implements IStorage {
     }
   }
 
+  async createSportCategory(category: InsertSportCategory): Promise<SportCategory> {
+    const created: SportCategory = {
+      ...category,
+      createdAt: new Date(),
+    };
+    this.sportCategories.set(category.id, created);
+    return created;
+  }
+
   async createSportOption(sport: InsertSportOption): Promise<SportOption> {
     const created: SportOption = {
       ...sport,
@@ -460,6 +541,10 @@ export class MemStorage implements IStorage {
     };
     this.trackEvents.set(event.id, created);
     return created;
+  }
+
+  async getSportCategories(): Promise<SportCategory[]> {
+    return Array.from(this.sportCategories.values()).sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
   }
 
   async getSportOptions(): Promise<SportOption[]> {
@@ -513,6 +598,28 @@ export class MemStorage implements IStorage {
 
   async getParticipantEventsByTournament(tournamentEventId: string): Promise<any[]> {
     return Array.from(this.participantEvents.values()).filter(e => e.tournamentEventId === tournamentEventId);
+  }
+
+  // Leaderboard methods
+  private leaderboardEntries: Map<string, any> = new Map();
+
+  async createLeaderboardEntry(entry: any): Promise<any> {
+    const id = randomUUID();
+    const created = { ...entry, id, createdAt: new Date() };
+    this.leaderboardEntries.set(id, created);
+    return created;
+  }
+  
+  async getLeaderboardEntries(tournamentId: string): Promise<any[]> {
+    return Array.from(this.leaderboardEntries.values()).filter(e => e.tournamentId === tournamentId);
+  }
+  
+  async updateLeaderboardEntry(id: string, updates: any): Promise<any> {
+    const entry = this.leaderboardEntries.get(id);
+    if (!entry) return null;
+    const updated = { ...entry, ...updates, updatedAt: new Date() };
+    this.leaderboardEntries.set(id, updated);
+    return updated;
   }
 }
 

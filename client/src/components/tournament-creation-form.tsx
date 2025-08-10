@@ -16,8 +16,9 @@ import EventSelectionModal from "@/components/event-selection-modal";
 const formSchema = insertTournamentSchema.extend({
   teamSize: z.number().min(4).max(32),
   tournamentType: z.enum(["single", "double", "pool-play", "round-robin", "swiss-system"]).default("single"),
-  competitionFormat: z.enum(["bracket", "leaderboard", "multi-stage"]).default("bracket"),
+  competitionFormat: z.enum(["bracket", "leaderboard", "series", "multi-stage"]).default("bracket"),
   totalStages: z.number().min(1).max(5).default(1),
+  seriesLength: z.number().min(1).max(7).default(1).optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -45,13 +46,17 @@ export default function TournamentCreationForm() {
 
   const selectedSport = sports.find(sport => sport.sportName === form.watch("sport"));
   const isLeaderboardSport = selectedSport?.competitionType === "leaderboard";
+  const isSeriesSport = selectedSport?.competitionType === "series";
+  const isBothSport = selectedSport?.competitionType === "both";
   const isTrackAndField = selectedSport?.sportName?.includes("Track & Field");
   const isSwimming = selectedSport?.sportName?.includes("Swimming");
   const isGolf = selectedSport?.sportName?.includes("Golf");
   const isFishingHunting = selectedSport?.sportName?.includes("Fishing") || selectedSport?.sportName?.includes("Hunting") || selectedSport?.sportName?.includes("Angling") || selectedSport?.sportName?.includes("Wildlife");
   const needsEventSelection = isTrackAndField || isSwimming || isGolf || isFishingHunting;
   const selectedTournamentType = form.watch("tournamentType");
+  const selectedCompetitionFormat = form.watch("competitionFormat");
   const isMultiStage = ["pool-play", "round-robin", "swiss-system"].includes(selectedTournamentType);
+  const showSeriesOptions = selectedCompetitionFormat === "series" || isSeriesSport;
 
   const createTournamentMutation = useMutation({
     mutationFn: async (data: FormData) => {
@@ -77,9 +82,11 @@ export default function TournamentCreationForm() {
 
   const onSubmit = (data: FormData) => {
     // Set competition format based on tournament type and sport
-    let competitionFormat = "bracket";
-    if (isLeaderboardSport) {
+    let competitionFormat = data.competitionFormat || "bracket";
+    if (isLeaderboardSport && !data.competitionFormat) {
       competitionFormat = "leaderboard";
+    } else if (isSeriesSport && !data.competitionFormat) {
+      competitionFormat = "series";
     } else if (isMultiStage) {
       competitionFormat = "multi-stage";
     }
@@ -205,8 +212,12 @@ export default function TournamentCreationForm() {
                 <SelectItem key={sport.id} value={sport.sportName} data-testid={`option-sport-${sport.id}`}>
                   <div className="flex items-center gap-2">
                     {sport.sportName}
-                    <Badge variant={sport.competitionType === "leaderboard" ? "outline" : "secondary"}>
-                      {sport.competitionType === "leaderboard" ? "Leaderboard" : "Bracket"}
+                    <Badge variant={sport.competitionType === "leaderboard" ? "outline" : 
+                                   sport.competitionType === "series" ? "destructive" :
+                                   sport.competitionType === "both" ? "default" : "secondary"}>
+                      {sport.competitionType === "leaderboard" ? "Leaderboard" : 
+                       sport.competitionType === "series" ? "Series" :
+                       sport.competitionType === "both" ? "Both" : "Bracket"}
                     </Badge>
                   </div>
                 </SelectItem>
@@ -216,12 +227,76 @@ export default function TournamentCreationForm() {
           {selectedSport && (
             <p className="text-sm text-gray-600 mt-1">
               {selectedSport.competitionType === "leaderboard" 
-                ? "Individual performance rankings - best times/scores/distances" 
+                ? "Individual performance rankings - best times/scores/distances"
+                : selectedSport.competitionType === "series"
+                ? "Best-of series format (best of 3, 5, or 7 games/matches)"
+                : selectedSport.competitionType === "both"
+                ? "Supports multiple competition formats - choose below"
                 : "Head-to-head elimination tournament brackets"
               }
             </p>
           )}
         </div>
+
+        {/* Competition Format Selection - show for sports that support multiple formats */}
+        {(isBothSport || selectedSport) && (
+          <div>
+            <Label htmlFor="competitionFormat" className="block text-sm font-medium text-gray-700 mb-2">
+              Competition Format
+            </Label>
+            <Select 
+              value={form.watch("competitionFormat")} 
+              onValueChange={(value) => form.setValue("competitionFormat", value as any)}
+              data-testid="select-competition-format"
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Choose format" />
+              </SelectTrigger>
+              <SelectContent>
+                {(!selectedSport || selectedSport.competitionType === "bracket" || selectedSport.competitionType === "both") && (
+                  <SelectItem value="bracket">Bracket Tournament</SelectItem>
+                )}
+                {(!selectedSport || selectedSport.competitionType === "leaderboard" || selectedSport.competitionType === "both") && (
+                  <SelectItem value="leaderboard">Leaderboard Competition</SelectItem>
+                )}
+                {(!selectedSport || selectedSport.competitionType === "series" || selectedSport.competitionType === "both") && (
+                  <SelectItem value="series">Best-of Series</SelectItem>
+                )}
+              </SelectContent>
+            </Select>
+            <p className="text-sm text-gray-600 mt-1">
+              {selectedCompetitionFormat === "bracket" && "Elimination tournament with winners advancing"}
+              {selectedCompetitionFormat === "leaderboard" && "Individual performance rankings"}
+              {selectedCompetitionFormat === "series" && "Teams play multiple games, first to win majority wins"}
+            </p>
+          </div>
+        )}
+
+        {/* Series Configuration - show when series format is selected */}
+        {showSeriesOptions && (
+          <div>
+            <Label htmlFor="seriesLength" className="block text-sm font-medium text-gray-700 mb-2">
+              Series Length
+            </Label>
+            <Select 
+              value={form.watch("seriesLength")?.toString() || "3"} 
+              onValueChange={(value) => form.setValue("seriesLength", parseInt(value))}
+              data-testid="select-series-length"
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Choose series length" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="3">Best of 3 (first to 2 wins)</SelectItem>
+                <SelectItem value="5">Best of 5 (first to 3 wins)</SelectItem>
+                <SelectItem value="7">Best of 7 (first to 4 wins)</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-sm text-gray-600 mt-1">
+              Teams will play up to {form.watch("seriesLength") || 3} games. First team to win {Math.ceil((form.watch("seriesLength") || 3) / 2)} games advances.
+            </p>
+          </div>
+        )}
 
         <div>
           <Label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">

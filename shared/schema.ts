@@ -8,7 +8,7 @@ export const tournaments = pgTable("tournaments", {
   name: text("name").notNull(),
   teamSize: integer("team_size").notNull(),
   tournamentType: text("tournament_type", { enum: ["single", "double", "pool-play", "round-robin", "swiss-system"] }).notNull().default("single"),
-  competitionFormat: text("competition_format", { enum: ["bracket", "leaderboard", "multi-stage"] }).notNull().default("bracket"),
+  competitionFormat: text("competition_format", { enum: ["bracket", "leaderboard", "series", "multi-stage"] }).notNull().default("bracket"),
   status: text("status", { enum: ["upcoming", "stage-1", "stage-2", "stage-3", "completed"] }).notNull().default("upcoming"),
   currentStage: integer("current_stage").default(1),
   totalStages: integer("total_stages").default(1),
@@ -24,6 +24,15 @@ export const tournaments = pgTable("tournaments", {
   updatedAt: timestamp("updated_at").notNull().default(sql`now()`),
 });
 
+// Sport Categories table
+export const sportCategories = pgTable("sport_categories", {
+  id: varchar("id").primaryKey(),
+  categoryName: text("category_name").notNull(),
+  categoryDescription: text("category_description"),
+  sortOrder: integer("category_sort_order"),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
 // Bubble data tables
 export const sportOptions = pgTable("sport_options", {
   id: varchar("id").primaryKey(),
@@ -31,7 +40,7 @@ export const sportOptions = pgTable("sport_options", {
   sportCategory: text("sport_category").notNull(),
   sportSubcategory: text("sport_subcategory"),
   sortOrder: integer("sport_sort_order"),
-  competitionType: text("competition_type", { enum: ["bracket", "leaderboard", "both"] }).notNull().default("bracket"),
+  competitionType: text("competition_type", { enum: ["bracket", "leaderboard", "series", "both"] }).notNull().default("bracket"),
   scoringMethod: text("scoring_method", { enum: ["wins", "time", "distance", "points", "placement"] }).default("wins"),
   measurementUnit: text("measurement_unit"), // seconds, meters, points, etc.
   hasSubEvents: boolean("has_sub_events").default(false), // Track & Field, Swimming have sub-events
@@ -120,6 +129,10 @@ export const insertTournamentSchema = createInsertSchema(tournaments).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+});
+
+export const insertSportCategorySchema = createInsertSchema(sportCategories).omit({
+  createdAt: true,
 });
 
 export const insertSportOptionSchema = createInsertSchema(sportOptions).omit({
