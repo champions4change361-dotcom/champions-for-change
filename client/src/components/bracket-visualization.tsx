@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { type Tournament, type Match } from "@shared/schema";
 import MatchUpdateModal from "@/components/match-update-modal";
+import TeamNameEditor from "@/components/team-name-editor";
 import { Button } from "@/components/ui/button";
 import { Download, FastForward } from "lucide-react";
 
@@ -169,17 +170,37 @@ export default function BracketVisualization({ tournament, matches }: BracketVis
                         >
                           <div className="space-y-2">
                             <div className={`flex justify-between items-center p-2 bg-white rounded border-l-4 ${getTeamBorderColor(match, 'team1')}`}>
-                              <span className={getTeamTextColor(match, 'team1')} data-testid={`match-${match.id}-team1`}>
-                                {match.team1 || 'TBD'}
-                              </span>
+                              <div className={`${getTeamTextColor(match, 'team1')} flex-1 mr-2`}>
+                                {match.team1 ? (
+                                  <TeamNameEditor
+                                    tournamentId={tournament.id}
+                                    currentName={match.team1}
+                                    onNameUpdate={(newName) => {
+                                      // The query will be invalidated by the mutation
+                                    }}
+                                  />
+                                ) : (
+                                  <span className="text-sm text-gray-500" data-testid={`match-${match.id}-team1`}>TBD</span>
+                                )}
+                              </div>
                               <span className={getScoreColor(match, 'team1')} data-testid={`match-${match.id}-score1`}>
                                 {match.status === 'upcoming' ? '-' : match.team1Score}
                               </span>
                             </div>
                             <div className={`flex justify-between items-center p-2 bg-white rounded border-l-4 ${getTeamBorderColor(match, 'team2')}`}>
-                              <span className={getTeamTextColor(match, 'team2')} data-testid={`match-${match.id}-team2`}>
-                                {match.team2 || 'TBD'}
-                              </span>
+                              <div className={`${getTeamTextColor(match, 'team2')} flex-1 mr-2`}>
+                                {match.team2 ? (
+                                  <TeamNameEditor
+                                    tournamentId={tournament.id}
+                                    currentName={match.team2}
+                                    onNameUpdate={(newName) => {
+                                      // The query will be invalidated by the mutation
+                                    }}
+                                  />
+                                ) : (
+                                  <span className="text-sm text-gray-500" data-testid={`match-${match.id}-team2`}>TBD</span>
+                                )}
+                              </div>
                               <span className={getScoreColor(match, 'team2')} data-testid={`match-${match.id}-score2`}>
                                 {match.status === 'upcoming' ? '-' : match.team2Score}
                               </span>

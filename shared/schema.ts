@@ -7,6 +7,7 @@ export const tournaments = pgTable("tournaments", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
   teamSize: integer("team_size").notNull(),
+  tournamentType: text("tournament_type", { enum: ["single", "double"] }).notNull().default("single"),
   status: text("status", { enum: ["upcoming", "in-progress", "completed"] }).notNull().default("upcoming"),
   bracket: jsonb("bracket").notNull(),
   createdAt: timestamp("created_at").notNull().default(sql`now()`),

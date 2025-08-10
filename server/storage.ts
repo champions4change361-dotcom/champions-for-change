@@ -18,6 +18,9 @@ export interface IStorage {
   createMatch(match: InsertMatch): Promise<Match>;
   updateMatch(id: string, match: UpdateMatch): Promise<Match | undefined>;
   deleteMatch(id: string): Promise<boolean>;
+  
+  // Team methods
+  updateTeamName(tournamentId: string, oldName: string, newName: string): Promise<void>;
 }
 
 export class DbStorage implements IStorage {
@@ -137,6 +140,39 @@ export class DbStorage implements IStorage {
       return false;
     }
   }
+
+  async updateTeamName(tournamentId: string, oldName: string, newName: string): Promise<void> {
+    try {
+      // Update all matches where team1, team2, or winner matches the oldName
+      const tournamentMatches = await this.db
+        .select()
+        .from(matches)
+        .where(eq(matches.tournamentId, tournamentId));
+
+      for (const match of tournamentMatches) {
+        const updates: any = {};
+        if (match.team1 === oldName) {
+          updates.team1 = newName;
+        }
+        if (match.team2 === oldName) {
+          updates.team2 = newName;
+        }
+        if (match.winner === oldName) {
+          updates.winner = newName;
+        }
+
+        if (Object.keys(updates).length > 0) {
+          await this.db
+            .update(matches)
+            .set({ ...updates, updatedAt: new Date() })
+            .where(eq(matches.id, match.id));
+        }
+      }
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to update team name");
+    }
+  }
 }
 
 export class MemStorage implements IStorage {
@@ -164,6 +200,7 @@ export class MemStorage implements IStorage {
     const tournament: Tournament = {
       ...insertTournament,
       id,
+      tournamentType: insertTournament.tournamentType || "single",
       status: insertTournament.status || "upcoming",
       createdAt: now,
       updatedAt: now,
@@ -246,6 +283,35 @@ export class MemStorage implements IStorage {
 
   async deleteMatch(id: string): Promise<boolean> {
     return this.matches.delete(id);
+  }
+
+  async updateTeamName(tournamentId: string, oldName: string, newName: string): Promise<void> {
+    // Update all matches for this tournament where team1, team2, or winner matches oldName
+    const matchEntries = Array.from(this.matches.entries());
+    for (const [matchId, match] of matchEntries) {
+      if (match.tournamentId === tournamentId) {
+        let needsUpdate = false;
+        const updatedMatch = { ...match };
+        
+        if (match.team1 === oldName) {
+          updatedMatch.team1 = newName;
+          needsUpdate = true;
+        }
+        if (match.team2 === oldName) {
+          updatedMatch.team2 = newName;
+          needsUpdate = true;
+        }
+        if (match.winner === oldName) {
+          updatedMatch.winner = newName;
+          needsUpdate = true;
+        }
+        
+        if (needsUpdate) {
+          updatedMatch.updatedAt = new Date();
+          this.matches.set(matchId, updatedMatch);
+        }
+      }
+    }
   }
 }
 

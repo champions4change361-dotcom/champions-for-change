@@ -13,6 +13,7 @@ import { insertTournamentSchema } from "@shared/schema";
 
 const formSchema = insertTournamentSchema.extend({
   teamSize: z.number().min(4).max(32),
+  tournamentType: z.enum(["single", "double"]).default("single"),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -26,6 +27,7 @@ export default function TournamentCreationForm() {
     defaultValues: {
       name: "",
       teamSize: 8,
+      tournamentType: "single",
       status: "upcoming",
       bracket: {},
     },
@@ -115,9 +117,9 @@ export default function TournamentCreationForm() {
             <label className="flex items-center">
               <input 
                 type="radio" 
-                name="type" 
                 value="single" 
-                defaultChecked 
+                checked={form.watch("tournamentType") === "single"}
+                onChange={() => form.setValue("tournamentType", "single")}
                 className="text-tournament-primary focus:ring-tournament-primary"
                 data-testid="radio-single-elimination"
               />
@@ -126,13 +128,13 @@ export default function TournamentCreationForm() {
             <label className="flex items-center">
               <input 
                 type="radio" 
-                name="type" 
                 value="double" 
-                disabled 
+                checked={form.watch("tournamentType") === "double"}
+                onChange={() => form.setValue("tournamentType", "double")}
                 className="text-tournament-primary focus:ring-tournament-primary"
                 data-testid="radio-double-elimination"
               />
-              <span className="ml-2 text-sm text-gray-400">Double Elimination (Coming Soon)</span>
+              <span className="ml-2 text-sm text-gray-700">Double Elimination</span>
             </label>
           </div>
         </div>
