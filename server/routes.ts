@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { getStorage } from "./storage";
 import { insertTournamentSchema, updateMatchSchema } from "@shared/schema";
+import { analyzeTournamentQuery } from "./ai-consultation";
 import { z } from "zod";
 
 function generateSingleEliminationBracket(teamSize: number, tournamentId: string) {
@@ -1350,6 +1351,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
   }
+
+  // AI Consultation Endpoints
+  app.get('/api/test', (req, res) => {
+    res.json({
+      status: 'Tournament AI Service Online!',
+      message: 'Ready for intelligent tournament consultation',
+      timestamp: new Date().toISOString(),
+      sports_loaded: 65,
+      ai_ready: true
+    });
+  });
+
+  app.post('/api/quick-consult', (req, res) => {
+    try {
+      const { user_input } = req.body;
+      
+      if (!user_input) {
+        return res.status(400).json({
+          success: false,
+          error: 'Please provide user_input'
+        });
+      }
+      
+      // AI analysis using the imported function
+      const result = analyzeTournamentQuery(user_input);
+      
+      res.json({
+        success: true,
+        recommendation: result.recommendation,
+        sport: result.sport,
+        format: result.format,
+        age_group: result.age_group,
+        gender_division: result.gender_division,
+        confidence: result.confidence
+      });
+      
+    } catch (error) {
+      console.error('AI Consultation Error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'AI consultation failed: ' + (error as Error).message
+      });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;
