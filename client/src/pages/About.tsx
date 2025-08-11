@@ -262,11 +262,11 @@ export default function About() {
             <Button 
               size="lg" 
               variant="outline"
-              className="border-white border-2 text-white hover:bg-white hover:text-green-600 font-semibold px-6"
+              className="border-white border-2 bg-transparent hover:bg-white hover:text-green-600 font-semibold px-6 button-outline-white"
               onClick={() => window.location.href = "/"}
               data-testid="button-back-home-cta"
             >
-              <span className="text-white">Back to Home</span>
+              Back to Home
             </Button>
           </div>
         </div>
