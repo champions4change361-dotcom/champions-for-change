@@ -291,28 +291,28 @@ export default function Landing() {
 
             <Card className="border-2 border-purple-500">
               <CardHeader>
-                <CardTitle>Enterprise</CardTitle>
-                <CardDescription>15% cheaper than Toornament Pro</CardDescription>
+                <CardTitle>Enterprise White-Label</CardTitle>
+                <CardDescription>Full website builder + tournament platform</CardDescription>
                 <div className="flex items-baseline gap-2 mb-2">
                   <div className="text-3xl font-bold text-green-600">$73<span className="text-sm font-normal text-gray-500">/month</span></div>
                   <div className="text-sm text-red-500">vs. Toornament €79 ($86)</div>
                 </div>
                 <div className="text-sm text-blue-600 mb-2">$730/year (annual) • $547.50/year (nonprofit)</div>
-                <Badge variant="secondary" className="w-fit">Premium features for less</Badge>
+                <Badge variant="secondary" className="w-fit">Complete website solution</Badge>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-sm">
-                  <li>✓ Complete white-labeling</li>
-                  <li>✓ Custom domain & branding</li>
-                  <li>✓ Revenue sharing options</li>
-                  <li>✓ API access & integrations</li>
-                  <li>✓ Dedicated account manager</li>
-                  <li>✓ Training & onboarding</li>
-                  <li>✓ Custom feature development</li>
-                  <li>✓ Unlimited text/email alerts</li>
+                  <li>✓ <strong>Website Builder:</strong> Create custom pages</li>
+                  <li>✓ <strong>Your Branding:</strong> Remove our logo entirely</li>
+                  <li>✓ <strong>Custom Domain:</strong> yourorganization.com</li>
+                  <li>✓ <strong>Content Management:</strong> Edit pages/content</li>
+                  <li>✓ <strong>Revenue Sharing:</strong> Keep tournament fees</li>
+                  <li>✓ <strong>API Access:</strong> Custom integrations</li>
+                  <li>✓ <strong>Dedicated Support:</strong> Personal account manager</li>
+                  <li>✓ <strong>Training Included:</strong> Setup & onboarding</li>
                 </ul>
-                <div className="mt-4 p-2 bg-green-50 rounded text-xs text-green-700">
-                  $42-48/month goes to student trips after costs
+                <div className="mt-4 p-2 bg-purple-50 rounded text-xs text-purple-700">
+                  Full website + tournament platform under your brand
                 </div>
               </CardContent>
             </Card>
@@ -359,17 +359,17 @@ export default function Landing() {
               <Card className="bg-green-50 border-green-200">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg flex items-center">
-                    <CreditCard className="h-5 w-5 mr-2 text-green-600" />
-                    Payment Flexibility
+                    <Globe className="h-5 w-5 mr-2 text-green-600" />
+                    White-Label Features
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ul className="text-sm space-y-1">
-                    <li>• Annual payment discounts</li>
-                    <li>• Purchase order support</li>
-                    <li>• Net 30 terms available</li>
-                    <li>• Multi-year contracts</li>
-                    <li>• Educational procurement</li>
+                    <li>• <strong>Website Builder:</strong> Create custom pages</li>
+                    <li>• <strong>Your Domain:</strong> yourorganization.com</li>
+                    <li>• <strong>Your Branding:</strong> Logo, colors, messaging</li>
+                    <li>• <strong>Revenue Control:</strong> Keep tournament fees</li>
+                    <li>• <strong>Content Management:</strong> Full page editing</li>
                   </ul>
                 </CardContent>
               </Card>
