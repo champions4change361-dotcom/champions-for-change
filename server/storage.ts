@@ -76,7 +76,14 @@ export class DbStorage implements IStorage {
   private db: ReturnType<typeof drizzle>;
 
   constructor() {
-    const sql = neon(process.env.DATABASE_URL!);
+    // Always use the Replit Database components to build proper PostgreSQL URL
+    const databaseUrl = `postgresql://${process.env.PGUSER}:${process.env.PGPASSWORD}@${process.env.PGHOST}:${process.env.PGPORT}/${process.env.PGDATABASE}`;
+    
+    if (!databaseUrl || databaseUrl.includes('undefined')) {
+      throw new Error("Database connection parameters are not properly configured");
+    }
+    
+    const sql = neon(databaseUrl);
     this.db = drizzle(sql);
   }
 
