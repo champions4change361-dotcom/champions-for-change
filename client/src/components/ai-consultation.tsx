@@ -74,13 +74,16 @@ export default function AIConsultation() {
   };
 
   const examples = [
-    "I need to organize a high school boys basketball tournament with 16 teams",
-    "Swimming meet for college women with timing events",
-    "Esports valorant tournament bracket style",
-    "Middle school girls track and field meet",
-    "Adult men's golf tournament with skill flights",
-    "Elementary cooking competition for 20 kids",
-    "University debate tournament double elimination"
+    "High school boys basketball tournament with 16 teams",
+    "College women's swimming meet with timing events", 
+    "Esports Valorant tournament bracket style playoffs",
+    "Middle school girls track and field championship",
+    "Adult men's golf tournament with stroke play scoring",
+    "Elementary school cooking competition for 20 kids",
+    "University debate tournament double elimination format",
+    "Youth soccer league with round robin then playoffs",
+    "Masters tennis tournament best-of-three series",
+    "Corporate hackathon with team coding challenges"
   ];
 
   return (
@@ -139,16 +142,17 @@ export default function AIConsultation() {
             <Label className="text-sm font-medium text-gray-700 mb-2 block">
               Try These Examples:
             </Label>
-            <div className="grid grid-cols-1 gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-48 overflow-y-auto">
               {examples.map((example, index) => (
                 <Button
                   key={index}
                   variant="outline"
                   size="sm"
-                  className="text-left justify-start text-xs h-auto py-2 px-3"
+                  className="text-left justify-start text-xs h-auto py-2 px-3 hover:bg-blue-50"
                   onClick={() => form.setValue("user_input", example)}
                   data-testid={`example-${index}`}
                 >
+                  <i className="fas fa-lightbulb mr-2 text-yellow-500"></i>
                   {example}
                 </Button>
               ))}
@@ -164,34 +168,40 @@ export default function AIConsultation() {
             <CardTitle className="flex items-center gap-2">
               <i className="fas fa-lightbulb text-yellow-500"></i>
               AI Recommendation
-              <Badge variant="secondary" className="ml-auto">
+              <Badge 
+                variant={recommendation.confidence >= 80 ? "default" : recommendation.confidence >= 60 ? "secondary" : "outline"} 
+                className="ml-auto"
+              >
                 {recommendation.confidence}% confidence
               </Badge>
             </CardTitle>
+            <CardDescription className="text-xs text-gray-500">
+              Generated in real-time • Based on 65+ sports database
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="text-center">
-                <div className="text-sm text-gray-600 mb-1">Sport</div>
-                <Badge variant="default" className="font-medium">
+              <div className="text-center p-3 bg-gray-50 rounded-lg">
+                <div className="text-xs text-gray-500 mb-2">🏆 SPORT</div>
+                <Badge variant="default" className="font-medium text-sm px-3 py-1">
                   {recommendation.sport}
                 </Badge>
               </div>
-              <div className="text-center">
-                <div className="text-sm text-gray-600 mb-1">Format</div>
-                <Badge variant="outline" className="font-medium">
+              <div className="text-center p-3 bg-gray-50 rounded-lg">
+                <div className="text-xs text-gray-500 mb-2">⚡ FORMAT</div>
+                <Badge variant="outline" className="font-medium text-sm px-3 py-1">
                   {recommendation.format}
                 </Badge>
               </div>
-              <div className="text-center">
-                <div className="text-sm text-gray-600 mb-1">Age Group</div>
-                <Badge variant="secondary" className="font-medium">
+              <div className="text-center p-3 bg-gray-50 rounded-lg">
+                <div className="text-xs text-gray-500 mb-2">🎂 AGE GROUP</div>
+                <Badge variant="secondary" className="font-medium text-sm px-3 py-1">
                   {recommendation.age_group}
                 </Badge>
               </div>
-              <div className="text-center">
-                <div className="text-sm text-gray-600 mb-1">Division</div>
-                <Badge variant="destructive" className="font-medium">
+              <div className="text-center p-3 bg-gray-50 rounded-lg">
+                <div className="text-xs text-gray-500 mb-2">👥 DIVISION</div>
+                <Badge variant="destructive" className="font-medium text-sm px-3 py-1">
                   {recommendation.gender_division}
                 </Badge>
               </div>
@@ -203,14 +213,17 @@ export default function AIConsultation() {
               <Label className="text-sm font-medium text-gray-700 mb-2 block">
                 Detailed Recommendation:
               </Label>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p className="text-sm text-blue-800">
-                  {recommendation.recommendation}
-                </p>
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <i className="fas fa-robot text-blue-600 text-lg mt-1"></i>
+                  <p className="text-sm text-blue-800 leading-relaxed">
+                    {recommendation.recommendation}
+                  </p>
+                </div>
               </div>
             </div>
 
-            <div className="flex gap-2 pt-2">
+            <div className="flex flex-wrap gap-2 pt-2">
               <Button
                 variant="outline"
                 size="sm"
@@ -231,9 +244,27 @@ export default function AIConsultation() {
                   });
                 }}
                 data-testid="button-apply-recommendation"
+                className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100"
               >
                 <i className="fas fa-check mr-2"></i>
-                Apply to Tournament Form
+                Apply to Form
+              </Button>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  navigator.clipboard.writeText(recommendation.recommendation);
+                  toast({
+                    title: "Copied to Clipboard",
+                    description: "AI recommendation copied for sharing",
+                  });
+                }}
+                data-testid="button-copy-recommendation"
+                className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+              >
+                <i className="fas fa-copy mr-2"></i>
+                Copy
               </Button>
               
               <Button
@@ -241,6 +272,7 @@ export default function AIConsultation() {
                 size="sm"
                 onClick={() => setRecommendation(null)}
                 data-testid="button-clear-recommendation"
+                className="text-gray-500 hover:text-gray-700"
               >
                 <i className="fas fa-times mr-2"></i>
                 Clear

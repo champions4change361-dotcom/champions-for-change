@@ -297,8 +297,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sportCategory: "1753907759981x546774752330226900", 
           sportSubcategory: "", 
           sortOrder: 1,
-          competitionType: "bracket" as const,
-          scoringMethod: "wins" as const
+          competitionType: "bracket" as const as const,
+          scoringMethod: "wins" as const as const
         },
         { 
           id: "1754180977955x395946833660146800", 
@@ -306,8 +306,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sportCategory: "1753907759981x546774752330226900", 
           sportSubcategory: "", 
           sortOrder: 2,
-          competitionType: "bracket" as const,
-          scoringMethod: "wins" as const
+          competitionType: "bracket" as const as const,
+          scoringMethod: "wins" as const as const
         },
         { 
           id: "1754181015919x333498357441713860", 
@@ -315,8 +315,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sportCategory: "1753907759981x546774752330226900", 
           sportSubcategory: "", 
           sortOrder: 3,
-          competitionType: "bracket",
-          scoringMethod: "wins"
+          competitionType: "bracket" as const,
+          scoringMethod: "wins" as const
         },
         { 
           id: "1754181255196x388986311669203840", 
@@ -324,8 +324,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sportCategory: "1753907823621x983678515921424100", 
           sportSubcategory: "", 
           sortOrder: 1,
-          competitionType: "leaderboard",
-          scoringMethod: "time",
+          competitionType: "leaderboard" as const,
+          scoringMethod: "time" as const,
           measurementUnit: "seconds"
         },
         { 
@@ -334,8 +334,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sportCategory: "1753907823621x983678515921424100", 
           sportSubcategory: "", 
           sortOrder: 2,
-          competitionType: "bracket",
-          scoringMethod: "wins"
+          competitionType: "bracket" as const,
+          scoringMethod: "wins" as const
         },
         { 
           id: "1754181187121x526423864176922750", 
@@ -343,8 +343,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sportCategory: "1753907823621x983678515921424100", 
           sportSubcategory: "", 
           sortOrder: 3,
-          competitionType: "leaderboard",
-          scoringMethod: "points",
+          competitionType: "leaderboard" as const,
+          scoringMethod: "points" as const,
           measurementUnit: "strokes"
         },
         { 
@@ -353,8 +353,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sportCategory: "1753907823621x983678515921424100", 
           sportSubcategory: "", 
           sortOrder: 4,
-          competitionType: "leaderboard",
-          scoringMethod: "time",
+          competitionType: "leaderboard" as const,
+          scoringMethod: "time" as const,
           measurementUnit: "seconds"
         },
         { 
@@ -363,8 +363,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sportCategory: "1754106388289x383805117761464300", 
           sportSubcategory: "", 
           sortOrder: 6,
-          competitionType: "bracket",
-          scoringMethod: "wins"
+          competitionType: "bracket" as const,
+          scoringMethod: "wins" as const
         },
         { 
           id: "1754186227104x911583160186015100", 
@@ -372,8 +372,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sportCategory: "1754106388289x383805117761464300", 
           sportSubcategory: "", 
           sortOrder: 7,
-          competitionType: "bracket",
-          scoringMethod: "wins"
+          competitionType: "bracket" as const,
+          scoringMethod: "wins" as const
         },
         { 
           id: "1754186254060x898039150049687400", 
@@ -381,8 +381,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sportCategory: "1754106388289x383805117761464300", 
           sportSubcategory: "", 
           sortOrder: 8,
-          competitionType: "bracket",
-          scoringMethod: "wins"
+          competitionType: "bracket" as const,
+          scoringMethod: "wins" as const
         },
         { 
           id: "1754808200000x123456789012345600", 
@@ -390,8 +390,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sportCategory: "1753907823621x983678515921424100", 
           sportSubcategory: "", 
           sortOrder: 9,
-          competitionType: "leaderboard",
-          scoringMethod: "points",
+          competitionType: "leaderboard" as const,
+          scoringMethod: "points" as const,
           measurementUnit: "weight"
         },
         { 
@@ -400,8 +400,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sportCategory: "1753907823621x983678515921424100", 
           sportSubcategory: "", 
           sortOrder: 10,
-          competitionType: "leaderboard",
-          scoringMethod: "points",
+          competitionType: "leaderboard" as const,
+          scoringMethod: "points" as const,
           measurementUnit: "points"
         },
         // Missing Team Sports
@@ -411,8 +411,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sportCategory: "1753907759981x546774752330226900", 
           sportSubcategory: "", 
           sortOrder: 4,
-          competitionType: "series",
-          scoringMethod: "wins"
+          competitionType: "series" as const,
+          scoringMethod: "wins" as const
         },
         { 
           id: "1754808500000x222222222222222200", 
@@ -420,8 +420,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sportCategory: "1753907759981x546774752330226900", 
           sportSubcategory: "", 
           sortOrder: 5,
-          competitionType: "both",
-          scoringMethod: "wins"
+          competitionType: "both" as const,
+          scoringMethod: "wins" as const
         },
         { 
           id: "1754808600000x333333333333333300", 
@@ -429,8 +429,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sportCategory: "1753907759981x546774752330226900", 
           sportSubcategory: "", 
           sortOrder: 6,
-          competitionType: "series",
-          scoringMethod: "wins"
+          competitionType: "series" as const,
+          scoringMethod: "wins" as const
         },
         // Culinary Competitions
         { 
@@ -439,8 +439,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sportCategory: "1754808800000x555555555555555500", 
           sportSubcategory: "", 
           sortOrder: 1,
-          competitionType: "both",
-          scoringMethod: "points"
+          competitionType: "both" as const,
+          scoringMethod: "points" as const
         },
         { 
           id: "1754808710000x444444444444444500", 
@@ -448,8 +448,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sportCategory: "1754808800000x555555555555555500", 
           sportSubcategory: "", 
           sortOrder: 2,
-          competitionType: "both",
-          scoringMethod: "points"
+          competitionType: "both" as const,
+          scoringMethod: "points" as const
         },
         { 
           id: "1754808720000x444444444444444600", 
@@ -457,8 +457,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sportCategory: "1754808800000x555555555555555500", 
           sportSubcategory: "", 
           sortOrder: 3,
-          competitionType: "leaderboard",
-          scoringMethod: "points",
+          competitionType: "leaderboard" as const,
+          scoringMethod: "points" as const,
           measurementUnit: "amount"
         },
         // Academic Competitions
@@ -468,8 +468,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sportCategory: "1754808810000x777777777777777700", 
           sportSubcategory: "", 
           sortOrder: 1,
-          competitionType: "bracket",
-          scoringMethod: "wins"
+          competitionType: "bracket" as const,
+          scoringMethod: "wins" as const
         },
         { 
           id: "1754808740000x666666666666666700", 
@@ -477,8 +477,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sportCategory: "1754808810000x777777777777777700", 
           sportSubcategory: "", 
           sortOrder: 2,
-          competitionType: "both",
-          scoringMethod: "points"
+          competitionType: "both" as const,
+          scoringMethod: "points" as const
         },
         { 
           id: "1754808750000x666666666666666800", 
@@ -486,8 +486,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sportCategory: "1754808810000x777777777777777700", 
           sportSubcategory: "", 
           sortOrder: 3,
-          competitionType: "both",
-          scoringMethod: "points"
+          competitionType: "both" as const,
+          scoringMethod: "points" as const
         },
         { 
           id: "1754808760000x666666666666666900", 
@@ -495,8 +495,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sportCategory: "1754808810000x777777777777777700", 
           sportSubcategory: "", 
           sortOrder: 4,
-          competitionType: "both",
-          scoringMethod: "points"
+          competitionType: "both" as const,
+          scoringMethod: "points" as const
         },
         { 
           id: "1754808770000x666666666666667000", 
@@ -504,8 +504,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sportCategory: "1754808810000x777777777777777700", 
           sportSubcategory: "", 
           sortOrder: 5,
-          competitionType: "bracket",
-          scoringMethod: "wins"
+          competitionType: "bracket" as const,
+          scoringMethod: "wins" as const
         }
       ];
 
@@ -681,8 +681,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1753907759981x546774752330226900", 
         sportSubcategory: "", 
         sortOrder: 1,
-        competitionType: "bracket-to-series",
-        scoringMethod: "wins"
+        competitionType: "bracket-to-series" as const,
+        scoringMethod: "wins" as const
       },
       { 
         id: "1754180977955x395946833660146800", 
@@ -690,8 +690,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1753907759981x546774752330226900", 
         sportSubcategory: "", 
         sortOrder: 2,
-        competitionType: "bracket",
-        scoringMethod: "wins"
+        competitionType: "bracket" as const,
+        scoringMethod: "wins" as const
       },
       { 
         id: "1754181015919x333498357441713860", 
@@ -699,8 +699,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1753907759981x546774752330226900", 
         sportSubcategory: "", 
         sortOrder: 3,
-        competitionType: "bracket",
-        scoringMethod: "wins"
+        competitionType: "bracket" as const,
+        scoringMethod: "wins" as const
       },
       { 
         id: "1754181255196x388986311669203840", 
@@ -708,8 +708,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1753907823621x983678515921424100", 
         sportSubcategory: "", 
         sortOrder: 1,
-        competitionType: "leaderboard",
-        scoringMethod: "time",
+        competitionType: "leaderboard" as const,
+        scoringMethod: "time" as const,
         measurementUnit: "seconds"
       },
       { 
@@ -718,8 +718,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1753907823621x983678515921424100", 
         sportSubcategory: "", 
         sortOrder: 2,
-        competitionType: "bracket",
-        scoringMethod: "wins"
+        competitionType: "bracket" as const,
+        scoringMethod: "wins" as const
       },
       { 
         id: "1754181187121x526423864176922750", 
@@ -727,8 +727,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1753907823621x983678515921424100", 
         sportSubcategory: "", 
         sortOrder: 3,
-        competitionType: "leaderboard",
-        scoringMethod: "points",
+        competitionType: "leaderboard" as const,
+        scoringMethod: "points" as const,
         measurementUnit: "strokes"
       },
       { 
@@ -737,8 +737,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1753907823621x983678515921424100", 
         sportSubcategory: "", 
         sortOrder: 4,
-        competitionType: "leaderboard",
-        scoringMethod: "time",
+        competitionType: "leaderboard" as const,
+        scoringMethod: "time" as const,
         measurementUnit: "seconds"
       },
       { 
@@ -747,8 +747,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754106388289x383805117761464300", 
         sportSubcategory: "", 
         sortOrder: 6,
-        competitionType: "bracket",
-        scoringMethod: "wins"
+        competitionType: "bracket" as const,
+        scoringMethod: "wins" as const
       },
       { 
         id: "1754186227104x911583160186015100", 
@@ -756,8 +756,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754106388289x383805117761464300", 
         sportSubcategory: "", 
         sortOrder: 7,
-        competitionType: "bracket",
-        scoringMethod: "wins"
+        competitionType: "bracket" as const,
+        scoringMethod: "wins" as const
       },
       { 
         id: "1754186254060x898039150049687400", 
@@ -765,8 +765,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754106388289x383805117761464300", 
         sportSubcategory: "", 
         sortOrder: 8,
-        competitionType: "bracket",
-        scoringMethod: "wins"
+        competitionType: "bracket" as const,
+        scoringMethod: "wins" as const
       },
       { 
         id: "1754808200000x123456789012345600", 
@@ -774,8 +774,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1753907823621x983678515921424100", 
         sportSubcategory: "", 
         sortOrder: 9,
-        competitionType: "leaderboard",
-        scoringMethod: "points",
+        competitionType: "leaderboard" as const,
+        scoringMethod: "points" as const,
         measurementUnit: "weight"
       },
       { 
@@ -784,8 +784,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1753907823621x983678515921424100", 
         sportSubcategory: "", 
         sortOrder: 10,
-        competitionType: "leaderboard",
-        scoringMethod: "points",
+        competitionType: "leaderboard" as const,
+        scoringMethod: "points" as const,
         measurementUnit: "points"
       },
       // Professional sports with bracket-to-series format
@@ -795,8 +795,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1753907759981x546774752330226900", 
         sportSubcategory: "", 
         sortOrder: 11,
-        competitionType: "bracket-to-series",
-        scoringMethod: "wins"
+        competitionType: "bracket-to-series" as const,
+        scoringMethod: "wins" as const
       },
       { 
         id: "1754809200000x222222222222222200", 
@@ -804,8 +804,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1753907759981x546774752330226900", 
         sportSubcategory: "", 
         sortOrder: 12,
-        competitionType: "bracket-to-series",
-        scoringMethod: "wins"
+        competitionType: "bracket-to-series" as const,
+        scoringMethod: "wins" as const
       },
       { 
         id: "1754809300000x333333333333333300", 
@@ -813,8 +813,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1753907759981x546774752330226900", 
         sportSubcategory: "", 
         sortOrder: 13,
-        competitionType: "both",
-        scoringMethod: "wins"
+        competitionType: "both" as const,
+        scoringMethod: "wins" as const
       },
       // Culinary competitions
       { 
@@ -823,8 +823,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754808800000x555555555555555500", 
         sportSubcategory: "", 
         sortOrder: 14,
-        competitionType: "leaderboard",
-        scoringMethod: "points"
+        competitionType: "leaderboard" as const,
+        scoringMethod: "points" as const
       },
       { 
         id: "1754809600000x666666666666666600", 
@@ -832,8 +832,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754808800000x555555555555555500", 
         sportSubcategory: "", 
         sortOrder: 15,
-        competitionType: "leaderboard",
-        scoringMethod: "points"
+        competitionType: "leaderboard" as const,
+        scoringMethod: "points" as const
       },
       { 
         id: "1754809700000x777777777777777700", 
@@ -841,8 +841,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754808800000x555555555555555500", 
         sportSubcategory: "", 
         sortOrder: 16,
-        competitionType: "leaderboard",
-        scoringMethod: "points"
+        competitionType: "leaderboard" as const,
+        scoringMethod: "points" as const
       },
       // Academic competitions
       { 
@@ -851,8 +851,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754808810000x777777777777777700", 
         sportSubcategory: "", 
         sortOrder: 17,
-        competitionType: "bracket",
-        scoringMethod: "wins"
+        competitionType: "bracket" as const,
+        scoringMethod: "wins" as const
       },
       { 
         id: "1754810000000x100000000000000000", 
@@ -860,8 +860,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754808810000x777777777777777700", 
         sportSubcategory: "", 
         sortOrder: 18,
-        competitionType: "leaderboard",
-        scoringMethod: "points"
+        competitionType: "leaderboard" as const,
+        scoringMethod: "points" as const
       },
       { 
         id: "1754810100000x110000000000000000", 
@@ -869,8 +869,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754808810000x777777777777777700", 
         sportSubcategory: "", 
         sortOrder: 19,
-        competitionType: "leaderboard",
-        scoringMethod: "points"
+        competitionType: "leaderboard" as const,
+        scoringMethod: "points" as const
       },
       { 
         id: "1754810200000x120000000000000000", 
@@ -878,8 +878,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754808810000x777777777777777700", 
         sportSubcategory: "", 
         sortOrder: 20,
-        competitionType: "bracket",
-        scoringMethod: "points"
+        competitionType: "bracket" as const,
+        scoringMethod: "points" as const
       },
       { 
         id: "1754810300000x130000000000000000", 
@@ -887,8 +887,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754808810000x777777777777777700", 
         sportSubcategory: "", 
         sortOrder: 21,
-        competitionType: "bracket",
-        scoringMethod: "wins"
+        competitionType: "bracket" as const,
+        scoringMethod: "wins" as const
       },
       // Major missing team sports
       { 
@@ -897,8 +897,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1753907759981x546774752330226900", 
         sportSubcategory: "", 
         sortOrder: 22,
-        competitionType: "bracket-to-series",
-        scoringMethod: "wins"
+        competitionType: "bracket-to-series" as const,
+        scoringMethod: "wins" as const
       },
       { 
         id: "1754811100000x150000000000000000", 
@@ -906,8 +906,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1753907759981x546774752330226900", 
         sportSubcategory: "", 
         sortOrder: 23,
-        competitionType: "bracket",
-        scoringMethod: "wins"
+        competitionType: "bracket" as const,
+        scoringMethod: "wins" as const
       },
       { 
         id: "1754811200000x160000000000000000", 
@@ -915,8 +915,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1753907759981x546774752330226900", 
         sportSubcategory: "", 
         sortOrder: 24,
-        competitionType: "bracket",
-        scoringMethod: "wins"
+        competitionType: "bracket" as const,
+        scoringMethod: "wins" as const
       },
       { 
         id: "1754811300000x170000000000000000", 
@@ -924,8 +924,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1753907759981x546774752330226900", 
         sportSubcategory: "", 
         sortOrder: 25,
-        competitionType: "bracket",
-        scoringMethod: "wins"
+        competitionType: "bracket" as const,
+        scoringMethod: "wins" as const
       },
       { 
         id: "1754811400000x180000000000000000", 
@@ -933,8 +933,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1753907759981x546774752330226900", 
         sportSubcategory: "", 
         sortOrder: 26,
-        competitionType: "bracket",
-        scoringMethod: "wins"
+        competitionType: "bracket" as const,
+        scoringMethod: "wins" as const
       },
       // Combat Sports
       { 
@@ -943,8 +943,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754810400000x800000000000000000", 
         sportSubcategory: "", 
         sortOrder: 27,
-        competitionType: "bracket",
-        scoringMethod: "points"
+        competitionType: "bracket" as const,
+        scoringMethod: "points" as const
       },
       { 
         id: "1754811600000x200000000000000000", 
@@ -952,8 +952,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754810400000x800000000000000000", 
         sportSubcategory: "", 
         sortOrder: 28,
-        competitionType: "bracket",
-        scoringMethod: "points"
+        competitionType: "bracket" as const,
+        scoringMethod: "points" as const
       },
       { 
         id: "1754811700000x210000000000000000", 
@@ -961,8 +961,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754810400000x800000000000000000", 
         sportSubcategory: "", 
         sortOrder: 29,
-        competitionType: "bracket",
-        scoringMethod: "points"
+        competitionType: "bracket" as const,
+        scoringMethod: "points" as const
       },
       { 
         id: "1754811800000x220000000000000000", 
@@ -970,8 +970,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754810400000x800000000000000000", 
         sportSubcategory: "", 
         sortOrder: 30,
-        competitionType: "bracket",
-        scoringMethod: "points"
+        competitionType: "bracket" as const,
+        scoringMethod: "points" as const
       },
       { 
         id: "1754811900000x230000000000000000", 
@@ -979,8 +979,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754810400000x800000000000000000", 
         sportSubcategory: "", 
         sortOrder: 31,
-        competitionType: "bracket",
-        scoringMethod: "points"
+        competitionType: "bracket" as const,
+        scoringMethod: "points" as const
       },
       { 
         id: "1754812000000x240000000000000000", 
@@ -988,8 +988,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754810400000x800000000000000000", 
         sportSubcategory: "", 
         sortOrder: 32,
-        competitionType: "bracket",
-        scoringMethod: "wins"
+        competitionType: "bracket" as const,
+        scoringMethod: "wins" as const
       },
       // Water Sports
       { 
@@ -998,8 +998,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754810500000x900000000000000000", 
         sportSubcategory: "", 
         sortOrder: 33,
-        competitionType: "bracket",
-        scoringMethod: "wins"
+        competitionType: "bracket" as const,
+        scoringMethod: "wins" as const
       },
       { 
         id: "1754812200000x260000000000000000", 
@@ -1007,8 +1007,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754810500000x900000000000000000", 
         sportSubcategory: "", 
         sortOrder: 34,
-        competitionType: "leaderboard",
-        scoringMethod: "points"
+        competitionType: "leaderboard" as const,
+        scoringMethod: "points" as const
       },
       { 
         id: "1754812300000x270000000000000000", 
@@ -1016,8 +1016,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754810500000x900000000000000000", 
         sportSubcategory: "", 
         sortOrder: 35,
-        competitionType: "leaderboard",
-        scoringMethod: "points"
+        competitionType: "leaderboard" as const,
+        scoringMethod: "points" as const
       },
       { 
         id: "1754812400000x280000000000000000", 
@@ -1025,8 +1025,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754810500000x900000000000000000", 
         sportSubcategory: "", 
         sortOrder: 36,
-        competitionType: "leaderboard",
-        scoringMethod: "points"
+        competitionType: "leaderboard" as const,
+        scoringMethod: "points" as const
       },
       // Winter Sports
       { 
@@ -1035,8 +1035,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754810600000x111111111111111111", 
         sportSubcategory: "", 
         sortOrder: 37,
-        competitionType: "bracket-to-series",
-        scoringMethod: "wins"
+        competitionType: "bracket-to-series" as const,
+        scoringMethod: "wins" as const
       },
       { 
         id: "1754812600000x300000000000000000", 
@@ -1044,8 +1044,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754810600000x111111111111111111", 
         sportSubcategory: "", 
         sortOrder: 38,
-        competitionType: "leaderboard",
-        scoringMethod: "points"
+        competitionType: "leaderboard" as const,
+        scoringMethod: "points" as const
       },
       { 
         id: "1754812700000x310000000000000000", 
@@ -1053,8 +1053,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754810600000x111111111111111111", 
         sportSubcategory: "", 
         sortOrder: 39,
-        competitionType: "leaderboard",
-        scoringMethod: "time"
+        competitionType: "leaderboard" as const,
+        scoringMethod: "time" as const
       },
       { 
         id: "1754812800000x320000000000000000", 
@@ -1062,8 +1062,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754810600000x111111111111111111", 
         sportSubcategory: "", 
         sortOrder: 40,
-        competitionType: "leaderboard",
-        scoringMethod: "points"
+        competitionType: "leaderboard" as const,
+        scoringMethod: "points" as const
       },
       { 
         id: "1754812900000x330000000000000000", 
@@ -1071,8 +1071,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754810600000x111111111111111111", 
         sportSubcategory: "", 
         sortOrder: 41,
-        competitionType: "bracket",
-        scoringMethod: "wins"
+        competitionType: "bracket" as const,
+        scoringMethod: "wins" as const
       },
       // Individual Sports expansions
       { 
@@ -1081,8 +1081,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1753907823621x983678515921424100", 
         sportSubcategory: "", 
         sortOrder: 42,
-        competitionType: "bracket",
-        scoringMethod: "wins"
+        competitionType: "bracket" as const,
+        scoringMethod: "wins" as const
       },
       { 
         id: "1754813100000x350000000000000000", 
@@ -1090,8 +1090,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1753907823621x983678515921424100", 
         sportSubcategory: "", 
         sortOrder: 43,
-        competitionType: "bracket",
-        scoringMethod: "wins"
+        competitionType: "bracket" as const,
+        scoringMethod: "wins" as const
       },
       { 
         id: "1754813200000x360000000000000000", 
@@ -1099,8 +1099,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1753907823621x983678515921424100", 
         sportSubcategory: "", 
         sortOrder: 44,
-        competitionType: "leaderboard",
-        scoringMethod: "points"
+        competitionType: "leaderboard" as const,
+        scoringMethod: "points" as const
       },
       { 
         id: "1754813300000x370000000000000000", 
@@ -1108,8 +1108,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1753907823621x983678515921424100", 
         sportSubcategory: "", 
         sortOrder: 45,
-        competitionType: "leaderboard",
-        scoringMethod: "time"
+        competitionType: "leaderboard" as const,
+        scoringMethod: "time" as const
       },
       { 
         id: "1754813400000x380000000000000000", 
@@ -1117,8 +1117,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1753907823621x983678515921424100", 
         sportSubcategory: "", 
         sortOrder: 46,
-        competitionType: "leaderboard",
-        scoringMethod: "points"
+        competitionType: "leaderboard" as const,
+        scoringMethod: "points" as const
       },
       { 
         id: "1754813500000x390000000000000000", 
@@ -1126,7 +1126,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1753907823621x983678515921424100", 
         sportSubcategory: "", 
         sortOrder: 47,
-        competitionType: "leaderboard",
+        competitionType: "leaderboard" as const,
         scoringMethod: "weight"
       },
       { 
@@ -1135,8 +1135,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754810700000x222222222222222222", 
         sportSubcategory: "", 
         sortOrder: 48,
-        competitionType: "leaderboard",
-        scoringMethod: "time"
+        competitionType: "leaderboard" as const,
+        scoringMethod: "time" as const
       },
       { 
         id: "1754813700000x410000000000000000", 
@@ -1144,8 +1144,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754810700000x222222222222222222", 
         sportSubcategory: "", 
         sortOrder: 49,
-        competitionType: "leaderboard",
-        scoringMethod: "points"
+        competitionType: "leaderboard" as const,
+        scoringMethod: "points" as const
       },
       { 
         id: "1754813800000x420000000000000000", 
@@ -1153,8 +1153,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754810700000x222222222222222222", 
         sportSubcategory: "", 
         sortOrder: 50,
-        competitionType: "leaderboard",
-        scoringMethod: "time"
+        competitionType: "leaderboard" as const,
+        scoringMethod: "time" as const
       },
       // Esports expansions
       { 
@@ -1163,8 +1163,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754106388289x383805117761464300", 
         sportSubcategory: "", 
         sortOrder: 51,
-        competitionType: "bracket",
-        scoringMethod: "wins"
+        competitionType: "bracket" as const,
+        scoringMethod: "wins" as const
       },
       { 
         id: "1754814000000x440000000000000000", 
@@ -1172,8 +1172,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754106388289x383805117761464300", 
         sportSubcategory: "", 
         sortOrder: 52,
-        competitionType: "bracket",
-        scoringMethod: "wins"
+        competitionType: "bracket" as const,
+        scoringMethod: "wins" as const
       },
       { 
         id: "1754814100000x450000000000000000", 
@@ -1181,8 +1181,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754106388289x383805117761464300", 
         sportSubcategory: "", 
         sortOrder: 53,
-        competitionType: "bracket",
-        scoringMethod: "wins"
+        competitionType: "bracket" as const,
+        scoringMethod: "wins" as const
       },
       { 
         id: "1754814200000x460000000000000000", 
@@ -1190,8 +1190,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754106388289x383805117761464300", 
         sportSubcategory: "", 
         sortOrder: 54,
-        competitionType: "leaderboard",
-        scoringMethod: "points"
+        competitionType: "leaderboard" as const,
+        scoringMethod: "points" as const
       },
       { 
         id: "1754814300000x470000000000000000", 
@@ -1199,8 +1199,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754106388289x383805117761464300", 
         sportSubcategory: "", 
         sortOrder: 55,
-        competitionType: "bracket",
-        scoringMethod: "wins"
+        competitionType: "bracket" as const,
+        scoringMethod: "wins" as const
       },
       // Creative Arts
       { 
@@ -1209,8 +1209,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754810900000x444444444444444444", 
         sportSubcategory: "", 
         sortOrder: 56,
-        competitionType: "leaderboard",
-        scoringMethod: "points"
+        competitionType: "leaderboard" as const,
+        scoringMethod: "points" as const
       },
       { 
         id: "1754814500000x490000000000000000", 
@@ -1218,8 +1218,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754810900000x444444444444444444", 
         sportSubcategory: "", 
         sortOrder: 57,
-        competitionType: "leaderboard",
-        scoringMethod: "points"
+        competitionType: "leaderboard" as const,
+        scoringMethod: "points" as const
       },
       { 
         id: "1754814600000x500000000000000000", 
@@ -1227,8 +1227,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754810900000x444444444444444444", 
         sportSubcategory: "", 
         sortOrder: 58,
-        competitionType: "leaderboard",
-        scoringMethod: "points"
+        competitionType: "leaderboard" as const,
+        scoringMethod: "points" as const
       },
       { 
         id: "1754814700000x510000000000000000", 
@@ -1236,8 +1236,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754810900000x444444444444444444", 
         sportSubcategory: "", 
         sortOrder: 59,
-        competitionType: "leaderboard",
-        scoringMethod: "points"
+        competitionType: "leaderboard" as const,
+        scoringMethod: "points" as const
       },
       // Professional Services
       { 
@@ -1246,8 +1246,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754810800000x333333333333333333", 
         sportSubcategory: "", 
         sortOrder: 60,
-        competitionType: "leaderboard",
-        scoringMethod: "points"
+        competitionType: "leaderboard" as const,
+        scoringMethod: "points" as const
       },
       { 
         id: "1754814900000x530000000000000000", 
@@ -1255,8 +1255,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754810800000x333333333333333333", 
         sportSubcategory: "", 
         sortOrder: 61,
-        competitionType: "leaderboard",
-        scoringMethod: "points"
+        competitionType: "leaderboard" as const,
+        scoringMethod: "points" as const
       },
       { 
         id: "1754815000000x540000000000000000", 
@@ -1264,8 +1264,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754810800000x333333333333333333", 
         sportSubcategory: "", 
         sortOrder: 62,
-        competitionType: "leaderboard",
-        scoringMethod: "points"
+        competitionType: "leaderboard" as const,
+        scoringMethod: "points" as const
       },
       { 
         id: "1754815100000x550000000000000000", 
@@ -1273,8 +1273,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportCategory: "1754810800000x333333333333333333", 
         sportSubcategory: "", 
         sortOrder: 63,
-        competitionType: "bracket",
-        scoringMethod: "points"
+        competitionType: "bracket" as const,
+        scoringMethod: "points" as const
       }
     ];
 
@@ -1286,37 +1286,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (sportOptionsData.find(s => s.sportName.includes("Track & Field"))) {
       const trackFieldEvents = [
         // Running Events - Sprints
-        { id: "tf-100m", eventName: "100 Meter Dash", sportId: "1754181255196x388986311669203840", eventType: "running", scoringMethod: "time", measurementUnit: "seconds", supportsMetric: true, supportsImperial: false, sortOrder: 1 },
-        { id: "tf-200m", eventName: "200 Meter Dash", sportId: "1754181255196x388986311669203840", eventType: "running", scoringMethod: "time", measurementUnit: "seconds", supportsMetric: true, supportsImperial: false, sortOrder: 2 },
-        { id: "tf-400m", eventName: "400 Meter Dash", sportId: "1754181255196x388986311669203840", eventType: "running", scoringMethod: "time", measurementUnit: "seconds", supportsMetric: true, supportsImperial: false, sortOrder: 3 },
+        { id: "tf-100m", eventName: "100 Meter Dash", sportId: "1754181255196x388986311669203840", eventType: "running", scoringMethod: "time" as const, measurementUnit: "seconds", supportsMetric: true, supportsImperial: false, sortOrder: 1 },
+        { id: "tf-200m", eventName: "200 Meter Dash", sportId: "1754181255196x388986311669203840", eventType: "running", scoringMethod: "time" as const, measurementUnit: "seconds", supportsMetric: true, supportsImperial: false, sortOrder: 2 },
+        { id: "tf-400m", eventName: "400 Meter Dash", sportId: "1754181255196x388986311669203840", eventType: "running", scoringMethod: "time" as const, measurementUnit: "seconds", supportsMetric: true, supportsImperial: false, sortOrder: 3 },
         
         // Running Events - Middle Distance
-        { id: "tf-800m", eventName: "800 Meter Run", sportId: "1754181255196x388986311669203840", eventType: "running", scoringMethod: "time", measurementUnit: "seconds", supportsMetric: true, supportsImperial: false, sortOrder: 4 },
-        { id: "tf-1600m", eventName: "1600 Meter Run", sportId: "1754181255196x388986311669203840", eventType: "running", scoringMethod: "time", measurementUnit: "seconds", supportsMetric: true, supportsImperial: false, sortOrder: 5 },
+        { id: "tf-800m", eventName: "800 Meter Run", sportId: "1754181255196x388986311669203840", eventType: "running", scoringMethod: "time" as const, measurementUnit: "seconds", supportsMetric: true, supportsImperial: false, sortOrder: 4 },
+        { id: "tf-1600m", eventName: "1600 Meter Run", sportId: "1754181255196x388986311669203840", eventType: "running", scoringMethod: "time" as const, measurementUnit: "seconds", supportsMetric: true, supportsImperial: false, sortOrder: 5 },
         
         // Running Events - Long Distance  
-        { id: "tf-3200m", eventName: "3200 Meter Run", sportId: "1754181255196x388986311669203840", eventType: "running", scoringMethod: "time", measurementUnit: "seconds", supportsMetric: true, supportsImperial: false, sortOrder: 6 },
+        { id: "tf-3200m", eventName: "3200 Meter Run", sportId: "1754181255196x388986311669203840", eventType: "running", scoringMethod: "time" as const, measurementUnit: "seconds", supportsMetric: true, supportsImperial: false, sortOrder: 6 },
         
         // Hurdles
-        { id: "tf-110h", eventName: "110 Meter Hurdles", sportId: "1754181255196x388986311669203840", eventType: "running", scoringMethod: "time", measurementUnit: "seconds", supportsMetric: true, supportsImperial: false, gender: "male", sortOrder: 7 },
-        { id: "tf-100h", eventName: "100 Meter Hurdles", sportId: "1754181255196x388986311669203840", eventType: "running", scoringMethod: "time", measurementUnit: "seconds", supportsMetric: true, supportsImperial: false, gender: "female", sortOrder: 8 },
-        { id: "tf-300h", eventName: "300 Meter Hurdles", sportId: "1754181255196x388986311669203840", eventType: "running", scoringMethod: "time", measurementUnit: "seconds", supportsMetric: true, supportsImperial: false, sortOrder: 9 },
+        { id: "tf-110h", eventName: "110 Meter Hurdles", sportId: "1754181255196x388986311669203840", eventType: "running", scoringMethod: "time" as const, measurementUnit: "seconds", supportsMetric: true, supportsImperial: false, gender: "male", sortOrder: 7 },
+        { id: "tf-100h", eventName: "100 Meter Hurdles", sportId: "1754181255196x388986311669203840", eventType: "running", scoringMethod: "time" as const, measurementUnit: "seconds", supportsMetric: true, supportsImperial: false, gender: "female", sortOrder: 8 },
+        { id: "tf-300h", eventName: "300 Meter Hurdles", sportId: "1754181255196x388986311669203840", eventType: "running", scoringMethod: "time" as const, measurementUnit: "seconds", supportsMetric: true, supportsImperial: false, sortOrder: 9 },
         
         // Jumping Events
         { id: "tf-hj", eventName: "High Jump", sportId: "1754181255196x388986311669203840", eventType: "jumping", scoringMethod: "height", measurementUnit: "meters", supportsMetric: true, supportsImperial: true, sortOrder: 10 },
         { id: "tf-pv", eventName: "Pole Vault", sportId: "1754181255196x388986311669203840", eventType: "jumping", scoringMethod: "height", measurementUnit: "meters", supportsMetric: true, supportsImperial: true, sortOrder: 11 },
-        { id: "tf-lj", eventName: "Long Jump", sportId: "1754181255196x388986311669203840", eventType: "jumping", scoringMethod: "distance", measurementUnit: "meters", supportsMetric: true, supportsImperial: true, sortOrder: 12 },
-        { id: "tf-tj", eventName: "Triple Jump", sportId: "1754181255196x388986311669203840", eventType: "jumping", scoringMethod: "distance", measurementUnit: "meters", supportsMetric: true, supportsImperial: true, sortOrder: 13 },
+        { id: "tf-lj", eventName: "Long Jump", sportId: "1754181255196x388986311669203840", eventType: "jumping", scoringMethod: "distance" as const, measurementUnit: "meters", supportsMetric: true, supportsImperial: true, sortOrder: 12 },
+        { id: "tf-tj", eventName: "Triple Jump", sportId: "1754181255196x388986311669203840", eventType: "jumping", scoringMethod: "distance" as const, measurementUnit: "meters", supportsMetric: true, supportsImperial: true, sortOrder: 13 },
         
         // Throwing Events
-        { id: "tf-shot", eventName: "Shot Put", sportId: "1754181255196x388986311669203840", eventType: "throwing", scoringMethod: "distance", measurementUnit: "meters", supportsMetric: true, supportsImperial: true, sortOrder: 14 },
-        { id: "tf-discus", eventName: "Discus Throw", sportId: "1754181255196x388986311669203840", eventType: "throwing", scoringMethod: "distance", measurementUnit: "meters", supportsMetric: true, supportsImperial: true, sortOrder: 15 },
-        { id: "tf-hammer", eventName: "Hammer Throw", sportId: "1754181255196x388986311669203840", eventType: "throwing", scoringMethod: "distance", measurementUnit: "meters", supportsMetric: true, supportsImperial: true, sortOrder: 16 },
-        { id: "tf-javelin", eventName: "Javelin Throw", sportId: "1754181255196x388986311669203840", eventType: "throwing", scoringMethod: "distance", measurementUnit: "meters", supportsMetric: true, supportsImperial: true, sortOrder: 17 },
+        { id: "tf-shot", eventName: "Shot Put", sportId: "1754181255196x388986311669203840", eventType: "throwing", scoringMethod: "distance" as const, measurementUnit: "meters", supportsMetric: true, supportsImperial: true, sortOrder: 14 },
+        { id: "tf-discus", eventName: "Discus Throw", sportId: "1754181255196x388986311669203840", eventType: "throwing", scoringMethod: "distance" as const, measurementUnit: "meters", supportsMetric: true, supportsImperial: true, sortOrder: 15 },
+        { id: "tf-hammer", eventName: "Hammer Throw", sportId: "1754181255196x388986311669203840", eventType: "throwing", scoringMethod: "distance" as const, measurementUnit: "meters", supportsMetric: true, supportsImperial: true, sortOrder: 16 },
+        { id: "tf-javelin", eventName: "Javelin Throw", sportId: "1754181255196x388986311669203840", eventType: "throwing", scoringMethod: "distance" as const, measurementUnit: "meters", supportsMetric: true, supportsImperial: true, sortOrder: 17 },
         
         // Relays
-        { id: "tf-4x100", eventName: "4x100 Meter Relay", sportId: "1754181255196x388986311669203840", eventType: "running", scoringMethod: "time", measurementUnit: "seconds", supportsMetric: true, supportsImperial: false, sortOrder: 18 },
-        { id: "tf-4x400", eventName: "4x400 Meter Relay", sportId: "1754181255196x388986311669203840", eventType: "running", scoringMethod: "time", measurementUnit: "seconds", supportsMetric: true, supportsImperial: false, sortOrder: 19 },
+        { id: "tf-4x100", eventName: "4x100 Meter Relay", sportId: "1754181255196x388986311669203840", eventType: "running", scoringMethod: "time" as const, measurementUnit: "seconds", supportsMetric: true, supportsImperial: false, sortOrder: 18 },
+        { id: "tf-4x400", eventName: "4x400 Meter Relay", sportId: "1754181255196x388986311669203840", eventType: "running", scoringMethod: "time" as const, measurementUnit: "seconds", supportsMetric: true, supportsImperial: false, sortOrder: 19 },
       ];
 
       for (const event of trackFieldEvents) {
@@ -1384,7 +1384,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         format: result.format,
         age_group: result.age_group,
         gender_division: result.gender_division,
-        confidence: result.confidence
+        confidence: result.confidence,
+        timestamp: new Date().toISOString(),
+        query_analyzed: user_input
       });
       
     } catch (error) {
@@ -1392,6 +1394,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({
         success: false,
         error: 'AI consultation failed: ' + (error as Error).message
+      });
+    }
+  });
+
+  // Tournament insights endpoint
+  app.get('/api/tournament-insights', async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const tournaments = await storage.getTournaments();
+      const sports = await storage.getSportOptions();
+      
+      const insights = {
+        total_tournaments: tournaments.length,
+        active_tournaments: tournaments.filter(t => t.status === 'stage-1' || t.status === 'stage-2').length,
+        completed_tournaments: tournaments.filter(t => t.status === 'completed').length,
+        popular_sports: sports.slice(0, 10).map(s => ({ 
+          name: s.sportName, 
+          category: s.sportCategory,
+          format: s.competitionType 
+        })),
+        total_sports_available: sports.length,
+        format_breakdown: {
+          bracket: sports.filter(s => s.competitionType?.includes('bracket')).length,
+          leaderboard: sports.filter(s => s.competitionType === 'leaderboard').length,
+          series: sports.filter(s => s.competitionType === 'series').length,
+          hybrid: sports.filter(s => s.competitionType === 'both').length
+        }
+      };
+      
+      res.json({ success: true, insights });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: 'Failed to generate tournament insights'
       });
     }
   });

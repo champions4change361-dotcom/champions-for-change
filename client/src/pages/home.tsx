@@ -4,6 +4,7 @@ import { Link } from "wouter";
 import TournamentCreationForm from "@/components/tournament-creation-form";
 import TournamentList from "@/components/tournament-list";
 import AIConsultation from "@/components/ai-consultation";
+import TournamentInsights from "@/components/tournament-insights";
 import { type Tournament } from "@shared/schema";
 
 export default function Home() {
@@ -39,6 +40,7 @@ export default function Home() {
           {/* Left Panel: AI Consultation & Tournament Creation */}
           <div className="lg:col-span-1 space-y-6">
             <AIConsultation />
+            <TournamentInsights />
             <TournamentCreationForm />
             <TournamentList 
               tournaments={tournaments}
