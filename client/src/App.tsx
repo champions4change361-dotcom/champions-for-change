@@ -3,15 +3,35 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import Home from "@/pages/home";
+import { useAuth } from "@/hooks/useAuth";
+import Landing from "@/pages/Landing";
+import Home from "@/pages/Home";
+import LegacyHome from "@/pages/home";
 import Tournament from "@/pages/tournament";
 import NotFound from "@/pages/not-found";
 
 function Router() {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" aria-label="Loading" />
+      </div>
+    );
+  }
+
   return (
     <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/tournament/:id" component={Tournament} />
+      {!isAuthenticated ? (
+        <Route path="/" component={Landing} />
+      ) : (
+        <>
+          <Route path="/" component={Home} />
+          <Route path="/tournament/:id" component={Tournament} />
+          <Route path="/legacy-home" component={LegacyHome} />
+        </>
+      )}
       <Route component={NotFound} />
     </Switch>
   );

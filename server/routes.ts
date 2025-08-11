@@ -1,9 +1,19 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { getStorage } from "./storage";
+import { storage } from "./storage";
 import { insertTournamentSchema, updateMatchSchema } from "@shared/schema";
 import { analyzeTournamentQuery, generateTournamentStructure } from "./ai-consultation";
+import { setupAuth, isAuthenticated } from "./replitAuth";
+import Stripe from "stripe";
 import { z } from "zod";
+
+// Initialize Stripe
+if (!process.env.STRIPE_SECRET_KEY) {
+  throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
+}
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: "2023-10-16",
+});
 
 function generateSingleEliminationBracket(teamSize: number, tournamentId: string) {
   const rounds = Math.ceil(Math.log2(teamSize));
@@ -155,6 +165,8 @@ function generateDoubleEliminationBracket(teamSize: number, tournamentId: string
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Setup authentication middleware
+  await setupAuth(app);
   // Get all tournaments
   app.get("/api/tournaments", async (req, res) => {
     try {
@@ -569,13 +581,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get sport options (auto-import if empty)
   app.get("/api/sports", async (req, res) => {
     try {
-      const storage = await getStorage();
       let sports = await storage.getSportOptions();
       
       // If no sports exist, auto-import the default sports
       if (sports.length === 0) {
         console.log("No sports found, auto-importing default sports data...");
-        await importDefaultSportsData(storage);
+        await importDefaultSportsData();
         sports = await storage.getSportOptions();
         console.log(`Auto-imported ${sports.length} sports`);
       }
@@ -599,7 +610,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Helper function to import default sports data
-  async function importDefaultSportsData(storage: any) {
+  async function importDefaultSportsData() {
     // First import sport categories
     const sportCategoriesData = [
       {
@@ -1516,6 +1527,134 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: false,
         error: 'Failed to generate tournament insights'
       });
+    }
+  });
+
+  // Authentication routes
+  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  // White-label configuration routes
+  app.post('/api/whitelabel-config', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const configData = req.body;
+      
+      const config = await storage.createWhitelabelConfig({
+        ...configData,
+        userId
+      });
+      
+      res.json(config);
+    } catch (error) {
+      console.error("Error creating white-label config:", error);
+      res.status(500).json({ message: "Failed to create configuration" });
+    }
+  });
+
+  app.get('/api/whitelabel-config/:domain', async (req, res) => {
+    try {
+      const { domain } = req.params;
+      const config = await storage.getWhitelabelConfigByDomain(domain);
+      
+      if (!config) {
+        return res.status(404).json({ message: "Configuration not found" });
+      }
+      
+      res.json(config);
+    } catch (error) {
+      console.error("Error fetching white-label config:", error);
+      res.status(500).json({ message: "Failed to fetch configuration" });
+    }
+  });
+
+  // Stripe payment routes
+  app.post("/api/create-payment-intent", isAuthenticated, async (req, res) => {
+    try {
+      const { amount } = req.body;
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount * 100), // Convert to cents
+        currency: "usd",
+      });
+      res.json({ clientSecret: paymentIntent.client_secret });
+    } catch (error: any) {
+      res.status(500).json({ 
+        message: "Error creating payment intent: " + error.message 
+      });
+    }
+  });
+
+  app.post('/api/create-subscription', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // If user already has a subscription, return existing
+      if (user.stripeSubscriptionId) {
+        const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+        return res.json({
+          subscriptionId: subscription.id,
+          clientSecret: (subscription.latest_invoice as any)?.payment_intent?.client_secret,
+        });
+      }
+      
+      if (!user.email) {
+        return res.status(400).json({ message: 'User email required for subscription' });
+      }
+
+      // Create Stripe customer
+      const customer = await stripe.customers.create({
+        email: user.email,
+        name: user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.email,
+      });
+
+      // Create subscription (you'll need to set STRIPE_PRICE_ID in environment)
+      const subscription = await stripe.subscriptions.create({
+        customer: customer.id,
+        items: [{
+          price: process.env.STRIPE_PRICE_ID || 'price_1234567890', // Replace with actual price ID
+        }],
+        payment_behavior: 'default_incomplete',
+        expand: ['latest_invoice.payment_intent'],
+      });
+
+      // Update user with Stripe info
+      await storage.updateUserStripeInfo(userId, customer.id, subscription.id);
+  
+      res.json({
+        subscriptionId: subscription.id,
+        clientSecret: (subscription.latest_invoice as any)?.payment_intent?.client_secret,
+      });
+    } catch (error: any) {
+      console.error("Subscription error:", error);
+      res.status(500).json({ 
+        message: "Error creating subscription: " + error.message 
+      });
+    }
+  });
+
+  // Protected tournament routes (user-specific)
+  app.get('/api/my-tournaments', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const tournaments = await storage.getTournaments();
+      const userTournaments = tournaments.filter(t => t.userId === userId);
+      res.json(userTournaments);
+    } catch (error) {
+      console.error("Error fetching user tournaments:", error);
+      res.status(500).json({ message: "Failed to fetch tournaments" });
     }
   });
 

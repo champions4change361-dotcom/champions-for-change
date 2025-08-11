@@ -1,7 +1,58 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, jsonb, timestamp, boolean, numeric } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, jsonb, timestamp, boolean, numeric, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+
+// Session storage table for authentication
+export const sessions = pgTable(
+  "sessions",
+  {
+    sid: varchar("sid").primaryKey(),
+    sess: jsonb("sess").notNull(),
+    expire: timestamp("expire").notNull(),
+  },
+  (table) => [index("IDX_session_expire").on(table.expire)],
+);
+
+// User authentication table
+export const users = pgTable("users", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  email: varchar("email").unique(),
+  firstName: varchar("first_name"),
+  lastName: varchar("last_name"),
+  profileImageUrl: varchar("profile_image_url"),
+  stripeCustomerId: varchar("stripe_customer_id"),
+  stripeSubscriptionId: varchar("stripe_subscription_id"),
+  subscriptionStatus: text("subscription_status", { 
+    enum: ["active", "inactive", "trialing", "past_due", "canceled", "unpaid"] 
+  }).default("inactive"),
+  subscriptionPlan: text("subscription_plan", { 
+    enum: ["free", "basic", "pro", "enterprise"] 
+  }).default("free"),
+  isWhitelabelClient: boolean("is_whitelabel_client").default(false),
+  whitelabelDomain: varchar("whitelabel_domain"),
+  whitelabelBranding: jsonb("whitelabel_branding"), // Custom colors, logos, etc
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// White-label client configurations
+export const whitelabelConfigs = pgTable("whitelabel_configs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  domain: varchar("domain").notNull().unique(),
+  companyName: varchar("company_name").notNull(),
+  primaryColor: varchar("primary_color").default("#3b82f6"),
+  secondaryColor: varchar("secondary_color").default("#1e40af"),
+  logoUrl: varchar("logo_url"),
+  faviconUrl: varchar("favicon_url"),
+  customCss: text("custom_css"),
+  allowedFeatures: jsonb("allowed_features"), // Feature toggles
+  revenueSharePercentage: numeric("revenue_share_percentage").default("0"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
 
 export const tournaments = pgTable("tournaments", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -15,7 +66,7 @@ export const tournaments = pgTable("tournaments", {
   stageConfiguration: jsonb("stage_configuration"), // Defines each stage structure
   seriesLength: integer("series_length").default(7), // For series and bracket-to-series formats
   bracket: jsonb("bracket").notNull(),
-  participants: jsonb("participants").default([]), // Tournament participants/teams
+  teams: jsonb("teams").default([]), // Tournament participants/teams - renamed from participants
   sport: text("sport"), // From Bubble SportOptions
   sportCategory: text("sport_category"), // From Bubble SportCategories
   tournamentStructure: text("tournament_structure"), // From Bubble TournamentStructures
@@ -27,6 +78,15 @@ export const tournaments = pgTable("tournaments", {
   }).default("Mixed"),
   divisions: jsonb("divisions"), // Multiple division categories within one tournament
   scoringMethod: text("scoring_method").default("wins"),
+  userId: varchar("user_id").references(() => users.id), // Tournament owner
+  whitelabelConfigId: varchar("whitelabel_config_id").references(() => whitelabelConfigs.id), // White-label client
+  entryFee: numeric("entry_fee").default("0"), // Tournament entry fee
+  maxParticipants: integer("max_participants"),
+  registrationDeadline: timestamp("registration_deadline"),
+  tournamentDate: timestamp("tournament_date"),
+  location: text("location"),
+  description: text("description"),
+  isPublic: boolean("is_public").default(true),
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
   updatedAt: timestamp("updated_at").notNull().default(sql`now()`),
 });
@@ -157,6 +217,25 @@ export const divisionMatches = pgTable("division_matches", {
   createdAt: timestamp("created_at").default(sql`now()`),
 });
 
+// User schemas
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const upsertUserSchema = createInsertSchema(users).omit({
+  createdAt: true,
+  updatedAt: true,
+});
+
+// White-label schemas
+export const insertWhitelabelConfigSchema = createInsertSchema(whitelabelConfigs).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export const insertTournamentSchema = createInsertSchema(tournaments).omit({
   id: true,
   createdAt: true,
@@ -205,6 +284,15 @@ export const updateMatchSchema = createInsertSchema(matches).omit({
   createdAt: true,
   updatedAt: true,
 }).partial();
+
+// User types
+export type User = typeof users.$inferSelect;
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type UpsertUser = z.infer<typeof upsertUserSchema>;
+
+// White-label types
+export type WhitelabelConfig = typeof whitelabelConfigs.$inferSelect;
+export type InsertWhitelabelConfig = z.infer<typeof insertWhitelabelConfigSchema>;
 
 export type Tournament = typeof tournaments.$inferSelect;
 export type InsertTournament = z.infer<typeof insertTournamentSchema>;

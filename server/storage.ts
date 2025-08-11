@@ -1,8 +1,9 @@
 import { 
+  type User, type UpsertUser, type WhitelabelConfig, type InsertWhitelabelConfig,
   type Tournament, type InsertTournament, type Match, type InsertMatch, type UpdateMatch,
   type SportOption, type InsertSportOption, type TournamentStructure, type InsertTournamentStructure,
   type TrackEvent, type InsertTrackEvent,
-  tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents 
+  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents 
 } from "@shared/schema";
 
 type SportCategory = typeof sportCategories.$inferSelect;
@@ -13,6 +14,17 @@ import { drizzle } from "drizzle-orm/neon-http";
 import { eq, desc } from "drizzle-orm";
 
 export interface IStorage {
+  // User authentication methods
+  getUser(id: string): Promise<User | undefined>;
+  upsertUser(user: UpsertUser): Promise<User>;
+  updateUserStripeInfo(id: string, customerId: string, subscriptionId: string): Promise<User | undefined>;
+
+  // White-label methods
+  createWhitelabelConfig(config: InsertWhitelabelConfig): Promise<WhitelabelConfig>;
+  getWhitelabelConfig(id: string): Promise<WhitelabelConfig | undefined>;
+  getWhitelabelConfigByDomain(domain: string): Promise<WhitelabelConfig | undefined>;
+  updateWhitelabelConfig(id: string, updates: Partial<WhitelabelConfig>): Promise<WhitelabelConfig | undefined>;
+
   // Tournament methods
   getTournaments(): Promise<Tournament[]>;
   getTournament(id: string): Promise<Tournament | undefined>;
@@ -85,6 +97,100 @@ export class DbStorage implements IStorage {
     
     const sql = neon(databaseUrl);
     this.db = drizzle(sql);
+  }
+
+  // User authentication methods
+  async getUser(id: string): Promise<User | undefined> {
+    try {
+      const result = await this.db.select().from(users).where(eq(users.id, id));
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    try {
+      const result = await this.db
+        .insert(users)
+        .values(userData)
+        .onConflictDoUpdate({
+          target: users.id,
+          set: {
+            ...userData,
+            updatedAt: new Date(),
+          },
+        })
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to upsert user");
+    }
+  }
+
+  async updateUserStripeInfo(id: string, customerId: string, subscriptionId: string): Promise<User | undefined> {
+    try {
+      const result = await this.db
+        .update(users)
+        .set({ 
+          stripeCustomerId: customerId,
+          stripeSubscriptionId: subscriptionId,
+          updatedAt: new Date() 
+        })
+        .where(eq(users.id, id))
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  // White-label methods
+  async createWhitelabelConfig(config: InsertWhitelabelConfig): Promise<WhitelabelConfig> {
+    try {
+      const result = await this.db.insert(whitelabelConfigs).values(config).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to create white-label config");
+    }
+  }
+
+  async getWhitelabelConfig(id: string): Promise<WhitelabelConfig | undefined> {
+    try {
+      const result = await this.db.select().from(whitelabelConfigs).where(eq(whitelabelConfigs.id, id));
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async getWhitelabelConfigByDomain(domain: string): Promise<WhitelabelConfig | undefined> {
+    try {
+      const result = await this.db.select().from(whitelabelConfigs).where(eq(whitelabelConfigs.domain, domain));
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async updateWhitelabelConfig(id: string, updates: Partial<WhitelabelConfig>): Promise<WhitelabelConfig | undefined> {
+    try {
+      const result = await this.db
+        .update(whitelabelConfigs)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(whitelabelConfigs.id, id))
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
   }
 
   async getTournaments(): Promise<Tournament[]> {
@@ -366,6 +472,8 @@ export class DbStorage implements IStorage {
 }
 
 export class MemStorage implements IStorage {
+  private users: Map<string, User>;
+  private whitelabelConfigs: Map<string, WhitelabelConfig>;
   private tournaments: Map<string, Tournament>;
   private matches: Map<string, Match>;
   private sportCategories: Map<string, SportCategory>;
@@ -374,12 +482,91 @@ export class MemStorage implements IStorage {
   private trackEvents: Map<string, TrackEvent>;
 
   constructor() {
+    this.users = new Map();
+    this.whitelabelConfigs = new Map();
     this.tournaments = new Map();
     this.matches = new Map();
     this.sportCategories = new Map();
     this.sportOptions = new Map();
     this.tournamentStructures = new Map();
     this.trackEvents = new Map();
+  }
+
+  // User authentication methods
+  async getUser(id: string): Promise<User | undefined> {
+    return this.users.get(id);
+  }
+
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const now = new Date();
+    const user: User = {
+      ...userData,
+      createdAt: userData.createdAt || now,
+      updatedAt: now,
+      subscriptionStatus: userData.subscriptionStatus || "inactive",
+      subscriptionPlan: userData.subscriptionPlan || "free",
+      isWhitelabelClient: userData.isWhitelabelClient || false,
+    };
+    this.users.set(user.id, user);
+    return user;
+  }
+
+  async updateUserStripeInfo(id: string, customerId: string, subscriptionId: string): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (!user) return undefined;
+    
+    const updatedUser: User = {
+      ...user,
+      stripeCustomerId: customerId,
+      stripeSubscriptionId: subscriptionId,
+      updatedAt: new Date(),
+    };
+    this.users.set(id, updatedUser);
+    return updatedUser;
+  }
+
+  // White-label methods
+  async createWhitelabelConfig(config: InsertWhitelabelConfig): Promise<WhitelabelConfig> {
+    const id = randomUUID();
+    const now = new Date();
+    const whitelabelConfig: WhitelabelConfig = {
+      ...config,
+      id,
+      primaryColor: config.primaryColor || "#3b82f6",
+      secondaryColor: config.secondaryColor || "#1e40af",
+      revenueSharePercentage: config.revenueSharePercentage || "0",
+      isActive: config.isActive !== undefined ? config.isActive : true,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.whitelabelConfigs.set(id, whitelabelConfig);
+    return whitelabelConfig;
+  }
+
+  async getWhitelabelConfig(id: string): Promise<WhitelabelConfig | undefined> {
+    return this.whitelabelConfigs.get(id);
+  }
+
+  async getWhitelabelConfigByDomain(domain: string): Promise<WhitelabelConfig | undefined> {
+    for (const config of this.whitelabelConfigs.values()) {
+      if (config.domain === domain) {
+        return config;
+      }
+    }
+    return undefined;
+  }
+
+  async updateWhitelabelConfig(id: string, updates: Partial<WhitelabelConfig>): Promise<WhitelabelConfig | undefined> {
+    const config = this.whitelabelConfigs.get(id);
+    if (!config) return undefined;
+    
+    const updatedConfig: WhitelabelConfig = {
+      ...config,
+      ...updates,
+      updatedAt: new Date(),
+    };
+    this.whitelabelConfigs.set(id, updatedConfig);
+    return updatedConfig;
   }
 
   async getTournaments(): Promise<Tournament[]> {
@@ -631,8 +818,6 @@ export class MemStorage implements IStorage {
 }
 
 // Try to use database storage, fallback to memory if database fails
-let storage: IStorage;
-
 async function initializeStorage(): Promise<IStorage> {
   if (process.env.DATABASE_URL) {
     try {
@@ -650,14 +835,16 @@ async function initializeStorage(): Promise<IStorage> {
   return new MemStorage();
 }
 
-// Initialize storage function
-let storagePromise: Promise<IStorage>;
+// Initialize storage 
+let storagePromise: Promise<IStorage> | null = null;
 
-function getStorage(): Promise<IStorage> {
+async function getStorage(): Promise<IStorage> {
   if (!storagePromise) {
     storagePromise = initializeStorage();
   }
   return storagePromise;
 }
 
+// Export synchronous storage instance for middleware
+export const storage = await getStorage();
 export { getStorage };
