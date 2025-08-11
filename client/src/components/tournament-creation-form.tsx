@@ -25,7 +25,11 @@ const formSchema = insertTournamentSchema.extend({
 
 type FormData = z.infer<typeof formSchema>;
 
-export default function TournamentCreationForm() {
+interface TournamentCreationFormProps {
+  onClose?: () => void;
+}
+
+export default function TournamentCreationForm({ onClose }: TournamentCreationFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showEventModal, setShowEventModal] = useState(false);
@@ -176,7 +180,17 @@ export default function TournamentCreationForm() {
         description: `${data.tournament.name} has been created successfully!`,
       });
       form.reset();
+      // Invalidate both query keys to refresh tournament lists
       queryClient.invalidateQueries({ queryKey: ["/api/tournaments"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/my-tournaments"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/tournament-insights"] });
+      
+      // Close the modal after successful creation
+      if (onClose) {
+        setTimeout(() => {
+          onClose();
+        }, 1500); // Wait 1.5 seconds to show the success message
+      }
     },
     onError: (error) => {
       toast({
