@@ -123,6 +123,7 @@ export default function Landing() {
             size="lg" 
             variant="outline"
             className="border-green-600 text-green-600 hover:bg-green-50"
+            onClick={() => window.location.href = "/api/login"}
             data-testid="button-view-demo"
           >
             View Platform Demo
