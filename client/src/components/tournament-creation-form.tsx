@@ -27,9 +27,10 @@ type FormData = z.infer<typeof formSchema>;
 
 interface TournamentCreationFormProps {
   onClose?: () => void;
+  aiRecommendations?: any;
 }
 
-export default function TournamentCreationForm({ onClose }: TournamentCreationFormProps) {
+export default function TournamentCreationForm({ onClose, aiRecommendations }: TournamentCreationFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showEventModal, setShowEventModal] = useState(false);
@@ -49,6 +50,65 @@ export default function TournamentCreationForm({ onClose }: TournamentCreationFo
       bracket: {},
     },
   });
+
+  // Apply AI recommendations when component mounts or recommendations change
+  useEffect(() => {
+    if (aiRecommendations) {
+      console.log("Applying AI recommendations from props:", aiRecommendations);
+      const { sport, format, age_group, gender_division, teamSize } = aiRecommendations;
+      
+      if (sport) {
+        console.log("Setting sport:", sport);
+        form.setValue("sport", sport);
+      }
+      
+      if (format) {
+        console.log("Setting format:", format);
+        form.setValue("competitionFormat", format);
+        
+        if (format === "bracket") {
+          form.setValue("tournamentType", "single");
+        } else if (format === "leaderboard") {
+          form.setValue("tournamentType", "round-robin");
+        } else if (format === "bracket-to-series") {
+          form.setValue("tournamentType", "single");
+          form.setValue("competitionFormat", "bracket-to-series");
+        }
+      }
+      
+      if (age_group && age_group !== "All Ages") {
+        console.log("Setting age group:", age_group);
+        form.setValue("ageGroup", age_group);
+      }
+      
+      if (gender_division && gender_division !== "Mixed") {
+        console.log("Setting gender division:", gender_division);
+        form.setValue("genderDivision", gender_division);
+      }
+      
+      if (teamSize) {
+        console.log("Setting team size:", teamSize);
+        form.setValue("teamSize", teamSize);
+      }
+      
+      // Auto-generate tournament name
+      const sportName = sport || "Championship";
+      const agePart = age_group && age_group !== "All Ages" ? `${age_group} ` : "";
+      const genderPart = gender_division && gender_division !== "Mixed" ? `${gender_division} ` : "";
+      const autoName = `${agePart}${genderPart}${sportName} Tournament`;
+      
+      console.log("Setting tournament name:", autoName);
+      form.setValue("name", autoName);
+      
+      // Force re-render
+      form.trigger();
+      
+      toast({
+        title: "AI Recommendations Applied",
+        description: `Form pre-filled with ${sport} tournament settings`,
+      });
+    }
+  }, [aiRecommendations, form, toast]);
 
   // Listen for AI recommendation events
   useEffect(() => {

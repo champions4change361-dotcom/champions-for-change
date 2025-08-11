@@ -14,18 +14,26 @@ export default function Home() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showAIConsultation, setShowAIConsultation] = useState(false);
   const [activeView, setActiveView] = useState<'dashboard' | 'tournaments' | 'billing' | 'settings'>('dashboard');
+  const [aiRecommendations, setAiRecommendations] = useState<any>(null);
 
-  // Listen for events to open tournament form
+  // Listen for events to open tournament form and store AI recommendations
   useEffect(() => {
     const handleOpenTournamentForm = () => {
       setShowAIConsultation(false); // Close AI consultation
       setShowCreateForm(true); // Open tournament form
     };
 
+    const handleAIRecommendation = (event: CustomEvent) => {
+      console.log("Home received AI recommendation:", event.detail);
+      setAiRecommendations(event.detail);
+    };
+
     window.addEventListener('open-tournament-form', handleOpenTournamentForm);
+    window.addEventListener('ai-recommendation', handleAIRecommendation as EventListener);
     
     return () => {
       window.removeEventListener('open-tournament-form', handleOpenTournamentForm);
+      window.removeEventListener('ai-recommendation', handleAIRecommendation as EventListener);
     };
   }, []);
 
@@ -66,7 +74,13 @@ export default function Home() {
           </div>
         </header>
         <div className="container mx-auto px-4 py-8">
-          <TournamentCreationForm onClose={() => setShowCreateForm(false)} />
+          <TournamentCreationForm 
+            onClose={() => {
+              setShowCreateForm(false);
+              setAiRecommendations(null); // Clear recommendations when closing
+            }}
+            aiRecommendations={aiRecommendations}
+          />
         </div>
       </div>
     );
