@@ -559,6 +559,11 @@ export default function AIConsultation() {
                           }
                         });
                         window.dispatchEvent(event);
+                        
+                        // Also trigger opening the tournament creation form
+                        const openFormEvent = new CustomEvent('open-tournament-form');
+                        window.dispatchEvent(openFormEvent);
+                        
                         toast({
                           title: "Form Pre-filled",
                           description: "Tournament creation form has been populated with AI recommendations",

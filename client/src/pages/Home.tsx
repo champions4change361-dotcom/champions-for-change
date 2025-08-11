@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +14,20 @@ export default function Home() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showAIConsultation, setShowAIConsultation] = useState(false);
   const [activeView, setActiveView] = useState<'dashboard' | 'tournaments' | 'billing' | 'settings'>('dashboard');
+
+  // Listen for events to open tournament form
+  useEffect(() => {
+    const handleOpenTournamentForm = () => {
+      setShowAIConsultation(false); // Close AI consultation
+      setShowCreateForm(true); // Open tournament form
+    };
+
+    window.addEventListener('open-tournament-form', handleOpenTournamentForm);
+    
+    return () => {
+      window.removeEventListener('open-tournament-form', handleOpenTournamentForm);
+    };
+  }, []);
 
   const { data: myTournaments } = useQuery({
     queryKey: ["/api/my-tournaments"],
