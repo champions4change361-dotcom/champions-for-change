@@ -14,9 +14,9 @@ import { storage, getStorage } from "./storage";
 const supportedDomains = process.env.REPLIT_DOMAINS ? 
   process.env.REPLIT_DOMAINS.split(",") : [];
 
-// Add tractortournaments.org as supported domain
-if (!supportedDomains.includes('tractortournaments.org')) {
-  supportedDomains.push('tractortournaments.org');
+// Add trantortournaments.org as supported domain
+if (!supportedDomains.includes('trantortournaments.org')) {
+  supportedDomains.push('trantortournaments.org');
 }
 
 console.log("Supported OAuth domains:", supportedDomains);

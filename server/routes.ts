@@ -1653,7 +1653,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       current_domain: req.get('host'),
       hostname: req.hostname,
       supported_domains: process.env.REPLIT_DOMAINS?.split(',') || [],
-      tractortournaments_supported: req.hostname === 'tractortournaments.org',
+      trantortournaments_supported: req.hostname === 'trantortournaments.org',
       oauth_configured: !!process.env.REPL_ID,
       issuer_url: process.env.ISSUER_URL || 'https://replit.com/oidc',
       environment: process.env.NODE_ENV || 'development',
