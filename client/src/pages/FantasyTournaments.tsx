@@ -12,8 +12,8 @@ export default function FantasyTournaments() {
       <div className="text-center space-y-4">
         <h1 className="text-4xl font-bold text-green-600">Fantasy Sports Tournaments</h1>
         <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-          Data-driven fantasy competitions supporting Champions for Change educational mission. 
-          Pure skill-based play with real player statistics - no gambling, just champions supporting champions.
+          Educational fantasy sports using PROFESSIONAL LEAGUE DATA ONLY (NFL, NBA, MLB, NHL). 
+          Zero involvement with youth/school sports - strictly adult professional athletics for educational purposes.
         </p>
       </div>
 
@@ -57,11 +57,15 @@ export default function FantasyTournaments() {
                   </ul>
                 </div>
               </div>
-              <div className="bg-green-50 p-4 rounded-lg">
-                <p className="text-green-800 font-medium">
-                  🎯 Data-Only Platform: We provide statistics and tracking tools. 
-                  Users handle any external activities independently.
-                </p>
+              <div className="bg-red-50 border-2 border-red-200 p-4 rounded-lg">
+                <h4 className="font-bold text-red-800 mb-2">TEXAS COMPLIANCE - PROFESSIONAL SPORTS ONLY</h4>
+                <ul className="text-red-800 text-sm space-y-1">
+                  <li>• ONLY professional leagues: NFL, NBA, MLB, NHL, MLS</li>
+                  <li>• ZERO youth, high school, or college sports data</li>
+                  <li>• Educational tool only - no gambling features</li>
+                  <li>• Data export for analysis and learning purposes</li>
+                  <li>• Compliant with Texas regulations on youth protection</li>
+                </ul>
               </div>
             </CardContent>
           </Card>
@@ -193,8 +197,8 @@ export default function FantasyTournaments() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="text-center p-4 border rounded-lg">
-              <h4 className="font-semibold mb-2">Real-Time Stats</h4>
-              <p className="text-sm text-gray-600">Official sports league APIs provide live player performance data</p>
+              <h4 className="font-semibold mb-2">Professional League Data</h4>
+              <p className="text-sm text-gray-600">NFL, NBA, MLB, NHL official APIs only - zero youth sports involvement</p>
             </div>
             <div className="text-center p-4 border rounded-lg">
               <h4 className="font-semibold mb-2">Educational Focus</h4>
@@ -205,11 +209,15 @@ export default function FantasyTournaments() {
               <p className="text-sm text-gray-600">Export tournament data for external analysis and research</p>
             </div>
           </div>
-          <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
-            <p className="text-yellow-800 text-sm">
-              <strong>Important:</strong> Champions for Change provides data and tournament management tools only. 
-              This platform does not facilitate gambling or monetary wagering. Users are responsible for their own activities outside this platform.
-            </p>
+          <div className="bg-yellow-50 border-2 border-yellow-400 p-4 rounded-lg">
+            <h4 className="font-bold text-yellow-800 mb-2">EDUCATIONAL USE DISCLAIMER</h4>
+            <ul className="text-yellow-800 text-sm space-y-1">
+              <li>• <strong>NO GAMBLING:</strong> This platform provides data analysis tools only</li>
+              <li>• <strong>PROFESSIONAL ONLY:</strong> Uses NFL/NBA/MLB/NHL statistics exclusively</li>
+              <li>• <strong>YOUTH PROTECTION:</strong> Zero involvement with student-athlete data</li>
+              <li>• <strong>EDUCATIONAL MISSION:</strong> Sports analytics learning to fund student trips</li>
+              <li>• <strong>USER RESPONSIBILITY:</strong> Any external activities are user's sole responsibility</li>
+            </ul>
           </div>
         </CardContent>
       </Card>

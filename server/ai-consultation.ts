@@ -230,13 +230,13 @@ function generateTier1Suggestions(sport: string, format: string, ageGroup: strin
     suggestions.push("Consider separate warm-up pool access");
     suggestions.push("Plan timing technology backup systems");
   } else if (sport.includes('Fantasy')) {
-    suggestions.push("Source real player statistics from official sports APIs");
-    suggestions.push("Update player performance data in real-time during games");
-    suggestions.push("Provide educational content about sports analytics");
-    suggestions.push("Focus on skill-based competition rather than gambling");
-    suggestions.push("Create team draft systems with fair selection processes");
-    suggestions.push("Provide data exports for external fantasy analysis");
-    suggestions.push("No gambling features - data-only platform for educational use");
+    suggestions.push("Use ONLY professional league data (NFL, NBA, MLB, NHL, MLS)");
+    suggestions.push("ZERO involvement with youth, high school, or college sports");
+    suggestions.push("Educational sports analytics tool - no gambling features");
+    suggestions.push("Texas compliant - strict professional sports data only");
+    suggestions.push("Data export capabilities for learning and analysis");
+    suggestions.push("Focus on statistical education and sports research");
+    suggestions.push("Platform protects youth by excluding amateur sports data");
   }
   
   // Age group specific suggestions
