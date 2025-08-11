@@ -3,14 +3,17 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Plus, Users, Settings, CreditCard, LogOut, GraduationCap, Heart } from "lucide-react";
+import { Trophy, Plus, Users, Settings, CreditCard, LogOut, GraduationCap, Heart, Sparkles } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import TournamentCreationForm from "@/components/tournament-creation-form";
+import AIConsultation from "@/components/ai-consultation";
 import championLogo from "@assets/IMG_1442_1754896656003.jpeg";
 
 export default function Home() {
   const { user, isLoading } = useAuth();
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showAIConsultation, setShowAIConsultation] = useState(false);
+  const [activeView, setActiveView] = useState<'dashboard' | 'tournaments' | 'billing' | 'settings'>('dashboard');
 
   const { data: myTournaments } = useQuery({
     queryKey: ["/api/my-tournaments"],
@@ -73,31 +76,33 @@ export default function Home() {
                   <div className="text-xs text-green-600 font-medium">Tournament Dashboard</div>
                 </div>
               </div>
-              <Badge variant="secondary" className="bg-green-100 text-green-800" data-testid="text-user-plan">
-                {user?.subscriptionPlan || "Supporter"} Plan
-              </Badge>
-              <Badge variant="outline" className="border-purple-300 text-purple-700">
-                <Heart className="h-3 w-3 mr-1" />
-                Supporting Students
-              </Badge>
+              <div className="flex items-center space-x-2">
+                <Badge variant="secondary" className="bg-green-100 text-green-800" data-testid="text-user-plan">
+                  Free Plan
+                </Badge>
+                <Badge variant="outline" className="border-purple-300 text-purple-700">
+                  <Heart className="h-3 w-3 mr-1" />
+                  Supporting Students
+                </Badge>
+              </div>
             </div>
             
             <div className="flex items-center space-x-4">
               <div className="text-right" data-testid="text-user-info">
                 <div className="font-medium">
-                  {user?.firstName && user?.lastName 
-                    ? `${user.firstName} ${user.lastName}` 
-                    : user?.email || "User"
+                  {(user as any)?.firstName && (user as any)?.lastName 
+                    ? `${(user as any).firstName} ${(user as any).lastName}` 
+                    : (user as any)?.email || "User"
                   }
                 </div>
                 <div className="text-sm text-gray-500">
-                  {user?.email}
+                  {(user as any)?.email}
                 </div>
               </div>
               
-              {user?.profileImageUrl && (
+              {(user as any)?.profileImageUrl && (
                 <img 
-                  src={user.profileImageUrl} 
+                  src={(user as any).profileImageUrl} 
                   alt="Profile" 
                   className="w-10 h-10 rounded-full object-cover"
                   data-testid="img-avatar"
@@ -125,7 +130,7 @@ export default function Home() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold mb-2">
-                Welcome back, {user?.firstName || "Champion"}!
+                Welcome back, {(user as any)?.firstName || "Champion"}!
               </h1>
               <p className="text-green-100 mb-4">
                 Every tournament you create helps fund educational opportunities for students in Corpus Christi, Texas.
@@ -150,7 +155,7 @@ export default function Home() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid md:grid-cols-4 gap-4 mb-8">
+        <div className="grid md:grid-cols-5 gap-4 mb-8">
           <Card className="cursor-pointer hover:shadow-xl transition-all hover:scale-105 border-green-200 hover:border-green-400" onClick={() => setShowCreateForm(true)}>
             <CardHeader className="text-center">
               <Plus className="h-8 w-8 text-green-600 mx-auto mb-2" />
@@ -159,23 +164,31 @@ export default function Home() {
             </CardHeader>
           </Card>
 
-          <Card className="cursor-pointer hover:shadow-xl transition-all hover:scale-105 border-blue-200 hover:border-blue-400">
+          <Card className="cursor-pointer hover:shadow-xl transition-all hover:scale-105 border-purple-200 hover:border-purple-400" onClick={() => setShowAIConsultation(true)}>
             <CardHeader className="text-center">
-              <Trophy className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-              <CardTitle className="text-lg">My Tournaments</CardTitle>
-              <CardDescription>{myTournaments?.length || 0} active</CardDescription>
+              <Sparkles className="h-8 w-8 text-purple-600 mx-auto mb-2" />
+              <CardTitle className="text-lg">Keystone AI</CardTitle>
+              <CardDescription>Tournament consultant</CardDescription>
             </CardHeader>
           </Card>
 
-          <Card className="cursor-pointer hover:shadow-xl transition-all hover:scale-105 border-purple-200 hover:border-purple-400">
+          <Card className="cursor-pointer hover:shadow-xl transition-all hover:scale-105 border-blue-200 hover:border-blue-400" onClick={() => setActiveView('tournaments')}>
             <CardHeader className="text-center">
-              <CreditCard className="h-8 w-8 text-purple-600 mx-auto mb-2" />
+              <Trophy className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+              <CardTitle className="text-lg">My Tournaments</CardTitle>
+              <CardDescription>{(myTournaments as any)?.length || 0} active</CardDescription>
+            </CardHeader>
+          </Card>
+
+          <Card className="cursor-pointer hover:shadow-xl transition-all hover:scale-105 border-orange-200 hover:border-orange-400" onClick={() => setActiveView('billing')}>
+            <CardHeader className="text-center">
+              <CreditCard className="h-8 w-8 text-orange-600 mx-auto mb-2" />
               <CardTitle className="text-lg">Impact & Billing</CardTitle>
               <CardDescription>View student support</CardDescription>
             </CardHeader>
           </Card>
 
-          <Card className="cursor-pointer hover:shadow-xl transition-all hover:scale-105 border-gray-200 hover:border-gray-400">
+          <Card className="cursor-pointer hover:shadow-xl transition-all hover:scale-105 border-gray-200 hover:border-gray-400" onClick={() => setActiveView('settings')}>
             <CardHeader className="text-center">
               <Settings className="h-8 w-8 text-gray-600 mx-auto mb-2" />
               <CardTitle className="text-lg">Settings</CardTitle>
@@ -183,6 +196,21 @@ export default function Home() {
             </CardHeader>
           </Card>
         </div>
+
+        {/* AI Consultation Modal */}
+        {showAIConsultation && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white dark:bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-2xl font-bold">Keystone AI Tournament Consultant</h2>
+                  <Button variant="ghost" onClick={() => setShowAIConsultation(false)}>✕</Button>
+                </div>
+                <AIConsultation />
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Impact & Statistics */}
         {insights && (
@@ -195,7 +223,7 @@ export default function Home() {
               <Card className="bg-green-50 border-green-200">
                 <CardHeader>
                   <CardTitle className="text-2xl font-bold text-green-600" data-testid="text-total-tournaments">
-                    {insights.total_tournaments}
+                    {(insights as any)?.total_tournaments || 0}
                   </CardTitle>
                   <CardDescription>Tournaments Created</CardDescription>
                   <div className="text-xs text-green-600 mt-1">Supporting students</div>
@@ -205,7 +233,7 @@ export default function Home() {
               <Card className="bg-blue-50 border-blue-200">
                 <CardHeader>
                   <CardTitle className="text-2xl font-bold text-blue-600" data-testid="text-active-tournaments">
-                    {insights.active_tournaments}
+                    {(insights as any)?.active_tournaments || 0}
                   </CardTitle>
                   <CardDescription>Active Tournaments</CardDescription>
                   <div className="text-xs text-blue-600 mt-1">Currently funding education</div>
@@ -215,7 +243,7 @@ export default function Home() {
               <Card className="bg-purple-50 border-purple-200">
                 <CardHeader>
                   <CardTitle className="text-2xl font-bold text-purple-600" data-testid="text-completed-tournaments">
-                    {insights.completed_tournaments}
+                    {(insights as any)?.completed_tournaments || 0}
                   </CardTitle>
                   <CardDescription>Completed Tournaments</CardDescription>
                   <div className="text-xs text-purple-600 mt-1">Impact achieved</div>
@@ -225,7 +253,7 @@ export default function Home() {
               <Card className="bg-orange-50 border-orange-200">
                 <CardHeader>
                   <CardTitle className="text-2xl font-bold text-orange-600" data-testid="text-sports-available">
-                    {insights.total_sports_available}
+                    {(insights as any)?.total_sports_available || 65}
                   </CardTitle>
                   <CardDescription>Sports Available</CardDescription>
                   <div className="text-xs text-orange-600 mt-1">Maximum options</div>
@@ -240,14 +268,14 @@ export default function Home() {
           <CardHeader>
             <CardTitle>My Recent Tournaments</CardTitle>
             <CardDescription>
-              {myTournaments?.length ? 
-                `You have ${myTournaments.length} tournament${myTournaments.length > 1 ? 's' : ''}` :
+              {(myTournaments as any)?.length ? 
+                `You have ${(myTournaments as any).length} tournament${(myTournaments as any).length > 1 ? 's' : ''}` :
                 'No tournaments created yet'
               }
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {!myTournaments?.length ? (
+            {!(myTournaments as any)?.length ? (
               <div className="text-center py-8 text-gray-500">
                 <Trophy className="h-12 w-12 mx-auto mb-4 opacity-50" />
                 <p>Create your first tournament to get started!</p>
@@ -261,7 +289,7 @@ export default function Home() {
               </div>
             ) : (
               <div className="space-y-4">
-                {myTournaments.slice(0, 5).map((tournament: any) => (
+                {(myTournaments as any)?.slice(0, 5).map((tournament: any) => (
                   <div 
                     key={tournament.id} 
                     className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
