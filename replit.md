@@ -4,11 +4,13 @@
 
 This is a full-stack tournament bracket management application that allows users to create and manage single-elimination tournaments with interactive bracket visualization and real-time match updates. The application features a React frontend with a Node.js/Express backend, using PostgreSQL for data persistence and in-memory storage as a fallback.
 
-**Status**: Full-stack white-label tournament management SaaS platform with user authentication, payment integration, and complete tournament generation capabilities. Features AI-powered tournament creation system, comprehensive sports coverage across 65+ sports, multi-tenant white-label architecture, user profiles, subscription management, and enterprise-ready tournament tools. Platform eliminates need for external dependencies like Bubble, providing complete self-contained solution for tournament organizers and white-label clients.
+**Status**: Complete white-label tournament management SaaS platform for Champions for Change nonprofit. Revenue funds educational opportunities for underprivileged youth in Corpus Christi, Texas. Built by coaches who identified tournament management needs. Features user authentication with Replit OAuth, Stripe payment integration, AI-powered tournament creation across 65+ sports, custom branding with Champions for Change logo and color scheme, multi-tenant white-label architecture, and mission-focused user experience emphasizing educational impact.
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+Mission-focused: Platform serves Champions for Change nonprofit to fund student trips and educational opportunities for middle schools in Corpus Christi, Texas.
+Branding: Green and blue color scheme from Champions for Change logo, emphasis on educational impact and coach-built heritage.
 
 ## System Architecture
 
@@ -35,9 +37,11 @@ Preferred communication style: Simple, everyday language.
 - **Data Validation**: Zod schemas for runtime type validation and Drizzle-Zod integration
 
 ### Authentication and Authorization
+- **Authentication Provider**: Replit OAuth integration with openid-client
 - **Session Management**: Express sessions with PostgreSQL session store (connect-pg-simple)
-- **Security**: CORS configuration and secure session handling
-- **Note**: Authentication endpoints not yet implemented but session infrastructure is in place
+- **User Management**: Complete user registration, login, logout flows
+- **Protected Routes**: Authentication middleware for tournament and payment endpoints
+- **Security**: CORS configuration, secure session handling, and user profile management
 
 ### External Dependencies
 - **Database**: Neon PostgreSQL (serverless)
@@ -58,3 +62,7 @@ Preferred communication style: Simple, everyday language.
 - **Advanced Event Selection**: Checkbox-based interface with category grouping, "Select All" functionality, and real-time event counters
 - **Sport-Specific Scoring**: Time-based (running/swimming), distance-based (throwing/jumping), stroke-based (golf), weight-based (fishing), and point-based (skills competitions) scoring systems
 - **Youth Program Support**: Specialized events for middle school programs including golf skills competitions and youth hunting/fishing derbies
+- **Mission Integration**: Platform branding reflects Champions for Change nonprofit mission with green/blue color scheme
+- **Educational Impact Focus**: User interface emphasizes funding student trips and educational opportunities
+- **Revenue-to-Education Model**: 100% of platform revenue directed to supporting underprivileged youth in Corpus Christi, Texas
+- **Coach-Built Heritage**: Platform messaging highlights development by coaches who understand tournament management needs

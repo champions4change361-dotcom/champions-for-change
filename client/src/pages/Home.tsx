@@ -3,9 +3,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Plus, Users, Settings, CreditCard, LogOut } from "lucide-react";
+import { Trophy, Plus, Users, Settings, CreditCard, LogOut, GraduationCap, Heart } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import TournamentCreationForm from "@/components/tournament-creation-form";
+import championLogo from "@assets/IMG_1442_1754896656003.jpeg";
 
 export default function Home() {
   const { user, isLoading } = useAuth();
@@ -55,18 +56,29 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">
       {/* Header */}
-      <header className="bg-white dark:bg-gray-800 shadow">
+      <header className="bg-white dark:bg-gray-800 shadow-lg border-b-2 border-green-200">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <Trophy className="h-8 w-8 text-blue-600" />
-                <span className="text-2xl font-bold">TournamentPro</span>
+              <div className="flex items-center space-x-3">
+                <img 
+                  src={championLogo} 
+                  alt="Champions for Change" 
+                  className="h-10 w-10 rounded-full object-cover"
+                />
+                <div>
+                  <div className="text-xl font-bold text-gray-900 dark:text-white">Champions for Change</div>
+                  <div className="text-xs text-green-600 font-medium">Tournament Dashboard</div>
+                </div>
               </div>
-              <Badge variant="secondary" data-testid="text-user-plan">
-                {user?.subscriptionPlan || "Free"} Plan
+              <Badge variant="secondary" className="bg-green-100 text-green-800" data-testid="text-user-plan">
+                {user?.subscriptionPlan || "Supporter"} Plan
+              </Badge>
+              <Badge variant="outline" className="border-purple-300 text-purple-700">
+                <Heart className="h-3 w-3 mr-1" />
+                Supporting Students
               </Badge>
             </div>
             
@@ -109,42 +121,60 @@ export default function Home() {
       {/* Dashboard */}
       <div className="container mx-auto px-4 py-8">
         {/* Welcome Section */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Welcome back, {user?.firstName || "there"}!
-          </h1>
-          <p className="text-gray-600 dark:text-gray-300">
-            Manage your tournaments and track your success.
-          </p>
+        <div className="bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-xl p-8 mb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">
+                Welcome back, {user?.firstName || "Champion"}!
+              </h1>
+              <p className="text-green-100 mb-4">
+                Every tournament you create helps fund educational opportunities for students in Corpus Christi, Texas.
+              </p>
+              <div className="flex items-center space-x-4 text-sm">
+                <div className="flex items-center space-x-1">
+                  <GraduationCap className="h-4 w-4" />
+                  <span>Supporting Education</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <Heart className="h-4 w-4" />
+                  <span>Built by Coaches</span>
+                </div>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-2xl font-bold">100%</div>
+              <div className="text-green-200 text-sm">Revenue to Students</div>
+            </div>
+          </div>
         </div>
 
         {/* Quick Actions */}
         <div className="grid md:grid-cols-4 gap-4 mb-8">
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setShowCreateForm(true)}>
+          <Card className="cursor-pointer hover:shadow-xl transition-all hover:scale-105 border-green-200 hover:border-green-400" onClick={() => setShowCreateForm(true)}>
             <CardHeader className="text-center">
-              <Plus className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+              <Plus className="h-8 w-8 text-green-600 mx-auto mb-2" />
               <CardTitle className="text-lg">Create Tournament</CardTitle>
-              <CardDescription>Start a new tournament</CardDescription>
+              <CardDescription>Start supporting students</CardDescription>
             </CardHeader>
           </Card>
 
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+          <Card className="cursor-pointer hover:shadow-xl transition-all hover:scale-105 border-blue-200 hover:border-blue-400">
             <CardHeader className="text-center">
-              <Trophy className="h-8 w-8 text-green-600 mx-auto mb-2" />
+              <Trophy className="h-8 w-8 text-blue-600 mx-auto mb-2" />
               <CardTitle className="text-lg">My Tournaments</CardTitle>
               <CardDescription>{myTournaments?.length || 0} active</CardDescription>
             </CardHeader>
           </Card>
 
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+          <Card className="cursor-pointer hover:shadow-xl transition-all hover:scale-105 border-purple-200 hover:border-purple-400">
             <CardHeader className="text-center">
               <CreditCard className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-              <CardTitle className="text-lg">Subscription</CardTitle>
-              <CardDescription>Manage billing</CardDescription>
+              <CardTitle className="text-lg">Impact & Billing</CardTitle>
+              <CardDescription>View student support</CardDescription>
             </CardHeader>
           </Card>
 
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+          <Card className="cursor-pointer hover:shadow-xl transition-all hover:scale-105 border-gray-200 hover:border-gray-400">
             <CardHeader className="text-center">
               <Settings className="h-8 w-8 text-gray-600 mx-auto mb-2" />
               <CardTitle className="text-lg">Settings</CardTitle>
@@ -153,44 +183,54 @@ export default function Home() {
           </Card>
         </div>
 
-        {/* Statistics */}
+        {/* Impact & Statistics */}
         {insights && (
-          <div className="grid md:grid-cols-4 gap-4 mb-8">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl font-bold" data-testid="text-total-tournaments">
-                  {insights.total_tournaments}
-                </CardTitle>
-                <CardDescription>Total Tournaments</CardDescription>
-              </CardHeader>
-            </Card>
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+              <Heart className="h-6 w-6 text-red-500 mr-2" />
+              Your Educational Impact
+            </h2>
+            <div className="grid md:grid-cols-4 gap-4">
+              <Card className="bg-green-50 border-green-200">
+                <CardHeader>
+                  <CardTitle className="text-2xl font-bold text-green-600" data-testid="text-total-tournaments">
+                    {insights.total_tournaments}
+                  </CardTitle>
+                  <CardDescription>Tournaments Created</CardDescription>
+                  <div className="text-xs text-green-600 mt-1">Supporting students</div>
+                </CardHeader>
+              </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl font-bold text-green-600" data-testid="text-active-tournaments">
-                  {insights.active_tournaments}
-                </CardTitle>
-                <CardDescription>Active Tournaments</CardDescription>
-              </CardHeader>
-            </Card>
+              <Card className="bg-blue-50 border-blue-200">
+                <CardHeader>
+                  <CardTitle className="text-2xl font-bold text-blue-600" data-testid="text-active-tournaments">
+                    {insights.active_tournaments}
+                  </CardTitle>
+                  <CardDescription>Active Tournaments</CardDescription>
+                  <div className="text-xs text-blue-600 mt-1">Currently funding education</div>
+                </CardHeader>
+              </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl font-bold text-blue-600" data-testid="text-completed-tournaments">
-                  {insights.completed_tournaments}
-                </CardTitle>
-                <CardDescription>Completed Tournaments</CardDescription>
-              </CardHeader>
-            </Card>
+              <Card className="bg-purple-50 border-purple-200">
+                <CardHeader>
+                  <CardTitle className="text-2xl font-bold text-purple-600" data-testid="text-completed-tournaments">
+                    {insights.completed_tournaments}
+                  </CardTitle>
+                  <CardDescription>Completed Tournaments</CardDescription>
+                  <div className="text-xs text-purple-600 mt-1">Impact achieved</div>
+                </CardHeader>
+              </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl font-bold text-purple-600" data-testid="text-sports-available">
-                  {insights.total_sports_available}
-                </CardTitle>
-                <CardDescription>Sports Available</CardDescription>
-              </CardHeader>
-            </Card>
+              <Card className="bg-orange-50 border-orange-200">
+                <CardHeader>
+                  <CardTitle className="text-2xl font-bold text-orange-600" data-testid="text-sports-available">
+                    {insights.total_sports_available}
+                  </CardTitle>
+                  <CardDescription>Sports Available</CardDescription>
+                  <div className="text-xs text-orange-600 mt-1">Maximum options</div>
+                </CardHeader>
+              </Card>
+            </div>
           </div>
         )}
 
