@@ -226,7 +226,7 @@ export default function Landing() {
           
           <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 mb-8 text-center">
             <p className="text-sm text-blue-700 dark:text-blue-300">
-              <strong>Student Trip Cost:</strong> $2,600+ per student • <strong>Nonprofit Discount:</strong> 25% off all plans • <strong>Annual Plans:</strong> Save 2 months
+              <strong>15% Cheaper</strong> than Jersey Watch, Toornament & better than Challonge • <strong>Nonprofit Discount:</strong> 25% off • <strong>Annual Plans:</strong> Save 2 months
             </p>
           </div>
           
@@ -234,55 +234,57 @@ export default function Landing() {
             <Card className="border-2 border-gray-200">
               <CardHeader>
                 <CardTitle>School District</CardTitle>
-                <CardDescription>Perfect for K-12 athletics</CardDescription>
+                <CardDescription>15% cheaper than Jersey Watch Basic</CardDescription>
                 <div className="flex items-baseline gap-2 mb-2">
-                  <div className="text-3xl font-bold text-green-600">$19<span className="text-sm font-normal text-gray-500">/month</span></div>
-                  <div className="text-sm text-gray-400 line-through">$25</div>
+                  <div className="text-3xl font-bold text-green-600">$25<span className="text-sm font-normal text-gray-500">/month</span></div>
+                  <div className="text-sm text-red-500">vs. Jersey Watch $29</div>
                 </div>
-                <div className="text-sm text-blue-600 mb-2">$190/year (annual) • $142.50/year (nonprofit)</div>
-                <Badge variant="secondary" className="w-fit">~$120-180/year to education</Badge>
+                <div className="text-sm text-blue-600 mb-2">$250/year (annual) • $187.50/year (nonprofit)</div>
+                <Badge variant="secondary" className="w-fit">15% savings vs competitors</Badge>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-sm">
-                  <li>✓ Up to 8 tournaments per month</li>
-                  <li>✓ Basic bracket management</li>
-                  <li>✓ 65+ sports library</li>
+                  <li>✓ Up to 10 tournaments per month</li>
+                  <li>✓ Advanced bracket management</li>
+                  <li>✓ 65+ sports library with AI</li>
                   <li>✓ School district portal</li>
                   <li>✓ Student impact reporting</li>
                   <li>✓ Bulk team registration</li>
+                  <li>✓ 500 text/email alerts</li>
                 </ul>
                 <div className="mt-4 p-2 bg-green-50 rounded text-xs text-green-700">
-                  Budget-friendly for education • $9-15/month to student trips
+                  $12-18/month goes to student trips after costs
                 </div>
               </CardContent>
             </Card>
 
             <Card className="border-2 border-green-500 relative">
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <Badge className="bg-green-600">Best Value</Badge>
+                <Badge className="bg-green-600">15% Cheaper</Badge>
               </div>
               <CardHeader>
                 <CardTitle>Champion</CardTitle>
-                <CardDescription>Growing sports organizations</CardDescription>
+                <CardDescription>15% cheaper than Jersey Watch Plus</CardDescription>
                 <div className="flex items-baseline gap-2 mb-2">
-                  <div className="text-3xl font-bold text-green-600">$49<span className="text-sm font-normal text-gray-500">/month</span></div>
-                  <div className="text-sm text-gray-400 line-through">$65</div>
+                  <div className="text-3xl font-bold text-green-600">$42<span className="text-sm font-normal text-gray-500">/month</span></div>
+                  <div className="text-sm text-red-500">vs. Jersey Watch $49</div>
                 </div>
-                <div className="text-sm text-blue-600 mb-2">$490/year (annual) • $367.50/year (nonprofit)</div>
-                <Badge variant="secondary" className="w-fit">~$300-450/year to education</Badge>
+                <div className="text-sm text-blue-600 mb-2">$420/year (annual) • $315/year (nonprofit)</div>
+                <Badge variant="secondary" className="w-fit">Best value vs competitors</Badge>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-sm">
                   <li>✓ Unlimited tournaments</li>
                   <li>✓ AI tournament generation</li>
-                  <li>✓ Payment processing</li>
+                  <li>✓ Payment processing (no fees)</li>
                   <li>✓ Analytics dashboard</li>
                   <li>✓ Priority support</li>
                   <li>✓ Multi-user accounts</li>
                   <li>✓ Custom branding options</li>
+                  <li>✓ 2,000 text/email alerts</li>
                 </ul>
                 <div className="mt-4 p-2 bg-green-50 rounded text-xs text-green-700">
-                  Perfect for leagues • $25-38/month to student trips
+                  $22-28/month goes to student trips after costs
                 </div>
               </CardContent>
             </Card>
@@ -290,13 +292,13 @@ export default function Landing() {
             <Card className="border-2 border-purple-500">
               <CardHeader>
                 <CardTitle>Enterprise</CardTitle>
-                <CardDescription>Full white-label solution</CardDescription>
+                <CardDescription>15% cheaper than Toornament Pro</CardDescription>
                 <div className="flex items-baseline gap-2 mb-2">
-                  <div className="text-3xl font-bold text-green-600">$149<span className="text-sm font-normal text-gray-500">/month</span></div>
-                  <div className="text-sm text-gray-400 line-through">$199</div>
+                  <div className="text-3xl font-bold text-green-600">$73<span className="text-sm font-normal text-gray-500">/month</span></div>
+                  <div className="text-sm text-red-500">vs. Toornament €79 ($86)</div>
                 </div>
-                <div className="text-sm text-blue-600 mb-2">$1,490/year (annual) • $1,117.50/year (nonprofit)</div>
-                <Badge variant="secondary" className="w-fit">~$900-1,350/year to education</Badge>
+                <div className="text-sm text-blue-600 mb-2">$730/year (annual) • $547.50/year (nonprofit)</div>
+                <Badge variant="secondary" className="w-fit">Premium features for less</Badge>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-sm">
@@ -307,9 +309,10 @@ export default function Landing() {
                   <li>✓ Dedicated account manager</li>
                   <li>✓ Training & onboarding</li>
                   <li>✓ Custom feature development</li>
+                  <li>✓ Unlimited text/email alerts</li>
                 </ul>
                 <div className="mt-4 p-2 bg-green-50 rounded text-xs text-green-700">
-                  White-label ready • $75-113/month to student trips
+                  $42-48/month goes to student trips after costs
                 </div>
               </CardContent>
             </Card>
@@ -397,12 +400,13 @@ export default function Landing() {
                   </ul>
                 </div>
                 <div>
-                  <h4 className="font-medium text-gray-900 dark:text-white">Funding Goals:</h4>
+                  <h4 className="font-medium text-gray-900 dark:text-white">Competitive Advantage:</h4>
                   <ul className="mt-2 space-y-1">
-                    <li>• 15 School Districts = 1 trip/year</li>
-                    <li>• 7 Champions = 1 trip/year</li>
-                    <li>• 3 Enterprise = 1 trip/year</li>
-                    <li>• Mixed subscriptions for more trips</li>
+                    <li>• 15% cheaper than Jersey Watch</li>
+                    <li>• 15% cheaper than Toornament</li>
+                    <li>• Better features than Challonge</li>
+                    <li>• Educational mission focus</li>
+                    <li>• 13 Champions = 1 trip/year funded</li>
                   </ul>
                 </div>
               </div>
