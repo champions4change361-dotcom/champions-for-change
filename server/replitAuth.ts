@@ -117,13 +117,13 @@ export async function setupAuth(app: Express) {
     let strategyName = `replitauth:${req.hostname}`;
     
     // If exact match not found, try the first available strategy
-    if (!passport._strategies[strategyName]) {
-      const availableStrategies = Object.keys(passport._strategies).filter(name => name.startsWith('replitauth:'));
+    if (!(passport as any)._strategies[strategyName]) {
+      const availableStrategies = Object.keys((passport as any)._strategies).filter(name => name.startsWith('replitauth:'));
       if (availableStrategies.length > 0) {
         strategyName = availableStrategies[0];
         console.log(`Using fallback strategy: ${strategyName}`);
       } else {
-        console.error(`No authentication strategies configured. Available: ${Object.keys(passport._strategies).join(', ')}`);
+        console.error(`No authentication strategies configured. Available: ${Object.keys((passport as any)._strategies).join(', ')}`);
         return res.status(500).json({ error: "Authentication strategy not configured" });
       }
     }
@@ -141,8 +141,8 @@ export async function setupAuth(app: Express) {
     let strategyName = `replitauth:${req.hostname}`;
     
     // If exact match not found, try the first available strategy
-    if (!passport._strategies[strategyName]) {
-      const availableStrategies = Object.keys(passport._strategies).filter(name => name.startsWith('replitauth:'));
+    if (!(passport as any)._strategies[strategyName]) {
+      const availableStrategies = Object.keys((passport as any)._strategies).filter(name => name.startsWith('replitauth:'));
       if (availableStrategies.length > 0) {
         strategyName = availableStrategies[0];
         console.log(`Using fallback strategy for callback: ${strategyName}`);
