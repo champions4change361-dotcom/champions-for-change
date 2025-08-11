@@ -249,6 +249,9 @@ function generateTier1Suggestions(sport: string, format: string, ageGroup: strin
   } else if (format === 'seasonal-leaderboard') {
     suggestions.push("Set up weekly ranking updates throughout the season");
     suggestions.push("Plan playoff seeding based on seasonal performance");
+    suggestions.push("Schedule multiple meets/games throughout the school year");
+    suggestions.push("Track cumulative standings across all district schools");
+    suggestions.push("Plan championship finale based on seasonal rankings");
   } else if (format === 'bracket') {
     suggestions.push("Seed teams based on recent performance data");
     suggestions.push("Plan bye rounds strategically for balanced competition");
@@ -547,7 +550,10 @@ export function analyzeTournamentQuery(text: string): KeystoneConsultationResult
     format = 'leaderboard';
     confidence += 20;
   }
-  else if (textLower.includes('seasonal') || textLower.includes('mid season') || textLower.includes('rankings') || textLower.includes('standings')) {
+  else if (textLower.includes('seasonal') || textLower.includes('mid season') || textLower.includes('rankings') || textLower.includes('standings') ||
+           textLower.includes('athletic director') || textLower.includes('school year') || textLower.includes('entire year') ||
+           textLower.includes('multi-month') || textLower.includes('season long') || textLower.includes('year-round') ||
+           (textLower.includes('district') && (textLower.includes('director') || textLower.includes('coordinator')))) {
     format = 'seasonal-leaderboard';
     confidence += 20;
   }
