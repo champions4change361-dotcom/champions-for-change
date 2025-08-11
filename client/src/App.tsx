@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import { Navigation } from "@/components/navigation";
 import Landing from "@/pages/Landing";
+import About from "@/pages/About";
 import Home from "@/pages/Home";
 import LegacyHome from "@/pages/home";
 import Tournament from "@/pages/tournament";
@@ -34,7 +35,10 @@ function Router() {
       {isAuthenticated && <Navigation />}
       <Switch>
         {!isAuthenticated ? (
-          <Route path="/" component={Landing} />
+          <>
+            <Route path="/" component={Landing} />
+            <Route path="/about" component={About} />
+          </>
         ) : (
           <>
             <Route path="/" component={Home} />
