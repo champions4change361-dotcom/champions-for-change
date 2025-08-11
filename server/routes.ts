@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertTournamentSchema, updateMatchSchema } from "@shared/schema";
-import { analyzeTournamentQuery, generateTournamentStructure } from "./ai-consultation";
+import { analyzeTournamentQuery, generateTournamentStructure, type KeystoneConsultationResult } from "./ai-consultation";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import Stripe from "stripe";
 import { z } from "zod";
@@ -1374,6 +1374,117 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Enhanced Keystone AI Consultation with Three-Tier Service Model
+  app.post('/api/keystone-consult', async (req, res) => {
+    try {
+      const { user_input, tier = 'consultation', subscription_level = 'free' } = req.body;
+      
+      if (!user_input) {
+        return res.status(400).json({
+          success: false,
+          error: 'Please provide user_input'
+        });
+      }
+      
+      // Get comprehensive AI analysis
+      const result: KeystoneConsultationResult = analyzeTournamentQuery(user_input);
+      
+      // Tier access control based on subscription
+      const response: any = {
+        success: true,
+        tier: result.tier,
+        sport: result.sport,
+        format: result.format,
+        age_group: result.age_group,
+        gender_division: result.gender_division,
+        confidence: result.confidence,
+        recommendation: result.recommendation,
+        estimated_participants: result.estimated_participants,
+        timestamp: new Date().toISOString(),
+        query_analyzed: user_input
+      };
+
+      // Tier 1: Tournament Consultation & Ideas (Available to all users)
+      response.tier1_consultation = {
+        strategic_suggestions: result.tier1_suggestions,
+        venue_suggestions: result.venue_suggestions,
+        schedule_template: result.schedule_template,
+        champions_for_change_integration: {
+          fundraising_opportunities: [
+            "Tournament registration fees go toward student trips",
+            "Concession sales with educational impact messaging",
+            "Sponsor recognition highlighting community investment in youth"
+          ],
+          educational_tie_ins: [
+            "Pre-tournament presentations about destination countries",
+            "Cultural exchange activities during breaks",
+            "Post-tournament travel planning sessions"
+          ]
+        }
+      };
+
+      // Tier 2: Auto-Generation (Requires Basic+ subscription)
+      if (subscription_level !== 'free' && (tier === 'generation' || tier === 'full-service')) {
+        response.tier2_generation = {
+          auto_bracket: result.tier2_structure,
+          participant_assignments: result.tier2_structure?.participants || [],
+          score_tracking_setup: {
+            performance_metrics: result.tier2_structure?.type === 'leaderboard' ? 'individual_scoring' : 'match_based',
+            real_time_updates: true,
+            mobile_friendly: true
+          }
+        };
+      } else if (subscription_level === 'free') {
+        response.tier2_preview = {
+          feature_available: false,
+          upgrade_message: "Upgrade to Basic plan for auto-bracket generation",
+          sample_structure: "8-team single elimination bracket with Champions for Change branding"
+        };
+      }
+
+      // Tier 3: Full Service with Custom Webpage (Requires Pro+ subscription)
+      if ((subscription_level === 'pro' || subscription_level === 'enterprise') && tier === 'full-service') {
+        response.tier3_full_service = {
+          custom_webpage: {
+            template_code: result.tier3_webpage_template,
+            domain_suggestions: [
+              `${result.sport.toLowerCase().replace(/\s+/g, '')}-tournament.champions4change.org`,
+              `${result.age_group.toLowerCase().replace(/\s+/g, '')}-${result.sport.toLowerCase().replace(/\s+/g, '')}.c4c-tournaments.com`
+            ],
+            seo_optimization: {
+              title: `${result.sport} ${result.age_group} Tournament | Champions for Change`,
+              description: `Join our ${result.sport} tournament supporting educational trips for Corpus Christi youth`,
+              keywords: `${result.sport}, tournament, education, Corpus Christi, Champions for Change`
+            }
+          },
+          complete_tournament_setup: true,
+          dedicated_support: "Priority email and phone support from Daniel Thornton",
+          custom_branding: {
+            logo_placement: "Champions for Change logo with custom tournament banner",
+            color_scheme: "Green and blue Champions for Change branding",
+            mission_integration: "Educational impact tracker and trip funding progress"
+          }
+        };
+      } else if (subscription_level !== 'pro' && subscription_level !== 'enterprise') {
+        response.tier3_preview = {
+          feature_available: false,
+          upgrade_message: "Upgrade to Pro plan for full-service tournament creation with custom webpages",
+          sample_features: ["Custom branded tournament website", "Complete setup service", "Priority support from Daniel"]
+        };
+      }
+
+      res.json(response);
+      
+    } catch (error) {
+      console.error('Keystone Consultation Error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Keystone consultation failed: ' + (error as Error).message
+      });
+    }
+  });
+
+  // Legacy endpoint for backward compatibility
   app.post('/api/quick-consult', (req, res) => {
     try {
       const { user_input } = req.body;

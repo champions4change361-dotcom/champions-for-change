@@ -189,6 +189,174 @@ function generateBracketToSeriesStructure(participants: string[], sport: string)
   };
 }
 
+// Tier 1: Tournament Consultation & Strategic Suggestions
+function generateTier1Suggestions(sport: string, format: string, ageGroup: string, genderDivision: string): string[] {
+  const suggestions = [];
+  
+  // Sport-specific strategic advice
+  if (sport.includes('Basketball')) {
+    suggestions.push("Consider 3-point shooting contests for skills competitions");
+    suggestions.push("Plan warm-up areas for teams between games");
+    suggestions.push("Schedule games with 15-minute buffers for overtime");
+  } else if (sport.includes('Track')) {
+    suggestions.push("Organize field events to run concurrent with track events");
+    suggestions.push("Consider weather contingency plans for outdoor events");
+    suggestions.push("Plan separate warm-up areas for sprinters and distance runners");
+  } else if (sport.includes('Swimming')) {
+    suggestions.push("Schedule longer events first to allow recovery time");
+    suggestions.push("Consider separate warm-up pool access");
+    suggestions.push("Plan timing technology backup systems");
+  }
+  
+  // Age group specific suggestions
+  if (ageGroup === 'Elementary' || ageGroup === 'Middle School') {
+    suggestions.push("Include participation awards for all competitors");
+    suggestions.push("Consider shorter competition duration to maintain engagement");
+    suggestions.push("Plan activities for families and spectators");
+  } else if (ageGroup === 'High School') {
+    suggestions.push("Coordinate with school athletic directors for scheduling");
+    suggestions.push("Consider streaming options for family viewing");
+    suggestions.push("Plan recognition ceremony for seniors");
+  }
+  
+  // Format-specific advice
+  if (format === 'bracket') {
+    suggestions.push("Seed teams based on recent performance data");
+    suggestions.push("Plan bye rounds strategically for balanced competition");
+  } else if (format === 'leaderboard') {
+    suggestions.push("Consider multiple scoring categories for comprehensive ranking");
+    suggestions.push("Plan real-time score updates for spectator engagement");
+  }
+  
+  // Champions for Change specific suggestions
+  suggestions.push("Partner with local educational tour companies for trip planning");
+  suggestions.push("Create fundraising opportunities during tournament breaks");
+  suggestions.push("Highlight student success stories from previous funded trips");
+  
+  return suggestions;
+}
+
+function getEstimatedParticipants(sport: string, ageGroup: string, format: string): number {
+  let base = 16; // Default tournament size
+  
+  // Adjust based on sport popularity
+  if (sport.includes('Basketball') || sport.includes('Soccer') || sport.includes('Football')) {
+    base = 32;
+  } else if (sport.includes('Track') || sport.includes('Swimming')) {
+    base = 64; // Individual events can accommodate more
+  } else if (sport.includes('Golf') || sport.includes('Tennis')) {
+    base = 24;
+  }
+  
+  // Adjust based on age group
+  if (ageGroup === 'Elementary') base = Math.max(8, base / 2);
+  else if (ageGroup === 'College') base = Math.min(64, base * 1.5);
+  
+  return base;
+}
+
+function generateVenueSuggestions(sport: string, ageGroup: string): string[] {
+  const venues = [];
+  
+  if (sport.includes('Basketball')) {
+    venues.push("School gymnasium with full court");
+    venues.push("Community center with multiple courts");
+    venues.push("Recreation center with spectator seating");
+  } else if (sport.includes('Swimming')) {
+    venues.push("School aquatic center with timing system");
+    venues.push("Municipal pool with lane capabilities");
+    venues.push("YMCA facility with diving capabilities");
+  } else if (sport.includes('Track')) {
+    venues.push("High school track with field event areas");
+    venues.push("College athletic facility");
+    venues.push("Municipal sports complex");
+  }
+  
+  // Corpus Christi specific venues for Champions for Change
+  if (ageGroup === 'Middle School' || ageGroup === 'High School') {
+    venues.push("Robert Driscoll Middle School (Champions for Change home base)");
+    venues.push("Corpus Christi ISD athletic facilities");
+    venues.push("Texas A&M University-Corpus Christi facilities");
+  }
+  
+  return venues;
+}
+
+function generateScheduleTemplate(sport: string, format: string, participants: number): any {
+  const template = {
+    duration_days: 1,
+    sessions: [],
+    breaks: [],
+    ceremonies: []
+  };
+  
+  if (format === 'bracket') {
+    const rounds = Math.ceil(Math.log2(participants));
+    template.duration_days = rounds > 4 ? 2 : 1;
+    
+    if (template.duration_days === 1) {
+      template.sessions = [
+        { name: "Opening Ceremony", start: "8:00 AM", duration: "30 min" },
+        { name: "First Round", start: "8:30 AM", duration: "2 hours" },
+        { name: "Lunch Break", start: "10:30 AM", duration: "45 min" },
+        { name: "Semifinals", start: "11:15 AM", duration: "1 hour" },
+        { name: "Championship", start: "12:30 PM", duration: "45 min" },
+        { name: "Awards Ceremony", start: "1:30 PM", duration: "30 min" }
+      ];
+    }
+  } else if (format === 'leaderboard') {
+    template.sessions = [
+      { name: "Registration & Warm-up", start: "8:00 AM", duration: "45 min" },
+      { name: "Competition Events", start: "8:45 AM", duration: "4 hours" },
+      { name: "Final Scoring", start: "1:00 PM", duration: "30 min" },
+      { name: "Awards Ceremony", start: "1:30 PM", duration: "30 min" }
+    ];
+  }
+  
+  return template;
+}
+
+function generateWebpageTemplate(sport: string, ageGroup: string, format: string): string {
+  return `
+    <tournament-webpage theme="champions-for-change">
+      <header>
+        <title>${sport} ${ageGroup} ${format.charAt(0).toUpperCase() + format.slice(1)} Tournament</title>
+        <subtitle>Supporting Educational Opportunities for Corpus Christi Youth</subtitle>
+      </header>
+      
+      <hero-section>
+        <championship-banner sport="${sport}" />
+        <mission-statement>
+          Every tournament entry helps fund $2,600+ educational trips for underprivileged students
+        </mission-statement>
+      </hero-section>
+      
+      <tournament-info>
+        <format>${format}</format>
+        <age-group>${ageGroup}</age-group>
+        <registration-status>Open</registration-status>
+      </tournament-info>
+      
+      <live-updates-section>
+        <bracket-display format="${format}" />
+        <leaderboard-display />
+        <live-scoring />
+      </live-updates-section>
+      
+      <impact-tracker>
+        <students-funded-counter />
+        <next-trip-goal />
+        <success-stories />
+      </impact-tracker>
+      
+      <footer>
+        <champions-for-change-branding />
+        <contact-info>Daniel Thornton: Champions4change361@gmail.com</contact-info>
+      </footer>
+    </tournament-webpage>
+  `;
+}
+
 function getPerformanceMetric(sport: string): string {
   if (sport.includes("Track")) {
     return "time (seconds)";
@@ -205,7 +373,24 @@ function getPerformanceMetric(sport: string): string {
   }
 }
 
-export function analyzeTournamentQuery(text: string) {
+// Keystone AI Consultation - Three-Tier Service Model
+export interface KeystoneConsultationResult {
+  tier: 'consultation' | 'generation' | 'full-service';
+  sport: string;
+  format: string;
+  age_group: string;
+  gender_division: string;
+  confidence: number;
+  recommendation: string;
+  tier1_suggestions?: string[];
+  tier2_structure?: any;
+  tier3_webpage_template?: string;
+  estimated_participants?: number;
+  venue_suggestions?: string[];
+  schedule_template?: any;
+}
+
+export function analyzeTournamentQuery(text: string): KeystoneConsultationResult {
   const textLower = text.toLowerCase();
   
   // Sport detection with comprehensive list
@@ -401,12 +586,29 @@ export function analyzeTournamentQuery(text: string) {
     recommendation += ' Stroke play format ensures the most skilled player wins based on total score.';
   }
 
+  // Determine estimated participants based on sport and age group
+  const estimated_participants = getEstimatedParticipants(sport, age_group, format);
+  
+  // Generate tier-specific content
+  const tier1_suggestions = generateTier1Suggestions(sport, format, age_group, gender_division);
+  const tier2_structure = format !== 'bracket' ? generateTournamentStructure(sport, format, estimated_participants, age_group, gender_division) : null;
+  const tier3_webpage_template = generateWebpageTemplate(sport, age_group, format);
+  const venue_suggestions = generateVenueSuggestions(sport, age_group);
+  const schedule_template = generateScheduleTemplate(sport, format, estimated_participants);
+
   return {
+    tier: 'consultation', // Default tier - can be upgraded based on subscription
     sport,
     format,
     age_group,
     gender_division,
     confidence: Math.min(confidence, 95),
-    recommendation
+    recommendation,
+    tier1_suggestions,
+    tier2_structure,
+    tier3_webpage_template,
+    estimated_participants,
+    venue_suggestions,
+    schedule_template
   };
 }
