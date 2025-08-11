@@ -4,7 +4,7 @@
 
 This is a full-stack tournament bracket management application that allows users to create and manage single-elimination tournaments with interactive bracket visualization and real-time match updates. The application features a React frontend with a Node.js/Express backend, using PostgreSQL for data persistence and in-memory storage as a fallback.
 
-**Status**: Complete white-label tournament management SaaS platform for Champions for Change nonprofit. Revenue funds educational opportunities for underprivileged youth in Corpus Christi, Texas. Built by coaches who identified tournament management needs. Features user authentication with Replit OAuth, Stripe payment integration, AI-powered tournament creation across 65+ sports, custom branding with Champions for Change logo and color scheme, multi-tenant white-label architecture, three-tier user hierarchy (Tournament Manager/Athletic Director → Coach → Athlete/Fan), and mission-focused user experience emphasizing educational impact.
+**Status**: Complete white-label tournament management SaaS platform for Champions for Change nonprofit. Revenue funds educational opportunities for underprivileged youth in Corpus Christi, Texas. Built by coaches who identified tournament management needs. Features user authentication with Replit OAuth, Stripe payment integration, AI-powered tournament creation across 65+ sports, custom branding with Champions for Change logo and color scheme, multi-tenant white-label architecture, five-tier user hierarchy reflecting real school district structure, and mission-focused user experience emphasizing educational impact.
 
 ## User Preferences
 
@@ -66,10 +66,12 @@ Branding: Green and blue color scheme from Champions for Change logo, emphasis o
 - **Educational Impact Focus**: User interface emphasizes funding student trips and educational opportunities
 - **Revenue-to-Education Model**: 100% of platform revenue directed to supporting underprivileged youth in Corpus Christi, Texas
 - **Coach-Built Heritage**: Platform messaging highlights development by coaches who understand tournament management needs
-- **Four-Tier User Hierarchy**: Tournament Manager/Athletic Director (creates tournaments, configures events, manages overall structure) → Coach (registers teams, assigns players to events, manages team participation) → Scorekeeper/Judge (assigned by tournament manager to specific events, updates scores for assigned events only) → Athlete/Fan (views results, tracks performance, follows tournaments)
+- **Five-Tier School District Hierarchy**: Tournament Manager/District Athletic Director (creates tournaments, assigns schools to events) → School Athletic Director (assigns coaches within their school to specific events) → Coach (registers teams, manages team participation, works under school AD) → Scorekeeper/Judge (assigned by tournament manager to specific events, updates scores for assigned events only) → Athlete/Fan (views results, tracks performance, follows tournaments)
 - **Role-Based Access Control**: Dynamic navigation and features based on user roles and subscription levels
 - **Team Registration System**: Coaches can register teams with full player rosters, organization details, and event selections
 - **Registration Approval Workflow**: Tournament managers review and approve/reject team registrations with detailed player information
 - **Scorekeeper Assignment System**: Tournament managers assign scorekeepers to specific events within tournaments, critical for multi-event sports and competitions like BBQ cookoffs
 - **Event-Specific Score Management**: Scorekeepers can only update scores for events they are specifically assigned to, ensuring secure and organized score recording
 - **Score Verification Process**: Tournament managers can verify scores entered by scorekeepers to ensure accuracy and integrity
+- **District-to-School Assignment Flow**: District ADs assign schools to tournament events, School ADs then assign their coaches to specific events within those assignments
+- **Hierarchical Coach Management**: School Athletic Directors manage coaches from their specific school/organization, reflecting real-world structure like Corpus Christi ISD → Robert Driscoll Middle School

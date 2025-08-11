@@ -30,7 +30,7 @@ export const users = pgTable("users", {
     enum: ["free", "basic", "pro", "enterprise"] 
   }).default("free"),
   userRole: text("user_role", {
-    enum: ["tournament_manager", "athletic_director", "coach", "scorekeeper", "athlete", "fan"]
+    enum: ["tournament_manager", "district_athletic_director", "school_athletic_director", "coach", "scorekeeper", "athlete", "fan"]
   }).default("fan"),
   organizationId: varchar("organization_id"), // School district, club, etc.
   organizationName: varchar("organization_name"), // Name of school/club they represent
@@ -371,15 +371,20 @@ export const organizations = pgTable("organizations", {
   zipCode: varchar("zip_code"),
   contactEmail: varchar("contact_email"),
   contactPhone: varchar("contact_phone"),
-  athleticDirectorId: varchar("athletic_director_id").references(() => users.id),
+  districtAthleticDirectorId: varchar("district_athletic_director_id").references(() => users.id),
+  schoolAthleticDirectorId: varchar("school_athletic_director_id").references(() => users.id),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const organizationsRelations = relations(organizations, ({ one, many }) => ({
-  athleticDirector: one(users, {
-    fields: [organizations.athleticDirectorId],
+  districtAthleticDirector: one(users, {
+    fields: [organizations.districtAthleticDirectorId],
+    references: [users.id],
+  }),
+  schoolAthleticDirector: one(users, {
+    fields: [organizations.schoolAthleticDirectorId],
     references: [users.id],
   }),
   members: many(users),
@@ -467,6 +472,77 @@ export type ScorekeeperAssignment = typeof scorekeeperAssignments.$inferSelect;
 export type InsertScorekeeperAssignment = typeof scorekeeperAssignments.$inferInsert;
 export type EventScore = typeof eventScores.$inferSelect;
 export type InsertEventScore = typeof eventScores.$inferInsert;
+
+// School assignments - district ADs assign schools to events, school ADs assign coaches
+export const schoolEventAssignments = pgTable("school_event_assignments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tournamentId: varchar("tournament_id").notNull().references(() => tournaments.id),
+  schoolId: varchar("school_id").notNull().references(() => organizations.id),
+  assignedById: varchar("assigned_by_id").notNull().references(() => users.id), // District AD who made assignment
+  eventNames: jsonb("event_names").notNull(), // Array of events this school is assigned to
+  schoolAthleticDirectorId: varchar("school_athletic_director_id").references(() => users.id),
+  notes: text("notes"),
+  isActive: boolean("is_active").default(true),
+  assignmentDate: timestamp("assignment_date").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const schoolEventAssignmentsRelations = relations(schoolEventAssignments, ({ one }) => ({
+  tournament: one(tournaments, {
+    fields: [schoolEventAssignments.tournamentId],
+    references: [tournaments.id],
+  }),
+  school: one(organizations, {
+    fields: [schoolEventAssignments.schoolId],
+    references: [organizations.id],
+  }),
+  assignedBy: one(users, {
+    fields: [schoolEventAssignments.assignedById],
+    references: [users.id],
+  }),
+  schoolAthleticDirector: one(users, {
+    fields: [schoolEventAssignments.schoolAthleticDirectorId],
+    references: [users.id],
+  }),
+}));
+
+// Coach assignments - school ADs assign coaches to specific events within their school's assignment
+export const coachEventAssignments = pgTable("coach_event_assignments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  schoolAssignmentId: varchar("school_assignment_id").notNull().references(() => schoolEventAssignments.id),
+  coachId: varchar("coach_id").notNull().references(() => users.id),
+  assignedById: varchar("assigned_by_id").notNull().references(() => users.id), // School AD who made assignment
+  eventName: varchar("event_name").notNull(),
+  role: text("role", {
+    enum: ["head_coach", "assistant_coach", "volunteer_coach"]
+  }).default("assistant_coach"),
+  responsibilities: text("responsibilities"), // What the coach is responsible for
+  isActive: boolean("is_active").default(true),
+  assignmentDate: timestamp("assignment_date").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const coachEventAssignmentsRelations = relations(coachEventAssignments, ({ one }) => ({
+  schoolAssignment: one(schoolEventAssignments, {
+    fields: [coachEventAssignments.schoolAssignmentId],
+    references: [schoolEventAssignments.id],
+  }),
+  coach: one(users, {
+    fields: [coachEventAssignments.coachId],
+    references: [users.id],
+  }),
+  assignedBy: one(users, {
+    fields: [coachEventAssignments.assignedById],
+    references: [users.id],
+  }),
+}));
+
+export type SchoolEventAssignment = typeof schoolEventAssignments.$inferSelect;
+export type InsertSchoolEventAssignment = typeof schoolEventAssignments.$inferInsert;
+export type CoachEventAssignment = typeof coachEventAssignments.$inferSelect;
+export type InsertCoachEventAssignment = typeof coachEventAssignments.$inferInsert;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type UpsertUser = z.infer<typeof upsertUserSchema>;
 

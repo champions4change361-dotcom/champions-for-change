@@ -5,7 +5,8 @@ import {
   type TrackEvent, type InsertTrackEvent, type Page, type InsertPage,
   type TeamRegistration, type InsertTeamRegistration, type Organization, type InsertOrganization,
   type ScorekeeperAssignment, type InsertScorekeeperAssignment, type EventScore, type InsertEventScore,
-  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, scorekeeperAssignments, eventScores 
+  type SchoolEventAssignment, type InsertSchoolEventAssignment, type CoachEventAssignment, type InsertCoachEventAssignment,
+  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments 
 } from "@shared/schema";
 
 type SportCategory = typeof sportCategories.$inferSelect;
@@ -65,6 +66,22 @@ export interface IStorage {
   getEventScoresByAssignment(assignmentId: string): Promise<EventScore[]>;
   updateEventScore(id: string, updates: Partial<EventScore>): Promise<EventScore | undefined>;
   deleteEventScore(id: string): Promise<boolean>;
+
+  // School event assignment methods (District AD assigns schools to events)
+  createSchoolEventAssignment(assignment: InsertSchoolEventAssignment): Promise<SchoolEventAssignment>;
+  getSchoolEventAssignment(id: string): Promise<SchoolEventAssignment | undefined>;
+  getSchoolEventAssignmentsByTournament(tournamentId: string): Promise<SchoolEventAssignment[]>;
+  getSchoolEventAssignmentsBySchool(schoolId: string): Promise<SchoolEventAssignment[]>;
+  updateSchoolEventAssignment(id: string, updates: Partial<SchoolEventAssignment>): Promise<SchoolEventAssignment | undefined>;
+  deleteSchoolEventAssignment(id: string): Promise<boolean>;
+
+  // Coach event assignment methods (School AD assigns coaches to events)
+  createCoachEventAssignment(assignment: InsertCoachEventAssignment): Promise<CoachEventAssignment>;
+  getCoachEventAssignment(id: string): Promise<CoachEventAssignment | undefined>;
+  getCoachEventAssignmentsBySchoolAssignment(schoolAssignmentId: string): Promise<CoachEventAssignment[]>;
+  getCoachEventAssignmentsByCoach(coachId: string): Promise<CoachEventAssignment[]>;
+  updateCoachEventAssignment(id: string, updates: Partial<CoachEventAssignment>): Promise<CoachEventAssignment | undefined>;
+  deleteCoachEventAssignment(id: string): Promise<boolean>;
 
   // Tournament methods
   getTournaments(): Promise<Tournament[]>;
@@ -564,6 +581,148 @@ export class DbStorage implements IStorage {
   async deleteEventScore(id: string): Promise<boolean> {
     try {
       const result = await this.db.delete(eventScores).where(eq(eventScores.id, id));
+      return result.rowCount > 0;
+    } catch (error) {
+      console.error("Database error:", error);
+      return false;
+    }
+  }
+
+  // School event assignment methods
+  async createSchoolEventAssignment(assignment: InsertSchoolEventAssignment): Promise<SchoolEventAssignment> {
+    try {
+      const result = await this.db.insert(schoolEventAssignments).values(assignment).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to create school event assignment");
+    }
+  }
+
+  async getSchoolEventAssignment(id: string): Promise<SchoolEventAssignment | undefined> {
+    try {
+      const result = await this.db.select().from(schoolEventAssignments).where(eq(schoolEventAssignments.id, id));
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async getSchoolEventAssignmentsByTournament(tournamentId: string): Promise<SchoolEventAssignment[]> {
+    try {
+      const result = await this.db
+        .select()
+        .from(schoolEventAssignments)
+        .where(eq(schoolEventAssignments.tournamentId, tournamentId));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async getSchoolEventAssignmentsBySchool(schoolId: string): Promise<SchoolEventAssignment[]> {
+    try {
+      const result = await this.db
+        .select()
+        .from(schoolEventAssignments)
+        .where(eq(schoolEventAssignments.schoolId, schoolId));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async updateSchoolEventAssignment(id: string, updates: Partial<SchoolEventAssignment>): Promise<SchoolEventAssignment | undefined> {
+    try {
+      const result = await this.db
+        .update(schoolEventAssignments)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(schoolEventAssignments.id, id))
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async deleteSchoolEventAssignment(id: string): Promise<boolean> {
+    try {
+      const result = await this.db.delete(schoolEventAssignments).where(eq(schoolEventAssignments.id, id));
+      return result.rowCount > 0;
+    } catch (error) {
+      console.error("Database error:", error);
+      return false;
+    }
+  }
+
+  // Coach event assignment methods
+  async createCoachEventAssignment(assignment: InsertCoachEventAssignment): Promise<CoachEventAssignment> {
+    try {
+      const result = await this.db.insert(coachEventAssignments).values(assignment).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to create coach event assignment");
+    }
+  }
+
+  async getCoachEventAssignment(id: string): Promise<CoachEventAssignment | undefined> {
+    try {
+      const result = await this.db.select().from(coachEventAssignments).where(eq(coachEventAssignments.id, id));
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async getCoachEventAssignmentsBySchoolAssignment(schoolAssignmentId: string): Promise<CoachEventAssignment[]> {
+    try {
+      const result = await this.db
+        .select()
+        .from(coachEventAssignments)
+        .where(eq(coachEventAssignments.schoolAssignmentId, schoolAssignmentId));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async getCoachEventAssignmentsByCoach(coachId: string): Promise<CoachEventAssignment[]> {
+    try {
+      const result = await this.db
+        .select()
+        .from(coachEventAssignments)
+        .where(eq(coachEventAssignments.coachId, coachId));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async updateCoachEventAssignment(id: string, updates: Partial<CoachEventAssignment>): Promise<CoachEventAssignment | undefined> {
+    try {
+      const result = await this.db
+        .update(coachEventAssignments)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(coachEventAssignments.id, id))
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async deleteCoachEventAssignment(id: string): Promise<boolean> {
+    try {
+      const result = await this.db.delete(coachEventAssignments).where(eq(coachEventAssignments.id, id));
       return result.rowCount > 0;
     } catch (error) {
       console.error("Database error:", error);

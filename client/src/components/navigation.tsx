@@ -7,7 +7,8 @@ import {
   Trophy, 
   Home,
   LogOut,
-  Calculator
+  Calculator,
+  School
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -23,8 +24,10 @@ export function Navigation() {
     // Add role-specific navigation items
     if (user?.userRole === "coach") {
       baseItems.push({ path: "/coach", label: "Coach Dashboard", icon: Users });
-    } else if (user?.userRole === "tournament_manager" || user?.userRole === "athletic_director") {
+    } else if (user?.userRole === "tournament_manager" || user?.userRole === "district_athletic_director") {
       baseItems.push({ path: "/tournament-manager", label: "Tournament Manager", icon: Trophy });
+    } else if (user?.userRole === "school_athletic_director") {
+      baseItems.push({ path: "/school-ad", label: "School Athletic Director", icon: School });
     } else if (user?.userRole === "scorekeeper") {
       baseItems.push({ path: "/scorekeeper", label: "Scorekeeper Dashboard", icon: Calculator });
     } else if (user?.userRole === "athlete" || user?.userRole === "fan") {

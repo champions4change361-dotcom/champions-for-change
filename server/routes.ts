@@ -1960,6 +1960,94 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // School event assignment routes (District AD functionality)
+  app.post('/api/school-event-assignments', isAuthenticated, async (req: any, res) => {
+    try {
+      const assignedById = req.user.claims.sub;
+      const assignmentData = { ...req.body, assignedById };
+      
+      const assignment = await storage.createSchoolEventAssignment(assignmentData);
+      res.json(assignment);
+    } catch (error) {
+      console.error("Error creating school event assignment:", error);
+      res.status(500).json({ message: "Failed to create school event assignment" });
+    }
+  });
+
+  app.get('/api/school-event-assignments/mine', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (user?.organizationId) {
+        const assignments = await storage.getSchoolEventAssignmentsBySchool(user.organizationId);
+        res.json(assignments);
+      } else {
+        res.json([]);
+      }
+    } catch (error) {
+      console.error("Error fetching school event assignments:", error);
+      res.status(500).json({ message: "Failed to fetch school event assignments" });
+    }
+  });
+
+  app.get('/api/school-event-assignments/:tournamentId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { tournamentId } = req.params;
+      const assignments = await storage.getSchoolEventAssignmentsByTournament(tournamentId);
+      res.json(assignments);
+    } catch (error) {
+      console.error("Error fetching tournament school assignments:", error);
+      res.status(500).json({ message: "Failed to fetch school assignments" });
+    }
+  });
+
+  // Coach event assignment routes (School AD functionality)
+  app.post('/api/coach-event-assignments', isAuthenticated, async (req: any, res) => {
+    try {
+      const assignedById = req.user.claims.sub;
+      const assignmentData = { ...req.body, assignedById };
+      
+      const assignment = await storage.createCoachEventAssignment(assignmentData);
+      res.json(assignment);
+    } catch (error) {
+      console.error("Error creating coach event assignment:", error);
+      res.status(500).json({ message: "Failed to create coach event assignment" });
+    }
+  });
+
+  app.get('/api/coach-event-assignments/:schoolAssignmentId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { schoolAssignmentId } = req.params;
+      const assignments = await storage.getCoachEventAssignmentsBySchoolAssignment(schoolAssignmentId);
+      res.json(assignments);
+    } catch (error) {
+      console.error("Error fetching coach event assignments:", error);
+      res.status(500).json({ message: "Failed to fetch coach assignments" });
+    }
+  });
+
+  app.get('/api/coaches/school', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (user?.organizationId) {
+        // Get all users from the same organization with coach role
+        const allUsers = await storage.getUsers();
+        const schoolCoaches = allUsers.filter((u: any) => 
+          u.organizationId === user.organizationId && u.userRole === 'coach'
+        );
+        res.json(schoolCoaches);
+      } else {
+        res.json([]);
+      }
+    } catch (error) {
+      console.error("Error fetching school coaches:", error);
+      res.status(500).json({ message: "Failed to fetch school coaches" });
+    }
+  });
+
   // Stripe payment routes
   app.post("/api/create-payment-intent", isAuthenticated, async (req, res) => {
     try {
