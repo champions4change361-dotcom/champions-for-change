@@ -8,7 +8,9 @@ import {
   Home,
   LogOut,
   Calculator,
-  School
+  School,
+  Users,
+  Target
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -18,7 +20,8 @@ export function Navigation() {
 
   const getNavItems = () => {
     const baseItems = [
-      { path: "/", label: "Home", icon: Home }
+      { path: "/", label: "Home", icon: Home },
+      { path: "/fantasy-tournaments", label: "Fantasy Sports", icon: Target }
     ];
 
     // Add role-specific navigation items

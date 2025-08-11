@@ -18,6 +18,7 @@ import TournamentManagerDashboard from "@/pages/TournamentManagerDashboard";
 import AthleteFanDashboard from "@/pages/AthleteFanDashboard";
 import ScorekeeperDashboard from "@/pages/ScorekeeperDashboard";
 import SchoolAthleticDirectorDashboard from "@/pages/SchoolAthleticDirectorDashboard";
+import FantasyTournaments from "@/pages/FantasyTournaments";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -51,6 +52,7 @@ function Router() {
             <Route path="/athlete" component={AthleteFanDashboard} />
             <Route path="/scorekeeper" component={ScorekeeperDashboard} />
             <Route path="/school-ad" component={SchoolAthleticDirectorDashboard} />
+            <Route path="/fantasy-tournaments" component={FantasyTournaments} />
           </>
         )}
         <Route component={NotFound} />

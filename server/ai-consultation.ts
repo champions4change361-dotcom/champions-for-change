@@ -229,6 +229,14 @@ function generateTier1Suggestions(sport: string, format: string, ageGroup: strin
     suggestions.push("Schedule longer events first to allow recovery time");
     suggestions.push("Consider separate warm-up pool access");
     suggestions.push("Plan timing technology backup systems");
+  } else if (sport.includes('Fantasy')) {
+    suggestions.push("Source real player statistics from official sports APIs");
+    suggestions.push("Update player performance data in real-time during games");
+    suggestions.push("Provide educational content about sports analytics");
+    suggestions.push("Focus on skill-based competition rather than gambling");
+    suggestions.push("Create team draft systems with fair selection processes");
+    suggestions.push("Provide data exports for external fantasy analysis");
+    suggestions.push("No gambling features - data-only platform for educational use");
   }
   
   // Age group specific suggestions
@@ -261,6 +269,16 @@ function generateTier1Suggestions(sport: string, format: string, ageGroup: strin
   } else if (format === 'series') {
     suggestions.push("Schedule adequate rest time between series games");
     suggestions.push("Plan for potential series length variations");
+  } else if (format === 'fantasy-knockout') {
+    suggestions.push("Create elimination-style fantasy competitions");
+    suggestions.push("Set weekly challenges for fantasy team performance");
+    suggestions.push("Implement head-to-head fantasy matchups");
+    suggestions.push("Track lowest-performing teams for elimination");
+  } else if (format === 'fantasy-performance') {
+    suggestions.push("Use cumulative player statistics for scoring");
+    suggestions.push("Create season-long fantasy leagues");
+    suggestions.push("Implement position-based scoring systems");
+    suggestions.push("Track individual fantasy team performance over time");
   }
   
   // Champions for Change specific suggestions
@@ -518,6 +536,14 @@ export function analyzeTournamentQuery(text: string): KeystoneConsultationResult
   else if (textLower.includes('rocket league')) { sport = 'Rocket League'; confidence += 30; }
   else if (textLower.includes('fifa')) { sport = 'FIFA'; confidence += 30; }
   
+  // Fantasy Sports - Check FIRST before other sports
+  else if (textLower.includes('fantasy') && (textLower.includes('football') || textLower.includes('nfl'))) { sport = 'Fantasy Football'; confidence += 35; }
+  else if (textLower.includes('fantasy') && (textLower.includes('basketball') || textLower.includes('nba'))) { sport = 'Fantasy Basketball'; confidence += 35; }
+  else if (textLower.includes('fantasy') && (textLower.includes('baseball') || textLower.includes('mlb'))) { sport = 'Fantasy Baseball'; confidence += 35; }
+  else if (textLower.includes('fantasy') && textLower.includes('soccer')) { sport = 'Fantasy Soccer'; confidence += 35; }
+  else if (textLower.includes('fantasy') && textLower.includes('hockey')) { sport = 'Fantasy Hockey'; confidence += 35; }
+  else if (textLower.includes('fantasy')) { sport = 'Fantasy Sports'; confidence += 30; }
+  
   // Professional/Academic
   else if (textLower.includes('hackathon') || textLower.includes('coding')) { sport = 'Hackathon'; confidence += 30; }
   else if (textLower.includes('spelling bee')) { sport = 'Spelling Bee'; confidence += 30; }
@@ -560,6 +586,18 @@ export function analyzeTournamentQuery(text: string): KeystoneConsultationResult
   else if (textLower.includes('world series') || textLower.includes('championship series')) {
     format = 'series';
     confidence += 20;
+  }
+  else if (textLower.includes('fantasy') && textLower.includes('knockout')) {
+    format = 'fantasy-knockout';
+    confidence += 25;
+  }
+  else if (textLower.includes('fantasy') && (textLower.includes('performance') || textLower.includes('player'))) {
+    format = 'fantasy-performance';
+    confidence += 25;
+  }
+  else if (sport.includes('Fantasy')) {
+    format = textLower.includes('knockout') ? 'fantasy-knockout' : 'fantasy-performance';
+    confidence += 15;
   }
   // Override with specific keywords
   else if (textLower.includes('leaderboard') || textLower.includes('ranking') || textLower.includes('time trial') || textLower.includes('scoring event')) {
