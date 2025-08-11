@@ -10,7 +10,8 @@ import {
   Calculator,
   School,
   Users,
-  Target
+  Target,
+  UserPlus
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -21,6 +22,7 @@ export function Navigation() {
   const getNavItems = () => {
     const baseItems = [
       { path: "/", label: "Home", icon: Home },
+      { path: "/contacts", label: "Contacts", icon: UserPlus },
       { path: "/fantasy-tournaments", label: "Fantasy Sports", icon: Target }
     ];
 

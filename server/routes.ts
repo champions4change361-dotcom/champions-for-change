@@ -1659,6 +1659,115 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Contact management routes
+  app.get('/api/contacts', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const contacts = await storage.getContacts(userId);
+      res.json(contacts);
+    } catch (error) {
+      console.error("Error fetching contacts:", error);
+      res.status(500).json({ message: "Failed to fetch contacts" });
+    }
+  });
+
+  app.get('/api/contacts/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const contact = await storage.getContact(req.params.id);
+      if (!contact) {
+        return res.status(404).json({ message: "Contact not found" });
+      }
+      // Verify ownership
+      if (contact.userId !== req.user.claims.sub) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      res.json(contact);
+    } catch (error) {
+      console.error("Error fetching contact:", error);
+      res.status(500).json({ message: "Failed to fetch contact" });
+    }
+  });
+
+  app.post('/api/contacts', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const contactData = { ...req.body, userId };
+      const contact = await storage.createContact(contactData);
+      res.json(contact);
+    } catch (error) {
+      console.error("Error creating contact:", error);
+      res.status(500).json({ message: "Failed to create contact" });
+    }
+  });
+
+  app.post('/api/contacts/import', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { contacts: contactsData } = req.body;
+      
+      // Add userId to each contact
+      const contactsWithUserId = contactsData.map((contact: any) => ({
+        ...contact,
+        userId,
+      }));
+      
+      const importedContacts = await storage.importContacts(userId, contactsWithUserId);
+      res.json(importedContacts);
+    } catch (error) {
+      console.error("Error importing contacts:", error);
+      res.status(500).json({ message: "Failed to import contacts" });
+    }
+  });
+
+  app.patch('/api/contacts/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const contact = await storage.getContact(req.params.id);
+      if (!contact) {
+        return res.status(404).json({ message: "Contact not found" });
+      }
+      // Verify ownership
+      if (contact.userId !== req.user.claims.sub) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const updatedContact = await storage.updateContact(req.params.id, req.body);
+      res.json(updatedContact);
+    } catch (error) {
+      console.error("Error updating contact:", error);
+      res.status(500).json({ message: "Failed to update contact" });
+    }
+  });
+
+  app.delete('/api/contacts/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const contact = await storage.getContact(req.params.id);
+      if (!contact) {
+        return res.status(404).json({ message: "Contact not found" });
+      }
+      // Verify ownership
+      if (contact.userId !== req.user.claims.sub) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      await storage.deleteContact(req.params.id);
+      res.json({ message: "Contact deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting contact:", error);
+      res.status(500).json({ message: "Failed to delete contact" });
+    }
+  });
+
+  app.get('/api/contacts/search/:query', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const contacts = await storage.searchContacts(userId, req.params.query);
+      res.json(contacts);
+    } catch (error) {
+      console.error("Error searching contacts:", error);
+      res.status(500).json({ message: "Failed to search contacts" });
+    }
+  });
+
   // White-label configuration routes
   app.post('/api/whitelabel-config', isAuthenticated, async (req: any, res) => {
     try {

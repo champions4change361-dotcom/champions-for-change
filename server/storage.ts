@@ -6,7 +6,8 @@ import {
   type TeamRegistration, type InsertTeamRegistration, type Organization, type InsertOrganization,
   type ScorekeeperAssignment, type InsertScorekeeperAssignment, type EventScore, type InsertEventScore,
   type SchoolEventAssignment, type InsertSchoolEventAssignment, type CoachEventAssignment, type InsertCoachEventAssignment,
-  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments 
+  type Contact, type InsertContact, type EmailCampaign, type InsertEmailCampaign, type CampaignRecipient, type InsertCampaignRecipient,
+  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients 
 } from "@shared/schema";
 
 type SportCategory = typeof sportCategories.$inferSelect;
@@ -82,6 +83,22 @@ export interface IStorage {
   getCoachEventAssignmentsByCoach(coachId: string): Promise<CoachEventAssignment[]>;
   updateCoachEventAssignment(id: string, updates: Partial<CoachEventAssignment>): Promise<CoachEventAssignment | undefined>;
   deleteCoachEventAssignment(id: string): Promise<boolean>;
+
+  // Contact operations
+  getContacts(userId: string): Promise<Contact[]>;
+  getContact(id: string): Promise<Contact | undefined>;
+  createContact(contact: InsertContact): Promise<Contact>;
+  updateContact(id: string, updates: Partial<InsertContact>): Promise<Contact>;
+  deleteContact(id: string): Promise<void>;
+  searchContacts(userId: string, query: string): Promise<Contact[]>;
+  importContacts(userId: string, contacts: InsertContact[]): Promise<Contact[]>;
+  
+  // Email campaign operations
+  getEmailCampaigns(userId: string): Promise<EmailCampaign[]>;
+  getEmailCampaign(id: string): Promise<EmailCampaign | undefined>;
+  createEmailCampaign(campaign: InsertEmailCampaign): Promise<EmailCampaign>;
+  updateEmailCampaign(id: string, updates: Partial<InsertEmailCampaign>): Promise<EmailCampaign>;
+  deleteEmailCampaign(id: string): Promise<void>;
 
   // Tournament methods
   getTournaments(): Promise<Tournament[]>;
@@ -1351,6 +1368,111 @@ export class MemStorage implements IStorage {
     const updated = { ...entry, ...updates, updatedAt: new Date() };
     this.leaderboardEntries.set(id, updated);
     return updated;
+  }
+
+  // Contact management methods
+  private contacts: Map<string, Contact> = new Map();
+  private emailCampaigns: Map<string, EmailCampaign> = new Map();
+  private campaignRecipients: Map<string, CampaignRecipient> = new Map();
+
+  async getContacts(userId: string): Promise<Contact[]> {
+    return Array.from(this.contacts.values()).filter(c => c.userId === userId);
+  }
+
+  async getContact(id: string): Promise<Contact | undefined> {
+    return this.contacts.get(id);
+  }
+
+  async createContact(contact: InsertContact): Promise<Contact> {
+    const id = randomUUID();
+    const created: Contact = {
+      ...contact,
+      id,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.contacts.set(id, created);
+    return created;
+  }
+
+  async updateContact(id: string, updates: Partial<InsertContact>): Promise<Contact> {
+    const existing = this.contacts.get(id);
+    if (!existing) {
+      throw new Error("Contact not found");
+    }
+    const updated: Contact = {
+      ...existing,
+      ...updates,
+      updatedAt: new Date(),
+    };
+    this.contacts.set(id, updated);
+    return updated;
+  }
+
+  async deleteContact(id: string): Promise<void> {
+    this.contacts.delete(id);
+  }
+
+  async searchContacts(userId: string, query: string): Promise<Contact[]> {
+    const userContacts = Array.from(this.contacts.values()).filter(c => c.userId === userId);
+    const searchLower = query.toLowerCase();
+    
+    return userContacts.filter(contact =>
+      contact.firstName?.toLowerCase().includes(searchLower) ||
+      contact.lastName?.toLowerCase().includes(searchLower) ||
+      contact.email.toLowerCase().includes(searchLower) ||
+      contact.organization?.toLowerCase().includes(searchLower)
+    );
+  }
+
+  async importContacts(userId: string, contacts: InsertContact[]): Promise<Contact[]> {
+    const importedContacts: Contact[] = [];
+    
+    for (const contactData of contacts) {
+      const contact = await this.createContact(contactData);
+      importedContacts.push(contact);
+    }
+    
+    return importedContacts;
+  }
+
+  // Email campaign methods
+  async getEmailCampaigns(userId: string): Promise<EmailCampaign[]> {
+    return Array.from(this.emailCampaigns.values()).filter(c => c.userId === userId);
+  }
+
+  async getEmailCampaign(id: string): Promise<EmailCampaign | undefined> {
+    return this.emailCampaigns.get(id);
+  }
+
+  async createEmailCampaign(campaign: InsertEmailCampaign): Promise<EmailCampaign> {
+    const id = randomUUID();
+    const created: EmailCampaign = {
+      ...campaign,
+      id,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.emailCampaigns.set(id, created);
+    return created;
+  }
+
+  async updateEmailCampaign(id: string, updates: Partial<InsertEmailCampaign>): Promise<EmailCampaign> {
+    const existing = this.emailCampaigns.get(id);
+    if (!existing) {
+      throw new Error("Email campaign not found");
+    }
+    const updated: EmailCampaign = {
+      ...existing,
+      ...updates,
+      updatedAt: new Date(),
+    };
+    this.emailCampaigns.set(id, updated);
+    return updated;
+  }
+
+  async deleteEmailCampaign(id: string): Promise<void> {
+    this.emailCampaigns.delete(id);
   }
 }
 

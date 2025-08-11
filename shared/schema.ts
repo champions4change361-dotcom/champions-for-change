@@ -59,6 +59,73 @@ export const whitelabelConfigs = pgTable("whitelabel_configs", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Contact database for marketing and outreach
+export const contacts = pgTable("contacts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id), // Owner of the contact
+  firstName: varchar("first_name"),
+  lastName: varchar("last_name"),
+  email: varchar("email").notNull(),
+  phone: varchar("phone"),
+  organization: varchar("organization"), // School, club, district, etc.
+  organizationType: text("organization_type", {
+    enum: ["school_district", "school", "club", "nonprofit", "business", "other"]
+  }),
+  position: varchar("position"), // Title/role
+  sport: varchar("sport"), // Primary sport they're involved with
+  state: varchar("state"),
+  city: varchar("city"),
+  zipCode: varchar("zip_code"),
+  source: text("source", {
+    enum: ["jersey_watch", "manual_entry", "referral", "website", "event", "other"]
+  }).default("manual_entry"),
+  status: text("status", {
+    enum: ["active", "inactive", "do_not_contact", "bounced"]
+  }).default("active"),
+  tags: text("tags").array(), // Searchable tags
+  notes: text("notes"),
+  lastContactDate: timestamp("last_contact_date"),
+  subscriptionInterest: text("subscription_interest", {
+    enum: ["foundation", "champion", "enterprise", "district_enterprise", "unknown"]
+  }),
+  isProspect: boolean("is_prospect").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Email campaigns for marketing
+export const emailCampaigns = pgTable("email_campaigns", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  name: varchar("name").notNull(),
+  subject: varchar("subject").notNull(),
+  content: text("content").notNull(),
+  status: text("status", {
+    enum: ["draft", "scheduled", "sent", "cancelled"]
+  }).default("draft"),
+  scheduledFor: timestamp("scheduled_for"),
+  sentAt: timestamp("sent_at"),
+  recipientCount: integer("recipient_count").default(0),
+  openCount: integer("open_count").default(0),
+  clickCount: integer("click_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Campaign recipients tracking
+export const campaignRecipients = pgTable("campaign_recipients", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  campaignId: varchar("campaign_id").notNull().references(() => emailCampaigns.id),
+  contactId: varchar("contact_id").notNull().references(() => contacts.id),
+  status: text("status", {
+    enum: ["pending", "sent", "delivered", "opened", "clicked", "bounced", "failed"]
+  }).default("pending"),
+  sentAt: timestamp("sent_at"),
+  openedAt: timestamp("opened_at"),
+  clickedAt: timestamp("clicked_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const tournaments = pgTable("tournaments", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
@@ -569,3 +636,27 @@ export type TournamentEvent = typeof tournamentEvents.$inferSelect;
 export type InsertTournamentEvent = z.infer<typeof insertTournamentEventSchema>;
 export type ParticipantEvent = typeof participantEvents.$inferSelect;
 export type InsertParticipantEvent = z.infer<typeof insertParticipantEventSchema>;
+
+// Contact types
+export type Contact = typeof contacts.$inferSelect;
+export type InsertContact = typeof contacts.$inferInsert;
+export const insertContactSchema = createInsertSchema(contacts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertContactType = z.infer<typeof insertContactSchema>;
+
+// Email campaign types
+export type EmailCampaign = typeof emailCampaigns.$inferSelect;
+export type InsertEmailCampaign = typeof emailCampaigns.$inferInsert;
+export const insertEmailCampaignSchema = createInsertSchema(emailCampaigns).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertEmailCampaignType = z.infer<typeof insertEmailCampaignSchema>;
+
+// Campaign recipient types  
+export type CampaignRecipient = typeof campaignRecipients.$inferSelect;
+export type InsertCampaignRecipient = typeof campaignRecipients.$inferInsert;
