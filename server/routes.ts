@@ -197,13 +197,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create tournament
-  app.post("/api/tournaments", async (req, res) => {
+  app.post("/api/tournaments", isAuthenticated, async (req: any, res) => {
     try {
       const validatedData = insertTournamentSchema.parse(req.body);
       const storage = await getStorage();
       
+      // Add user ID to tournament data
+      const tournamentData = {
+        ...validatedData,
+        userId: req.user.claims.sub
+      };
+      
       // Create tournament
-      const tournament = await storage.createTournament(validatedData);
+      const tournament = await storage.createTournament(tournamentData);
       
       // Generate bracket matches based on tournament type
       const matches = validatedData.tournamentType === "double" 
@@ -1889,7 +1895,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Tournament routes for managers
-  app.get('/api/tournaments/mine', isAuthenticated, async (req: any, res) => {
+  app.get('/api/my-tournaments', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const tournaments = await storage.getTournaments();
