@@ -226,7 +226,7 @@ export default function Landing() {
           
           <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 mb-8 text-center">
             <p className="text-sm text-blue-700 dark:text-blue-300">
-              <strong>Enterprise Value:</strong> $149/month vs $30k+ custom development • <strong>Full Website Builder</strong> + Tournament Platform • <strong>Nonprofit Discounts Available</strong>
+              <strong>Realistic Pricing:</strong> Based on actual school district budgets • <strong>More messaging</strong> than Jersey Watch • <strong>Better AI features</strong> + education mission
             </p>
           </div>
           
@@ -234,43 +234,44 @@ export default function Landing() {
             <Card className="border-2 border-gray-200">
               <CardHeader>
                 <CardTitle>School District</CardTitle>
-                <CardDescription>15% cheaper than Jersey Watch Basic</CardDescription>
+                <CardDescription>Small districts (under 2,000 students)</CardDescription>
                 <div className="flex items-baseline gap-2 mb-2">
-                  <div className="text-3xl font-bold text-green-600">$25<span className="text-sm font-normal text-gray-500">/month</span></div>
-                  <div className="text-sm text-red-500">vs. Jersey Watch $29</div>
+                  <div className="text-3xl font-bold text-green-600">$39<span className="text-sm font-normal text-gray-500">/month</span></div>
+                  <div className="text-sm text-red-500">vs. Jersey Watch $500/year</div>
                 </div>
-                <div className="text-sm text-blue-600 mb-2">$250/year (annual) • $187.50/year (nonprofit)</div>
-                <Badge variant="secondary" className="w-fit">15% savings vs competitors</Badge>
+                <div className="text-sm text-blue-600 mb-2">$390/year (annual) • $292.50/year (nonprofit)</div>
+                <Badge variant="secondary" className="w-fit">Better value than Jersey Watch</Badge>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-sm">
-                  <li>✓ Up to 10 tournaments per month</li>
-                  <li>✓ Advanced bracket management</li>
-                  <li>✓ 65+ sports library with AI</li>
+                  <li>✓ Up to 8 tournaments per month</li>
+                  <li>✓ Advanced bracket management + AI</li>
+                  <li>✓ 65+ sports library</li>
                   <li>✓ School district portal</li>
                   <li>✓ Student impact reporting</li>
                   <li>✓ Bulk team registration</li>
-                  <li>✓ 500 text/email alerts</li>
+                  <li>✓ 750 text/email alerts per month</li>
+                  <li>✓ Purchase order support</li>
                 </ul>
                 <div className="mt-4 p-2 bg-green-50 rounded text-xs text-green-700">
-                  $12-18/month goes to student trips after costs
+                  More features than Jersey Watch at similar price
                 </div>
               </CardContent>
             </Card>
 
             <Card className="border-2 border-green-500 relative">
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <Badge className="bg-green-600">15% Cheaper</Badge>
+                <Badge className="bg-green-600">Best Value</Badge>
               </div>
               <CardHeader>
                 <CardTitle>Champion</CardTitle>
-                <CardDescription>15% cheaper than Jersey Watch Plus</CardDescription>
+                <CardDescription>Large districts & sports organizations</CardDescription>
                 <div className="flex items-baseline gap-2 mb-2">
-                  <div className="text-3xl font-bold text-green-600">$42<span className="text-sm font-normal text-gray-500">/month</span></div>
-                  <div className="text-sm text-red-500">vs. Jersey Watch $49</div>
+                  <div className="text-3xl font-bold text-green-600">$79<span className="text-sm font-normal text-gray-500">/month</span></div>
+                  <div className="text-sm text-red-500">vs. Jersey Watch Plus $49</div>
                 </div>
-                <div className="text-sm text-blue-600 mb-2">$420/year (annual) • $315/year (nonprofit)</div>
-                <Badge variant="secondary" className="w-fit">Best value vs competitors</Badge>
+                <div className="text-sm text-blue-600 mb-2">$790/year (annual) • $592.50/year (nonprofit)</div>
+                <Badge variant="secondary" className="w-fit">Premium features justified</Badge>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-sm">
@@ -281,10 +282,11 @@ export default function Landing() {
                   <li>✓ Priority support</li>
                   <li>✓ Multi-user accounts</li>
                   <li>✓ Custom branding options</li>
-                  <li>✓ 2,000 text/email alerts</li>
+                  <li>✓ 3,000 text/email alerts per month</li>
+                  <li>✓ Advanced reporting</li>
                 </ul>
                 <div className="mt-4 p-2 bg-green-50 rounded text-xs text-green-700">
-                  $22-28/month goes to student trips after costs
+                  Higher price reflects premium AI & unlimited features
                 </div>
               </CardContent>
             </Card>
