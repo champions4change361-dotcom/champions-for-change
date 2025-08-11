@@ -66,7 +66,10 @@ Branding: Green and blue color scheme from Champions for Change logo, emphasis o
 - **Educational Impact Focus**: User interface emphasizes funding student trips and educational opportunities
 - **Revenue-to-Education Model**: 100% of platform revenue directed to supporting underprivileged youth in Corpus Christi, Texas
 - **Coach-Built Heritage**: Platform messaging highlights development by coaches who understand tournament management needs
-- **Three-Tier User Hierarchy**: Tournament Manager/Athletic Director (creates tournaments, configures events, manages overall structure) → Coach (registers teams, assigns players to events, manages team participation) → Athlete/Fan (views results, tracks performance, follows tournaments)
+- **Four-Tier User Hierarchy**: Tournament Manager/Athletic Director (creates tournaments, configures events, manages overall structure) → Coach (registers teams, assigns players to events, manages team participation) → Scorekeeper/Judge (assigned by tournament manager to specific events, updates scores for assigned events only) → Athlete/Fan (views results, tracks performance, follows tournaments)
 - **Role-Based Access Control**: Dynamic navigation and features based on user roles and subscription levels
 - **Team Registration System**: Coaches can register teams with full player rosters, organization details, and event selections
 - **Registration Approval Workflow**: Tournament managers review and approve/reject team registrations with detailed player information
+- **Scorekeeper Assignment System**: Tournament managers assign scorekeepers to specific events within tournaments, critical for multi-event sports and competitions like BBQ cookoffs
+- **Event-Specific Score Management**: Scorekeepers can only update scores for events they are specifically assigned to, ensuring secure and organized score recording
+- **Score Verification Process**: Tournament managers can verify scores entered by scorekeepers to ensure accuracy and integrity

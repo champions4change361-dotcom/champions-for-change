@@ -30,7 +30,7 @@ export const users = pgTable("users", {
     enum: ["free", "basic", "pro", "enterprise"] 
   }).default("free"),
   userRole: text("user_role", {
-    enum: ["tournament_manager", "athletic_director", "coach", "athlete", "fan"]
+    enum: ["tournament_manager", "athletic_director", "coach", "scorekeeper", "athlete", "fan"]
   }).default("fan"),
   organizationId: varchar("organization_id"), // School district, club, etc.
   organizationName: varchar("organization_name"), // Name of school/club they represent
@@ -399,6 +399,74 @@ export type TeamRegistration = typeof teamRegistrations.$inferSelect;
 export type InsertTeamRegistration = typeof teamRegistrations.$inferInsert;
 export type Organization = typeof organizations.$inferSelect;
 export type InsertOrganization = typeof organizations.$inferInsert;
+// Scorekeeper assignments - tournament managers assign scorekeepers to specific events
+export const scorekeeperAssignments = pgTable("scorekeeper_assignments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tournamentId: varchar("tournament_id").notNull().references(() => tournaments.id),
+  scorekeeperId: varchar("scorekeeper_id").notNull().references(() => users.id),
+  assignedById: varchar("assigned_by_id").notNull().references(() => users.id), // Tournament manager who made assignment
+  eventName: varchar("event_name").notNull(), // Specific event/competition within tournament
+  eventDescription: text("event_description"),
+  canUpdateScores: boolean("can_update_scores").default(true),
+  isActive: boolean("is_active").default(true),
+  assignmentDate: timestamp("assignment_date").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const scorekeeperAssignmentsRelations = relations(scorekeeperAssignments, ({ one }) => ({
+  tournament: one(tournaments, {
+    fields: [scorekeeperAssignments.tournamentId],
+    references: [tournaments.id],
+  }),
+  scorekeeper: one(users, {
+    fields: [scorekeeperAssignments.scorekeeperId],
+    references: [users.id],
+  }),
+  assignedBy: one(users, {
+    fields: [scorekeeperAssignments.assignedById],
+    references: [users.id],
+  }),
+}));
+
+// Event scores - scorekeepers update scores for their assigned events
+export const eventScores = pgTable("event_scores", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tournamentId: varchar("tournament_id").notNull().references(() => tournaments.id),
+  assignmentId: varchar("assignment_id").notNull().references(() => scorekeeperAssignments.id),
+  teamId: varchar("team_id"), // Reference to team registration or participant
+  participantName: varchar("participant_name").notNull(),
+  eventName: varchar("event_name").notNull(),
+  scoreValue: numeric("score_value"), // Numeric score (time, distance, points)
+  scoreUnit: varchar("score_unit"), // Unit: seconds, meters, points, etc.
+  placement: integer("placement"), // 1st, 2nd, 3rd place
+  notes: text("notes"), // Judge notes, penalties, etc.
+  scoredAt: timestamp("scored_at").defaultNow(),
+  scoredById: varchar("scored_by_id").notNull().references(() => users.id), // Scorekeeper who entered score
+  isVerified: boolean("is_verified").default(false), // Tournament manager can verify scores
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const eventScoresRelations = relations(eventScores, ({ one }) => ({
+  tournament: one(tournaments, {
+    fields: [eventScores.tournamentId],
+    references: [tournaments.id],
+  }),
+  assignment: one(scorekeeperAssignments, {
+    fields: [eventScores.assignmentId],
+    references: [scorekeeperAssignments.id],
+  }),
+  scoredBy: one(users, {
+    fields: [eventScores.scoredById],
+    references: [users.id],
+  }),
+}));
+
+export type ScorekeeperAssignment = typeof scorekeeperAssignments.$inferSelect;
+export type InsertScorekeeperAssignment = typeof scorekeeperAssignments.$inferInsert;
+export type EventScore = typeof eventScores.$inferSelect;
+export type InsertEventScore = typeof eventScores.$inferInsert;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type UpsertUser = z.infer<typeof upsertUserSchema>;
 

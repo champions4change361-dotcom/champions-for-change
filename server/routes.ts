@@ -1831,6 +1831,135 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Scorekeeper assignment routes
+  app.post('/api/scorekeeper-assignments', isAuthenticated, async (req: any, res) => {
+    try {
+      const assignedById = req.user.claims.sub;
+      const assignmentData = { ...req.body, assignedById };
+      
+      const assignment = await storage.createScorekeeperAssignment(assignmentData);
+      res.json(assignment);
+    } catch (error) {
+      console.error("Error creating scorekeeper assignment:", error);
+      res.status(500).json({ message: "Failed to create scorekeeper assignment" });
+    }
+  });
+
+  app.get('/api/scorekeeper-assignments/mine', isAuthenticated, async (req: any, res) => {
+    try {
+      const scorekeeperId = req.user.claims.sub;
+      const assignments = await storage.getScorekeeperAssignmentsByUser(scorekeeperId);
+      res.json(assignments);
+    } catch (error) {
+      console.error("Error fetching scorekeeper assignments:", error);
+      res.status(500).json({ message: "Failed to fetch scorekeeper assignments" });
+    }
+  });
+
+  app.get('/api/scorekeeper-assignments/:tournamentId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { tournamentId } = req.params;
+      const assignments = await storage.getScorekeeperAssignmentsByTournament(tournamentId);
+      res.json(assignments);
+    } catch (error) {
+      console.error("Error fetching tournament scorekeeper assignments:", error);
+      res.status(500).json({ message: "Failed to fetch scorekeeper assignments" });
+    }
+  });
+
+  app.patch('/api/scorekeeper-assignments/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+      
+      const assignment = await storage.updateScorekeeperAssignment(id, updates);
+      
+      if (!assignment) {
+        return res.status(404).json({ message: "Assignment not found" });
+      }
+      
+      res.json(assignment);
+    } catch (error) {
+      console.error("Error updating scorekeeper assignment:", error);
+      res.status(500).json({ message: "Failed to update scorekeeper assignment" });
+    }
+  });
+
+  app.delete('/api/scorekeeper-assignments/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const success = await storage.deleteScorekeeperAssignment(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Assignment not found" });
+      }
+      
+      res.json({ message: "Assignment deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting scorekeeper assignment:", error);
+      res.status(500).json({ message: "Failed to delete scorekeeper assignment" });
+    }
+  });
+
+  // Event score routes
+  app.post('/api/event-scores', isAuthenticated, async (req: any, res) => {
+    try {
+      const scoredById = req.user.claims.sub;
+      const scoreData = { ...req.body, scoredById };
+      
+      const score = await storage.createEventScore(scoreData);
+      res.json(score);
+    } catch (error) {
+      console.error("Error creating event score:", error);
+      res.status(500).json({ message: "Failed to create event score" });
+    }
+  });
+
+  app.get('/api/event-scores/:assignmentId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { assignmentId } = req.params;
+      const scores = await storage.getEventScoresByAssignment(assignmentId);
+      res.json(scores);
+    } catch (error) {
+      console.error("Error fetching event scores:", error);
+      res.status(500).json({ message: "Failed to fetch event scores" });
+    }
+  });
+
+  app.patch('/api/event-scores/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+      
+      const score = await storage.updateEventScore(id, updates);
+      
+      if (!score) {
+        return res.status(404).json({ message: "Score not found" });
+      }
+      
+      res.json(score);
+    } catch (error) {
+      console.error("Error updating event score:", error);
+      res.status(500).json({ message: "Failed to update event score" });
+    }
+  });
+
+  app.delete('/api/event-scores/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const success = await storage.deleteEventScore(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Score not found" });
+      }
+      
+      res.json({ message: "Score deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting event score:", error);
+      res.status(500).json({ message: "Failed to delete event score" });
+    }
+  });
+
   // Stripe payment routes
   app.post("/api/create-payment-intent", isAuthenticated, async (req, res) => {
     try {

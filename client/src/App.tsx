@@ -15,6 +15,7 @@ import WebsiteBuilder from "@/pages/WebsiteBuilder";
 import CoachDashboard from "@/pages/CoachDashboard";
 import TournamentManagerDashboard from "@/pages/TournamentManagerDashboard";
 import AthleteFanDashboard from "@/pages/AthleteFanDashboard";
+import ScorekeeperDashboard from "@/pages/ScorekeeperDashboard";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -43,6 +44,7 @@ function Router() {
             <Route path="/coach" component={CoachDashboard} />
             <Route path="/tournament-manager" component={TournamentManagerDashboard} />
             <Route path="/athlete" component={AthleteFanDashboard} />
+            <Route path="/scorekeeper" component={ScorekeeperDashboard} />
           </>
         )}
         <Route component={NotFound} />

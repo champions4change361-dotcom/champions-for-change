@@ -23,7 +23,9 @@ import {
   XCircle,
   Edit,
   Eye,
-  MoreHorizontal
+  MoreHorizontal,
+  Calculator,
+  Target
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -81,6 +83,12 @@ export default function TournamentManagerDashboard() {
   // Get team registrations for selected tournament
   const { data: registrations = [] } = useQuery({
     queryKey: ["/api/team-registrations", selectedTournament],
+    enabled: !!selectedTournament
+  });
+
+  // Get scorekeeper assignments for selected tournament
+  const { data: scorekeeperAssignments = [] } = useQuery({
+    queryKey: ["/api/scorekeeper-assignments", selectedTournament],
     enabled: !!selectedTournament
   });
 
@@ -508,10 +516,13 @@ export default function TournamentManagerDashboard() {
       </div>
 
       <Tabs defaultValue="tournaments" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="tournaments">My Tournaments</TabsTrigger>
           <TabsTrigger value="registrations" disabled={!selectedTournament}>
             Team Registrations {selectedTournament && registrations.length > 0 && `(${registrations.length})`}
+          </TabsTrigger>
+          <TabsTrigger value="scorekeepers" disabled={!selectedTournament}>
+            Scorekeepers {selectedTournament && scorekeeperAssignments.length > 0 && `(${scorekeeperAssignments.length})`}
           </TabsTrigger>
         </TabsList>
 
@@ -685,6 +696,105 @@ export default function TournamentManagerDashboard() {
                 <h3 className="text-lg font-medium mb-2">Select a Tournament</h3>
                 <p className="text-muted-foreground">
                   Click "Manage" on a tournament to view and approve team registrations.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="scorekeepers" className="space-y-6">
+          {selectedTournament ? (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-medium">Scorekeeper Assignments</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Assign scorekeepers to specific events within this tournament
+                  </p>
+                </div>
+                <Button data-testid="button-assign-scorekeeper">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Assign Scorekeeper
+                </Button>
+              </div>
+
+              <div className="grid gap-4">
+                {(scorekeeperAssignments as any[]).map((assignment: any) => (
+                  <Card key={assignment.id}>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <CardTitle className="flex items-center gap-2">
+                            <Target className="h-5 w-5" />
+                            {assignment.eventName}
+                          </CardTitle>
+                          <CardDescription>
+                            Scorekeeper: {assignment.scorekeeper?.firstName} {assignment.scorekeeper?.lastName} ({assignment.scorekeeper?.email})
+                          </CardDescription>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {assignment.isActive ? (
+                            <Badge className="bg-green-100 text-green-800">
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              Active
+                            </Badge>
+                          ) : (
+                            <Badge variant="secondary">
+                              Inactive
+                            </Badge>
+                          )}
+                          <Button variant="outline" size="sm" data-testid={`button-edit-assignment-${assignment.id}`}>
+                            <Edit className="h-4 w-4 mr-2" />
+                            Edit
+                          </Button>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-3 gap-4 text-sm">
+                        <div>
+                          <span className="font-medium">Assigned:</span> {new Date(assignment.assignmentDate).toLocaleDateString()}
+                        </div>
+                        <div>
+                          <span className="font-medium">Can Update Scores:</span> {assignment.canUpdateScores ? "Yes" : "No"}
+                        </div>
+                        <div>
+                          <span className="font-medium">Scores Recorded:</span> {assignment.eventScores?.length || 0}
+                        </div>
+                      </div>
+                      {assignment.eventDescription && (
+                        <div className="mt-2 text-sm text-muted-foreground">
+                          {assignment.eventDescription}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+
+                {scorekeeperAssignments.length === 0 && (
+                  <Card>
+                    <CardContent className="text-center py-8">
+                      <Calculator className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                      <h3 className="text-lg font-medium mb-2">No Scorekeeper Assignments</h3>
+                      <p className="text-muted-foreground mb-4">
+                        Assign scorekeepers to specific events within this tournament. This is critical for multi-event sports and competitions.
+                      </p>
+                      <Button variant="outline">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Assign First Scorekeeper
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="text-center py-8">
+                <Calculator className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                <h3 className="text-lg font-medium mb-2">Select a Tournament</h3>
+                <p className="text-muted-foreground">
+                  Choose a tournament to manage scorekeeper assignments for specific events.
                 </p>
               </CardContent>
             </Card>
