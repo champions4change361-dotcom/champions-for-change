@@ -190,8 +190,20 @@ function generateBracketToSeriesStructure(participants: string[], sport: string)
 }
 
 // Tier 1: Tournament Consultation & Strategic Suggestions
-function generateTier1Suggestions(sport: string, format: string, ageGroup: string, genderDivision: string): string[] {
+function generateTier1Suggestions(sport: string, format: string, ageGroup: string, genderDivision: string, userInput?: string): string[] {
   const suggestions = [];
+  const textLower = userInput?.toLowerCase() || '';
+  
+  // Enterprise deployment suggestions for multi-state scenarios
+  const hasEnterpriseKeywords = textLower.includes('state') || textLower.includes('million') || textLower.includes('viewers') || textLower.includes('logging in') || textLower.includes('deployment');
+  if (hasEnterpriseKeywords) {
+    suggestions.push("Deploy CDN infrastructure across all 32 states for optimal performance");
+    suggestions.push("Implement real-time score streaming with 99.9% uptime guarantee");
+    suggestions.push("Set up load balancers to handle 3+ million concurrent viewers");
+    suggestions.push("Configure geographic redundancy for uninterrupted service");
+    suggestions.push("Enable white-label branding for each state/district deployment");
+    suggestions.push("Establish dedicated support teams for enterprise customers");
+  }
   
   // Sport-specific strategic advice
   if (sport.includes('Basketball')) {
@@ -219,13 +231,22 @@ function generateTier1Suggestions(sport: string, format: string, ageGroup: strin
     suggestions.push("Plan recognition ceremony for seniors");
   }
   
-  // Format-specific advice
-  if (format === 'bracket') {
+  // Format-specific advice for complex tournaments
+  if (format === 'conference-bracket-to-series') {
+    suggestions.push("Coordinate conference playoff schedules across regions");
+    suggestions.push("Plan championship series venue with maximum capacity");
+  } else if (format === 'seasonal-leaderboard') {
+    suggestions.push("Set up weekly ranking updates throughout the season");
+    suggestions.push("Plan playoff seeding based on seasonal performance");
+  } else if (format === 'bracket') {
     suggestions.push("Seed teams based on recent performance data");
     suggestions.push("Plan bye rounds strategically for balanced competition");
   } else if (format === 'leaderboard') {
     suggestions.push("Consider multiple scoring categories for comprehensive ranking");
     suggestions.push("Plan real-time score updates for spectator engagement");
+  } else if (format === 'series') {
+    suggestions.push("Schedule adequate rest time between series games");
+    suggestions.push("Plan for potential series length variations");
   }
   
   // Champions for Change specific suggestions
@@ -641,12 +662,17 @@ export function analyzeTournamentQuery(text: string): KeystoneConsultationResult
   if (sport.includes('Golf') && format === 'leaderboard') {
     recommendation += ' Stroke play format ensures the most skilled player wins based on total score.';
   }
+  
+  // Enterprise deployment scale considerations
+  if (textLower.includes('state') || textLower.includes('million') || textLower.includes('viewers') || textLower.includes('logging in')) {
+    recommendation += ' For enterprise deployment across multiple states with millions of viewers, Champions for Change provides white-label solutions with dedicated CDN infrastructure, real-time score streaming, and scalable user management.';
+  }
 
   // Determine estimated participants based on sport and age group
   const estimated_participants = getEstimatedParticipants(sport, age_group, format, text);
   
   // Generate tier-specific content
-  const tier1_suggestions = generateTier1Suggestions(sport, format, age_group, gender_division);
+  const tier1_suggestions = generateTier1Suggestions(sport, format, age_group, gender_division, text);
   const tier2_structure = format !== 'bracket' ? generateTournamentStructure(sport, format, estimated_participants, age_group, gender_division) : null;
   const tier3_webpage_template = generateWebpageTemplate(sport, age_group, format);
   const venue_suggestions = generateVenueSuggestions(sport, age_group);
