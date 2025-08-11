@@ -53,14 +53,17 @@ export default function TournamentCreationForm({ onClose }: TournamentCreationFo
   // Listen for AI recommendation events
   useEffect(() => {
     const handleAIRecommendation = (event: CustomEvent) => {
+      console.log("Received AI recommendation event:", event.detail);
       const { sport, format, age_group, gender_division, teamSize } = event.detail;
       
-      // Apply AI recommendations to form
+      // Apply AI recommendations to form with debugging
       if (sport) {
+        console.log("Setting sport:", sport);
         form.setValue("sport", sport);
       }
       
       if (format) {
+        console.log("Setting format:", format);
         form.setValue("competitionFormat", format);
         
         // Auto-set tournament type based on format
@@ -75,14 +78,17 @@ export default function TournamentCreationForm({ onClose }: TournamentCreationFo
       }
       
       if (age_group && age_group !== "All Ages") {
+        console.log("Setting age group:", age_group);
         form.setValue("ageGroup", age_group);
       }
       
       if (gender_division && gender_division !== "Mixed") {
+        console.log("Setting gender division:", gender_division);
         form.setValue("genderDivision", gender_division);
       }
       
       if (teamSize) {
+        console.log("Setting team size:", teamSize);
         form.setValue("teamSize", teamSize);
       }
       
@@ -92,13 +98,15 @@ export default function TournamentCreationForm({ onClose }: TournamentCreationFo
       const genderPart = gender_division && gender_division !== "Mixed" ? `${gender_division} ` : "";
       const autoName = `${agePart}${genderPart}${sportName} Tournament`;
       
-      if (!form.getValues("name")) {
-        form.setValue("name", autoName);
-      }
+      console.log("Setting tournament name:", autoName);
+      form.setValue("name", autoName);
+      
+      // Force re-render by triggering form validation
+      form.trigger();
       
       toast({
         title: "AI Recommendations Applied",
-        description: "Tournament form has been pre-filled with AI suggestions",
+        description: `Form pre-filled with ${sport} tournament settings`,
       });
     };
 

@@ -549,24 +549,31 @@ export default function AIConsultation() {
                       size="sm"
                       onClick={() => {
                         // Pre-fill tournament creation form with AI recommendations
+                        const eventDetail = {
+                          sport: recommendation.sport,
+                          format: recommendation.format,
+                          age_group: recommendation.age_group,
+                          gender_division: recommendation.gender_division,
+                          teamSize: recommendation.estimated_participants || 16
+                        };
+                        
+                        console.log("Dispatching AI recommendation event:", eventDetail);
+                        
                         const event = new CustomEvent('ai-recommendation', { 
-                          detail: {
-                            sport: recommendation.sport,
-                            format: recommendation.format,
-                            age_group: recommendation.age_group,
-                            gender_division: recommendation.gender_division,
-                            teamSize: recommendation.estimated_participants || 16
-                          }
+                          detail: eventDetail
                         });
                         window.dispatchEvent(event);
                         
-                        // Also trigger opening the tournament creation form
-                        const openFormEvent = new CustomEvent('open-tournament-form');
-                        window.dispatchEvent(openFormEvent);
+                        // Wait a moment for event to be processed before opening form
+                        setTimeout(() => {
+                          // Also trigger opening the tournament creation form
+                          const openFormEvent = new CustomEvent('open-tournament-form');
+                          window.dispatchEvent(openFormEvent);
+                        }, 100);
                         
                         toast({
                           title: "Form Pre-filled",
-                          description: "Tournament creation form has been populated with AI recommendations",
+                          description: `Tournament form pre-filled with ${recommendation.sport} settings`,
                         });
                       }}
                       data-testid="button-apply-to-form"
