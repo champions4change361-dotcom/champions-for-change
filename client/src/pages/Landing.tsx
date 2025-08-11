@@ -226,7 +226,7 @@ export default function Landing() {
           
           <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 mb-8 text-center">
             <p className="text-sm text-blue-700 dark:text-blue-300">
-              <strong>15% Cheaper</strong> than Jersey Watch, Toornament & better than Challonge • <strong>Nonprofit Discount:</strong> 25% off • <strong>Annual Plans:</strong> Save 2 months
+              <strong>Enterprise Value:</strong> $149/month vs $30k+ custom development • <strong>Full Website Builder</strong> + Tournament Platform • <strong>Nonprofit Discounts Available</strong>
             </p>
           </div>
           
@@ -289,30 +289,33 @@ export default function Landing() {
               </CardContent>
             </Card>
 
-            <Card className="border-2 border-purple-500">
+            <Card className="border-2 border-purple-500 relative">
+              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                <Badge className="bg-purple-600">Massive Value</Badge>
+              </div>
               <CardHeader>
                 <CardTitle>Enterprise White-Label</CardTitle>
-                <CardDescription>Full website builder + tournament platform</CardDescription>
+                <CardDescription>Worth $30k+ in custom development</CardDescription>
                 <div className="flex items-baseline gap-2 mb-2">
-                  <div className="text-3xl font-bold text-green-600">$73<span className="text-sm font-normal text-gray-500">/month</span></div>
-                  <div className="text-sm text-red-500">vs. Toornament €79 ($86)</div>
+                  <div className="text-3xl font-bold text-green-600">$149<span className="text-sm font-normal text-gray-500">/month</span></div>
+                  <div className="text-sm text-red-500">vs. $30k+ custom build</div>
                 </div>
-                <div className="text-sm text-blue-600 mb-2">$730/year (annual) • $547.50/year (nonprofit)</div>
-                <Badge variant="secondary" className="w-fit">Complete website solution</Badge>
+                <div className="text-sm text-blue-600 mb-2">$1,490/year (annual) • $1,117.50/year (nonprofit)</div>
+                <Badge variant="secondary" className="w-fit">Complete platform ownership</Badge>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-sm">
-                  <li>✓ <strong>Website Builder:</strong> Create custom pages</li>
-                  <li>✓ <strong>Your Branding:</strong> Remove our logo entirely</li>
+                  <li>✓ <strong>Full Website Builder:</strong> Unlimited custom pages</li>
+                  <li>✓ <strong>100% Your Brand:</strong> Zero Champions for Change branding</li>
                   <li>✓ <strong>Custom Domain:</strong> yourorganization.com</li>
-                  <li>✓ <strong>Content Management:</strong> Edit pages/content</li>
-                  <li>✓ <strong>Revenue Sharing:</strong> Keep tournament fees</li>
-                  <li>✓ <strong>API Access:</strong> Custom integrations</li>
-                  <li>✓ <strong>Dedicated Support:</strong> Personal account manager</li>
-                  <li>✓ <strong>Training Included:</strong> Setup & onboarding</li>
+                  <li>✓ <strong>CMS Platform:</strong> Edit any content, anytime</li>
+                  <li>✓ <strong>Revenue Control:</strong> Keep 100% of tournament fees</li>
+                  <li>✓ <strong>Full API Access:</strong> Custom integrations & features</li>
+                  <li>✓ <strong>Dedicated Manager:</strong> Personal account support</li>
+                  <li>✓ <strong>Custom Development:</strong> New features on request</li>
                 </ul>
                 <div className="mt-4 p-2 bg-purple-50 rounded text-xs text-purple-700">
-                  Full website + tournament platform under your brand
+                  What others charge $30k+ for, we deliver monthly
                 </div>
               </CardContent>
             </Card>
@@ -400,13 +403,13 @@ export default function Landing() {
                   </ul>
                 </div>
                 <div>
-                  <h4 className="font-medium text-gray-900 dark:text-white">Competitive Advantage:</h4>
+                  <h4 className="font-medium text-gray-900 dark:text-white">Unmatched Value:</h4>
                   <ul className="mt-2 space-y-1">
-                    <li>• 15% cheaper than Jersey Watch</li>
-                    <li>• 15% cheaper than Toornament</li>
-                    <li>• Better features than Challonge</li>
-                    <li>• Educational mission focus</li>
-                    <li>• 13 Champions = 1 trip/year funded</li>
+                    <li>• Enterprise: $149/month vs $30k+ custom build</li>
+                    <li>• Full website builder (others don't offer)</li>
+                    <li>• Complete white-label (others keep branding)</li>
+                    <li>• API + custom development included</li>
+                    <li>• Educational mission impact</li>
                   </ul>
                 </div>
               </div>
