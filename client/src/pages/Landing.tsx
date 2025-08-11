@@ -122,7 +122,7 @@ export default function Landing() {
           <Button 
             size="lg" 
             variant="outline"
-            className="border-green-600 text-green-600 hover:bg-green-50"
+            className="border-green-600 text-green-600 hover:bg-green-50 font-semibold"
             onClick={() => window.location.href = "/api/login"}
             data-testid="button-view-demo"
           >
@@ -511,7 +511,7 @@ export default function Landing() {
             <Button 
               size="lg" 
               variant="outline"
-              className="border-white text-white hover:bg-white hover:text-green-600"
+              className="border-white text-white hover:bg-white hover:text-green-600 font-semibold"
               onClick={() => window.location.href = "/about"}
               data-testid="button-learn-more"
             >

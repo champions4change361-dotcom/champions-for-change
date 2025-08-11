@@ -251,22 +251,21 @@ export default function About() {
           <div className="flex gap-4 justify-center">
             <Button 
               size="lg" 
-              className="bg-white text-green-600 hover:bg-gray-100"
+              className="bg-white text-green-600 hover:bg-gray-100 font-semibold"
               onClick={() => window.location.href = "/api/login"}
               data-testid="button-start-mission"
             >
               Start Supporting Students Today
             </Button>
-            <Link href="/">
-              <Button 
-                size="lg" 
-                variant="outline"
-                className="border-white text-white hover:bg-white hover:text-green-600"
-                data-testid="button-back-home-cta"
-              >
-                Back to Home
-              </Button>
-            </Link>
+            <Button 
+              size="lg" 
+              variant="outline"
+              className="border-white text-white hover:bg-white hover:text-green-600 font-semibold"
+              onClick={() => window.location.href = "/"}
+              data-testid="button-back-home-cta"
+            >
+              Back to Home
+            </Button>
           </div>
         </div>
       </section>
