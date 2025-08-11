@@ -14,11 +14,32 @@ export function Navigation() {
   const [location] = useLocation();
   const { user } = useAuth();
 
-  const navItems = [
-    { path: "/", label: "Home", icon: Home },
-    { path: "/admin/whitelabel", label: "White-Label Config", icon: Settings },
-    { path: "/admin/website", label: "Website Builder", icon: LayoutTemplate },
-  ];
+  const getNavItems = () => {
+    const baseItems = [
+      { path: "/", label: "Home", icon: Home }
+    ];
+
+    // Add role-specific navigation items
+    if (user?.userRole === "coach") {
+      baseItems.push({ path: "/coach", label: "Coach Dashboard", icon: Users });
+    } else if (user?.userRole === "tournament_manager" || user?.userRole === "athletic_director") {
+      baseItems.push({ path: "/tournament-manager", label: "Tournament Manager", icon: Trophy });
+    } else if (user?.userRole === "athlete" || user?.userRole === "fan") {
+      baseItems.push({ path: "/athlete", label: "Tournament Dashboard", icon: Trophy });
+    }
+
+    // Add admin items for enterprise users or white-label clients
+    if (user?.subscriptionPlan === "enterprise" || user?.isWhitelabelClient) {
+      baseItems.push(
+        { path: "/admin/whitelabel", label: "White-Label Config", icon: Settings },
+        { path: "/admin/website", label: "Website Builder", icon: LayoutTemplate }
+      );
+    }
+
+    return baseItems;
+  };
+
+  const navItems = getNavItems();
 
   return (
     <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">

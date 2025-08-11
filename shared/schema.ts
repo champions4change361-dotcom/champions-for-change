@@ -29,6 +29,11 @@ export const users = pgTable("users", {
   subscriptionPlan: text("subscription_plan", { 
     enum: ["free", "basic", "pro", "enterprise"] 
   }).default("free"),
+  userRole: text("user_role", {
+    enum: ["tournament_manager", "athletic_director", "coach", "athlete", "fan"]
+  }).default("fan"),
+  organizationId: varchar("organization_id"), // School district, club, etc.
+  organizationName: varchar("organization_name"), // Name of school/club they represent
   isWhitelabelClient: boolean("is_whitelabel_client").default(false),
   whitelabelDomain: varchar("whitelabel_domain"),
   whitelabelBranding: jsonb("whitelabel_branding"), // Custom colors, logos, etc
@@ -323,6 +328,77 @@ export const whitelabelConfigsRelations = relations(whitelabelConfigs, ({ one })
 
 export type WhitelabelConfig = typeof whitelabelConfigs.$inferSelect;
 export type InsertWhitelabelConfig = typeof whitelabelConfigs.$inferInsert;
+
+// Team registrations - coaches register their teams for tournaments
+export const teamRegistrations = pgTable("team_registrations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tournamentId: varchar("tournament_id").notNull().references(() => tournaments.id),
+  coachId: varchar("coach_id").notNull().references(() => users.id),
+  teamName: varchar("team_name").notNull(),
+  organizationName: varchar("organization_name"), // School/club name
+  playerList: jsonb("player_list"), // Array of player details
+  registeredEvents: jsonb("registered_events"), // Which events this team is competing in
+  registrationStatus: text("registration_status", {
+    enum: ["pending", "approved", "rejected", "waitlisted"]
+  }).default("pending"),
+  registrationDate: timestamp("registration_date").defaultNow(),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const teamRegistrationsRelations = relations(teamRegistrations, ({ one }) => ({
+  tournament: one(tournaments, {
+    fields: [teamRegistrations.tournamentId],
+    references: [tournaments.id],
+  }),
+  coach: one(users, {
+    fields: [teamRegistrations.coachId],
+    references: [users.id],
+  }),
+}));
+
+// Organizations - school districts, clubs, etc.
+export const organizations = pgTable("organizations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  type: text("type", {
+    enum: ["school_district", "high_school", "middle_school", "elementary_school", "club", "recreation_center", "other"]
+  }).notNull(),
+  address: text("address"),
+  city: varchar("city"),
+  state: varchar("state"),
+  zipCode: varchar("zip_code"),
+  contactEmail: varchar("contact_email"),
+  contactPhone: varchar("contact_phone"),
+  athleticDirectorId: varchar("athletic_director_id").references(() => users.id),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const organizationsRelations = relations(organizations, ({ one, many }) => ({
+  athleticDirector: one(users, {
+    fields: [organizations.athleticDirectorId],
+    references: [users.id],
+  }),
+  members: many(users),
+}));
+
+// Update users relations to include organization
+export const usersRelations = relations(users, ({ one, many }) => ({
+  organization: one(organizations, {
+    fields: [users.organizationId],
+    references: [organizations.id],
+  }),
+  ownedTournaments: many(tournaments),
+  teamRegistrations: many(teamRegistrations),
+}));
+
+export type TeamRegistration = typeof teamRegistrations.$inferSelect;
+export type InsertTeamRegistration = typeof teamRegistrations.$inferInsert;
+export type Organization = typeof organizations.$inferSelect;
+export type InsertOrganization = typeof organizations.$inferInsert;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type UpsertUser = z.infer<typeof upsertUserSchema>;
 

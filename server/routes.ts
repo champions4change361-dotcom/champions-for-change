@@ -1707,6 +1707,130 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Team registration routes
+  app.post('/api/team-registrations', isAuthenticated, async (req: any, res) => {
+    try {
+      const coachId = req.user.claims.sub;
+      const registrationData = { ...req.body, coachId };
+      
+      const registration = await storage.createTeamRegistration(registrationData);
+      res.json(registration);
+    } catch (error) {
+      console.error("Error creating team registration:", error);
+      res.status(500).json({ message: "Failed to create team registration" });
+    }
+  });
+
+  app.get('/api/team-registrations/mine', isAuthenticated, async (req: any, res) => {
+    try {
+      const coachId = req.user.claims.sub;
+      const registrations = await storage.getTeamRegistrationsByCoach(coachId);
+      res.json(registrations);
+    } catch (error) {
+      console.error("Error fetching team registrations:", error);
+      res.status(500).json({ message: "Failed to fetch team registrations" });
+    }
+  });
+
+  app.get('/api/team-registrations/:tournamentId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { tournamentId } = req.params;
+      const registrations = await storage.getTeamRegistrationsByTournament(tournamentId);
+      res.json(registrations);
+    } catch (error) {
+      console.error("Error fetching tournament registrations:", error);
+      res.status(500).json({ message: "Failed to fetch tournament registrations" });
+    }
+  });
+
+  app.patch('/api/team-registrations/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+      
+      const registration = await storage.updateTeamRegistration(id, updates);
+      
+      if (!registration) {
+        return res.status(404).json({ message: "Registration not found" });
+      }
+      
+      res.json(registration);
+    } catch (error) {
+      console.error("Error updating team registration:", error);
+      res.status(500).json({ message: "Failed to update team registration" });
+    }
+  });
+
+  app.delete('/api/team-registrations/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const success = await storage.deleteTeamRegistration(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Registration not found" });
+      }
+      
+      res.json({ message: "Registration deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting team registration:", error);
+      res.status(500).json({ message: "Failed to delete team registration" });
+    }
+  });
+
+  // Tournament routes for managers
+  app.get('/api/tournaments/mine', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const tournaments = await storage.getTournaments();
+      
+      // Filter tournaments created by this user
+      const myTournaments = tournaments.filter((t: any) => t.userId === userId);
+      res.json(myTournaments);
+    } catch (error) {
+      console.error("Error fetching user tournaments:", error);
+      res.status(500).json({ message: "Failed to fetch tournaments" });
+    }
+  });
+
+  // Public tournament routes for athletes/fans
+  app.get('/api/tournaments/public', async (req, res) => {
+    try {
+      const tournaments = await storage.getTournaments();
+      
+      // Filter only public tournaments
+      const publicTournaments = tournaments.filter((t: any) => t.isPublic === true);
+      res.json(publicTournaments);
+    } catch (error) {
+      console.error("Error fetching public tournaments:", error);
+      res.status(500).json({ message: "Failed to fetch public tournaments" });
+    }
+  });
+
+  app.get('/api/tournaments/featured', async (req, res) => {
+    try {
+      const tournaments = await storage.getTournaments();
+      
+      // For now, featured tournaments are those with high participation or special status
+      const featuredTournaments = tournaments.filter((t: any) => 
+        t.isPublic === true && (t.teams?.length > 10 || t.entryFee > 0)
+      );
+      res.json(featuredTournaments);
+    } catch (error) {
+      console.error("Error fetching featured tournaments:", error);
+      res.status(500).json({ message: "Failed to fetch featured tournaments" });
+    }
+  });
+
+  app.get('/api/tournaments/followed', isAuthenticated, async (req: any, res) => {
+    try {
+      // For now, return empty array. This would be expanded with user preferences
+      res.json([]);
+    } catch (error) {
+      console.error("Error fetching followed tournaments:", error);
+      res.status(500).json({ message: "Failed to fetch followed tournaments" });
+    }
+  });
+
   // Stripe payment routes
   app.post("/api/create-payment-intent", isAuthenticated, async (req, res) => {
     try {

@@ -12,6 +12,9 @@ import Tournament from "@/pages/tournament";
 import NotFound from "@/pages/not-found";
 import WhiteLabelAdmin from "@/pages/WhiteLabelAdmin";
 import WebsiteBuilder from "@/pages/WebsiteBuilder";
+import CoachDashboard from "@/pages/CoachDashboard";
+import TournamentManagerDashboard from "@/pages/TournamentManagerDashboard";
+import AthleteFanDashboard from "@/pages/AthleteFanDashboard";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -37,6 +40,9 @@ function Router() {
             <Route path="/legacy-home" component={LegacyHome} />
             <Route path="/admin/whitelabel" component={WhiteLabelAdmin} />
             <Route path="/admin/website" component={WebsiteBuilder} />
+            <Route path="/coach" component={CoachDashboard} />
+            <Route path="/tournament-manager" component={TournamentManagerDashboard} />
+            <Route path="/athlete" component={AthleteFanDashboard} />
           </>
         )}
         <Route component={NotFound} />

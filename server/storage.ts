@@ -3,7 +3,8 @@ import {
   type Tournament, type InsertTournament, type Match, type InsertMatch, type UpdateMatch,
   type SportOption, type InsertSportOption, type TournamentStructure, type InsertTournamentStructure,
   type TrackEvent, type InsertTrackEvent, type Page, type InsertPage,
-  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages 
+  type TeamRegistration, type InsertTeamRegistration, type Organization, type InsertOrganization,
+  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations 
 } from "@shared/schema";
 
 type SportCategory = typeof sportCategories.$inferSelect;
@@ -33,6 +34,20 @@ export interface IStorage {
   getPagesByUserId(userId: string): Promise<Page[]>;
   updatePage(id: string, updates: Partial<Page>): Promise<Page | undefined>;
   deletePage(id: string): Promise<boolean>;
+
+  // Team registration methods
+  createTeamRegistration(registration: InsertTeamRegistration): Promise<TeamRegistration>;
+  getTeamRegistration(id: string): Promise<TeamRegistration | undefined>;
+  getTeamRegistrationsByTournament(tournamentId: string): Promise<TeamRegistration[]>;
+  getTeamRegistrationsByCoach(coachId: string): Promise<TeamRegistration[]>;
+  updateTeamRegistration(id: string, updates: Partial<TeamRegistration>): Promise<TeamRegistration | undefined>;
+  deleteTeamRegistration(id: string): Promise<boolean>;
+
+  // Organization methods
+  createOrganization(organization: InsertOrganization): Promise<Organization>;
+  getOrganization(id: string): Promise<Organization | undefined>;
+  getOrganizations(): Promise<Organization[]>;
+  updateOrganization(id: string, updates: Partial<Organization>): Promise<Organization | undefined>;
 
   // Tournament methods
   getTournaments(): Promise<Tournament[]>;
@@ -278,6 +293,122 @@ export class DbStorage implements IStorage {
     } catch (error) {
       console.error("Database error:", error);
       return false;
+    }
+  }
+
+  // Team registration methods
+  async createTeamRegistration(registration: InsertTeamRegistration): Promise<TeamRegistration> {
+    try {
+      const result = await this.db.insert(teamRegistrations).values(registration).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to create team registration");
+    }
+  }
+
+  async getTeamRegistration(id: string): Promise<TeamRegistration | undefined> {
+    try {
+      const result = await this.db.select().from(teamRegistrations).where(eq(teamRegistrations.id, id));
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async getTeamRegistrationsByTournament(tournamentId: string): Promise<TeamRegistration[]> {
+    try {
+      const result = await this.db
+        .select()
+        .from(teamRegistrations)
+        .where(eq(teamRegistrations.tournamentId, tournamentId));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async getTeamRegistrationsByCoach(coachId: string): Promise<TeamRegistration[]> {
+    try {
+      const result = await this.db
+        .select()
+        .from(teamRegistrations)
+        .where(eq(teamRegistrations.coachId, coachId));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async updateTeamRegistration(id: string, updates: Partial<TeamRegistration>): Promise<TeamRegistration | undefined> {
+    try {
+      const result = await this.db
+        .update(teamRegistrations)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(teamRegistrations.id, id))
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async deleteTeamRegistration(id: string): Promise<boolean> {
+    try {
+      const result = await this.db.delete(teamRegistrations).where(eq(teamRegistrations.id, id));
+      return result.rowCount > 0;
+    } catch (error) {
+      console.error("Database error:", error);
+      return false;
+    }
+  }
+
+  // Organization methods
+  async createOrganization(organization: InsertOrganization): Promise<Organization> {
+    try {
+      const result = await this.db.insert(organizations).values(organization).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to create organization");
+    }
+  }
+
+  async getOrganization(id: string): Promise<Organization | undefined> {
+    try {
+      const result = await this.db.select().from(organizations).where(eq(organizations.id, id));
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async getOrganizations(): Promise<Organization[]> {
+    try {
+      const result = await this.db.select().from(organizations);
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async updateOrganization(id: string, updates: Partial<Organization>): Promise<Organization | undefined> {
+    try {
+      const result = await this.db
+        .update(organizations)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(organizations.id, id))
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
     }
   }
 

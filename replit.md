@@ -4,7 +4,7 @@
 
 This is a full-stack tournament bracket management application that allows users to create and manage single-elimination tournaments with interactive bracket visualization and real-time match updates. The application features a React frontend with a Node.js/Express backend, using PostgreSQL for data persistence and in-memory storage as a fallback.
 
-**Status**: Complete white-label tournament management SaaS platform for Champions for Change nonprofit. Revenue funds educational opportunities for underprivileged youth in Corpus Christi, Texas. Built by coaches who identified tournament management needs. Features user authentication with Replit OAuth, Stripe payment integration, AI-powered tournament creation across 65+ sports, custom branding with Champions for Change logo and color scheme, multi-tenant white-label architecture, and mission-focused user experience emphasizing educational impact.
+**Status**: Complete white-label tournament management SaaS platform for Champions for Change nonprofit. Revenue funds educational opportunities for underprivileged youth in Corpus Christi, Texas. Built by coaches who identified tournament management needs. Features user authentication with Replit OAuth, Stripe payment integration, AI-powered tournament creation across 65+ sports, custom branding with Champions for Change logo and color scheme, multi-tenant white-label architecture, three-tier user hierarchy (Tournament Manager/Athletic Director → Coach → Athlete/Fan), and mission-focused user experience emphasizing educational impact.
 
 ## User Preferences
 
@@ -66,3 +66,7 @@ Branding: Green and blue color scheme from Champions for Change logo, emphasis o
 - **Educational Impact Focus**: User interface emphasizes funding student trips and educational opportunities
 - **Revenue-to-Education Model**: 100% of platform revenue directed to supporting underprivileged youth in Corpus Christi, Texas
 - **Coach-Built Heritage**: Platform messaging highlights development by coaches who understand tournament management needs
+- **Three-Tier User Hierarchy**: Tournament Manager/Athletic Director (creates tournaments, configures events, manages overall structure) → Coach (registers teams, assigns players to events, manages team participation) → Athlete/Fan (views results, tracks performance, follows tournaments)
+- **Role-Based Access Control**: Dynamic navigation and features based on user roles and subscription levels
+- **Team Registration System**: Coaches can register teams with full player rosters, organization details, and event selections
+- **Registration Approval Workflow**: Tournament managers review and approve/reject team registrations with detailed player information
