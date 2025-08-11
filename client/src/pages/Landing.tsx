@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Users, Zap, Globe, CreditCard, Star, Heart, GraduationCap, MapPin } from "lucide-react";
+import { Trophy, Users, Zap, Globe, CreditCard, Star, Heart, GraduationCap, MapPin, Award, Mail, Phone } from "lucide-react";
 import championLogo from "@assets/IMG_1442_1754896656003.jpeg";
+import Footer from "@/components/Footer";
 
 export default function Landing() {
   return (
@@ -58,12 +59,54 @@ export default function Landing() {
           Every subscription helps fund student trips and educational opportunities for middle schools in Corpus Christi, Texas.
         </p>
         
-        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-6 mb-8 max-w-3xl mx-auto">
-          <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-200 mb-2">Our Impact Mission</h3>
-          <p className="text-blue-700 dark:text-blue-300">
+        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-6 mb-8 max-w-4xl mx-auto">
+          <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-200 mb-3">Our Impact Mission</h3>
+          <p className="text-blue-700 dark:text-blue-300 mb-4">
             Revenue from this platform directly funds educational trips and opportunities for underprivileged youth. 
             When you choose our tournament management solution, you're not just organizing competitions—you're championing change in young lives.
           </p>
+          
+          <div className="grid md:grid-cols-2 gap-6 mt-4">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-4">
+              <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-2 flex items-center">
+                <Award className="h-4 w-4 mr-2 text-blue-600" />
+                Leadership
+              </h4>
+              <div className="text-sm text-gray-600 dark:text-gray-300">
+                <p className="font-medium">Executive Director of Champions for Change</p>
+                <p className="text-xs mt-1">21 years military service (Marines & Army) • Teaching & coaching at Robert Driscoll Middle School since 2016</p>
+              </div>
+            </div>
+            
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-4">
+              <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-2 flex items-center">
+                <Mail className="h-4 w-4 mr-2 text-green-600" />
+                Contact
+              </h4>
+              <div className="text-sm space-y-1">
+                <div className="flex items-center">
+                  <Mail className="h-3 w-3 mr-2 text-green-500" />
+                  <a 
+                    href="mailto:Champions4change361@gmail.com" 
+                    className="text-blue-600 hover:text-blue-800 text-xs"
+                    data-testid="hero-email-link"
+                  >
+                    Champions4change361@gmail.com
+                  </a>
+                </div>
+                <div className="flex items-center">
+                  <Phone className="h-3 w-3 mr-2 text-blue-500" />
+                  <a 
+                    href="tel:361-300-1552" 
+                    className="text-blue-600 hover:text-blue-800 text-xs"
+                    data-testid="hero-phone-link"
+                  >
+                    (361) 300-1552
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         
         <div className="flex gap-4 justify-center">
@@ -429,9 +472,31 @@ export default function Landing() {
           <p className="text-xl text-green-100 mb-4 max-w-3xl mx-auto">
             Join coaches and organizations who are transforming tournament management while funding student education
           </p>
-          <p className="text-green-200 mb-8">
-            Built by coaches in Corpus Christi, Texas • Supporting students since day one
-          </p>
+          <div className="text-green-200 mb-8 space-y-2">
+            <p>Built by coaches in Corpus Christi, Texas • Supporting students since day one</p>
+            <div className="flex justify-center gap-6 text-sm">
+              <div className="flex items-center">
+                <Mail className="h-4 w-4 mr-2" />
+                <a 
+                  href="mailto:Champions4change361@gmail.com" 
+                  className="hover:text-white transition-colors"
+                  data-testid="cta-email-link"
+                >
+                  Champions4change361@gmail.com
+                </a>
+              </div>
+              <div className="flex items-center">
+                <Phone className="h-4 w-4 mr-2" />
+                <a 
+                  href="tel:361-300-1552" 
+                  className="hover:text-white transition-colors"
+                  data-testid="cta-phone-link"
+                >
+                  (361) 300-1552
+                </a>
+              </div>
+            </div>
+          </div>
           <div className="flex gap-4 justify-center">
             <Button 
               size="lg" 
@@ -453,58 +518,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-3 gap-8">
-            <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <img 
-                  src={championLogo} 
-                  alt="Champions for Change" 
-                  className="h-8 w-8 rounded-full object-cover"
-                />
-                <span className="text-xl font-bold">Champions for Change</span>
-              </div>
-              <p className="text-gray-400 mb-4">
-                Tournament management platform built by coaches to fund educational opportunities for underprivileged youth.
-              </p>
-              <div className="flex items-center space-x-2 text-green-400">
-                <MapPin className="h-4 w-4" />
-                <span className="text-sm">Corpus Christi, Texas</span>
-              </div>
-            </div>
-            
-            <div>
-              <h3 className="font-semibold mb-4">Platform Features</h3>
-              <ul className="space-y-2 text-gray-400 text-sm">
-                <li>AI Tournament Generation</li>
-                <li>65+ Sports Coverage</li>
-                <li>White-Label Solutions</li>
-                <li>Payment Processing</li>
-                <li>Analytics & Reporting</li>
-              </ul>
-            </div>
-            
-            <div>
-              <h3 className="font-semibold mb-4">Our Impact</h3>
-              <ul className="space-y-2 text-gray-400 text-sm">
-                <li>100% Revenue to Education</li>
-                <li>Student Trip Funding</li>
-                <li>Educational Opportunities</li>
-                <li>Coach-to-Coach Support</li>
-                <li>Community Building</li>
-              </ul>
-            </div>
-          </div>
-          
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center">
-            <p className="text-gray-400 text-sm">
-              © 2025 Champions for Change. Every tournament managed helps fund student education.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
