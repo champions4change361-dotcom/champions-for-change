@@ -90,19 +90,26 @@ export default function Landing() {
       <section className="bg-gradient-to-r from-green-600 to-blue-600 text-white py-16">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-8">Making a Real Difference</h2>
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-4 gap-6">
+            <div>
+              <div className="text-4xl font-bold mb-2">$2,600+</div>
+              <div className="text-green-100">Per student trip cost</div>
+            </div>
             <div>
               <div className="text-4xl font-bold mb-2">100%</div>
-              <div className="text-green-100">Revenue goes to education</div>
+              <div className="text-green-100">Profit goes to education</div>
             </div>
             <div>
               <div className="text-4xl font-bold mb-2">65+</div>
               <div className="text-green-100">Sports supported</div>
             </div>
             <div>
-              <div className="text-4xl font-bold mb-2">∞</div>
-              <div className="text-green-100">Student futures changed</div>
+              <div className="text-4xl font-bold mb-2">5-15</div>
+              <div className="text-green-100">Students funded annually</div>
             </div>
+          </div>
+          <div className="mt-8 text-green-200 text-sm">
+            With just 10 Champion subscribers, we can fund one complete student trip per year
           </div>
         </div>
       </section>
@@ -213,13 +220,19 @@ export default function Landing() {
             </p>
           </div>
           
+          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 mb-8 text-center">
+            <p className="text-sm text-blue-700 dark:text-blue-300">
+              <strong>Student Trip Cost:</strong> $2,600+ per student • Platform operating costs covered first, 100% of remaining revenue funds education
+            </p>
+          </div>
+          
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             <Card className="border-2 border-gray-200">
               <CardHeader>
                 <CardTitle>Supporter</CardTitle>
                 <CardDescription>Perfect for small tournaments</CardDescription>
-                <div className="text-3xl font-bold text-green-600">$19<span className="text-sm font-normal text-gray-500">/month</span></div>
-                <Badge variant="secondary" className="w-fit">Funds 1 student trip/year</Badge>
+                <div className="text-3xl font-bold text-green-600">$29<span className="text-sm font-normal text-gray-500">/month</span></div>
+                <Badge variant="secondary" className="w-fit">~$228/year to education</Badge>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-sm">
@@ -229,6 +242,9 @@ export default function Landing() {
                   <li>✓ Community support</li>
                   <li>✓ Impact reporting</li>
                 </ul>
+                <div className="mt-4 p-2 bg-green-50 rounded text-xs text-green-700">
+                  After platform costs (~$8/month), $21 goes to student education
+                </div>
               </CardContent>
             </Card>
 
@@ -239,8 +255,8 @@ export default function Landing() {
               <CardHeader>
                 <CardTitle>Champion</CardTitle>
                 <CardDescription>For growing organizations</CardDescription>
-                <div className="text-3xl font-bold text-green-600">$49<span className="text-sm font-normal text-gray-500">/month</span></div>
-                <Badge variant="secondary" className="w-fit">Funds 3 student trips/year</Badge>
+                <div className="text-3xl font-bold text-green-600">$79<span className="text-sm font-normal text-gray-500">/month</span></div>
+                <Badge variant="secondary" className="w-fit">~$612/year to education</Badge>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-sm">
@@ -251,6 +267,9 @@ export default function Landing() {
                   <li>✓ Priority support</li>
                   <li>✓ Detailed impact reports</li>
                 </ul>
+                <div className="mt-4 p-2 bg-green-50 rounded text-xs text-green-700">
+                  After platform costs (~$28/month), $51 goes to student education
+                </div>
               </CardContent>
             </Card>
 
@@ -258,8 +277,8 @@ export default function Landing() {
               <CardHeader>
                 <CardTitle>Game Changer</CardTitle>
                 <CardDescription>White-label solution</CardDescription>
-                <div className="text-3xl font-bold text-green-600">$149<span className="text-sm font-normal text-gray-500">/month</span></div>
-                <Badge variant="secondary" className="w-fit">Funds 8+ student trips/year</Badge>
+                <div className="text-3xl font-bold text-green-600">$249<span className="text-sm font-normal text-gray-500">/month</span></div>
+                <Badge variant="secondary" className="w-fit">~$1,944/year to education</Badge>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-sm">
@@ -270,8 +289,38 @@ export default function Landing() {
                   <li>✓ Dedicated support</li>
                   <li>✓ Student scholarship naming rights</li>
                 </ul>
+                <div className="mt-4 p-2 bg-green-50 rounded text-xs text-green-700">
+                  After platform costs (~$87/month), $162 goes to student education
+                </div>
               </CardContent>
             </Card>
+          </div>
+          
+          <div className="mt-8 p-6 bg-gray-100 dark:bg-gray-800 rounded-lg">
+            <h3 className="font-semibold mb-3 flex items-center">
+              <GraduationCap className="h-5 w-5 mr-2 text-green-600" />
+              Transparent Funding Model
+            </h3>
+            <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-600 dark:text-gray-300">
+              <div>
+                <h4 className="font-medium text-gray-900 dark:text-white">Platform Operating Costs:</h4>
+                <ul className="mt-2 space-y-1">
+                  <li>• Replit Core hosting: $20/month</li>
+                  <li>• Database & storage: $15-25/month</li>
+                  <li>• Payment processing: 2.9% + 30¢</li>
+                  <li>• Development & maintenance</li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-medium text-gray-900 dark:text-white">Student Trip Funding:</h4>
+                <ul className="mt-2 space-y-1">
+                  <li>• Educational tours: $2,600+ per student</li>
+                  <li>• Multiple tour companies available</li>
+                  <li>• 100% transparency on fund usage</li>
+                  <li>• Quarterly impact reports</li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
       </section>

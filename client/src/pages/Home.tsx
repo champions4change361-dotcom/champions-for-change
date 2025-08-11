@@ -142,8 +142,9 @@ export default function Home() {
               </div>
             </div>
             <div className="text-right">
-              <div className="text-2xl font-bold">100%</div>
-              <div className="text-green-200 text-sm">Revenue to Students</div>
+              <div className="text-2xl font-bold">$2,600+</div>
+              <div className="text-green-200 text-sm">Per Student Trip</div>
+              <div className="text-xs text-green-300 mt-1">Costs covered first</div>
             </div>
           </div>
         </div>
