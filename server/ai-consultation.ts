@@ -472,7 +472,14 @@ export function analyzeTournamentQuery(text: string): KeystoneConsultationResult
 
   // Enhanced format detection
   let format = 'bracket';
-  if (textLower.includes('leaderboard') || textLower.includes('ranking') || textLower.includes('time trial') || textLower.includes('scoring event')) {
+  
+  // Sport-specific format defaults
+  if (sport === 'Track & Field' || sport === 'Swimming & Diving' || sport === 'Golf' || sport === 'Cross Country') {
+    format = 'leaderboard';
+    confidence += 20;
+  }
+  // Override with specific keywords
+  else if (textLower.includes('leaderboard') || textLower.includes('ranking') || textLower.includes('time trial') || textLower.includes('scoring event')) {
     format = 'leaderboard';
     confidence += 15;
   }
