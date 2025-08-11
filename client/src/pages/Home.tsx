@@ -7,6 +7,7 @@ import { Trophy, Plus, Users, Settings, CreditCard, LogOut, GraduationCap, Heart
 import { useQuery } from "@tanstack/react-query";
 import TournamentCreationForm from "@/components/tournament-creation-form";
 import AIConsultation from "@/components/ai-consultation";
+import { DonationSection } from "@/components/DonationSection";
 import championLogo from "@assets/IMG_1442_1754896656003.jpeg";
 
 export default function Home() {
@@ -289,6 +290,11 @@ export default function Home() {
               </Card>
             </div>
           </div>
+        )}
+
+        {/* Donation Section for Free Users */}
+        {(!user?.subscription || user?.subscription === 'free') && (
+          <DonationSection className="mb-6" />
         )}
 
         {/* Recent Tournaments */}

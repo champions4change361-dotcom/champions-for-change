@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Trophy, Users, Zap, Globe, CreditCard, Star, Heart, GraduationCap, MapPin, Award, Mail, Phone } from "lucide-react";
 import championLogo from "@assets/IMG_1442_1754896656003.jpeg";
+import { DonationSection } from "@/components/DonationSection";
 import Footer from "@/components/Footer";
 
 export default function Landing() {
@@ -463,6 +464,11 @@ export default function Landing() {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* Donation Section for Non-Users */}
+      <section className="container mx-auto px-4 py-12">
+        <DonationSection />
       </section>
 
       {/* CTA */}
