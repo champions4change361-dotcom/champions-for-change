@@ -29,7 +29,7 @@ export default function Contacts() {
   const queryClient = useQueryClient();
 
   // Fetch contacts
-  const { data: contacts = [], isLoading } = useQuery({
+  const { data: contacts = [], isLoading } = useQuery<Contact[]>({
     queryKey: ["/api/contacts"],
   });
 
@@ -60,7 +60,7 @@ export default function Contacts() {
     mutationFn: async (contactsData: InsertContactType[]) => {
       return apiRequest("POST", "/api/contacts/import", { contacts: contactsData });
     },
-    onSuccess: (data) => {
+    onSuccess: (data: Contact[]) => {
       queryClient.invalidateQueries({ queryKey: ["/api/contacts"] });
       setShowImportDialog(false);
       toast({
@@ -78,7 +78,7 @@ export default function Contacts() {
   });
 
   // Filter contacts
-  const filteredContacts = contacts.filter((contact: Contact) => {
+  const filteredContacts = contacts.filter((contact) => {
     const matchesSearch = 
       contact.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       contact.lastName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -92,6 +92,7 @@ export default function Contacts() {
 
   const handleAddContact = (formData: FormData) => {
     const contact: InsertContactType = {
+      userId: '', // Will be set by the server
       firstName: formData.get("firstName") as string,
       lastName: formData.get("lastName") as string,
       email: formData.get("email") as string,
@@ -114,47 +115,108 @@ export default function Contacts() {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    if (!file.name.toLowerCase().endsWith('.csv')) {
+      toast({
+        title: "Invalid File Type",
+        description: "Please upload a CSV file. Export your Excel file as CSV first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
         const text = e.target?.result as string;
         const lines = text.split('\n').filter(line => line.trim());
-        const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+        
+        if (lines.length < 2) {
+          toast({
+            title: "Empty File",
+            description: "The CSV file appears to be empty or has no data rows.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/['"]/g, ''));
+        
+        // Map common Excel column names to our schema
+        const fieldMapping: Record<string, string> = {
+          'first name': 'firstName',
+          'firstname': 'firstName', 
+          'last name': 'lastName',
+          'lastname': 'lastName',
+          'email': 'email',
+          'email address': 'email',
+          'phone': 'phone',
+          'phone number': 'phone',
+          'organization': 'organization',
+          'company': 'organization',
+          'school': 'organization',
+          'position': 'position',
+          'title': 'position',
+          'role': 'position',
+          'sport': 'sport',
+          'sports': 'sport',
+          'state': 'state',
+          'city': 'city',
+          'zip': 'zipCode',
+          'zip code': 'zipCode',
+          'zipcode': 'zipCode',
+          'notes': 'notes',
+          'source': 'source',
+        };
         
         const contacts: InsertContactType[] = lines.slice(1).map(line => {
-          const values = line.split(',').map(v => v.trim().replace(/['"]/g, ''));
-          const contact: any = { source: "jersey_watch" };
+          // Handle CSV parsing with proper quote handling
+          const values: string[] = [];
+          let current = '';
+          let inQuotes = false;
           
+          for (let i = 0; i < line.length; i++) {
+            const char = line[i];
+            if (char === '"') {
+              inQuotes = !inQuotes;
+            } else if (char === ',' && !inQuotes) {
+              values.push(current.trim());
+              current = '';
+            } else {
+              current += char;
+            }
+          }
+          values.push(current.trim()); // Add the last value
+          
+          const contact: InsertContactType = {
+            userId: '', // Will be set by the server
+            firstName: '',
+            lastName: '',
+            email: '',
+            source: 'jersey_watch', // Default source for imported contacts
+            subscriptionInterest: 'unknown',
+          };
+
           headers.forEach((header, index) => {
-            const value = values[index];
-            if (!value) return;
+            const value = values[index]?.replace(/['"]/g, '').trim() || '';
+            const mappedField = fieldMapping[header] || header;
             
-            // Map CSV headers to our schema
-            switch (header) {
-              case 'first name':
-              case 'firstname':
+            switch (mappedField) {
+              case 'firstName':
                 contact.firstName = value;
                 break;
-              case 'last name':
-              case 'lastname':
+              case 'lastName':
                 contact.lastName = value;
                 break;
               case 'email':
-              case 'email address':
                 contact.email = value;
                 break;
               case 'phone':
-              case 'phone number':
                 contact.phone = value;
                 break;
               case 'organization':
-              case 'school':
-              case 'company':
                 contact.organization = value;
                 break;
               case 'position':
-              case 'title':
-              case 'role':
                 contact.position = value;
                 break;
               case 'sport':
@@ -166,14 +228,22 @@ export default function Contacts() {
               case 'city':
                 contact.city = value;
                 break;
+              case 'zipCode':
+                contact.zipCode = value;
+                break;
               case 'notes':
                 contact.notes = value;
                 break;
             }
           });
           
+          // Skip contacts without email (required field)
+          if (!contact.email) {
+            return null;
+          }
+          
           return contact;
-        }).filter(contact => contact.email); // Only include contacts with email
+        }).filter(contact => contact !== null); // Only include valid contacts
         
         importContactsMutation.mutate(contacts);
       } catch (error) {
