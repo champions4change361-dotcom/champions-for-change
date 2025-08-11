@@ -511,11 +511,11 @@ export default function Landing() {
             <Button 
               size="lg" 
               variant="outline"
-              className="border-white text-white hover:bg-white hover:text-green-600 font-semibold"
+              className="border-white border-2 text-white hover:bg-white hover:text-green-600 font-semibold px-6"
               onClick={() => window.location.href = "/about"}
               data-testid="button-learn-more"
             >
-              Learn About Our Mission
+              <span className="text-white">Learn About Our Mission</span>
             </Button>
           </div>
         </div>

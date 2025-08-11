@@ -11,7 +11,7 @@ export default function About() {
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">
       {/* Header */}
       <header className="container mx-auto px-4 py-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center space-x-3">
             <img 
               src={championLogo} 
@@ -23,12 +23,14 @@ export default function About() {
               <div className="text-sm text-green-600 font-medium">About Our Mission</div>
             </div>
           </div>
-          <div className="flex gap-3">
-            <Link href="/">
-              <Button variant="outline" data-testid="button-back-home">
-                Back to Home
-              </Button>
-            </Link>
+          <div className="flex gap-3 flex-shrink-0">
+            <Button 
+              variant="outline" 
+              onClick={() => window.location.href = "/"}
+              data-testid="button-back-home"
+            >
+              Back to Home
+            </Button>
             <Button 
               onClick={() => window.location.href = "/api/login"}
               className="bg-green-600 hover:bg-green-700"
@@ -260,11 +262,11 @@ export default function About() {
             <Button 
               size="lg" 
               variant="outline"
-              className="border-white text-white hover:bg-white hover:text-green-600 font-semibold"
+              className="border-white border-2 text-white hover:bg-white hover:text-green-600 font-semibold px-6"
               onClick={() => window.location.href = "/"}
               data-testid="button-back-home-cta"
             >
-              Back to Home
+              <span className="text-white">Back to Home</span>
             </Button>
           </div>
         </div>
