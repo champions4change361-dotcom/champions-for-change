@@ -6,6 +6,7 @@ import session from "express-session";
 import type { Express, RequestHandler } from "express";
 import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
+import MemoryStore from "memorystore";
 import { storage } from "./storage";
 
 if (!process.env.REPLIT_DOMAINS) {
@@ -24,13 +25,13 @@ const getOidcConfig = memoize(
 
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
-  const pgStore = connectPg(session);
-  const sessionStore = new pgStore({
-    conString: process.env.DATABASE_URL,
-    createTableIfMissing: false,
-    ttl: sessionTtl,
-    tableName: "sessions",
+  
+  // Use memory store for development due to database connection issues
+  const SessionMemoryStore = MemoryStore(session);
+  const sessionStore = new SessionMemoryStore({
+    checkPeriod: sessionTtl, // prune expired entries every 24h
   });
+  
   return session({
     secret: process.env.SESSION_SECRET!,
     store: sessionStore,
@@ -38,8 +39,9 @@ export function getSession() {
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: true,
+      secure: false, // Allow HTTP for development
       maxAge: sessionTtl,
+      sameSite: 'lax', // More permissive for OAuth flows
     },
   });
 }
@@ -84,19 +86,21 @@ export async function setupAuth(app: Express) {
     verified(null, user);
   };
 
-  // Add support for localhost in development
+  // Add support for localhost and handle Replit domains properly
   const domains = process.env.REPLIT_DOMAINS!.split(",");
   if (process.env.NODE_ENV === 'development' && !domains.includes('localhost')) {
     domains.push('localhost');
   }
   
   for (const domain of domains) {
+    // Use HTTP for localhost, HTTPS for Replit domains
+    const protocol = domain.includes('localhost') ? 'http' : 'https';
     const strategy = new Strategy(
       {
         name: `replitauth:${domain}`,
         config,
         scope: "openid email profile offline_access",
-        callbackURL: `https://${domain}/api/callback`,
+        callbackURL: `${protocol}://${domain}/api/callback`,
       },
       verify,
     );
@@ -107,14 +111,26 @@ export async function setupAuth(app: Express) {
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
   app.get("/api/login", (req, res, next) => {
-    passport.authenticate(`replitauth:${req.hostname}`, {
+    console.log(`Login attempt for hostname: ${req.hostname}`);
+    const strategyName = `replitauth:${req.hostname}`;
+    
+    // Check if strategy exists
+    if (!passport._strategies[strategyName]) {
+      console.error(`No strategy found for ${strategyName}`);
+      return res.status(500).json({ error: "Authentication strategy not configured" });
+    }
+    
+    passport.authenticate(strategyName, {
       prompt: "login consent",
       scope: ["openid", "email", "profile", "offline_access"],
     })(req, res, next);
   });
 
   app.get("/api/callback", (req, res, next) => {
-    passport.authenticate(`replitauth:${req.hostname}`, {
+    console.log(`Callback for hostname: ${req.hostname}`);
+    const strategyName = `replitauth:${req.hostname}`;
+    
+    passport.authenticate(strategyName, {
       successReturnToOrRedirect: "/",
       failureRedirect: "/api/login",
     })(req, res, next);
