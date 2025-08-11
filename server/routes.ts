@@ -1,6 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { storage, getStorage } from "./storage";
 import { insertTournamentSchema, updateMatchSchema } from "@shared/schema";
 import { analyzeTournamentQuery, generateTournamentStructure, type KeystoneConsultationResult } from "./ai-consultation";
 import { setupAuth, isAuthenticated } from "./replitAuth";

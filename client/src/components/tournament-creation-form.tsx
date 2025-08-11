@@ -49,39 +49,47 @@ export default function TournamentCreationForm() {
   // Listen for AI recommendation events
   useEffect(() => {
     const handleAIRecommendation = (event: CustomEvent) => {
-      const { sport, competitionFormat, ageGroup, genderDivision } = event.detail;
+      const { sport, format, age_group, gender_division, teamSize } = event.detail;
       
       // Apply AI recommendations to form
       if (sport) {
         form.setValue("sport", sport);
       }
       
-      if (competitionFormat) {
-        form.setValue("competitionFormat", competitionFormat);
+      if (format) {
+        form.setValue("competitionFormat", format);
         
         // Auto-set tournament type based on format
-        if (competitionFormat === "bracket") {
+        if (format === "bracket") {
           form.setValue("tournamentType", "single");
-        } else if (competitionFormat === "leaderboard") {
+        } else if (format === "leaderboard") {
           form.setValue("tournamentType", "round-robin");
-        } else if (competitionFormat === "bracket-to-series") {
+        } else if (format === "bracket-to-series") {
           form.setValue("tournamentType", "single");
           form.setValue("competitionFormat", "bracket-to-series");
         }
       }
       
-      if (ageGroup && ageGroup !== "All Ages") {
-        form.setValue("ageGroup", ageGroup);
+      if (age_group && age_group !== "All Ages") {
+        form.setValue("ageGroup", age_group);
       }
       
-      if (genderDivision && genderDivision !== "Mixed") {
-        form.setValue("genderDivision", genderDivision);
+      if (gender_division && gender_division !== "Mixed") {
+        form.setValue("genderDivision", gender_division);
       }
       
-      // Generate a suggested tournament name based on recommendations
-      if (sport && ageGroup && genderDivision) {
-        const suggestedName = `${ageGroup !== "All Ages" ? ageGroup + " " : ""}${genderDivision !== "Mixed" ? genderDivision + " " : ""}${sport} Tournament`;
-        form.setValue("name", suggestedName);
+      if (teamSize) {
+        form.setValue("teamSize", teamSize);
+      }
+      
+      // Auto-generate tournament name
+      const sportName = sport || form.getValues("sport") || "Championship";
+      const agePart = age_group && age_group !== "All Ages" ? `${age_group} ` : "";
+      const genderPart = gender_division && gender_division !== "Mixed" ? `${gender_division} ` : "";
+      const autoName = `${agePart}${genderPart}${sportName} Tournament`;
+      
+      if (!form.getValues("name")) {
+        form.setValue("name", autoName);
       }
       
       toast({
