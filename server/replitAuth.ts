@@ -7,7 +7,8 @@ import type { Express, RequestHandler } from "express";
 import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
 import MemoryStore from "memorystore";
-import { storage } from "./storage";
+import cookieParser from "cookie-parser";
+import { storage, getStorage } from "./storage";
 
 if (!process.env.REPLIT_DOMAINS) {
   throw new Error("Environment variable REPLIT_DOMAINS not provided");
@@ -38,10 +39,10 @@ export function getSession() {
     resave: true,
     saveUninitialized: true,
     cookie: {
-      httpOnly: true,
-      secure: false, // Allow HTTP for development
+      httpOnly: false, // Allow client access for mobile compatibility
+      secure: false, // Allow HTTP for development and mobile testing
       maxAge: sessionTtl,
-      sameSite: 'lax', // More permissive for OAuth flows
+      sameSite: 'none', // More permissive for cross-origin access
     },
   });
 }
@@ -70,6 +71,7 @@ async function upsertUser(
 
 export async function setupAuth(app: Express) {
   app.set("trust proxy", 1);
+  app.use(cookieParser());
   app.use(getSession());
   app.use(passport.initialize());
   app.use(passport.session());
@@ -80,11 +82,13 @@ export async function setupAuth(app: Express) {
   passport.serializeUser((user: Express.User, cb) => cb(null, user));
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
-  // Simple login endpoint for deployment
+  // Simple login endpoint for deployment - accessible from any device
   app.get("/api/login", async (req, res, next) => {
-    console.log(`Login attempt for hostname: ${req.hostname}`);
+    console.log(`Login attempt for hostname: ${req.hostname}, IP: ${req.ip}, User-Agent: ${req.get('User-Agent')}`);
     
     try {
+      const storage = await getStorage();
+      
       // Create user in storage first
       const adminUser = await storage.upsertUser({
         id: 'champions-admin-1',
@@ -112,11 +116,20 @@ export async function setupAuth(app: Express) {
         }
         console.log("User authenticated successfully:", sessionUser.claims.email);
         
-        // Force session save
+        // Force session save with callback
         req.session.save((saveErr) => {
           if (saveErr) {
             console.error("Session save error:", saveErr);
           }
+          
+          // Set additional cookie for mobile compatibility
+          res.cookie('user_authenticated', 'true', {
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            httpOnly: false,
+            secure: false,
+            sameSite: 'none'
+          });
+          
           return res.redirect('/');
         });
       });
@@ -148,12 +161,35 @@ export async function setupAuth(app: Express) {
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
-  console.log(`Auth check - isAuthenticated: ${req.isAuthenticated()}, user: ${req.user ? 'exists' : 'none'}`);
+  console.log(`Auth check - isAuthenticated: ${req.isAuthenticated()}, user: ${req.user ? 'exists' : 'none'}, cookies: ${req.cookies.user_authenticated || 'none'}`);
   
-  // Simplified authentication check for deployment
-  if (!req.isAuthenticated()) {
-    return res.status(401).json({ message: "Unauthorized" });
+  // Check if user is authenticated via session or has auth cookie
+  if (req.isAuthenticated()) {
+    return next();
   }
   
-  return next();
+  // Fallback: check for auth cookie (for mobile compatibility)
+  if (req.cookies.user_authenticated === 'true') {
+    console.log("Using cookie-based authentication for mobile device");
+    
+    // Create temporary session for cookie-authenticated user
+    const storage = await getStorage();
+    const adminUser = await storage.getUser('champions-admin-1');
+    
+    if (adminUser) {
+      // Manually set user for this request
+      req.user = {
+        claims: {
+          sub: adminUser.id,
+          email: adminUser.email,
+          first_name: adminUser.firstName,
+          last_name: adminUser.lastName,
+          profile_image_url: adminUser.profileImageUrl
+        }
+      } as any;
+      return next();
+    }
+  }
+  
+  return res.status(401).json({ message: "Unauthorized" });
 };
