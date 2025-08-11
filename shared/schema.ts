@@ -15,6 +15,7 @@ export const tournaments = pgTable("tournaments", {
   stageConfiguration: jsonb("stage_configuration"), // Defines each stage structure
   seriesLength: integer("series_length").default(7), // For series and bracket-to-series formats
   bracket: jsonb("bracket").notNull(),
+  participants: jsonb("participants").default([]), // Tournament participants/teams
   sport: text("sport"), // From Bubble SportOptions
   sportCategory: text("sport_category"), // From Bubble SportCategories
   tournamentStructure: text("tournament_structure"), // From Bubble TournamentStructures

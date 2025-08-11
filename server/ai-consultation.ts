@@ -1,4 +1,211 @@
 // AI Consultation System for Tournament Platform
+
+// Generate sample participants based on sport and demographics
+export function generateSampleParticipants(sport: string, teamSize: number, ageGroup: string, genderDivision: string): string[] {
+  const participants: string[] = [];
+  
+  // Sport-specific team/participant name patterns
+  const getNamePatterns = () => {
+    if (sport.includes("Basketball")) {
+      return ["Eagles", "Hawks", "Wolves", "Tigers", "Lions", "Bears", "Panthers", "Sharks", "Thunder", "Storm", "Lightning", "Flames", "Rockets", "Comets", "Spartans", "Warriors"];
+    } else if (sport.includes("Football")) {
+      return ["Bulldogs", "Mustangs", "Raiders", "Cowboys", "Steelers", "Giants", "Patriots", "Chiefs", "Packers", "Vikings", "Broncos", "Falcons", "Cardinals", "Ravens", "Saints", "Titans"];
+    } else if (sport.includes("Soccer")) {
+      return ["United", "City", "Rangers", "Athletic", "Real", "FC", "Dynamo", "Galaxy", "Fire", "Revolution", "Impact", "Whitecaps", "Sounders", "Timbers", "Rapids", "Crew"];
+    } else if (sport.includes("Baseball")) {
+      return ["Yankees", "Red Sox", "Dodgers", "Giants", "Cubs", "Cardinals", "Pirates", "Brewers", "Twins", "Tigers", "Angels", "Athletics", "Mariners", "Rangers", "Astros", "Royals"];
+    } else if (sport.includes("Track") || sport.includes("Swimming")) {
+      return ["Johnson", "Smith", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas"];
+    } else if (sport.includes("Golf")) {
+      return ["Woods", "Palmer", "Nicklaus", "Player", "Watson", "Singh", "Garcia", "Mickelson", "McIlroy", "Spieth", "Johnson", "Fowler", "Reed", "Casey", "Rose", "Stenson"];
+    } else if (sport.includes("Esports")) {
+      return ["CyberWolves", "PixelWarriors", "NeonStorm", "QuantumForce", "VoidHunters", "DataKnights", "CodeCrusaders", "TechTitans", "DigitalDragons", "BinaryBeasts", "NetNinjas", "CyberSpartans", "TechThunder", "PixelPirates", "CodeCommanders", "DataDynamos"];
+    } else {
+      return ["Team Alpha", "Team Beta", "Team Gamma", "Team Delta", "Team Omega", "Team Phoenix", "Team Nova", "Team Vortex", "Team Apex", "Team Elite", "Team Prime", "Team Fusion", "Team Nexus", "Team Zero", "Team Infinity", "Team Legend"];
+    }
+  };
+
+  const namePatterns = getNamePatterns();
+  const isIndividual = sport.includes("Track") || sport.includes("Swimming") || sport.includes("Golf") || sport.includes("Tennis");
+  
+  // School/Organization prefixes based on age group
+  const getPrefixes = () => {
+    if (ageGroup === "Elementary") {
+      return ["Lincoln Elementary", "Washington Elementary", "Roosevelt Elementary", "Kennedy Elementary", "Jefferson Elementary", "Madison Elementary"];
+    } else if (ageGroup === "Middle School") {
+      return ["Central Middle", "North Middle", "South Middle", "East Middle", "West Middle", "Valley Middle"];
+    } else if (ageGroup === "High School") {
+      return ["Central High", "North High", "South High", "East High", "West High", "Valley High", "Mountain View", "Riverside", "Oakwood", "Pinewood"];
+    } else if (ageGroup === "College") {
+      return ["State University", "Tech University", "Community College", "Regional University", "Metro College", "City University"];
+    } else {
+      return ["Metro", "Regional", "City", "County", "Valley", "Mountain"];
+    }
+  };
+
+  const prefixes = getPrefixes();
+  
+  for (let i = 0; i < teamSize; i++) {
+    if (isIndividual) {
+      // Individual participant names
+      const firstName = ["Alex", "Jordan", "Taylor", "Morgan", "Casey", "Riley", "Avery", "Quinn", "Sage", "River"][i % 10];
+      const lastName = namePatterns[i % namePatterns.length];
+      participants.push(`${firstName} ${lastName}`);
+    } else {
+      // Team names
+      const prefix = prefixes[i % prefixes.length];
+      const name = namePatterns[i % namePatterns.length];
+      participants.push(`${prefix} ${name}`);
+    }
+  }
+  
+  return participants;
+}
+
+// Generate complete tournament structure with brackets/leaderboards
+export function generateTournamentStructure(
+  sport: string, 
+  format: string, 
+  teamSize: number, 
+  ageGroup: string, 
+  genderDivision: string,
+  tournamentName: string
+) {
+  const participants = generateSampleParticipants(sport, teamSize, ageGroup, genderDivision);
+  
+  if (format === "leaderboard") {
+    return generateLeaderboardStructure(participants, sport);
+  } else if (format === "series") {
+    return generateSeriesStructure(participants, sport, 7);
+  } else if (format === "bracket-to-series") {
+    return generateBracketToSeriesStructure(participants, sport);
+  } else {
+    return generateBracketStructure(participants, sport);
+  }
+}
+
+function generateBracketStructure(participants: string[], sport: string) {
+  const rounds = Math.ceil(Math.log2(participants.length));
+  const bracket: any = {};
+  
+  // Create bracket structure
+  for (let round = 1; round <= rounds; round++) {
+    bracket[`round_${round}`] = [];
+    const matchesInRound = Math.pow(2, rounds - round);
+    
+    for (let match = 0; match < matchesInRound; match++) {
+      if (round === 1) {
+        // First round - pair up participants
+        const team1 = participants[match * 2] || "BYE";
+        const team2 = participants[match * 2 + 1] || "BYE";
+        bracket[`round_${round}`].push({
+          match_id: `r${round}_m${match + 1}`,
+          team1,
+          team2,
+          winner: null,
+          score1: null,
+          score2: null
+        });
+      } else {
+        // Later rounds - winners from previous round
+        bracket[`round_${round}`].push({
+          match_id: `r${round}_m${match + 1}`,
+          team1: "TBD",
+          team2: "TBD",
+          winner: null,
+          score1: null,
+          score2: null
+        });
+      }
+    }
+  }
+  
+  return { type: "bracket", structure: bracket, participants };
+}
+
+function generateLeaderboardStructure(participants: string[], sport: string) {
+  const leaderboard = participants.map((participant, index) => ({
+    rank: index + 1,
+    participant,
+    score: null,
+    performance: getPerformanceMetric(sport),
+    status: "pending"
+  }));
+  
+  return { type: "leaderboard", structure: leaderboard, participants };
+}
+
+function generateSeriesStructure(participants: string[], sport: string, seriesLength = 7) {
+  const series = [];
+  
+  for (let i = 0; i < participants.length; i += 2) {
+    if (participants[i + 1]) {
+      series.push({
+        series_id: `series_${Math.floor(i / 2) + 1}`,
+        team1: participants[i],
+        team2: participants[i + 1],
+        games: Array.from({ length: seriesLength }, (_, gameIndex) => ({
+          game_number: gameIndex + 1,
+          winner: null,
+          score1: null,
+          score2: null,
+          status: "pending"
+        })),
+        series_winner: null,
+        wins_needed: Math.ceil(seriesLength / 2)
+      });
+    }
+  }
+  
+  return { type: "series", structure: series, participants };
+}
+
+function generateBracketToSeriesStructure(participants: string[], sport: string) {
+  // Stage 1: Bracket to determine finalists
+  const bracketStructure = generateBracketStructure(participants, sport);
+  
+  // Stage 2: Championship series
+  const championshipSeries = {
+    series_id: "championship",
+    team1: "TBD (Bracket Winner 1)",
+    team2: "TBD (Bracket Winner 2)",
+    games: Array.from({ length: 7 }, (_, gameIndex) => ({
+      game_number: gameIndex + 1,
+      winner: null,
+      score1: null,
+      score2: null,
+      status: "pending"
+    })),
+    series_winner: null,
+    wins_needed: 4
+  };
+  
+  return {
+    type: "bracket-to-series",
+    structure: {
+      stage1: bracketStructure.structure,
+      stage2: championshipSeries
+    },
+    participants
+  };
+}
+
+function getPerformanceMetric(sport: string): string {
+  if (sport.includes("Track")) {
+    return "time (seconds)";
+  } else if (sport.includes("Swimming")) {
+    return "time (minutes:seconds)";
+  } else if (sport.includes("Golf")) {
+    return "strokes";
+  } else if (sport.includes("Weight") || sport.includes("Shot") || sport.includes("Discus")) {
+    return "distance (meters)";
+  } else if (sport.includes("Fishing")) {
+    return "weight (pounds)";
+  } else {
+    return "points";
+  }
+}
+
 export function analyzeTournamentQuery(text: string) {
   const textLower = text.toLowerCase();
   

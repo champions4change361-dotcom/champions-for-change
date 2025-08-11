@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -30,7 +30,9 @@ interface AIRecommendation {
 
 export default function AIConsultation() {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [recommendation, setRecommendation] = useState<AIRecommendation | null>(null);
+  const [isBuildingTournament, setIsBuildingTournament] = useState(false);
 
   const form = useForm<ConsultationFormData>({
     resolver: zodResolver(consultationSchema),
@@ -68,6 +70,47 @@ export default function AIConsultation() {
       });
     },
   });
+
+  const aiBuildTournamentMutation = useMutation({
+    mutationFn: async (userInput: string) => {
+      const response = await apiRequest("POST", "/api/ai-build-tournament", { user_input: userInput });
+      return response.json();
+    },
+    onSuccess: (data) => {
+      if (data.success) {
+        toast({
+          title: "Tournament Created!",
+          description: data.message,
+        });
+        queryClient.invalidateQueries({ queryKey: ["/api/tournaments"] });
+        form.reset();
+        setRecommendation(null);
+      } else {
+        toast({
+          title: "Error",
+          description: data.error || "Failed to create tournament",
+          variant: "destructive",
+        });
+      }
+      setIsBuildingTournament(false);
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create tournament",
+        variant: "destructive",
+      });
+      setIsBuildingTournament(false);
+    },
+  });
+
+  const aiBuildTournament = () => {
+    if (!recommendation) return;
+    
+    setIsBuildingTournament(true);
+    const originalQuery = form.getValues("user_input");
+    aiBuildTournamentMutation.mutate(originalQuery);
+  };
 
   const onSubmit = (data: ConsultationFormData) => {
     consultationMutation.mutate(data);
@@ -223,60 +266,127 @@ export default function AIConsultation() {
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-2 pt-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  // Pre-fill tournament creation form with AI recommendations
-                  const event = new CustomEvent('ai-recommendation', { 
-                    detail: {
-                      sport: recommendation.sport,
-                      competitionFormat: recommendation.format,
-                      ageGroup: recommendation.age_group,
-                      genderDivision: recommendation.gender_division
-                    }
-                  });
-                  window.dispatchEvent(event);
-                  toast({
-                    title: "Recommendation Applied",
-                    description: "Tournament form pre-filled with AI suggestions",
-                  });
-                }}
-                data-testid="button-apply-recommendation"
-                className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100"
-              >
-                <i className="fas fa-check mr-2"></i>
-                Apply to Form
-              </Button>
+            {/* Action Options */}
+            <div className="border-t pt-4 mt-4">
+              <h4 className="text-sm font-medium text-gray-700 mb-3">
+                🚀 How would you like to proceed?
+              </h4>
               
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  navigator.clipboard.writeText(recommendation.recommendation);
-                  toast({
-                    title: "Copied to Clipboard",
-                    description: "AI recommendation copied for sharing",
-                  });
-                }}
-                data-testid="button-copy-recommendation"
-                className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
-              >
-                <i className="fas fa-copy mr-2"></i>
-                Copy
-              </Button>
-              
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setRecommendation(null)}
-                data-testid="button-clear-recommendation"
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <i className="fas fa-times mr-2"></i>
-                Clear
-              </Button>
+              <div className="space-y-3">
+                {/* Option 1: AI Builds Complete Tournament */}
+                <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-4 rounded-lg border border-purple-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h5 className="font-medium text-purple-900 mb-1">
+                        🤖 AI Builds Complete Tournament
+                      </h5>
+                      <p className="text-sm text-purple-700">
+                        Let AI create the full tournament with sample participants, brackets/leaderboards, and ready-to-use structure.
+                      </p>
+                      <div className="text-xs text-purple-600 mt-1">
+                        ✅ Instant setup • ✅ Sample data • ✅ Ready to start
+                      </div>
+                    </div>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={() => aiBuildTournament()}
+                      disabled={isBuildingTournament}
+                      data-testid="button-ai-build-tournament"
+                      className="bg-purple-600 hover:bg-purple-700 text-white"
+                    >
+                      {isBuildingTournament ? (
+                        <>
+                          <i className="fas fa-spinner fa-spin mr-2"></i>
+                          Building...
+                        </>
+                      ) : (
+                        <>
+                          <i className="fas fa-magic mr-2"></i>
+                          Build It!
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Option 2: Apply to Form for Manual Configuration */}
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg border border-green-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h5 className="font-medium text-green-900 mb-1">
+                        ⚙️ Configure Tournament Manually
+                      </h5>
+                      <p className="text-sm text-green-700">
+                        Pre-fill the form with AI recommendations, then customize settings and add your own participants.
+                      </p>
+                      <div className="text-xs text-green-600 mt-1">
+                        ✅ Full control • ✅ Custom settings • ✅ Your participants
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          // Pre-fill tournament creation form with AI recommendations
+                          const event = new CustomEvent('ai-recommendation', { 
+                            detail: {
+                              sport: recommendation.sport,
+                              competitionFormat: recommendation.format,
+                              ageGroup: recommendation.age_group,
+                              genderDivision: recommendation.gender_division
+                            }
+                          });
+                          window.dispatchEvent(event);
+                          toast({
+                            title: "Recommendation Applied",
+                            description: "Tournament form pre-filled with AI suggestions",
+                          });
+                        }}
+                        data-testid="button-apply-recommendation"
+                        className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100"
+                      >
+                        <i className="fas fa-check mr-2"></i>
+                        Apply to Form
+                      </Button>
+                      
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          navigator.clipboard.writeText(recommendation.recommendation);
+                          toast({
+                            title: "Copied to Clipboard",
+                            description: "AI recommendation copied for sharing",
+                          });
+                        }}
+                        data-testid="button-copy-recommendation"
+                        className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+                      >
+                        <i className="fas fa-copy mr-2"></i>
+                        Copy
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center mt-3 pt-2 border-t">
+                <div className="text-xs text-gray-500">
+                  💡 Choose based on your preference for speed vs. customization
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setRecommendation(null)}
+                  data-testid="button-clear-recommendation"
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <i className="fas fa-times mr-1"></i>
+                  Clear
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>

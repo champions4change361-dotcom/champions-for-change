@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { getStorage } from "./storage";
 import { insertTournamentSchema, updateMatchSchema } from "@shared/schema";
-import { analyzeTournamentQuery } from "./ai-consultation";
+import { analyzeTournamentQuery, generateTournamentStructure } from "./ai-consultation";
 import { z } from "zod";
 
 function generateSingleEliminationBracket(teamSize: number, tournamentId: string) {
@@ -1394,6 +1394,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({
         success: false,
         error: 'AI consultation failed: ' + (error as Error).message
+      });
+    }
+  });
+
+  // AI auto-build tournament endpoint
+  app.post('/api/ai-build-tournament', async (req, res) => {
+    try {
+      const { user_input } = req.body;
+      
+      if (!user_input) {
+        return res.status(400).json({
+          success: false,
+          error: 'Please provide user_input'
+        });
+      }
+      
+      // Get AI analysis
+      const aiResult = analyzeTournamentQuery(user_input);
+      
+      // Default tournament parameters
+      const teamSize = 8; // Can be customized based on user input
+      const tournamentName = `${aiResult.age_group !== "All Ages" ? aiResult.age_group + " " : ""}${aiResult.gender_division !== "Mixed" ? aiResult.gender_division + " " : ""}${aiResult.sport} Tournament`;
+      
+      // Generate tournament structure
+      const tournamentStructure = generateTournamentStructure(
+        aiResult.sport,
+        aiResult.format,
+        teamSize,
+        aiResult.age_group,
+        aiResult.gender_division,
+        tournamentName
+      );
+      
+      // Create the tournament in the database
+      const storage = await getStorage();
+      const tournament = await storage.createTournament({
+        name: tournamentName,
+        sport: aiResult.sport,
+        teamSize: teamSize,
+        tournamentType: aiResult.format === "leaderboard" ? "round-robin" : "single",
+        competitionFormat: aiResult.format as any,
+        ageGroup: aiResult.age_group as any,
+        genderDivision: aiResult.gender_division as any,
+        status: "stage-1",
+        bracket: tournamentStructure.structure,
+        participants: tournamentStructure.participants || []
+      });
+      
+      res.json({
+        success: true,
+        tournament,
+        structure: tournamentStructure,
+        ai_analysis: aiResult,
+        message: `✨ AI has created a complete ${aiResult.format} tournament for ${aiResult.sport} with ${teamSize} ${tournamentStructure.type === "leaderboard" ? "participants" : "teams"}!`
+      });
+      
+    } catch (error) {
+      console.error('AI Tournament Build Error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to build tournament: ' + (error as Error).message
       });
     }
   });
