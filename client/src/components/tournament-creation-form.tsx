@@ -19,6 +19,8 @@ const formSchema = insertTournamentSchema.extend({
   competitionFormat: z.enum(["bracket", "leaderboard", "series", "bracket-to-series", "multi-stage"]).default("bracket"),
   totalStages: z.number().min(1).max(5).default(1),
   seriesLength: z.number().min(1).max(7).default(7).optional(),
+  ageGroup: z.string().optional(),
+  genderDivision: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -58,6 +60,49 @@ export default function TournamentCreationForm() {
   const selectedCompetitionFormat = form.watch("competitionFormat");
   const isMultiStage = ["pool-play", "round-robin", "swiss-system"].includes(selectedTournamentType);
   const showSeriesOptions = selectedCompetitionFormat === "series" || selectedCompetitionFormat === "bracket-to-series" || isSeriesSport || isBracketToSeriesSport;
+
+  // Sport-specific division guidance function
+  const getSportDivisionGuidance = (sport: string, ageGroup?: string, genderDivision?: string) => {
+    const guidelines: React.ReactNode[] = [];
+    
+    if (sport.includes("Football") || sport.includes("Basketball") || sport.includes("Wrestling")) {
+      guidelines.push(<div key="contact">• Contact sports typically require gender separation and weight/age classes</div>);
+      
+      if (ageGroup === "High School" || ageGroup === "Middle School") {
+        guidelines.push(<div key="school">• School competitions follow state athletic association rules</div>);
+      }
+    }
+    
+    if (sport.includes("Track & Field") || sport.includes("Swimming")) {
+      guidelines.push(<div key="records">• Separate gender divisions maintain fair competition and record standards</div>);
+      
+      if (ageGroup === "High School" || ageGroup === "Middle School") {
+        guidelines.push(<div key="grades">• Consider JV (9th-10th) vs Varsity (11th-12th) divisions</div>);
+      }
+    }
+    
+    if (sport.includes("Golf") || sport.includes("Tennis")) {
+      guidelines.push(<div key="skill">• Consider skill-based flights within age/gender divisions</div>);
+      
+      if (genderDivision === "Mixed" || genderDivision === "Co-Ed") {
+        guidelines.push(<div key="mixed">• Mixed divisions work well for recreational tournaments</div>);
+      }
+    }
+    
+    if (sport.includes("Esports") || sport.includes("Chess") || sport.includes("Debate")) {
+      guidelines.push(<div key="mental">• Mental/skill sports can accommodate mixed gender competition</div>);
+    }
+    
+    if (ageGroup === "Elementary" || ageGroup === "Middle School") {
+      guidelines.push(<div key="youth">• Youth divisions prioritize participation and skill development</div>);
+    }
+    
+    if (ageGroup === "Masters" || ageGroup === "Senior") {
+      guidelines.push(<div key="masters">• Masters divisions often use 5-year age brackets</div>);
+    }
+    
+    return guidelines.length > 0 ? guidelines : [<div key="default">• Standard tournament divisions apply</div>];
+  };
 
   const createTournamentMutation = useMutation({
     mutationFn: async (data: FormData) => {
@@ -480,6 +525,59 @@ export default function TournamentCreationForm() {
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Age Group and Gender Division Selection */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="ageGroup" className="block text-sm font-medium text-gray-700 mb-2">
+              Age Group
+            </Label>
+            <Select onValueChange={(value) => form.setValue("ageGroup", value)} data-testid="select-age-group">
+              <SelectTrigger>
+                <SelectValue placeholder="All Ages" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="All Ages">All Ages</SelectItem>
+                <SelectItem value="Elementary">Elementary School</SelectItem>
+                <SelectItem value="Middle School">Middle School (6th-8th Grade)</SelectItem>
+                <SelectItem value="High School">High School (9th-12th Grade)</SelectItem>
+                <SelectItem value="College">College/University</SelectItem>
+                <SelectItem value="Adult">Adult (18+)</SelectItem>
+                <SelectItem value="Masters">Masters (35+)</SelectItem>
+                <SelectItem value="Senior">Senior (50+)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="genderDivision" className="block text-sm font-medium text-gray-700 mb-2">
+              Gender Division
+            </Label>
+            <Select onValueChange={(value) => form.setValue("genderDivision", value)} data-testid="select-gender-division">
+              <SelectTrigger>
+                <SelectValue placeholder="Mixed" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Mixed">Mixed/Open</SelectItem>
+                <SelectItem value="Co-Ed">Co-Ed (Equal Gender Balance)</SelectItem>
+                <SelectItem value="Men">Men's</SelectItem>
+                <SelectItem value="Women">Women's</SelectItem>
+                <SelectItem value="Boys">Boys' (Youth)</SelectItem>
+                <SelectItem value="Girls">Girls' (Youth)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* Sport-Specific Division Guidance */}
+        {selectedSport && form.watch("ageGroup") && form.watch("genderDivision") && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <h4 className="font-medium text-blue-900 mb-2">Division Guidelines for {selectedSport.sportName}</h4>
+            <div className="text-sm text-blue-800 space-y-1">
+              {getSportDivisionGuidance(selectedSport.sportName, form.watch("ageGroup"), form.watch("genderDivision"))}
+            </div>
           </div>
         )}
         

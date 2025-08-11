@@ -18,8 +18,13 @@ export const tournaments = pgTable("tournaments", {
   sport: text("sport"), // From Bubble SportOptions
   sportCategory: text("sport_category"), // From Bubble SportCategories
   tournamentStructure: text("tournament_structure"), // From Bubble TournamentStructures
-  ageGroup: text("age_group").default("All Ages"),
-  genderDivision: text("gender_division").default("Mixed"),
+  ageGroup: text("age_group", { 
+    enum: ["Elementary", "Middle School", "High School", "College", "Adult", "Masters", "Senior", "All Ages"] 
+  }).default("All Ages"),
+  genderDivision: text("gender_division", { 
+    enum: ["Men", "Women", "Mixed", "Boys", "Girls", "Co-Ed"] 
+  }).default("Mixed"),
+  divisions: jsonb("divisions"), // Multiple division categories within one tournament
   scoringMethod: text("scoring_method").default("wins"),
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
   updatedAt: timestamp("updated_at").notNull().default(sql`now()`),
@@ -58,8 +63,10 @@ export const sportEvents = pgTable("sport_events", {
   measurementUnit: text("measurement_unit").notNull(), // "seconds", "meters", "feet", etc.
   supportsMetric: boolean("supports_metric").default(true),
   supportsImperial: boolean("supports_imperial").default(true),
-  gender: text("gender", { enum: ["male", "female", "mixed"] }).default("mixed"),
-  ageGroup: text("age_group"), // "youth", "adult", "masters", etc.
+  gender: text("gender", { enum: ["men", "women", "boys", "girls", "mixed", "co-ed"] }).default("mixed"),
+  ageGroup: text("age_group", { 
+    enum: ["elementary", "middle-school", "high-school", "college", "adult", "masters", "senior"] 
+  }),
   sortOrder: integer("sort_order"),
   createdAt: timestamp("created_at").default(sql`now()`),
 });
@@ -124,6 +131,29 @@ export const matches = pgTable("matches", {
   status: text("status", { enum: ["upcoming", "in-progress", "completed"] }).notNull().default("upcoming"),
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
   updatedAt: timestamp("updated_at").notNull().default(sql`now()`),
+});
+
+// Sport-specific division rules
+export const sportDivisionRules = pgTable("sport_division_rules", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sportId: varchar("sport_id").notNull().references(() => sportOptions.id),
+  requiredDivisions: jsonb("required_divisions"), // Array of required divisions
+  allowedCombinations: jsonb("allowed_combinations"), // Valid age/gender combos
+  ageGroupRules: jsonb("age_group_rules"), // Age cutoffs, grade requirements
+  genderRules: jsonb("gender_rules"), // Gender-specific rules
+  performanceStandards: jsonb("performance_standards"), // Different standards by division
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+// Division-specific matches for tournaments with multiple divisions
+export const divisionMatches = pgTable("division_matches", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tournamentId: varchar("tournament_id").notNull().references(() => tournaments.id),
+  matchId: varchar("match_id").notNull().references(() => matches.id),
+  division: text("division").notNull(), // "Men's Varsity", "Women's JV", etc.
+  ageGroup: text("age_group"),
+  gender: text("gender"),
+  createdAt: timestamp("created_at").default(sql`now()`),
 });
 
 export const insertTournamentSchema = createInsertSchema(tournaments).omit({
