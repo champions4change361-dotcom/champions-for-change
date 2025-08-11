@@ -25,20 +25,23 @@ export function Navigation() {
     ];
 
     // Add role-specific navigation items
-    if (user?.userRole === "coach") {
+    const userRole = (user as any)?.userRole || (user as any)?.role;
+    if (userRole === "coach") {
       baseItems.push({ path: "/coach", label: "Coach Dashboard", icon: Users });
-    } else if (user?.userRole === "tournament_manager" || user?.userRole === "district_athletic_director") {
+    } else if (userRole === "tournament_manager" || userRole === "district_athletic_director") {
       baseItems.push({ path: "/tournament-manager", label: "Tournament Manager", icon: Trophy });
-    } else if (user?.userRole === "school_athletic_director") {
+    } else if (userRole === "school_athletic_director") {
       baseItems.push({ path: "/school-ad", label: "School Athletic Director", icon: School });
-    } else if (user?.userRole === "scorekeeper") {
+    } else if (userRole === "scorekeeper") {
       baseItems.push({ path: "/scorekeeper", label: "Scorekeeper Dashboard", icon: Calculator });
-    } else if (user?.userRole === "athlete" || user?.userRole === "fan") {
+    } else if (userRole === "athlete" || userRole === "fan") {
       baseItems.push({ path: "/athlete", label: "Tournament Dashboard", icon: Trophy });
     }
 
     // Add admin items for enterprise users or white-label clients
-    if (user?.subscriptionPlan === "enterprise" || user?.isWhitelabelClient) {
+    const subscriptionPlan = (user as any)?.subscriptionPlan || (user as any)?.subscription;
+    const isWhitelabelClient = (user as any)?.isWhitelabelClient;
+    if (subscriptionPlan === "enterprise" || isWhitelabelClient) {
       baseItems.push(
         { path: "/admin/whitelabel", label: "White-Label Config", icon: Settings },
         { path: "/admin/website", label: "Website Builder", icon: LayoutTemplate }
@@ -86,7 +89,7 @@ export function Navigation() {
             {user && (
               <div className="flex items-center space-x-2">
                 <span className="text-sm text-muted-foreground">
-                  {user.firstName || user.email}
+                  {(user as any)?.firstName || (user as any)?.email || 'User'}
                 </span>
                 <Button
                   variant="ghost"
