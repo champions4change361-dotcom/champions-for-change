@@ -511,6 +511,10 @@ export default function Landing() {
               size="lg" 
               variant="outline"
               className="border-white text-white hover:bg-white hover:text-green-600"
+              onClick={() => {
+                const missionSection = document.querySelector('section');
+                missionSection?.scrollIntoView({ behavior: 'smooth' });
+              }}
               data-testid="button-learn-more"
             >
               Learn About Our Mission
