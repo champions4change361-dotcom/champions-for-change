@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -45,6 +45,59 @@ export default function TournamentCreationForm() {
       bracket: {},
     },
   });
+
+  // Listen for AI recommendation events
+  useEffect(() => {
+    const handleAIRecommendation = (event: CustomEvent) => {
+      const { sport, competitionFormat, ageGroup, genderDivision } = event.detail;
+      
+      // Apply AI recommendations to form
+      if (sport) {
+        form.setValue("sport", sport);
+      }
+      
+      if (competitionFormat) {
+        form.setValue("competitionFormat", competitionFormat);
+        
+        // Auto-set tournament type based on format
+        if (competitionFormat === "bracket") {
+          form.setValue("tournamentType", "single");
+        } else if (competitionFormat === "leaderboard") {
+          form.setValue("tournamentType", "round-robin");
+        } else if (competitionFormat === "bracket-to-series") {
+          form.setValue("tournamentType", "single");
+          form.setValue("competitionFormat", "bracket-to-series");
+        }
+      }
+      
+      if (ageGroup && ageGroup !== "All Ages") {
+        form.setValue("ageGroup", ageGroup);
+      }
+      
+      if (genderDivision && genderDivision !== "Mixed") {
+        form.setValue("genderDivision", genderDivision);
+      }
+      
+      // Generate a suggested tournament name based on recommendations
+      if (sport && ageGroup && genderDivision) {
+        const suggestedName = `${ageGroup !== "All Ages" ? ageGroup + " " : ""}${genderDivision !== "Mixed" ? genderDivision + " " : ""}${sport} Tournament`;
+        form.setValue("name", suggestedName);
+      }
+      
+      toast({
+        title: "AI Recommendations Applied",
+        description: "Tournament form has been pre-filled with AI suggestions",
+      });
+    };
+
+    // Add event listener
+    window.addEventListener('ai-recommendation', handleAIRecommendation as EventListener);
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('ai-recommendation', handleAIRecommendation as EventListener);
+    };
+  }, [form, toast]);
 
   const selectedSport = sports.find(sport => sport.sportName === form.watch("sport"));
   const isLeaderboardSport = selectedSport?.competitionType === "leaderboard";
@@ -251,7 +304,7 @@ export default function TournamentCreationForm() {
           <Label htmlFor="sport" className="block text-sm font-medium text-gray-700 mb-2">
             Sport
           </Label>
-          <Select onValueChange={(value) => form.setValue("sport", value)}>
+          <Select onValueChange={(value) => form.setValue("sport", value)} value={form.watch("sport")}>
             <SelectTrigger data-testid="select-sport">
               <SelectValue placeholder="Choose a sport" />
             </SelectTrigger>
@@ -400,13 +453,83 @@ export default function TournamentCreationForm() {
             </p>
           )}
         </div>
+
+        {/* Age Group Selection */}
+        <div>
+          <Label htmlFor="ageGroup" className="block text-sm font-medium text-gray-700 mb-2">
+            Age Group
+          </Label>
+          <Select
+            value={form.watch("ageGroup") || ""}
+            onValueChange={(value) => form.setValue("ageGroup", value)}
+            data-testid="select-age-group"
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select age group" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Elementary">Elementary (K-5)</SelectItem>
+              <SelectItem value="Middle School">Middle School (6-8)</SelectItem>
+              <SelectItem value="High School">High School (9-12)</SelectItem>
+              <SelectItem value="College">College/University</SelectItem>
+              <SelectItem value="Adult">Adult (18+)</SelectItem>
+              <SelectItem value="Masters">Masters (35+)</SelectItem>
+              <SelectItem value="Senior">Senior (50+)</SelectItem>
+              <SelectItem value="All Ages">All Ages/Open</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Gender Division Selection */}
+        <div>
+          <Label htmlFor="genderDivision" className="block text-sm font-medium text-gray-700 mb-2">
+            Gender Division
+          </Label>
+          <Select
+            value={form.watch("genderDivision") || ""}
+            onValueChange={(value) => form.setValue("genderDivision", value)}
+            data-testid="select-gender-division"
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select gender division" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Men">Men's</SelectItem>
+              <SelectItem value="Women">Women's</SelectItem>
+              <SelectItem value="Boys">Boys'</SelectItem>
+              <SelectItem value="Girls">Girls'</SelectItem>
+              <SelectItem value="Mixed">Mixed/Open</SelectItem>
+              <SelectItem value="Co-Ed">Co-Ed</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Division Guidance */}
+        {(form.watch("sport") || form.watch("ageGroup") || form.watch("genderDivision")) && (
+          <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+            <h4 className="font-semibold text-yellow-900 mb-2 flex items-center">
+              <i className="fas fa-lightbulb mr-2"></i>
+              Division Guidelines
+            </h4>
+            <div className="text-sm text-yellow-800 space-y-1">
+              {getSportDivisionGuidance(
+                form.watch("sport") || "",
+                form.watch("ageGroup"),
+                form.watch("genderDivision")
+              )}
+            </div>
+          </div>
+        )}
         
         {!isLeaderboardSport && (
           <div>
             <Label htmlFor="tournamentType" className="block text-sm font-medium text-gray-700 mb-2">
               Tournament Format
             </Label>
-            <Select onValueChange={(value) => form.setValue("tournamentType", value as any)}>
+            <Select 
+              value={form.watch("tournamentType")}
+              onValueChange={(value) => form.setValue("tournamentType", value as any)}
+            >
               <SelectTrigger data-testid="select-tournament-type">
                 <SelectValue placeholder="Select tournament format" />
               </SelectTrigger>
@@ -431,7 +554,10 @@ export default function TournamentCreationForm() {
             <Label htmlFor="totalStages" className="block text-sm font-medium text-gray-700 mb-2">
               Number of Stages
             </Label>
-            <Select onValueChange={(value) => form.setValue("totalStages", parseInt(value))}>
+            <Select 
+              value={form.watch("totalStages")?.toString()}
+              onValueChange={(value) => form.setValue("totalStages", parseInt(value))}
+            >
               <SelectTrigger data-testid="select-total-stages">
                 <SelectValue placeholder="Select number of stages" />
               </SelectTrigger>
