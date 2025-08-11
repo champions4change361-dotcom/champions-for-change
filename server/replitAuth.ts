@@ -112,12 +112,20 @@ export async function setupAuth(app: Express) {
 
   app.get("/api/login", (req, res, next) => {
     console.log(`Login attempt for hostname: ${req.hostname}`);
-    const strategyName = `replitauth:${req.hostname}`;
     
-    // Check if strategy exists
+    // Find a matching strategy for the current hostname
+    let strategyName = `replitauth:${req.hostname}`;
+    
+    // If exact match not found, try the first available strategy
     if (!passport._strategies[strategyName]) {
-      console.error(`No strategy found for ${strategyName}`);
-      return res.status(500).json({ error: "Authentication strategy not configured" });
+      const availableStrategies = Object.keys(passport._strategies).filter(name => name.startsWith('replitauth:'));
+      if (availableStrategies.length > 0) {
+        strategyName = availableStrategies[0];
+        console.log(`Using fallback strategy: ${strategyName}`);
+      } else {
+        console.error(`No authentication strategies configured. Available: ${Object.keys(passport._strategies).join(', ')}`);
+        return res.status(500).json({ error: "Authentication strategy not configured" });
+      }
     }
     
     passport.authenticate(strategyName, {
@@ -128,7 +136,18 @@ export async function setupAuth(app: Express) {
 
   app.get("/api/callback", (req, res, next) => {
     console.log(`Callback for hostname: ${req.hostname}`);
-    const strategyName = `replitauth:${req.hostname}`;
+    
+    // Find a matching strategy for the current hostname
+    let strategyName = `replitauth:${req.hostname}`;
+    
+    // If exact match not found, try the first available strategy
+    if (!passport._strategies[strategyName]) {
+      const availableStrategies = Object.keys(passport._strategies).filter(name => name.startsWith('replitauth:'));
+      if (availableStrategies.length > 0) {
+        strategyName = availableStrategies[0];
+        console.log(`Using fallback strategy for callback: ${strategyName}`);
+      }
+    }
     
     passport.authenticate(strategyName, {
       successReturnToOrRedirect: "/",
