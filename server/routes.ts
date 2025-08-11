@@ -1398,7 +1398,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Tier access control based on subscription
       const response: any = {
         success: true,
-        tier: result.tier,
+        tier: tier, // Use the requested tier, not result.tier
         sport: result.sport,
         format: result.format,
         age_group: result.age_group,

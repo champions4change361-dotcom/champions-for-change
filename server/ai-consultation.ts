@@ -236,8 +236,21 @@ function generateTier1Suggestions(sport: string, format: string, ageGroup: strin
   return suggestions;
 }
 
-function getEstimatedParticipants(sport: string, ageGroup: string, format: string): number {
+function getEstimatedParticipants(sport: string, ageGroup: string, format: string, inputText?: string): number {
   let base = 16; // Default tournament size
+  
+  // First check if user specified a number
+  const matches = inputText?.match(/(\d+)\s*(teams?|participants?|players?|athletes?|competitors?)/i);
+  if (matches) {
+    const specified = parseInt(matches[1]);
+    if (specified > 0 && specified <= 128) {
+      // For bracket formats, round up to next power of 2
+      if (format === 'bracket') {
+        return Math.pow(2, Math.ceil(Math.log2(specified)));
+      }
+      return specified;
+    }
+  }
   
   // Adjust based on sport popularity
   if (sport.includes('Basketball') || sport.includes('Soccer') || sport.includes('Football')) {
@@ -251,6 +264,11 @@ function getEstimatedParticipants(sport: string, ageGroup: string, format: strin
   // Adjust based on age group
   if (ageGroup === 'Elementary') base = Math.max(8, base / 2);
   else if (ageGroup === 'College') base = Math.min(64, base * 1.5);
+  
+  // For bracket formats, ensure it's a power of 2
+  if (format === 'bracket') {
+    return Math.pow(2, Math.ceil(Math.log2(base)));
+  }
   
   return base;
 }
@@ -285,9 +303,9 @@ function generateVenueSuggestions(sport: string, ageGroup: string): string[] {
 function generateScheduleTemplate(sport: string, format: string, participants: number): any {
   const template = {
     duration_days: 1,
-    sessions: [],
-    breaks: [],
-    ceremonies: []
+    sessions: [] as any[],
+    breaks: [] as any[],
+    ceremonies: [] as any[]
   };
   
   if (format === 'bracket') {
@@ -397,12 +415,16 @@ export function analyzeTournamentQuery(text: string): KeystoneConsultationResult
   let sport = 'Basketball'; // default
   let confidence = 40; // Lower base confidence
   
-  // Team Sports - Enhanced detection
+  // Team Sports - Enhanced detection  
   if (textLower.includes('basketball') || textLower.includes('hoops')) { 
     sport = 'Basketball'; confidence += 35; 
     if (textLower.includes('nba') || textLower.includes('college basketball')) confidence += 10;
   }
-  else if (textLower.includes('soccer') || textLower.includes('football') && !textLower.includes('american')) { 
+  else if (textLower.includes('football') && !textLower.includes('soccer') && !textLower.includes('futbol')) { 
+    sport = 'Football'; confidence += 40; 
+    if (textLower.includes('american football') || textLower.includes('nfl') || textLower.includes('high school football')) confidence += 10;
+  }
+  else if (textLower.includes('soccer') || textLower.includes('futbol') || (textLower.includes('football') && (textLower.includes('fifa') || textLower.includes('world cup')))) { 
     sport = 'Soccer'; confidence += 35; 
     if (textLower.includes('fifa') || textLower.includes('world cup')) confidence += 10;
   }
@@ -421,12 +443,12 @@ export function analyzeTournamentQuery(text: string): KeystoneConsultationResult
   
   // Individual Sports - Enhanced detection
   else if (textLower.includes('swimming') || textLower.includes('swim meet') || textLower.includes('aquatic')) { 
-    sport = 'Swimming'; confidence += 35; 
+    sport = 'Swimming & Diving'; confidence += 35; 
     if (textLower.includes('olympics') || textLower.includes('freestyle') || textLower.includes('backstroke')) confidence += 10;
   }
-  else if (textLower.includes('track') || textLower.includes('field') || textLower.includes('running') || textLower.includes('athletics')) { 
+  else if (textLower.includes('track') || textLower.includes('field') || textLower.includes('cross country') || textLower.includes('running') || textLower.includes('athletics')) { 
     sport = 'Track & Field'; confidence += 35; 
-    if (textLower.includes('sprint') || textLower.includes('distance') || textLower.includes('hurdles')) confidence += 10;
+    if (textLower.includes('sprint') || textLower.includes('distance') || textLower.includes('hurdles') || textLower.includes('cross country')) confidence += 10;
   }
   else if (textLower.includes('golf') || textLower.includes('pga')) { 
     sport = 'Golf'; confidence += 35; 
@@ -474,7 +496,7 @@ export function analyzeTournamentQuery(text: string): KeystoneConsultationResult
   let format = 'bracket';
   
   // Sport-specific format defaults
-  if (sport === 'Track & Field' || sport === 'Swimming & Diving' || sport === 'Golf' || sport === 'Cross Country') {
+  if (sport === 'Track & Field' || sport === 'Swimming & Diving' || sport === 'Golf' || sport === 'Cross Country' || sport.includes('Swimming')) {
     format = 'leaderboard';
     confidence += 20;
   }
@@ -594,7 +616,7 @@ export function analyzeTournamentQuery(text: string): KeystoneConsultationResult
   }
 
   // Determine estimated participants based on sport and age group
-  const estimated_participants = getEstimatedParticipants(sport, age_group, format);
+  const estimated_participants = getEstimatedParticipants(sport, age_group, format, text);
   
   // Generate tier-specific content
   const tier1_suggestions = generateTier1Suggestions(sport, format, age_group, gender_division);
@@ -604,7 +626,7 @@ export function analyzeTournamentQuery(text: string): KeystoneConsultationResult
   const schedule_template = generateScheduleTemplate(sport, format, estimated_participants);
 
   return {
-    tier: 'consultation', // Default tier - can be upgraded based on subscription
+    tier: 'consultation', // This will be overridden by the endpoint based on user subscription
     sport,
     format,
     age_group,
