@@ -214,49 +214,62 @@ export default function Landing() {
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
               Choose Your Impact Level
             </h2>
-            <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-              Every subscription directly funds educational opportunities for students in Corpus Christi, Texas. 
-              Choose the plan that fits your needs and maximizes your impact.
+            <p className="text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-4">
+              Pricing designed for school districts and nonprofits. Every subscription directly funds educational opportunities for students in Corpus Christi, Texas.
             </p>
+            <div className="flex justify-center gap-4 mb-6">
+              <Badge className="bg-blue-100 text-blue-800">School District Friendly</Badge>
+              <Badge className="bg-purple-100 text-purple-800">Nonprofit Discounts Available</Badge>
+              <Badge className="bg-green-100 text-green-800">Annual Savings</Badge>
+            </div>
           </div>
           
           <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 mb-8 text-center">
             <p className="text-sm text-blue-700 dark:text-blue-300">
-              <strong>Student Trip Cost:</strong> $2,600+ per student • Platform operating costs covered first, 100% of remaining revenue funds education
+              <strong>Student Trip Cost:</strong> $2,600+ per student • <strong>Nonprofit Discount:</strong> 25% off all plans • <strong>Annual Plans:</strong> Save 2 months
             </p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             <Card className="border-2 border-gray-200">
               <CardHeader>
-                <CardTitle>Supporter</CardTitle>
-                <CardDescription>Perfect for small tournaments</CardDescription>
-                <div className="text-3xl font-bold text-green-600">$29<span className="text-sm font-normal text-gray-500">/month</span></div>
-                <Badge variant="secondary" className="w-fit">~$228/year to education</Badge>
+                <CardTitle>School District</CardTitle>
+                <CardDescription>Perfect for K-12 athletics</CardDescription>
+                <div className="flex items-baseline gap-2 mb-2">
+                  <div className="text-3xl font-bold text-green-600">$19<span className="text-sm font-normal text-gray-500">/month</span></div>
+                  <div className="text-sm text-gray-400 line-through">$25</div>
+                </div>
+                <div className="text-sm text-blue-600 mb-2">$190/year (annual) • $142.50/year (nonprofit)</div>
+                <Badge variant="secondary" className="w-fit">~$120-180/year to education</Badge>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-sm">
-                  <li>✓ Up to 5 tournaments per month</li>
+                  <li>✓ Up to 8 tournaments per month</li>
                   <li>✓ Basic bracket management</li>
                   <li>✓ 65+ sports library</li>
-                  <li>✓ Community support</li>
-                  <li>✓ Impact reporting</li>
+                  <li>✓ School district portal</li>
+                  <li>✓ Student impact reporting</li>
+                  <li>✓ Bulk team registration</li>
                 </ul>
                 <div className="mt-4 p-2 bg-green-50 rounded text-xs text-green-700">
-                  After platform costs (~$8/month), $21 goes to student education
+                  Budget-friendly for education • $9-15/month to student trips
                 </div>
               </CardContent>
             </Card>
 
             <Card className="border-2 border-green-500 relative">
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <Badge className="bg-green-600">Most Popular</Badge>
+                <Badge className="bg-green-600">Best Value</Badge>
               </div>
               <CardHeader>
                 <CardTitle>Champion</CardTitle>
-                <CardDescription>For growing organizations</CardDescription>
-                <div className="text-3xl font-bold text-green-600">$79<span className="text-sm font-normal text-gray-500">/month</span></div>
-                <Badge variant="secondary" className="w-fit">~$612/year to education</Badge>
+                <CardDescription>Growing sports organizations</CardDescription>
+                <div className="flex items-baseline gap-2 mb-2">
+                  <div className="text-3xl font-bold text-green-600">$49<span className="text-sm font-normal text-gray-500">/month</span></div>
+                  <div className="text-sm text-gray-400 line-through">$65</div>
+                </div>
+                <div className="text-sm text-blue-600 mb-2">$490/year (annual) • $367.50/year (nonprofit)</div>
+                <Badge variant="secondary" className="w-fit">~$300-450/year to education</Badge>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-sm">
@@ -265,60 +278,133 @@ export default function Landing() {
                   <li>✓ Payment processing</li>
                   <li>✓ Analytics dashboard</li>
                   <li>✓ Priority support</li>
-                  <li>✓ Detailed impact reports</li>
+                  <li>✓ Multi-user accounts</li>
+                  <li>✓ Custom branding options</li>
                 </ul>
                 <div className="mt-4 p-2 bg-green-50 rounded text-xs text-green-700">
-                  After platform costs (~$28/month), $51 goes to student education
+                  Perfect for leagues • $25-38/month to student trips
                 </div>
               </CardContent>
             </Card>
 
             <Card className="border-2 border-purple-500">
               <CardHeader>
-                <CardTitle>Game Changer</CardTitle>
-                <CardDescription>White-label solution</CardDescription>
-                <div className="text-3xl font-bold text-green-600">$249<span className="text-sm font-normal text-gray-500">/month</span></div>
-                <Badge variant="secondary" className="w-fit">~$1,944/year to education</Badge>
+                <CardTitle>Enterprise</CardTitle>
+                <CardDescription>Full white-label solution</CardDescription>
+                <div className="flex items-baseline gap-2 mb-2">
+                  <div className="text-3xl font-bold text-green-600">$149<span className="text-sm font-normal text-gray-500">/month</span></div>
+                  <div className="text-sm text-gray-400 line-through">$199</div>
+                </div>
+                <div className="text-sm text-blue-600 mb-2">$1,490/year (annual) • $1,117.50/year (nonprofit)</div>
+                <Badge variant="secondary" className="w-fit">~$900-1,350/year to education</Badge>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-sm">
                   <li>✓ Complete white-labeling</li>
                   <li>✓ Custom domain & branding</li>
                   <li>✓ Revenue sharing options</li>
-                  <li>✓ API access</li>
-                  <li>✓ Dedicated support</li>
-                  <li>✓ Student scholarship naming rights</li>
+                  <li>✓ API access & integrations</li>
+                  <li>✓ Dedicated account manager</li>
+                  <li>✓ Training & onboarding</li>
+                  <li>✓ Custom feature development</li>
                 </ul>
                 <div className="mt-4 p-2 bg-green-50 rounded text-xs text-green-700">
-                  After platform costs (~$87/month), $162 goes to student education
+                  White-label ready • $75-113/month to student trips
                 </div>
               </CardContent>
             </Card>
           </div>
           
-          <div className="mt-8 p-6 bg-gray-100 dark:bg-gray-800 rounded-lg">
-            <h3 className="font-semibold mb-3 flex items-center">
-              <GraduationCap className="h-5 w-5 mr-2 text-green-600" />
-              Transparent Funding Model
-            </h3>
-            <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-600 dark:text-gray-300">
-              <div>
-                <h4 className="font-medium text-gray-900 dark:text-white">Platform Operating Costs:</h4>
-                <ul className="mt-2 space-y-1">
-                  <li>• Replit Core hosting: $20/month</li>
-                  <li>• Database & storage: $15-25/month</li>
-                  <li>• Payment processing: 2.9% + 30¢</li>
-                  <li>• Development & maintenance</li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-medium text-gray-900 dark:text-white">Student Trip Funding:</h4>
-                <ul className="mt-2 space-y-1">
-                  <li>• Educational tours: $2,600+ per student</li>
-                  <li>• Multiple tour companies available</li>
-                  <li>• 100% transparency on fund usage</li>
-                  <li>• Quarterly impact reports</li>
-                </ul>
+          <div className="mt-8 space-y-6">
+            <div className="grid md:grid-cols-3 gap-4">
+              <Card className="bg-blue-50 border-blue-200">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center">
+                    <GraduationCap className="h-5 w-5 mr-2 text-blue-600" />
+                    School District Benefits
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="text-sm space-y-1">
+                    <li>• Budget-friendly pricing</li>
+                    <li>• Educational impact focus</li>
+                    <li>• Bulk registration tools</li>
+                    <li>• Student progress tracking</li>
+                    <li>• Grant-friendly invoicing</li>
+                  </ul>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-purple-50 border-purple-200">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center">
+                    <Heart className="h-5 w-5 mr-2 text-purple-600" />
+                    Nonprofit Advantages
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="text-sm space-y-1">
+                    <li>• 25% nonprofit discount</li>
+                    <li>• 501(c)(3) verification</li>
+                    <li>• Mission alignment</li>
+                    <li>• Impact documentation</li>
+                    <li>• Tax-deductible receipts</li>
+                  </ul>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-green-50 border-green-200">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center">
+                    <CreditCard className="h-5 w-5 mr-2 text-green-600" />
+                    Payment Flexibility
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="text-sm space-y-1">
+                    <li>• Annual payment discounts</li>
+                    <li>• Purchase order support</li>
+                    <li>• Net 30 terms available</li>
+                    <li>• Multi-year contracts</li>
+                    <li>• Educational procurement</li>
+                  </ul>
+                </CardContent>
+              </Card>
+            </div>
+            
+            <div className="p-6 bg-gray-100 dark:bg-gray-800 rounded-lg">
+              <h3 className="font-semibold mb-3 flex items-center">
+                <GraduationCap className="h-5 w-5 mr-2 text-green-600" />
+                Transparent Educational Funding Model
+              </h3>
+              <div className="grid md:grid-cols-3 gap-4 text-sm text-gray-600 dark:text-gray-300">
+                <div>
+                  <h4 className="font-medium text-gray-900 dark:text-white">Platform Costs:</h4>
+                  <ul className="mt-2 space-y-1">
+                    <li>• Hosting & infrastructure: ~$45/month</li>
+                    <li>• Payment processing: 2.9% + 30¢</li>
+                    <li>• Development & support</li>
+                    <li>• Educational compliance</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium text-gray-900 dark:text-white">Student Impact:</h4>
+                  <ul className="mt-2 space-y-1">
+                    <li>• Trip cost: $2,600+ per student</li>
+                    <li>• Multiple tour companies</li>
+                    <li>• 100% profit to education</li>
+                    <li>• Quarterly impact reports</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium text-gray-900 dark:text-white">Funding Goals:</h4>
+                  <ul className="mt-2 space-y-1">
+                    <li>• 15 School Districts = 1 trip/year</li>
+                    <li>• 7 Champions = 1 trip/year</li>
+                    <li>• 3 Enterprise = 1 trip/year</li>
+                    <li>• Mixed subscriptions for more trips</li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
