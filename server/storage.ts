@@ -2,8 +2,8 @@ import {
   type User, type UpsertUser, type WhitelabelConfig, type InsertWhitelabelConfig,
   type Tournament, type InsertTournament, type Match, type InsertMatch, type UpdateMatch,
   type SportOption, type InsertSportOption, type TournamentStructure, type InsertTournamentStructure,
-  type TrackEvent, type InsertTrackEvent,
-  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents 
+  type TrackEvent, type InsertTrackEvent, type Page, type InsertPage,
+  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages 
 } from "@shared/schema";
 
 type SportCategory = typeof sportCategories.$inferSelect;
@@ -23,7 +23,16 @@ export interface IStorage {
   createWhitelabelConfig(config: InsertWhitelabelConfig): Promise<WhitelabelConfig>;
   getWhitelabelConfig(id: string): Promise<WhitelabelConfig | undefined>;
   getWhitelabelConfigByDomain(domain: string): Promise<WhitelabelConfig | undefined>;
+  getWhitelabelConfigByUserId(userId: string): Promise<WhitelabelConfig | undefined>;
   updateWhitelabelConfig(id: string, updates: Partial<WhitelabelConfig>): Promise<WhitelabelConfig | undefined>;
+
+  // Page management methods
+  createPage(page: InsertPage): Promise<Page>;
+  getPage(id: string): Promise<Page | undefined>;
+  getPageBySlug(slug: string, userId?: string): Promise<Page | undefined>;
+  getPagesByUserId(userId: string): Promise<Page[]>;
+  updatePage(id: string, updates: Partial<Page>): Promise<Page | undefined>;
+  deletePage(id: string): Promise<boolean>;
 
   // Tournament methods
   getTournaments(): Promise<Tournament[]>;
@@ -190,6 +199,85 @@ export class DbStorage implements IStorage {
     } catch (error) {
       console.error("Database error:", error);
       return undefined;
+    }
+  }
+
+  async getWhitelabelConfigByUserId(userId: string): Promise<WhitelabelConfig | undefined> {
+    try {
+      const result = await this.db.select().from(whitelabelConfigs).where(eq(whitelabelConfigs.userId, userId));
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  // Page management methods
+  async createPage(page: InsertPage): Promise<Page> {
+    try {
+      const result = await this.db.insert(pages).values(page).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to create page");
+    }
+  }
+
+  async getPage(id: string): Promise<Page | undefined> {
+    try {
+      const result = await this.db.select().from(pages).where(eq(pages.id, id));
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async getPageBySlug(slug: string, userId?: string): Promise<Page | undefined> {
+    try {
+      let query = this.db.select().from(pages).where(eq(pages.slug, slug));
+      if (userId) {
+        query = query.where(eq(pages.userId, userId));
+      }
+      const result = await query;
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async getPagesByUserId(userId: string): Promise<Page[]> {
+    try {
+      const result = await this.db.select().from(pages).where(eq(pages.userId, userId));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async updatePage(id: string, updates: Partial<Page>): Promise<Page | undefined> {
+    try {
+      const result = await this.db
+        .update(pages)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(pages.id, id))
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async deletePage(id: string): Promise<boolean> {
+    try {
+      const result = await this.db.delete(pages).where(eq(pages.id, id));
+      return result.rowCount > 0;
+    } catch (error) {
+      console.error("Database error:", error);
+      return false;
     }
   }
 

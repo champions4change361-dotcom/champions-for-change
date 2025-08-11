@@ -1576,6 +1576,137 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/whitelabel-config/me', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const config = await storage.getWhitelabelConfigByUserId(userId);
+      
+      if (!config) {
+        return res.status(404).json({ message: "Configuration not found" });
+      }
+      
+      res.json(config);
+    } catch (error) {
+      console.error("Error fetching white-label config:", error);
+      res.status(500).json({ message: "Failed to fetch configuration" });
+    }
+  });
+
+  app.patch('/api/whitelabel-config/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.claims.sub;
+      const updates = req.body;
+      
+      // Check if user owns this config
+      const existingConfig = await storage.getWhitelabelConfig(id);
+      if (!existingConfig || existingConfig.userId !== userId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const config = await storage.updateWhitelabelConfig(id, updates);
+      
+      if (!config) {
+        return res.status(404).json({ message: "Configuration not found" });
+      }
+      
+      res.json(config);
+    } catch (error) {
+      console.error("Error updating white-label config:", error);
+      res.status(500).json({ message: "Failed to update configuration" });
+    }
+  });
+
+  // Page management routes
+  app.post('/api/pages', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const pageData = { ...req.body, userId };
+      
+      const page = await storage.createPage(pageData);
+      res.json(page);
+    } catch (error) {
+      console.error("Error creating page:", error);
+      res.status(500).json({ message: "Failed to create page" });
+    }
+  });
+
+  app.get('/api/pages', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const pages = await storage.getPagesByUserId(userId);
+      res.json(pages);
+    } catch (error) {
+      console.error("Error fetching pages:", error);
+      res.status(500).json({ message: "Failed to fetch pages" });
+    }
+  });
+
+  app.get('/api/pages/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const page = await storage.getPage(id);
+      
+      if (!page) {
+        return res.status(404).json({ message: "Page not found" });
+      }
+      
+      res.json(page);
+    } catch (error) {
+      console.error("Error fetching page:", error);
+      res.status(500).json({ message: "Failed to fetch page" });
+    }
+  });
+
+  app.patch('/api/pages/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.claims.sub;
+      const updates = req.body;
+      
+      // Check if user owns this page
+      const existingPage = await storage.getPage(id);
+      if (!existingPage || existingPage.userId !== userId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const page = await storage.updatePage(id, updates);
+      
+      if (!page) {
+        return res.status(404).json({ message: "Page not found" });
+      }
+      
+      res.json(page);
+    } catch (error) {
+      console.error("Error updating page:", error);
+      res.status(500).json({ message: "Failed to update page" });
+    }
+  });
+
+  app.delete('/api/pages/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.claims.sub;
+      
+      // Check if user owns this page
+      const existingPage = await storage.getPage(id);
+      if (!existingPage || existingPage.userId !== userId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const success = await storage.deletePage(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Page not found" });
+      }
+      
+      res.json({ message: "Page deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting page:", error);
+      res.status(500).json({ message: "Failed to delete page" });
+    }
+  });
+
   // Stripe payment routes
   app.post("/api/create-payment-intent", isAuthenticated, async (req, res) => {
     try {

@@ -4,11 +4,14 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
+import { Navigation } from "@/components/navigation";
 import Landing from "@/pages/Landing";
 import Home from "@/pages/Home";
 import LegacyHome from "@/pages/home";
 import Tournament from "@/pages/tournament";
 import NotFound from "@/pages/not-found";
+import WhiteLabelAdmin from "@/pages/WhiteLabelAdmin";
+import WebsiteBuilder from "@/pages/WebsiteBuilder";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -22,18 +25,23 @@ function Router() {
   }
 
   return (
-    <Switch>
-      {!isAuthenticated ? (
-        <Route path="/" component={Landing} />
-      ) : (
-        <>
-          <Route path="/" component={Home} />
-          <Route path="/tournament/:id" component={Tournament} />
-          <Route path="/legacy-home" component={LegacyHome} />
-        </>
-      )}
-      <Route component={NotFound} />
-    </Switch>
+    <div className="min-h-screen bg-background">
+      {isAuthenticated && <Navigation />}
+      <Switch>
+        {!isAuthenticated ? (
+          <Route path="/" component={Landing} />
+        ) : (
+          <>
+            <Route path="/" component={Home} />
+            <Route path="/tournament/:id" component={Tournament} />
+            <Route path="/legacy-home" component={LegacyHome} />
+            <Route path="/admin/whitelabel" component={WhiteLabelAdmin} />
+            <Route path="/admin/website" component={WebsiteBuilder} />
+          </>
+        )}
+        <Route component={NotFound} />
+      </Switch>
+    </div>
   );
 }
 

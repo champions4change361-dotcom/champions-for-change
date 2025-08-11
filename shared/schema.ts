@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { sql, relations } from "drizzle-orm";
 import { pgTable, text, varchar, integer, jsonb, timestamp, boolean, numeric, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -287,6 +287,42 @@ export const updateMatchSchema = createInsertSchema(matches).omit({
 
 // User types
 export type User = typeof users.$inferSelect;
+
+// White-label pages schema
+export const pages = pgTable("pages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  title: varchar("title").notNull(),
+  slug: varchar("slug").notNull(),
+  content: text("content").notNull(),
+  metaDescription: varchar("meta_description"),
+  isPublished: boolean("is_published").default(false),
+  pageType: text("page_type", { enum: ["landing", "about", "contact", "custom"] }).default("custom"),
+  templateId: varchar("template_id"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const pagesRelations = relations(pages, ({ one }) => ({
+  user: one(users, {
+    fields: [pages.userId],
+    references: [users.id],
+  }),
+}));
+
+export type Page = typeof pages.$inferSelect;
+export type InsertPage = typeof pages.$inferInsert;
+
+// Update white-label configs with relations
+export const whitelabelConfigsRelations = relations(whitelabelConfigs, ({ one }) => ({
+  user: one(users, {
+    fields: [whitelabelConfigs.userId],
+    references: [users.id],
+  }),
+}));
+
+export type WhitelabelConfig = typeof whitelabelConfigs.$inferSelect;
+export type InsertWhitelabelConfig = typeof whitelabelConfigs.$inferInsert;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type UpsertUser = z.infer<typeof upsertUserSchema>;
 
