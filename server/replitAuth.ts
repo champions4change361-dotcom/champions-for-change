@@ -35,8 +35,8 @@ export function getSession() {
   return session({
     secret: process.env.SESSION_SECRET!,
     store: sessionStore,
-    resave: false,
-    saveUninitialized: false,
+    resave: true,
+    saveUninitialized: true,
     cookie: {
       httpOnly: true,
       secure: false, // Allow HTTP for development
@@ -81,28 +81,49 @@ export async function setupAuth(app: Express) {
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
   // Simple login endpoint for deployment
-  app.get("/api/login", (req, res, next) => {
+  app.get("/api/login", async (req, res, next) => {
     console.log(`Login attempt for hostname: ${req.hostname}`);
     
-    // Create authenticated session for Champions for Change admin
-    const adminUser = {
-      claims: { 
-        sub: 'champions-admin-1',
+    try {
+      // Create user in storage first
+      const adminUser = await storage.upsertUser({
+        id: 'champions-admin-1',
         email: 'champions4change361@gmail.com',
-        first_name: 'Daniel',
-        last_name: 'Thornton',
-        profile_image_url: null
-      }
-    };
-    
-    req.login(adminUser, (err) => {
-      if (err) {
-        console.error("Login error:", err);
-        return res.status(500).json({ error: "Login failed" });
-      }
-      console.log("User authenticated successfully");
-      return res.redirect('/');
-    });
+        firstName: 'Daniel',
+        lastName: 'Thornton',
+        profileImageUrl: null
+      });
+      
+      // Create authenticated session
+      const sessionUser = {
+        claims: { 
+          sub: adminUser.id,
+          email: adminUser.email,
+          first_name: adminUser.firstName,
+          last_name: adminUser.lastName,
+          profile_image_url: adminUser.profileImageUrl
+        }
+      };
+      
+      req.login(sessionUser, (err) => {
+        if (err) {
+          console.error("Login error:", err);
+          return res.status(500).json({ error: "Login failed" });
+        }
+        console.log("User authenticated successfully:", sessionUser.claims.email);
+        
+        // Force session save
+        req.session.save((saveErr) => {
+          if (saveErr) {
+            console.error("Session save error:", saveErr);
+          }
+          return res.redirect('/');
+        });
+      });
+    } catch (error) {
+      console.error("Failed to create user:", error);
+      return res.status(500).json({ error: "Authentication setup failed" });
+    }
   });
 
   app.get("/api/callback", (req, res, next) => {
@@ -127,6 +148,8 @@ export async function setupAuth(app: Express) {
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
+  console.log(`Auth check - isAuthenticated: ${req.isAuthenticated()}, user: ${req.user ? 'exists' : 'none'}`);
+  
   // Simplified authentication check for deployment
   if (!req.isAuthenticated()) {
     return res.status(401).json({ message: "Unauthorized" });

@@ -1651,7 +1651,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
+      const storage = await getStorage();
+      
+      // Try to get user, if not found create from session claims
+      let user = await storage.getUser(userId);
+      if (!user && req.user.claims) {
+        user = await storage.upsertUser({
+          id: userId,
+          email: req.user.claims.email || 'admin@championsforchange.net',
+          firstName: req.user.claims.first_name || 'Daniel',
+          lastName: req.user.claims.last_name || 'Thornton',
+          profileImageUrl: req.user.claims.profile_image_url || null
+        });
+      }
+      
       res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);
