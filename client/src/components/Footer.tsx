@@ -28,7 +28,8 @@ export default function Footer() {
             </h3>
             <div className="text-gray-300 text-sm space-y-2">
               <p>
-                <span className="font-medium">Executive Director</span><br />
+                <span className="font-medium text-white">Daniel Thornton</span><br />
+                <span className="text-blue-400">Executive Director</span><br />
                 Champions for Change
               </p>
               <p className="text-xs text-gray-400">

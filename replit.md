@@ -14,7 +14,7 @@ Branding: Green and blue color scheme from Champions for Change logo, emphasis o
 
 ## Executive Director Information
 
-Name: Executive Director of Champions for Change
+Name: Daniel Thornton, Executive Director of Champions for Change
 Background: 21 years military service (Marines then Army), retired and moved to Corpus Christi, Texas in 2016. Teaching and coaching at Robert Driscoll Middle School since 2016.
 Contact: Champions4change361@gmail.com, 361-300-1552
 Mission: Funding $2,600+ student trips through educational tour companies for underprivileged youth in Corpus Christi, Texas.

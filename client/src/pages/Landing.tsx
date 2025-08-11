@@ -73,7 +73,8 @@ export default function Landing() {
                 Leadership
               </h4>
               <div className="text-sm text-gray-600 dark:text-gray-300">
-                <p className="font-medium">Executive Director of Champions for Change</p>
+                <p className="font-medium">Daniel Thornton</p>
+                <p className="text-xs text-blue-600">Executive Director of Champions for Change</p>
                 <p className="text-xs mt-1">21 years military service (Marines & Army) • Teaching & coaching at Robert Driscoll Middle School since 2016</p>
               </div>
             </div>
@@ -473,7 +474,7 @@ export default function Landing() {
             Join coaches and organizations who are transforming tournament management while funding student education
           </p>
           <div className="text-green-200 mb-8 space-y-2">
-            <p>Built by coaches in Corpus Christi, Texas • Supporting students since day one</p>
+            <p>Built by Daniel Thornton and coaches in Corpus Christi, Texas • Supporting students since day one</p>
             <div className="flex justify-center gap-6 text-sm">
               <div className="flex items-center">
                 <Mail className="h-4 w-4 mr-2" />
