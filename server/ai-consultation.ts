@@ -68,8 +68,7 @@ export function generateTournamentStructure(
   format: string, 
   teamSize: number, 
   ageGroup: string, 
-  genderDivision: string,
-  tournamentName: string
+  genderDivision: string = "Mixed"
 ) {
   const participants = generateSampleParticipants(sport, teamSize, ageGroup, genderDivision);
   

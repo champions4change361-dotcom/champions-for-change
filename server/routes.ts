@@ -1413,19 +1413,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get AI analysis
       const aiResult = analyzeTournamentQuery(user_input);
       
-      // Default tournament parameters
-      const teamSize = 8; // Can be customized based on user input
+      // Extract team size from user input or use default
+      let teamSize = 8;
+      
+      // Try multiple patterns to extract team count
+      const sizePatterns = [
+        /(\d+)\s*teams?/i,
+        /(\d+)\s*team/i,
+        /(\d+)\s*participant/i,
+        /(\d+)\s*player/i,
+        /(\d+)\s*school/i,
+        /(\d+)\s*compet/i,
+        /for\s+(\d+)/i,
+        /with\s+(\d+)/i,
+        /(\d+)\s*(?:people|individuals|entries)/i
+      ];
+      
+      for (const pattern of sizePatterns) {
+        const match = user_input.match(pattern);
+        if (match) {
+          teamSize = parseInt(match[1]);
+          break;
+        }
+      }
+      
+      // Fallback word-based detection
+      if (teamSize === 8) {
+        if (user_input.includes('20') || user_input.includes('twenty')) {
+          teamSize = 20;
+        }
+        else if (user_input.includes('16') || user_input.includes('sixteen')) teamSize = 16;
+        else if (user_input.includes('32') || user_input.includes('thirty')) teamSize = 32;
+        else if (user_input.includes('12') || user_input.includes('twelve')) teamSize = 12;
+        else if (user_input.includes('24') || user_input.includes('twenty-four')) teamSize = 24;
+      }
+      
       const tournamentName = `${aiResult.age_group !== "All Ages" ? aiResult.age_group + " " : ""}${aiResult.gender_division !== "Mixed" ? aiResult.gender_division + " " : ""}${aiResult.sport} Tournament`;
       
-      // Generate tournament structure
-      const tournamentStructure = generateTournamentStructure(
-        aiResult.sport,
-        aiResult.format,
-        teamSize,
-        aiResult.age_group,
-        aiResult.gender_division,
-        tournamentName
-      );
+      // Generate tournament structure with proper bracket and teams
+      const tournamentStructure = generateTournamentStructure(aiResult.sport, aiResult.format, teamSize, aiResult.age_group, aiResult.gender_division);
       
       // Create the tournament in the database
       const storage = await getStorage();
