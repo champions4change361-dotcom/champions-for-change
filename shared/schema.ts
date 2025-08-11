@@ -27,7 +27,7 @@ export const users = pgTable("users", {
     enum: ["active", "inactive", "trialing", "past_due", "canceled", "unpaid"] 
   }).default("inactive"),
   subscriptionPlan: text("subscription_plan", { 
-    enum: ["free", "basic", "pro", "enterprise"] 
+    enum: ["free", "foundation", "champion", "enterprise", "district_enterprise"] 
   }).default("free"),
   userRole: text("user_role", {
     enum: ["tournament_manager", "district_athletic_director", "school_athletic_director", "coach", "scorekeeper", "athlete", "fan"]

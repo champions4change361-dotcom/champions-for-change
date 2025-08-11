@@ -253,117 +253,175 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* Tax Advantage Banner */}
+      <section className="bg-gradient-to-r from-blue-600 to-green-600 text-white py-12">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-2xl font-bold mb-4">Tax-Advantaged Business Investment</h2>
+          <div className="max-w-4xl mx-auto">
+            <p className="text-lg mb-6">
+              100% tax-deductible business expense + Corporate Social Responsibility benefits + Educational mission impact
+            </p>
+            <div className="grid md:grid-cols-3 gap-6 text-sm">
+              <div className="bg-white/10 rounded-lg p-4">
+                <h3 className="font-semibold mb-2">Tax Benefits</h3>
+                <p>Enterprise subscription: $5,988/year × 21% corporate rate = $1,257 annual tax savings</p>
+              </div>
+              <div className="bg-white/10 rounded-lg p-4">
+                <h3 className="font-semibold mb-2">CSR Value</h3>
+                <p>Stakeholder impact documentation, employee engagement, community reputation enhancement</p>
+              </div>
+              <div className="bg-white/10 rounded-lg p-4">
+                <h3 className="font-semibold mb-2">Mission Impact</h3>
+                <p>Every subscription funds $2,600+ student educational trips in Corpus Christi, Texas</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Pricing */}
       <section className="bg-gray-50 dark:bg-gray-800 py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-              Choose Your Impact Level
+              Investment Tiers - Optimized for Maximum Impact
             </h2>
             <p className="text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-4">
-              Pricing designed for school districts and nonprofits. Every subscription directly funds educational opportunities for students in Corpus Christi, Texas.
+              Professional tournament management with tax advantages and educational mission support. 
+              Pricing reflects enterprise-grade value delivery.
             </p>
             <div className="flex justify-center gap-4 mb-6">
-              <Badge className="bg-blue-100 text-blue-800">School District Friendly</Badge>
-              <Badge className="bg-purple-100 text-purple-800">Nonprofit Discounts Available</Badge>
-              <Badge className="bg-green-100 text-green-800">Annual Savings</Badge>
+              <Badge className="bg-blue-100 text-blue-800">100% Tax Deductible</Badge>
+              <Badge className="bg-purple-100 text-purple-800">CSR Benefits</Badge>
+              <Badge className="bg-green-100 text-green-800">Educational Impact</Badge>
             </div>
           </div>
           
           <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 mb-8 text-center">
             <p className="text-sm text-blue-700 dark:text-blue-300">
-              <strong>Realistic Pricing:</strong> Based on actual school district budgets • <strong>More messaging</strong> than Jersey Watch • <strong>Better AI features</strong> + education mission
+              <strong>Value Positioning:</strong> Enterprise features + Tax benefits + Mission impact • 
+              <strong>vs Jersey Watch:</strong> 65+ sports vs 15 sports, AI consultation vs basic templates, 
+              100% revenue control vs 70% • <strong>vs Custom Development:</strong> $30k-100k setup cost avoided
             </p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
             <Card className="border-2 border-gray-200">
               <CardHeader>
-                <CardTitle>School District</CardTitle>
-                <CardDescription>Small districts (under 2,000 students)</CardDescription>
+                <CardTitle>Foundation</CardTitle>
+                <CardDescription>Schools & nonprofits</CardDescription>
                 <div className="flex items-baseline gap-2 mb-2">
-                  <div className="text-3xl font-bold text-green-600">$39<span className="text-sm font-normal text-gray-500">/month</span></div>
-                  <div className="text-sm text-red-500">vs. Jersey Watch $500/year</div>
+                  <div className="text-3xl font-bold text-green-600">$79<span className="text-sm font-normal text-gray-500">/month</span></div>
                 </div>
-                <div className="text-sm text-blue-600 mb-2">$390/year (annual) • $292.50/year (nonprofit)</div>
-                <Badge variant="secondary" className="w-fit">Better value than Jersey Watch</Badge>
+                <div className="text-sm text-blue-600 mb-2">$948/year • Effective: $747/year after tax benefits</div>
+                <Badge variant="secondary" className="w-fit">Better than Jersey Watch</Badge>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-sm">
-                  <li>✓ Up to 8 tournaments per month</li>
-                  <li>✓ Advanced bracket management + AI</li>
+                  <li>✓ Up to 8 tournaments/month</li>
                   <li>✓ 65+ sports library</li>
-                  <li>✓ School district portal</li>
+                  <li>✓ AI consultation system</li>
                   <li>✓ Student impact reporting</li>
-                  <li>✓ Bulk team registration</li>
-                  <li>✓ 750 text/email alerts per month</li>
-                  <li>✓ Purchase order support</li>
+                  <li>✓ Advanced bracket management</li>
+                  <li>✓ 750 text/email alerts</li>
+                  <li>✓ Tax-deductible business expense</li>
                 </ul>
                 <div className="mt-4 p-2 bg-green-50 rounded text-xs text-green-700">
-                  More features than Jersey Watch at similar price
+                  Jersey Watch equivalent + AI + mission impact
                 </div>
               </CardContent>
             </Card>
 
             <Card className="border-2 border-green-500 relative">
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <Badge className="bg-green-600">Best Value</Badge>
+                <Badge className="bg-green-600">Most Popular</Badge>
               </div>
               <CardHeader>
                 <CardTitle>Champion</CardTitle>
-                <CardDescription>Large districts & sports organizations</CardDescription>
+                <CardDescription>Large districts & organizations</CardDescription>
                 <div className="flex items-baseline gap-2 mb-2">
-                  <div className="text-3xl font-bold text-green-600">$79<span className="text-sm font-normal text-gray-500">/month</span></div>
-                  <div className="text-sm text-red-500">vs. Jersey Watch Plus $49</div>
+                  <div className="text-3xl font-bold text-green-600">$199<span className="text-sm font-normal text-gray-500">/month</span></div>
                 </div>
-                <div className="text-sm text-blue-600 mb-2">$790/year (annual) • $592.50/year (nonprofit)</div>
-                <Badge variant="secondary" className="w-fit">Premium features justified</Badge>
+                <div className="text-sm text-blue-600 mb-2">$2,388/year • Effective: $1,886/year after tax benefits</div>
+                <Badge variant="secondary" className="w-fit">Saves $500+ monthly on payment fees</Badge>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-sm">
                   <li>✓ Unlimited tournaments</li>
                   <li>✓ AI tournament generation</li>
-                  <li>✓ Payment processing (no fees)</li>
+                  <li>✓ Payment processing (zero fees)</li>
                   <li>✓ Analytics dashboard</li>
                   <li>✓ Priority support</li>
                   <li>✓ Multi-user accounts</li>
                   <li>✓ Custom branding options</li>
-                  <li>✓ 3,000 text/email alerts per month</li>
-                  <li>✓ Advanced reporting</li>
+                  <li>✓ 3,000 text/email alerts</li>
                 </ul>
                 <div className="mt-4 p-2 bg-green-50 rounded text-xs text-green-700">
-                  Higher price reflects premium AI & unlimited features
+                  Payment fee savings alone justify subscription cost
                 </div>
               </CardContent>
             </Card>
 
             <Card className="border-2 border-purple-500 relative">
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <Badge className="bg-purple-600">Massive Value</Badge>
+                <Badge className="bg-purple-600">Enterprise</Badge>
               </div>
               <CardHeader>
-                <CardTitle>Enterprise White-Label</CardTitle>
-                <CardDescription>Worth $30k+ in custom development</CardDescription>
+                <CardTitle>Enterprise</CardTitle>
+                <CardDescription>White-label platform ownership</CardDescription>
                 <div className="flex items-baseline gap-2 mb-2">
-                  <div className="text-3xl font-bold text-green-600">$149<span className="text-sm font-normal text-gray-500">/month</span></div>
-                  <div className="text-sm text-red-500">vs. $30k+ custom build</div>
+                  <div className="text-3xl font-bold text-green-600">$499<span className="text-sm font-normal text-gray-500">/month</span></div>
                 </div>
-                <div className="text-sm text-blue-600 mb-2">$1,490/year (annual) • $1,117.50/year (nonprofit)</div>
-                <Badge variant="secondary" className="w-fit">Complete platform ownership</Badge>
+                <div className="text-sm text-blue-600 mb-2">$5,988/year • Effective: $4,731/year after tax benefits</div>
+                <Badge variant="secondary" className="w-fit">90% less than custom development</Badge>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-sm">
-                  <li>✓ <strong>Full Website Builder:</strong> Unlimited custom pages</li>
-                  <li>✓ <strong>100% Your Brand:</strong> Zero Champions for Change branding</li>
-                  <li>✓ <strong>Custom Domain:</strong> yourorganization.com</li>
-                  <li>✓ <strong>CMS Platform:</strong> Edit any content, anytime</li>
-                  <li>✓ <strong>Revenue Control:</strong> Keep 100% of tournament fees</li>
-                  <li>✓ <strong>Full API Access:</strong> Custom integrations & features</li>
-                  <li>✓ <strong>Dedicated Manager:</strong> Personal account support</li>
-                  <li>✓ <strong>Custom Development:</strong> New features on request</li>
+                  <li>✓ Full website builder</li>
+                  <li>✓ 100% your brand (zero our branding)</li>
+                  <li>✓ Custom domain (yourorg.com)</li>
+                  <li>✓ Revenue control (keep 100% fees)</li>
+                  <li>✓ Full API access</li>
+                  <li>✓ Dedicated account manager</li>
+                  <li>✓ Custom development requests</li>
+                  <li>✓ CMS platform (edit anytime)</li>
+                  <li>✓ Full API access</li>
+                  <li>✓ Dedicated account manager</li>
+                  <li>✓ Custom development requests</li>
+                  <li>✓ CMS platform (edit anytime)</li>
                 </ul>
                 <div className="mt-4 p-2 bg-purple-50 rounded text-xs text-purple-700">
-                  What others charge $30k+ for, we deliver monthly
+                  Custom development alternative: $30k-100k + $2k-5k monthly
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-2 border-blue-500 relative">
+              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                <Badge className="bg-blue-600">District Scale</Badge>
+              </div>
+              <CardHeader>
+                <CardTitle>District Enterprise</CardTitle>
+                <CardDescription>Multi-school district management</CardDescription>
+                <div className="flex items-baseline gap-2 mb-2">
+                  <div className="text-3xl font-bold text-green-600">$999<span className="text-sm font-normal text-gray-500">/month</span></div>
+                </div>
+                <div className="text-sm text-blue-600 mb-2">$11,988/year • Effective: $9,469/year after tax benefits</div>
+                <Badge variant="secondary" className="w-fit">Enterprise district management</Badge>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-sm">
+                  <li>✓ Everything in Enterprise tier</li>
+                  <li>✓ Multi-school administration</li>
+                  <li>✓ District-wide analytics</li>
+                  <li>✓ Bulk user management (500+ users)</li>
+                  <li>✓ Advanced permissions/roles</li>
+                  <li>✓ School system integrations</li>
+                  <li>✓ On-site training & setup</li>
+                  <li>✓ Dedicated implementation team</li>
+                </ul>
+                <div className="mt-4 p-2 bg-blue-50 rounded text-xs text-blue-700">
+                  Manage entire district for less than one custom build
                 </div>
               </CardContent>
             </Card>
@@ -461,6 +519,89 @@ export default function Landing() {
                   </ul>
                 </div>
               </div>
+            </div>
+          </div>
+          
+          {/* Competitive Comparison */}
+          <div className="mt-12 bg-white dark:bg-gray-900 rounded-lg p-8">
+            <h3 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-8">
+              Why Choose Champions for Change Over Competitors
+            </h3>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-3 px-4">Feature</th>
+                    <th className="text-center py-3 px-4 text-red-600">Jersey Watch</th>
+                    <th className="text-center py-3 px-4 text-blue-600">TeamSnap</th>
+                    <th className="text-center py-3 px-4 text-purple-600">SportsEngine</th>
+                    <th className="text-center py-3 px-4 text-green-600 font-semibold">Champions for Change</th>
+                  </tr>
+                </thead>
+                <tbody className="text-xs">
+                  <tr className="border-b">
+                    <td className="py-3 px-4 font-medium">Monthly Cost</td>
+                    <td className="text-center py-3 px-4">$42/month</td>
+                    <td className="text-center py-3 px-4">$199/month</td>
+                    <td className="text-center py-3 px-4">$250/month</td>
+                    <td className="text-center py-3 px-4 font-semibold text-green-600">$79-999/month</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="py-3 px-4 font-medium">Sports Covered</td>
+                    <td className="text-center py-3 px-4">15</td>
+                    <td className="text-center py-3 px-4">25</td>
+                    <td className="text-center py-3 px-4">30</td>
+                    <td className="text-center py-3 px-4 font-semibold text-green-600">65+</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="py-3 px-4 font-medium">AI Features</td>
+                    <td className="text-center py-3 px-4">❌</td>
+                    <td className="text-center py-3 px-4">❌</td>
+                    <td className="text-center py-3 px-4">❌</td>
+                    <td className="text-center py-3 px-4 font-semibold text-green-600">✅ Full AI consultation</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="py-3 px-4 font-medium">Custom Domains</td>
+                    <td className="text-center py-3 px-4">❌</td>
+                    <td className="text-center py-3 px-4">❌</td>
+                    <td className="text-center py-3 px-4">Limited</td>
+                    <td className="text-center py-3 px-4 font-semibold text-green-600">✅ Unlimited</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="py-3 px-4 font-medium">Revenue Control</td>
+                    <td className="text-center py-3 px-4">70%</td>
+                    <td className="text-center py-3 px-4">90%</td>
+                    <td className="text-center py-3 px-4">85%</td>
+                    <td className="text-center py-3 px-4 font-semibold text-green-600">✅ 100%</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="py-3 px-4 font-medium">Educational Mission</td>
+                    <td className="text-center py-3 px-4">❌</td>
+                    <td className="text-center py-3 px-4">❌</td>
+                    <td className="text-center py-3 px-4">❌</td>
+                    <td className="text-center py-3 px-4 font-semibold text-green-600">✅ Champions for Change</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="py-3 px-4 font-medium">Tax Benefits</td>
+                    <td className="text-center py-3 px-4">Basic expense only</td>
+                    <td className="text-center py-3 px-4">Basic expense only</td>
+                    <td className="text-center py-3 px-4">Basic expense only</td>
+                    <td className="text-center py-3 px-4 font-semibold text-green-600">✅ Tax + CSR + Mission</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3 px-4 font-medium">White-Label Builder</td>
+                    <td className="text-center py-3 px-4">❌</td>
+                    <td className="text-center py-3 px-4">❌</td>
+                    <td className="text-center py-3 px-4">❌</td>
+                    <td className="text-center py-3 px-4 font-semibold text-green-600">✅ Full website builder</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div className="mt-6 text-center">
+              <Badge className="bg-green-100 text-green-800">
+                Only platform with enterprise features + tax benefits + educational mission
+              </Badge>
             </div>
           </div>
         </div>
