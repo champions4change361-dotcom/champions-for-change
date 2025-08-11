@@ -239,7 +239,16 @@ function generateTier1Suggestions(sport: string, format: string, ageGroup: strin
 function getEstimatedParticipants(sport: string, ageGroup: string, format: string, inputText?: string): number {
   let base = 16; // Default tournament size
   
-  // First check if user specified a number
+  // Check for conference-based scenarios FIRST (3 teams east + 3 teams west = 6 total)
+  const eastMatches = inputText?.match(/(\d+)\s*teams?\s*.*\beast\b/i);
+  const westMatches = inputText?.match(/(\d+)\s*teams?\s*.*\bwest\b/i);
+  if (eastMatches && westMatches) {
+    const eastTeams = parseInt(eastMatches[1]);
+    const westTeams = parseInt(westMatches[1]);
+    return eastTeams + westTeams;
+  }
+  
+  // Then check if user specified a single total number
   const matches = inputText?.match(/(\d+)\s*(teams?|participants?|players?|athletes?|competitors?)/i);
   if (matches) {
     const specified = parseInt(matches[1]);
@@ -416,13 +425,13 @@ export function analyzeTournamentQuery(text: string): KeystoneConsultationResult
   let confidence = 40; // Lower base confidence
   
   // Team Sports - Enhanced detection  
-  if (textLower.includes('basketball') || textLower.includes('hoops')) { 
+  if (textLower.includes('basketball') || textLower.includes('hoops') || textLower.includes('nba')) { 
     sport = 'Basketball'; confidence += 35; 
-    if (textLower.includes('nba') || textLower.includes('college basketball')) confidence += 10;
+    if (textLower.includes('nba') || textLower.includes('college basketball') || textLower.includes('finals')) confidence += 10;
   }
   else if (textLower.includes('football') && !textLower.includes('soccer') && !textLower.includes('futbol')) { 
     sport = 'Football'; confidence += 40; 
-    if (textLower.includes('american football') || textLower.includes('nfl') || textLower.includes('high school football')) confidence += 10;
+    if (textLower.includes('american football') || textLower.includes('nfl') || textLower.includes('high school football') || textLower.includes('college football')) confidence += 10;
   }
   else if (textLower.includes('soccer') || textLower.includes('futbol') || (textLower.includes('football') && (textLower.includes('fifa') || textLower.includes('world cup')))) { 
     sport = 'Soccer'; confidence += 35; 
@@ -431,8 +440,9 @@ export function analyzeTournamentQuery(text: string): KeystoneConsultationResult
   else if (textLower.includes('volleyball') || textLower.includes('vball')) { 
     sport = 'Volleyball'; confidence += 35; 
   }
-  else if (textLower.includes('baseball') || textLower.includes('mlb')) { 
+  else if (textLower.includes('baseball') || textLower.includes('mlb') || textLower.includes('world series')) { 
     sport = 'Baseball'; confidence += 35; 
+    if (textLower.includes('world series') || textLower.includes('best of 7')) confidence += 15;
   }
   else if (textLower.includes('softball')) { 
     sport = 'Softball'; confidence += 35; 
@@ -495,9 +505,22 @@ export function analyzeTournamentQuery(text: string): KeystoneConsultationResult
   // Enhanced format detection
   let format = 'bracket';
   
+  // Multi-stage tournament detection - check FIRST before sport defaults
+  if ((textLower.includes('conference') || textLower.includes('finals')) && (textLower.includes('east') || textLower.includes('west'))) {
+    format = 'conference-bracket-to-series';
+    confidence += 25;
+  }
   // Sport-specific format defaults
-  if (sport === 'Track & Field' || sport === 'Swimming & Diving' || sport === 'Golf' || sport === 'Cross Country' || sport.includes('Swimming')) {
+  else if (sport === 'Track & Field' || sport === 'Swimming & Diving' || sport === 'Golf' || sport === 'Cross Country' || sport.includes('Swimming')) {
     format = 'leaderboard';
+    confidence += 20;
+  }
+  else if (textLower.includes('seasonal') || textLower.includes('mid season') || textLower.includes('rankings') || textLower.includes('standings')) {
+    format = 'seasonal-leaderboard';
+    confidence += 20;
+  }
+  else if (textLower.includes('world series') || textLower.includes('championship series')) {
+    format = 'series';
     confidence += 20;
   }
   // Override with specific keywords
@@ -586,8 +609,12 @@ export function analyzeTournamentQuery(text: string): KeystoneConsultationResult
   // Add format-specific advice
   if (format === 'leaderboard') {
     recommendation += '. This individual performance format works great for timed events, scoring competitions, and skill demonstrations.';
+  } else if (format === 'seasonal-leaderboard') {
+    recommendation += '. Seasonal rankings track team performance over time, perfect for college football standings and playoff seeding.';
+  } else if (format === 'conference-bracket-to-series') {
+    recommendation += '. Conference-based playoffs (East/West) leading to championship series mirrors professional sports like NBA Finals.';
   } else if (format === 'series') {
-    recommendation += '. Best-of series format ensures the better team wins and creates exciting multi-game matchups.';
+    recommendation += '. Best-of series format ensures the better team wins and creates exciting multi-game matchups, perfect for World Series-style competition.';
   } else if (format === 'bracket-to-series') {
     recommendation += '. Bracket elimination leading to championship series combines the excitement of playoffs with decisive final competition.';
   } else {
