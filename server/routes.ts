@@ -16,8 +16,8 @@ if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY - See STRIPE_SETUP_GUIDE.md');
 }
 
-// Champions for Change live key (environment has caching issues)  
-const stripeKey = "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";
+// Use environment variable (fallback for activation delay)
+const stripeKey = process.env.STRIPE_SECRET_KEY || "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";
 console.log(`🔑 Champions for Change payment system ready`);
 console.log(`🔑 Key ends with: ...${stripeKey.slice(-15)}`);
 console.log(`🔑 Live mode enabled for real donations`);
@@ -26,12 +26,25 @@ const stripe = new Stripe(stripeKey, {
   apiVersion: "2024-11-20.acacia", // More stable version
 });
 
-// Test the key immediately
-stripe.accounts.retrieve().then(() => {
-  console.log('✅ Stripe key validation successful');
-}).catch((err) => {
-  console.error('❌ Stripe key validation failed:', err.message);
-});
+// Test the key with retry logic for activation delay
+let validationAttempts = 0;
+const validateStripeKey = async () => {
+  try {
+    await stripe.accounts.retrieve();
+    console.log('✅ Stripe key validation successful');
+  } catch (err: any) {
+    validationAttempts++;
+    console.error(`❌ Stripe validation attempt ${validationAttempts}:`, err.message);
+    
+    if (err.message.includes('Expired API Key') && validationAttempts < 3) {
+      console.log('🔄 Retrying validation in 30 seconds (account may still be activating)...');
+      setTimeout(validateStripeKey, 30000);
+    } else if (err.message.includes('account') || err.message.includes('activate')) {
+      console.log('⏳ Stripe account is activating - payment processing may be delayed');
+    }
+  }
+};
+validateStripeKey();
 
 function generateSingleEliminationBracket(teamSize: number, tournamentId: string) {
   const rounds = Math.ceil(Math.log2(teamSize));

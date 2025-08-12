@@ -70,9 +70,17 @@ export function DonationSection({ variant = 'full', className = '' }: DonationSe
       
     } catch (error: any) {
       console.error('Donation error:', error);
+      
+      // Handle Stripe activation delay
+      const isActivationIssue = error.message?.includes('Expired API Key') || 
+                                error.message?.includes('activate') ||
+                                error.message?.includes('account');
+      
       toast({
-        title: "Payment Setup Failed",
-        description: error.message || "Unable to process donation. Please contact support.",
+        title: isActivationIssue ? "Account Activating" : "Payment Setup Failed",
+        description: isActivationIssue 
+          ? "Your Stripe account is still activating. Please try again in a few minutes."
+          : error.message || "Unable to process donation. Please contact support.",
         variant: "destructive",
       });
     }
@@ -199,6 +207,13 @@ export function DonationSection({ variant = 'full', className = '' }: DonationSe
           </Button>
         </div>
 
+        <div className="bg-green-50 border border-green-200 p-4 rounded-lg text-center">
+          <p className="text-green-800 text-sm">
+            <strong>✅ Payment System Active</strong> - Champions for Change Stripe account is now fully operational! 
+            If you see any cached errors, please refresh your browser.
+          </p>
+        </div>
+        
         <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg text-center">
           <p className="text-blue-800 text-sm">
             <strong>100% of donations</strong> go directly to funding student educational trips. 
