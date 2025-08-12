@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "wouter";
 import { Trophy, Plus, Users, Settings, CreditCard, LogOut, GraduationCap, Heart, Sparkles } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import TournamentCreationForm from "@/components/tournament-creation-form";

@@ -17,7 +17,7 @@ export function DonationSection({ variant = 'full', className = '' }: DonationSe
 
   const predefinedAmounts = ['25', '50', '100', '250'];
 
-  const handleDonation = (amount: string) => {
+  const handleDonation = async (amount: string) => {
     const finalAmount = amount || customAmount;
     if (!finalAmount || parseInt(finalAmount) < 1) {
       toast({
@@ -28,15 +28,37 @@ export function DonationSection({ variant = 'full', className = '' }: DonationSe
       return;
     }
 
-    // In a real implementation, this would integrate with Stripe for donations
-    toast({
-      title: "Thank You!",
-      description: `Your $${finalAmount} donation will help fund student educational trips!`,
-    });
-    
-    // Reset form
-    setDonationAmount('');
-    setCustomAmount('');
+    try {
+      // Create Stripe payment intent for donation
+      const response = await fetch('/api/create-payment-intent', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          amount: parseInt(finalAmount),
+          description: 'Donation to Champions for Change educational programs'
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Payment setup failed: ${response.status}`);
+      }
+
+      const { clientSecret } = await response.json();
+      
+      // Redirect to payment page with the client secret
+      window.location.href = `/checkout?client_secret=${clientSecret}&amount=${finalAmount}&type=donation`;
+      
+    } catch (error) {
+      console.error('Donation error:', error);
+      toast({
+        title: "Payment Setup Failed",
+        description: "Unable to process donation at this time. Please try again or contact support.",
+        variant: "destructive",
+      });
+    }
   };
 
   if (variant === 'compact') {

@@ -8,8 +8,9 @@ import { Navigation } from "@/components/navigation";
 import Landing from "@/pages/Landing";
 import About from "@/pages/About";
 import Home from "@/pages/Home";
-import LegacyHome from "@/pages/home";
 import Tournament from "@/pages/tournament";
+import Checkout from "@/pages/Checkout";
+import PaymentSuccess from "@/pages/PaymentSuccess";
 import NotFound from "@/pages/not-found";
 import WhiteLabelAdmin from "@/pages/WhiteLabelAdmin";
 import WebsiteBuilder from "@/pages/WebsiteBuilder";
@@ -40,12 +41,16 @@ function Router() {
           <>
             <Route path="/" component={Landing} />
             <Route path="/about" component={About} />
+            <Route path="/checkout" component={Checkout} />
+            <Route path="/payment-success" component={PaymentSuccess} />
           </>
         ) : (
           <>
             <Route path="/" component={Home} />
             <Route path="/tournament/:id" component={Tournament} />
-            <Route path="/legacy-home" component={LegacyHome} />
+
+            <Route path="/checkout" component={Checkout} />
+            <Route path="/payment-success" component={PaymentSuccess} />
             <Route path="/admin/whitelabel" component={WhiteLabelAdmin} />
             <Route path="/admin/website" component={WebsiteBuilder} />
             <Route path="/coach" component={CoachDashboard} />
