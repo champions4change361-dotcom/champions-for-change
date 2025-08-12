@@ -4,6 +4,7 @@ import { storage, getStorage } from "./storage";
 import { insertTournamentSchema, updateMatchSchema } from "@shared/schema";
 import { analyzeTournamentQuery, generateTournamentStructure, generateIntelligentTournamentStructure, generateWebpageTemplate, type KeystoneConsultationResult } from "./ai-consultation";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupDomainRoutes } from "./domainRoutes";
 import Stripe from "stripe";
 import { z } from "zod";
 
@@ -198,6 +199,10 @@ function generateDoubleEliminationBracket(teamSize: number, tournamentId: string
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication middleware
   await setupAuth(app);
+  
+  // Setup domain-aware routes
+  setupDomainRoutes(app);
+  
   // Get all tournaments
   app.get("/api/tournaments", async (req, res) => {
     try {

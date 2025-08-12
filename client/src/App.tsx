@@ -4,7 +4,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Switch, Route, Router } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
-import Home from './pages/Home';
+import { useDomain } from "@/hooks/useDomain";
+import DomainNavigation from "@/components/DomainNavigation";
+import Home from './pages/home';
 import Landing from './pages/Landing';
 import DonationFlow from './pages/DonationFlow';
 import PaymentMethods from './pages/PaymentMethods';
@@ -22,25 +24,49 @@ import TournamentEmpire from './pages/TournamentEmpire';
 import FantasyTournaments from './pages/FantasyTournaments';
 
 function AuthenticatedRoutes() {
+  const { isFeatureEnabled, isFantasyDomain, config } = useDomain();
+
   return (
-    <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/create" component={CreateTournament} />
-      <Route path="/tournament/:id" component={Tournament} />
-      <Route path="/contacts" component={Contacts} />
-      <Route path="/ai-consultation" component={AIConsultation} />
-      <Route path="/settings" component={Settings} />
-      <Route path="/live-matches" component={LiveMatches} />
-      <Route path="/championships" component={Championships} />
-      <Route path="/webpage-builder" component={WebpageBuilder} />
-      <Route path="/tournament-empire" component={TournamentEmpire} />
-      <Route path="/fantasy-tournaments" component={FantasyTournaments} />
-      <Route>
-        {/* 404 - redirect to home */}
-        <Home />
-      </Route>
-    </Switch>
+    <div className={getDomainBackgroundClass(config.brand)}>
+      <DomainNavigation />
+      <Switch>
+        <Route path="/" component={() => <Home />} />
+        <Route path="/create" component={CreateTournament} />
+        <Route path="/tournament/:id" component={Tournament} />
+        <Route path="/contacts" component={Contacts} />
+        <Route path="/ai-consultation" component={AIConsultation} />
+        <Route path="/settings" component={Settings} />
+        <Route path="/live-matches" component={LiveMatches} />
+        <Route path="/championships" component={Championships} />
+        <Route path="/webpage-builder" component={WebpageBuilder} />
+        
+        {/* Show Tournament Empire only for school-safe and pro domains */}
+        {!isFantasyDomain() && (
+          <Route path="/tournament-empire" component={TournamentEmpire} />
+        )}
+        
+        {/* Show Fantasy Tournaments only for fantasy and pro domains */}
+        {isFeatureEnabled('fantasyLeagues') && (
+          <Route path="/fantasy-tournaments" component={FantasyTournaments} />
+        )}
+        
+        <Route>
+          {/* 404 - redirect to home */}
+          <Home />
+        </Route>
+      </Switch>
+    </div>
   );
+}
+
+function getDomainBackgroundClass(brand: string) {
+  if (brand === 'SCHOLASTIC_TOURNAMENTS') {
+    return "min-h-screen bg-gradient-to-br from-blue-50 to-slate-50";
+  }
+  if (brand === 'FANTASY_LEAGUE_CENTRAL') {
+    return "min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900";
+  }
+  return "min-h-screen bg-gradient-to-br from-orange-50 to-red-50";
 }
 
 function App() {
@@ -58,13 +84,16 @@ function App() {
 
 function AppRouter() {
   const { isAuthenticated, isLoading } = useAuth();
+  const { config } = useDomain();
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-white text-lg">Loading Champions Arena...</p>
+      <div className={getDomainBackgroundClass(config.brand)} style={{ minHeight: '100vh' }}>
+        <div className="flex items-center justify-center h-screen">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-white text-lg">Loading {config.branding.tagline}...</p>
+          </div>
         </div>
       </div>
     );
@@ -77,7 +106,9 @@ function AppRouter() {
       <Route path="/checkout" component={Checkout} />
       <Route path="/donation-success" component={DonationSuccess} />
       {!isAuthenticated ? (
-        <Route component={Landing} />
+        <div className={getDomainBackgroundClass(config.brand)}>
+          <Landing />
+        </div>
       ) : (
         <AuthenticatedRoutes />
       )}

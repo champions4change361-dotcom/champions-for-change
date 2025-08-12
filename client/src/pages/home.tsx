@@ -1,8 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { Trophy, Zap, Users, Calendar, Settings, Award, Timer, Star, ChevronRight } from 'lucide-react';
 import { Link } from "wouter";
+import { useDomain } from "@/hooks/useDomain";
+import DomainHome from "./DomainHome";
 
 export default function Home() {
+  const { isSchoolSafe } = useDomain();
+
+  // For school domains, show domain-specific home page
+  if (isSchoolSafe()) {
+    return <DomainHome />;
+  }
+
+  // For other domains, show original Champions Arena home
+  return <OriginalHome />;
+}
+
+function OriginalHome() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [liveMatches, setLiveMatches] = useState(3);
 
