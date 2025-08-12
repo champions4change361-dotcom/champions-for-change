@@ -203,8 +203,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup domain-aware routes
   setupDomainRoutes(app);
   
-  // Get all tournaments
-  app.get("/api/tournaments", async (req, res) => {
+  // Guest access middleware for school domains
+  const allowGuestAccess = (req: any, res: any, next: any) => {
+    const isSchoolDomain = req.hostname?.includes('tournaments') || req.hostname?.includes('localhost');
+    const isPublicRoute = req.path.includes('/public');
+    
+    if (isSchoolDomain || isPublicRoute) {
+      return next(); // Allow access without authentication
+    }
+    
+    return isAuthenticated(req, res, next);
+  };
+
+  // Get all tournaments (guest access for school domains)
+  app.get("/api/tournaments", allowGuestAccess, async (req, res) => {
     try {
       const storage = await getStorage();
       const tournaments = await storage.getTournaments();
@@ -214,8 +226,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get single tournament with matches
-  app.get("/api/tournaments/:id", async (req, res) => {
+  // Get single tournament with matches (guest access for school domains)
+  app.get("/api/tournaments/:id", allowGuestAccess, async (req, res) => {
     try {
       const { id } = req.params;
       const storage = await getStorage();

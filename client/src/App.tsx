@@ -84,7 +84,10 @@ function App() {
 
 function AppRouter() {
   const { isAuthenticated, isLoading } = useAuth();
-  const { config } = useDomain();
+  const { config, isSchoolSafe } = useDomain();
+  
+  // For school domains, allow guest access to view tournaments
+  const allowGuestAccess = isSchoolSafe();
 
   if (isLoading) {
     return (
@@ -105,7 +108,7 @@ function AppRouter() {
       <Route path="/payment-methods" component={PaymentMethods} />
       <Route path="/checkout" component={Checkout} />
       <Route path="/donation-success" component={DonationSuccess} />
-      {!isAuthenticated ? (
+      {!isAuthenticated && !allowGuestAccess ? (
         <div className={getDomainBackgroundClass(config.brand)}>
           <Landing />
         </div>

@@ -2,14 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { Trophy, Zap, Users, Calendar, Settings, Award, Timer, Star, ChevronRight } from 'lucide-react';
 import { Link } from "wouter";
 import { useDomain } from "@/hooks/useDomain";
+import { useAuth } from "@/hooks/useAuth";
 import DomainHome from "./DomainHome";
+import GuestBanner from "@/components/GuestBanner";
 
 export default function Home() {
   const { isSchoolSafe } = useDomain();
+  const { isAuthenticated } = useAuth();
 
-  // For school domains, show domain-specific home page
+  // For school domains, show domain-specific home page with guest banner
   if (isSchoolSafe()) {
-    return <DomainHome />;
+    return (
+      <div>
+        {!isAuthenticated && <GuestBanner />}
+        <DomainHome />
+      </div>
+    );
   }
 
   // For other domains, show original Champions Arena home
