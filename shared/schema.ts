@@ -350,6 +350,45 @@ export const trackEventTiming = pgTable("track_event_timing", {
   createdAt: timestamp("created_at").default(sql`now()`),
 });
 
+// Tournament format configurations table - connects tournament structures to sport-specific settings
+export const tournamentFormatConfigs = pgTable("tournament_format_configs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tournamentStructureId: varchar("tournament_structure_id").references(() => tournamentStructures.id),
+  sportCategory: varchar("sport_category").references(() => sportCategories.id),
+  minParticipants: integer("min_participants").notNull().default(2),
+  maxParticipants: integer("max_participants"),
+  idealParticipants: integer("ideal_participants"),
+  bracketGenerationRules: jsonb("bracket_generation_rules"),
+  advancementRules: jsonb("advancement_rules"),
+  tiebreakerRules: jsonb("tiebreaker_rules"),
+  schedulingRequirements: jsonb("scheduling_requirements"),
+  venueRequirements: jsonb("venue_requirements"),
+  officiatingRequirements: jsonb("officiating_requirements"),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+// Bracket templates table - pre-built bracket structures for common participant counts
+export const bracketTemplates = pgTable("bracket_templates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tournamentStructureId: varchar("tournament_structure_id").references(() => tournamentStructures.id),
+  participantCount: integer("participant_count").notNull(),
+  bracketStructure: jsonb("bracket_structure").notNull(),
+  matchSequence: jsonb("match_sequence").notNull(),
+  advancementMap: jsonb("advancement_map").notNull(),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+// Tournament generation log table - tracks tournament creation process
+export const tournamentGenerationLog = pgTable("tournament_generation_log", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tournamentId: varchar("tournament_id").references(() => tournaments.id),
+  generationStep: varchar("generation_step").notNull(),
+  stepData: jsonb("step_data"),
+  success: boolean("success").default(true),
+  errorMessage: text("error_message"),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
 export const matches = pgTable("matches", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   tournamentId: varchar("tournament_id").notNull().references(() => tournaments.id, { onDelete: "cascade" }),
@@ -434,6 +473,21 @@ export const insertTrackEventTimingSchema = createInsertSchema(trackEventTiming)
   createdAt: true,
 });
 
+export const insertTournamentFormatConfigSchema = createInsertSchema(tournamentFormatConfigs).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertBracketTemplateSchema = createInsertSchema(bracketTemplates).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertTournamentGenerationLogSchema = createInsertSchema(tournamentGenerationLog).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertSportEventSchema = createInsertSchema(sportEvents).omit({
   createdAt: true,
 });
@@ -469,6 +523,14 @@ export type TrackEvent = typeof trackEvents.$inferSelect;
 export type InsertTrackEvent = typeof trackEvents.$inferInsert;
 export type TrackEventTiming = typeof trackEventTiming.$inferSelect;
 export type InsertTrackEventTiming = typeof trackEventTiming.$inferInsert;
+
+// Tournament Integration types
+export type TournamentFormatConfig = typeof tournamentFormatConfigs.$inferSelect;
+export type InsertTournamentFormatConfig = typeof tournamentFormatConfigs.$inferInsert;
+export type BracketTemplate = typeof bracketTemplates.$inferSelect;
+export type InsertBracketTemplate = typeof bracketTemplates.$inferInsert;
+export type TournamentGenerationLog = typeof tournamentGenerationLog.$inferSelect;
+export type InsertTournamentGenerationLog = typeof tournamentGenerationLog.$inferInsert;
 
 // White-label pages schema
 export const pages = pgTable("pages", {

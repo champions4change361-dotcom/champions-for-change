@@ -152,6 +152,16 @@ export interface IStorage {
   getSportDivisionRules(): Promise<SportDivisionRules[]>;
   getSportDivisionRulesBySport(sportId: string): Promise<SportDivisionRules[]>;
   createSportDivisionRules(rules: InsertSportDivisionRules): Promise<SportDivisionRules>;
+  
+  // Tournament Integration methods
+  getTournamentFormatConfigs(): Promise<TournamentFormatConfig[]>;
+  getTournamentFormatConfigsByStructure(structureId: string): Promise<TournamentFormatConfig[]>;
+  getTournamentFormatConfigsBySport(sportCategory: string): Promise<TournamentFormatConfig[]>;
+  getBracketTemplates(): Promise<BracketTemplate[]>;
+  getBracketTemplatesByStructure(structureId: string): Promise<BracketTemplate[]>;
+  getBracketTemplateByParticipants(structureId: string, participantCount: number): Promise<BracketTemplate | undefined>;
+  createTournamentGenerationLog(log: InsertTournamentGenerationLog): Promise<TournamentGenerationLog>;
+  getTournamentGenerationLogsByTournament(tournamentId: string): Promise<TournamentGenerationLog[]>;
   createSportDivisionRules(rules: InsertSportDivisionRules): Promise<SportDivisionRules>;
 
   // Sport Events methods
@@ -1063,6 +1073,9 @@ export class MemStorage implements IStorage {
   private trackEvents: Map<string, TrackEvent>;
   private trackEventTiming: Map<string, TrackEventTiming>;
   private sportDivisionRules: Map<string, SportDivisionRules>;
+  private tournamentFormatConfigs: Map<string, TournamentFormatConfig>;
+  private bracketTemplates: Map<string, BracketTemplate>;
+  private tournamentGenerationLog: Map<string, TournamentGenerationLog>;
   private donors: Map<string, Donor>;
   private donations: Map<string, Donation>;
   private contacts: Map<string, Contact>;
@@ -1079,15 +1092,19 @@ export class MemStorage implements IStorage {
     this.trackEvents = new Map();
     this.trackEventTiming = new Map();
     this.sportDivisionRules = new Map();
+    this.tournamentFormatConfigs = new Map();
+    this.bracketTemplates = new Map();
+    this.tournamentGenerationLog = new Map();
     this.donors = new Map();
     this.donations = new Map();
     this.contacts = new Map();
     this.emailCampaigns = new Map();
     
-    // Initialize with default tournament structures, sport division rules, and track events
+    // Initialize with default tournament structures, sport division rules, track events, and tournament integration
     this.initializeDefaultStructures();
     this.initializeSportDivisionRules();
     this.initializeUltimateTrackEvents();
+    this.initializeTournamentIntegration();
   }
 
   private initializeDefaultStructures() {
@@ -2180,6 +2197,326 @@ export class MemStorage implements IStorage {
 
   async getTrackEventTimingByEventId(trackEventId: string): Promise<TrackEventTiming[]> {
     return Array.from(this.trackEventTiming.values()).filter(t => t.trackEventId === trackEventId);
+  }
+
+  // Tournament Integration initialization
+  private initializeTournamentIntegration() {
+    const tournamentFormatConfigs = [
+      // SINGLE ELIMINATION CONFIGURATIONS
+      {
+        id: randomUUID(),
+        tournamentStructureId: "1", // Single Elimination
+        sportCategory: "team-sports",
+        minParticipants: 4,
+        maxParticipants: 128,
+        idealParticipants: 16,
+        bracketGenerationRules: {
+          "bracket_type": "standard",
+          "seeding": "optional",
+          "byes": "auto_calculate",
+          "consolation": "optional"
+        },
+        advancementRules: {
+          "elimination": "single_loss",
+          "advancement": "winner_only",
+          "finals": "single_game"
+        },
+        tiebreakerRules: {
+          "overtime": "sudden_death",
+          "tied_series": "extra_game",
+          "equal_records": "head_to_head"
+        },
+        schedulingRequirements: {
+          "games_per_day": 4,
+          "rest_between_games": "30_minutes",
+          "championship_rest": "1_hour"
+        },
+        venueRequirements: {
+          "courts_needed": "calculated",
+          "simultaneous_games": true,
+          "championship_court": "preferred"
+        },
+        officiatingRequirements: {
+          "referees_per_game": 2,
+          "tournament_director": 1,
+          "scorekeeper": 1
+        },
+        createdAt: new Date()
+      },
+      // DOUBLE ELIMINATION CONFIGURATIONS
+      {
+        id: randomUUID(),
+        tournamentStructureId: "2", // Double Elimination
+        sportCategory: "team-sports",
+        minParticipants: 4,
+        maxParticipants: 64,
+        idealParticipants: 12,
+        bracketGenerationRules: {
+          "bracket_type": "double",
+          "winners_bracket": true,
+          "losers_bracket": true,
+          "grand_finals": "winners_advantage"
+        },
+        advancementRules: {
+          "elimination": "two_losses",
+          "losers_bracket_advancement": "complex",
+          "grand_finals_rule": "double_elimination"
+        },
+        tiebreakerRules: {
+          "overtime": "sudden_death",
+          "losers_bracket_tiebreak": "run_differential",
+          "winners_bracket_tiebreak": "head_to_head"
+        },
+        schedulingRequirements: {
+          "games_per_day": 6,
+          "rest_between_games": "45_minutes",
+          "elimination_rest": "1_hour"
+        },
+        venueRequirements: {
+          "courts_needed": "double_calculated",
+          "losers_bracket_court": "secondary",
+          "finals_court": "primary"
+        },
+        officiatingRequirements: {
+          "referees_per_game": 2,
+          "bracket_coordinator": 1,
+          "scorekeeper": 2
+        },
+        createdAt: new Date()
+      },
+      // ROUND ROBIN CONFIGURATIONS
+      {
+        id: randomUUID(),
+        tournamentStructureId: "3", // Round Robin
+        sportCategory: "individual-sports",
+        minParticipants: 3,
+        maxParticipants: 20,
+        idealParticipants: 8,
+        bracketGenerationRules: {
+          "format": "everyone_plays_everyone",
+          "rounds": "calculated",
+          "courts": "rotation"
+        },
+        advancementRules: {
+          "ranking": "win_percentage",
+          "playoff": "optional",
+          "tiebreakers": "multiple_criteria"
+        },
+        tiebreakerRules: {
+          "primary": "head_to_head",
+          "secondary": "point_differential",
+          "tertiary": "points_for"
+        },
+        schedulingRequirements: {
+          "rounds_per_day": 3,
+          "matches_per_round": "calculated",
+          "rest_between_rounds": "15_minutes"
+        },
+        venueRequirements: {
+          "courts_needed": "half_participants",
+          "rotation_system": true,
+          "scoreboard": "central"
+        },
+        officiatingRequirements: {
+          "referees_per_match": 1,
+          "round_coordinator": 1,
+          "central_scoring": 1
+        },
+        createdAt: new Date()
+      },
+      // TRACK & FIELD MULTI-EVENT CONFIGURATION
+      {
+        id: randomUUID(),
+        tournamentStructureId: "17", // Multi-Event Competition
+        sportCategory: "individual-sports",
+        minParticipants: 5,
+        maxParticipants: 50,
+        idealParticipants: 20,
+        bracketGenerationRules: {
+          "event_count": "variable",
+          "scoring": "IAAF_tables",
+          "event_order": "standard",
+          "qualifying": "optional"
+        },
+        advancementRules: {
+          "advancement": "cumulative_points",
+          "event_completion": "required",
+          "final_ranking": "total_points"
+        },
+        tiebreakerRules: {
+          "primary": "total_points",
+          "secondary": "head_to_head_events",
+          "tertiary": "best_individual_event"
+        },
+        schedulingRequirements: {
+          "days": "2_day_format",
+          "events_per_day": "5",
+          "rest_between_events": "45_minutes"
+        },
+        venueRequirements: {
+          "track_required": true,
+          "field_areas": "multiple",
+          "warm_up_areas": "required",
+          "timing_system": "FAT"
+        },
+        officiatingRequirements: {
+          "meet_director": 1,
+          "event_judges": "per_event",
+          "timing_crew": 3,
+          "results_crew": 2
+        },
+        createdAt: new Date()
+      }
+    ];
+
+    // Load tournament format configurations
+    tournamentFormatConfigs.forEach(config => {
+      this.tournamentFormatConfigs.set(config.id, config);
+    });
+
+    // Create bracket templates for common sizes
+    const bracketTemplates = [
+      // Single Elimination 4 teams
+      {
+        id: randomUUID(),
+        tournamentStructureId: "1",
+        participantCount: 4,
+        bracketStructure: {
+          "rounds": 2,
+          "total_matches": 3,
+          "structure": "linear"
+        },
+        matchSequence: {
+          "round_1": [
+            {"match_1": {"team_a": "seed_1", "team_b": "seed_4"}},
+            {"match_2": {"team_a": "seed_2", "team_b": "seed_3"}}
+          ],
+          "round_2": [
+            {"championship": {"team_a": "winner_match_1", "team_b": "winner_match_2"}}
+          ]
+        },
+        advancementMap: {
+          "round_1_winners": ["championship"],
+          "championship_winner": ["tournament_winner"]
+        },
+        createdAt: new Date()
+      },
+      // Single Elimination 8 teams
+      {
+        id: randomUUID(),
+        tournamentStructureId: "1",
+        participantCount: 8,
+        bracketStructure: {
+          "rounds": 3,
+          "total_matches": 7,
+          "structure": "tree"
+        },
+        matchSequence: {
+          "round_1": [
+            {"match_1": {"team_a": "seed_1", "team_b": "seed_8"}},
+            {"match_2": {"team_a": "seed_4", "team_b": "seed_5"}},
+            {"match_3": {"team_a": "seed_2", "team_b": "seed_7"}},
+            {"match_4": {"team_a": "seed_3", "team_b": "seed_6"}}
+          ],
+          "round_2": [
+            {"semifinal_1": {"team_a": "winner_match_1", "team_b": "winner_match_2"}},
+            {"semifinal_2": {"team_a": "winner_match_3", "team_b": "winner_match_4"}}
+          ],
+          "round_3": [
+            {"championship": {"team_a": "winner_semifinal_1", "team_b": "winner_semifinal_2"}}
+          ]
+        },
+        advancementMap: {
+          "round_1_winners": ["semifinals"],
+          "semifinal_winners": ["championship"],
+          "championship_winner": ["tournament_winner"]
+        },
+        createdAt: new Date()
+      },
+      // Round Robin 6 teams
+      {
+        id: randomUUID(),
+        tournamentStructureId: "3",
+        participantCount: 6,
+        bracketStructure: {
+          "rounds": 5,
+          "total_matches": 15,
+          "structure": "matrix"
+        },
+        matchSequence: {
+          "all_matches": [
+            {
+              "round_1": [
+                {"match_1": {"team_a": "team_1", "team_b": "team_2"}},
+                {"match_2": {"team_a": "team_3", "team_b": "team_4"}},
+                {"match_3": {"team_a": "team_5", "team_b": "team_6"}}
+              ]
+            },
+            {
+              "round_2": [
+                {"match_4": {"team_a": "team_1", "team_b": "team_3"}},
+                {"match_5": {"team_a": "team_2", "team_b": "team_5"}},
+                {"match_6": {"team_a": "team_4", "team_b": "team_6"}}
+              ]
+            }
+          ]
+        },
+        advancementMap: {
+          "final_ranking": "win_loss_record",
+          "tiebreakers": ["head_to_head", "point_differential"]
+        },
+        createdAt: new Date()
+      }
+    ];
+
+    // Load bracket templates
+    bracketTemplates.forEach(template => {
+      this.bracketTemplates.set(template.id, template);
+    });
+
+    console.log(`⚡ Tournament Integration initialized: ${tournamentFormatConfigs.length} format configs, ${bracketTemplates.length} bracket templates loaded`);
+  }
+
+  // Tournament Integration methods
+  async getTournamentFormatConfigs(): Promise<TournamentFormatConfig[]> {
+    return Array.from(this.tournamentFormatConfigs.values());
+  }
+
+  async getTournamentFormatConfigsByStructure(structureId: string): Promise<TournamentFormatConfig[]> {
+    return Array.from(this.tournamentFormatConfigs.values()).filter(c => c.tournamentStructureId === structureId);
+  }
+
+  async getTournamentFormatConfigsBySport(sportCategory: string): Promise<TournamentFormatConfig[]> {
+    return Array.from(this.tournamentFormatConfigs.values()).filter(c => c.sportCategory === sportCategory);
+  }
+
+  async getBracketTemplates(): Promise<BracketTemplate[]> {
+    return Array.from(this.bracketTemplates.values());
+  }
+
+  async getBracketTemplatesByStructure(structureId: string): Promise<BracketTemplate[]> {
+    return Array.from(this.bracketTemplates.values()).filter(t => t.tournamentStructureId === structureId);
+  }
+
+  async getBracketTemplateByParticipants(structureId: string, participantCount: number): Promise<BracketTemplate | undefined> {
+    return Array.from(this.bracketTemplates.values()).find(t => 
+      t.tournamentStructureId === structureId && t.participantCount === participantCount
+    );
+  }
+
+  async createTournamentGenerationLog(log: InsertTournamentGenerationLog): Promise<TournamentGenerationLog> {
+    const id = randomUUID();
+    const created: TournamentGenerationLog = {
+      ...log,
+      id,
+      createdAt: new Date(),
+    };
+    this.tournamentGenerationLog.set(id, created);
+    return created;
+  }
+
+  async getTournamentGenerationLogsByTournament(tournamentId: string): Promise<TournamentGenerationLog[]> {
+    return Array.from(this.tournamentGenerationLog.values()).filter(l => l.tournamentId === tournamentId);
   }
 }
 

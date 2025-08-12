@@ -732,6 +732,101 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Tournament Integration API endpoints
+  
+  // Get all tournament format configurations
+  app.get("/api/tournament-format-configs", async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const configs = await storage.getTournamentFormatConfigs();
+      res.json(configs);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch tournament format configs" });
+    }
+  });
+
+  // Get tournament format configurations by structure
+  app.get("/api/tournament-format-configs/structure/:structureId", async (req, res) => {
+    try {
+      const { structureId } = req.params;
+      const storage = await getStorage();
+      const configs = await storage.getTournamentFormatConfigsByStructure(structureId);
+      res.json(configs);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch tournament format configs by structure" });
+    }
+  });
+
+  // Get tournament format configurations by sport
+  app.get("/api/tournament-format-configs/sport/:sportCategory", async (req, res) => {
+    try {
+      const { sportCategory } = req.params;
+      const storage = await getStorage();
+      const configs = await storage.getTournamentFormatConfigsBySport(sportCategory);
+      res.json(configs);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch tournament format configs by sport" });
+    }
+  });
+
+  // Get all bracket templates
+  app.get("/api/bracket-templates", async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const templates = await storage.getBracketTemplates();
+      res.json(templates);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch bracket templates" });
+    }
+  });
+
+  // Get bracket templates by structure
+  app.get("/api/bracket-templates/structure/:structureId", async (req, res) => {
+    try {
+      const { structureId } = req.params;
+      const storage = await getStorage();
+      const templates = await storage.getBracketTemplatesByStructure(structureId);
+      res.json(templates);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch bracket templates by structure" });
+    }
+  });
+
+  // Get bracket template by participant count
+  app.get("/api/bracket-templates/structure/:structureId/participants/:count", async (req, res) => {
+    try {
+      const { structureId, count } = req.params;
+      const participantCount = parseInt(count);
+      
+      if (isNaN(participantCount)) {
+        return res.status(400).json({ error: "Invalid participant count" });
+      }
+      
+      const storage = await getStorage();
+      const template = await storage.getBracketTemplateByParticipants(structureId, participantCount);
+      
+      if (!template) {
+        return res.status(404).json({ error: "Bracket template not found for the specified parameters" });
+      }
+      
+      res.json(template);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch bracket template" });
+    }
+  });
+
+  // Get tournament generation logs by tournament
+  app.get("/api/tournament-generation-logs/:tournamentId", async (req, res) => {
+    try {
+      const { tournamentId } = req.params;
+      const storage = await getStorage();
+      const logs = await storage.getTournamentGenerationLogsByTournament(tournamentId);
+      res.json(logs);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch tournament generation logs" });
+    }
+  });
+
   // Helper function to import default sports data
   async function importDefaultSportsData() {
     // First import sport categories
