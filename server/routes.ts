@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage, getStorage } from "./storage";
 import { insertTournamentSchema, updateMatchSchema } from "@shared/schema";
-import { analyzeTournamentQuery, generateTournamentStructure, type KeystoneConsultationResult } from "./ai-consultation";
+import { analyzeTournamentQuery, generateTournamentStructure, generateIntelligentTournamentStructure, generateWebpageTemplate, type KeystoneConsultationResult } from "./ai-consultation";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import Stripe from "stripe";
 import { z } from "zod";
@@ -1426,32 +1426,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get comprehensive AI analysis with intelligent tournament structure
       const result: KeystoneConsultationResult = analyzeTournamentQuery(user_input);
       
-      // Add intelligent tournament structure generation
+      // Generate intelligent tournament structure with complete website code
       const participants = result.estimated_participants || 16;
-      const intelligentStructure = {
-        format: result.sport.toLowerCase().includes('basketball') ? 'single-elimination-bracket' : 
-                result.sport.toLowerCase().includes('track') ? 'performance-leaderboard' :
-                result.sport.toLowerCase().includes('baseball') ? 'bracket-to-championship-series' :
-                'single-elimination-bracket',
-        naturalReason: result.sport.toLowerCase().includes('basketball') ? 'Basketball traditionally uses single-elimination brackets like March Madness' :
-                      result.sport.toLowerCase().includes('track') ? 'Track & Field uses individual performance metrics, not head-to-head elimination' :
-                      result.sport.toLowerCase().includes('baseball') ? 'Baseball follows MLB model: playoffs leading to World Series' :
-                      'Standard elimination format for team-based competition',
-        codeImplementation: `// ${result.sport} Tournament Implementation
-function create${result.sport.replace(/\s+/g, '')}Tournament() {
-  const tournament = {
-    name: "${result.age_group} ${result.sport} Championship",
-    format: "${result.format}",
-    participantCount: ${participants},
-    championsForChangeIntegration: true,
-    educationalImpactTracking: {
-      studentTripCost: 2600,
-      revenueToImpactRatio: "Direct funding for Corpus Christi student trips"
-    }
-  };
-  return tournament;
-}`
-      };
+      const intelligentStructure = generateIntelligentTournamentStructure(result.sport, participants, result.age_group);
+      
+      // Generate complete website template
+      const completeWebsite = generateWebpageTemplate(result.sport, result.age_group, result.format);
       
       // Tier access control based on subscription
       const response: any = {
@@ -1515,9 +1495,12 @@ function create${result.sport.replace(/\s+/g, '')}Tournament() {
       if ((subscription_level === 'pro' || subscription_level === 'enterprise' || subscription_level === 'district_enterprise') && tier === 'full-service') {
         response.tier3_full_service = {
           custom_webpage: {
-            template_code: result.tier3_webpage_template,
+            complete_website_html: completeWebsite,
+            template_code: result.tier3_webpage_template || completeWebsite,
             implementation_ready: true,
-            copy_paste_code: intelligentStructure.codeImplementation,
+            copy_paste_ready: true,
+            deployable_code: completeWebsite,
+            tournament_logic_code: intelligentStructure.codeImplementation || `// ${result.sport} Implementation`,
             domain_suggestions: [
               `${result.sport.toLowerCase().replace(/\s+/g, '')}-tournament.champions4change.org`,
               `${result.age_group.toLowerCase().replace(/\s+/g, '')}-${result.sport.toLowerCase().replace(/\s+/g, '')}.c4c-tournaments.com`
@@ -1529,10 +1512,12 @@ function create${result.sport.replace(/\s+/g, '')}Tournament() {
             }
           },
           intelligent_tournament_logic: {
-            format_explanation: intelligentStructure.naturalReason,
-            sport_specific_structure: intelligentStructure.structure,
-            ready_to_deploy_code: intelligentStructure.codeImplementation,
-            platform_integration: "Code works with any JavaScript framework or vanilla HTML"
+            format_explanation: intelligentStructure.naturalReason || `Standard ${result.sport} tournament format`,
+            sport_specific_structure: intelligentStructure.structure || result.format,
+            ready_to_deploy_code: intelligentStructure.codeImplementation || `// ${result.sport} Implementation Code`,
+            complete_website_template: completeWebsite,
+            platform_integration: "Complete HTML/CSS/JS website ready to deploy anywhere",
+            implementation_instructions: "1. Copy the HTML code 2. Save as .html file 3. Deploy to any web hosting 4. Customize branding as needed"
           },
           complete_tournament_setup: true,
           dedicated_support: "Priority email and phone support from Daniel Thornton",

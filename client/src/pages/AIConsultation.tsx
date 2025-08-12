@@ -174,12 +174,62 @@ export default function AIConsultation() {
                 </div>
               )}
 
+              {/* Complete Website Code */}
+              {response.tier3_full_service?.intelligent_tournament_logic?.complete_website_template && (
+                <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/30 rounded-lg p-6">
+                  <h4 className="text-purple-400 font-semibold mb-4 flex items-center">
+                    <Monitor className="h-5 w-5 mr-2" />
+                    🚀 Complete Deployable Website
+                  </h4>
+                  
+                  <div className="space-y-4">
+                    <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
+                      <div className="text-yellow-400 font-semibold mb-2">⚡ Ready to Deploy!</div>
+                      <div className="text-slate-300 text-sm">
+                        Complete HTML website with Champions for Change branding, educational impact tracking, and sport-specific tournament structure.
+                      </div>
+                    </div>
+                    
+                    <div className="bg-slate-900 rounded-lg p-4 max-h-96 overflow-y-auto">
+                      <div className="flex justify-between items-center mb-4">
+                        <span className="text-purple-300 font-semibold">Complete Website Code</span>
+                        <button 
+                          onClick={() => navigator.clipboard.writeText(response.tier3_full_service.intelligent_tournament_logic.complete_website_template)}
+                          className="bg-purple-500 hover:bg-purple-600 text-white px-3 py-1 rounded text-sm transition-colors"
+                        >
+                          Copy All
+                        </button>
+                      </div>
+                      <pre className="text-purple-200 text-xs font-mono leading-relaxed">
+                        <code>{response.tier3_full_service.intelligent_tournament_logic.complete_website_template}</code>
+                      </pre>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="bg-slate-700/50 rounded-lg p-4">
+                        <div className="text-sm text-slate-400 mb-2">Implementation</div>
+                        <div className="text-purple-300 text-sm">
+                          {response.tier3_full_service.intelligent_tournament_logic.implementation_instructions}
+                        </div>
+                      </div>
+                      
+                      <div className="bg-slate-700/50 rounded-lg p-4">
+                        <div className="text-sm text-slate-400 mb-2">Platform Support</div>
+                        <div className="text-purple-300 text-sm">
+                          {response.tier3_full_service.intelligent_tournament_logic.platform_integration}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Custom Webpage Template */}
               {response.tier3_full_service?.custom_webpage && (
                 <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/30 rounded-lg p-6">
                   <h4 className="text-purple-400 font-semibold mb-4 flex items-center">
                     <Monitor className="h-5 w-5 mr-2" />
-                    Complete Website Template
+                    Website Configuration
                   </h4>
                   <div className="space-y-4">
                     <div className="bg-slate-700/50 rounded-lg p-4">

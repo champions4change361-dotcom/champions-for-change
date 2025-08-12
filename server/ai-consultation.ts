@@ -737,7 +737,7 @@ function generateBracket(numTeams) {
 }`;
 }
 
-function generateWebpageTemplate(sport: string, ageGroup: string, format: string): string {
+export function generateWebpageTemplate(sport: string, ageGroup: string, format: string): string {
   const sportSlug = sport.toLowerCase().replace(/\s+/g, '-');
   const ageSlug = ageGroup.toLowerCase().replace(/\s+/g, '-');
   const tournamentStructure = generateIntelligentTournamentStructure(sport, 16, ageGroup);
