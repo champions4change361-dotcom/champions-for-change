@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'wouter';
-import { ArrowLeft, Trophy, Sparkles, Zap, Brain, Target, Code, Monitor } from 'lucide-react';
+import { ArrowLeft, Trophy, Sparkles, Zap, Brain, Target, Code, Monitor, LogOut } from 'lucide-react';
 import { useAuth } from "@/hooks/useAuth";
 
 export default function AIConsultation() {
@@ -49,10 +49,20 @@ export default function AIConsultation() {
               </Link>
             </div>
             
-            <Link href="/" className="flex items-center text-slate-300 hover:text-yellow-400 transition-colors">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard
-            </Link>
+            <div className="flex items-center space-x-4">
+              <Link href="/" className="flex items-center text-slate-300 hover:text-yellow-400 transition-colors">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Dashboard
+              </Link>
+              <a 
+                href="/api/logout"
+                className="flex items-center space-x-2 px-3 py-2 text-slate-300 hover:text-yellow-400 transition-colors"
+                title="Logout"
+              >
+                <LogOut className="h-4 w-4" />
+                <span className="text-sm">Logout</span>
+              </a>
+            </div>
           </div>
         </div>
       </header>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Trophy, Zap, Users, Calendar, Settings, Award, Timer, Star, ChevronRight } from 'lucide-react';
+import { Trophy, Zap, Users, Calendar, Settings, Award, Timer, Star, ChevronRight, LogOut } from 'lucide-react';
 import { Link } from "wouter";
 
 export default function Home() {
@@ -56,6 +56,14 @@ export default function Home() {
                 <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center">
                   <span className="text-slate-900 font-bold">D</span>
                 </div>
+                <a 
+                  href="/api/logout"
+                  className="flex items-center space-x-2 px-3 py-2 text-slate-300 hover:text-yellow-400 transition-colors"
+                  title="Logout"
+                >
+                  <LogOut className="h-5 w-5" />
+                  <span className="text-sm">Logout</span>
+                </a>
               </div>
             </div>
           </div>
