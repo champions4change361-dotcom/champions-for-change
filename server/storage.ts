@@ -1069,6 +1069,23 @@ export class MemStorage implements IStorage {
     this.donations = new Map();
     this.contacts = new Map();
     this.emailCampaigns = new Map();
+    
+    // Initialize with default tournament structures
+    this.initializeDefaultStructures();
+  }
+
+  private initializeDefaultStructures() {
+    const defaultStructures = [
+      { id: '1', formatName: 'Single Elimination', formatDescription: 'Traditional bracket where one loss eliminates team/player. Fast, decisive tournament format perfect for time-constrained events.', formatType: 'Universal', applicableSports: 'all', sortOrder: 1, createdAt: new Date() },
+      { id: '2', formatName: 'Double Elimination', formatDescription: 'Bracket with winners and losers brackets - teams get second chance after first loss. More games, fairer outcomes.', formatType: 'Universal', applicableSports: 'all', sortOrder: 2, createdAt: new Date() },
+      { id: '3', formatName: 'Round Robin', formatDescription: 'Every team/player competes against every other participant - comprehensive competition format. Best for determining true rankings.', formatType: 'Universal', applicableSports: 'all', sortOrder: 3, createdAt: new Date() },
+      { id: '4', formatName: 'Pool Play → Single Elimination', formatDescription: 'Groups compete in round robin pools, then top teams advance to single elimination bracket. Balances fairness with efficiency.', formatType: 'Hybrid', applicableSports: 'all', sortOrder: 4, createdAt: new Date() },
+      { id: '5', formatName: 'Pool Play → Double Elimination', formatDescription: 'Pool play followed by double elimination bracket for advanced teams. Maximum fairness with second chances.', formatType: 'Hybrid', applicableSports: 'all', sortOrder: 5, createdAt: new Date() }
+    ];
+
+    defaultStructures.forEach(structure => {
+      this.tournamentStructures.set(structure.id, structure as TournamentStructure);
+    });
   }
 
   // User authentication methods
