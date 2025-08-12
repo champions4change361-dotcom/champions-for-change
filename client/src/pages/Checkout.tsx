@@ -64,7 +64,8 @@ function CheckoutForm({ amount, type }: { amount: string; type: string }) {
           <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75">
             <div className="text-center">
               <div className="animate-spin w-6 h-6 border-2 border-green-600 border-t-transparent rounded-full mx-auto mb-2" />
-              <p className="text-sm text-gray-600">Loading payment form...</p>
+              <p className="text-sm text-gray-600">Loading secure payment form...</p>
+              <p className="text-xs text-gray-500 mt-1">You should see card icons when this loads</p>
             </div>
           </div>
         )}
@@ -88,7 +89,7 @@ function CheckoutForm({ amount, type }: { amount: string; type: string }) {
       
       {(!stripe || !elements) && (
         <p className="text-xs text-center text-orange-600 bg-orange-50 p-2 rounded">
-          ⚠️ Payment form is loading. If this persists, please refresh the page.
+          Payment form loading... You should see credit card icons when ready. If this persists, the Stripe keys may need to be updated.
         </p>
       )}
     </form>
