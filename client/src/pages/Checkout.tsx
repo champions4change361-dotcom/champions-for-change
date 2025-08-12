@@ -53,15 +53,44 @@ function CheckoutForm({ amount, type }: { amount: string; type: string }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <PaymentElement />
+      <div className="relative min-h-[200px]">
+        <PaymentElement 
+          options={{
+            layout: 'tabs',
+            paymentMethodOrder: ['card', 'apple_pay', 'google_pay']
+          }}
+        />
+        {(!stripe || !elements) && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75">
+            <div className="text-center">
+              <div className="animate-spin w-6 h-6 border-2 border-green-600 border-t-transparent rounded-full mx-auto mb-2" />
+              <p className="text-sm text-gray-600">Loading payment form...</p>
+            </div>
+          </div>
+        )}
+      </div>
+      
       <Button 
         type="submit" 
-        disabled={!stripe || isProcessing}
-        className="w-full bg-green-600 hover:bg-green-700 py-3 text-lg"
+        disabled={!stripe || !elements || isProcessing}
+        className="w-full bg-green-600 hover:bg-green-700 py-3 text-lg disabled:opacity-50"
         data-testid="button-complete-payment"
       >
-        {isProcessing ? 'Processing...' : `${type === 'donation' ? 'Donate' : 'Pay'} $${amount}`}
+        {isProcessing ? (
+          <span className="flex items-center justify-center gap-2">
+            <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
+            Processing...
+          </span>
+        ) : (
+          `${type === 'donation' ? '💚 Donate' : 'Pay'} $${amount}`
+        )}
       </Button>
+      
+      {(!stripe || !elements) && (
+        <p className="text-xs text-center text-orange-600 bg-orange-50 p-2 rounded">
+          ⚠️ Payment form is loading. If this persists, please refresh the page.
+        </p>
+      )}
     </form>
   );
 }
@@ -90,9 +119,15 @@ export default function Checkout() {
   if (!clientSecret) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
+        <div className="text-center max-w-md mx-auto p-6">
           <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
-          <p className="text-gray-600">Setting up payment...</p>
+          <p className="text-gray-600 mb-4">Setting up secure payment...</p>
+          <p className="text-sm text-gray-500">
+            If this takes too long, please go back and try again.
+          </p>
+          <Link href="/" className="mt-4 inline-block text-green-600 hover:text-green-700 underline">
+            ← Back to Home
+          </Link>
         </div>
       </div>
     );
@@ -159,7 +194,14 @@ export default function Checkout() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Elements stripe={stripePromise} options={{ clientSecret, appearance }}>
+            <div className="mb-4 text-center text-sm text-gray-600">
+              🔒 Secure payment processing • All data encrypted
+            </div>
+            <Elements 
+              stripe={stripePromise} 
+              options={{ clientSecret, appearance }}
+              key={clientSecret} // Force re-render if client secret changes
+            >
               <CheckoutForm amount={amount} type={type} />
             </Elements>
           </CardContent>
