@@ -827,6 +827,94 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Competition Format Templates API endpoints
+
+  // Get all competition format templates
+  app.get("/api/competition-format-templates", async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const templates = await storage.getCompetitionFormatTemplates();
+      res.json(templates);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch competition format templates" });
+    }
+  });
+
+  // Get competition format templates by sport
+  app.get("/api/competition-format-templates/sport/:sportId", async (req, res) => {
+    try {
+      const { sportId } = req.params;
+      const storage = await getStorage();
+      const templates = await storage.getCompetitionFormatTemplatesBySport(sportId);
+      res.json(templates);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch competition format templates by sport" });
+    }
+  });
+
+  // Get default competition format template for a sport
+  app.get("/api/competition-format-templates/sport/:sportId/default", async (req, res) => {
+    try {
+      const { sportId } = req.params;
+      const storage = await getStorage();
+      const template = await storage.getDefaultCompetitionFormatTemplate(sportId);
+      
+      if (!template) {
+        return res.status(404).json({ error: "Default competition format template not found for this sport" });
+      }
+      
+      res.json(template);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch default competition format template" });
+    }
+  });
+
+  // Get all series templates
+  app.get("/api/series-templates", async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const templates = await storage.getSeriesTemplates();
+      res.json(templates);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch series templates" });
+    }
+  });
+
+  // Get series templates by sport
+  app.get("/api/series-templates/sport/:sportId", async (req, res) => {
+    try {
+      const { sportId } = req.params;
+      const storage = await getStorage();
+      const templates = await storage.getSeriesTemplatesBySport(sportId);
+      res.json(templates);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch series templates by sport" });
+    }
+  });
+
+  // Get all game length templates
+  app.get("/api/game-length-templates", async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const templates = await storage.getGameLengthTemplates();
+      res.json(templates);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch game length templates" });
+    }
+  });
+
+  // Get game length templates by sport
+  app.get("/api/game-length-templates/sport/:sportId", async (req, res) => {
+    try {
+      const { sportId } = req.params;
+      const storage = await getStorage();
+      const templates = await storage.getGameLengthTemplatesBySport(sportId);
+      res.json(templates);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch game length templates by sport" });
+    }
+  });
+
   // Helper function to import default sports data
   async function importDefaultSportsData() {
     // First import sport categories

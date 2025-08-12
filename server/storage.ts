@@ -162,6 +162,15 @@ export interface IStorage {
   getBracketTemplateByParticipants(structureId: string, participantCount: number): Promise<BracketTemplate | undefined>;
   createTournamentGenerationLog(log: InsertTournamentGenerationLog): Promise<TournamentGenerationLog>;
   getTournamentGenerationLogsByTournament(tournamentId: string): Promise<TournamentGenerationLog[]>;
+
+  // Competition Format Templates methods
+  getCompetitionFormatTemplates(): Promise<CompetitionFormatTemplate[]>;
+  getCompetitionFormatTemplatesBySport(sportId: string): Promise<CompetitionFormatTemplate[]>;
+  getDefaultCompetitionFormatTemplate(sportId: string): Promise<CompetitionFormatTemplate | undefined>;
+  getSeriesTemplates(): Promise<SeriesTemplate[]>;
+  getSeriesTemplatesBySport(sportId: string): Promise<SeriesTemplate[]>;
+  getGameLengthTemplates(): Promise<GameLengthTemplate[]>;
+  getGameLengthTemplatesBySport(sportId: string): Promise<GameLengthTemplate[]>;
   createSportDivisionRules(rules: InsertSportDivisionRules): Promise<SportDivisionRules>;
 
   // Sport Events methods
@@ -1076,6 +1085,9 @@ export class MemStorage implements IStorage {
   private tournamentFormatConfigs: Map<string, TournamentFormatConfig>;
   private bracketTemplates: Map<string, BracketTemplate>;
   private tournamentGenerationLog: Map<string, TournamentGenerationLog>;
+  private competitionFormatTemplates: Map<string, CompetitionFormatTemplate>;
+  private gameLengthTemplates: Map<string, GameLengthTemplate>;
+  private seriesTemplates: Map<string, SeriesTemplate>;
   private donors: Map<string, Donor>;
   private donations: Map<string, Donation>;
   private contacts: Map<string, Contact>;
@@ -1095,16 +1107,20 @@ export class MemStorage implements IStorage {
     this.tournamentFormatConfigs = new Map();
     this.bracketTemplates = new Map();
     this.tournamentGenerationLog = new Map();
+    this.competitionFormatTemplates = new Map();
+    this.gameLengthTemplates = new Map();
+    this.seriesTemplates = new Map();
     this.donors = new Map();
     this.donations = new Map();
     this.contacts = new Map();
     this.emailCampaigns = new Map();
     
-    // Initialize with default tournament structures, sport division rules, track events, and tournament integration
+    // Initialize with default tournament structures, sport division rules, track events, tournament integration, and competition formats
     this.initializeDefaultStructures();
     this.initializeSportDivisionRules();
     this.initializeUltimateTrackEvents();
     this.initializeTournamentIntegration();
+    this.initializeCompetitionFormatTemplates();
   }
 
   private initializeDefaultStructures() {
@@ -2517,6 +2533,366 @@ export class MemStorage implements IStorage {
 
   async getTournamentGenerationLogsByTournament(tournamentId: string): Promise<TournamentGenerationLog[]> {
     return Array.from(this.tournamentGenerationLog.values()).filter(l => l.tournamentId === tournamentId);
+  }
+
+  // Competition Format Templates initialization and methods
+  private initializeCompetitionFormatTemplates() {
+    const basketballSportId = "basketball"; // Assuming we have basketball sport
+    const soccerSportId = "soccer"; // Assuming we have soccer sport
+    const tennisSportId = "tennis"; // Assuming we have tennis sport
+    const golfSportId = "golf"; // Assuming we have golf sport
+    const trackFieldSportId = "track-field"; // Assuming we have track & field sport
+
+    const competitionFormatTemplates = [
+      // BASKETBALL TEMPLATE
+      {
+        id: randomUUID(),
+        sportId: basketballSportId,
+        templateName: "Standard Basketball Tournament",
+        templateDescription: "Professional basketball tournament configuration with flexible age groups and divisions",
+        isDefault: true,
+        ageGroupConfig: {
+          "youth": {
+            "U10": {"game_length": "4x6_minutes", "ball_size": "27.5_inch", "basket_height": "8_feet"},
+            "U12": {"game_length": "4x6_minutes", "ball_size": "27.5_inch", "basket_height": "9_feet"},
+            "U14": {"game_length": "4x8_minutes", "ball_size": "28.5_inch", "basket_height": "10_feet"},
+            "U16": {"game_length": "4x8_minutes", "ball_size": "29.5_inch", "basket_height": "10_feet"},
+            "U18": {"game_length": "4x8_minutes", "ball_size": "29.5_inch", "basket_height": "10_feet"}
+          },
+          "adult": {"Open": {"game_length": "4x12_minutes", "ball_size": "29.5_inch", "basket_height": "10_feet"}}
+        },
+        genderDivisionConfig: {
+          "mens": {"allowed": true, "ball_size": "29.5_inch"},
+          "womens": {"allowed": true, "ball_size": "28.5_inch"},
+          "mixed": {"allowed": true, "ball_size": "28.5_inch", "special_rules": "alternating_possession"}
+        },
+        teamSizeConfig: {
+          "minimum": 5, "maximum": 12, "on_court": 5, "substitutions": "unlimited", "roster_limit": 15
+        },
+        equipmentSpecifications: {
+          "court": "94x50_feet", "baskets": "regulation_10_feet", "balls": "certified_leather", 
+          "uniforms": "contrasting_colors", "scoreboard": "electronic_preferred"
+        },
+        gameFormatConfig: {
+          "game_length": "regulation_32_minutes", "periods": 4, "overtime": "5_minutes", 
+          "shot_clock": "24_seconds", "timeouts": "5_per_team"
+        },
+        scoringSystemConfig: {
+          "field_goals": 2, "three_pointers": 3, "free_throws": 1, 
+          "technical_fouls": "ejection_after_2", "flagrant_fouls": "automatic_ejection"
+        },
+        seriesConfig: {
+          "best_of": [1, 3, 5, 7], "default": 1, "championship": "best_of_3", 
+          "elimination": "single_game", "round_robin": "single_game"
+        },
+        venueRequirements: {
+          "court_size": "full_regulation", "seating": "tournament_capacity", 
+          "warm_up_area": "required", "locker_rooms": "both_teams"
+        },
+        officiatingConfig: {
+          "referees": 2, "scorekeeper": 1, "timekeeper": 1, "shot_clock_operator": 1, "statistics": "optional"
+        },
+        timingConfig: {
+          "game_clock": "stop_time", "shot_clock": "24_seconds", "timeout_length": "60_seconds", "halftime": "15_minutes"
+        },
+        createdAt: new Date()
+      },
+
+      // SOCCER TEMPLATE
+      {
+        id: randomUUID(),
+        sportId: soccerSportId,
+        templateName: "FIFA Standard Soccer Tournament",
+        templateDescription: "Professional soccer tournament with age-appropriate modifications",
+        isDefault: true,
+        ageGroupConfig: {
+          "youth": {
+            "U8": {"game_length": "2x20_minutes", "field_size": "small", "ball_size": "3", "players": 7},
+            "U10": {"game_length": "2x25_minutes", "field_size": "small", "ball_size": "3", "players": 9},
+            "U12": {"game_length": "2x30_minutes", "field_size": "medium", "ball_size": "4", "players": 11},
+            "U14": {"game_length": "2x35_minutes", "field_size": "full", "ball_size": "5", "players": 11},
+            "U16": {"game_length": "2x40_minutes", "field_size": "full", "ball_size": "5", "players": 11}
+          },
+          "adult": {"Open": {"game_length": "2x45_minutes", "field_size": "full", "ball_size": "5", "players": 11}}
+        },
+        genderDivisionConfig: {
+          "mens": {"allowed": true},
+          "womens": {"allowed": true},
+          "mixed": {"allowed": true, "special_rules": "minimum_female_players"}
+        },
+        teamSizeConfig: {
+          "minimum": 11, "maximum": 18, "on_field": 11, "substitutions": 3, "roster_limit": 23
+        },
+        equipmentSpecifications: {
+          "field": "100-130x50-100_yards", "goals": "8x24_feet", "balls": "FIFA_approved", 
+          "uniforms": "contrasting_jerseys", "corner_flags": "required"
+        },
+        gameFormatConfig: {
+          "game_length": "90_minutes", "periods": 2, "halftime": "15_minutes", 
+          "stoppage_time": "referee_discretion", "extra_time": "2x15_minutes"
+        },
+        scoringSystemConfig: {
+          "goals": 1, "yellow_cards": "caution", "red_cards": "ejection", 
+          "penalty_kicks": "shootout_tiebreaker", "offside": "active"
+        },
+        seriesConfig: {
+          "best_of": [1, 3], "default": 1, "championship": "single_game", 
+          "group_stage": "single_round_robin", "penalties": "if_tied"
+        },
+        venueRequirements: {
+          "field_size": "regulation", "goals": "regulation", "seating": "spectator_area", "parking": "adequate"
+        },
+        officiatingConfig: {
+          "referee": 1, "assistant_referees": 2, "fourth_official": "championship_only", "var": "optional"
+        },
+        timingConfig: {
+          "match_clock": "continuous", "halftime": "15_minutes", "injury_time": "referee_adds", "extra_time": "knockout_only"
+        },
+        createdAt: new Date()
+      },
+
+      // TENNIS TEMPLATE
+      {
+        id: randomUUID(),
+        sportId: tennisSportId,
+        templateName: "Professional Tennis Tournament",
+        templateDescription: "USTA-standard tennis tournament with skill-based divisions",
+        isDefault: true,
+        ageGroupConfig: {
+          "junior": {
+            "U10": {"court_size": "36_feet", "ball_type": "red", "sets": "best_of_3_short"},
+            "U12": {"court_size": "60_feet", "ball_type": "orange", "sets": "best_of_3_short"},
+            "U14": {"court_size": "full", "ball_type": "green", "sets": "best_of_3"},
+            "U16": {"court_size": "full", "ball_type": "yellow", "sets": "best_of_3"},
+            "U18": {"court_size": "full", "ball_type": "yellow", "sets": "best_of_3"}
+          },
+          "adult": {"Open": {"court_size": "full", "ball_type": "yellow", "sets": "best_of_3"}}
+        },
+        genderDivisionConfig: {
+          "mens_singles": {"allowed": true},
+          "womens_singles": {"allowed": true},
+          "mens_doubles": {"allowed": true},
+          "womens_doubles": {"allowed": true},
+          "mixed_doubles": {"allowed": true}
+        },
+        teamSizeConfig: {
+          "singles": {"players": 1},
+          "doubles": {"players": 2, "team_composition": "flexible"}
+        },
+        equipmentSpecifications: {
+          "court": "78x36_feet", "net": "3_feet_center", "balls": "tournament_grade", "rackets": "player_provided"
+        },
+        gameFormatConfig: {
+          "match_format": "best_of_sets", "set_format": "first_to_6_games", 
+          "tiebreak": "7_points", "deuce": "advantage_system"
+        },
+        scoringSystemConfig: {
+          "games": 1, "sets": 1, "matches": 1, "tiebreak_points": 1, "double_faults": "point_loss"
+        },
+        seriesConfig: {
+          "best_of": [1, 3, 5], "default": 3, "championship": "best_of_3", 
+          "round_robin": "best_of_3_sets", "consolation": "best_of_1"
+        },
+        venueRequirements: {
+          "courts": "hard_surface_preferred", "seating": "courtside", "water_stations": "required", "shade": "preferred"
+        },
+        officiatingConfig: {
+          "chair_umpire": "championship", "line_judges": "optional", "ball_persons": "4_minimum"
+        },
+        timingConfig: {
+          "warm_up": "5_minutes", "changeover": "90_seconds", "set_break": "120_seconds", "medical_timeout": "3_minutes"
+        },
+        createdAt: new Date()
+      },
+
+      // TRACK & FIELD TEMPLATE
+      {
+        id: randomUUID(),
+        sportId: trackFieldSportId,
+        templateName: "IAAF Standard Track Meet",
+        templateDescription: "Professional track and field meet with all event categories",
+        isDefault: true,
+        ageGroupConfig: {
+          "youth": {
+            "U10": {"events": "modified", "distances": "shortened", "implements": "youth_weight"},
+            "U12": {"events": "standard", "distances": "youth", "implements": "youth_weight"},
+            "U14": {"events": "full", "distances": "standard", "implements": "intermediate"},
+            "U16": {"events": "full", "distances": "standard", "implements": "standard"},
+            "U18": {"events": "full", "distances": "standard", "implements": "standard"}
+          },
+          "adult": {
+            "Open": {"events": "full", "distances": "standard", "implements": "standard"},
+            "Masters": {"age_groups": ["35-39", "40-44", "45-49", "50-54", "55-59", "60+"], "implements": "age_adjusted"}
+          }
+        },
+        genderDivisionConfig: {
+          "mens": {"required": true, "separate_events": true, "implements": "standard_weight"},
+          "womens": {"required": true, "separate_events": true, "implements": "standard_weight"},
+          "mixed": {"relay_events_only": true}
+        },
+        teamSizeConfig: {
+          "individual": {"athletes": 1},
+          "relay": {"athletes": 4, "team_composition": "same_gender"},
+          "team": {"unlimited_entries": true}
+        },
+        equipmentSpecifications: {
+          "track": "400m_oval", "field_areas": "regulation", "implements": "certified_weights", 
+          "timing_system": "FAT", "wind_gauge": "required"
+        },
+        gameFormatConfig: {
+          "meet_format": "multi_event", "sessions": "multiple", 
+          "event_schedule": "standard_order", "warm_up_time": "45_minutes"
+        },
+        scoringSystemConfig: {
+          "time": "faster_wins", "distance": "longer_wins", "height": "higher_wins", 
+          "points": "IAAF_scoring_tables", "placing": "1st_through_8th"
+        },
+        seriesConfig: {
+          "sessions": [1, 2, 3], "default": 1, "championship": 2, 
+          "combined_events": 2, "relays": "final_session"
+        },
+        venueRequirements: {
+          "track": "regulation_400m", "field_events": "infield_and_adjacent", 
+          "warm_up_track": "preferred", "timing_tower": "required"
+        },
+        officiatingConfig: {
+          "meet_director": 1, "track_referee": 1, "field_referees": "per_event", 
+          "timing_crew": 3, "announcer": 1
+        },
+        timingConfig: {
+          "event_intervals": "15_minutes", "field_event_time": "1.5_hours", 
+          "awards": "after_each_event", "cool_down": "15_minutes"
+        },
+        createdAt: new Date()
+      }
+    ];
+
+    // Load competition format templates
+    competitionFormatTemplates.forEach(template => {
+      this.competitionFormatTemplates.set(template.id, template);
+    });
+
+    // Initialize series templates
+    const seriesTemplates = [
+      // Basketball series
+      {
+        id: randomUUID(),
+        sportId: basketballSportId,
+        seriesName: "Single Game",
+        gamesToWin: 1,
+        maximumGames: 1,
+        homeFieldAdvantage: false,
+        gameIntervals: {"rest_days": 0},
+        tiebreakerRules: {"overtime": "5_minute_periods"},
+        createdAt: new Date()
+      },
+      {
+        id: randomUUID(),
+        sportId: basketballSportId,
+        seriesName: "Best of 3",
+        gamesToWin: 2,
+        maximumGames: 3,
+        homeFieldAdvantage: true,
+        gameIntervals: {"rest_days": 1, "travel_days": 2},
+        tiebreakerRules: {"game_3_neutral": false},
+        createdAt: new Date()
+      },
+      {
+        id: randomUUID(),
+        sportId: basketballSportId,
+        seriesName: "Best of 7",
+        gamesToWin: 4,
+        maximumGames: 7,
+        homeFieldAdvantage: true,
+        gameIntervals: {"rest_days": 1, "travel_days": 2},
+        tiebreakerRules: {"2-3-2_format": true},
+        createdAt: new Date()
+      },
+
+      // Soccer series
+      {
+        id: randomUUID(),
+        sportId: soccerSportId,
+        seriesName: "Single Match",
+        gamesToWin: 1,
+        maximumGames: 1,
+        homeFieldAdvantage: false,
+        gameIntervals: {"rest_days": 0},
+        tiebreakerRules: {"extra_time": "2x15_minutes", "penalties": "if_tied"},
+        createdAt: new Date()
+      },
+      {
+        id: randomUUID(),
+        sportId: soccerSportId,
+        seriesName: "Home and Away",
+        gamesToWin: 1,
+        maximumGames: 2,
+        homeFieldAdvantage: true,
+        gameIntervals: {"leg_interval": 7},
+        tiebreakerRules: {"away_goals_rule": true, "extra_time": "second_leg_only"},
+        createdAt: new Date()
+      },
+
+      // Tennis series
+      {
+        id: randomUUID(),
+        sportId: tennisSportId,
+        seriesName: "Single Match",
+        gamesToWin: 1,
+        maximumGames: 1,
+        homeFieldAdvantage: false,
+        gameIntervals: {"rest_days": 0},
+        tiebreakerRules: {"tiebreak": "7_points", "final_set": "advantage"},
+        createdAt: new Date()
+      },
+      {
+        id: randomUUID(),
+        sportId: tennisSportId,
+        seriesName: "Best of 3 Sets",
+        gamesToWin: 2,
+        maximumGames: 3,
+        homeFieldAdvantage: false,
+        gameIntervals: {"set_break": 2},
+        tiebreakerRules: {"final_set_tiebreak": "10_points"},
+        createdAt: new Date()
+      }
+    ];
+
+    // Load series templates
+    seriesTemplates.forEach(template => {
+      this.seriesTemplates.set(template.id, template);
+    });
+
+    console.log(`🐋 Competition Format Templates initialized: ${competitionFormatTemplates.length} templates, ${seriesTemplates.length} series templates loaded`);
+  }
+
+  // Competition Format Templates methods
+  async getCompetitionFormatTemplates(): Promise<CompetitionFormatTemplate[]> {
+    return Array.from(this.competitionFormatTemplates.values());
+  }
+
+  async getCompetitionFormatTemplatesBySport(sportId: string): Promise<CompetitionFormatTemplate[]> {
+    return Array.from(this.competitionFormatTemplates.values()).filter(t => t.sportId === sportId);
+  }
+
+  async getDefaultCompetitionFormatTemplate(sportId: string): Promise<CompetitionFormatTemplate | undefined> {
+    return Array.from(this.competitionFormatTemplates.values()).find(t => t.sportId === sportId && t.isDefault);
+  }
+
+  async getSeriesTemplates(): Promise<SeriesTemplate[]> {
+    return Array.from(this.seriesTemplates.values());
+  }
+
+  async getSeriesTemplatesBySport(sportId: string): Promise<SeriesTemplate[]> {
+    return Array.from(this.seriesTemplates.values()).filter(t => t.sportId === sportId);
+  }
+
+  async getGameLengthTemplates(): Promise<GameLengthTemplate[]> {
+    return Array.from(this.gameLengthTemplates.values());
+  }
+
+  async getGameLengthTemplatesBySport(sportId: string): Promise<GameLengthTemplate[]> {
+    return Array.from(this.gameLengthTemplates.values()).filter(t => t.sportId === sportId);
   }
 }
 

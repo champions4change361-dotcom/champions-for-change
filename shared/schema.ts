@@ -389,6 +389,51 @@ export const tournamentGenerationLog = pgTable("tournament_generation_log", {
   createdAt: timestamp("created_at").default(sql`now()`),
 });
 
+// Competition format templates table - sport-specific configurations
+export const competitionFormatTemplates = pgTable("competition_format_templates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sportId: varchar("sport_id").references(() => sportOptions.id),
+  templateName: varchar("template_name").notNull(),
+  templateDescription: text("template_description"),
+  isDefault: boolean("is_default").default(false),
+  ageGroupConfig: jsonb("age_group_config"),
+  genderDivisionConfig: jsonb("gender_division_config"),
+  teamSizeConfig: jsonb("team_size_config"),
+  equipmentSpecifications: jsonb("equipment_specifications"),
+  gameFormatConfig: jsonb("game_format_config"),
+  scoringSystemConfig: jsonb("scoring_system_config"),
+  seriesConfig: jsonb("series_config"),
+  venueRequirements: jsonb("venue_requirements"),
+  officiatingConfig: jsonb("officiating_config"),
+  timingConfig: jsonb("timing_config"),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+// Game length templates table - sport and age-specific timing configurations
+export const gameLengthTemplates = pgTable("game_length_templates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sportId: varchar("sport_id").references(() => sportOptions.id),
+  ageGroup: varchar("age_group").notNull(),
+  regulationTime: jsonb("regulation_time").notNull(),
+  overtimeRules: jsonb("overtime_rules"),
+  breakIntervals: jsonb("break_intervals"),
+  timeoutRules: jsonb("timeout_rules"),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+// Series templates table - multi-game series configurations  
+export const seriesTemplates = pgTable("series_templates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sportId: varchar("sport_id").references(() => sportOptions.id),
+  seriesName: varchar("series_name").notNull(),
+  gamesToWin: integer("games_to_win").notNull(),
+  maximumGames: integer("maximum_games").notNull(),
+  homeFieldAdvantage: boolean("home_field_advantage").default(false),
+  gameIntervals: jsonb("game_intervals"),
+  tiebreakerRules: jsonb("tiebreaker_rules"),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
 export const matches = pgTable("matches", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   tournamentId: varchar("tournament_id").notNull().references(() => tournaments.id, { onDelete: "cascade" }),
@@ -488,6 +533,21 @@ export const insertTournamentGenerationLogSchema = createInsertSchema(tournament
   createdAt: true,
 });
 
+export const insertCompetitionFormatTemplateSchema = createInsertSchema(competitionFormatTemplates).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertGameLengthTemplateSchema = createInsertSchema(gameLengthTemplates).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertSeriesTemplateSchema = createInsertSchema(seriesTemplates).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertSportEventSchema = createInsertSchema(sportEvents).omit({
   createdAt: true,
 });
@@ -531,6 +591,14 @@ export type BracketTemplate = typeof bracketTemplates.$inferSelect;
 export type InsertBracketTemplate = typeof bracketTemplates.$inferInsert;
 export type TournamentGenerationLog = typeof tournamentGenerationLog.$inferSelect;
 export type InsertTournamentGenerationLog = typeof tournamentGenerationLog.$inferInsert;
+
+// Competition Format types
+export type CompetitionFormatTemplate = typeof competitionFormatTemplates.$inferSelect;
+export type InsertCompetitionFormatTemplate = typeof competitionFormatTemplates.$inferInsert;
+export type GameLengthTemplate = typeof gameLengthTemplates.$inferSelect;
+export type InsertGameLengthTemplate = typeof gameLengthTemplates.$inferInsert;
+export type SeriesTemplate = typeof seriesTemplates.$inferSelect;
+export type InsertSeriesTemplate = typeof seriesTemplates.$inferInsert;
 
 // White-label pages schema
 export const pages = pgTable("pages", {
