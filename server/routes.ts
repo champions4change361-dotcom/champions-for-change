@@ -17,9 +17,9 @@ if (!process.env.STRIPE_SECRET_KEY) {
 }
 
 const stripeKey = process.env.STRIPE_SECRET_KEY;
-console.log(`🔑 Stripe key loaded: sk_${stripeKey.split('_')[1]}_${stripeKey.split('_')[2].substring(0, 8)}...`);
+console.log(`🔑 Champions for Change payment system ready`);
 console.log(`🔑 Key ends with: ...${stripeKey.slice(-15)}`);
-console.log(`🔑 Key length: ${stripeKey.length} characters`);
+console.log(`🔑 Live mode enabled for real donations`);
 
 const stripe = new Stripe(stripeKey, {
   apiVersion: "2024-11-20.acacia", // More stable version
