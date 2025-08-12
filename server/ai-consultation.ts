@@ -396,45 +396,521 @@ function generateScheduleTemplate(sport: string, format: string, participants: n
   return template;
 }
 
+// Enhanced AI Tournament Builder - Matches Sport's Natural Structure
+export function generateIntelligentTournamentStructure(sport: string, participants: number, ageGroup: string): any {
+  const sportLower = sport.toLowerCase();
+  
+  // Basketball - naturally bracket-based (March Madness style)
+  if (sportLower.includes('basketball')) {
+    const teams = Math.pow(2, Math.ceil(Math.log2(participants)));
+    return {
+      format: 'single-elimination-bracket',
+      structure: 'march-madness-style',
+      teams: teams,
+      rounds: Math.log2(teams),
+      naturalReason: 'Basketball traditionally uses single-elimination brackets like March Madness',
+      codeImplementation: generateBasketballBracketCode(teams, ageGroup)
+    };
+  }
+  
+  // Track & Field - naturally leaderboard (individual times/distances)
+  if (sportLower.includes('track') || sportLower.includes('field')) {
+    return {
+      format: 'performance-leaderboard',
+      structure: 'event-based-scoring',
+      events: ['100m', '200m', '400m', 'Long Jump', 'Shot Put', 'High Jump'],
+      scoring: 'time-and-distance-based',
+      naturalReason: 'Track & Field uses individual performance metrics, not head-to-head elimination',
+      codeImplementation: generateTrackFieldLeaderboardCode(ageGroup)
+    };
+  }
+  
+  // Baseball - naturally series-based (World Series model)
+  if (sportLower.includes('baseball')) {
+    return {
+      format: 'bracket-to-championship-series',
+      structure: 'playoff-bracket-then-best-of-7',
+      teams: participants,
+      playoffRounds: Math.ceil(Math.log2(participants)) - 1,
+      championshipSeries: 'best-of-7',
+      naturalReason: 'Baseball follows MLB model: playoffs leading to World Series',
+      codeImplementation: generateBaseballSeriesCode(participants, ageGroup)
+    };
+  }
+  
+  // Soccer - naturally group-stage-to-knockout (World Cup model)
+  if (sportLower.includes('soccer') || sportLower.includes('football')) {
+    const groups = Math.ceil(participants / 4);
+    return {
+      format: 'group-stage-to-knockout',
+      structure: 'world-cup-style',
+      groups: groups,
+      groupSize: 4,
+      knockoutTeams: groups * 2,
+      naturalReason: 'Soccer follows World Cup format: group stage then knockout rounds',
+      codeImplementation: generateSoccerWorldCupCode(participants, ageGroup)
+    };
+  }
+  
+  // Golf - naturally leaderboard with stroke play
+  if (sportLower.includes('golf')) {
+    return {
+      format: 'stroke-play-leaderboard',
+      structure: 'cumulative-scoring',
+      rounds: ageGroup.includes('Elementary') ? 1 : 2,
+      scoring: 'lowest-total-strokes',
+      naturalReason: 'Golf uses stroke play where lowest total score wins',
+      codeImplementation: generateGolfLeaderboardCode(ageGroup)
+    };
+  }
+  
+  // Swimming - naturally time-based leaderboard
+  if (sportLower.includes('swimming')) {
+    return {
+      format: 'time-based-leaderboard',
+      structure: 'event-heats-to-finals',
+      events: ['50m Freestyle', '100m Freestyle', '100m Backstroke', '100m Breaststroke'],
+      scoring: 'fastest-time-wins',
+      naturalReason: 'Swimming competitions rank by fastest times in each event',
+      codeImplementation: generateSwimmingLeaderboardCode(ageGroup)
+    };
+  }
+  
+  // Default to bracket for team sports
+  return {
+    format: 'single-elimination-bracket',
+    structure: 'standard-tournament',
+    teams: Math.pow(2, Math.ceil(Math.log2(participants))),
+    naturalReason: 'Standard elimination format for team-based competition',
+    codeImplementation: generateStandardBracketCode(participants, ageGroup)
+  };
+}
+
+// Code generators for each sport's natural structure
+function generateBasketballBracketCode(teams: number, ageGroup: string): string {
+  return `// Basketball Tournament Bracket Generator
+function createBasketballTournament(teams) {
+  const bracket = {
+    name: "${ageGroup} Basketball Championship",
+    format: "single-elimination",
+    rounds: ${Math.log2(teams)},
+    teams: teams,
+    matches: []
+  };
+  
+  // Generate first round matchups
+  for (let i = 0; i < teams; i += 2) {
+    bracket.matches.push({
+      round: 1,
+      team1: \`Team \${i + 1}\`,
+      team2: \`Team \${i + 2}\`,
+      courtTime: \`\${Math.floor(i/2) * 45 + 480} minutes\`,
+      winner: null
+    });
+  }
+  
+  return bracket;
+}
+
+// Champions for Change Integration
+function trackEducationalImpact(registrationFee) {
+  const studentTripCost = 2600;
+  const studentsFunded = Math.floor(registrationFee / studentTripCost);
+  
+  return {
+    revenue: registrationFee,
+    studentsFunded: studentsFunded,
+    tripsEnabled: studentsFunded,
+    educationalImpact: \`\${studentsFunded} students can now experience educational travel\`
+  };
+}`;
+}
+
+function generateTrackFieldLeaderboardCode(ageGroup: string): string {
+  return `// Track & Field Event Leaderboard
+function createTrackFieldTournament(events) {
+  const tournament = {
+    name: "${ageGroup} Track & Field Meet",
+    format: "performance-leaderboard",
+    events: [
+      { name: "100m Dash", unit: "seconds", type: "time" },
+      { name: "Long Jump", unit: "meters", type: "distance" },
+      { name: "Shot Put", unit: "meters", type: "distance" }
+    ],
+    participants: [],
+    results: {}
+  };
+  
+  // Score tracking for each event
+  events.forEach(event => {
+    tournament.results[event.name] = [];
+  });
+  
+  return tournament;
+}
+
+// Performance ranking system
+function rankPerformances(eventData, eventType) {
+  if (eventType === "time") {
+    return eventData.sort((a, b) => a.result - b.result); // Fastest first
+  } else {
+    return eventData.sort((a, b) => b.result - a.result); // Furthest first
+  }
+}`;
+}
+
+function generateBaseballSeriesCode(teams: number, ageGroup: string): string {
+  return `// Baseball Tournament with Championship Series
+function createBaseballTournament(teams) {
+  const tournament = {
+    name: "${ageGroup} Baseball Championship",
+    format: "bracket-to-series",
+    playoffBracket: createPlayoffBracket(teams),
+    championshipSeries: {
+      format: "best-of-7",
+      games: [],
+      winner: null
+    }
+  };
+  
+  return tournament;
+}
+
+// World Series style championship
+function createChampionshipSeries(team1, team2) {
+  const series = {
+    teams: [team1, team2],
+    games: [],
+    wins: { [team1]: 0, [team2]: 0 },
+    champion: null
+  };
+  
+  // Generate up to 7 games
+  for (let i = 1; i <= 7; i++) {
+    series.games.push({
+      gameNumber: i,
+      homeTeam: i % 2 === 1 ? team1 : team2,
+      awayTeam: i % 2 === 1 ? team2 : team1,
+      score: null,
+      winner: null
+    });
+  }
+  
+  return series;
+}`;
+}
+
+function generateSoccerWorldCupCode(teams: number, ageGroup: string): string {
+  return `// Soccer World Cup Style Tournament
+function createSoccerTournament(teams) {
+  const groups = Math.ceil(teams / 4);
+  const tournament = {
+    name: "${ageGroup} Soccer Cup",
+    format: "group-stage-to-knockout",
+    groupStage: createGroupStage(groups),
+    knockout: {
+      round16: [],
+      quarterfinals: [],
+      semifinals: [],
+      final: null
+    }
+  };
+  
+  return tournament;
+}
+
+// Group stage round-robin
+function createGroupStage(numGroups) {
+  const groups = {};
+  
+  for (let i = 0; i < numGroups; i++) {
+    const groupLetter = String.fromCharCode(65 + i); // A, B, C, etc.
+    groups[\`Group \${groupLetter}\`] = {
+      teams: [],
+      matches: [],
+      standings: []
+    };
+  }
+  
+  return groups;
+}`;
+}
+
+function generateGolfLeaderboardCode(ageGroup: string): string {
+  return `// Golf Stroke Play Tournament
+function createGolfTournament(players) {
+  const tournament = {
+    name: "${ageGroup} Golf Tournament",
+    format: "stroke-play",
+    rounds: ${ageGroup.includes('Elementary') ? 1 : 2},
+    leaderboard: [],
+    scorecards: {}
+  };
+  
+  players.forEach(player => {
+    tournament.scorecards[player] = {
+      rounds: [],
+      totalStrokes: 0,
+      position: null
+    };
+  });
+  
+  return tournament;
+}
+
+// Calculate golf standings
+function updateLeaderboard(tournament) {
+  const standings = Object.entries(tournament.scorecards)
+    .map(([player, scorecard]) => ({
+      player,
+      totalStrokes: scorecard.totalStrokes,
+      rounds: scorecard.rounds
+    }))
+    .sort((a, b) => a.totalStrokes - b.totalStrokes);
+  
+  tournament.leaderboard = standings;
+  return standings;
+}`;
+}
+
+function generateSwimmingLeaderboardCode(ageGroup: string): string {
+  return `// Swimming Meet Time-Based Competition
+function createSwimmingMeet(swimmers) {
+  const meet = {
+    name: "${ageGroup} Swimming Championship",
+    format: "time-based-leaderboard",
+    events: [
+      { name: "50m Freestyle", swimmers: [], results: [] },
+      { name: "100m Freestyle", swimmers: [], results: [] },
+      { name: "100m Backstroke", swimmers: [], results: [] }
+    ],
+    overallStandings: []
+  };
+  
+  return meet;
+}
+
+// Time conversion and ranking
+function rankSwimmers(eventResults) {
+  return eventResults.sort((a, b) => {
+    const timeA = convertToSeconds(a.time);
+    const timeB = convertToSeconds(b.time);
+    return timeA - timeB; // Fastest first
+  });
+}
+
+function convertToSeconds(timeString) {
+  const [minutes, seconds] = timeString.split(':');
+  return parseInt(minutes) * 60 + parseFloat(seconds);
+}`;
+}
+
+function generateStandardBracketCode(teams: number, ageGroup: string): string {
+  return `// Standard Tournament Bracket
+function createStandardTournament(teams) {
+  const tournament = {
+    name: "${ageGroup} Tournament",
+    format: "single-elimination",
+    bracket: generateBracket(teams),
+    currentRound: 1,
+    champion: null
+  };
+  
+  return tournament;
+}
+
+function generateBracket(numTeams) {
+  const bracketSize = Math.pow(2, Math.ceil(Math.log2(numTeams)));
+  const rounds = Math.log2(bracketSize);
+  const bracket = [];
+  
+  for (let round = 1; round <= rounds; round++) {
+    const matchesInRound = bracketSize / Math.pow(2, round);
+    bracket.push({
+      round: round,
+      matches: matchesInRound,
+      winners: []
+    });
+  }
+  
+  return bracket;
+}`;
+}
+
 function generateWebpageTemplate(sport: string, ageGroup: string, format: string): string {
-  return `
-    <tournament-webpage theme="champions-for-change">
-      <header>
-        <title>${sport} ${ageGroup} ${format.charAt(0).toUpperCase() + format.slice(1)} Tournament</title>
-        <subtitle>Supporting Educational Opportunities for Corpus Christi Youth</subtitle>
-      </header>
-      
-      <hero-section>
-        <championship-banner sport="${sport}" />
-        <mission-statement>
-          Every tournament entry helps fund $2,600+ educational trips for underprivileged students
-        </mission-statement>
-      </hero-section>
-      
-      <tournament-info>
-        <format>${format}</format>
-        <age-group>${ageGroup}</age-group>
-        <registration-status>Open</registration-status>
-      </tournament-info>
-      
-      <live-updates-section>
-        <bracket-display format="${format}" />
-        <leaderboard-display />
-        <live-scoring />
-      </live-updates-section>
-      
-      <impact-tracker>
-        <students-funded-counter />
-        <next-trip-goal />
-        <success-stories />
-      </impact-tracker>
-      
-      <footer>
-        <champions-for-change-branding />
-        <contact-info>Daniel Thornton: Champions4change361@gmail.com</contact-info>
-      </footer>
-    </tournament-webpage>
-  `;
+  const sportSlug = sport.toLowerCase().replace(/\s+/g, '-');
+  const ageSlug = ageGroup.toLowerCase().replace(/\s+/g, '-');
+  const tournamentStructure = generateIntelligentTournamentStructure(sport, 16, ageGroup);
+  
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${sport} ${ageGroup} Tournament | Champions for Change</title>
+    <meta name="description" content="Join our ${sport} tournament supporting educational trips for Corpus Christi youth">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; line-height: 1.6; color: #1f2937; }
+        .header { background: linear-gradient(135deg, #059669, #2563eb); color: white; padding: 2rem 0; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .hero { padding: 4rem 0; background: linear-gradient(to bottom, #f0fdf4, #ecfdf5); }
+        .tournament-format { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 1rem 1.5rem; margin: 2rem 0; border-radius: 0 8px 8px 0; }
+        .code-section { background: #1f2937; color: #f9fafb; padding: 2rem; border-radius: 12px; margin: 2rem 0; overflow-x: auto; }
+        .champions-impact { background: linear-gradient(135deg, #059669, #047857); color: white; padding: 3rem 2rem; text-align: center; border-radius: 16px; margin: 3rem 0; }
+        .registration-btn { background: #059669; color: white; padding: 16px 32px; border: none; border-radius: 8px; font-size: 18px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .registration-btn:hover { background: #047857; transform: translateY(-1px); box-shadow: 0 8px 25px rgba(5, 150, 105, 0.3); }
+        .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin: 3rem 0; }
+        .feature-card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 1px solid #e5e7eb; }
+        .impact-counter { background: rgba(255,255,255,0.2); padding: 1rem 2rem; border-radius: 50px; display: inline-block; margin: 1rem; }
+        pre { background: #111827; padding: 1.5rem; border-radius: 8px; overflow-x: auto; }
+        code { font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace; font-size: 14px; line-height: 1.5; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <h1>${sport} ${ageGroup} Tournament</h1>
+            <p>Powered by Champions for Change Educational Mission</p>
+        </div>
+    </header>
+    
+    <section class="hero">
+        <div class="container">
+            <div class="tournament-format">
+                <h3>🏆 Intelligent Tournament Format: ${tournamentStructure.format}</h3>
+                <p><strong>Why this format?</strong> ${tournamentStructure.naturalReason}</p>
+            </div>
+            
+            <h2>Join the ${sport} Championship</h2>
+            <p style="font-size: 18px; color: #6b7280; max-width: 600px; margin: 1rem auto;">
+                Experience competitive ${sport} while funding educational opportunities for underprivileged youth in Corpus Christi, Texas.
+            </p>
+            <div style="margin: 2rem 0;">
+                <button class="registration-btn" onclick="registerTeam()">Register Your Team</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="champions-impact">
+        <div class="container">
+            <h2>Educational Impact Through Sports</h2>
+            <div style="display: flex; justify-content: center; flex-wrap: wrap; margin: 2rem 0;">
+                <div class="impact-counter">
+                    <div style="font-size: 2rem; font-weight: bold;" id="students-funded">0</div>
+                    <div>Students Funded</div>
+                </div>
+                <div class="impact-counter">
+                    <div style="font-size: 2rem; font-weight: bold;">$2,600</div>
+                    <div>Per Student Trip</div>
+                </div>
+                <div class="impact-counter">
+                    <div style="font-size: 2rem; font-weight: bold;" id="trips-completed">0</div>
+                    <div>Trips Completed</div>
+                </div>
+            </div>
+            <p style="font-size: 18px; opacity: 0.9;">Every tournament registration directly funds educational travel experiences that inspire learning and broaden horizons for middle school students in Corpus Christi.</p>
+        </div>
+    </section>
+    
+    <section class="feature-grid">
+        <div class="container">
+            <div class="feature-card">
+                <h3>🎯 Sport-Specific Format</h3>
+                <p><strong>Format:</strong> ${tournamentStructure.format}</p>
+                <p><strong>Structure:</strong> ${tournamentStructure.structure}</p>
+                <p>This tournament follows the natural competitive structure of ${sport}, ensuring authentic competition that athletes and coaches recognize.</p>
+            </div>
+            
+            <div class="feature-card">
+                <h3>📊 Real-Time Tracking</h3>
+                <p>Live scoring, bracket updates, and performance metrics. Parents and fans can follow the action remotely with instant notifications.</p>
+            </div>
+            
+            <div class="feature-card">
+                <h3>🎓 Educational Mission</h3>
+                <p>100% of proceeds fund $2,600 educational trips for underprivileged students. Your participation creates lasting educational impact.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="code-section">
+        <div class="container">
+            <h3 style="color: #10b981; margin-bottom: 1rem;">🛠️ Developer Implementation Code</h3>
+            <p style="color: #d1d5db; margin-bottom: 1.5rem;">
+                Copy this code to implement the ${sport} tournament structure in your own platform:
+            </p>
+            <pre><code>${tournamentStructure.codeImplementation}</code></pre>
+            
+            <div style="margin-top: 2rem; padding: 1rem; background: rgba(16, 185, 129, 0.1); border-radius: 8px;">
+                <p style="color: #10b981; font-weight: 600;">✨ This code is automatically generated based on ${sport}'s natural tournament structure</p>
+                <p style="color: #d1d5db; margin-top: 0.5rem;">Includes Champions for Change educational impact tracking and revenue attribution</p>
+            </div>
+        </div>
+    </section>
+    
+    <script>
+        // Tournament registration with educational impact tracking
+        function registerTeam() {
+            const registrationData = {
+                tournament: '${sportSlug}-${ageSlug}',
+                sport: '${sport}',
+                ageGroup: '${ageGroup}',
+                format: '${tournamentStructure.format}',
+                educationalImpact: true
+            };
+            
+            // Redirect to registration with pre-filled data
+            const params = new URLSearchParams(registrationData);
+            window.open(\`/register?\${params.toString()}\`, '_blank');
+        }
+        
+        // Real-time educational impact metrics
+        async function updateImpactMetrics() {
+            try {
+                const response = await fetch('/api/educational-impact');
+                const data = await response.json();
+                
+                document.getElementById('students-funded').textContent = data.studentsFunded || 0;
+                document.getElementById('trips-completed').textContent = data.tripsCompleted || 0;
+                
+                // Animate numbers
+                animateCounter('students-funded', data.studentsFunded || 0);
+                animateCounter('trips-completed', data.tripsCompleted || 0);
+            } catch (error) {
+                console.log('Impact metrics will load when connected to Champions for Change platform');
+            }
+        }
+        
+        function animateCounter(elementId, targetValue) {
+            const element = document.getElementById(elementId);
+            const start = 0;
+            const duration = 2000;
+            const startTime = performance.now();
+            
+            function updateCounter(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const currentValue = Math.floor(progress * targetValue);
+                
+                element.textContent = currentValue;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(updateCounter);
+                }
+            }
+            
+            requestAnimationFrame(updateCounter);
+        }
+        
+        // Initialize impact tracking
+        updateImpactMetrics();
+        
+        // Update every 30 seconds for live events
+        setInterval(updateImpactMetrics, 30000);
+    </script>
+</body>
+</html>`;
 }
 
 function getPerformanceMetric(sport: string): string {

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'wouter';
-import { ArrowLeft, Trophy, Sparkles, Zap, Brain, Target } from 'lucide-react';
+import { ArrowLeft, Trophy, Sparkles, Zap, Brain, Target, Code, Monitor } from 'lucide-react';
 import { useAuth } from "@/hooks/useAuth";
 
 export default function AIConsultation() {
@@ -79,7 +79,7 @@ export default function AIConsultation() {
             <textarea
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="e.g., 'Build a webpage for our basketball tournament' or 'Create a custom site for a 16-team middle school soccer tournament'"
+              placeholder="Try: 'Build a webpage for 16-team basketball tournament' or 'Create swimming meet with leaderboards' or 'Generate code for baseball playoffs'"
               className="w-full h-32 bg-slate-700 border border-slate-600 rounded-lg p-4 text-white placeholder-slate-400 focus:border-purple-400 focus:outline-none resize-none"
             />
           </div>
@@ -117,6 +117,78 @@ export default function AIConsultation() {
                 <div className="text-white whitespace-pre-line">{response.recommendation}</div>
               </div>
 
+              {/* Intelligent Tournament Structure Display */}
+              {response.tier2_generation?.intelligent_tournament_structure && (
+                <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/30 rounded-lg p-6">
+                  <h4 className="text-blue-400 font-semibold mb-4 flex items-center">
+                    <Brain className="h-5 w-5 mr-2" />
+                    Intelligent Tournament Structure
+                  </h4>
+                  <div className="space-y-4">
+                    <div className="bg-slate-700/50 rounded-lg p-4">
+                      <div className="text-sm text-slate-400 mb-2">Recommended Format</div>
+                      <div className="text-white font-semibold text-lg">{response.tier2_generation.intelligent_tournament_structure.format}</div>
+                      <div className="text-slate-300 text-sm mt-2">{response.tier2_generation.intelligent_tournament_structure.naturalReason}</div>
+                    </div>
+                    
+                    {response.tier2_generation.intelligent_tournament_structure.events && (
+                      <div className="bg-slate-700/50 rounded-lg p-4">
+                        <div className="text-sm text-slate-400 mb-2">Events Included</div>
+                        <div className="flex flex-wrap gap-2">
+                          {response.tier2_generation.intelligent_tournament_structure.events.map((event: string, idx: number) => (
+                            <span key={idx} className="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-sm">{event}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Implementation Code Section */}
+              {response.tier2_generation?.implementation_code && (
+                <div className="bg-slate-900 border border-green-500/30 rounded-lg p-6">
+                  <h4 className="text-green-400 font-semibold mb-4 flex items-center">
+                    <Code className="h-5 w-5 mr-2" />
+                    Copy-Paste Implementation Code
+                  </h4>
+                  <div className="bg-black rounded-lg p-4 overflow-x-auto">
+                    <pre className="text-green-300 text-sm font-mono">
+                      <code>{response.tier2_generation.implementation_code}</code>
+                    </pre>
+                  </div>
+                  <div className="mt-4 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
+                    <div className="text-green-400 text-sm font-semibold">Ready to Deploy</div>
+                    <div className="text-slate-300 text-sm">This code works with any JavaScript framework or vanilla HTML. Copy and paste to implement the tournament structure.</div>
+                  </div>
+                </div>
+              )}
+
+              {/* Custom Webpage Template */}
+              {response.tier3_full_service?.custom_webpage && (
+                <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/30 rounded-lg p-6">
+                  <h4 className="text-purple-400 font-semibold mb-4 flex items-center">
+                    <Monitor className="h-5 w-5 mr-2" />
+                    Complete Website Template
+                  </h4>
+                  <div className="space-y-4">
+                    <div className="bg-slate-700/50 rounded-lg p-4">
+                      <div className="text-sm text-slate-400 mb-2">Domain Suggestions</div>
+                      {response.tier3_full_service.custom_webpage.domain_suggestions.map((domain: string, idx: number) => (
+                        <div key={idx} className="text-purple-300 font-mono text-sm bg-slate-800 px-3 py-1 rounded mb-2">{domain}</div>
+                      ))}
+                    </div>
+                    
+                    <div className="bg-slate-700/50 rounded-lg p-4">
+                      <div className="text-sm text-slate-400 mb-2">SEO Optimized</div>
+                      <div className="text-white font-semibold">{response.tier3_full_service.custom_webpage.seo_optimization.title}</div>
+                      <div className="text-slate-300 text-sm mt-1">{response.tier3_full_service.custom_webpage.seo_optimization.description}</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Subscription Tier Info */}
               {response.sport !== 'Custom Tournament' && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="bg-slate-700 rounded-lg p-4 text-center">

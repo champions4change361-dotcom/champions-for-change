@@ -1423,8 +1423,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Get comprehensive AI analysis
+      // Get comprehensive AI analysis with intelligent tournament structure
       const result: KeystoneConsultationResult = analyzeTournamentQuery(user_input);
+      
+      // Add intelligent tournament structure generation
+      const participants = result.estimated_participants || 16;
+      const intelligentStructure = require('./ai-consultation').generateIntelligentTournamentStructure(result.sport, participants, result.age_group);
       
       // Tier access control based on subscription
       const response: any = {
@@ -1460,13 +1464,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       };
 
-      // Tier 2: Auto-Generation (Requires Basic+ subscription)
+      // Tier 2: Intelligent Auto-Generation (Requires Basic+ subscription)
       if (subscription_level !== 'free' && (tier === 'generation' || tier === 'full-service')) {
         response.tier2_generation = {
+          intelligent_tournament_structure: intelligentStructure,
           auto_bracket: result.tier2_structure,
+          sport_specific_format: intelligentStructure.format,
+          natural_competition_reason: intelligentStructure.naturalReason,
+          implementation_code: intelligentStructure.codeImplementation,
           participant_assignments: result.tier2_structure?.participants || [],
           score_tracking_setup: {
-            performance_metrics: result.tier2_structure?.type === 'leaderboard' ? 'individual_scoring' : 'match_based',
+            performance_metrics: intelligentStructure.format.includes('leaderboard') ? 'individual_scoring' : 'match_based',
             real_time_updates: true,
             mobile_friendly: true
           }
@@ -1474,16 +1482,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else if (subscription_level === 'free') {
         response.tier2_preview = {
           feature_available: false,
-          upgrade_message: "Upgrade to Basic plan for auto-bracket generation",
-          sample_structure: "8-team single elimination bracket with Champions for Change branding"
+          upgrade_message: "Upgrade to Basic plan for intelligent tournament generation",
+          sample_structure: `${intelligentStructure.format} - ${intelligentStructure.naturalReason}`,
+          intelligent_format_preview: intelligentStructure.format
         };
       }
 
-      // Tier 3: Full Service with Custom Webpage (Requires Pro+ subscription)
-      if ((subscription_level === 'pro' || subscription_level === 'enterprise') && tier === 'full-service') {
+      // Tier 3: Full Service with Custom Webpage & Implementation Code (Requires Pro+ subscription)
+      if ((subscription_level === 'pro' || subscription_level === 'enterprise' || subscription_level === 'district_enterprise') && tier === 'full-service') {
         response.tier3_full_service = {
           custom_webpage: {
             template_code: result.tier3_webpage_template,
+            implementation_ready: true,
+            copy_paste_code: intelligentStructure.codeImplementation,
             domain_suggestions: [
               `${result.sport.toLowerCase().replace(/\s+/g, '')}-tournament.champions4change.org`,
               `${result.age_group.toLowerCase().replace(/\s+/g, '')}-${result.sport.toLowerCase().replace(/\s+/g, '')}.c4c-tournaments.com`
@@ -1494,6 +1505,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
               keywords: `${result.sport}, tournament, education, Corpus Christi, Champions for Change`
             }
           },
+          intelligent_tournament_logic: {
+            format_explanation: intelligentStructure.naturalReason,
+            sport_specific_structure: intelligentStructure.structure,
+            ready_to_deploy_code: intelligentStructure.codeImplementation,
+            platform_integration: "Code works with any JavaScript framework or vanilla HTML"
+          },
           complete_tournament_setup: true,
           dedicated_support: "Priority email and phone support from Daniel Thornton",
           custom_branding: {
@@ -1502,11 +1519,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
             mission_integration: "Educational impact tracker and trip funding progress"
           }
         };
-      } else if (subscription_level !== 'pro' && subscription_level !== 'enterprise') {
+      } else if (subscription_level !== 'pro' && subscription_level !== 'enterprise' && subscription_level !== 'district_enterprise') {
         response.tier3_preview = {
           feature_available: false,
-          upgrade_message: "Upgrade to Pro plan for full-service tournament creation with custom webpages",
-          sample_features: ["Custom branded tournament website", "Complete setup service", "Priority support from Daniel"]
+          upgrade_message: "Upgrade to Pro plan for full-service tournament creation with custom webpages and implementation code",
+          sample_features: [
+            "Custom branded tournament website with copy-paste code", 
+            "Sport-specific tournament logic generation", 
+            "Complete setup service", 
+            "Priority support from Daniel"
+          ]
         };
       }
 
