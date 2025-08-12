@@ -120,8 +120,8 @@ export default function DonationFlow() {
         throw new Error('Payment setup incomplete');
       }
       
-      // Redirect to Stripe checkout with donation context
-      window.location.href = `/checkout?client_secret=${encodeURIComponent(clientSecret)}&amount=${numericAmount}&type=donation&donor_id=${donorId}&choice=${postDonationChoice}`;
+      // Redirect to payment method selection instead of direct checkout
+      window.location.href = `/payment-methods?amount=${numericAmount}&donor_id=${donorId}&choice=${postDonationChoice}`;
       
     } catch (error: any) {
       console.error('Donation error:', error);
