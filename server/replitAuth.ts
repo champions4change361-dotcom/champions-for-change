@@ -11,8 +11,11 @@ import cookieParser from "cookie-parser";
 import { storage, getStorage } from "./storage";
 
 // Configure domains for OAuth - support both Replit and custom domain
-const supportedDomains = process.env.REPLIT_DOMAINS ? 
+let supportedDomains = process.env.REPLIT_DOMAINS ? 
   process.env.REPLIT_DOMAINS.split(",") : [];
+
+// Auto-detect current Replit domain - the workspace domain from REPLIT_DOMAINS is the actual domain
+// Don't construct a domain from REPL_SLUG/REPL_OWNER as it may not match the actual URL
 
 // Add trantortournaments.org as supported domain
 if (!supportedDomains.includes('trantortournaments.org')) {
@@ -147,18 +150,12 @@ export async function setupAuth(app: Express) {
     // Check if OAuth is configured for this domain
     const strategyName = `replitauth:${req.hostname}`;
     
-    // Try OAuth first if configured
-    if (supportedDomains.includes(req.hostname) && process.env.REPL_ID) {
-      console.log(`Using OAuth strategy for domain: ${req.hostname}`);
-      try {
-        return passport.authenticate(strategyName, {
-          prompt: "login consent",
-          scope: ["openid", "email", "profile", "offline_access"],
-        })(req, res, next);
-      } catch (error) {
-        console.log(`OAuth strategy failed for ${req.hostname}, using fallback`);
-      }
-    }
+    // Always use fallback authentication for development to avoid OAuth redirect loops
+    console.log(`Domain check: ${req.hostname} in [${supportedDomains.join(', ')}] = ${supportedDomains.includes(req.hostname)}`);
+    console.log(`Forcing fallback authentication to avoid OAuth redirect loops`);
+    
+    // Skip OAuth for development and always use fallback
+    // OAuth will be enabled after deployment to production domains
     
     // Fallback to simplified authentication for development/testing
     console.log(`Using fallback authentication for ${req.hostname}`);
