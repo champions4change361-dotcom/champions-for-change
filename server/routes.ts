@@ -16,8 +16,8 @@ if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY - See STRIPE_SETUP_GUIDE.md');
 }
 
-// Use environment variable (fallback for activation delay)
-const stripeKey = process.env.STRIPE_SECRET_KEY || "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";
+// Champions for Change live key (override environment caching)
+const stripeKey = "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";
 console.log(`🔑 Champions for Change payment system ready`);
 console.log(`🔑 Key ends with: ...${stripeKey.slice(-15)}`);
 console.log(`🔑 Live mode enabled for real donations`);

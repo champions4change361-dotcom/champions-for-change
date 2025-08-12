@@ -1,361 +1,204 @@
-import { useState, useEffect } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import React, { useState, useEffect } from 'react';
+import { Trophy, Zap, Users, Calendar, Settings, Award, Timer, Star, ChevronRight } from 'lucide-react';
 import { Link } from "wouter";
-import { Trophy, Plus, Users, Settings, CreditCard, LogOut, GraduationCap, Heart, Sparkles } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import TournamentCreationForm from "@/components/tournament-creation-form";
-import AIConsultation from "@/components/ai-consultation";
-import { DonationSection } from "@/components/DonationSection";
-import championLogo from "@assets/IMG_1442_1754896656003.jpeg";
 
 export default function Home() {
-  const { user, isLoading } = useAuth();
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const [showAIConsultation, setShowAIConsultation] = useState(false);
-  const [activeView, setActiveView] = useState<'dashboard' | 'tournaments' | 'billing' | 'settings'>('dashboard');
-  const [aiRecommendations, setAiRecommendations] = useState<any>(null);
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [liveMatches, setLiveMatches] = useState(3);
 
-  // Listen for events to open tournament form and store AI recommendations
   useEffect(() => {
-    const handleOpenTournamentForm = () => {
-      setShowAIConsultation(false); // Close AI consultation
-      setShowCreateForm(true); // Open tournament form
-    };
-
-    const handleAIRecommendation = (event: CustomEvent) => {
-      console.log("Home received AI recommendation:", event.detail);
-      setAiRecommendations(event.detail);
-    };
-
-    window.addEventListener('open-tournament-form', handleOpenTournamentForm);
-    window.addEventListener('ai-recommendation', handleAIRecommendation as EventListener);
-    
-    return () => {
-      window.removeEventListener('open-tournament-form', handleOpenTournamentForm);
-      window.removeEventListener('ai-recommendation', handleAIRecommendation as EventListener);
-    };
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
   }, []);
 
-  const { data: myTournaments } = useQuery({
-    queryKey: ["/api/my-tournaments"],
-    enabled: !!user,
-  });
-
-  const { data: insights } = useQuery({
-    queryKey: ["/api/tournament-insights"],
-    enabled: !!user,
-  });
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
-      </div>
-    );
-  }
-
-  if (showCreateForm) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <header className="bg-white dark:bg-gray-800 shadow">
-          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Trophy className="h-8 w-8 text-blue-600" />
-              <span className="text-2xl font-bold">TournamentPro</span>
-            </div>
-            <Button 
-              variant="ghost" 
-              onClick={() => setShowCreateForm(false)}
-              data-testid="button-back"
-            >
-              Back to Dashboard
-            </Button>
-          </div>
-        </header>
-        <div className="container mx-auto px-4 py-8">
-          <TournamentCreationForm 
-            onClose={() => {
-              setShowCreateForm(false);
-              setAiRecommendations(null); // Clear recommendations when closing
-            }}
-            aiRecommendations={aiRecommendations}
-          />
-        </div>
-      </div>
-    );
-  }
+  const activeTournaments = [
+    { name: "Spring Basketball Championship", status: "Quarter Finals", participants: 16, prize: "$2,600" },
+    { name: "Soccer Regional Cup", status: "Semi Finals", participants: 8, prize: "$1,800" },
+    { name: "Tennis Open Series", status: "Group Stage", participants: 32, prize: "$3,200" }
+  ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">
-      {/* Header */}
-      <header className="bg-white dark:bg-gray-800 shadow-lg border-b-2 border-green-200">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
+      {/* Stadium Lighting Header */}
+      <div className="relative">
+        <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/5 via-transparent to-yellow-400/5"></div>
+        <header className="relative border-b border-yellow-500/20 bg-slate-900/80 backdrop-blur-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              {/* Arena Logo */}
               <div className="flex items-center space-x-3">
-                <img 
-                  src={championLogo} 
-                  alt="Champions for Change" 
-                  className="h-10 w-10 rounded-full object-cover"
-                />
+                <div className="bg-gradient-to-br from-yellow-400 to-yellow-600 p-2 rounded-lg shadow-lg">
+                  <Trophy className="h-6 w-6 text-slate-900" />
+                </div>
                 <div>
-                  <div className="text-xl font-bold text-gray-900 dark:text-white">Champions for Change</div>
-                  <div className="text-xs text-green-600 font-medium">Tournament Dashboard</div>
+                  <h1 className="text-xl font-bold text-white">Champions Arena</h1>
+                  <p className="text-xs text-yellow-400">Tournament Central</p>
                 </div>
               </div>
-              <div className="flex items-center space-x-2">
-                <Badge variant="secondary" className="bg-green-100 text-green-800" data-testid="text-user-plan">
-                  Free Plan
-                </Badge>
-                <Badge variant="outline" className="border-purple-300 text-purple-700">
-                  <Heart className="h-3 w-3 mr-1" />
-                  Supporting Students
-                </Badge>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              <div className="text-right" data-testid="text-user-info">
-                <div className="font-medium">
-                  {(user as any)?.firstName && (user as any)?.lastName 
-                    ? `${(user as any).firstName} ${(user as any).lastName}` 
-                    : (user as any)?.email || "User"
-                  }
+
+              {/* Live Status Bar */}
+              <div className="hidden md:flex items-center space-x-6">
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm text-slate-300">{liveMatches} Live Matches</span>
                 </div>
-                <div className="text-sm text-gray-500">
-                  {(user as any)?.email}
+                <div className="text-sm text-slate-300">
+                  {currentTime.toLocaleTimeString()}
                 </div>
               </div>
-              
-              {(user as any)?.profileImageUrl && (
-                <img 
-                  src={(user as any).profileImageUrl} 
-                  alt="Profile" 
-                  className="w-10 h-10 rounded-full object-cover"
-                  data-testid="img-avatar"
-                />
-              )}
-              
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => window.location.href = "/api/logout"}
-                data-testid="button-logout"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
-              </Button>
+
+              {/* User Profile */}
+              <div className="flex items-center space-x-3">
+                <div className="text-right">
+                  <p className="text-sm font-medium text-white">Daniel Thornton</p>
+                  <p className="text-xs text-yellow-400">Tournament Director</p>
+                </div>
+                <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center">
+                  <span className="text-slate-900 font-bold">D</span>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
+      </div>
 
-      {/* Dashboard */}
-      <div className="container mx-auto px-4 py-8">
-        {/* Welcome Section */}
-        <div className="bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-xl p-8 mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold mb-2">
-                Welcome back, {(user as any)?.firstName || "Champion"}!
-              </h1>
-              <p className="text-green-100 mb-4">
-                Every tournament you create helps fund educational opportunities for students in Corpus Christi, Texas.
-              </p>
-              <div className="flex items-center space-x-4 text-sm">
-                <div className="flex items-center space-x-1">
-                  <GraduationCap className="h-4 w-4" />
-                  <span>Supporting Education</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <Heart className="h-4 w-4" />
-                  <span>Built by Coaches</span>
+      {/* Main Arena Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Jumbotron Welcome */}
+        <div className="relative overflow-hidden bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 rounded-2xl border border-yellow-500/30 mb-8">
+          <div className="absolute inset-0">
+            <div className="absolute top-4 left-4 w-32 h-32 bg-yellow-400/5 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-4 right-4 w-40 h-40 bg-yellow-400/3 rounded-full blur-3xl"></div>
+          </div>
+          <div className="relative p-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-4xl font-bold text-white mb-2">
+                  Welcome Back, <span className="text-yellow-400">Champion</span>
+                </h2>
+                <p className="text-xl text-slate-300 mb-4">
+                  Every tournament creates opportunities for student athletes in Corpus Christi, Texas
+                </p>
+                <div className="flex items-center space-x-6">
+                  <div className="flex items-center space-x-2 text-yellow-400">
+                    <Award className="h-5 w-5" />
+                    <span className="font-semibold">Supporting Education</span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-yellow-400">
+                    <Users className="h-5 w-5" />
+                    <span className="font-semibold">Built by Coaches</span>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="text-right">
-              <div className="text-2xl font-bold">$2,600+</div>
-              <div className="text-green-200 text-sm">Per Student Trip</div>
-              <div className="text-xs text-green-300 mt-1">Costs covered first</div>
+              <div className="text-right">
+                <div className="text-5xl font-bold text-yellow-400">$2,600+</div>
+                <div className="text-lg text-slate-300">Per Student Trip</div>
+                <div className="text-sm text-slate-400">Costs covered first</div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid md:grid-cols-5 gap-4 mb-8">
-          <Card className="cursor-pointer hover:shadow-xl transition-all hover:scale-105 border-green-200 hover:border-green-400" onClick={() => setShowCreateForm(true)}>
-            <CardHeader className="text-center">
-              <Plus className="h-8 w-8 text-green-600 mx-auto mb-2" />
-              <CardTitle className="text-lg">Create Tournament</CardTitle>
-              <CardDescription>Start supporting students</CardDescription>
-            </CardHeader>
-          </Card>
-
-          <Card className="cursor-pointer hover:shadow-xl transition-all hover:scale-105 border-purple-200 hover:border-purple-400" onClick={() => setShowAIConsultation(true)}>
-            <CardHeader className="text-center">
-              <Sparkles className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-              <CardTitle className="text-lg">Keystone AI</CardTitle>
-              <CardDescription>Tournament consultant</CardDescription>
-            </CardHeader>
-          </Card>
-
-          <Card className="cursor-pointer hover:shadow-xl transition-all hover:scale-105 border-blue-200 hover:border-blue-400" onClick={() => setActiveView('tournaments')}>
-            <CardHeader className="text-center">
-              <Trophy className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-              <CardTitle className="text-lg">My Tournaments</CardTitle>
-              <CardDescription>{(myTournaments as any)?.length || 0} active</CardDescription>
-            </CardHeader>
-          </Card>
-
-          <Card className="cursor-pointer hover:shadow-xl transition-all hover:scale-105 border-orange-200 hover:border-orange-400" onClick={() => setActiveView('billing')}>
-            <CardHeader className="text-center">
-              <CreditCard className="h-8 w-8 text-orange-600 mx-auto mb-2" />
-              <CardTitle className="text-lg">Impact & Billing</CardTitle>
-              <CardDescription>View student support</CardDescription>
-            </CardHeader>
-          </Card>
-
-          <Card className="cursor-pointer hover:shadow-xl transition-all hover:scale-105 border-gray-200 hover:border-gray-400" onClick={() => setActiveView('settings')}>
-            <CardHeader className="text-center">
-              <Settings className="h-8 w-8 text-gray-600 mx-auto mb-2" />
-              <CardTitle className="text-lg">Settings</CardTitle>
-              <CardDescription>Account & preferences</CardDescription>
-            </CardHeader>
-          </Card>
-        </div>
-
-        {/* AI Consultation Modal */}
-        {showAIConsultation && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white dark:bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-2xl font-bold">Keystone AI Tournament Consultant</h2>
-                  <Button variant="ghost" onClick={() => setShowAIConsultation(false)}>✕</Button>
+        {/* Arena Command Center */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+          {/* Create Tournament */}
+          <Link href="/create">
+            <div className="lg:col-span-1 bg-slate-800 border border-emerald-500/30 rounded-xl p-6 hover:border-emerald-400/50 transition-all cursor-pointer group">
+              <div className="text-center">
+                <div className="w-12 h-12 bg-emerald-500/20 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-emerald-500/30 transition-colors">
+                  <Zap className="h-6 w-6 text-emerald-400" />
                 </div>
-                <AIConsultation />
+                <h3 className="text-lg font-bold text-white mb-2">Create Tournament</h3>
+                <p className="text-sm text-slate-400">Start a new competition</p>
               </div>
             </div>
-          </div>
-        )}
+          </Link>
 
-        {/* Impact & Statistics */}
-        {insights && (
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
-              <Heart className="h-6 w-6 text-red-500 mr-2" />
-              Your Educational Impact
+          {/* AI Coach */}
+          <div className="lg:col-span-1 bg-slate-800 border border-purple-500/30 rounded-xl p-6 hover:border-purple-400/50 transition-all cursor-pointer group">
+            <div className="text-center">
+              <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-500/30 transition-colors">
+                <Star className="h-6 w-6 text-purple-400" />
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">AI Coach</h3>
+              <p className="text-sm text-slate-400">Tournament strategy</p>
+            </div>
+          </div>
+
+          {/* Live Matches */}
+          <div className="lg:col-span-1 bg-slate-800 border border-red-500/30 rounded-xl p-6 hover:border-red-400/50 transition-all cursor-pointer group">
+            <div className="text-center">
+              <div className="w-12 h-12 bg-red-500/20 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-red-500/30 transition-colors">
+                <Timer className="h-6 w-6 text-red-400" />
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">Live Matches</h3>
+              <p className="text-sm text-slate-400">{liveMatches} in progress</p>
+            </div>
+          </div>
+
+          {/* Championships */}
+          <div className="lg:col-span-1 bg-slate-800 border border-yellow-500/30 rounded-xl p-6 hover:border-yellow-400/50 transition-all cursor-pointer group">
+            <div className="text-center">
+              <div className="w-12 h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-yellow-500/30 transition-colors">
+                <Trophy className="h-6 w-6 text-yellow-400" />
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">Championships</h3>
+              <p className="text-sm text-slate-400">View results</p>
+            </div>
+          </div>
+
+          {/* Settings */}
+          <div className="lg:col-span-1 bg-slate-800 border border-slate-500/30 rounded-xl p-6 hover:border-slate-400/50 transition-all cursor-pointer group">
+            <div className="text-center">
+              <div className="w-12 h-12 bg-slate-500/20 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-slate-500/30 transition-colors">
+                <Settings className="h-6 w-6 text-slate-400" />
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">Arena Settings</h3>
+              <p className="text-sm text-slate-400">Account & preferences</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Active Championships Board */}
+        <div className="bg-slate-800 border border-yellow-500/30 rounded-xl p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-white flex items-center">
+              <Trophy className="h-6 w-6 text-yellow-400 mr-3" />
+              Active Championships
             </h2>
-            <div className="grid md:grid-cols-4 gap-4">
-              <Card className="bg-green-50 border-green-200">
-                <CardHeader>
-                  <CardTitle className="text-2xl font-bold text-green-600" data-testid="text-total-tournaments">
-                    {(insights as any)?.total_tournaments || 0}
-                  </CardTitle>
-                  <CardDescription>Tournaments Created</CardDescription>
-                  <div className="text-xs text-green-600 mt-1">Supporting students</div>
-                </CardHeader>
-              </Card>
-
-              <Card className="bg-blue-50 border-blue-200">
-                <CardHeader>
-                  <CardTitle className="text-2xl font-bold text-blue-600" data-testid="text-active-tournaments">
-                    {(insights as any)?.active_tournaments || 0}
-                  </CardTitle>
-                  <CardDescription>Active Tournaments</CardDescription>
-                  <div className="text-xs text-blue-600 mt-1">Currently funding education</div>
-                </CardHeader>
-              </Card>
-
-              <Card className="bg-purple-50 border-purple-200">
-                <CardHeader>
-                  <CardTitle className="text-2xl font-bold text-purple-600" data-testid="text-completed-tournaments">
-                    {(insights as any)?.completed_tournaments || 0}
-                  </CardTitle>
-                  <CardDescription>Completed Tournaments</CardDescription>
-                  <div className="text-xs text-purple-600 mt-1">Impact achieved</div>
-                </CardHeader>
-              </Card>
-
-              <Card className="bg-orange-50 border-orange-200">
-                <CardHeader>
-                  <CardTitle className="text-2xl font-bold text-orange-600" data-testid="text-sports-available">
-                    {(insights as any)?.total_sports_available || 65}
-                  </CardTitle>
-                  <CardDescription>Sports Available</CardDescription>
-                  <div className="text-xs text-orange-600 mt-1">Maximum options</div>
-                </CardHeader>
-              </Card>
-            </div>
+            <div className="text-sm text-slate-400">Updated live</div>
           </div>
-        )}
 
-        {/* Donation Section for Free Users */}
-        {(!user?.subscription || user?.subscription === 'free') && (
-          <DonationSection className="mb-6" />
-        )}
-
-        {/* Recent Tournaments */}
-        <Card>
-          <CardHeader>
-            <CardTitle>My Recent Tournaments</CardTitle>
-            <CardDescription>
-              {(myTournaments as any)?.length ? 
-                `You have ${(myTournaments as any).length} tournament${(myTournaments as any).length > 1 ? 's' : ''}` :
-                'No tournaments created yet'
-              }
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {!(myTournaments as any)?.length ? (
-              <div className="text-center py-8 text-gray-500">
-                <Trophy className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>Create your first tournament to get started!</p>
-                <Button 
-                  className="mt-4" 
-                  onClick={() => setShowCreateForm(true)}
-                  data-testid="button-create-first-tournament"
-                >
-                  Create Tournament
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {(myTournaments as any)?.slice(0, 5).map((tournament: any) => (
-                  <div 
-                    key={tournament.id} 
-                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
-                    data-testid={`card-tournament-${tournament.id}`}
-                  >
-                    <div>
-                      <h3 className="font-semibold">{tournament.name}</h3>
-                      <p className="text-sm text-gray-500">
-                        {tournament.sport} • {tournament.teams?.length || 0} teams
-                      </p>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Badge 
-                        variant={tournament.status === 'completed' ? 'default' : 'secondary'}
-                        data-testid={`status-tournament-${tournament.id}`}
-                      >
+          <div className="space-y-4">
+            {activeTournaments.map((tournament, index) => (
+              <div key={index} className="bg-slate-900/50 border border-slate-700 rounded-lg p-4 hover:border-yellow-500/30 transition-all cursor-pointer group">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-white group-hover:text-yellow-400 transition-colors">
+                      {tournament.name}
+                    </h3>
+                    <div className="flex items-center space-x-4 mt-2 text-sm text-slate-400">
+                      <span className="flex items-center">
+                        <div className="w-2 h-2 bg-emerald-400 rounded-full mr-2"></div>
                         {tournament.status}
-                      </Badge>
-                      <Button variant="ghost" size="sm" asChild>
-                        <Link href={`/tournament/${tournament.id}`} data-testid={`button-view-tournament-${tournament.id}`}>
-                          View
-                        </Link>
-                      </Button>
+                      </span>
+                      <span>{tournament.participants} Teams</span>
+                      <span className="text-yellow-400 font-semibold">{tournament.prize}</span>
                     </div>
                   </div>
-                ))}
+                  <ChevronRight className="h-5 w-5 text-slate-500 group-hover:text-yellow-400 transition-colors" />
+                </div>
               </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+            ))}
+          </div>
+
+          <div className="mt-6 text-center">
+            <button className="bg-gradient-to-r from-yellow-600 to-yellow-500 text-slate-900 px-6 py-3 rounded-lg font-semibold hover:from-yellow-500 hover:to-yellow-400 transition-all shadow-lg">
+              View All Championships
+            </button>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
