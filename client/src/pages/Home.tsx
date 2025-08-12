@@ -123,48 +123,56 @@ export default function Home() {
           </Link>
 
           {/* AI Coach */}
-          <div className="lg:col-span-1 bg-slate-800 border border-purple-500/30 rounded-xl p-6 hover:border-purple-400/50 transition-all cursor-pointer group">
-            <div className="text-center">
-              <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-500/30 transition-colors">
-                <Star className="h-6 w-6 text-purple-400" />
+          <Link href="/ai-consultation">
+            <div className="lg:col-span-1 bg-slate-800 border border-purple-500/30 rounded-xl p-6 hover:border-purple-400/50 transition-all cursor-pointer group">
+              <div className="text-center">
+                <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-500/30 transition-colors">
+                  <Star className="h-6 w-6 text-purple-400" />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">AI Coach</h3>
+                <p className="text-sm text-slate-400">Tournament strategy</p>
               </div>
-              <h3 className="text-lg font-bold text-white mb-2">AI Coach</h3>
-              <p className="text-sm text-slate-400">Tournament strategy</p>
             </div>
-          </div>
+          </Link>
 
           {/* Live Matches */}
-          <div className="lg:col-span-1 bg-slate-800 border border-red-500/30 rounded-xl p-6 hover:border-red-400/50 transition-all cursor-pointer group">
-            <div className="text-center">
-              <div className="w-12 h-12 bg-red-500/20 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-red-500/30 transition-colors">
-                <Timer className="h-6 w-6 text-red-400" />
+          <Link href="/live-matches">
+            <div className="lg:col-span-1 bg-slate-800 border border-red-500/30 rounded-xl p-6 hover:border-red-400/50 transition-all cursor-pointer group">
+              <div className="text-center">
+                <div className="w-12 h-12 bg-red-500/20 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-red-500/30 transition-colors">
+                  <Timer className="h-6 w-6 text-red-400" />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">Live Matches</h3>
+                <p className="text-sm text-slate-400">{liveMatches} in progress</p>
               </div>
-              <h3 className="text-lg font-bold text-white mb-2">Live Matches</h3>
-              <p className="text-sm text-slate-400">{liveMatches} in progress</p>
             </div>
-          </div>
+          </Link>
 
           {/* Championships */}
-          <div className="lg:col-span-1 bg-slate-800 border border-yellow-500/30 rounded-xl p-6 hover:border-yellow-400/50 transition-all cursor-pointer group">
-            <div className="text-center">
-              <div className="w-12 h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-yellow-500/30 transition-colors">
-                <Trophy className="h-6 w-6 text-yellow-400" />
+          <Link href="/championships">
+            <div className="lg:col-span-1 bg-slate-800 border border-yellow-500/30 rounded-xl p-6 hover:border-yellow-400/50 transition-all cursor-pointer group">
+              <div className="text-center">
+                <div className="w-12 h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-yellow-500/30 transition-colors">
+                  <Trophy className="h-6 w-6 text-yellow-400" />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">Championships</h3>
+                <p className="text-sm text-slate-400">View results</p>
               </div>
-              <h3 className="text-lg font-bold text-white mb-2">Championships</h3>
-              <p className="text-sm text-slate-400">View results</p>
             </div>
-          </div>
+          </Link>
 
           {/* Settings */}
-          <div className="lg:col-span-1 bg-slate-800 border border-slate-500/30 rounded-xl p-6 hover:border-slate-400/50 transition-all cursor-pointer group">
-            <div className="text-center">
-              <div className="w-12 h-12 bg-slate-500/20 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-slate-500/30 transition-colors">
-                <Settings className="h-6 w-6 text-slate-400" />
+          <Link href="/settings">
+            <div className="lg:col-span-1 bg-slate-800 border border-slate-500/30 rounded-xl p-6 hover:border-slate-400/50 transition-all cursor-pointer group">
+              <div className="text-center">
+                <div className="w-12 h-12 bg-slate-500/20 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-slate-500/30 transition-colors">
+                  <Settings className="h-6 w-6 text-slate-400" />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">Arena Settings</h3>
+                <p className="text-sm text-slate-400">Account & preferences</p>
               </div>
-              <h3 className="text-lg font-bold text-white mb-2">Arena Settings</h3>
-              <p className="text-sm text-slate-400">Account & preferences</p>
             </div>
-          </div>
+          </Link>
         </div>
 
         {/* Active Championships Board */}
