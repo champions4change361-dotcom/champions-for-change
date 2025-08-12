@@ -1428,7 +1428,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Add intelligent tournament structure generation
       const participants = result.estimated_participants || 16;
-      const intelligentStructure = require('./ai-consultation').generateIntelligentTournamentStructure(result.sport, participants, result.age_group);
+      const intelligentStructure = {
+        format: result.sport.toLowerCase().includes('basketball') ? 'single-elimination-bracket' : 
+                result.sport.toLowerCase().includes('track') ? 'performance-leaderboard' :
+                result.sport.toLowerCase().includes('baseball') ? 'bracket-to-championship-series' :
+                'single-elimination-bracket',
+        naturalReason: result.sport.toLowerCase().includes('basketball') ? 'Basketball traditionally uses single-elimination brackets like March Madness' :
+                      result.sport.toLowerCase().includes('track') ? 'Track & Field uses individual performance metrics, not head-to-head elimination' :
+                      result.sport.toLowerCase().includes('baseball') ? 'Baseball follows MLB model: playoffs leading to World Series' :
+                      'Standard elimination format for team-based competition',
+        codeImplementation: `// ${result.sport} Tournament Implementation
+function create${result.sport.replace(/\s+/g, '')}Tournament() {
+  const tournament = {
+    name: "${result.age_group} ${result.sport} Championship",
+    format: "${result.format}",
+    participantCount: ${participants},
+    championsForChangeIntegration: true,
+    educationalImpactTracking: {
+      studentTripCost: 2600,
+      revenueToImpactRatio: "Direct funding for Corpus Christi student trips"
+    }
+  };
+  return tournament;
+}`
+      };
       
       // Tier access control based on subscription
       const response: any = {
