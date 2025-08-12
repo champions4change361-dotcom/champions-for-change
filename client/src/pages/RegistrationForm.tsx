@@ -144,9 +144,9 @@ export default function RegistrationFormPage() {
   ];
 
   const tierPricing = {
-    foundation: { name: 'Foundation', price: 'Free', features: ['Up to 5 tournaments', 'Basic features'] },
-    champion: { name: 'Champion', price: '$29/month', features: ['Unlimited tournaments', 'Advanced features'] },
-    enterprise: { name: 'Enterprise', price: 'Custom', features: ['White-label solution', 'Dedicated support'] }
+    foundation: { name: 'Foundation', price: 'Free', features: ['Up to 5 tournaments', 'Basic features', 'Community support'] },
+    champion: { name: 'Champion', price: '$99/month', features: ['Unlimited tournaments', 'Advanced analytics', 'Multi-school management', 'Priority support'] },
+    enterprise: { name: 'District Enterprise', price: '$399/month', features: ['White-label solution', 'Custom domain', 'Dedicated support', 'District-wide management', 'Advanced reporting'] }
   };
 
   if (step === 5) {

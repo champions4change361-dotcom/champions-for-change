@@ -193,15 +193,25 @@ export default function DonationFlow() {
           </div>
         </div>
 
-        <Button 
-          onClick={handleContinueToContact}
-          className="w-full bg-green-600 hover:bg-green-700 text-lg py-6"
-          disabled={!getFinalAmount()}
-          data-testid="button-continue-contact"
-        >
-          Continue to Contact Information
-          <ArrowRight className="ml-2 h-5 w-5" />
-        </Button>
+        <div className="flex gap-3">
+          <Button 
+            variant="outline" 
+            onClick={() => setLocation('/')}
+            className="flex-1"
+            data-testid="button-cancel-donation-amount"
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleContinueToContact}
+            className="flex-1 bg-green-600 hover:bg-green-700 text-lg py-6"
+            disabled={!getFinalAmount()}
+            data-testid="button-continue-contact"
+          >
+            Continue to Contact Information
+            <ArrowRight className="ml-2 h-5 w-5" />
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
@@ -301,6 +311,14 @@ export default function DonationFlow() {
         </div>
 
         <div className="flex gap-3">
+          <Button 
+            variant="outline" 
+            onClick={() => setLocation('/')}
+            className="flex-1"
+            data-testid="button-cancel-donation"
+          >
+            Cancel
+          </Button>
           <Button 
             variant="outline" 
             onClick={() => setStep('amount')}
