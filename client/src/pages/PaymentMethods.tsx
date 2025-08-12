@@ -71,8 +71,8 @@ export default function PaymentMethods() {
   const handleVenmoPayment = () => {
     if (!paymentData) return;
     
-    // Venmo deep link - replace with your actual Venmo username
-    const venmoUsername = 'Champions-for-Change'; // Replace with your Venmo business username
+    // Venmo deep link - using your actual Venmo username
+    const venmoUsername = 'championsforcahnge'; // Your Venmo business username
     const note = encodeURIComponent(`$${paymentData.amount} donation for Champions for Change educational programs`);
     const venmoUrl = `https://venmo.com/${venmoUsername}?txn=pay&amount=${paymentData.amount}&note=${note}`;
     
