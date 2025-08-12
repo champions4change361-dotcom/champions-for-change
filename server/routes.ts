@@ -1414,7 +1414,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Enhanced Keystone AI Consultation with Three-Tier Service Model
   app.post('/api/keystone-consult', async (req, res) => {
     try {
-      const { user_input, tier = 'consultation', subscription_level = 'free' } = req.body;
+      const { user_input, consultation_type = 'tournament', tier = 'consultation', subscription_level = 'free' } = req.body;
       
       if (!user_input) {
         return res.status(400).json({
@@ -1423,16 +1423,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Get comprehensive AI analysis with intelligent tournament structure
-      const result: KeystoneConsultationResult = analyzeTournamentQuery(user_input);
+      // Handle different consultation types
+      let result: KeystoneConsultationResult;
+      let intelligentStructure;
+      let completeWebsite;
       
-      // Generate intelligent tournament structure with complete website code
-      const participants = result.estimated_participants || 16;
-      const intelligentStructure = generateIntelligentTournamentStructure(result.sport, participants, result.age_group);
-      
-      // Generate complete website template
-      const completeWebsite = generateWebpageTemplate(result.sport, result.age_group, result.format);
-      console.log(`🔧 Generated website template: ${completeWebsite.length} characters`);
+      if (consultation_type === 'website') {
+        // Website Builder AI - Focus on user hierarchy and link sharing
+        result = analyzeWebsiteBuilderQuery(user_input);
+        completeWebsite = generateWebsiteBuilderTemplate(result.sport, result.age_group, result.format);
+        console.log(`🌐 Generated website builder template: ${completeWebsite.length} characters`);
+      } else {
+        // Tournament Logic AI - Focus on sport-specific structures  
+        result = analyzeTournamentQuery(user_input);
+        const participants = result.estimated_participants || 16;
+        intelligentStructure = generateIntelligentTournamentStructure(result.sport, participants, result.age_group);
+        completeWebsite = generateWebpageTemplate(result.sport, result.age_group, result.format);
+        console.log(`🏆 Generated tournament template: ${completeWebsite.length} characters`);
+      }
       
       // Tier access control based on subscription
       const response: any = {

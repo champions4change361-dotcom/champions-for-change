@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'wouter';
-import { ArrowLeft, Trophy, Sparkles, Zap, Brain, Target, Code, Monitor, LogOut } from 'lucide-react';
+import { ArrowLeft, Trophy, Sparkles, Zap, Brain, Target, Code, Monitor, LogOut, Globe, Users } from 'lucide-react';
 import { useAuth } from "@/hooks/useAuth";
 
 export default function AIConsultation() {
@@ -8,6 +8,7 @@ export default function AIConsultation() {
   const [query, setQuery] = useState('');
   const [response, setResponse] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [consultationType, setConsultationType] = useState<'website' | 'tournament'>('website');
 
   const handleConsultation = async () => {
     if (!query.trim()) return;
@@ -19,6 +20,7 @@ export default function AIConsultation() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           user_input: query,
+          consultation_type: consultationType,
           subscription_level: user?.subscriptionPlan || 'free'
         })
       });
@@ -72,25 +74,76 @@ export default function AIConsultation() {
         <div className="text-center mb-8">
           <div className="inline-flex items-center space-x-2 bg-purple-500/10 text-purple-400 px-4 py-2 rounded-full text-sm font-medium mb-4">
             <Brain className="h-4 w-4" />
-            <span>AI Tournament Coach</span>
+            <span>Dual AI Consultation System</span>
           </div>
-          <h1 className="text-4xl font-bold text-white mb-4">Keystone AI Consultation</h1>
+          <h1 className="text-4xl font-bold text-white mb-4">AI Tournament Specialists</h1>
           <p className="text-xl text-slate-300">
-            Get intelligent tournament advice from our AI system trained on 65+ sports
+            Choose your AI consultant: Website Builder or Tournament Logic Expert
           </p>
+        </div>
+
+        {/* Consultation Type Selector */}
+        <div className="mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <button
+              data-testid="button-website-consultant"
+              onClick={() => setConsultationType('website')}
+              className={`p-6 rounded-xl border transition-all ${
+                consultationType === 'website'
+                  ? 'bg-blue-500/20 border-blue-400 text-blue-300'
+                  : 'bg-slate-800 border-slate-600 text-slate-300 hover:border-blue-400/50'
+              }`}
+            >
+              <div className="text-center">
+                <Globe className="h-12 w-12 mx-auto mb-3" />
+                <h3 className="text-xl font-bold mb-2">Website Builder AI</h3>
+                <p className="text-sm opacity-90">
+                  Creates complete tournament websites with user hierarchy management. 
+                  Jersey Watch-style link sharing: Tournament Director → Coaches → Players → Scorekeepers.
+                  Role-based access control with Champions for Change styling.
+                </p>
+              </div>
+            </button>
+
+            <button
+              data-testid="button-tournament-consultant"
+              onClick={() => setConsultationType('tournament')}
+              className={`p-6 rounded-xl border transition-all ${
+                consultationType === 'tournament'
+                  ? 'bg-purple-500/20 border-purple-400 text-purple-300'
+                  : 'bg-slate-800 border-slate-600 text-slate-300 hover:border-purple-400/50'
+              }`}
+            >
+              <div className="text-center">
+                <Trophy className="h-12 w-12 mx-auto mb-3" />
+                <h3 className="text-xl font-bold mb-2">Tournament Logic AI</h3>
+                <p className="text-sm opacity-90">
+                  Builds sport-specific tournament structures. Basketball gets March Madness brackets, 
+                  Swimming gets performance leaderboards, Baseball gets playoff-to-World Series formats.
+                </p>
+              </div>
+            </button>
+          </div>
         </div>
 
         {/* AI Consultation Interface */}
         <div className="bg-slate-800 border border-purple-500/30 rounded-2xl p-8 mb-8">
           <div className="mb-6">
             <label className="block text-white font-semibold mb-3">
-              Describe your tournament idea or challenge:
+              {consultationType === 'website' 
+                ? 'Describe your tournament website needs:'
+                : 'Describe your tournament structure requirements:'
+              }
             </label>
             <textarea
               data-testid="input-ai-query"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Try: 'Build a webpage for 16-team basketball tournament' or 'Create swimming meet with leaderboards' or 'Generate code for baseball playoffs'"
+              placeholder={
+                consultationType === 'website'
+                  ? "Try: 'Build a tournament website where I can share links with coaches, coaches can add/remove players, and scorekeepers can only update assigned events'"
+                  : "Try: 'Create a 16-team basketball bracket with March Madness style' or 'Swimming meet with performance leaderboards'"
+              }
               className="w-full h-32 bg-slate-700 border border-slate-600 rounded-lg p-4 text-white placeholder-slate-400 focus:border-purple-400 focus:outline-none resize-none"
               autoFocus
             />
@@ -110,7 +163,7 @@ export default function AIConsultation() {
             ) : (
               <>
                 <Sparkles className="h-5 w-5" />
-                <span>Get AI Consultation</span>
+                <span>{consultationType === 'website' ? 'Build Website' : 'Design Tournament'}</span>
               </>
             )}
           </button>

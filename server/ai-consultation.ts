@@ -946,6 +946,357 @@ export interface KeystoneConsultationResult {
   schedule_template?: any;
 }
 
+// Website Builder Query Analysis - Jersey Watch Style
+export function analyzeWebsiteBuilderQuery(userInput: string): KeystoneConsultationResult {
+  const input = userInput.toLowerCase();
+  
+  // Enhanced sport detection with website focus
+  let sport = "Multi-Sport";
+  let format = "user_hierarchy";
+  let ageGroup = "Mixed Age";
+  let genderDivision = "Mixed";
+  let participants = 16;
+  
+  // Sport detection (same logic but website-focused)
+  if (input.includes("basketball")) sport = "Basketball";
+  else if (input.includes("soccer") || input.includes("football")) sport = "Soccer";
+  else if (input.includes("baseball") || input.includes("softball")) sport = "Baseball";
+  else if (input.includes("volleyball")) sport = "Volleyball";
+  else if (input.includes("swimming")) sport = "Swimming";
+  else if (input.includes("tennis")) sport = "Tennis";
+  else if (input.includes("golf")) sport = "Golf";
+  else if (input.includes("track")) sport = "Track & Field";
+  
+  // Website-specific features detection
+  const hasUserHierarchy = input.includes("user") || input.includes("coach") || input.includes("player") || input.includes("scorekeeper");
+  const hasLinkSharing = input.includes("link") || input.includes("share") || input.includes("send");
+  const hasRoleAccess = input.includes("access") || input.includes("permission") || input.includes("role");
+  
+  return {
+    tier: "website_builder" as any,
+    sport,
+    format,
+    age_group: ageGroup,
+    gender_division: genderDivision,
+    estimated_participants: participants,
+    confidence: 0.95,
+    recommendation: `Website Builder AI detected: ${sport} tournament with user hierarchy management. Creating Jersey Watch-style platform with link sharing and role-based access control.`,
+    tier1_suggestions: [
+      "Tournament Director creates main tournament website",
+      "Generates shareable links for coaches to access their team management areas",
+      "Coaches can add/remove players from their teams",
+      "Scorekeepers get assigned-event-only access for score updates",
+      "Players/fans get read-only access to view results and schedules",
+      "Champions for Change branding and educational impact messaging integrated throughout"
+    ],
+    venue_suggestions: generateVenueSuggestions(sport),
+    schedule_template: generateScheduleTemplate(sport, participants)
+  };
+}
+
+// Website Builder Template Generator
+export function generateWebsiteBuilderTemplate(sport: string, ageGroup: string, format: string): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${sport} Tournament - Champions for Change</title>
+    <style>
+        /* Champions for Change Styling */
+        :root {
+            --primary-green: #22c55e;
+            --primary-blue: #3b82f6;
+            --dark-bg: #0f172a;
+            --card-bg: #1e293b;
+            --text-light: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: #334155;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #1e293b 100%);
+            color: var(--text-light);
+            min-height: 100vh;
+        }
+        .header {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-blue));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .role-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .role-director { background: linear-gradient(135deg, #dc2626, #b91c1c); }
+        .role-coach { background: linear-gradient(135deg, var(--primary-blue), #2563eb); }
+        .role-scorekeeper { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .role-player { background: linear-gradient(135deg, var(--primary-green), #16a34a); }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            border-color: var(--primary-blue);
+            transform: translateY(-2px);
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary-green), var(--primary-blue));
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-blue), #2563eb);
+            color: white;
+        }
+        .btn-success {
+            background: linear-gradient(135deg, var(--primary-green), #16a34a);
+            color: white;
+        }
+        .role-access {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+        .access-level {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .access-level:last-child { border-bottom: none; }
+        .access-title {
+            font-weight: 600;
+            color: var(--primary-blue);
+            margin-bottom: 0.5rem;
+        }
+        .educational-impact {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(59, 130, 246, 0.1));
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">🏆</div>
+                <div>
+                    <h1>${sport} Tournament</h1>
+                    <p style="font-size: 0.875rem; color: var(--text-muted);">Champions for Change Platform</p>
+                </div>
+            </div>
+            <div class="user-menu">
+                <span class="role-badge role-director" id="user-role">Tournament Director</span>
+                <button class="btn btn-primary" onclick="shareLink()">Share Access Link</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="educational-impact">
+            <h2>Educational Impact Dashboard</h2>
+            <p>This tournament directly funds student educational trips through Champions for Change</p>
+            <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 1rem;">
+                <div>
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--primary-green);" id="students-funded">0</div>
+                    <div style="font-size: 0.875rem; color: var(--text-muted);">Students Funded</div>
+                </div>
+                <div>
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--primary-blue);" id="trips-completed">0</div>
+                    <div style="font-size: 0.875rem; color: var(--text-muted);">Educational Trips</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Role-Based Access Control Demo -->
+        <div class="role-access">
+            <div class="access-level">
+                <div class="access-title">🎯 Tournament Director (You)</div>
+                <p>Full access: Create tournaments, assign coaches, manage scorekeepers, view all data</p>
+                <button class="btn btn-primary">Manage Tournament Settings</button>
+            </div>
+            <div class="access-level">
+                <div class="access-title">👨‍🏫 Coaches</div>
+                <p>Team management: Add/remove players, view schedules, communicate with players</p>
+                <button class="btn btn-success" onclick="generateCoachLink()">Generate Coach Access Link</button>
+            </div>
+            <div class="access-level">
+                <div class="access-title">⚖️ Scorekeepers/Judges</div>
+                <p>Event-specific: Update scores only for assigned events, view event schedules</p>
+                <button class="btn btn-success" onclick="generateScorekeeperLink()">Generate Scorekeeper Link</button>
+            </div>
+            <div class="access-level">
+                <div class="access-title">🏃‍♂️ Players/Fans</div>
+                <p>Read-only: View results, schedules, and tournament information</p>
+                <button class="btn btn-success" onclick="generatePlayerLink()">Generate Viewer Link</button>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">👥</div>
+                    <div>
+                        <h3>Team Management</h3>
+                        <p style="color: var(--text-muted); font-size: 0.875rem;">Manage teams and rosters</p>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="width: 100%;">View Teams</button>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">📊</div>
+                    <div>
+                        <h3>Live Scores</h3>
+                        <p style="color: var(--text-muted); font-size: 0.875rem;">Real-time score updates</p>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="width: 100%;">Update Scores</button>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">🏆</div>
+                    <div>
+                        <h3>Tournament Bracket</h3>
+                        <p style="color: var(--text-muted); font-size: 0.875rem;">${sport} tournament structure</p>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="width: 100%;">View Bracket</button>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">🔗</div>
+                    <div>
+                        <h3>Share Links</h3>
+                        <p style="color: var(--text-muted); font-size: 0.875rem;">Generate access links</p>
+                    </div>
+                </div>
+                <button class="btn btn-success" style="width: 100%;" onclick="showLinkGenerator()">Generate Links</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Jersey Watch-Style Link Generation
+        function generateCoachLink() {
+            const coachId = Math.random().toString(36).substr(2, 9);
+            const link = \`\${window.location.origin}/coach/\${coachId}\`;
+            navigator.clipboard.writeText(link);
+            alert('Coach access link copied to clipboard! Share this with your coaches.');
+        }
+
+        function generateScorekeeperLink() {
+            const scorekeeperId = Math.random().toString(36).substr(2, 9);
+            const link = \`\${window.location.origin}/scorekeeper/\${scorekeeperId}\`;
+            navigator.clipboard.writeText(link);
+            alert('Scorekeeper access link copied to clipboard! Share this with event judges.');
+        }
+
+        function generatePlayerLink() {
+            const link = \`\${window.location.origin}/view\`;
+            navigator.clipboard.writeText(link);
+            alert('Viewer link copied to clipboard! Share this with players and fans.');
+        }
+
+        function shareLink() {
+            showLinkGenerator();
+        }
+
+        function showLinkGenerator() {
+            alert('Link Generator: Choose who you want to share access with using the buttons in the Role-Based Access section above.');
+        }
+
+        // Simulate educational impact metrics
+        function updateImpactMetrics() {
+            document.getElementById('students-funded').textContent = Math.floor(Math.random() * 50) + 25;
+            document.getElementById('trips-completed').textContent = Math.floor(Math.random() * 10) + 5;
+        }
+
+        // Initialize
+        updateImpactMetrics();
+        setInterval(updateImpactMetrics, 30000);
+    </script>
+</body>
+</html>`;
+}
+
 export function analyzeTournamentQuery(text: string): KeystoneConsultationResult {
   const textLower = text.toLowerCase();
   
