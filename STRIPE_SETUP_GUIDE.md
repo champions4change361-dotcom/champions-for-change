@@ -14,8 +14,10 @@ Since you don't currently have a Stripe account for Champions for Change, you ne
 
 ### Step 2: Complete Business Profile
 - Business description: "Educational nonprofit funding student trips for underprivileged youth in Corpus Christi, Texas"
-- Website: trantortournaments.org
+- Website: **https://trantortournaments.org** (NOT www.trantortournaments.org)
 - Business address: Your Champions for Change address
+
+**Important**: Stripe requires the website URL to be in the format `https://trantortournaments.org` without the "www" prefix.
 
 ### Step 3: Get Your API Keys
 Once your account is created:
