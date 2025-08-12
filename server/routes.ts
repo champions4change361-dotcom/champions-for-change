@@ -915,6 +915,235 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ===================================================================
+  // KRAKEN MULTI-DIVISION SYSTEM API ENDPOINTS 🐙💥
+  // ===================================================================
+
+  // DIVISION TEMPLATES ENDPOINTS
+
+  // Get all division templates
+  app.get("/api/division-templates", async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const templates = await storage.getDivisionTemplates();
+      res.json(templates);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch division templates" });
+    }
+  });
+
+  // Get division templates by sport category
+  app.get("/api/division-templates/sport/:sportCategory", async (req, res) => {
+    try {
+      const { sportCategory } = req.params;
+      const storage = await getStorage();
+      const templates = await storage.getDivisionTemplatesBySport(sportCategory);
+      res.json(templates);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch division templates by sport" });
+    }
+  });
+
+  // Get specific division template
+  app.get("/api/division-templates/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const storage = await getStorage();
+      const template = await storage.getDivisionTemplate(id);
+      
+      if (!template) {
+        return res.status(404).json({ error: "Division template not found" });
+      }
+      
+      res.json(template);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch division template" });
+    }
+  });
+
+  // Create division template
+  app.post("/api/division-templates", async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const template = await storage.createDivisionTemplate(req.body);
+      res.status(201).json(template);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create division template" });
+    }
+  });
+
+  // TOURNAMENT DIVISIONS ENDPOINTS
+
+  // Get all tournament divisions
+  app.get("/api/tournament-divisions", async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const divisions = await storage.getTournamentDivisions();
+      res.json(divisions);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch tournament divisions" });
+    }
+  });
+
+  // Get tournament divisions by tournament
+  app.get("/api/tournament-divisions/tournament/:tournamentId", async (req, res) => {
+    try {
+      const { tournamentId } = req.params;
+      const storage = await getStorage();
+      const divisions = await storage.getTournamentDivisionsByTournament(tournamentId);
+      res.json(divisions);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch tournament divisions" });
+    }
+  });
+
+  // Get specific tournament division
+  app.get("/api/tournament-divisions/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const storage = await getStorage();
+      const division = await storage.getTournamentDivision(id);
+      
+      if (!division) {
+        return res.status(404).json({ error: "Tournament division not found" });
+      }
+      
+      res.json(division);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch tournament division" });
+    }
+  });
+
+  // Create tournament division
+  app.post("/api/tournament-divisions", async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const division = await storage.createTournamentDivision(req.body);
+      res.status(201).json(division);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create tournament division" });
+    }
+  });
+
+  // Update tournament division
+  app.patch("/api/tournament-divisions/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const storage = await getStorage();
+      const division = await storage.updateTournamentDivision(id, req.body);
+      
+      if (!division) {
+        return res.status(404).json({ error: "Tournament division not found" });
+      }
+      
+      res.json(division);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update tournament division" });
+    }
+  });
+
+  // DIVISION PARTICIPANTS ENDPOINTS
+
+  // Get division participants by division
+  app.get("/api/division-participants/division/:divisionId", async (req, res) => {
+    try {
+      const { divisionId } = req.params;
+      const storage = await getStorage();
+      const participants = await storage.getDivisionParticipantsByDivision(divisionId);
+      res.json(participants);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch division participants" });
+    }
+  });
+
+  // Create division participant
+  app.post("/api/division-participants", async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const participant = await storage.createDivisionParticipant(req.body);
+      res.status(201).json(participant);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create division participant" });
+    }
+  });
+
+  // Update division participant
+  app.patch("/api/division-participants/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const storage = await getStorage();
+      const participant = await storage.updateDivisionParticipant(id, req.body);
+      
+      if (!participant) {
+        return res.status(404).json({ error: "Division participant not found" });
+      }
+      
+      res.json(participant);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update division participant" });
+    }
+  });
+
+  // KRAKEN AUTOMATIC DIVISION GENERATION
+
+  // Generate divisions from template
+  app.post("/api/tournaments/:tournamentId/generate-divisions", async (req, res) => {
+    try {
+      const { tournamentId } = req.params;
+      const { templateId, config } = req.body;
+      
+      if (!templateId) {
+        return res.status(400).json({ error: "Template ID is required" });
+      }
+      
+      const storage = await getStorage();
+      const divisions = await storage.generateDivisionsFromTemplate(tournamentId, templateId, config);
+      res.status(201).json({ 
+        message: `🐙 KRAKEN STRIKE! Generated ${divisions.length} divisions`,
+        divisions 
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to generate divisions from template" });
+    }
+  });
+
+  // Get division generation rules by tournament
+  app.get("/api/division-generation-rules/tournament/:tournamentId", async (req, res) => {
+    try {
+      const { tournamentId } = req.params;
+      const storage = await getStorage();
+      const rules = await storage.getDivisionGenerationRulesByTournament(tournamentId);
+      res.json(rules);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch division generation rules" });
+    }
+  });
+
+  // DIVISION SCHEDULING ENDPOINTS
+
+  // Get division scheduling by tournament
+  app.get("/api/division-scheduling/tournament/:tournamentId", async (req, res) => {
+    try {
+      const { tournamentId } = req.params;
+      const storage = await getStorage();
+      const scheduling = await storage.getDivisionSchedulingByTournament(tournamentId);
+      res.json(scheduling);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch division scheduling" });
+    }
+  });
+
+  // Create division scheduling
+  app.post("/api/division-scheduling", async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const scheduling = await storage.createDivisionScheduling(req.body);
+      res.status(201).json(scheduling);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create division scheduling" });
+    }
+  });
+
   // Helper function to import default sports data
   async function importDefaultSportsData() {
     // First import sport categories

@@ -171,6 +171,29 @@ export interface IStorage {
   getSeriesTemplatesBySport(sportId: string): Promise<SeriesTemplate[]>;
   getGameLengthTemplates(): Promise<GameLengthTemplate[]>;
   getGameLengthTemplatesBySport(sportId: string): Promise<GameLengthTemplate[]>;
+
+  // KRAKEN MULTI-DIVISION SYSTEM METHODS 🐙💥
+  getDivisionTemplates(): Promise<DivisionTemplate[]>;
+  getDivisionTemplatesBySport(sportCategory: string): Promise<DivisionTemplate[]>;
+  getDivisionTemplate(id: string): Promise<DivisionTemplate | undefined>;
+  createDivisionTemplate(template: InsertDivisionTemplate): Promise<DivisionTemplate>;
+  getTournamentDivisions(): Promise<TournamentDivision[]>;
+  getTournamentDivisionsByTournament(tournamentId: string): Promise<TournamentDivision[]>;
+  getTournamentDivision(id: string): Promise<TournamentDivision | undefined>;
+  createTournamentDivision(division: InsertTournamentDivision): Promise<TournamentDivision>;
+  updateTournamentDivision(id: string, updates: Partial<TournamentDivision>): Promise<TournamentDivision | undefined>;
+  getDivisionParticipants(): Promise<DivisionParticipant[]>;
+  getDivisionParticipantsByDivision(divisionId: string): Promise<DivisionParticipant[]>;
+  getDivisionParticipant(id: string): Promise<DivisionParticipant | undefined>;
+  createDivisionParticipant(participant: InsertDivisionParticipant): Promise<DivisionParticipant>;
+  updateDivisionParticipant(id: string, updates: Partial<DivisionParticipant>): Promise<DivisionParticipant | undefined>;
+  getDivisionGenerationRules(): Promise<DivisionGenerationRule[]>;
+  getDivisionGenerationRulesByTournament(tournamentId: string): Promise<DivisionGenerationRule[]>;
+  createDivisionGenerationRule(rule: InsertDivisionGenerationRule): Promise<DivisionGenerationRule>;
+  generateDivisionsFromTemplate(tournamentId: string, templateId: string, config?: any): Promise<TournamentDivision[]>;
+  getDivisionScheduling(): Promise<DivisionScheduling[]>;
+  getDivisionSchedulingByTournament(tournamentId: string): Promise<DivisionScheduling[]>;
+  createDivisionScheduling(scheduling: InsertDivisionScheduling): Promise<DivisionScheduling>;
   createSportDivisionRules(rules: InsertSportDivisionRules): Promise<SportDivisionRules>;
 
   // Sport Events methods
@@ -1088,6 +1111,13 @@ export class MemStorage implements IStorage {
   private competitionFormatTemplates: Map<string, CompetitionFormatTemplate>;
   private gameLengthTemplates: Map<string, GameLengthTemplate>;
   private seriesTemplates: Map<string, SeriesTemplate>;
+  
+  // KRAKEN MULTI-DIVISION SYSTEM - THE TENTACLES OF POWER! 🐙💥
+  private tournamentDivisions: Map<string, TournamentDivision>;
+  private divisionParticipants: Map<string, DivisionParticipant>;
+  private divisionTemplates: Map<string, DivisionTemplate>;
+  private divisionGenerationRules: Map<string, DivisionGenerationRule>;
+  private divisionScheduling: Map<string, DivisionScheduling>;
   private donors: Map<string, Donor>;
   private donations: Map<string, Donation>;
   private contacts: Map<string, Contact>;
@@ -1110,17 +1140,25 @@ export class MemStorage implements IStorage {
     this.competitionFormatTemplates = new Map();
     this.gameLengthTemplates = new Map();
     this.seriesTemplates = new Map();
+    
+    // KRAKEN MULTI-DIVISION SYSTEM INITIALIZATION 🐙
+    this.tournamentDivisions = new Map();
+    this.divisionParticipants = new Map();
+    this.divisionTemplates = new Map();
+    this.divisionGenerationRules = new Map();
+    this.divisionScheduling = new Map();
     this.donors = new Map();
     this.donations = new Map();
     this.contacts = new Map();
     this.emailCampaigns = new Map();
     
-    // Initialize with default tournament structures, sport division rules, track events, tournament integration, and competition formats
+    // Initialize with default tournament structures, sport division rules, track events, tournament integration, competition formats, and KRAKEN!
     this.initializeDefaultStructures();
     this.initializeSportDivisionRules();
     this.initializeUltimateTrackEvents();
     this.initializeTournamentIntegration();
     this.initializeCompetitionFormatTemplates();
+    this.initializeKrakenDivisionSystem();
   }
 
   private initializeDefaultStructures() {
@@ -2893,6 +2931,307 @@ export class MemStorage implements IStorage {
 
   async getGameLengthTemplatesBySport(sportId: string): Promise<GameLengthTemplate[]> {
     return Array.from(this.gameLengthTemplates.values()).filter(t => t.sportId === sportId);
+  }
+
+  // ===================================================================
+  // KRAKEN DIVISION SYSTEM - RELEASE THE TENTACLES! 🐙💥
+  // ===================================================================
+
+  private initializeKrakenDivisionSystem() {
+    // First, let's find sport categories for our templates
+    const teamSportsCategoryId = Array.from(this.sportCategories.values()).find(c => c.categoryName === "Team Sports")?.id || "team-sports";
+    const individualSportsCategoryId = Array.from(this.sportCategories.values()).find(c => c.categoryName === "Individual Sports")?.id || "individual-sports";
+    const academicCategoryId = Array.from(this.sportCategories.values()).find(c => c.categoryName === "Academic Competitions")?.id || "academic";
+    const esportsCategoryId = Array.from(this.sportCategories.values()).find(c => c.categoryName === "Esports")?.id || "esports";
+
+    const divisionTemplates = [
+      // BASKETBALL KRAKEN: Age and Gender Divisions Simultaneously
+      {
+        id: randomUUID(),
+        templateName: "Basketball Age/Gender Matrix",
+        templateDescription: "Complete basketball tournament with all age groups and gender divisions",
+        sportCategory: teamSportsCategoryId,
+        divisionStructure: {
+          "divisions": [
+            {"name": "Boys U12", "type": "age_gender", "config": {"age_max": 12, "gender": "male", "team_size": 5}},
+            {"name": "Girls U12", "type": "age_gender", "config": {"age_max": 12, "gender": "female", "team_size": 5}},
+            {"name": "Boys U14", "type": "age_gender", "config": {"age_max": 14, "gender": "male", "team_size": 5}},
+            {"name": "Girls U14", "type": "age_gender", "config": {"age_max": 14, "gender": "female", "team_size": 5}},
+            {"name": "Boys U16", "type": "age_gender", "config": {"age_max": 16, "gender": "male", "team_size": 5}},
+            {"name": "Girls U16", "type": "age_gender", "config": {"age_max": 16, "gender": "female", "team_size": 5}},
+            {"name": "Boys U18", "type": "age_gender", "config": {"age_max": 18, "gender": "male", "team_size": 5}},
+            {"name": "Girls U18", "type": "age_gender", "config": {"age_max": 18, "gender": "female", "team_size": 5}},
+            {"name": "Mens Open", "type": "age_gender", "config": {"age_min": 18, "gender": "male", "team_size": 5}},
+            {"name": "Womens Open", "type": "age_gender", "config": {"age_min": 18, "gender": "female", "team_size": 5}}
+          ]
+        },
+        autoGenerationRules: {"auto_create": true, "min_participants_per_division": 4, "merge_small_divisions": true, "bracket_type": "single_elimination"},
+        isActive: true,
+        createdAt: new Date()
+      },
+
+      // SOCCER KRAKEN: Regional + Age + Skill Divisions
+      {
+        id: randomUUID(),
+        templateName: "Soccer Regional Championship",
+        templateDescription: "Multi-regional soccer tournament with age and skill divisions",
+        sportCategory: teamSportsCategoryId,
+        divisionStructure: {
+          "divisions": [
+            {"name": "North Region U16 Elite", "type": "regional_age_skill", "config": {"region": "north", "age_max": 16, "skill": "elite"}},
+            {"name": "North Region U16 Competitive", "type": "regional_age_skill", "config": {"region": "north", "age_max": 16, "skill": "competitive"}},
+            {"name": "North Region U16 Recreational", "type": "regional_age_skill", "config": {"region": "north", "age_max": 16, "skill": "recreational"}},
+            {"name": "South Region U16 Elite", "type": "regional_age_skill", "config": {"region": "south", "age_max": 16, "skill": "elite"}},
+            {"name": "South Region U16 Competitive", "type": "regional_age_skill", "config": {"region": "south", "age_max": 16, "skill": "competitive"}},
+            {"name": "South Region U16 Recreational", "type": "regional_age_skill", "config": {"region": "south", "age_max": 16, "skill": "recreational"}},
+            {"name": "East Region U16 Elite", "type": "regional_age_skill", "config": {"region": "east", "age_max": 16, "skill": "elite"}},
+            {"name": "West Region U16 Elite", "type": "regional_age_skill", "config": {"region": "west", "age_max": 16, "skill": "elite"}}
+          ]
+        },
+        autoGenerationRules: {"regional_winners_advance": true, "inter_regional_playoff": true, "skill_level_requirements": {"elite": "club_level", "competitive": "school_level", "recreational": "open"}},
+        isActive: true,
+        createdAt: new Date()
+      },
+
+      // TRACK & FIELD KRAKEN: The Ultimate Multi-Division Beast!
+      {
+        id: randomUUID(),
+        templateName: "Track & Field Championship Meet",
+        templateDescription: "Complete track meet with all age groups, genders, and event categories",
+        sportCategory: individualSportsCategoryId,
+        divisionStructure: {
+          "divisions": [
+            {"name": "Boys U12 Track", "type": "age_gender_event", "config": {"age_max": 12, "gender": "male", "events": "track_only"}},
+            {"name": "Girls U12 Track", "type": "age_gender_event", "config": {"age_max": 12, "gender": "female", "events": "track_only"}},
+            {"name": "Boys U12 Field", "type": "age_gender_event", "config": {"age_max": 12, "gender": "male", "events": "field_only"}},
+            {"name": "Girls U12 Field", "type": "age_gender_event", "config": {"age_max": 12, "gender": "female", "events": "field_only"}},
+            {"name": "Boys U14 Track", "type": "age_gender_event", "config": {"age_max": 14, "gender": "male", "events": "track_full"}},
+            {"name": "Girls U14 Track", "type": "age_gender_event", "config": {"age_max": 14, "gender": "female", "events": "track_full"}},
+            {"name": "Boys U14 Field", "type": "age_gender_event", "config": {"age_max": 14, "gender": "male", "events": "field_full"}},
+            {"name": "Girls U14 Field", "type": "age_gender_event", "config": {"age_max": 14, "gender": "female", "events": "field_full"}},
+            {"name": "Boys U16 All Events", "type": "age_gender_event", "config": {"age_max": 16, "gender": "male", "events": "all"}},
+            {"name": "Girls U16 All Events", "type": "age_gender_event", "config": {"age_max": 16, "gender": "female", "events": "all"}},
+            {"name": "Boys U18 All Events", "type": "age_gender_event", "config": {"age_max": 18, "gender": "male", "events": "all"}},
+            {"name": "Girls U18 All Events", "type": "age_gender_event", "config": {"age_max": 18, "gender": "female", "events": "all"}},
+            {"name": "Mens Open", "type": "age_gender_event", "config": {"age_min": 18, "gender": "male", "events": "all"}},
+            {"name": "Womens Open", "type": "age_gender_event", "config": {"age_min": 18, "gender": "female", "events": "all"}},
+            {"name": "Mixed Relay Events", "type": "mixed_special", "config": {"gender": "mixed", "events": "relay_only"}}
+          ]
+        },
+        autoGenerationRules: {"event_scheduling": "optimize_conflicts", "field_event_rotations": true, "relay_team_composition": "verify_eligibility"},
+        isActive: true,
+        createdAt: new Date()
+      },
+
+      // ACADEMIC KRAKEN: School District Championship
+      {
+        id: randomUUID(),
+        templateName: "Academic District Championship",
+        templateDescription: "Multi-school academic competition with grade-level divisions",
+        sportCategory: academicCategoryId,
+        divisionStructure: {
+          "divisions": [
+            {"name": "Elementary Math Bowl", "type": "grade_subject", "config": {"grades": "K-5", "subject": "mathematics"}},
+            {"name": "Elementary Spelling Bee", "type": "grade_subject", "config": {"grades": "K-5", "subject": "spelling"}},
+            {"name": "Middle School Math Bowl", "type": "grade_subject", "config": {"grades": "6-8", "subject": "mathematics"}},
+            {"name": "Middle School Science Bowl", "type": "grade_subject", "config": {"grades": "6-8", "subject": "science"}},
+            {"name": "Middle School Quiz Bowl", "type": "grade_subject", "config": {"grades": "6-8", "subject": "general_knowledge"}},
+            {"name": "High School Math Bowl", "type": "grade_subject", "config": {"grades": "9-12", "subject": "mathematics"}},
+            {"name": "High School Science Bowl", "type": "grade_subject", "config": {"grades": "9-12", "subject": "science"}},
+            {"name": "High School Quiz Bowl", "type": "grade_subject", "config": {"grades": "9-12", "subject": "general_knowledge"}},
+            {"name": "High School Debate", "type": "grade_subject", "config": {"grades": "9-12", "subject": "debate"}}
+          ]
+        },
+        autoGenerationRules: {"school_representation": "multiple_teams_allowed", "individual_and_team": true, "advancement_to_regional": true},
+        isActive: true,
+        createdAt: new Date()
+      },
+
+      // ESPORTS KRAKEN: Multi-Game Tournament
+      {
+        id: randomUUID(),
+        templateName: "Esports Championship Series",
+        templateDescription: "Multi-game esports tournament with rank-based divisions",
+        sportCategory: esportsCategoryId,
+        divisionStructure: {
+          "divisions": [
+            {"name": "League of Legends Bronze/Silver", "type": "game_rank", "config": {"game": "league_of_legends", "rank_range": ["Bronze", "Silver"]}},
+            {"name": "League of Legends Gold/Platinum", "type": "game_rank", "config": {"game": "league_of_legends", "rank_range": ["Gold", "Platinum"]}},
+            {"name": "League of Legends Diamond+", "type": "game_rank", "config": {"game": "league_of_legends", "rank_range": ["Diamond", "Master", "Grandmaster", "Challenger"]}},
+            {"name": "Valorant Iron/Bronze", "type": "game_rank", "config": {"game": "valorant", "rank_range": ["Iron", "Bronze"]}},
+            {"name": "Valorant Silver/Gold", "type": "game_rank", "config": {"game": "valorant", "rank_range": ["Silver", "Gold"]}},
+            {"name": "Valorant Platinum+", "type": "game_rank", "config": {"game": "valorant", "rank_range": ["Platinum", "Diamond", "Immortal", "Radiant"]}},
+            {"name": "CS:GO Open Division", "type": "game_skill", "config": {"game": "csgo", "skill": "open"}},
+            {"name": "CS:GO Premier Division", "type": "game_skill", "config": {"game": "csgo", "skill": "premier"}}
+          ]
+        },
+        autoGenerationRules: {"rank_verification": "required", "team_composition": "locked_after_registration", "cross_game_participation": "allowed"},
+        isActive: true,
+        createdAt: new Date()
+      }
+    ];
+
+    // Load division templates
+    divisionTemplates.forEach(template => {
+      this.divisionTemplates.set(template.id, template);
+    });
+
+    console.log(`🐙 THE KRAKEN HAS BEEN RELEASED! TENTACLES OF TOURNAMENT TERROR DEPLOYED!`);
+    console.log(`🐙 Division Templates initialized: ${divisionTemplates.length} multi-division templates loaded`);
+  }
+
+  // KRAKEN DIVISION TEMPLATE METHODS
+  async getDivisionTemplates(): Promise<DivisionTemplate[]> {
+    return Array.from(this.divisionTemplates.values());
+  }
+
+  async getDivisionTemplatesBySport(sportCategory: string): Promise<DivisionTemplate[]> {
+    return Array.from(this.divisionTemplates.values()).filter(t => t.sportCategory === sportCategory);
+  }
+
+  async getDivisionTemplate(id: string): Promise<DivisionTemplate | undefined> {
+    return this.divisionTemplates.get(id);
+  }
+
+  async createDivisionTemplate(template: InsertDivisionTemplate): Promise<DivisionTemplate> {
+    const id = randomUUID();
+    const created = { ...template, id, createdAt: new Date() };
+    this.divisionTemplates.set(id, created);
+    return created;
+  }
+
+  // KRAKEN TOURNAMENT DIVISION METHODS
+  async getTournamentDivisions(): Promise<TournamentDivision[]> {
+    return Array.from(this.tournamentDivisions.values());
+  }
+
+  async getTournamentDivisionsByTournament(tournamentId: string): Promise<TournamentDivision[]> {
+    return Array.from(this.tournamentDivisions.values()).filter(d => d.tournamentId === tournamentId);
+  }
+
+  async getTournamentDivision(id: string): Promise<TournamentDivision | undefined> {
+    return this.tournamentDivisions.get(id);
+  }
+
+  async createTournamentDivision(division: InsertTournamentDivision): Promise<TournamentDivision> {
+    const id = randomUUID();
+    const created = { ...division, id, createdAt: new Date() };
+    this.tournamentDivisions.set(id, created);
+    return created;
+  }
+
+  async updateTournamentDivision(id: string, updates: Partial<TournamentDivision>): Promise<TournamentDivision | undefined> {
+    const existing = this.tournamentDivisions.get(id);
+    if (!existing) return undefined;
+    
+    const updated = { ...existing, ...updates };
+    this.tournamentDivisions.set(id, updated);
+    return updated;
+  }
+
+  // KRAKEN DIVISION PARTICIPANT METHODS
+  async getDivisionParticipants(): Promise<DivisionParticipant[]> {
+    return Array.from(this.divisionParticipants.values());
+  }
+
+  async getDivisionParticipantsByDivision(divisionId: string): Promise<DivisionParticipant[]> {
+    return Array.from(this.divisionParticipants.values()).filter(p => p.divisionId === divisionId);
+  }
+
+  async getDivisionParticipant(id: string): Promise<DivisionParticipant | undefined> {
+    return this.divisionParticipants.get(id);
+  }
+
+  async createDivisionParticipant(participant: InsertDivisionParticipant): Promise<DivisionParticipant> {
+    const id = randomUUID();
+    const created = { ...participant, id, registrationTime: new Date() };
+    this.divisionParticipants.set(id, created);
+    
+    // Update division participant count
+    const division = await this.getTournamentDivision(participant.divisionId!);
+    if (division) {
+      await this.updateTournamentDivision(division.id, { 
+        participantCount: (division.participantCount || 0) + 1 
+      });
+    }
+    
+    return created;
+  }
+
+  async updateDivisionParticipant(id: string, updates: Partial<DivisionParticipant>): Promise<DivisionParticipant | undefined> {
+    const existing = this.divisionParticipants.get(id);
+    if (!existing) return undefined;
+    
+    const updated = { ...existing, ...updates };
+    this.divisionParticipants.set(id, updated);
+    return updated;
+  }
+
+  // KRAKEN DIVISION GENERATION METHODS
+  async getDivisionGenerationRules(): Promise<DivisionGenerationRule[]> {
+    return Array.from(this.divisionGenerationRules.values());
+  }
+
+  async getDivisionGenerationRulesByTournament(tournamentId: string): Promise<DivisionGenerationRule[]> {
+    return Array.from(this.divisionGenerationRules.values()).filter(r => r.tournamentId === tournamentId);
+  }
+
+  async createDivisionGenerationRule(rule: InsertDivisionGenerationRule): Promise<DivisionGenerationRule> {
+    const id = randomUUID();
+    const created = { ...rule, id, createdAt: new Date() };
+    this.divisionGenerationRules.set(id, created);
+    return created;
+  }
+
+  // KRAKEN AUTOMATIC DIVISION GENERATION - THE TENTACLES MOVE!
+  async generateDivisionsFromTemplate(tournamentId: string, templateId: string, config: any = {}): Promise<TournamentDivision[]> {
+    const template = await this.getDivisionTemplate(templateId);
+    if (!template) {
+      throw new Error("Division template not found");
+    }
+
+    const divisions = template.divisionStructure.divisions as any[];
+    const createdDivisions: TournamentDivision[] = [];
+
+    for (const divisionData of divisions) {
+      const division = await this.createTournamentDivision({
+        tournamentId,
+        divisionName: divisionData.name,
+        divisionType: divisionData.type,
+        divisionConfig: divisionData.config,
+        maxParticipants: config.maxParticipants || 64,
+        divisionStatus: "open"
+      });
+      createdDivisions.push(division);
+    }
+
+    // Create generation rule record
+    await this.createDivisionGenerationRule({
+      tournamentId,
+      templateId,
+      generationConfig: config,
+      status: "generated",
+      generatedDivisions: createdDivisions.map(d => ({ id: d.id, name: d.divisionName }))
+    });
+
+    console.log(`🐙 KRAKEN STRIKE! Generated ${createdDivisions.length} divisions from template: ${template.templateName}`);
+    return createdDivisions;
+  }
+
+  // KRAKEN DIVISION SCHEDULING METHODS
+  async getDivisionScheduling(): Promise<DivisionScheduling[]> {
+    return Array.from(this.divisionScheduling.values());
+  }
+
+  async getDivisionSchedulingByTournament(tournamentId: string): Promise<DivisionScheduling[]> {
+    return Array.from(this.divisionScheduling.values()).filter(s => s.tournamentId === tournamentId);
+  }
+
+  async createDivisionScheduling(scheduling: InsertDivisionScheduling): Promise<DivisionScheduling> {
+    const id = randomUUID();
+    const created = { ...scheduling, id, createdAt: new Date() };
+    this.divisionScheduling.set(id, created);
+    return created;
   }
 }
 

@@ -434,6 +434,74 @@ export const seriesTemplates = pgTable("series_templates", {
   createdAt: timestamp("created_at").default(sql`now()`),
 });
 
+// KRAKEN MULTI-DIVISION SYSTEM - THE TENTACLES OF TOURNAMENT POWER! 🐙💥
+
+// Tournament divisions table - the first tentacle
+export const tournamentDivisions = pgTable("tournament_divisions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tournamentId: varchar("tournament_id").references(() => tournaments.id),
+  divisionName: varchar("division_name").notNull(),
+  divisionType: varchar("division_type").notNull(), // age, gender, skill, regional, custom
+  divisionConfig: jsonb("division_config").notNull(),
+  participantCount: integer("participant_count").default(0),
+  maxParticipants: integer("max_participants"),
+  registrationDeadline: timestamp("registration_deadline"),
+  divisionStatus: varchar("division_status").default("open"), // open, closed, active, completed
+  bracketStructure: jsonb("bracket_structure"),
+  advancementRules: jsonb("advancement_rules"),
+  prizeStructure: jsonb("prize_structure"),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+// Division participants table - the second tentacle
+export const divisionParticipants = pgTable("division_participants", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  divisionId: varchar("division_id").references(() => tournamentDivisions.id),
+  participantId: varchar("participant_id").notNull(), // Could be team or individual
+  participantName: varchar("participant_name").notNull(),
+  participantType: varchar("participant_type").notNull(), // individual, team
+  seedNumber: integer("seed_number"),
+  qualificationData: jsonb("qualification_data"),
+  registrationTime: timestamp("registration_time").default(sql`now()`),
+  status: varchar("status").default("registered"), // registered, confirmed, withdrawn, disqualified
+});
+
+// Division templates table - the fourth tentacle
+export const divisionTemplates = pgTable("division_templates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  templateName: varchar("template_name").notNull(),
+  templateDescription: text("template_description"),
+  sportCategory: varchar("sport_category").references(() => sportCategories.id),
+  divisionStructure: jsonb("division_structure").notNull(),
+  autoGenerationRules: jsonb("auto_generation_rules"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+// Division generation rules table - kraken automation
+export const divisionGenerationRules = pgTable("division_generation_rules", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tournamentId: varchar("tournament_id").references(() => tournaments.id),
+  templateId: varchar("template_id").references(() => divisionTemplates.id),
+  generationConfig: jsonb("generation_config").notNull(),
+  status: varchar("status").default("pending"), // pending, generated, active, completed
+  generatedDivisions: jsonb("generated_divisions"),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+// Division scheduling table - kraken optimization
+export const divisionScheduling = pgTable("division_scheduling", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tournamentId: varchar("tournament_id").references(() => tournaments.id),
+  divisionId: varchar("division_id").references(() => tournamentDivisions.id),
+  schedulingConfig: jsonb("scheduling_config").notNull(),
+  venueAssignments: jsonb("venue_assignments"),
+  timeSlots: jsonb("time_slots"),
+  conflictResolution: jsonb("conflict_resolution"),
+  optimizationScore: numeric("optimization_score"),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
 export const matches = pgTable("matches", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   tournamentId: varchar("tournament_id").notNull().references(() => tournaments.id, { onDelete: "cascade" }),
@@ -548,6 +616,31 @@ export const insertSeriesTemplateSchema = createInsertSchema(seriesTemplates).om
   createdAt: true,
 });
 
+export const insertTournamentDivisionSchema = createInsertSchema(tournamentDivisions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertDivisionParticipantSchema = createInsertSchema(divisionParticipants).omit({
+  id: true,
+  registrationTime: true,
+});
+
+export const insertDivisionTemplateSchema = createInsertSchema(divisionTemplates).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertDivisionGenerationRuleSchema = createInsertSchema(divisionGenerationRules).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertDivisionSchedulingSchema = createInsertSchema(divisionScheduling).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertSportEventSchema = createInsertSchema(sportEvents).omit({
   createdAt: true,
 });
@@ -599,6 +692,18 @@ export type GameLengthTemplate = typeof gameLengthTemplates.$inferSelect;
 export type InsertGameLengthTemplate = typeof gameLengthTemplates.$inferInsert;
 export type SeriesTemplate = typeof seriesTemplates.$inferSelect;
 export type InsertSeriesTemplate = typeof seriesTemplates.$inferInsert;
+
+// Kraken Multi-Division types
+export type TournamentDivision = typeof tournamentDivisions.$inferSelect;
+export type InsertTournamentDivision = typeof tournamentDivisions.$inferInsert;
+export type DivisionParticipant = typeof divisionParticipants.$inferSelect;
+export type InsertDivisionParticipant = typeof divisionParticipants.$inferInsert;
+export type DivisionTemplate = typeof divisionTemplates.$inferSelect;
+export type InsertDivisionTemplate = typeof divisionTemplates.$inferInsert;
+export type DivisionGenerationRule = typeof divisionGenerationRules.$inferSelect;
+export type InsertDivisionGenerationRule = typeof divisionGenerationRules.$inferInsert;
+export type DivisionScheduling = typeof divisionScheduling.$inferSelect;
+export type InsertDivisionScheduling = typeof divisionScheduling.$inferInsert;
 
 // White-label pages schema
 export const pages = pgTable("pages", {
