@@ -7,6 +7,8 @@ import { useAuth } from "@/hooks/useAuth";
 import Home from './pages/Home';
 import Landing from './pages/Landing';
 import DonationFlow from './pages/DonationFlow';
+import Checkout from './pages/Checkout';
+import DonationSuccess from './pages/DonationSuccess';
 import CreateTournament from './pages/CreateTournament';
 import Tournament from './pages/tournament';
 import Contacts from './pages/Contacts';
@@ -66,6 +68,8 @@ function AppRouter() {
   return (
     <Switch>
       <Route path="/donate" component={DonationFlow} />
+      <Route path="/checkout" component={Checkout} />
+      <Route path="/donation-success" component={DonationSuccess} />
       {!isAuthenticated ? (
         <Route component={Landing} />
       ) : (
