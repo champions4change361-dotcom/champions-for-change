@@ -29,7 +29,7 @@ export function DonationSection({ variant = 'full', className = '' }: DonationSe
     }
 
     try {
-      // Create Stripe payment intent for donation
+      // Create payment intent on the server (secure)
       const response = await fetch('/api/create-payment-intent', {
         method: 'POST',
         headers: {
@@ -43,19 +43,24 @@ export function DonationSection({ variant = 'full', className = '' }: DonationSe
       });
 
       if (!response.ok) {
-        throw new Error(`Payment setup failed: ${response.status}`);
+        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+        throw new Error(errorData.message || `Payment setup failed: ${response.status}`);
       }
 
       const { clientSecret } = await response.json();
       
-      // Redirect to payment page with the client secret
-      window.location.href = `/checkout?client_secret=${clientSecret}&amount=${finalAmount}&type=donation`;
+      if (!clientSecret) {
+        throw new Error('Payment setup incomplete');
+      }
       
-    } catch (error) {
+      // Redirect to secure payment page
+      window.location.href = `/checkout?client_secret=${encodeURIComponent(clientSecret)}&amount=${finalAmount}&type=donation`;
+      
+    } catch (error: any) {
       console.error('Donation error:', error);
       toast({
         title: "Payment Setup Failed",
-        description: "Unable to process donation at this time. Please try again or contact support.",
+        description: error.message || "Unable to process donation. Please contact support.",
         variant: "destructive",
       });
     }

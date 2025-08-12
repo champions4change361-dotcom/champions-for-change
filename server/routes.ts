@@ -2301,16 +2301,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Stripe payment routes
-  app.post("/api/create-payment-intent", isAuthenticated, async (req, res) => {
+  // Stripe payment routes (public endpoint for donations)
+  app.post("/api/create-payment-intent", async (req, res) => {
     try {
-      const { amount } = req.body;
+      const { amount, description = "Payment" } = req.body;
+      
+      if (!amount || amount < 1) {
+        return res.status(400).json({ message: "Valid amount required" });
+      }
+      
       const paymentIntent = await stripe.paymentIntents.create({
         amount: Math.round(amount * 100), // Convert to cents
         currency: "usd",
+        description: description,
+        metadata: {
+          source: 'Champions for Change Platform'
+        }
       });
+      
       res.json({ clientSecret: paymentIntent.client_secret });
     } catch (error: any) {
+      console.error("Payment intent error:", error);
       res.status(500).json({ 
         message: "Error creating payment intent: " + error.message 
       });
