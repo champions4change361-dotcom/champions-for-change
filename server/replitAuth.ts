@@ -202,9 +202,24 @@ export async function setupAuth(app: Express) {
   });
 
   app.get("/api/callback", (req, res, next) => {
-    console.log(`OAuth callback for hostname: ${req.hostname}`);
+    console.log(`OAuth callback for hostname: ${req.hostname}, query:`, req.query);
     
-    const strategyName = `replitauth:${req.hostname}`;
+    // Find the correct strategy for this domain
+    let strategyName = `replitauth:${req.hostname}`;
+    
+    // If we can't find the strategy for the current hostname, try the supported domains
+    if (!supportedDomains.includes(req.hostname)) {
+      console.log(`Domain ${req.hostname} not directly supported, checking configured domains`);
+      // Use the first supported domain that has OAuth configured
+      const configuredDomain = supportedDomains.find(domain => domain.includes('trantortournaments.org'));
+      if (configuredDomain) {
+        strategyName = `replitauth:${configuredDomain}`;
+        console.log(`Using OAuth strategy: ${strategyName}`);
+      } else {
+        console.log('No suitable OAuth strategy found, redirecting to login');
+        return res.redirect("/api/login");
+      }
+    }
     
     passport.authenticate(strategyName, {
       successReturnToOrRedirect: "/",

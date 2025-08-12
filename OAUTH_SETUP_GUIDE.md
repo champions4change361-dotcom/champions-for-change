@@ -29,9 +29,13 @@
 3. **After login**: Redirects back to your platform dashboard
 
 ## Current Behavior
-- **Development URLs**: Uses real OAuth if configured
-- **trantortournaments.org**: Uses real OAuth if configured
-- **Fallback**: Simplified authentication for testing (currently active)
+- **Development URLs**: Uses fallback authentication (works for testing)
+- **trantortournaments.org**: Will use real OAuth when deployed
+- **OAuth Flow**: Working correctly - shows consent screen, but callback needs production domain
+
+## Testing Authentication
+- **For Development**: Go to `/api/login` - uses fallback authentication (Daniel Thornton)
+- **OAuth Testing**: Shows Replit consent screen correctly, but redirect requires production deployment
 
 ## Debug Information
 Visit: `https://trantortournaments.org/api/auth/debug` to see current configuration
