@@ -8,11 +8,13 @@ import {
   type SchoolEventAssignment, type InsertSchoolEventAssignment, type CoachEventAssignment, type InsertCoachEventAssignment,
   type Contact, type InsertContact, type EmailCampaign, type InsertEmailCampaign, type CampaignRecipient, type InsertCampaignRecipient,
   type Donor, type InsertDonor, type Donation, type InsertDonation,
-  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations 
+  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules
 } from "@shared/schema";
 
 type SportCategory = typeof sportCategories.$inferSelect;
 type InsertSportCategory = typeof sportCategories.$inferInsert;
+type SportDivisionRules = typeof sportDivisionRules.$inferSelect;
+type InsertSportDivisionRules = typeof sportDivisionRules.$inferInsert;
 import { randomUUID } from "crypto";
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
@@ -143,6 +145,9 @@ export interface IStorage {
   getSportOptions(): Promise<SportOption[]>;
   getTournamentStructures(): Promise<TournamentStructure[]>;
   getTrackEvents(): Promise<TrackEvent[]>;
+  getSportDivisionRules(): Promise<SportDivisionRules[]>;
+  getSportDivisionRulesBySport(sportId: string): Promise<SportDivisionRules[]>;
+  createSportDivisionRules(rules: InsertSportDivisionRules): Promise<SportDivisionRules>;
 
   // Sport Events methods
   createSportEvent(event: any): Promise<any>;
@@ -1051,6 +1056,7 @@ export class MemStorage implements IStorage {
   private sportOptions: Map<string, SportOption>;
   private tournamentStructures: Map<string, TournamentStructure>;
   private trackEvents: Map<string, TrackEvent>;
+  private sportDivisionRules: Map<string, SportDivisionRules>;
   private donors: Map<string, Donor>;
   private donations: Map<string, Donation>;
   private contacts: Map<string, Contact>;
@@ -1065,13 +1071,15 @@ export class MemStorage implements IStorage {
     this.sportOptions = new Map();
     this.tournamentStructures = new Map();
     this.trackEvents = new Map();
+    this.sportDivisionRules = new Map();
     this.donors = new Map();
     this.donations = new Map();
     this.contacts = new Map();
     this.emailCampaigns = new Map();
     
-    // Initialize with default tournament structures
+    // Initialize with default tournament structures and sport division rules
     this.initializeDefaultStructures();
+    this.initializeSportDivisionRules();
   }
 
   private initializeDefaultStructures() {
@@ -1110,6 +1118,66 @@ export class MemStorage implements IStorage {
 
     defaultStructures.forEach(structure => {
       this.tournamentStructures.set(structure.id, structure as TournamentStructure);
+    });
+  }
+
+  private initializeSportDivisionRules() {
+    // Initialize sport division rules from your migration data
+    const defaultRules = [
+      {
+        id: randomUUID(),
+        sportId: 'basketball',
+        requiredDivisions: {"min_divisions": 1, "max_divisions": 8, "default_type": "age_gender"},
+        allowedCombinations: {"age_gender": true, "skill_only": true, "mixed_age": false},
+        ageGroupRules: {"youth": {"U10": {"max_age": 10, "min_players": 5}, "U12": {"max_age": 12, "min_players": 5}, "U14": {"max_age": 14, "min_players": 5}, "U16": {"max_age": 16, "min_players": 5}, "U18": {"max_age": 18, "min_players": 5}}, "adult": {"Open": {"min_age": 18, "min_players": 5}, "Masters": {"min_age": 35, "min_players": 5}}},
+        genderRules: {"mens": {"required": false, "min_players": 5}, "womens": {"required": false, "min_players": 5}, "mixed": {"required": false, "min_players": 5, "gender_ratio": "flexible"}},
+        performanceStandards: {"recreational": {"skill_level": 1, "description": "Beginner to intermediate players"}, "competitive": {"skill_level": 2, "description": "Advanced recreational and former high school players"}, "elite": {"skill_level": 3, "description": "College and professional level players"}},
+        createdAt: new Date()
+      },
+      {
+        id: randomUUID(),
+        sportId: 'soccer',
+        requiredDivisions: {"min_divisions": 1, "max_divisions": 12, "default_type": "age_gender"},
+        allowedCombinations: {"age_gender": true, "skill_only": true, "mixed_age": true},
+        ageGroupRules: {"youth": {"U8": {"max_age": 8, "min_players": 7, "field_size": "small"}, "U10": {"max_age": 10, "min_players": 9, "field_size": "small"}, "U12": {"max_age": 12, "min_players": 11, "field_size": "full"}, "U14": {"max_age": 14, "min_players": 11}, "U16": {"max_age": 16, "min_players": 11}, "U18": {"max_age": 18, "min_players": 11}}, "adult": {"Open": {"min_age": 18, "min_players": 11}, "Over30": {"min_age": 30, "min_players": 11}, "Over40": {"min_age": 40, "min_players": 11}}},
+        genderRules: {"mens": {"required": false, "min_players": 11}, "womens": {"required": false, "min_players": 11}, "mixed": {"required": false, "min_players": 11, "gender_ratio": "flexible"}},
+        performanceStandards: {"division_4": {"skill_level": 1, "description": "Recreational, new players welcome"}, "division_3": {"skill_level": 2, "description": "Intermediate recreational"}, "division_2": {"skill_level": 3, "description": "Competitive recreational"}, "division_1": {"skill_level": 4, "description": "Highly competitive, club level"}},
+        createdAt: new Date()
+      },
+      {
+        id: randomUUID(),
+        sportId: 'tennis',
+        requiredDivisions: {"min_divisions": 1, "max_divisions": 16, "default_type": "age_gender_skill"},
+        allowedCombinations: {"age_gender": true, "skill_only": true, "mixed_doubles": true},
+        ageGroupRules: {"junior": {"U10": {"max_age": 10, "court_size": "36ft"}, "U12": {"max_age": 12, "court_size": "60ft"}, "U14": {"max_age": 14, "court_size": "full"}, "U16": {"max_age": 16}, "U18": {"max_age": 18}}, "adult": {"Open": {"min_age": 18}, "35+": {"min_age": 35}, "45+": {"min_age": 45}, "55+": {"min_age": 55}, "65+": {"min_age": 65}}},
+        genderRules: {"mens_singles": {"required": false}, "womens_singles": {"required": false}, "mens_doubles": {"required": false}, "womens_doubles": {"required": false}, "mixed_doubles": {"required": false, "gender_ratio": "1:1"}},
+        performanceStandards: {"beginner": {"skill_level": 1, "ntrp_range": "1.0-2.5", "description": "New to tennis"}, "intermediate": {"skill_level": 2, "ntrp_range": "3.0-3.5", "description": "Regular recreational player"}, "advanced": {"skill_level": 3, "ntrp_range": "4.0-4.5", "description": "Tournament experienced"}, "open": {"skill_level": 4, "ntrp_range": "5.0+", "description": "Highly competitive"}},
+        createdAt: new Date()
+      },
+      {
+        id: randomUUID(),
+        sportId: 'golf',
+        requiredDivisions: {"min_divisions": 1, "max_divisions": 20, "default_type": "age_gender_handicap"},
+        allowedCombinations: {"age_gender": true, "handicap_flights": true, "mixed_age": true},
+        ageGroupRules: {"junior": {"U12": {"max_age": 12, "tee_color": "red"}, "U15": {"max_age": 15, "tee_color": "red"}, "U18": {"max_age": 18, "tee_color": "white"}}, "adult": {"Open": {"min_age": 18, "tee_color": "white"}, "Senior": {"min_age": 50, "tee_color": "white"}, "Super_Senior": {"min_age": 65, "tee_color": "gold"}}},
+        genderRules: {"mens": {"required": false, "tee_color": "white"}, "womens": {"required": false, "tee_color": "red"}, "mixed": {"required": false, "tee_color": "flexible"}},
+        performanceStandards: {"championship": {"handicap_range": "0-5", "description": "Scratch to low handicap"}, "A_flight": {"handicap_range": "6-12", "description": "Low to mid handicap"}, "B_flight": {"handicap_range": "13-20", "description": "Mid to high handicap"}, "C_flight": {"handicap_range": "21-36", "description": "High handicap and beginners"}},
+        createdAt: new Date()
+      },
+      {
+        id: randomUUID(),
+        sportId: 'wrestling',
+        requiredDivisions: {"min_divisions": 1, "max_divisions": 30, "default_type": "weight_age_experience"},
+        allowedCombinations: {"weight_classes": true, "age_groups": true, "experience_level": true},
+        ageGroupRules: {"youth": {"U8": {"max_age": 8, "weight_classes": "modified"}, "U10": {"max_age": 10, "weight_classes": "youth"}, "U12": {"max_age": 12, "weight_classes": "youth"}, "U14": {"max_age": 14, "weight_classes": "cadet"}, "U16": {"max_age": 16, "weight_classes": "junior"}, "U18": {"max_age": 18, "weight_classes": "junior"}}, "adult": {"Open": {"min_age": 18, "weight_classes": "senior"}, "Masters": {"age_groups": ["35-39", "40-44", "45-49", "50+"]}}},
+        genderRules: {"mens": {"required": true, "separate_divisions": true}, "womens": {"required": true, "separate_divisions": true}},
+        performanceStandards: {"novice": {"experience": "0-1_years", "description": "New wrestlers"}, "intermediate": {"experience": "2-4_years", "description": "Developing wrestlers"}, "advanced": {"experience": "5+_years", "description": "Experienced competitive wrestlers"}},
+        createdAt: new Date()
+      }
+    ];
+
+    defaultRules.forEach(rule => {
+      this.sportDivisionRules.set(rule.id, rule as SportDivisionRules);
     });
   }
 
@@ -1632,6 +1700,26 @@ export class MemStorage implements IStorage {
 
   async deleteDonation(id: string): Promise<void> {
     this.donations.delete(id);
+  }
+
+  // Sport Division Rules methods
+  async getSportDivisionRules(): Promise<SportDivisionRules[]> {
+    return Array.from(this.sportDivisionRules.values());
+  }
+
+  async getSportDivisionRulesBySport(sportId: string): Promise<SportDivisionRules[]> {
+    return Array.from(this.sportDivisionRules.values()).filter(r => r.sportId === sportId);
+  }
+
+  async createSportDivisionRules(rules: InsertSportDivisionRules): Promise<SportDivisionRules> {
+    const id = randomUUID();
+    const created: SportDivisionRules = {
+      ...rules,
+      id,
+      createdAt: new Date(),
+    };
+    this.sportDivisionRules.set(id, created);
+    return created;
   }
 }
 

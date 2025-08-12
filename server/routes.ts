@@ -646,6 +646,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get sport division rules
+  app.get("/api/sport-division-rules", async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const rules = await storage.getSportDivisionRules();
+      res.json(rules);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch sport division rules" });
+    }
+  });
+
+  // Get sport division rules by sport ID
+  app.get("/api/sport-division-rules/sport/:sportId", async (req, res) => {
+    try {
+      const { sportId } = req.params;
+      const storage = await getStorage();
+      const rules = await storage.getSportDivisionRulesBySport(sportId);
+      res.json(rules);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch sport division rules" });
+    }
+  });
+
   // Helper function to import default sports data
   async function importDefaultSportsData() {
     // First import sport categories
