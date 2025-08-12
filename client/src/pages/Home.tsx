@@ -112,7 +112,7 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           {/* Create Tournament */}
           <Link href="/create">
-            <div className="lg:col-span-1 bg-slate-800 border border-emerald-500/30 rounded-xl p-6 hover:border-emerald-400/50 transition-all cursor-pointer group">
+            <div data-testid="card-create-tournament" className="lg:col-span-1 bg-slate-800 border border-emerald-500/30 rounded-xl p-6 hover:border-emerald-400/50 transition-all cursor-pointer group">
               <div className="text-center">
                 <div className="w-12 h-12 bg-emerald-500/20 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-emerald-500/30 transition-colors">
                   <Zap className="h-6 w-6 text-emerald-400" />
@@ -125,7 +125,7 @@ export default function Home() {
 
           {/* AI Coach */}
           <Link href="/ai-consultation">
-            <div className="lg:col-span-1 bg-slate-800 border border-purple-500/30 rounded-xl p-6 hover:border-purple-400/50 transition-all cursor-pointer group">
+            <div data-testid="card-ai-consultation" className="lg:col-span-1 bg-slate-800 border border-purple-500/30 rounded-xl p-6 hover:border-purple-400/50 transition-all cursor-pointer group">
               <div className="text-center">
                 <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-500/30 transition-colors">
                   <Star className="h-6 w-6 text-purple-400" />
@@ -138,7 +138,7 @@ export default function Home() {
 
           {/* Live Matches */}
           <Link href="/live-matches">
-            <div className="lg:col-span-1 bg-slate-800 border border-red-500/30 rounded-xl p-6 hover:border-red-400/50 transition-all cursor-pointer group">
+            <div data-testid="card-live-matches" className="lg:col-span-1 bg-slate-800 border border-red-500/30 rounded-xl p-6 hover:border-red-400/50 transition-all cursor-pointer group">
               <div className="text-center">
                 <div className="w-12 h-12 bg-red-500/20 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-red-500/30 transition-colors">
                   <Timer className="h-6 w-6 text-red-400" />
@@ -151,7 +151,7 @@ export default function Home() {
 
           {/* Championships */}
           <Link href="/championships">
-            <div className="lg:col-span-1 bg-slate-800 border border-yellow-500/30 rounded-xl p-6 hover:border-yellow-400/50 transition-all cursor-pointer group">
+            <div data-testid="card-championships" className="lg:col-span-1 bg-slate-800 border border-yellow-500/30 rounded-xl p-6 hover:border-yellow-400/50 transition-all cursor-pointer group">
               <div className="text-center">
                 <div className="w-12 h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-yellow-500/30 transition-colors">
                   <Trophy className="h-6 w-6 text-yellow-400" />
@@ -164,7 +164,7 @@ export default function Home() {
 
           {/* Settings */}
           <Link href="/settings">
-            <div className="lg:col-span-1 bg-slate-800 border border-slate-500/30 rounded-xl p-6 hover:border-slate-400/50 transition-all cursor-pointer group">
+            <div data-testid="card-settings" className="lg:col-span-1 bg-slate-800 border border-slate-500/30 rounded-xl p-6 hover:border-slate-400/50 transition-all cursor-pointer group">
               <div className="text-center">
                 <div className="w-12 h-12 bg-slate-500/20 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-slate-500/30 transition-colors">
                   <Settings className="h-6 w-6 text-slate-400" />

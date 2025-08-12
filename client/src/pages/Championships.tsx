@@ -1,52 +1,34 @@
 import React from 'react';
 import { Link } from 'wouter';
-import { ArrowLeft, Trophy, Award, Star, Crown, Medal } from 'lucide-react';
+import { ArrowLeft, Trophy, Award, Calendar, Users, LogOut } from 'lucide-react';
 
 export default function Championships() {
-  const recentChampions = [
-    {
-      id: '1',
-      tournament: 'Spring Basketball Championship',
-      winner: 'Robert Driscoll Eagles',
-      date: '2024-03-15',
-      sport: 'Basketball',
+  const championships = [
+    { 
+      id: 1, 
+      title: "Spring Basketball Championship", 
+      winner: "Eagles", 
+      date: "March 15, 2024", 
       participants: 16,
-      fundsRaised: '$2,600'
+      prize: "$2,600"
     },
-    {
-      id: '2',
-      tournament: 'Soccer Regional Cup',
-      winner: 'Coastal Bend United',
-      date: '2024-03-10',
-      sport: 'Soccer',
+    { 
+      id: 2, 
+      title: "Soccer Regional Cup", 
+      winner: "Lions", 
+      date: "April 22, 2024", 
       participants: 12,
-      fundsRaised: '$1,800'
+      prize: "$1,800"
     },
-    {
-      id: '3',
-      tournament: 'Tennis Open Series',
-      winner: 'Champions Tennis Club',
-      date: '2024-03-05',
-      sport: 'Tennis',
+    { 
+      id: 3, 
+      title: "Tennis Open Series", 
+      winner: "Johnson", 
+      date: "May 8, 2024", 
       participants: 24,
-      fundsRaised: '$3,200'
-    },
-    {
-      id: '4',
-      tournament: 'Track & Field Invitational',
-      winner: 'CCISD Speedsters',
-      date: '2024-02-28',
-      sport: 'Track & Field',
-      participants: 32,
-      fundsRaised: '$4,100'
+      prize: "$3,200"
     }
   ];
-
-  const totalFundsRaised = recentChampions.reduce((total, champion) => {
-    return total + parseInt(champion.fundsRaised.replace('$', '').replace(',', ''));
-  }, 0);
-
-  const studentsSupported = Math.floor(totalFundsRaised / 2600);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
@@ -66,10 +48,20 @@ export default function Championships() {
               </Link>
             </div>
             
-            <Link href="/" className="flex items-center text-slate-300 hover:text-yellow-400 transition-colors">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard
-            </Link>
+            <div className="flex items-center space-x-4">
+              <Link href="/" className="flex items-center text-slate-300 hover:text-yellow-400 transition-colors">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Dashboard
+              </Link>
+              <a 
+                href="/api/logout"
+                className="flex items-center space-x-2 px-3 py-2 text-slate-300 hover:text-yellow-400 transition-colors"
+                title="Logout"
+              >
+                <LogOut className="h-4 w-4" />
+                <span className="text-sm">Logout</span>
+              </a>
+            </div>
           </div>
         </div>
       </header>
@@ -78,132 +70,79 @@ export default function Championships() {
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center mb-8">
           <div className="inline-flex items-center space-x-2 bg-yellow-500/10 text-yellow-400 px-4 py-2 rounded-full text-sm font-medium mb-4">
-            <Crown className="h-4 w-4" />
+            <Award className="h-4 w-4" />
             <span>Hall of Champions</span>
           </div>
-          <h1 className="text-4xl font-bold text-white mb-4">Championships</h1>
+          <h1 className="text-4xl font-bold text-white mb-4">Championship Results</h1>
           <p className="text-xl text-slate-300">
-            Celebrating our winners and the students they support through Champions for Change
+            Celebrating our tournament winners and their achievements
           </p>
         </div>
 
-        {/* Championship Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-slate-800 border border-yellow-500/30 rounded-xl p-6 text-center">
-            <div className="w-12 h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center mx-auto mb-4">
-              <Trophy className="h-6 w-6 text-yellow-400" />
-            </div>
-            <div className="text-3xl font-bold text-yellow-400 mb-2">{recentChampions.length}</div>
-            <div className="text-slate-300">Tournaments Completed</div>
-          </div>
-          
-          <div className="bg-slate-800 border border-emerald-500/30 rounded-xl p-6 text-center">
-            <div className="w-12 h-12 bg-emerald-500/20 rounded-lg flex items-center justify-center mx-auto mb-4">
-              <Award className="h-6 w-6 text-emerald-400" />
-            </div>
-            <div className="text-3xl font-bold text-emerald-400 mb-2">${totalFundsRaised.toLocaleString()}</div>
-            <div className="text-slate-300">Total Funds Raised</div>
-          </div>
-          
-          <div className="bg-slate-800 border border-blue-500/30 rounded-xl p-6 text-center">
-            <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mx-auto mb-4">
-              <Star className="h-6 w-6 text-blue-400" />
-            </div>
-            <div className="text-3xl font-bold text-blue-400 mb-2">{studentsSupported}</div>
-            <div className="text-slate-300">Students Supported</div>
-          </div>
-          
-          <div className="bg-slate-800 border border-purple-500/30 rounded-xl p-6 text-center">
-            <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mx-auto mb-4">
-              <Medal className="h-6 w-6 text-purple-400" />
-            </div>
-            <div className="text-3xl font-bold text-purple-400 mb-2">84</div>
-            <div className="text-slate-300">Total Teams Participated</div>
-          </div>
-        </div>
-
-        {/* Recent Champions */}
-        <div className="bg-slate-800 border border-slate-700 rounded-2xl p-8 mb-8">
-          <h2 className="text-2xl font-bold text-white mb-6 flex items-center space-x-2">
-            <Trophy className="h-6 w-6 text-yellow-400" />
-            <span>Recent Champions</span>
-          </h2>
-          
-          <div className="space-y-4">
-            {recentChampions.map((champion, index) => (
-              <div key={champion.id} className="bg-slate-700 rounded-xl p-6 hover:bg-slate-600/50 transition-all">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                      index === 0 ? 'bg-yellow-400 text-slate-900' :
-                      index === 1 ? 'bg-slate-400 text-slate-900' :
-                      index === 2 ? 'bg-orange-400 text-slate-900' :
-                      'bg-slate-600 text-slate-300'
-                    }`}>
-                      {index === 0 ? <Crown className="h-6 w-6" /> : <Medal className="h-6 w-6" />}
-                    </div>
-                    <div>
-                      <h3 className="text-white font-semibold text-lg">{champion.winner}</h3>
-                      <p className="text-slate-400">{champion.tournament}</p>
-                      <p className="text-slate-500 text-sm">{champion.sport} • {champion.date}</p>
+        {/* Championships Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {championships.map((championship) => (
+            <div key={championship.id} className="bg-slate-800 border border-yellow-500/30 rounded-xl p-6">
+              <div className="text-center mb-4">
+                <div className="w-16 h-16 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <Trophy className="h-8 w-8 text-yellow-400" />
+                </div>
+                <h3 className="text-white font-bold text-lg mb-2">{championship.title}</h3>
+              </div>
+              
+              <div className="space-y-3">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-yellow-400">{championship.winner}</div>
+                  <div className="text-sm text-slate-400">Champion</div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4 text-center">
+                  <div>
+                    <div className="flex items-center justify-center space-x-1 text-slate-300 text-sm">
+                      <Calendar className="h-4 w-4" />
+                      <span>{championship.date}</span>
                     </div>
                   </div>
-                  
-                  <div className="text-right">
-                    <div className="text-emerald-400 font-bold text-xl">{champion.fundsRaised}</div>
-                    <div className="text-slate-400 text-sm">for student education</div>
-                    <div className="text-slate-500 text-xs">{champion.participants} teams</div>
+                  <div>
+                    <div className="flex items-center justify-center space-x-1 text-slate-300 text-sm">
+                      <Users className="h-4 w-4" />
+                      <span>{championship.participants} teams</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Educational Impact */}
-        <div className="bg-gradient-to-r from-emerald-500/10 to-blue-500/10 border border-emerald-500/30 rounded-2xl p-8">
-          <div className="text-center">
-            <div className="inline-flex items-center space-x-2 bg-emerald-400/20 text-emerald-400 px-4 py-2 rounded-full text-sm font-medium mb-6">
-              <Star className="h-4 w-4" />
-              <span>Educational Impact</span>
-            </div>
-            <h3 className="text-3xl font-bold text-white mb-6">Champions Creating Opportunities</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="text-left">
-                <h4 className="text-xl font-semibold text-white mb-4">Student Trip Destinations Funded</h4>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between bg-slate-800/50 rounded-lg p-3">
-                    <span className="text-slate-300">Washington D.C. Leadership Trip</span>
-                    <span className="text-emerald-400 font-semibold">2 Students</span>
-                  </div>
-                  <div className="flex items-center justify-between bg-slate-800/50 rounded-lg p-3">
-                    <span className="text-slate-300">Space Center Houston STEM Trip</span>
-                    <span className="text-emerald-400 font-semibold">3 Students</span>
-                  </div>
-                  <div className="flex items-center justify-between bg-slate-800/50 rounded-lg p-3">
-                    <span className="text-slate-300">College Campus Tour</span>
-                    <span className="text-emerald-400 font-semibold">1 Student</span>
-                  </div>
+                
+                <div className="text-center pt-2 border-t border-slate-700">
+                  <div className="text-emerald-400 font-semibold">{championship.prize}</div>
+                  <div className="text-xs text-slate-400">Educational Funding Generated</div>
                 </div>
               </div>
               
-              <div className="text-left">
-                <h4 className="text-xl font-semibold text-white mb-4">School Participation</h4>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between bg-slate-800/50 rounded-lg p-3">
-                    <span className="text-slate-300">Robert Driscoll Middle School</span>
-                    <span className="text-yellow-400 font-semibold">12 Teams</span>
-                  </div>
-                  <div className="flex items-center justify-between bg-slate-800/50 rounded-lg p-3">
-                    <span className="text-slate-300">CCISD Schools</span>
-                    <span className="text-yellow-400 font-semibold">8 Teams</span>
-                  </div>
-                  <div className="flex items-center justify-between bg-slate-800/50 rounded-lg p-3">
-                    <span className="text-slate-300">Coastal Bend Schools</span>
-                    <span className="text-yellow-400 font-semibold">6 Teams</span>
-                  </div>
-                </div>
+              <button className="w-full mt-4 bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-semibold py-2 px-4 rounded-lg transition-colors">
+                View Details
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {/* Educational Impact Summary */}
+        <div className="bg-gradient-to-r from-emerald-500/10 to-blue-500/10 border border-emerald-500/30 rounded-2xl p-8 mt-8">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold text-white mb-4">Educational Impact</h2>
+            <p className="text-xl text-slate-300 mb-6">
+              Tournament revenue directly funds student educational opportunities
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="text-center">
+                <div className="text-4xl font-bold text-emerald-400">$7,600</div>
+                <div className="text-slate-300">Total Funding Generated</div>
+              </div>
+              <div className="text-center">
+                <div className="text-4xl font-bold text-blue-400">3</div>
+                <div className="text-slate-300">Student Trips Funded</div>
+              </div>
+              <div className="text-center">
+                <div className="text-4xl font-bold text-yellow-400">52</div>
+                <div className="text-slate-300">Tournaments Completed</div>
               </div>
             </div>
           </div>

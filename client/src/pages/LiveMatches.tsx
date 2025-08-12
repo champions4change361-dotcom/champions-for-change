@@ -1,42 +1,12 @@
 import React from 'react';
 import { Link } from 'wouter';
-import { ArrowLeft, Trophy, Timer, Play, Pause, Users } from 'lucide-react';
+import { ArrowLeft, Trophy, Timer, Users, MapPin, LogOut } from 'lucide-react';
 
 export default function LiveMatches() {
   const liveMatches = [
-    {
-      id: '1',
-      tournament: 'Spring Basketball Championship',
-      round: 'Quarter Final',
-      team1: 'Robert Driscoll Eagles',
-      team2: 'CCISD Hawks',
-      team1Score: 45,
-      team2Score: 42,
-      status: 'live',
-      timeRemaining: '6:23'
-    },
-    {
-      id: '2', 
-      tournament: 'Soccer Regional Cup',
-      round: 'Semi Final',
-      team1: 'Corpus Christi Storm',
-      team2: 'Coastal Bend United',
-      team1Score: 2,
-      team2Score: 1,
-      status: 'live',
-      timeRemaining: '15:45'
-    },
-    {
-      id: '3',
-      tournament: 'Tennis Open Series',
-      round: 'Group Stage',
-      team1: 'Champions Tennis Club',
-      team2: 'Bay Area Rackets',
-      team1Score: 4,
-      team2Score: 6,
-      status: 'live',
-      timeRemaining: 'Set 2'
-    }
+    { id: 1, sport: "Basketball", teams: ["Eagles vs Hawks"], venue: "Gym A", time: "2:15 PM", status: "Quarter 3" },
+    { id: 2, sport: "Soccer", teams: ["Lions vs Tigers"], venue: "Field 1", time: "3:30 PM", status: "Half Time" },
+    { id: 3, sport: "Tennis", teams: ["Smith vs Johnson"], venue: "Court 2", time: "1:45 PM", status: "Set 2" }
   ];
 
   return (
@@ -57,10 +27,20 @@ export default function LiveMatches() {
               </Link>
             </div>
             
-            <Link href="/" className="flex items-center text-slate-300 hover:text-yellow-400 transition-colors">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard
-            </Link>
+            <div className="flex items-center space-x-4">
+              <Link href="/" className="flex items-center text-slate-300 hover:text-yellow-400 transition-colors">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Dashboard
+              </Link>
+              <a 
+                href="/api/logout"
+                className="flex items-center space-x-2 px-3 py-2 text-slate-300 hover:text-yellow-400 transition-colors"
+                title="Logout"
+              >
+                <LogOut className="h-4 w-4" />
+                <span className="text-sm">Logout</span>
+              </a>
+            </div>
           </div>
         </div>
       </header>
@@ -70,110 +50,45 @@ export default function LiveMatches() {
         <div className="text-center mb-8">
           <div className="inline-flex items-center space-x-2 bg-red-500/10 text-red-400 px-4 py-2 rounded-full text-sm font-medium mb-4">
             <Timer className="h-4 w-4" />
-            <span>Live Action</span>
+            <span>Live Tournament Action</span>
           </div>
           <h1 className="text-4xl font-bold text-white mb-4">Live Matches</h1>
           <p className="text-xl text-slate-300">
-            Follow the action in real-time across all Champions for Change tournaments
+            Track ongoing competitions and real-time scores
           </p>
-        </div>
-
-        {/* Live Match Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-slate-800 border border-red-500/30 rounded-xl p-6 text-center">
-            <div className="w-12 h-12 bg-red-500/20 rounded-lg flex items-center justify-center mx-auto mb-4">
-              <Play className="h-6 w-6 text-red-400" />
-            </div>
-            <div className="text-3xl font-bold text-red-400 mb-2">{liveMatches.length}</div>
-            <div className="text-slate-300">Live Matches</div>
-          </div>
-          
-          <div className="bg-slate-800 border border-yellow-500/30 rounded-xl p-6 text-center">
-            <div className="w-12 h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center mx-auto mb-4">
-              <Users className="h-6 w-6 text-yellow-400" />
-            </div>
-            <div className="text-3xl font-bold text-yellow-400 mb-2">48</div>
-            <div className="text-slate-300">Teams Competing</div>
-          </div>
-          
-          <div className="bg-slate-800 border border-emerald-500/30 rounded-xl p-6 text-center">
-            <div className="w-12 h-12 bg-emerald-500/20 rounded-lg flex items-center justify-center mx-auto mb-4">
-              <Trophy className="h-6 w-6 text-emerald-400" />
-            </div>
-            <div className="text-3xl font-bold text-emerald-400 mb-2">3</div>
-            <div className="text-slate-300">Active Tournaments</div>
-          </div>
         </div>
 
         {/* Live Matches Grid */}
-        <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {liveMatches.map((match) => (
-            <div key={match.id} className="bg-slate-800 border border-slate-700 rounded-2xl p-6 hover:border-red-400/50 transition-all">
+            <div key={match.id} className="bg-slate-800 border border-red-500/30 rounded-xl p-6">
               <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className="text-white font-semibold text-lg">{match.tournament}</h3>
-                  <p className="text-slate-400">{match.round}</p>
-                </div>
                 <div className="flex items-center space-x-2">
                   <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-                  <span className="text-red-400 font-medium">LIVE</span>
-                  <span className="text-slate-400">{match.timeRemaining}</span>
+                  <span className="text-red-400 font-semibold text-sm">LIVE</span>
+                </div>
+                <span className="text-slate-400 text-sm">{match.time}</span>
+              </div>
+              
+              <h3 className="text-white font-bold text-lg mb-2">{match.sport}</h3>
+              <p className="text-yellow-400 font-semibold mb-3">{match.teams[0]}</p>
+              
+              <div className="space-y-2">
+                <div className="flex items-center text-slate-300 text-sm">
+                  <MapPin className="h-4 w-4 mr-2" />
+                  {match.venue}
+                </div>
+                <div className="flex items-center text-slate-300 text-sm">
+                  <Users className="h-4 w-4 mr-2" />
+                  {match.status}
                 </div>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
-                {/* Team 1 */}
-                <div className="text-center md:text-right">
-                  <div className="text-white font-semibold text-xl mb-2">{match.team1}</div>
-                  <div className="text-4xl font-bold text-yellow-400">{match.team1Score}</div>
-                </div>
-                
-                {/* VS */}
-                <div className="text-center">
-                  <div className="text-slate-400 text-lg">VS</div>
-                  <Link 
-                    href={`/tournament/${match.id}`}
-                    className="inline-block mt-2 bg-yellow-400 hover:bg-yellow-500 text-slate-900 px-4 py-2 rounded-lg font-medium transition-colors"
-                  >
-                    Watch Live
-                  </Link>
-                </div>
-                
-                {/* Team 2 */}
-                <div className="text-center md:text-left">
-                  <div className="text-white font-semibold text-xl mb-2">{match.team2}</div>
-                  <div className="text-4xl font-bold text-yellow-400">{match.team2Score}</div>
-                </div>
-              </div>
+              <button className="w-full mt-4 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg transition-colors">
+                View Match
+              </button>
             </div>
           ))}
-        </div>
-
-        {/* Revenue Impact Banner */}
-        <div className="mt-12 bg-gradient-to-r from-emerald-500/10 to-yellow-500/10 border border-emerald-500/30 rounded-2xl p-8 text-center">
-          <div className="inline-flex items-center space-x-2 bg-emerald-400/20 text-emerald-400 px-4 py-2 rounded-full text-sm font-medium mb-4">
-            <Trophy className="h-4 w-4" />
-            <span>Educational Impact</span>
-          </div>
-          <h3 className="text-2xl font-bold text-white mb-4">Every Match Funds Student Dreams</h3>
-          <p className="text-slate-300 text-lg mb-6">
-            These tournaments generate revenue that directly funds $2,600+ educational trips for 
-            underprivileged youth in Corpus Christi, Texas
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-slate-800/50 rounded-xl p-4">
-              <div className="text-2xl font-bold text-emerald-400 mb-1">$1,200</div>
-              <div className="text-slate-300 text-sm">Raised today from live tournaments</div>
-            </div>
-            <div className="bg-slate-800/50 rounded-xl p-4">
-              <div className="text-2xl font-bold text-yellow-400 mb-1">24</div>
-              <div className="text-slate-300 text-sm">Students can attend trips so far</div>
-            </div>
-            <div className="bg-slate-800/50 rounded-xl p-4">
-              <div className="text-2xl font-bold text-emerald-400 mb-1">3</div>
-              <div className="text-slate-300 text-sm">Schools participating today</div>
-            </div>
-          </div>
         </div>
       </main>
     </div>

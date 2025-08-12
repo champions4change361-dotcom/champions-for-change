@@ -87,14 +87,17 @@ export default function AIConsultation() {
               Describe your tournament idea or challenge:
             </label>
             <textarea
+              data-testid="input-ai-query"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Try: 'Build a webpage for 16-team basketball tournament' or 'Create swimming meet with leaderboards' or 'Generate code for baseball playoffs'"
               className="w-full h-32 bg-slate-700 border border-slate-600 rounded-lg p-4 text-white placeholder-slate-400 focus:border-purple-400 focus:outline-none resize-none"
+              autoFocus
             />
           </div>
           
           <button
+            data-testid="button-get-consultation"
             onClick={handleConsultation}
             disabled={isLoading || !query.trim()}
             className="w-full bg-purple-500 hover:bg-purple-600 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center space-x-2"
@@ -196,6 +199,7 @@ export default function AIConsultation() {
                       <div className="flex justify-between items-center mb-4">
                         <span className="text-purple-300 font-semibold">Complete Website Code</span>
                         <button 
+                          data-testid="button-copy-website-code"
                           onClick={() => {
                             const code = response.tier3_full_service.intelligent_tournament_logic?.complete_website_template || 
                                        response.tier3_full_service.custom_webpage?.complete_website_html || 
