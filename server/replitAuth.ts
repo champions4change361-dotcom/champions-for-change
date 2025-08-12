@@ -68,12 +68,26 @@ async function upsertUser(
   claims: any,
 ) {
   const userStorage = await getStorage();
+  
+  // Special handling for Daniel Thornton - Champions for Change owner
+  const isOwner = claims["email"] === 'champions4change361@gmail.com' || 
+                  claims["sub"] === 'champions-admin-1';
+  
   await userStorage.upsertUser({
     id: claims["sub"],
     email: claims["email"],
     firstName: claims["first_name"],
     lastName: claims["last_name"],
     profileImageUrl: claims["profile_image_url"],
+    ...(isOwner && {
+      subscriptionPlan: 'district_enterprise',
+      subscriptionStatus: 'active',
+      userRole: 'tournament_manager',
+      organizationId: 'champions-for-change',
+      organizationName: 'Champions for Change',
+      isWhitelabelClient: true,
+      whitelabelDomain: 'trantortournaments.org'
+    })
   });
 }
 
@@ -151,13 +165,20 @@ export async function setupAuth(app: Express) {
     try {
       const storage = await getStorage();
       
-      // Create user in storage first
+      // Create user in storage first with full administrator privileges
       const adminUser = await storage.upsertUser({
         id: 'champions-admin-1',
         email: 'champions4change361@gmail.com',
         firstName: 'Daniel',
         lastName: 'Thornton',
-        profileImageUrl: null
+        profileImageUrl: null,
+        subscriptionPlan: 'district_enterprise',
+        subscriptionStatus: 'active',
+        userRole: 'tournament_manager',
+        organizationId: 'champions-for-change',
+        organizationName: 'Champions for Change',
+        isWhitelabelClient: true,
+        whitelabelDomain: 'trantortournaments.org'
       });
       
       // Create authenticated session

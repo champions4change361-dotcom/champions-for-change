@@ -1,15 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { Trophy, Zap, Users, Calendar, Settings, Award, Timer, Star, ChevronRight } from 'lucide-react';
+import { Trophy, Zap, Users, Calendar, Settings, Award, Timer, Star, ChevronRight, Crown, Shield } from 'lucide-react';
 import { Link } from "wouter";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function SportsArenaHomepage() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [liveMatches, setLiveMatches] = useState(3);
+  const { user, isLoading } = useAuth();
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  // If still loading user data, show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-white text-lg">Loading your Champions Arena...</p>
+        </div>
+      </div>
+    );
+  }
 
   const activeTournaments = [
     { name: "Spring Basketball Championship", status: "Quarter Finals", participants: 16, prize: "$2,600" },
@@ -47,15 +61,46 @@ export default function SportsArenaHomepage() {
                 </div>
               </div>
 
-              {/* User Profile */}
+              {/* User Profile - Admin Level */}
               <div className="flex items-center space-x-3">
                 <div className="text-right">
-                  <p className="text-sm font-medium text-white">Daniel Thornton</p>
-                  <p className="text-xs text-yellow-400">Tournament Director</p>
+                  <div className="flex items-center space-x-2">
+                    <p className="text-sm font-medium text-white">
+                      {user?.firstName || 'Daniel'} {user?.lastName || 'Thornton'}
+                    </p>
+                    {user?.subscriptionPlan === 'district_enterprise' && (
+                      <Crown className="h-4 w-4 text-yellow-400" />
+                    )}
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <p className="text-xs text-yellow-400">
+                      {user?.userRole === 'tournament_manager' ? 'Platform Owner' : 'Tournament Director'}
+                    </p>
+                    {user?.subscriptionPlan === 'district_enterprise' && (
+                      <span className="text-xs bg-yellow-400/20 text-yellow-400 px-2 py-0.5 rounded-full">
+                        ENTERPRISE
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center">
-                  <span className="text-slate-900 font-bold">D</span>
+                <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center relative">
+                  <span className="text-slate-900 font-bold">
+                    {(user?.firstName?.[0] || 'D')}
+                  </span>
+                  {user?.subscriptionPlan === 'district_enterprise' && (
+                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                      <Shield className="h-2.5 w-2.5 text-white" />
+                    </div>
+                  )}
                 </div>
+                {!user && (
+                  <a 
+                    href="/api/login" 
+                    className="bg-yellow-400 hover:bg-yellow-500 text-slate-900 px-4 py-2 rounded-lg font-medium transition-colors"
+                  >
+                    Login as Admin
+                  </a>
+                )}
               </div>
             </div>
           </div>
@@ -74,11 +119,27 @@ export default function SportsArenaHomepage() {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-4xl font-bold text-white mb-2">
-                  Welcome Back, <span className="text-yellow-400">Champion</span>
+                  Welcome Back, <span className="text-yellow-400">
+                    {user?.subscriptionPlan === 'district_enterprise' ? 'Platform Owner' : 'Champion'}
+                  </span>
                 </h2>
                 <p className="text-xl text-slate-300 mb-4">
-                  Every tournament creates opportunities for student athletes in Corpus Christi, Texas
+                  {user?.subscriptionPlan === 'district_enterprise' 
+                    ? 'Your Champions for Change platform is generating revenue for student education'
+                    : 'Every tournament creates opportunities for student athletes in Corpus Christi, Texas'
+                  }
                 </p>
+                {!user && (
+                  <div className="bg-yellow-400/10 border border-yellow-400/30 rounded-lg p-4 mt-4">
+                    <p className="text-yellow-400 font-medium">Please log in to access your administrator dashboard</p>
+                    <a 
+                      href="/api/login" 
+                      className="inline-block mt-2 bg-yellow-400 hover:bg-yellow-500 text-slate-900 px-4 py-2 rounded-lg font-medium transition-colors"
+                    >
+                      Login as Platform Owner
+                    </a>
+                  </div>
+                )}
                 <div className="flex items-center space-x-6">
                   <div className="flex items-center space-x-2 text-yellow-400">
                     <Award className="h-5 w-5" />
