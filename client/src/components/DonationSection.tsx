@@ -17,11 +17,12 @@ export function DonationSection({ variant = 'full', className = '' }: DonationSe
 
   const predefinedAmounts = ['25', '50', '100', '250'];
 
-  const handleDonation = async (amount: string) => {
-    const finalAmount = amount || customAmount;
+  const handleDonation = async (amount?: string) => {
+    // Use the provided amount, or fall back to selected amount or custom amount
+    const finalAmount = amount || donationAmount || customAmount;
     const numericAmount = parseInt(finalAmount);
     
-    console.log('Donation attempt:', { amount, customAmount, finalAmount, numericAmount });
+    console.log('Donation attempt:', { amount, donationAmount, customAmount, finalAmount, numericAmount });
     
     if (!finalAmount || isNaN(numericAmount) || numericAmount < 1) {
       toast({
@@ -167,6 +168,7 @@ export function DonationSection({ variant = 'full', className = '' }: DonationSe
                 onClick={() => {
                   setDonationAmount(amount);
                   setCustomAmount('');
+                  handleDonation(amount);
                 }}
                 data-testid={`button-select-${amount}`}
               >
@@ -198,12 +200,12 @@ export function DonationSection({ variant = 'full', className = '' }: DonationSe
           </div>
 
           <Button
-            onClick={() => handleDonation(donationAmount)}
-            disabled={!donationAmount}
+            onClick={() => handleDonation()}
+            disabled={!donationAmount && !customAmount}
             className="w-full bg-green-600 hover:bg-green-700 py-3 text-lg"
             data-testid="button-donate-selected"
           >
-            {donationAmount ? `Donate $${donationAmount}` : 'Select Amount Above'}
+            {donationAmount ? `Donate $${donationAmount}` : customAmount ? `Donate $${customAmount}` : 'Select Amount Above'}
           </Button>
         </div>
 

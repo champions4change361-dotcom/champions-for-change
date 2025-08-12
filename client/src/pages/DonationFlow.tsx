@@ -18,8 +18,12 @@ interface DonorInfo {
 }
 
 export default function DonationFlow() {
+  // Parse amount from URL parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlAmount = urlParams.get('amount');
+  
   const [step, setStep] = useState<'amount' | 'contact' | 'payment' | 'success'>('amount');
-  const [donationAmount, setDonationAmount] = useState('');
+  const [donationAmount, setDonationAmount] = useState(urlAmount || '');
   const [customAmount, setCustomAmount] = useState('');
   const [donorInfo, setDonorInfo] = useState<DonorInfo>({
     firstName: '',
