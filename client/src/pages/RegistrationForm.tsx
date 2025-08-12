@@ -13,6 +13,7 @@ import { CheckCircle, AlertCircle, CreditCard, FileText, Anchor, Trophy } from '
 import { useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import { useDomain } from '@/hooks/useDomain';
 import { CrossPlatformPromotion, FantasyPromotion } from '@/components/CrossPlatformPromotion';
 
 const registrationSchema = z.object({
@@ -48,6 +49,7 @@ export default function RegistrationFormPage() {
   const [selectedTier, setSelectedTier] = useState<string>('foundation');
   const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'check'>('stripe');
   const { toast } = useToast();
+  const { isSchoolDomain } = useDomain();
 
   // Get tier from URL params
   useEffect(() => {
@@ -505,11 +507,12 @@ export default function RegistrationFormPage() {
           )}
         </form>
         
-        {/* Enhanced Cross-Platform Promotion */}
+        {/* Enhanced Cross-Platform Promotion - Only on business domains */}
         <FantasyPromotion />
         <CrossPlatformPromotion placement="signup" />
         
-        {/* Complete Tournament Ecosystem */}
+        {/* Complete Tournament Ecosystem - NEVER show on school domains */}
+        {!isSchoolDomain() && (
         <div className="mt-12 bg-slate-800 border border-slate-600 rounded-xl p-8">
           <div className="text-center mb-6">
             <h3 className="text-xl font-semibold text-white mb-2">
@@ -561,6 +564,7 @@ export default function RegistrationFormPage() {
             </Card>
           </div>
         </div>
+        )}
       </div>
     </div>
   );
