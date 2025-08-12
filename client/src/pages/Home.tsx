@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Trophy, Zap, Users, Calendar, Settings, Award, Timer, Star, ChevronRight, LogOut } from 'lucide-react';
 import { Link } from "wouter";
+import MoxyMessage from "../components/MoxyMessage";
 
 export default function Home() {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -213,6 +214,11 @@ export default function Home() {
               View All Championships
             </button>
           </div>
+        </div>
+
+        {/* Mission Philosophy Section */}
+        <div className="mt-8">
+          <MoxyMessage />
         </div>
       </main>
     </div>
