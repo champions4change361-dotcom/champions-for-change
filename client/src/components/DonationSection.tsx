@@ -19,11 +19,14 @@ export function DonationSection({ variant = 'full', className = '' }: DonationSe
 
   const handleDonation = async (amount: string) => {
     const finalAmount = amount || customAmount;
+    const numericAmount = parseInt(finalAmount);
     
-    if (!finalAmount || isNaN(parseInt(finalAmount)) || parseInt(finalAmount) < 1) {
+    console.log('Donation attempt:', { amount, customAmount, finalAmount, numericAmount });
+    
+    if (!finalAmount || isNaN(numericAmount) || numericAmount < 1) {
       toast({
         title: "Invalid Amount",
-        description: "Please enter a valid donation amount.",
+        description: "Please enter a valid donation amount (minimum $1).",
         variant: "destructive",
       });
       return;
@@ -38,13 +41,20 @@ export function DonationSection({ variant = 'full', className = '' }: DonationSe
         },
         credentials: 'include',
         body: JSON.stringify({
-          amount: parseInt(finalAmount),
-          description: 'Donation to Champions for Change educational programs'
+          amount: numericAmount,
+          description: `$${numericAmount} donation to Champions for Change educational programs`
         }),
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+        const errorText = await response.text();
+        console.error('Payment setup error:', { status: response.status, response: errorText });
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch {
+          errorData = { message: `Payment setup failed (${response.status})` };
+        }
         throw new Error(errorData.message || `Payment setup failed: ${response.status}`);
       }
 
@@ -55,7 +65,8 @@ export function DonationSection({ variant = 'full', className = '' }: DonationSe
       }
       
       // Redirect to secure payment page
-      window.location.href = `/checkout?client_secret=${encodeURIComponent(clientSecret)}&amount=${finalAmount}&type=donation`;
+      console.log('Payment setup successful, redirecting to checkout...');
+      window.location.href = `/checkout?client_secret=${encodeURIComponent(clientSecret)}&amount=${numericAmount}&type=donation`;
       
     } catch (error: any) {
       console.error('Donation error:', error);
