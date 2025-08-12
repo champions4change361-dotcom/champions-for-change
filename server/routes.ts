@@ -5,6 +5,7 @@ import { insertTournamentSchema, updateMatchSchema, insertRegistrationRequestSch
 import { analyzeTournamentQuery, generateTournamentStructure, generateIntelligentTournamentStructure, generateWebpageTemplate, type KeystoneConsultationResult } from "./ai-consultation";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { setupDomainRoutes } from "./domainRoutes";
+import { AIContextService } from "./ai-context";
 import Stripe from "stripe";
 import { z } from "zod";
 
@@ -3532,6 +3533,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching user tournaments:", error);
       res.status(500).json({ message: "Failed to fetch tournaments" });
+    }
+  });
+
+  // AI CONTEXTUAL HELP API ENDPOINTS
+  
+  // Enhanced AI chat with database context
+  app.post("/api/ai/contextual-help", async (req, res) => {
+    try {
+      const { userId, tournamentId, question, conversationHistory } = req.body;
+      const storage = await getStorage();
+      const aiContext = new AIContextService(storage);
+
+      // Get comprehensive context
+      const context = await aiContext.getAIContext(userId, tournamentId);
+      
+      // Generate contextual response
+      const aiResponse = await aiContext.generateContextualResponse(context, question);
+      
+      // Update interaction tracking
+      await storage.updateUser(userId, {
+        aiInteractionCount: (context.user.totalInteractions || 0) + 1,
+        updatedAt: new Date()
+      });
+
+      // Store conversation for context
+      if (tournamentId) {
+        const currentProgress = context.currentTournament?.aiSetupProgress || {};
+        await aiContext.updateAIProgress(tournamentId, {
+          ...currentProgress,
+          lastAIInteraction: new Date().toISOString(),
+          previousQuestions: [
+            ...(currentProgress.previousQuestions || []).slice(-4), // Keep last 5
+            question
+          ]
+        });
+      }
+
+      res.json({
+        success: true,
+        response: aiResponse,
+        context: {
+          userLevel: context.user.techSkillLevel,
+          experienceLevel: context.user.successfulSetups > 2 ? 'experienced' : 'learning',
+          suggestions: await aiContext.generateSuggestions(context, question)
+        }
+      });
+
+    } catch (error) {
+      console.error("AI contextual help error:", error);
+      res.status(500).json({
+        success: false,
+        message: "AI help temporarily unavailable",
+        fallbackResponse: "I'm having trouble accessing your tournament data right now, but I'm still here to help! What specific question do you have about setting up donations or Stripe?"
+      });
+    }
+  });
+
+  // Proactive AI suggestions based on tournament state
+  app.get("/api/ai/proactive-suggestions/:tournamentId", async (req, res) => {
+    try {
+      const { tournamentId } = req.params;
+      const { userId } = req.query;
+      const storage = await getStorage();
+      const aiContext = new AIContextService(storage);
+
+      const context = await aiContext.getAIContext(userId as string, tournamentId);
+      const suggestions = await aiContext.generateSuggestions(context, "");
+
+      res.json({
+        success: true,
+        suggestions: suggestions.slice(0, 2) // Max 2 suggestions to avoid overwhelm
+      });
+
+    } catch (error) {
+      console.error("Proactive suggestions error:", error);
+      res.json({ success: true, suggestions: [] }); // Fail gracefully
+    }
+  });
+
+  // Get AI context for a user/tournament
+  app.get("/api/ai/context/:userId", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { tournamentId } = req.query;
+      const storage = await getStorage();
+      const aiContext = new AIContextService(storage);
+
+      const context = await aiContext.getAIContext(userId, tournamentId as string);
+      
+      res.json({
+        success: true,
+        context
+      });
+
+    } catch (error) {
+      console.error("AI context error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch AI context"
+      });
     }
   });
 

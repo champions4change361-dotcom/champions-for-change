@@ -37,6 +37,23 @@ export const users = pgTable("users", {
   isWhitelabelClient: boolean("is_whitelabel_client").default(false),
   whitelabelDomain: varchar("whitelabel_domain"),
   whitelabelBranding: jsonb("whitelabel_branding"), // Custom colors, logos, etc
+  
+  // AI PREFERENCE FIELDS
+  aiPreferences: jsonb("ai_preferences").$type<{
+    wantsProactiveHelp: boolean;
+    communicationStyle: 'friendly' | 'professional' | 'technical';
+    helpLevel: 'minimal' | 'guided' | 'comprehensive';
+    hasCompletedOnboarding: boolean;
+  }>(),
+  
+  techSkillLevel: text("tech_skill_level", {
+    enum: ["beginner", "intermediate", "advanced"]
+  }).default("intermediate"),
+  
+  // LEARNING PROGRESS
+  completedAITutorials: jsonb("completed_ai_tutorials").$type<string[]>(),
+  aiInteractionCount: integer("ai_interaction_count").default(0),
+  
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -319,6 +336,46 @@ export const tournaments = pgTable("tournaments", {
   location: text("location"),
   description: text("description"),
   isPublic: boolean("is_public").default(true),
+  
+  // DONATION MODULE FIELDS
+  donationsEnabled: boolean("donations_enabled").default(false),
+  donationGoal: numeric("donation_goal").default("0"),
+  donationDescription: text("donation_description"),
+  stripeAccountId: varchar("stripe_account_id"),
+  registrationFeeEnabled: boolean("registration_fee_enabled").default(false),
+  
+  // AI CONTEXT FIELDS
+  aiSetupProgress: jsonb("ai_setup_progress").$type<{
+    donationModuleStep: 'not_started' | 'suggested' | 'creating' | 'stripe_setup' | 'testing' | 'complete';
+    stripeAccountStatus: 'unknown' | 'none' | 'creating' | 'has_account' | 'keys_added' | 'validated';
+    lastAIInteraction: string;
+    completedSteps: string[];
+    userResponses: Record<string, any>;
+  }>(),
+  
+  aiContext: jsonb("ai_context").$type<{
+    userTechLevel: 'beginner' | 'intermediate' | 'advanced';
+    preferredCommunicationStyle: 'detailed' | 'concise' | 'visual';
+    hasAskedForHelp: boolean;
+    previousQuestions: string[];
+    successfulSetups: number;
+  }>(),
+  
+  setupAssistanceLevel: text("setup_assistance_level", {
+    enum: ["minimal", "standard", "full_guidance", "expert_mode"]
+  }).default("standard"),
+  
+  donationSetupData: jsonb("donation_setup_data").$type<{
+    goal: number;
+    purpose: string;
+    description: string;
+    suggestedAmounts: number[];
+    stripePublicKey?: string;
+    stripeAccountId?: string;
+    setupStartedAt?: string;
+    setupCompletedAt?: string;
+  }>(),
+  
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
   updatedAt: timestamp("updated_at").notNull().default(sql`now()`),
 });
