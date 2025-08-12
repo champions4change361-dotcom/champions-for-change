@@ -79,7 +79,7 @@ export default function AIConsultation() {
             <textarea
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="e.g., 'I want to create a basketball tournament for 16 middle school teams that will raise money for student trips to Washington DC'"
+              placeholder="e.g., 'Build a webpage for our basketball tournament' or 'Create a custom site for a 16-team middle school soccer tournament'"
               className="w-full h-32 bg-slate-700 border border-slate-600 rounded-lg p-4 text-white placeholder-slate-400 focus:border-purple-400 focus:outline-none resize-none"
             />
           </div>
@@ -112,29 +112,47 @@ export default function AIConsultation() {
             </div>
             
             <div className="space-y-6">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-slate-700 rounded-lg p-4 text-center">
-                  <div className="text-sm text-slate-400 mb-1">Sport</div>
-                  <div className="text-white font-semibold">{response.sport}</div>
-                </div>
-                <div className="bg-slate-700 rounded-lg p-4 text-center">
-                  <div className="text-sm text-slate-400 mb-1">Format</div>
-                  <div className="text-white font-semibold">{response.format}</div>
-                </div>
-                <div className="bg-slate-700 rounded-lg p-4 text-center">
-                  <div className="text-sm text-slate-400 mb-1">Age Group</div>
-                  <div className="text-white font-semibold">{response.age_group}</div>
-                </div>
-                <div className="bg-slate-700 rounded-lg p-4 text-center">
-                  <div className="text-sm text-slate-400 mb-1">Participants</div>
-                  <div className="text-white font-semibold">{response.estimated_participants}</div>
-                </div>
-              </div>
-
               <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-6">
                 <h4 className="text-emerald-400 font-semibold mb-3">Strategic Recommendation</h4>
-                <p className="text-white">{response.recommendation}</p>
+                <div className="text-white whitespace-pre-line">{response.recommendation}</div>
               </div>
+
+              {response.sport !== 'Custom Tournament' && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="bg-slate-700 rounded-lg p-4 text-center">
+                    <div className="text-sm text-slate-400 mb-1">Sport</div>
+                    <div className="text-white font-semibold">{response.sport}</div>
+                  </div>
+                  <div className="bg-slate-700 rounded-lg p-4 text-center">
+                    <div className="text-sm text-slate-400 mb-1">Format</div>
+                    <div className="text-white font-semibold">{response.format}</div>
+                  </div>
+                  <div className="bg-slate-700 rounded-lg p-4 text-center">
+                    <div className="text-sm text-slate-400 mb-1">Age Group</div>
+                    <div className="text-white font-semibold">{response.age_group}</div>
+                  </div>
+                  <div className="bg-slate-700 rounded-lg p-4 text-center">
+                    <div className="text-sm text-slate-400 mb-1">Participants</div>
+                    <div className="text-white font-semibold">{response.estimated_participants}</div>
+                  </div>
+                </div>
+              )}
+
+              {response.tier3_full_service && (
+                <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-6">
+                  <h4 className="text-blue-400 font-semibold mb-3">Webpage Generation Available</h4>
+                  <p className="text-slate-300 mb-4">
+                    Your District Enterprise subscription includes custom webpage generation!
+                  </p>
+                  <Link 
+                    href="/webpage-builder"
+                    className="inline-flex items-center space-x-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors"
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    <span>Build Tournament Webpage</span>
+                  </Link>
+                </div>
+              )}
 
               {response.tier1_consultation && (
                 <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-6">
@@ -143,7 +161,7 @@ export default function AIConsultation() {
                     <div>
                       <h5 className="text-white font-medium mb-2">Fundraising Opportunities</h5>
                       <ul className="text-slate-300 text-sm space-y-1">
-                        {response.tier1_consultation.champions_for_change_integration.fundraising_opportunities.map((item, index) => (
+                        {response.tier1_consultation.champions_for_change_integration.fundraising_opportunities.map((item: string, index: number) => (
                           <li key={index}>• {item}</li>
                         ))}
                       </ul>
@@ -151,7 +169,7 @@ export default function AIConsultation() {
                     <div>
                       <h5 className="text-white font-medium mb-2">Educational Tie-ins</h5>
                       <ul className="text-slate-300 text-sm space-y-1">
-                        {response.tier1_consultation.champions_for_change_integration.educational_tie_ins.map((item, index) => (
+                        {response.tier1_consultation.champions_for_change_integration.educational_tie_ins.map((item: string, index: number) => (
                           <li key={index}>• {item}</li>
                         ))}
                       </ul>

@@ -11,6 +11,7 @@ import AIConsultation from './pages/AIConsultation';
 import Settings from './pages/Settings';
 import LiveMatches from './pages/LiveMatches';
 import Championships from './pages/Championships';
+import WebpageBuilder from './pages/WebpageBuilder';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
             <Route path="/settings" component={Settings} />
             <Route path="/live-matches" component={LiveMatches} />
             <Route path="/championships" component={Championships} />
+            <Route path="/webpage-builder" component={WebpageBuilder} />
             <Route>
               {/* 404 - redirect to home */}
               <SportsArenaHomepage />

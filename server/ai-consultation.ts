@@ -473,9 +473,14 @@ export interface KeystoneConsultationResult {
 export function analyzeTournamentQuery(text: string): KeystoneConsultationResult {
   const textLower = text.toLowerCase();
   
+  // Check if user wants webpage creation/building
+  const isWebpageRequest = textLower.includes('webpage') || textLower.includes('website') || 
+                          textLower.includes('build') || textLower.includes('create') ||
+                          textLower.includes('page') || textLower.includes('site');
+  
   // Sport detection with comprehensive list
-  let sport = 'Basketball'; // default
-  let confidence = 40; // Lower base confidence
+  let sport = 'Custom Tournament'; // Better default for webpage requests
+  let confidence = 30; // Lower base confidence for better detection
   
   // Team Sports - Enhanced detection  
   if (textLower.includes('basketball') || textLower.includes('hoops') || textLower.includes('nba')) { 
@@ -675,26 +680,49 @@ export function analyzeTournamentQuery(text: string): KeystoneConsultationResult
     confidence += 15;
   }
 
-  // Generate AI recommendation
-  let recommendation = `I recommend creating a ${format} tournament for ${sport}`;
+  // Generate AI recommendation based on request type
+  let recommendation = '';
   
-  if (age_group !== 'All Ages' || gender_division !== 'Mixed') {
-    recommendation += ` with ${gender_division} ${age_group} divisions`;
-  }
-  
-  // Add format-specific advice
-  if (format === 'leaderboard') {
-    recommendation += '. This individual performance format works great for timed events, scoring competitions, and skill demonstrations.';
-  } else if (format === 'seasonal-leaderboard') {
-    recommendation += '. Seasonal rankings track team performance over time, perfect for college football standings and playoff seeding.';
-  } else if (format === 'conference-bracket-to-series') {
-    recommendation += '. Conference-based playoffs (East/West) leading to championship series mirrors professional sports like NBA Finals.';
-  } else if (format === 'series') {
-    recommendation += '. Best-of series format ensures the better team wins and creates exciting multi-game matchups, perfect for World Series-style competition.';
-  } else if (format === 'bracket-to-series') {
-    recommendation += '. Bracket elimination leading to championship series combines the excitement of playoffs with decisive final competition.';
+  if (isWebpageRequest) {
+    if (confidence >= 60) {
+      recommendation = `I can help you create a custom tournament webpage for your ${sport} tournament! Based on your Champions for Change subscription level, I can provide:
+
+**Tier 1 (Free)**: Tournament consultation and strategic planning
+**Tier 2 (Basic+)**: Auto-generated tournament bracket and registration system  
+**Tier 3 (Pro+)**: Complete custom webpage with domain, branding, and full tournament management
+
+Your webpage will include Champions for Change branding, educational impact tracking, and integrated payment processing for $2,600 student trip funding. What specific features would you like included?`;
+    } else {
+      recommendation = `I'd love to help you build a custom tournament webpage! To create the perfect site for your tournament, please tell me:
+
+1. What sport/activity is this for?
+2. How many participants/teams do you expect?
+3. What age group are you targeting?
+4. Any specific features you need (registration, brackets, live scoring)?
+
+I'll then generate a complete webpage with Champions for Change branding and educational impact integration.`;
+    }
   } else {
-    recommendation += '. Single or double elimination brackets create clear head-to-head competition with definitive winners.';
+    recommendation = `I recommend creating a ${format} tournament for ${sport}`;
+    
+    if (age_group !== 'All Ages' || gender_division !== 'Mixed') {
+      recommendation += ` with ${gender_division} ${age_group} divisions`;
+    }
+    
+    // Add format-specific advice
+    if (format === 'leaderboard') {
+      recommendation += '. This individual performance format works great for timed events, scoring competitions, and skill demonstrations.';
+    } else if (format === 'seasonal-leaderboard') {
+      recommendation += '. Seasonal rankings track team performance over time, perfect for college football standings and playoff seeding.';
+    } else if (format === 'conference-bracket-to-series') {
+      recommendation += '. Conference-based playoffs (East/West) leading to championship series mirrors professional sports like NBA Finals.';
+    } else if (format === 'series') {
+      recommendation += '. Best-of series format ensures the better team wins and creates exciting multi-game matchups, perfect for World Series-style competition.';
+    } else if (format === 'bracket-to-series') {
+      recommendation += '. Bracket elimination leading to championship series combines the excitement of playoffs with decisive final competition.';
+    } else {
+      recommendation += '. Single or double elimination brackets create clear head-to-head competition with definitive winners.';
+    }
   }
 
   // Add sport-specific and division advice
