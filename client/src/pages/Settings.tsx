@@ -2,6 +2,8 @@ import React from 'react';
 import { Link } from 'wouter';
 import { ArrowLeft, Trophy, Settings as SettingsIcon, Shield, Crown, Palette, Globe, CreditCard } from 'lucide-react';
 import { useAuth } from "@/hooks/useAuth";
+import { AccountLinking } from "@/components/AccountLinking";
+import { CrossPlatformPromotion } from "@/components/CrossPlatformPromotion";
 
 export default function Settings() {
   const { user } = useAuth();
@@ -238,6 +240,22 @@ export default function Settings() {
               </div>
             </div>
           </div>
+          
+          {/* Account Linking Section */}
+          <Card className="md:col-span-2">
+            <CardHeader>
+              <CardTitle>Platform Access</CardTitle>
+              <CardDescription>Link your account to access other Champions for Change platforms</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <AccountLinking />
+            </CardContent>
+          </Card>
+        </div>
+        
+        {/* Sidebar Promotion */}
+        <div className="mt-8">
+          <CrossPlatformPromotion placement="sidebar" />
         </div>
       </main>
     </div>

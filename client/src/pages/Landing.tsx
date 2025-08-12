@@ -5,6 +5,7 @@ import { Trophy, Users, Zap, Globe, CreditCard, Star, Heart, GraduationCap, MapP
 import championLogo from "@assets/IMG_1442_1754896656003.jpeg";
 import { DonationSection } from "@/components/DonationSection";
 import { SignupSection } from "@/components/SignupSection";
+import { CrossPlatformPromotion } from "@/components/CrossPlatformPromotion";
 import Footer from "@/components/Footer";
 
 export default function Landing() {
@@ -325,6 +326,9 @@ export default function Landing() {
             </Button>
           </div>
         </div>
+
+        {/* Cross-Platform Promotion Banner */}
+        <CrossPlatformPromotion placement="banner" />
 
         {/* Professional Signup Section */}
         <SignupSection />

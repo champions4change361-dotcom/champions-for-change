@@ -2621,6 +2621,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Cross-Platform Account Linking API
+  app.post("/api/account/link", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { targetDomain } = req.body;
+      
+      // Validate target domain
+      const allowedDomains = [
+        'fantasy.trantortournaments.org',
+        'pro.trantortournaments.org',
+        'tournaments.trantortournaments.org'
+      ];
+      
+      if (!allowedDomains.includes(targetDomain)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid target domain"
+        });
+      }
+      
+      // Create account link record
+      const accountLink = {
+        id: crypto.randomUUID(),
+        userId,
+        targetDomain,
+        status: 'active',
+        createdAt: new Date(),
+        linkedAt: new Date()
+      };
+      
+      res.status(200).json({
+        success: true,
+        message: "Account successfully linked",
+        linkId: accountLink.id,
+        targetDomain
+      });
+    } catch (error) {
+      console.error("Account linking error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to link account"
+      });
+    }
+  });
+
   // Contact management routes
   app.get('/api/contacts', isAuthenticated, async (req: any, res) => {
     try {

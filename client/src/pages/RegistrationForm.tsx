@@ -13,6 +13,7 @@ import { CheckCircle, AlertCircle, CreditCard, FileText } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import { CrossPlatformPromotion } from '@/components/CrossPlatformPromotion';
 
 const registrationSchema = z.object({
   requestType: z.enum(['district_admin', 'school_admin', 'coach', 'scorekeeper']),
@@ -503,6 +504,9 @@ export default function RegistrationFormPage() {
             </Card>
           )}
         </form>
+        
+        {/* Cross-Platform Promotion */}
+        <CrossPlatformPromotion placement="signup" />
       </div>
     </div>
   );
