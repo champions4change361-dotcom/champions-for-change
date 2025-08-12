@@ -9,11 +9,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { CheckCircle, AlertCircle, CreditCard, FileText } from 'lucide-react';
+import { CheckCircle, AlertCircle, CreditCard, FileText, Anchor, Trophy } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { CrossPlatformPromotion } from '@/components/CrossPlatformPromotion';
+import { CrossPlatformPromotion, FantasyPromotion } from '@/components/CrossPlatformPromotion';
 
 const registrationSchema = z.object({
   requestType: z.enum(['district_admin', 'school_admin', 'coach', 'scorekeeper']),
@@ -505,8 +505,62 @@ export default function RegistrationFormPage() {
           )}
         </form>
         
-        {/* Cross-Platform Promotion */}
+        {/* Enhanced Cross-Platform Promotion */}
+        <FantasyPromotion />
         <CrossPlatformPromotion placement="signup" />
+        
+        {/* Complete Tournament Ecosystem */}
+        <div className="mt-12 bg-slate-800 border border-slate-600 rounded-xl p-8">
+          <div className="text-center mb-6">
+            <h3 className="text-xl font-semibold text-white mb-2">
+              Complete Your Tournament Ecosystem
+            </h3>
+            <p className="text-slate-400">
+              Get the most out of our platform with complementary services
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 gap-6">
+            <Card className="bg-slate-700 border-purple-500/30">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-purple-300">
+                  <Anchor className="h-5 w-5" />
+                  Captain's Lounge Fantasy
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-slate-300 mb-4">
+                  Add fantasy sports to your office culture with our ad-free platform
+                </p>
+                <Button 
+                  variant="outline" 
+                  className="w-full border-purple-500/50 text-purple-400 hover:bg-purple-500/10"
+                  onClick={() => window.open('https://fantasy.trantortournaments.org', '_blank')}
+                  data-testid="button-fantasy-ecosystem"
+                >
+                  Learn More
+                </Button>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-slate-700 border-green-500/30">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-green-300">
+                  <Trophy className="h-5 w-5" />
+                  Educational Impact
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-slate-300 mb-4">
+                  Your subscription helps fund student educational trips in Corpus Christi
+                </p>
+                <div className="text-xs text-green-400 font-semibold">
+                  ✓ $15,000+ already funded for students
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -1,18 +1,150 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Star, Users, Target, ArrowRight, Crown, Zap } from "lucide-react";
+import { Trophy, Star, Users, Target, ArrowRight, Crown, Zap, BarChart3, TrendingUp, Anchor } from "lucide-react";
 import { useDomain } from "@/hooks/useDomain";
 
 interface CrossPlatformPromotionProps {
   placement: 'banner' | 'sidebar' | 'footer' | 'signup';
 }
 
+// Fantasy Promotion for Pro Domain
+export function FantasyPromotion() {
+  const { canShowFantasyPromo } = useDomain();
+  
+  if (!canShowFantasyPromo()) return null;
+
+  return (
+    <Card className="bg-gradient-to-r from-purple-50 to-indigo-50 border-purple-200 mb-6">
+      <CardHeader className="pb-4">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-purple-100 rounded-lg">
+            <Anchor className="h-6 w-6 text-purple-600" />
+          </div>
+          <div>
+            <CardTitle className="text-xl text-purple-900">
+              Captain's Lounge Fantasy Sports
+            </CardTitle>
+            <CardDescription className="text-purple-700">
+              Professional fantasy analytics for data-driven teams
+            </CardDescription>
+          </div>
+          <Badge className="bg-purple-600 text-white ml-auto">Ad-Free</Badge>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="grid md:grid-cols-2 gap-6">
+          <div>
+            <h4 className="font-semibold text-purple-900 mb-3">Perfect for Your Office:</h4>
+            <ul className="space-y-2 text-sm text-purple-800">
+              <li className="flex items-center gap-2">
+                <BarChart3 className="h-4 w-4 text-purple-600" />
+                Advanced NFL/NBA analytics dashboard
+              </li>
+              <li className="flex items-center gap-2">
+                <Users className="h-4 w-4 text-purple-600" />
+                Private office leagues & tournaments
+              </li>
+              <li className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-purple-600" />
+                Real-time scoring with ESPN integration
+              </li>
+              <li className="flex items-center gap-2">
+                <Zap className="h-4 w-4 text-purple-600" />
+                Completely ad-free experience
+              </li>
+            </ul>
+          </div>
+          <div className="flex flex-col justify-center">
+            <div className="bg-white p-4 rounded-lg border border-purple-200 mb-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-purple-900">100% Free</div>
+                <div className="text-sm text-purple-700">Donation-supported model</div>
+              </div>
+            </div>
+            <Button 
+              className="bg-purple-600 hover:bg-purple-700 text-white w-full"
+              onClick={() => window.open('https://fantasy.trantortournaments.org', '_blank')}
+              data-testid="button-fantasy-full-promo"
+            >
+              <Anchor className="mr-2 h-4 w-4" />
+              Visit Captain's Lounge
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// Pro Tournament Promotion for Fantasy Domain
+export function ProTournamentPromotion() {
+  const { canShowProPromo } = useDomain();
+  
+  if (!canShowProPromo()) return null;
+
+  return (
+    <Card className="bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200 mb-6">
+      <CardHeader className="pb-4">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-blue-100 rounded-lg">
+            <Trophy className="h-6 w-6 text-blue-600" />
+          </div>
+          <div>
+            <CardTitle className="text-xl text-blue-900">
+              Tournament Pro Platform
+            </CardTitle>
+            <CardDescription className="text-blue-700">
+              Professional tournament management for businesses & clubs
+            </CardDescription>
+          </div>
+          <Badge className="bg-blue-600 text-white ml-auto">Enterprise</Badge>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="grid md:grid-cols-2 gap-6">
+          <div>
+            <h4 className="font-semibold text-blue-900 mb-3">Business Tournaments:</h4>
+            <ul className="space-y-2 text-sm text-blue-800">
+              <li className="flex items-center gap-2">
+                <Trophy className="h-4 w-4 text-blue-600" />
+                Hackathons, coding competitions
+              </li>
+              <li className="flex items-center gap-2">
+                <Users className="h-4 w-4 text-blue-600" />
+                Corporate team building events
+              </li>
+              <li className="flex items-center gap-2">
+                <BarChart3 className="h-4 w-4 text-blue-600" />
+                Professional league management
+              </li>
+              <li className="flex items-center gap-2">
+                <Zap className="h-4 w-4 text-blue-600" />
+                Custom branding & white-label options
+              </li>
+            </ul>
+          </div>
+          <div className="flex flex-col justify-center">
+            <Button 
+              className="bg-blue-600 hover:bg-blue-700 text-white w-full"
+              onClick={() => window.open('https://pro.trantortournaments.org', '_blank')}
+              data-testid="button-pro-full-promo"
+            >
+              <Trophy className="mr-2 h-4 w-4" />
+              Explore Tournament Pro
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function CrossPlatformPromotion({ placement }: CrossPlatformPromotionProps) {
-  const { isSchoolSafe, isProDomain, isFantasyDomain } = useDomain();
+  const { isSchoolDomain, isProDomain, isFantasyDomain, canShowFantasyPromo, canShowProPromo } = useDomain();
 
   // Never show fantasy promotion on school domains
-  if (isSchoolSafe()) {
+  if (isSchoolDomain()) {
     return null;
   }
 
