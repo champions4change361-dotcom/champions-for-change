@@ -145,8 +145,13 @@ export interface IStorage {
   getSportOptions(): Promise<SportOption[]>;
   getTournamentStructures(): Promise<TournamentStructure[]>;
   getTrackEvents(): Promise<TrackEvent[]>;
+  getTrackEventsByCategory(category: string): Promise<TrackEvent[]>;
+  getTrackEvent(id: string): Promise<TrackEvent | undefined>;
+  getTrackEventTiming(): Promise<TrackEventTiming[]>;
+  getTrackEventTimingByEventId(trackEventId: string): Promise<TrackEventTiming[]>;
   getSportDivisionRules(): Promise<SportDivisionRules[]>;
   getSportDivisionRulesBySport(sportId: string): Promise<SportDivisionRules[]>;
+  createSportDivisionRules(rules: InsertSportDivisionRules): Promise<SportDivisionRules>;
   createSportDivisionRules(rules: InsertSportDivisionRules): Promise<SportDivisionRules>;
 
   // Sport Events methods
@@ -1056,6 +1061,7 @@ export class MemStorage implements IStorage {
   private sportOptions: Map<string, SportOption>;
   private tournamentStructures: Map<string, TournamentStructure>;
   private trackEvents: Map<string, TrackEvent>;
+  private trackEventTiming: Map<string, TrackEventTiming>;
   private sportDivisionRules: Map<string, SportDivisionRules>;
   private donors: Map<string, Donor>;
   private donations: Map<string, Donation>;
@@ -1071,15 +1077,17 @@ export class MemStorage implements IStorage {
     this.sportOptions = new Map();
     this.tournamentStructures = new Map();
     this.trackEvents = new Map();
+    this.trackEventTiming = new Map();
     this.sportDivisionRules = new Map();
     this.donors = new Map();
     this.donations = new Map();
     this.contacts = new Map();
     this.emailCampaigns = new Map();
     
-    // Initialize with default tournament structures and sport division rules
+    // Initialize with default tournament structures, sport division rules, and track events
     this.initializeDefaultStructures();
     this.initializeSportDivisionRules();
+    this.initializeUltimateTrackEvents();
   }
 
   private initializeDefaultStructures() {
@@ -1720,6 +1728,458 @@ export class MemStorage implements IStorage {
     };
     this.sportDivisionRules.set(id, created);
     return created;
+  }
+
+  // Ultimate Track Events initialization
+  private initializeUltimateTrackEvents() {
+    const ultimateTrackEvents = [
+      // SPRINTS (100m family) 
+      {
+        id: "tf-100m",
+        eventName: "100 Meter Dash",
+        eventCategory: "Track",
+        distanceMeters: 100,
+        measurementType: "time",
+        maxAttempts: 1,
+        usesLanes: true,
+        usesStagger: false,
+        usesHurdles: false,
+        hurdleHeightMen: null,
+        hurdleHeightWomen: null,
+        hurdleCount: 0,
+        implementsUsed: [],
+        windLegalDistance: 100,
+        qualifyingStandards: {
+          "high_school_boys": "11.50",
+          "high_school_girls": "13.00",
+          "college_men": "10.80",
+          "college_women": "12.30",
+          "open_men": "10.50",
+          "open_women": "12.00"
+        },
+        equipmentSpecs: {
+          "lanes": 8,
+          "blocks": "required",
+          "wind_gauge": "required"
+        },
+        scoringMethod: "time_ascending",
+        ribbonPlaces: 8,
+        ageRestrictions: { "youth_minimum": 8 },
+        genderSpecific: false,
+        sortOrder: 1,
+        createdAt: new Date()
+      },
+      {
+        id: "tf-200m",
+        eventName: "200 Meter Dash",
+        eventCategory: "Track",
+        distanceMeters: 200,
+        measurementType: "time",
+        maxAttempts: 1,
+        usesLanes: true,
+        usesStagger: true,
+        usesHurdles: false,
+        hurdleHeightMen: null,
+        hurdleHeightWomen: null,
+        hurdleCount: 0,
+        implementsUsed: [],
+        windLegalDistance: 200,
+        qualifyingStandards: {
+          "high_school_boys": "23.50",
+          "high_school_girls": "26.50",
+          "college_men": "22.00",
+          "college_women": "24.50",
+          "open_men": "21.50",
+          "open_women": "24.00"
+        },
+        equipmentSpecs: {
+          "lanes": 8,
+          "blocks": "required",
+          "stagger": "calculated",
+          "wind_gauge": "required"
+        },
+        scoringMethod: "time_ascending",
+        ribbonPlaces: 8,
+        ageRestrictions: { "youth_minimum": 10 },
+        genderSpecific: false,
+        sortOrder: 2,
+        createdAt: new Date()
+      },
+      {
+        id: "tf-400m",
+        eventName: "400 Meter Dash",
+        eventCategory: "Track",
+        distanceMeters: 400,
+        measurementType: "time",
+        maxAttempts: 1,
+        usesLanes: true,
+        usesStagger: true,
+        usesHurdles: false,
+        hurdleHeightMen: null,
+        hurdleHeightWomen: null,
+        hurdleCount: 0,
+        implementsUsed: [],
+        windLegalDistance: null,
+        qualifyingStandards: {
+          "high_school_boys": "52.00",
+          "high_school_girls": "60.00",
+          "college_men": "48.50",
+          "college_women": "55.00",
+          "open_men": "47.00",
+          "open_women": "53.00"
+        },
+        equipmentSpecs: {
+          "lanes": 8,
+          "blocks": "required",
+          "stagger": "calculated"
+        },
+        scoringMethod: "time_ascending",
+        ribbonPlaces: 8,
+        ageRestrictions: { "youth_minimum": 12 },
+        genderSpecific: false,
+        sortOrder: 3,
+        createdAt: new Date()
+      },
+      // HURDLES
+      {
+        id: "tf-110h",
+        eventName: "110 Meter Hurdles",
+        eventCategory: "Track",
+        distanceMeters: 110,
+        measurementType: "time",
+        maxAttempts: 1,
+        usesLanes: true,
+        usesStagger: false,
+        usesHurdles: true,
+        hurdleHeightMen: "1.067",
+        hurdleHeightWomen: null,
+        hurdleCount: 10,
+        implementsUsed: [],
+        windLegalDistance: 110,
+        qualifyingStandards: {
+          "high_school_boys": "16.00",
+          "college_men": "14.50",
+          "open_men": "14.00"
+        },
+        equipmentSpecs: {
+          "lanes": 8,
+          "hurdle_height": "42_inches",
+          "hurdle_spacing": "9.14m",
+          "blocks": "required",
+          "wind_gauge": "required"
+        },
+        scoringMethod: "time_ascending",
+        ribbonPlaces: 8,
+        ageRestrictions: { "youth_minimum": 13 },
+        genderSpecific: true,
+        sortOrder: 4,
+        createdAt: new Date()
+      },
+      {
+        id: "tf-100h",
+        eventName: "100 Meter Hurdles",
+        eventCategory: "Track",
+        distanceMeters: 100,
+        measurementType: "time",
+        maxAttempts: 1,
+        usesLanes: true,
+        usesStagger: false,
+        usesHurdles: true,
+        hurdleHeightMen: null,
+        hurdleHeightWomen: "0.838",
+        hurdleCount: 10,
+        implementsUsed: [],
+        windLegalDistance: 100,
+        qualifyingStandards: {
+          "high_school_girls": "16.50",
+          "college_women": "14.00",
+          "open_women": "13.50"
+        },
+        equipmentSpecs: {
+          "lanes": 8,
+          "hurdle_height": "33_inches",
+          "hurdle_spacing": "8.5m",
+          "blocks": "required",
+          "wind_gauge": "required"
+        },
+        scoringMethod: "time_ascending",
+        ribbonPlaces: 8,
+        ageRestrictions: { "youth_minimum": 13 },
+        genderSpecific: true,
+        sortOrder: 5,
+        createdAt: new Date()
+      },
+      // FIELD EVENTS - Shot Put
+      {
+        id: "tf-shot-put",
+        eventName: "Shot Put",
+        eventCategory: "Field",
+        distanceMeters: null,
+        measurementType: "distance",
+        maxAttempts: 3,
+        usesLanes: false,
+        usesStagger: false,
+        usesHurdles: false,
+        hurdleHeightMen: null,
+        hurdleHeightWomen: null,
+        hurdleCount: 0,
+        implementsUsed: ["shot_16lb_men", "shot_12lb_women", "shot_8.8lb_youth"],
+        windLegalDistance: null,
+        qualifyingStandards: {
+          "high_school_boys": "45_feet",
+          "high_school_girls": "35_feet",
+          "college_men": "55_feet",
+          "college_women": "45_feet",
+          "open_men": "60_feet",
+          "open_women": "50_feet"
+        },
+        equipmentSpecs: {
+          "circle_diameter": "7_feet",
+          "toe_board": "required",
+          "sector_angle": "34.92_degrees",
+          "implements": "certified_weights"
+        },
+        scoringMethod: "distance_descending",
+        ribbonPlaces: 8,
+        ageRestrictions: { "youth_minimum": 8 },
+        genderSpecific: false,
+        sortOrder: 10,
+        createdAt: new Date()
+      },
+      // HIGH JUMP
+      {
+        id: "tf-high-jump",
+        eventName: "High Jump",
+        eventCategory: "Field",
+        distanceMeters: null,
+        measurementType: "height",
+        maxAttempts: 3,
+        usesLanes: false,
+        usesStagger: false,
+        usesHurdles: false,
+        hurdleHeightMen: null,
+        hurdleHeightWomen: null,
+        hurdleCount: 0,
+        implementsUsed: ["crossbar", "standards", "landing_mat"],
+        windLegalDistance: null,
+        qualifyingStandards: {
+          "high_school_boys": "6_feet",
+          "high_school_girls": "5_feet",
+          "college_men": "6_feet_8_inches",
+          "college_women": "5_feet_6_inches",
+          "open_men": "7_feet",
+          "open_women": "6_feet"
+        },
+        equipmentSpecs: {
+          "approach_unlimited": true,
+          "bar_progression": "standard",
+          "landing_mat": "required",
+          "standards": "IAAF_certified"
+        },
+        scoringMethod: "height_descending",
+        ribbonPlaces: 8,
+        ageRestrictions: { "youth_minimum": 8 },
+        genderSpecific: false,
+        sortOrder: 15,
+        createdAt: new Date()
+      },
+      // LONG JUMP
+      {
+        id: "tf-long-jump",
+        eventName: "Long Jump",
+        eventCategory: "Field",
+        distanceMeters: null,
+        measurementType: "distance",
+        maxAttempts: 3,
+        usesLanes: false,
+        usesStagger: false,
+        usesHurdles: false,
+        hurdleHeightMen: null,
+        hurdleHeightWomen: null,
+        hurdleCount: 0,
+        implementsUsed: ["takeoff_board", "sand_pit"],
+        windLegalDistance: null,
+        qualifyingStandards: {
+          "high_school_boys": "20_feet",
+          "high_school_girls": "16_feet",
+          "college_men": "23_feet",
+          "college_women": "19_feet",
+          "open_men": "25_feet",
+          "open_women": "21_feet"
+        },
+        equipmentSpecs: {
+          "runway_length": "130_feet",
+          "runway_width": "4_feet",
+          "takeoff_board": "required",
+          "sand_pit": "minimum_9_meters"
+        },
+        scoringMethod: "distance_descending",
+        ribbonPlaces: 8,
+        ageRestrictions: { "youth_minimum": 8 },
+        genderSpecific: false,
+        sortOrder: 16,
+        createdAt: new Date()
+      },
+      // RELAYS
+      {
+        id: "tf-4x100",
+        eventName: "4x100 Meter Relay",
+        eventCategory: "Relay",
+        distanceMeters: 400,
+        measurementType: "time",
+        maxAttempts: 1,
+        usesLanes: true,
+        usesStagger: true,
+        usesHurdles: false,
+        hurdleHeightMen: null,
+        hurdleHeightWomen: null,
+        hurdleCount: 0,
+        implementsUsed: ["baton"],
+        windLegalDistance: 400,
+        qualifyingStandards: {
+          "high_school_boys": "44.00",
+          "high_school_girls": "50.00",
+          "college_men": "40.50",
+          "college_women": "45.00",
+          "open_men": "39.50",
+          "open_women": "43.50"
+        },
+        equipmentSpecs: {
+          "exchange_zones": 4,
+          "zone_length": "20m",
+          "baton_required": true,
+          "team_size": 4
+        },
+        scoringMethod: "time_ascending",
+        ribbonPlaces: 8,
+        ageRestrictions: { "youth_minimum": 10 },
+        genderSpecific: false,
+        sortOrder: 20,
+        createdAt: new Date()
+      },
+      // COMBINED EVENTS
+      {
+        id: "tf-decathlon",
+        eventName: "Decathlon",
+        eventCategory: "Combined",
+        distanceMeters: null,
+        measurementType: "points",
+        maxAttempts: 10,
+        usesLanes: false,
+        usesStagger: false,
+        usesHurdles: false,
+        hurdleHeightMen: null,
+        hurdleHeightWomen: null,
+        hurdleCount: 0,
+        implementsUsed: ["various"],
+        windLegalDistance: null,
+        qualifyingStandards: {
+          "college_men": "6000_points",
+          "open_men": "7000_points"
+        },
+        equipmentSpecs: {
+          "events": ["100m", "long_jump", "shot_put", "high_jump", "400m", "110m_hurdles", "discus", "pole_vault", "javelin", "1500m"],
+          "scoring": "IAAF_tables",
+          "days": 2
+        },
+        scoringMethod: "points_descending",
+        ribbonPlaces: 8,
+        ageRestrictions: { "youth_minimum": 16 },
+        genderSpecific: true,
+        sortOrder: 25,
+        createdAt: new Date()
+      },
+      {
+        id: "tf-heptathlon",
+        eventName: "Heptathlon",
+        eventCategory: "Combined",
+        distanceMeters: null,
+        measurementType: "points",
+        maxAttempts: 7,
+        usesLanes: false,
+        usesStagger: false,
+        usesHurdles: false,
+        hurdleHeightMen: null,
+        hurdleHeightWomen: null,
+        hurdleCount: 0,
+        implementsUsed: ["various"],
+        windLegalDistance: null,
+        qualifyingStandards: {
+          "high_school_girls": "4000_points",
+          "college_women": "4500_points",
+          "open_women": "5500_points"
+        },
+        equipmentSpecs: {
+          "events": ["100m_hurdles", "high_jump", "shot_put", "200m", "long_jump", "javelin", "800m"],
+          "scoring": "IAAF_tables",
+          "days": 2
+        },
+        scoringMethod: "points_descending",
+        ribbonPlaces: 8,
+        ageRestrictions: { "youth_minimum": 16 },
+        genderSpecific: true,
+        sortOrder: 26,
+        createdAt: new Date()
+      }
+    ];
+
+    // Load all ultimate track events
+    ultimateTrackEvents.forEach(event => {
+      this.trackEvents.set(event.id, event);
+    });
+
+    // Create timing configurations for each event
+    ultimateTrackEvents.forEach(event => {
+      const timingConfig = {
+        id: randomUUID(),
+        trackEventId: event.id,
+        timingMethod: event.distanceMeters && event.distanceMeters <= 400 ? 'FAT' : 
+                     event.distanceMeters && event.distanceMeters <= 1600 ? 'electronic' : 'manual',
+        precisionLevel: event.distanceMeters && event.distanceMeters <= 800 ? 'hundredth' : 'tenth',
+        windMeasurement: event.windLegalDistance !== null,
+        photoFinish: event.distanceMeters && event.distanceMeters <= 800,
+        reactionTimeTracking: event.distanceMeters && event.distanceMeters <= 400,
+        intermediateSplits: event.distanceMeters === 800 ? { "splits": ["400m"] } :
+                           event.distanceMeters === 1500 || event.distanceMeters === 1600 ? { "splits": ["400m", "800m", "1200m"] } :
+                           event.distanceMeters && event.distanceMeters >= 3000 ? { "splits": ["1000m", "2000m"] } : {},
+        createdAt: new Date()
+      };
+      this.trackEventTiming.set(timingConfig.id, timingConfig);
+    });
+
+    console.log(`🏃‍♂️ Ultimate Track Events initialized: ${ultimateTrackEvents.length} events loaded`);
+  }
+
+  // Track Events methods
+  async getTrackEvents(): Promise<TrackEvent[]> {
+    return Array.from(this.trackEvents.values());
+  }
+
+  async getTrackEventsByCategory(category: string): Promise<TrackEvent[]> {
+    return Array.from(this.trackEvents.values()).filter(e => e.eventCategory === category);
+  }
+
+  async getTrackEvent(id: string): Promise<TrackEvent | undefined> {
+    return this.trackEvents.get(id);
+  }
+
+  async createTrackEvent(event: InsertTrackEvent): Promise<TrackEvent> {
+    const id = randomUUID();
+    const created: TrackEvent = {
+      ...event,
+      id,
+      createdAt: new Date(),
+    };
+    this.trackEvents.set(id, created);
+    return created;
+  }
+
+  async getTrackEventTiming(): Promise<TrackEventTiming[]> {
+    return Array.from(this.trackEventTiming.values());
+  }
+
+  async getTrackEventTimingByEventId(trackEventId: string): Promise<TrackEventTiming[]> {
+    return Array.from(this.trackEventTiming.values()).filter(t => t.trackEventId === trackEventId);
   }
 }
 

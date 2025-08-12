@@ -669,6 +669,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get track events
+  app.get("/api/track-events", async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const events = await storage.getTrackEvents();
+      res.json(events);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch track events" });
+    }
+  });
+
+  // Get track events by category
+  app.get("/api/track-events/category/:category", async (req, res) => {
+    try {
+      const { category } = req.params;
+      const storage = await getStorage();
+      const events = await storage.getTrackEventsByCategory(category);
+      res.json(events);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch track events by category" });
+    }
+  });
+
+  // Get single track event
+  app.get("/api/track-events/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const storage = await getStorage();
+      const event = await storage.getTrackEvent(id);
+      
+      if (!event) {
+        return res.status(404).json({ error: "Track event not found" });
+      }
+      
+      res.json(event);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch track event" });
+    }
+  });
+
+  // Get track event timing configurations
+  app.get("/api/track-event-timing", async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const timingConfigs = await storage.getTrackEventTiming();
+      res.json(timingConfigs);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch track event timing" });
+    }
+  });
+
+  // Get track event timing by event ID
+  app.get("/api/track-event-timing/event/:eventId", async (req, res) => {
+    try {
+      const { eventId } = req.params;
+      const storage = await getStorage();
+      const timingConfigs = await storage.getTrackEventTimingByEventId(eventId);
+      res.json(timingConfigs);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch track event timing" });
+    }
+  });
+
   // Helper function to import default sports data
   async function importDefaultSportsData() {
     // First import sport categories

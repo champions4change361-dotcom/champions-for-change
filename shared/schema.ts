@@ -315,12 +315,38 @@ export const tournamentStructures = pgTable("tournament_structures", {
 export const trackEvents = pgTable("track_events", {
   id: varchar("id").primaryKey(),
   eventName: text("event_name").notNull(),
-  eventCategory: text("event_category"),
-  measurementType: text("measurement_type"),
-  maxAttempts: integer("max_attempt"),
-  ribbonPlaces: integer("ribbon_places"),
-  usesStakes: text("uses_stakes"),
+  eventCategory: text("event_category"), // Track, Field, Relay, Combined
+  distanceMeters: integer("distance_meters"), // null for field events
+  measurementType: text("measurement_type"), // time, distance, height, points
+  maxAttempts: integer("max_attempts").default(3),
+  usesLanes: boolean("uses_lanes").default(false),
+  usesStagger: boolean("uses_stagger").default(false),
+  usesHurdles: boolean("uses_hurdles").default(false),
+  hurdleHeightMen: numeric("hurdle_height_men"), // in meters
+  hurdleHeightWomen: numeric("hurdle_height_women"), // in meters
+  hurdleCount: integer("hurdle_count").default(0),
+  implementsUsed: jsonb("implements_used"), // Array of required equipment
+  windLegalDistance: integer("wind_legal_distance"), // Distance for wind measurement
+  qualifyingStandards: jsonb("qualifying_standards"), // Performance standards by level
+  equipmentSpecs: jsonb("equipment_specs"), // Equipment specifications
+  scoringMethod: text("scoring_method"), // time_ascending, distance_descending, etc.
+  ribbonPlaces: integer("ribbon_places").default(8),
+  ageRestrictions: jsonb("age_restrictions"), // Minimum age requirements
+  genderSpecific: boolean("gender_specific").default(false), // Male/female only events
   sortOrder: integer("event_sort_order"),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+// Track Event Timing Configuration
+export const trackEventTiming = pgTable("track_event_timing", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  trackEventId: varchar("track_event_id").notNull().references(() => trackEvents.id),
+  timingMethod: text("timing_method").notNull(), // manual, FAT, electronic
+  precisionLevel: text("precision_level").notNull(), // tenth, hundredth, thousandth
+  windMeasurement: boolean("wind_measurement").default(false),
+  photoFinish: boolean("photo_finish").default(false),
+  reactionTimeTracking: boolean("reaction_time_tracking").default(false),
+  intermediateSplits: jsonb("intermediate_splits"),
   createdAt: timestamp("created_at").default(sql`now()`),
 });
 
@@ -403,6 +429,11 @@ export const insertTrackEventSchema = createInsertSchema(trackEvents).omit({
   createdAt: true,
 });
 
+export const insertTrackEventTimingSchema = createInsertSchema(trackEventTiming).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertSportEventSchema = createInsertSchema(sportEvents).omit({
   createdAt: true,
 });
@@ -432,6 +463,12 @@ export const updateMatchSchema = createInsertSchema(matches).omit({
 
 // User types
 export type User = typeof users.$inferSelect;
+
+// Track Events types
+export type TrackEvent = typeof trackEvents.$inferSelect;
+export type InsertTrackEvent = typeof trackEvents.$inferInsert;
+export type TrackEventTiming = typeof trackEventTiming.$inferSelect;
+export type InsertTrackEventTiming = typeof trackEventTiming.$inferInsert;
 
 // White-label pages schema
 export const pages = pgTable("pages", {
