@@ -126,6 +126,53 @@ export const campaignRecipients = pgTable("campaign_recipients", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Educational Impact Tracking for Champions for Change Mission
+export const educationalImpactMetrics = pgTable("educational_impact_metrics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  tournamentId: varchar("tournament_id").references(() => tournaments.id),
+  metricType: text("metric_type", {
+    enum: ["revenue_generated", "students_funded", "trips_completed", "schools_reached", "tournaments_hosted"]
+  }).notNull(),
+  value: numeric("value").notNull(),
+  description: text("description"),
+  dateRecorded: timestamp("date_recorded").defaultNow(),
+  academicYear: varchar("academic_year"), // "2024-2025"
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Platform Analytics for Daniel's Revenue Tracking
+export const platformAnalytics = pgTable("platform_analytics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  date: timestamp("date").notNull(),
+  activeUsers: integer("active_users").default(0),
+  newSignups: integer("new_signups").default(0),
+  tournamentsCreated: integer("tournaments_created").default(0),
+  revenueGenerated: numeric("revenue_generated").default("0"),
+  subscriptionUpgrades: integer("subscription_upgrades").default(0),
+  whitelabelClientsActive: integer("whitelabel_clients_active").default(0),
+  studentTripsFunded: integer("student_trips_funded").default(0),
+  championsCampaignProgress: numeric("champions_campaign_progress").default("0"), // Toward $2,600 goal
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Role-Based Access Control for Five-Tier Hierarchy
+export const rolePermissions = pgTable("role_permissions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userRole: text("user_role", {
+    enum: ["tournament_manager", "district_athletic_director", "school_athletic_director", "coach", "scorekeeper", "athlete", "fan"]
+  }).notNull(),
+  permission: text("permission", {
+    enum: [
+      "create_tournaments", "manage_all_tournaments", "assign_schools_to_events", 
+      "assign_coaches_to_events", "register_teams", "update_scores", "view_results",
+      "manage_organization", "access_analytics", "white_label_admin"
+    ]
+  }).notNull(),
+  isAllowed: boolean("is_allowed").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const tournaments = pgTable("tournaments", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
