@@ -22,6 +22,7 @@ import Championships from './pages/Championships';
 import WebpageBuilder from './pages/WebpageBuilder';
 import TournamentEmpire from './pages/TournamentEmpire';
 import FantasyTournaments from './pages/FantasyTournaments';
+import Register from './pages/Register';
 
 function AuthenticatedRoutes() {
   const { isFeatureEnabled, isFantasyDomain, config } = useDomain();
@@ -108,13 +109,23 @@ function AppRouter() {
       <Route path="/payment-methods" component={PaymentMethods} />
       <Route path="/checkout" component={Checkout} />
       <Route path="/donation-success" component={DonationSuccess} />
-      {!isAuthenticated && !allowGuestAccess ? (
+      <Route path="/register" component={Register} />
+      {/* Show Landing page if not authenticated or on school-safe domains */}
+      {(!isAuthenticated || allowGuestAccess) && (
+        <Route path="/">
+          <div className={getDomainBackgroundClass(config.brand)}>
+            <Landing />
+          </div>
+        </Route>
+      )}
+      {/* Show authenticated routes if authenticated */}
+      {isAuthenticated && <AuthenticatedRoutes />}
+      {/* Default fallback */}
+      <Route>
         <div className={getDomainBackgroundClass(config.brand)}>
           <Landing />
         </div>
-      ) : (
-        <AuthenticatedRoutes />
-      )}
+      </Route>
     </Switch>
   );
 }

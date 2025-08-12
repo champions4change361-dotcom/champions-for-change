@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage, getStorage } from "./storage";
-import { insertTournamentSchema, updateMatchSchema } from "@shared/schema";
+import { insertTournamentSchema, updateMatchSchema, insertRegistrationRequestSchema } from "@shared/schema";
 import { analyzeTournamentQuery, generateTournamentStructure, generateIntelligentTournamentStructure, generateWebpageTemplate, type KeystoneConsultationResult } from "./ai-consultation";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { setupDomainRoutes } from "./domainRoutes";
@@ -2559,8 +2559,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Authentication routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+  app.get('/api/auth/user', async (req: any, res) => {
     try {
+      console.log(`Auth check - isAuthenticated: ${req.isAuthenticated()}, user: ${req.user ? 'exists' : 'none'}, cookies: ${req.cookies ? Object.keys(req.cookies).length : 'none'}`);
+      
+      if (!req.isAuthenticated() || !req.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
       const userId = req.user.claims.sub;
       const storage = await getStorage();
       
@@ -3368,6 +3374,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         message: "Error creating subscription: " + error.message 
       });
+    }
+  });
+
+  // Registration request submission
+  app.post("/api/registration/request", async (req, res) => {
+    try {
+      const requestData = insertRegistrationRequestSchema.parse(req.body);
+      const storage = await getStorage();
+      
+      // Determine status based on payment method
+      const status = requestData.paymentMethod === 'check' ? 'pending_payment' : 'pending';
+      
+      // Create registration request
+      const request = await storage.createRegistrationRequest({
+        ...requestData,
+        status
+      });
+      
+      res.status(201).json({
+        success: true,
+        message: "Registration request submitted successfully",
+        requestId: request.id,
+        status: request.status
+      });
+    } catch (error) {
+      console.error("Registration request error:", error);
+      res.status(500).json({ 
+        success: false,
+        message: "Failed to submit registration request" 
+      });
+    }
+  });
+
+  // Get all registration requests (admin only)
+  app.get("/api/registration/requests", isAuthenticated, async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const requests = await storage.getRegistrationRequests();
+      res.json(requests);
+    } catch (error) {
+      console.error("Failed to fetch registration requests:", error);
+      res.status(500).json({ message: "Failed to fetch registration requests" });
+    }
+  });
+
+  // Approve/reject registration request (admin only)
+  app.patch("/api/registration/requests/:id", isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status, reviewNotes } = req.body;
+      const reviewerId = req.user?.claims?.sub;
+      
+      const storage = await getStorage();
+      const updatedRequest = await storage.updateRegistrationRequest(id, {
+        status,
+        reviewNotes,
+        reviewedBy: reviewerId,
+        reviewedAt: new Date()
+      });
+      
+      res.json({
+        success: true,
+        message: `Registration request ${status}`,
+        request: updatedRequest
+      });
+    } catch (error) {
+      console.error("Failed to update registration request:", error);
+      res.status(500).json({ message: "Failed to update registration request" });
     }
   });
 

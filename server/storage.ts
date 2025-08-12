@@ -7,8 +7,8 @@ import {
   type ScorekeeperAssignment, type InsertScorekeeperAssignment, type EventScore, type InsertEventScore,
   type SchoolEventAssignment, type InsertSchoolEventAssignment, type CoachEventAssignment, type InsertCoachEventAssignment,
   type Contact, type InsertContact, type EmailCampaign, type InsertEmailCampaign, type CampaignRecipient, type InsertCampaignRecipient,
-  type Donor, type InsertDonor, type Donation, type InsertDonation,
-  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules
+  type Donor, type InsertDonor, type Donation, type InsertDonation, type RegistrationRequest, type InsertRegistrationRequest,
+  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests
 } from "@shared/schema";
 
 type SportCategory = typeof sportCategories.$inferSelect;
@@ -54,6 +54,11 @@ export interface IStorage {
   getOrganization(id: string): Promise<Organization | undefined>;
   getOrganizations(): Promise<Organization[]>;
   updateOrganization(id: string, updates: Partial<Organization>): Promise<Organization | undefined>;
+
+  // Registration request methods
+  createRegistrationRequest(request: InsertRegistrationRequest): Promise<RegistrationRequest>;
+  getRegistrationRequests(): Promise<RegistrationRequest[]>;
+  updateRegistrationRequest(id: string, updates: Partial<RegistrationRequest>): Promise<RegistrationRequest | undefined>;
 
   // Scorekeeper assignment methods
   createScorekeeperAssignment(assignment: InsertScorekeeperAssignment): Promise<ScorekeeperAssignment>;
@@ -524,6 +529,41 @@ export class DbStorage implements IStorage {
         .update(organizations)
         .set({ ...updates, updatedAt: new Date() })
         .where(eq(organizations.id, id))
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  // Registration request methods
+  async createRegistrationRequest(request: InsertRegistrationRequest): Promise<RegistrationRequest> {
+    try {
+      const result = await this.db.insert(registrationRequests).values(request).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to create registration request");
+    }
+  }
+
+  async getRegistrationRequests(): Promise<RegistrationRequest[]> {
+    try {
+      const result = await this.db.select().from(registrationRequests);
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async updateRegistrationRequest(id: string, updates: Partial<RegistrationRequest>): Promise<RegistrationRequest | undefined> {
+    try {
+      const result = await this.db
+        .update(registrationRequests)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(registrationRequests.id, id))
         .returning();
       return result[0];
     } catch (error) {
@@ -1127,6 +1167,7 @@ export class MemStorage implements IStorage {
   private donations: Map<string, Donation>;
   private contacts: Map<string, Contact>;
   private emailCampaigns: Map<string, EmailCampaign>;
+  private registrationRequests: Map<string, RegistrationRequest>;
 
   constructor() {
     this.users = new Map();
@@ -1161,6 +1202,7 @@ export class MemStorage implements IStorage {
     this.donations = new Map();
     this.contacts = new Map();
     this.emailCampaigns = new Map();
+    this.registrationRequests = new Map();
     
     // Initialize with default tournament structures, sport division rules, track events, tournament integration, competition formats, and KRAKEN!
     this.initializeDefaultStructures();
@@ -1698,6 +1740,37 @@ export class MemStorage implements IStorage {
 
   async deleteEmailCampaign(id: string): Promise<void> {
     this.emailCampaigns.delete(id);
+  }
+
+  // Registration request methods
+  async createRegistrationRequest(request: InsertRegistrationRequest): Promise<RegistrationRequest> {
+    const id = randomUUID();
+    const created: RegistrationRequest = {
+      ...request,
+      id,
+      status: request.status || 'pending',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.registrationRequests.set(id, created);
+    return created;
+  }
+
+  async getRegistrationRequests(): Promise<RegistrationRequest[]> {
+    return Array.from(this.registrationRequests.values());
+  }
+
+  async updateRegistrationRequest(id: string, updates: Partial<RegistrationRequest>): Promise<RegistrationRequest | undefined> {
+    const existing = this.registrationRequests.get(id);
+    if (!existing) return undefined;
+    
+    const updated = {
+      ...existing,
+      ...updates,
+      updatedAt: new Date(),
+    };
+    this.registrationRequests.set(id, updated);
+    return updated;
   }
 
   // Donor methods

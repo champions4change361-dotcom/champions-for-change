@@ -119,6 +119,91 @@ export const donations = pgTable("donations", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Organization registration and management
+export const organizations = pgTable("organizations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  type: text("type", {
+    enum: ["school_district", "school", "club", "nonprofit", "business"]
+  }).notNull(),
+  contactEmail: varchar("contact_email").notNull(),
+  contactPhone: varchar("contact_phone"),
+  address: text("address"),
+  city: varchar("city"),
+  state: varchar("state"),
+  zipCode: varchar("zip_code"),
+  website: varchar("website"),
+  parentOrganizationId: varchar("parent_organization_id"), // For schools under districts
+  isVerified: boolean("is_verified").default(false),
+  verificationNotes: text("verification_notes"),
+  registrationStatus: text("registration_status", {
+    enum: ["pending", "approved", "rejected", "inactive"]
+  }).default("pending"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Self-registration requests for review
+export const registrationRequests = pgTable("registration_requests", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  requestType: text("request_type", {
+    enum: ["district_admin", "school_admin", "coach", "scorekeeper"]
+  }).notNull(),
+  firstName: varchar("first_name").notNull(),
+  lastName: varchar("last_name").notNull(),
+  email: varchar("email").notNull(),
+  phone: varchar("phone"),
+  position: varchar("position"), // Job title
+  organizationName: varchar("organization_name").notNull(),
+  organizationType: text("organization_type", {
+    enum: ["school_district", "school", "club", "nonprofit"]
+  }).notNull(),
+  parentOrganization: varchar("parent_organization"), // District name for schools
+  yearsExperience: integer("years_experience"),
+  sportsInvolved: jsonb("sports_involved"), // Array of sports
+  certifications: text("certifications"),
+  requestReason: text("request_reason"),
+  paymentMethod: text("payment_method", {
+    enum: ["stripe", "check"]
+  }).notNull().default("stripe"),
+  subscriptionPlan: text("subscription_plan", {
+    enum: ["foundation", "champion", "enterprise", "district_enterprise"]
+  }).notNull(),
+  status: text("status", {
+    enum: ["pending", "approved", "rejected", "needs_info", "pending_payment"]
+  }).default("pending"),
+  reviewNotes: text("review_notes"),
+  reviewedBy: varchar("reviewed_by"),
+  reviewedAt: timestamp("reviewed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Registration form schemas
+export const insertRegistrationRequestSchema = createInsertSchema(registrationRequests).omit({
+  id: true,
+  status: true,
+  reviewNotes: true,
+  reviewedBy: true,
+  reviewedAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertOrganizationSchema = createInsertSchema(organizations).omit({
+  id: true,
+  isVerified: true,
+  verificationNotes: true,
+  registrationStatus: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type RegistrationRequest = typeof registrationRequests.$inferSelect;
+export type InsertRegistrationRequest = z.infer<typeof insertRegistrationRequestSchema>;
+export type Organization = typeof organizations.$inferSelect;
+export type InsertOrganization = z.infer<typeof insertOrganizationSchema>;
+
 // Email campaigns for marketing
 export const emailCampaigns = pgTable("email_campaigns", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -1148,37 +1233,7 @@ export const teamRegistrationsRelations = relations(teamRegistrations, ({ one })
   }),
 }));
 
-// Organizations - school districts, clubs, etc.
-export const organizations = pgTable("organizations", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  name: varchar("name").notNull(),
-  type: text("type", {
-    enum: ["school_district", "high_school", "middle_school", "elementary_school", "club", "recreation_center", "other"]
-  }).notNull(),
-  address: text("address"),
-  city: varchar("city"),
-  state: varchar("state"),
-  zipCode: varchar("zip_code"),
-  contactEmail: varchar("contact_email"),
-  contactPhone: varchar("contact_phone"),
-  districtAthleticDirectorId: varchar("district_athletic_director_id").references(() => users.id),
-  schoolAthleticDirectorId: varchar("school_athletic_director_id").references(() => users.id),
-  isActive: boolean("is_active").default(true),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
 
-export const organizationsRelations = relations(organizations, ({ one, many }) => ({
-  districtAthleticDirector: one(users, {
-    fields: [organizations.districtAthleticDirectorId],
-    references: [users.id],
-  }),
-  schoolAthleticDirector: one(users, {
-    fields: [organizations.schoolAthleticDirectorId],
-    references: [users.id],
-  }),
-  members: many(users),
-}));
 
 // Update users relations to include organization
 export const usersRelations = relations(users, ({ one, many }) => ({
