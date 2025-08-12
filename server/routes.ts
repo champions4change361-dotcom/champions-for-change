@@ -1228,6 +1228,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ESPN API Test Endpoint for Fantasy Sports Integration
+  app.get('/test-nfl', async (req, res) => {
+    try {
+      const response = await fetch('https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard');
+      const data = await response.json();
+      res.json({ 
+        success: true, 
+        totalGames: data.events.length,
+        sampleGame: data.events[0]?.name || 'No games today',
+        message: 'ESPN API working in Replit!' 
+      });
+    } catch (error) {
+      res.json({ success: false, error: error.message });
+    }
+  });
+
   // ===================================================================
   // KRAKEN MULTI-DIVISION SYSTEM API ENDPOINTS 🐙💥
   // ===================================================================
