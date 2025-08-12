@@ -641,6 +641,75 @@ export const insertDivisionSchedulingSchema = createInsertSchema(divisionSchedul
   createdAt: true,
 });
 
+// Insert schemas moved after table definitions
+
+// ===================================================================
+// TOURNAMENT EMPIRE ROLE-BASED SYSTEM! 👑⚡
+// ===================================================================
+
+// Role-based dashboard configuration
+export const userDashboardConfigs = pgTable("user_dashboard_configs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userRole: varchar("user_role").notNull(),
+  subscriptionTier: varchar("subscription_tier").notNull(),
+  dashboardLayout: jsonb("dashboard_layout").notNull(),
+  availableFeatures: jsonb("available_features").notNull(),
+  uiPermissions: jsonb("ui_permissions").notNull(),
+  navigationConfig: jsonb("navigation_config").notNull(),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+// Organization hierarchy management (Tournament Empire)
+export const tournamentOrganizations = pgTable("tournament_organizations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationName: varchar("organization_name").notNull(),
+  organizationType: varchar("organization_type").notNull(), // district, school, club, community
+  parentOrganizationId: varchar("parent_organization_id").references(() => tournamentOrganizations.id),
+  subscriptionTier: varchar("subscription_tier").notNull(),
+  whiteLabelConfig: jsonb("white_label_config"),
+  brandingConfig: jsonb("branding_config"),
+  customDomain: varchar("custom_domain"),
+  organizationSettings: jsonb("organization_settings"),
+  billingConfig: jsonb("billing_config"),
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+});
+
+// User-organization assignments
+export const userOrganizationRoles = pgTable("user_organization_roles", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  organizationId: varchar("organization_id").references(() => tournamentOrganizations.id),
+  roleWithinOrg: varchar("role_within_org").notNull(),
+  permissionsOverride: jsonb("permissions_override"),
+  assignmentDate: timestamp("assignment_date").default(sql`now()`),
+  status: varchar("status").default("active"), // active, suspended, terminated
+});
+
+// Granular permission system
+export const permissionAssignments = pgTable("permission_assignments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  permissionType: varchar("permission_type").notNull(),
+  resourceId: varchar("resource_id"), // tournament_id, event_id, organization_id
+  resourceType: varchar("resource_type"), // tournament, event, organization, global
+  permissionScope: jsonb("permission_scope"), // specific limitations like "discus_pit_only"
+  grantedBy: varchar("granted_by").notNull().references(() => users.id),
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
+// Permission templates for common role assignments
+export const permissionTemplates = pgTable("permission_templates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  templateName: varchar("template_name").notNull(),
+  roleType: varchar("role_type").notNull(),
+  subscriptionTier: varchar("subscription_tier").notNull(),
+  permissions: jsonb("permissions").notNull(),
+  restrictions: jsonb("restrictions"),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
 export const insertSportEventSchema = createInsertSchema(sportEvents).omit({
   createdAt: true,
 });
@@ -672,8 +741,8 @@ export const updateMatchSchema = createInsertSchema(matches).omit({
 export type User = typeof users.$inferSelect;
 
 // Track Events types
-export type TrackEvent = typeof trackEvents.$inferSelect;
-export type InsertTrackEvent = typeof trackEvents.$inferInsert;
+export type TrackEventData = typeof trackEvents.$inferSelect;
+export type InsertTrackEventData = typeof trackEvents.$inferInsert;
 export type TrackEventTiming = typeof trackEventTiming.$inferSelect;
 export type InsertTrackEventTiming = typeof trackEventTiming.$inferInsert;
 
@@ -704,6 +773,45 @@ export type DivisionGenerationRule = typeof divisionGenerationRules.$inferSelect
 export type InsertDivisionGenerationRule = typeof divisionGenerationRules.$inferInsert;
 export type DivisionScheduling = typeof divisionScheduling.$inferSelect;
 export type InsertDivisionScheduling = typeof divisionScheduling.$inferInsert;
+
+// Tournament Empire types
+export type UserDashboardConfig = typeof userDashboardConfigs.$inferSelect;
+export type InsertUserDashboardConfig = typeof userDashboardConfigs.$inferInsert;
+export type Organization = typeof organizations.$inferSelect;
+export type InsertOrganization = typeof organizations.$inferInsert;
+export type UserOrganizationRole = typeof userOrganizationRoles.$inferSelect;
+export type InsertUserOrganizationRole = typeof userOrganizationRoles.$inferInsert;
+export type PermissionAssignment = typeof permissionAssignments.$inferSelect;
+export type InsertPermissionAssignment = typeof permissionAssignments.$inferInsert;
+export type PermissionTemplate = typeof permissionTemplates.$inferSelect;
+export type InsertPermissionTemplate = typeof permissionTemplates.$inferInsert;
+
+// Tournament Empire insert schemas
+export const insertUserDashboardConfigSchema = createInsertSchema(userDashboardConfigs).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertTournamentOrganizationSchema = createInsertSchema(tournamentOrganizations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertUserOrganizationRoleSchema = createInsertSchema(userOrganizationRoles).omit({
+  id: true,
+  assignmentDate: true,
+});
+
+export const insertPermissionAssignmentSchema = createInsertSchema(permissionAssignments).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertPermissionTemplateSchema = createInsertSchema(permissionTemplates).omit({
+  id: true,
+  createdAt: true,
+});
 
 // White-label pages schema
 export const pages = pgTable("pages", {
@@ -738,8 +846,8 @@ export const whitelabelConfigsRelations = relations(whitelabelConfigs, ({ one })
   }),
 }));
 
-export type WhitelabelConfig = typeof whitelabelConfigs.$inferSelect;
-export type InsertWhitelabelConfig = typeof whitelabelConfigs.$inferInsert;
+export type WhitelabelConfigData = typeof whitelabelConfigs.$inferSelect;
+export type InsertWhitelabelConfigData = typeof whitelabelConfigs.$inferInsert;
 
 // Donor types
 export type Donor = typeof donors.$inferSelect;
@@ -897,7 +1005,7 @@ export type InsertEventScore = typeof eventScores.$inferInsert;
 export const schoolEventAssignments = pgTable("school_event_assignments", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   tournamentId: varchar("tournament_id").notNull().references(() => tournaments.id),
-  schoolId: varchar("school_id").notNull().references(() => organizations.id),
+  schoolId: varchar("school_id").notNull().references(() => tournamentOrganizations.id),
   assignedById: varchar("assigned_by_id").notNull().references(() => users.id), // District AD who made assignment
   eventNames: jsonb("event_names").notNull(), // Array of events this school is assigned to
   schoolAthleticDirectorId: varchar("school_athletic_director_id").references(() => users.id),
@@ -967,8 +1075,8 @@ export type InsertUser = z.infer<typeof insertUserSchema>;
 export type UpsertUser = z.infer<typeof upsertUserSchema>;
 
 // White-label types
-export type WhitelabelConfig = typeof whitelabelConfigs.$inferSelect;
-export type InsertWhitelabelConfig = z.infer<typeof insertWhitelabelConfigSchema>;
+export type WhitelabelConfigRecord = typeof whitelabelConfigs.$inferSelect;
+export type InsertWhitelabelConfigRecord = z.infer<typeof insertWhitelabelConfigSchema>;
 
 export type Tournament = typeof tournaments.$inferSelect;
 export type InsertTournament = z.infer<typeof insertTournamentSchema>;
@@ -980,8 +1088,8 @@ export type SportOption = typeof sportOptions.$inferSelect;
 export type InsertSportOption = z.infer<typeof insertSportOptionSchema>;
 export type TournamentStructure = typeof tournamentStructures.$inferSelect;
 export type InsertTournamentStructure = z.infer<typeof insertTournamentStructureSchema>;
-export type TrackEvent = typeof trackEvents.$inferSelect;
-export type InsertTrackEvent = z.infer<typeof insertTrackEventSchema>;
+export type TrackEventRecord = typeof trackEvents.$inferSelect;
+export type InsertTrackEventRecord = z.infer<typeof insertTrackEventSchema>;
 
 export type SportEvent = typeof sportEvents.$inferSelect;
 export type InsertSportEvent = z.infer<typeof insertSportEventSchema>;

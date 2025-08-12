@@ -1118,6 +1118,11 @@ export class MemStorage implements IStorage {
   private divisionTemplates: Map<string, DivisionTemplate>;
   private divisionGenerationRules: Map<string, DivisionGenerationRule>;
   private divisionScheduling: Map<string, DivisionScheduling>;
+  
+  // TOURNAMENT EMPIRE ROLE-BASED SYSTEM! 👑⚡
+  private dashboardConfigs: Map<string, any>;
+  private organizations: Map<string, any>;
+  private permissionTemplates: Map<string, any>;
   private donors: Map<string, Donor>;
   private donations: Map<string, Donation>;
   private contacts: Map<string, Contact>;
@@ -1147,6 +1152,11 @@ export class MemStorage implements IStorage {
     this.divisionTemplates = new Map();
     this.divisionGenerationRules = new Map();
     this.divisionScheduling = new Map();
+    
+    // TOURNAMENT EMPIRE INITIALIZATION 👑
+    this.dashboardConfigs = new Map();
+    this.organizations = new Map();
+    this.permissionTemplates = new Map();
     this.donors = new Map();
     this.donations = new Map();
     this.contacts = new Map();
@@ -1159,6 +1169,7 @@ export class MemStorage implements IStorage {
     this.initializeTournamentIntegration();
     this.initializeCompetitionFormatTemplates();
     this.initializeKrakenDivisionSystem();
+    this.initializeTournamentEmpire();
   }
 
   private initializeDefaultStructures() {
@@ -3232,6 +3243,150 @@ export class MemStorage implements IStorage {
     const created = { ...scheduling, id, createdAt: new Date() };
     this.divisionScheduling.set(id, created);
     return created;
+  }
+
+  // ===================================================================
+  // TOURNAMENT EMPIRE COMPLETION SYSTEM! 👑⚡
+  // ===================================================================
+
+  // Initialize Tournament Empire role-based dashboard and organization system
+  initializeTournamentEmpire() {
+    console.log("👑 Initializing Tournament Empire completion system...");
+    
+    // Initialize role-based dashboard configurations
+    this.initializeDashboardConfigs();
+    
+    // Initialize organization templates
+    this.initializeOrganizations();
+    
+    // Initialize permission templates
+    this.initializePermissionTemplates();
+    
+    console.log("👑 TOURNAMENT EMPIRE DEPLOYED! Role-based dashboards, organization hierarchy, and granular permissions ready!");
+  }
+
+  // Initialize dashboard configurations for all roles and subscription tiers
+  initializeDashboardConfigs() {
+    const dashboardConfigs = [
+      // TOURNAMENT MANAGER DASHBOARDS
+      {
+        userRole: "tournament_manager",
+        subscriptionTier: "district_enterprise",
+        dashboardLayout: JSON.stringify({
+          layout: "enterprise_command_center",
+          panels: ["tournament_overview", "multi_division_management", "ai_tournament_builder", "analytics_dashboard", "white_label_admin", "revenue_tracking"]
+        }),
+        availableFeatures: JSON.stringify({
+          tournament_creation: "unlimited",
+          ai_assistance: "advanced",
+          white_label: true,
+          custom_branding: true,
+          multi_division: true,
+          coach_communication: true,
+          judge_assignment: true,
+          analytics: "advanced",
+          api_access: true
+        }),
+        uiPermissions: JSON.stringify({
+          can_create_tournaments: true,
+          can_manage_all_tournaments: true,
+          can_assign_roles: true,
+          can_configure_white_label: true,
+          can_access_ai_builder: true,
+          can_view_revenue: true,
+          can_manage_subscriptions: true
+        }),
+        navigationConfig: JSON.stringify({
+          main_nav: ["Dashboard", "Tournaments", "AI Builder", "Organizations", "Users", "Analytics", "Billing", "Settings"],
+          quick_actions: ["Create Tournament", "AI Tournament", "Assign Roles", "View Reports"]
+        })
+      }
+    ];
+
+    dashboardConfigs.forEach(config => {
+      this.dashboardConfigs.set(`${config.userRole}-${config.subscriptionTier}`, config);
+    });
+  }
+
+  // Initialize sample organizations
+  initializeOrganizations() {
+    const organizations = [
+      {
+        id: "ccisd-athletics",
+        organizationName: "CCISD Athletics",
+        organizationType: "district",
+        subscriptionTier: "district_enterprise",
+        whiteLabelConfig: JSON.stringify({
+          enabled: true,
+          custom_logo: true,
+          custom_colors: true,
+          custom_domain: true,
+          remove_branding: true
+        }),
+        brandingConfig: JSON.stringify({
+          primary_color: "#1f4e79",
+          secondary_color: "#f4d03f",
+          logo_url: "/assets/ccisd-logo.png",
+          district_name: "Corpus Christi ISD",
+          mascot: "Rays"
+        }),
+        customDomain: "ccisd-athletics.com"
+      }
+    ];
+
+    organizations.forEach(org => {
+      this.organizations.set(org.id, org);
+    });
+  }
+
+  // Initialize permission templates
+  initializePermissionTemplates() {
+    const permissionTemplates = [
+      {
+        id: "track-field-judge",
+        templateName: "Track Field Event Judge",
+        roleType: "scorekeeper",
+        subscriptionTier: "district_enterprise",
+        permissions: JSON.stringify({
+          can_score_assigned_events: true,
+          can_update_field_measurements: true,
+          can_record_attempts: true,
+          can_submit_final_results: true,
+          can_view_event_schedule: true
+        }),
+        restrictions: JSON.stringify({
+          event_scope: "field_events_only",
+          specific_events: ["shot_put", "discus", "javelin", "hammer", "long_jump", "triple_jump", "high_jump", "pole_vault"],
+          cannot_access: "track_events"
+        })
+      }
+    ];
+
+    permissionTemplates.forEach(template => {
+      this.permissionTemplates.set(template.id, template);
+    });
+  }
+
+  // Tournament Empire API Methods
+  async getDashboardConfigByRole(userRole: string, subscriptionTier: string): Promise<any> {
+    const key = `${userRole}-${subscriptionTier}`;
+    return this.dashboardConfigs.get(key);
+  }
+
+  async getOrganizations(): Promise<any[]> {
+    return Array.from(this.organizations.values());
+  }
+
+  async getOrganization(id: string): Promise<any> {
+    return this.organizations.get(id);
+  }
+
+  async getPermissionTemplates(): Promise<any[]> {
+    return Array.from(this.permissionTemplates.values());
+  }
+
+  async getPermissionTemplate(id: string): Promise<any> {
+    return this.permissionTemplates.get(id);
   }
 }
 

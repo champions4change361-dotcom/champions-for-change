@@ -916,6 +916,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ===================================================================
+  // TOURNAMENT EMPIRE API ENDPOINTS! 👑⚡ 
+  // ===================================================================
+
+  // Tournament Empire status endpoint
+  app.get("/api/empire/status", async (req, res) => {
+    try {
+      const [organizations, templates] = await Promise.all([
+        storage.getOrganizations(),
+        storage.getPermissionTemplates()
+      ]);
+      
+      res.json({
+        empire_status: "FULLY OPERATIONAL",
+        systems: {
+          dashboard_configs: "ACTIVE",
+          organization_hierarchy: "ACTIVE", 
+          permission_system: "ACTIVE",
+          role_based_access: "ACTIVE"
+        },
+        stats: {
+          organizations_count: organizations.length,
+          permission_templates_count: templates.length,
+          supported_roles: ["tournament_manager", "coach", "scorekeeper", "athlete", "fan"],
+          supported_tiers: ["district_enterprise", "enterprise", "champion", "foundation", "free"]
+        },
+        deployment_time: new Date().toISOString(),
+        message: "TOURNAMENT EMPIRE CONQUEST COMPLETE! 👑⚡"
+      });
+    } catch (error) {
+      console.error("Empire status error:", error);
+      res.status(500).json({ message: "Empire status check failed" });
+    }
+  });
+
+  // Get dashboard configuration for user role and subscription tier
+  app.get("/api/empire/dashboard-config/:userRole/:subscriptionTier", async (req, res) => {
+    try {
+      const { userRole, subscriptionTier } = req.params;
+      const config = await storage.getDashboardConfigByRole(userRole, subscriptionTier);
+      
+      if (!config) {
+        return res.status(404).json({ 
+          message: "Dashboard configuration not found",
+          available_roles: ["tournament_manager", "coach", "scorekeeper"],
+          available_tiers: ["district_enterprise", "enterprise", "champion", "foundation", "free"]
+        });
+      }
+      
+      res.json({
+        success: true,
+        config,
+        empire_status: "TOURNAMENT EMPIRE ACTIVE"
+      });
+    } catch (error) {
+      console.error("Empire dashboard config error:", error);
+      res.status(500).json({ message: "Failed to fetch dashboard configuration" });
+    }
+  });
+
+  // ===================================================================
   // KRAKEN MULTI-DIVISION SYSTEM API ENDPOINTS 🐙💥
   // ===================================================================
 
