@@ -2398,6 +2398,99 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create donation with donor information
+  app.post("/api/create-donation", async (req, res) => {
+    try {
+      const { amount, donorInfo, postDonationChoice, description } = req.body;
+
+      if (!amount || amount < 1) {
+        return res.status(400).json({ message: "Valid amount required" });
+      }
+
+      if (!donorInfo?.email || !donorInfo?.firstName || !donorInfo?.lastName) {
+        return res.status(400).json({ message: "Donor contact information required" });
+      }
+
+      const storage = await getStorage();
+      let donor;
+
+      try {
+        // Try to find existing donor by email
+        const existingDonor = await storage.getDonorByEmail(donorInfo.email);
+        
+        if (existingDonor) {
+          // Update existing donor
+          donor = await storage.updateDonor(existingDonor.id, {
+            ...donorInfo,
+            totalDonated: (parseFloat(existingDonor.totalDonated) + amount).toString(),
+            donationCount: existingDonor.donationCount + 1,
+            lastDonationDate: new Date(),
+            updatedAt: new Date(),
+          });
+        } else {
+          // Create new donor
+          donor = await storage.createDonor({
+            ...donorInfo,
+            totalDonated: amount.toString(),
+            donationCount: 1,
+            lastDonationDate: new Date(),
+          });
+        }
+      } catch (dbError) {
+        console.warn('Database operation failed for donor, using fallback');
+        // For fallback storage, create a simple donor record
+        donor = {
+          id: Math.random().toString(36).substr(2, 9),
+          ...donorInfo,
+          totalDonated: amount.toString(),
+          donationCount: 1,
+          lastDonationDate: new Date(),
+          preferredContactMethod: "email",
+          source: "landing_page",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+      }
+
+      // Create Stripe payment intent
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount * 100), // Convert to cents
+        currency: "usd",
+        description: description || `$${amount} donation to Champions for Change educational programs`,
+        metadata: {
+          donor_id: donor.id,
+          donor_email: donorInfo.email,
+          post_donation_choice: postDonationChoice,
+          source: 'Champions for Change Platform'
+        },
+      });
+
+      // Create donation record
+      try {
+        await storage.createDonation({
+          donorId: donor.id,
+          amount: amount.toString(),
+          stripePaymentIntentId: paymentIntent.id,
+          paymentStatus: "pending",
+          donationPurpose: "general_education",
+          postDonationChoice,
+        });
+      } catch (dbError) {
+        console.warn('Failed to create donation record in database, continuing with payment');
+      }
+
+      res.json({ 
+        clientSecret: paymentIntent.client_secret,
+        donorId: donor.id 
+      });
+    } catch (error: any) {
+      console.error('Donation creation error:', error);
+      res.status(500).json({ 
+        message: "Error creating donation: " + error.message 
+      });
+    }
+  });
+
   app.post('/api/create-subscription', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;

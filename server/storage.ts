@@ -7,7 +7,8 @@ import {
   type ScorekeeperAssignment, type InsertScorekeeperAssignment, type EventScore, type InsertEventScore,
   type SchoolEventAssignment, type InsertSchoolEventAssignment, type CoachEventAssignment, type InsertCoachEventAssignment,
   type Contact, type InsertContact, type EmailCampaign, type InsertEmailCampaign, type CampaignRecipient, type InsertCampaignRecipient,
-  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients 
+  type Donor, type InsertDonor, type Donation, type InsertDonation,
+  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations 
 } from "@shared/schema";
 
 type SportCategory = typeof sportCategories.$inferSelect;
@@ -92,6 +93,22 @@ export interface IStorage {
   deleteContact(id: string): Promise<void>;
   searchContacts(userId: string, query: string): Promise<Contact[]>;
   importContacts(userId: string, contacts: InsertContact[]): Promise<Contact[]>;
+
+  // Donor operations
+  getDonors(): Promise<Donor[]>;
+  getDonor(id: string): Promise<Donor | undefined>;
+  getDonorByEmail(email: string): Promise<Donor | undefined>;
+  createDonor(donor: InsertDonor): Promise<Donor>;
+  updateDonor(id: string, updates: Partial<Donor>): Promise<Donor>;
+  deleteDonor(id: string): Promise<void>;
+
+  // Donation operations
+  getDonations(): Promise<Donation[]>;
+  getDonation(id: string): Promise<Donation | undefined>;
+  getDonationsByDonor(donorId: string): Promise<Donation[]>;
+  createDonation(donation: InsertDonation): Promise<Donation>;
+  updateDonation(id: string, updates: Partial<Donation>): Promise<Donation>;
+  deleteDonation(id: string): Promise<void>;
   
   // Email campaign operations
   getEmailCampaigns(userId: string): Promise<EmailCampaign[]>;
@@ -1034,6 +1051,10 @@ export class MemStorage implements IStorage {
   private sportOptions: Map<string, SportOption>;
   private tournamentStructures: Map<string, TournamentStructure>;
   private trackEvents: Map<string, TrackEvent>;
+  private donors: Map<string, Donor>;
+  private donations: Map<string, Donation>;
+  private contacts: Map<string, Contact>;
+  private emailCampaigns: Map<string, EmailCampaign>;
 
   constructor() {
     this.users = new Map();
@@ -1044,6 +1065,10 @@ export class MemStorage implements IStorage {
     this.sportOptions = new Map();
     this.tournamentStructures = new Map();
     this.trackEvents = new Map();
+    this.donors = new Map();
+    this.donations = new Map();
+    this.contacts = new Map();
+    this.emailCampaigns = new Map();
   }
 
   // User authentication methods
@@ -1473,6 +1498,98 @@ export class MemStorage implements IStorage {
 
   async deleteEmailCampaign(id: string): Promise<void> {
     this.emailCampaigns.delete(id);
+  }
+
+  // Donor methods
+  async getDonors(): Promise<Donor[]> {
+    return Array.from(this.donors.values());
+  }
+
+  async getDonor(id: string): Promise<Donor | undefined> {
+    return this.donors.get(id);
+  }
+
+  async getDonorByEmail(email: string): Promise<Donor | undefined> {
+    return Array.from(this.donors.values()).find(d => d.email === email);
+  }
+
+  async createDonor(donor: InsertDonor): Promise<Donor> {
+    const id = randomUUID();
+    const created: Donor = {
+      ...donor,
+      id,
+      totalDonated: donor.totalDonated || "0",
+      donationCount: donor.donationCount || 0,
+      preferredContactMethod: donor.preferredContactMethod || "email",
+      source: donor.source || "landing_page",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.donors.set(id, created);
+    return created;
+  }
+
+  async updateDonor(id: string, updates: Partial<Donor>): Promise<Donor> {
+    const existing = this.donors.get(id);
+    if (!existing) {
+      throw new Error("Donor not found");
+    }
+    const updated: Donor = {
+      ...existing,
+      ...updates,
+      updatedAt: new Date(),
+    };
+    this.donors.set(id, updated);
+    return updated;
+  }
+
+  async deleteDonor(id: string): Promise<void> {
+    this.donors.delete(id);
+  }
+
+  // Donation methods
+  async getDonations(): Promise<Donation[]> {
+    return Array.from(this.donations.values());
+  }
+
+  async getDonation(id: string): Promise<Donation | undefined> {
+    return this.donations.get(id);
+  }
+
+  async getDonationsByDonor(donorId: string): Promise<Donation[]> {
+    return Array.from(this.donations.values()).filter(d => d.donorId === donorId);
+  }
+
+  async createDonation(donation: InsertDonation): Promise<Donation> {
+    const id = randomUUID();
+    const created: Donation = {
+      ...donation,
+      id,
+      paymentStatus: donation.paymentStatus || "pending",
+      donationPurpose: donation.donationPurpose || "general_education",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.donations.set(id, created);
+    return created;
+  }
+
+  async updateDonation(id: string, updates: Partial<Donation>): Promise<Donation> {
+    const existing = this.donations.get(id);
+    if (!existing) {
+      throw new Error("Donation not found");
+    }
+    const updated: Donation = {
+      ...existing,
+      ...updates,
+      updatedAt: new Date(),
+    };
+    this.donations.set(id, updated);
+    return updated;
+  }
+
+  async deleteDonation(id: string): Promise<void> {
+    this.donations.delete(id);
   }
 }
 

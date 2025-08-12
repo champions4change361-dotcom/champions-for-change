@@ -6,6 +6,7 @@ import { Switch, Route, Router } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import Home from './pages/Home';
 import Landing from './pages/Landing';
+import DonationFlow from './pages/DonationFlow';
 import CreateTournament from './pages/CreateTournament';
 import Tournament from './pages/tournament';
 import Contacts from './pages/Contacts';
@@ -62,11 +63,16 @@ function AppRouter() {
     );
   }
 
-  if (!isAuthenticated) {
-    return <Landing />;
-  }
-
-  return <AuthenticatedRoutes />;
+  return (
+    <Switch>
+      <Route path="/donate" component={DonationFlow} />
+      {!isAuthenticated ? (
+        <Route component={Landing} />
+      ) : (
+        <AuthenticatedRoutes />
+      )}
+    </Switch>
+  );
 }
 
 export default App;

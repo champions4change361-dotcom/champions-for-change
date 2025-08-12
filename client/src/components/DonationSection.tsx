@@ -64,9 +64,9 @@ export function DonationSection({ variant = 'full', className = '' }: DonationSe
         throw new Error('Payment setup incomplete');
       }
       
-      // Redirect to secure payment page
-      console.log('Payment setup successful, redirecting to checkout...');
-      window.location.href = `/checkout?client_secret=${encodeURIComponent(clientSecret)}&amount=${numericAmount}&type=donation`;
+      // Redirect to donation flow instead of direct checkout
+      console.log('Redirecting to donation flow...');
+      window.location.href = `/donate?amount=${numericAmount}`;
       
     } catch (error: any) {
       console.error('Donation error:', error);

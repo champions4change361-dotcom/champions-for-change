@@ -73,22 +73,48 @@ export const contacts = pgTable("contacts", {
   }),
   position: varchar("position"), // Title/role
   sport: varchar("sport"), // Primary sport they're involved with
-  state: varchar("state"),
-  city: varchar("city"),
-  zipCode: varchar("zip_code"),
-  source: text("source", {
-    enum: ["jersey_watch", "manual_entry", "referral", "website", "event", "other"]
-  }).default("manual_entry"),
-  status: text("status", {
-    enum: ["active", "inactive", "do_not_contact", "bounced"]
-  }).default("active"),
-  tags: text("tags").array(), // Searchable tags
   notes: text("notes"),
+  source: text("source").default("manual_entry"),
   lastContactDate: timestamp("last_contact_date"),
-  subscriptionInterest: text("subscription_interest", {
-    enum: ["foundation", "champion", "enterprise", "district_enterprise", "unknown"]
-  }),
-  isProspect: boolean("is_prospect").default(true),
+  contactStatus: text("contact_status", {
+    enum: ["active", "inactive", "do_not_contact"]
+  }).default("active"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Donor contacts for donation tracking and follow-up
+export const donors = pgTable("donors", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  firstName: varchar("first_name").notNull(),
+  lastName: varchar("last_name").notNull(),
+  email: varchar("email").notNull(),
+  phone: varchar("phone"),
+  totalDonated: numeric("total_donated").default("0"),
+  donationCount: integer("donation_count").default(0),
+  lastDonationDate: timestamp("last_donation_date"),
+  preferredContactMethod: text("preferred_contact_method", {
+    enum: ["email", "phone", "text"]
+  }).default("email"),
+  source: text("source").default("landing_page"), // How they found us
+  notes: text("notes"), // Any additional information
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Individual donation records
+export const donations = pgTable("donations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  donorId: varchar("donor_id").notNull().references(() => donors.id),
+  amount: numeric("amount").notNull(),
+  stripePaymentIntentId: varchar("stripe_payment_intent_id"),
+  paymentStatus: text("payment_status", {
+    enum: ["pending", "succeeded", "failed", "canceled"]
+  }).default("pending"),
+  donationPurpose: text("donation_purpose").default("general_education"), // What they're supporting
+  postDonationChoice: text("post_donation_choice", {
+    enum: ["test_platform", "just_donate", "learn_more"]
+  }), // What they chose to do after donating
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -442,6 +468,14 @@ export const whitelabelConfigsRelations = relations(whitelabelConfigs, ({ one })
 
 export type WhitelabelConfig = typeof whitelabelConfigs.$inferSelect;
 export type InsertWhitelabelConfig = typeof whitelabelConfigs.$inferInsert;
+
+// Donor types
+export type Donor = typeof donors.$inferSelect;
+export type InsertDonor = typeof donors.$inferInsert;
+
+// Donation types  
+export type Donation = typeof donations.$inferSelect;
+export type InsertDonation = typeof donations.$inferInsert;
 
 // Team registrations - coaches register their teams for tournaments
 export const teamRegistrations = pgTable("team_registrations", {
