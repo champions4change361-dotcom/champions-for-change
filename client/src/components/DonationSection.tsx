@@ -19,7 +19,8 @@ export function DonationSection({ variant = 'full', className = '' }: DonationSe
 
   const handleDonation = async (amount: string) => {
     const finalAmount = amount || customAmount;
-    if (!finalAmount || parseInt(finalAmount) < 1) {
+    
+    if (!finalAmount || isNaN(parseInt(finalAmount)) || parseInt(finalAmount) < 1) {
       toast({
         title: "Invalid Amount",
         description: "Please enter a valid donation amount.",

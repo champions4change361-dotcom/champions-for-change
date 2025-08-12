@@ -11,8 +11,12 @@ import { z } from "zod";
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
 }
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2023-10-16",
+
+const stripeKey = process.env.STRIPE_SECRET_KEY;
+console.log(`🔑 Stripe key loaded successfully - ends with: ...${stripeKey.slice(-15)}`);
+
+const stripe = new Stripe(stripeKey, {
+  apiVersion: "2025-07-30.basil",
 });
 
 function generateSingleEliminationBracket(teamSize: number, tournamentId: string) {
