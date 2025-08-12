@@ -342,8 +342,10 @@ export default function Home() {
                       >
                         {tournament.status}
                       </Badge>
-                      <Button variant="ghost" size="sm">
-                        View
+                      <Button variant="ghost" size="sm" asChild>
+                        <Link href={`/tournament/${tournament.id}`} data-testid={`button-view-tournament-${tournament.id}`}>
+                          View
+                        </Link>
                       </Button>
                     </div>
                   </div>
