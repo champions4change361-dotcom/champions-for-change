@@ -13,7 +13,7 @@ if (!process.env.STRIPE_SECRET_KEY) {
 }
 
 const stripeKey = process.env.STRIPE_SECRET_KEY;
-console.log(`🔑 Stripe key loaded successfully - ends with: ...${stripeKey.slice(-15)}`);
+console.log(`🔑 Stripe payment system ready - ends with: ...${stripeKey.slice(-15)}`);
 
 const stripe = new Stripe(stripeKey, {
   apiVersion: "2025-07-30.basil",
