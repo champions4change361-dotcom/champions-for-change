@@ -1432,6 +1432,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Generate complete website template
       const completeWebsite = generateWebpageTemplate(result.sport, result.age_group, result.format);
+      console.log(`🔧 Generated website template: ${completeWebsite.length} characters`);
       
       // Tier access control based on subscription
       const response: any = {
