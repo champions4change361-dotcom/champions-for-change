@@ -9,14 +9,27 @@ import { z } from "zod";
 
 // Initialize Stripe
 if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
+  console.log('⚠️  No Stripe account configured for Champions for Change');
+  console.log('📋 Please create a new Stripe account at https://stripe.com');
+  console.log('📧 Use champions4change361@gmail.com for the business email');
+  console.log('🏢 Business: Champions for Change (Nonprofit)');
+  throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY - See STRIPE_SETUP_GUIDE.md');
 }
 
 const stripeKey = process.env.STRIPE_SECRET_KEY;
-console.log(`🔑 Stripe payment system ready - ends with: ...${stripeKey.slice(-15)}`);
+console.log(`🔑 Stripe key loaded: sk_${stripeKey.split('_')[1]}_${stripeKey.split('_')[2].substring(0, 8)}...`);
+console.log(`🔑 Key ends with: ...${stripeKey.slice(-15)}`);
+console.log(`🔑 Key length: ${stripeKey.length} characters`);
 
 const stripe = new Stripe(stripeKey, {
-  apiVersion: "2025-07-30.basil",
+  apiVersion: "2024-11-20.acacia", // More stable version
+});
+
+// Test the key immediately
+stripe.accounts.retrieve().then(() => {
+  console.log('✅ Stripe key validation successful');
+}).catch((err) => {
+  console.error('❌ Stripe key validation failed:', err.message);
 });
 
 function generateSingleEliminationBracket(teamSize: number, tournamentId: string) {
