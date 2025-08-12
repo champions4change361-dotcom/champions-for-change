@@ -143,7 +143,7 @@ export const organizations = pgTable("organizations", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Self-registration requests for review
+// Self-registration requests for review - ENHANCED WITH PROFESSIONAL FEATURES
 export const registrationRequests = pgTable("registration_requests", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   requestType: text("request_type", {
@@ -153,24 +153,26 @@ export const registrationRequests = pgTable("registration_requests", {
   lastName: varchar("last_name").notNull(),
   email: varchar("email").notNull(),
   phone: varchar("phone"),
-  position: varchar("position"), // Job title
+  position: varchar("position"),
   organizationName: varchar("organization_name").notNull(),
   organizationType: text("organization_type", {
     enum: ["school_district", "school", "club", "nonprofit"]
   }).notNull(),
-  parentOrganization: varchar("parent_organization"), // District name for schools
+  parentOrganization: varchar("parent_organization"),
   yearsExperience: integer("years_experience"),
-  sportsInvolved: jsonb("sports_involved"), // Array of sports
+  sportsInvolved: jsonb("sports_involved"),
   certifications: text("certifications"),
+  references: jsonb("references"),
   requestReason: text("request_reason"),
+  selectedTier: text("selected_tier", {
+    enum: ["foundation", "champion", "enterprise"]
+  }).default("foundation"),
   paymentMethod: text("payment_method", {
-    enum: ["stripe", "check"]
-  }).notNull().default("stripe"),
-  subscriptionPlan: text("subscription_plan", {
-    enum: ["foundation", "champion", "enterprise", "district_enterprise"]
-  }).notNull(),
+    enum: ["stripe", "check", "pending"]
+  }).default("pending"),
+  stripeSessionId: varchar("stripe_session_id"),
   status: text("status", {
-    enum: ["pending", "approved", "rejected", "needs_info", "pending_payment"]
+    enum: ["pending", "approved", "rejected", "needs_info", "payment_pending"]
   }).default("pending"),
   reviewNotes: text("review_notes"),
   reviewedBy: varchar("reviewed_by"),

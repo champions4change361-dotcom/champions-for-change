@@ -56,7 +56,7 @@ export interface IStorage {
   updateOrganization(id: string, updates: Partial<Organization>): Promise<Organization | undefined>;
 
   // Registration request methods
-  createRegistrationRequest(request: InsertRegistrationRequest): Promise<RegistrationRequest>;
+  createRegistrationRequest(request: any): Promise<any>;
   getRegistrationRequests(): Promise<RegistrationRequest[]>;
   updateRegistrationRequest(id: string, updates: Partial<RegistrationRequest>): Promise<RegistrationRequest | undefined>;
 
@@ -538,7 +538,7 @@ export class DbStorage implements IStorage {
   }
 
   // Registration request methods
-  async createRegistrationRequest(request: InsertRegistrationRequest): Promise<RegistrationRequest> {
+  async createRegistrationRequest(request: any): Promise<any> {
     try {
       const result = await this.db.insert(registrationRequests).values(request).returning();
       return result[0];

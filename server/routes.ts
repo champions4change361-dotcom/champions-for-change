@@ -2589,6 +2589,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Registration API endpoints - Professional Self-Registration System
+  app.post("/api/registration/request", async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const requestData = req.body;
+      
+      // Generate unique ID and timestamps
+      const registrationRequest = {
+        ...requestData,
+        id: crypto.randomUUID(),
+        status: 'pending',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      // Store registration request
+      await storage.createRegistrationRequest(registrationRequest);
+      
+      res.status(201).json({
+        success: true,
+        message: "Registration request submitted successfully",
+        requestId: registrationRequest.id
+      });
+    } catch (error) {
+      console.error("Registration request error:", error);
+      res.status(500).json({ 
+        success: false,
+        message: "Failed to submit registration request" 
+      });
+    }
+  });
+
   // Contact management routes
   app.get('/api/contacts', isAuthenticated, async (req: any, res) => {
     try {

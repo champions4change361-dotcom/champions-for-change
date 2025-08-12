@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Trophy, Users, Zap, Globe, CreditCard, Star, Heart, GraduationCap, MapPin, Award, Mail, Phone, Timer, UserCheck, Shield } from "lucide-react";
 import championLogo from "@assets/IMG_1442_1754896656003.jpeg";
 import { DonationSection } from "@/components/DonationSection";
+import { SignupSection } from "@/components/SignupSection";
 import Footer from "@/components/Footer";
 
 export default function Landing() {
@@ -324,6 +325,9 @@ export default function Landing() {
             </Button>
           </div>
         </div>
+
+        {/* Professional Signup Section */}
+        <SignupSection />
 
         {/* Donation Section */}
         <DonationSection />
