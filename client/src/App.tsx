@@ -19,6 +19,7 @@ import LiveMatches from './pages/LiveMatches';
 import Championships from './pages/Championships';
 import WebpageBuilder from './pages/WebpageBuilder';
 import TournamentEmpire from './pages/TournamentEmpire';
+import FantasyTournaments from './pages/FantasyTournaments';
 
 function AuthenticatedRoutes() {
   return (
@@ -33,6 +34,7 @@ function AuthenticatedRoutes() {
       <Route path="/championships" component={Championships} />
       <Route path="/webpage-builder" component={WebpageBuilder} />
       <Route path="/tournament-empire" component={TournamentEmpire} />
+      <Route path="/fantasy-tournaments" component={FantasyTournaments} />
       <Route>
         {/* 404 - redirect to home */}
         <Home />

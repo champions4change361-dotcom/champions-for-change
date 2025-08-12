@@ -1,5 +1,5 @@
 import { sql, relations } from "drizzle-orm";
-import { pgTable, text, varchar, integer, jsonb, timestamp, boolean, numeric, index } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, jsonb, timestamp, boolean, numeric, decimal, date, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -811,6 +811,268 @@ export const insertPermissionAssignmentSchema = createInsertSchema(permissionAss
 export const insertPermissionTemplateSchema = createInsertSchema(permissionTemplates).omit({
   id: true,
   createdAt: true,
+});
+
+// ===================================================================
+// ADULT-ONLY FANTASY SYSTEM! 🎮⚡ 
+// DRAFTKINGS/FANDUEL COMPETITOR - LEGALLY BULLETPROOF!
+// ===================================================================
+
+// Fantasy leagues - age-gated and professional focus
+export const fantasyLeagues = pgTable("fantasy_leagues", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  leagueName: varchar("league_name").notNull(),
+  commissionerId: varchar("commissioner_id").notNull(),
+  sportType: varchar("sport_type").notNull(), // nfl, nba, mlb, nhl, esports, college
+  leagueFormat: varchar("league_format").notNull(), // survivor, draft, daily, season
+  dataSource: varchar("data_source").notNull(), // espn_api, nfl_api, manual_import, esports_api
+  ageRestriction: integer("age_restriction").default(18),
+  requiresAgeVerification: boolean("requires_age_verification").default(true),
+  maxParticipants: integer("max_participants").default(12),
+  entryRequirements: jsonb("entry_requirements"), // Age verification, location restrictions
+  scoringConfig: jsonb("scoring_config").notNull(),
+  prizeStructure: jsonb("prize_structure"), // Optional - we don't manage money
+  leagueSettings: jsonb("league_settings").notNull(),
+  status: varchar("status").default("open"), // open, closed, active, completed
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Fantasy participants - verified adults only
+export const fantasyParticipants = pgTable("fantasy_participants", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  leagueId: varchar("league_id").references(() => fantasyLeagues.id),
+  userId: varchar("user_id").notNull(),
+  teamName: varchar("team_name").notNull(),
+  ageVerified: boolean("age_verified").default(false),
+  ageVerificationDate: timestamp("age_verification_date"),
+  entryDate: timestamp("entry_date").defaultNow(),
+  currentScore: decimal("current_score").default("0"),
+  eliminated: boolean("eliminated").default(false),
+  eliminationWeek: integer("elimination_week"),
+  participantStatus: varchar("participant_status").default("active"), // active, eliminated, withdrawn
+});
+
+// Professional player database - external API integration
+export const professionalPlayers = pgTable("professional_players", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  externalPlayerId: varchar("external_player_id").notNull(), // ESPN ID, NFL ID, etc.
+  dataSource: varchar("data_source").notNull(), // espn, nfl_api, nba_api, etc.
+  playerName: varchar("player_name").notNull(),
+  teamName: varchar("team_name").notNull(),
+  teamAbbreviation: varchar("team_abbreviation"),
+  position: varchar("position").notNull(),
+  sport: varchar("sport").notNull(), // nfl, nba, mlb, nhl, esports
+  jerseyNumber: integer("jersey_number"),
+  salary: integer("salary"), // For salary cap formats
+  currentSeasonStats: jsonb("current_season_stats"),
+  injuryStatus: varchar("injury_status").default("healthy"),
+  byeWeek: integer("bye_week"), // For NFL
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  isActive: boolean("is_active").default(true),
+});
+
+// Fantasy picks - survivor & draft systems
+export const fantasyPicks = pgTable("fantasy_picks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  leagueId: varchar("league_id").references(() => fantasyLeagues.id),
+  participantId: varchar("participant_id").references(() => fantasyParticipants.id),
+  weekNumber: integer("week_number"), // For survivor leagues
+  pickType: varchar("pick_type").notNull(), // survivor_pick, draft_pick, lineup_set
+  selectedPlayerId: varchar("selected_player_id").references(() => professionalPlayers.id),
+  selectedTeam: varchar("selected_team"), // For team-based picks
+  pickTimestamp: timestamp("pick_timestamp").defaultNow(),
+  pointsEarned: decimal("points_earned").default("0"),
+  isEliminatedPick: boolean("is_eliminated_pick").default(false), // For survivor
+  usedPlayers: jsonb("used_players"), // Track previously used players/teams
+});
+
+// Fantasy lineups - DraftKings style daily/weekly
+export const fantasyLineups = pgTable("fantasy_lineups", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  leagueId: varchar("league_id").references(() => fantasyLeagues.id),
+  participantId: varchar("participant_id").references(() => fantasyParticipants.id),
+  weekNumber: integer("week_number"),
+  lineupConfig: jsonb("lineup_config").notNull(), // Position requirements
+  totalSalary: integer("total_salary"), // Salary cap total
+  projectedPoints: decimal("projected_points"),
+  actualPoints: decimal("actual_points").default("0"),
+  lineupStatus: varchar("lineup_status").default("set"), // set, locked, scored
+  submissionTimestamp: timestamp("submission_timestamp").defaultNow(),
+});
+
+// Player performance - real-time scoring integration
+export const playerPerformances = pgTable("player_performances", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  playerId: varchar("player_id").references(() => professionalPlayers.id),
+  weekNumber: integer("week_number"),
+  season: varchar("season"),
+  gameDate: timestamp("game_date"),
+  opponent: varchar("opponent"),
+  stats: jsonb("stats").notNull(), // Sport-specific stats
+  fantasyPoints: decimal("fantasy_points").notNull(),
+  dataSource: varchar("data_source"), // Which API provided the data
+  lastUpdated: timestamp("last_updated").defaultNow(),
+});
+
+// Age verification records
+export const ageVerifications = pgTable("age_verifications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  verificationMethod: varchar("verification_method").notNull(), // id_upload, credit_card, third_party
+  dateOfBirth: date("date_of_birth").notNull(),
+  verifiedAge: integer("verified_age").notNull(),
+  verificationDate: timestamp("verification_date").defaultNow(),
+  verificationStatus: varchar("verification_status").default("verified"), // verified, pending, rejected
+  verifyingDocumentHash: varchar("verifying_document_hash"), // Hashed for privacy
+  expiresAt: timestamp("expires_at"),
+});
+
+// Fantasy league eligibility checks
+export const fantasyEligibilityChecks = pgTable("fantasy_eligibility_checks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  leagueId: varchar("league_id").references(() => fantasyLeagues.id),
+  userId: varchar("user_id").notNull(),
+  ageCheckPassed: boolean("age_check_passed").default(false),
+  locationCheckPassed: boolean("location_check_passed").default(true), // For legal compliance
+  eligibilityDate: timestamp("eligibility_date").defaultNow(),
+  checkDetails: jsonb("check_details"),
+});
+
+// Safety restrictions by sport/league type
+export const fantasySafetyRules = pgTable("fantasy_safety_rules", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sportType: varchar("sport_type").notNull(),
+  leagueFormat: varchar("league_format").notNull(),
+  minAgeRequirement: integer("min_age_requirement").default(18),
+  restrictedRegions: jsonb("restricted_regions"), // Legal compliance
+  maxEntryAmount: decimal("max_entry_amount"), // If handling entry fees
+  requiresIdentityVerification: boolean("requires_identity_verification").default(true),
+  additionalRestrictions: jsonb("additional_restrictions"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// API data source configuration
+export const apiConfigurations = pgTable("api_configurations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  apiName: varchar("api_name").notNull(), // espn, nfl, nba, riot, etc.
+  sportType: varchar("sport_type").notNull(),
+  apiEndpoint: varchar("api_endpoint").notNull(),
+  apiKeyHash: varchar("api_key_hash"), // Encrypted storage
+  rateLimitPerHour: integer("rate_limit_per_hour"),
+  lastSyncTimestamp: timestamp("last_sync_timestamp"),
+  syncFrequencyMinutes: integer("sync_frequency_minutes").default(60),
+  isActive: boolean("is_active").default(true),
+  dataMapping: jsonb("data_mapping"), // How to map their data to our schema
+});
+
+// Automated scoring functions framework
+export const scoringAutomations = pgTable("scoring_automations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  leagueId: varchar("league_id").references(() => fantasyLeagues.id),
+  automationType: varchar("automation_type").notNull(), // weekly_update, daily_update, real_time
+  dataSource: varchar("data_source").notNull(),
+  lastRun: timestamp("last_run"),
+  nextScheduledRun: timestamp("next_scheduled_run"),
+  automationStatus: varchar("automation_status").default("active"),
+  errorLog: jsonb("error_log"),
+});
+
+// Fantasy system relations
+export const fantasyLeaguesRelations = relations(fantasyLeagues, ({ many }) => ({
+  participants: many(fantasyParticipants),
+  picks: many(fantasyPicks),
+  lineups: many(fantasyLineups),
+}));
+
+export const fantasyParticipantsRelations = relations(fantasyParticipants, ({ one, many }) => ({
+  league: one(fantasyLeagues, {
+    fields: [fantasyParticipants.leagueId],
+    references: [fantasyLeagues.id],
+  }),
+  picks: many(fantasyPicks),
+  lineups: many(fantasyLineups),
+}));
+
+export const professionalPlayersRelations = relations(professionalPlayers, ({ many }) => ({
+  picks: many(fantasyPicks),
+  performances: many(playerPerformances),
+}));
+
+export const fantasyPicksRelations = relations(fantasyPicks, ({ one }) => ({
+  league: one(fantasyLeagues, {
+    fields: [fantasyPicks.leagueId],
+    references: [fantasyLeagues.id],
+  }),
+  participant: one(fantasyParticipants, {
+    fields: [fantasyPicks.participantId],
+    references: [fantasyParticipants.id],
+  }),
+  player: one(professionalPlayers, {
+    fields: [fantasyPicks.selectedPlayerId],
+    references: [professionalPlayers.id],
+  }),
+}));
+
+// Fantasy system types
+export type FantasyLeague = typeof fantasyLeagues.$inferSelect;
+export type InsertFantasyLeague = typeof fantasyLeagues.$inferInsert;
+export type FantasyParticipant = typeof fantasyParticipants.$inferSelect;
+export type InsertFantasyParticipant = typeof fantasyParticipants.$inferInsert;
+export type ProfessionalPlayer = typeof professionalPlayers.$inferSelect;
+export type InsertProfessionalPlayer = typeof professionalPlayers.$inferInsert;
+export type FantasyPick = typeof fantasyPicks.$inferSelect;
+export type InsertFantasyPick = typeof fantasyPicks.$inferInsert;
+export type FantasyLineup = typeof fantasyLineups.$inferSelect;
+export type InsertFantasyLineup = typeof fantasyLineups.$inferInsert;
+export type PlayerPerformance = typeof playerPerformances.$inferSelect;
+export type InsertPlayerPerformance = typeof playerPerformances.$inferInsert;
+export type AgeVerification = typeof ageVerifications.$inferSelect;
+export type InsertAgeVerification = typeof ageVerifications.$inferInsert;
+export type FantasyEligibilityCheck = typeof fantasyEligibilityChecks.$inferSelect;
+export type InsertFantasyEligibilityCheck = typeof fantasyEligibilityChecks.$inferInsert;
+export type FantasySafetyRule = typeof fantasySafetyRules.$inferSelect;
+export type InsertFantasySafetyRule = typeof fantasySafetyRules.$inferInsert;
+export type ApiConfiguration = typeof apiConfigurations.$inferSelect;
+export type InsertApiConfiguration = typeof apiConfigurations.$inferInsert;
+export type ScoringAutomation = typeof scoringAutomations.$inferSelect;
+export type InsertScoringAutomation = typeof scoringAutomations.$inferInsert;
+
+// Fantasy insert schemas
+export const insertFantasyLeagueSchema = createInsertSchema(fantasyLeagues).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertFantasyParticipantSchema = createInsertSchema(fantasyParticipants).omit({
+  id: true,
+  entryDate: true,
+});
+
+export const insertProfessionalPlayerSchema = createInsertSchema(professionalPlayers).omit({
+  id: true,
+  lastUpdated: true,
+});
+
+export const insertFantasyPickSchema = createInsertSchema(fantasyPicks).omit({
+  id: true,
+  pickTimestamp: true,
+});
+
+export const insertFantasyLineupSchema = createInsertSchema(fantasyLineups).omit({
+  id: true,
+  submissionTimestamp: true,
+});
+
+export const insertPlayerPerformanceSchema = createInsertSchema(playerPerformances).omit({
+  id: true,
+  lastUpdated: true,
+});
+
+export const insertAgeVerificationSchema = createInsertSchema(ageVerifications).omit({
+  id: true,
+  verificationDate: true,
 });
 
 // White-label pages schema

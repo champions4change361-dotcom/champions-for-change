@@ -3262,6 +3262,9 @@ export class MemStorage implements IStorage {
     // Initialize permission templates
     this.initializePermissionTemplates();
     
+    // Initialize adult fantasy system
+    this.initializeAdultFantasySystem();
+    
     console.log("👑 TOURNAMENT EMPIRE DEPLOYED! Role-based dashboards, organization hierarchy, and granular permissions ready!");
   }
 
@@ -3387,6 +3390,544 @@ export class MemStorage implements IStorage {
 
   async getPermissionTemplate(id: string): Promise<any> {
     return this.permissionTemplates.get(id);
+  }
+
+  // ===================================================================
+  // ADULT-ONLY FANTASY SYSTEM METHODS! 🎮⚡
+  // DRAFTKINGS/FANDUEL COMPETITOR STORAGE OPERATIONS
+  // ===================================================================
+
+  // Fantasy league storage operations
+  private fantasyLeagues: Map<string, any> = new Map();
+  private fantasyParticipants: Map<string, any> = new Map();
+  private professionalPlayers: Map<string, any> = new Map();
+  private fantasyPicks: Map<string, any> = new Map();
+  private fantasyLineups: Map<string, any> = new Map();
+  private playerPerformances: Map<string, any> = new Map();
+  private ageVerifications: Map<string, any> = new Map();
+  private fantasySafetyRules: Map<string, any> = new Map();
+  private apiConfigurations: Map<string, any> = new Map();
+
+  // Initialize adult fantasy system with age-gated leagues and professional players
+  initializeAdultFantasySystem() {
+    console.log("🎮 Initializing Adult-Only Fantasy System...");
+    
+    // Initialize fantasy leagues with age restrictions
+    this.initializeFantasyLeagues();
+    
+    // Initialize professional player database
+    this.initializeProfessionalPlayers();
+    
+    // Initialize safety rules and age verification
+    this.initializeFantasySafetyRules();
+    
+    // Initialize API configurations
+    this.initializeApiConfigurations();
+    
+    console.log("🎮 ADULT FANTASY EMPIRE DEPLOYED! Age-verified leagues, professional players, and API integrations ready!");
+  }
+
+  // Initialize fantasy leagues with comprehensive adult-only formats
+  initializeFantasyLeagues() {
+    const fantasyLeagues = [
+      {
+        id: "nfl-survivor-2025",
+        leagueName: "NFL Survivor Challenge 2025",
+        commissionerId: "sample_commissioner_id",
+        sportType: "nfl",
+        leagueFormat: "survivor",
+        dataSource: "espn_api",
+        ageRestriction: 18,
+        requiresAgeVerification: true,
+        maxParticipants: 100,
+        scoringConfig: {
+          type: "survivor",
+          elimination_rule: "wrong_pick",
+          weekly_picks: 1,
+          no_reuse_teams: true
+        },
+        leagueSettings: {
+          max_participants: 100,
+          entry_deadline: "2025-09-05T00:00:00Z",
+          season_length: 18,
+          tiebreaker: "last_elimination",
+          late_entry: false
+        },
+        status: "open"
+      },
+      {
+        id: "nba-dfs-championship",
+        leagueName: "NBA DFS Championship",
+        commissionerId: "sample_commissioner_id",
+        sportType: "nba",
+        leagueFormat: "daily",
+        dataSource: "espn_api",
+        ageRestriction: 18,
+        requiresAgeVerification: true,
+        maxParticipants: 1000,
+        scoringConfig: {
+          type: "daily_fantasy",
+          salary_cap: 50000,
+          scoring: {
+            points: 1,
+            rebounds: 1.2,
+            assists: 1.5,
+            steals: 3,
+            blocks: 3,
+            turnovers: -1,
+            double_double: 1.5,
+            triple_double: 3
+          }
+        },
+        leagueSettings: {
+          lineup_requirements: {
+            PG: 1, SG: 1, SF: 1, PF: 1, C: 1, G: 1, F: 1, UTIL: 1
+          },
+          late_swap: true,
+          multi_entry: true
+        },
+        status: "open"
+      },
+      {
+        id: "lol-pro-fantasy",
+        leagueName: "League of Legends Pro Fantasy",
+        commissionerId: "sample_commissioner_id",
+        sportType: "esports",
+        leagueFormat: "season",
+        dataSource: "riot_api",
+        ageRestriction: 18,
+        requiresAgeVerification: true,
+        maxParticipants: 50,
+        scoringConfig: {
+          type: "season_long",
+          scoring: {
+            kills: 2,
+            deaths: -0.5,
+            assists: 1.5,
+            cs: 0.01,
+            vision_score: 0.02,
+            game_win: 2
+          }
+        },
+        leagueSettings: {
+          roster_size: 6,
+          lineup_size: 5,
+          trades_allowed: true,
+          waiver_claims: true,
+          playoff_weeks: 3
+        },
+        status: "open"
+      },
+      {
+        id: "college-football-pickem",
+        leagueName: "College Football Pick Em",
+        commissionerId: "sample_commissioner_id",
+        sportType: "college_football",
+        leagueFormat: "weekly",
+        dataSource: "espn_api",
+        ageRestriction: 21,
+        requiresAgeVerification: true,
+        maxParticipants: 200,
+        scoringConfig: {
+          type: "pick_confidence",
+          weekly_games: 10,
+          confidence_points: true,
+          spread_picks: false
+        },
+        leagueSettings: {
+          season_length: 15,
+          playoff_included: true,
+          tiebreaker: "total_points",
+          age_verification_required: true
+        },
+        status: "open"
+      }
+    ];
+
+    fantasyLeagues.forEach(league => {
+      this.fantasyLeagues.set(league.id, league);
+    });
+  }
+
+  // Initialize professional player database with real sports data structure
+  initializeProfessionalPlayers() {
+    const professionalPlayers = [
+      // NFL Players
+      {
+        id: "dak-prescott-dal",
+        externalPlayerId: "espn_123456",
+        dataSource: "espn_api",
+        playerName: "Dak Prescott",
+        teamName: "Dallas Cowboys",
+        teamAbbreviation: "DAL",
+        position: "QB",
+        sport: "nfl",
+        jerseyNumber: 4,
+        salary: 8500,
+        injuryStatus: "healthy",
+        byeWeek: 9,
+        isActive: true
+      },
+      {
+        id: "ceedee-lamb-dal",
+        externalPlayerId: "espn_123457",
+        dataSource: "espn_api",
+        playerName: "CeeDee Lamb",
+        teamName: "Dallas Cowboys",
+        teamAbbreviation: "DAL",
+        position: "WR",
+        sport: "nfl",
+        jerseyNumber: 88,
+        salary: 7200,
+        injuryStatus: "healthy",
+        byeWeek: 9,
+        isActive: true
+      },
+      {
+        id: "jalen-hurts-phi",
+        externalPlayerId: "espn_123458",
+        dataSource: "espn_api",
+        playerName: "Jalen Hurts",
+        teamName: "Philadelphia Eagles",
+        teamAbbreviation: "PHI",
+        position: "QB",
+        sport: "nfl",
+        jerseyNumber: 1,
+        salary: 8200,
+        injuryStatus: "healthy",
+        byeWeek: 5,
+        isActive: true
+      },
+      {
+        id: "aj-brown-phi",
+        externalPlayerId: "espn_123459",
+        dataSource: "espn_api",
+        playerName: "A.J. Brown",
+        teamName: "Philadelphia Eagles",
+        teamAbbreviation: "PHI",
+        position: "WR",
+        sport: "nfl",
+        jerseyNumber: 11,
+        salary: 6800,
+        injuryStatus: "healthy",
+        byeWeek: 5,
+        isActive: true
+      },
+      // NBA Players
+      {
+        id: "luka-doncic-dal",
+        externalPlayerId: "espn_nba_001",
+        dataSource: "espn_api",
+        playerName: "Luka Doncic",
+        teamName: "Dallas Mavericks",
+        teamAbbreviation: "DAL",
+        position: "PG",
+        sport: "nba",
+        jerseyNumber: 77,
+        salary: 11500,
+        injuryStatus: "healthy",
+        isActive: true
+      },
+      {
+        id: "kyrie-irving-dal",
+        externalPlayerId: "espn_nba_002",
+        dataSource: "espn_api",
+        playerName: "Kyrie Irving",
+        teamName: "Dallas Mavericks",
+        teamAbbreviation: "DAL",
+        position: "PG",
+        sport: "nba",
+        jerseyNumber: 11,
+        salary: 8900,
+        injuryStatus: "healthy",
+        isActive: true
+      },
+      {
+        id: "jayson-tatum-bos",
+        externalPlayerId: "espn_nba_003",
+        dataSource: "espn_api",
+        playerName: "Jayson Tatum",
+        teamName: "Boston Celtics",
+        teamAbbreviation: "BOS",
+        position: "SF",
+        sport: "nba",
+        jerseyNumber: 0,
+        salary: 10800,
+        injuryStatus: "healthy",
+        isActive: true
+      },
+      {
+        id: "jaylen-brown-bos",
+        externalPlayerId: "espn_nba_004",
+        dataSource: "espn_api",
+        playerName: "Jaylen Brown",
+        teamName: "Boston Celtics",
+        teamAbbreviation: "BOS",
+        position: "SG",
+        sport: "nba",
+        jerseyNumber: 7,
+        salary: 9200,
+        injuryStatus: "healthy",
+        isActive: true
+      },
+      // Esports Players
+      {
+        id: "faker-t1",
+        externalPlayerId: "riot_001",
+        dataSource: "riot_api",
+        playerName: "Faker",
+        teamName: "T1",
+        teamAbbreviation: "T1",
+        position: "Mid",
+        sport: "lol",
+        salary: 9500,
+        injuryStatus: "healthy",
+        isActive: true
+      },
+      {
+        id: "gumayusi-t1",
+        externalPlayerId: "riot_002",
+        dataSource: "riot_api",
+        playerName: "Gumayusi",
+        teamName: "T1",
+        teamAbbreviation: "T1",
+        position: "ADC",
+        sport: "lol",
+        salary: 8200,
+        injuryStatus: "healthy",
+        isActive: true
+      },
+      {
+        id: "jankos-g2",
+        externalPlayerId: "riot_003",
+        dataSource: "riot_api",
+        playerName: "Jankos",
+        teamName: "G2 Esports",
+        teamAbbreviation: "G2",
+        position: "Jungle",
+        sport: "lol",
+        salary: 7800,
+        injuryStatus: "healthy",
+        isActive: true
+      },
+      {
+        id: "caps-g2",
+        externalPlayerId: "riot_004",
+        dataSource: "riot_api",
+        playerName: "Caps",
+        teamName: "G2 Esports",
+        teamAbbreviation: "G2",
+        position: "Mid",
+        sport: "lol",
+        salary: 8500,
+        injuryStatus: "healthy",
+        isActive: true
+      }
+    ];
+
+    professionalPlayers.forEach(player => {
+      this.professionalPlayers.set(player.id, player);
+    });
+  }
+
+  // Initialize safety rules with age verification requirements
+  initializeFantasySafetyRules() {
+    const safetyRules = [
+      {
+        id: "nfl-survivor-safety",
+        sportType: "nfl",
+        leagueFormat: "survivor",
+        minAgeRequirement: 18,
+        requiresIdentityVerification: true,
+        additionalRestrictions: {
+          no_youth_players: true,
+          professional_only: true
+        }
+      },
+      {
+        id: "nba-daily-safety",
+        sportType: "nba",
+        leagueFormat: "daily",
+        minAgeRequirement: 18,
+        requiresIdentityVerification: true,
+        additionalRestrictions: {
+          no_college_players: false,
+          salary_cap_required: true
+        }
+      },
+      {
+        id: "esports-season-safety",
+        sportType: "esports",
+        leagueFormat: "season",
+        minAgeRequirement: 18,
+        requiresIdentityVerification: true,
+        additionalRestrictions: {
+          game_rating_check: "T_for_Teen_minimum",
+          professional_leagues_only: true
+        }
+      },
+      {
+        id: "college-weekly-safety",
+        sportType: "college_football",
+        leagueFormat: "weekly",
+        minAgeRequirement: 21,
+        requiresIdentityVerification: true,
+        additionalRestrictions: {
+          college_players_allowed: true,
+          no_high_school: true
+        }
+      }
+    ];
+
+    safetyRules.forEach(rule => {
+      this.fantasySafetyRules.set(rule.id, rule);
+    });
+  }
+
+  // Initialize API configurations for external data sources
+  initializeApiConfigurations() {
+    const apiConfigs = [
+      {
+        id: "espn-nfl-api",
+        apiName: "ESPN API",
+        sportType: "nfl",
+        apiEndpoint: "https://site.api.espn.com/apis/site/v2/sports/football/nfl",
+        rateLimitPerHour: 1000,
+        syncFrequencyMinutes: 60,
+        isActive: true,
+        dataMapping: {
+          player_name: "displayName",
+          team: "team.displayName",
+          position: "position.abbreviation",
+          jersey: "jersey"
+        }
+      },
+      {
+        id: "espn-nba-api",
+        apiName: "ESPN API",
+        sportType: "nba",
+        apiEndpoint: "https://site.api.espn.com/apis/site/v2/sports/basketball/nba",
+        rateLimitPerHour: 1000,
+        syncFrequencyMinutes: 60,
+        isActive: true,
+        dataMapping: {
+          player_name: "displayName",
+          team: "team.displayName",
+          position: "position.abbreviation",
+          jersey: "jersey"
+        }
+      },
+      {
+        id: "riot-lol-api",
+        apiName: "Riot Games API",
+        sportType: "lol",
+        apiEndpoint: "https://americas.api.riotgames.com/lol",
+        rateLimitPerHour: 100,
+        syncFrequencyMinutes: 120,
+        isActive: true,
+        dataMapping: {
+          player_name: "summonerName",
+          team: "teamName",
+          position: "position",
+          champion: "championName"
+        }
+      }
+    ];
+
+    apiConfigs.forEach(config => {
+      this.apiConfigurations.set(config.id, config);
+    });
+  }
+
+  // Fantasy system API methods
+  async getFantasyLeagues(): Promise<any[]> {
+    return Array.from(this.fantasyLeagues.values());
+  }
+
+  async getFantasyLeague(id: string): Promise<any> {
+    return this.fantasyLeagues.get(id);
+  }
+
+  async getFantasyLeaguesBySport(sportType: string): Promise<any[]> {
+    return Array.from(this.fantasyLeagues.values()).filter(league => league.sportType === sportType);
+  }
+
+  async getFantasyLeaguesByFormat(leagueFormat: string): Promise<any[]> {
+    return Array.from(this.fantasyLeagues.values()).filter(league => league.leagueFormat === leagueFormat);
+  }
+
+  async getProfessionalPlayers(): Promise<any[]> {
+    return Array.from(this.professionalPlayers.values());
+  }
+
+  async getProfessionalPlayer(id: string): Promise<any> {
+    return this.professionalPlayers.get(id);
+  }
+
+  async getProfessionalPlayersBySport(sport: string): Promise<any[]> {
+    return Array.from(this.professionalPlayers.values()).filter(player => player.sport === sport);
+  }
+
+  async getProfessionalPlayersByTeam(teamAbbreviation: string): Promise<any[]> {
+    return Array.from(this.professionalPlayers.values()).filter(player => player.teamAbbreviation === teamAbbreviation);
+  }
+
+  async getFantasySafetyRules(): Promise<any[]> {
+    return Array.from(this.fantasySafetyRules.values());
+  }
+
+  async getFantasySafetyRule(id: string): Promise<any> {
+    return this.fantasySafetyRules.get(id);
+  }
+
+  async getApiConfigurations(): Promise<any[]> {
+    return Array.from(this.apiConfigurations.values());
+  }
+
+  async getApiConfiguration(id: string): Promise<any> {
+    return this.apiConfigurations.get(id);
+  }
+
+  async createFantasyLeague(league: any): Promise<any> {
+    const id = randomUUID();
+    const created = { ...league, id, createdAt: new Date() };
+    this.fantasyLeagues.set(id, created);
+    return created;
+  }
+
+  async createFantasyParticipant(participant: any): Promise<any> {
+    const id = randomUUID();
+    const created = { ...participant, id, entryDate: new Date() };
+    this.fantasyParticipants.set(id, created);
+    return created;
+  }
+
+  async createProfessionalPlayer(player: any): Promise<any> {
+    const id = randomUUID();
+    const created = { ...player, id, lastUpdated: new Date() };
+    this.professionalPlayers.set(id, created);
+    return created;
+  }
+
+  async createFantasyPick(pick: any): Promise<any> {
+    const id = randomUUID();
+    const created = { ...pick, id, pickTimestamp: new Date() };
+    this.fantasyPicks.set(id, created);
+    return created;
+  }
+
+  async createFantasyLineup(lineup: any): Promise<any> {
+    const id = randomUUID();
+    const created = { ...lineup, id, submissionTimestamp: new Date() };
+    this.fantasyLineups.set(id, created);
+    return created;
+  }
+
+  async createAgeVerification(verification: any): Promise<any> {
+    const id = randomUUID();
+    const created = { ...verification, id, verificationDate: new Date() };
+    this.ageVerifications.set(id, created);
+    return created;
   }
 }
 
