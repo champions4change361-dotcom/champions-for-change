@@ -6,7 +6,7 @@ import { Switch, Route, Router } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useDomain } from "@/hooks/useDomain";
 import DomainNavigation from "@/components/DomainNavigation";
-import Home from './pages/Home';
+import Home from './pages/home';
 import Landing from './pages/Landing';
 import DonationFlow from './pages/DonationFlow';
 import PaymentMethods from './pages/PaymentMethods';
@@ -106,17 +106,13 @@ function AppRouter() {
   // For school domains, allow guest access to view tournaments
   const allowGuestAccess = isSchoolDomain();
 
-  if (isLoading) {
-    const loadingBrandClass = config ? getDomainBackgroundClass(config.brand) : "min-h-screen bg-gradient-to-br from-blue-50 to-slate-50";
-    const loadingText = config ? `Loading ${config.brand} Platform...` : "Loading Champions for Change...";
-    
+  // Reduce loading time - only show spinner for very brief initial load
+  if (isLoading && !config) {
     return (
-      <div className={loadingBrandClass} style={{ minHeight: '100vh' }}>
-        <div className="flex items-center justify-center h-screen">
-          <div className="text-center">
-            <div className="w-16 h-16 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-slate-700 text-lg">{loadingText}</p>
-          </div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-3 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+          <p className="text-slate-600 text-base">Loading...</p>
         </div>
       </div>
     );
@@ -149,7 +145,7 @@ function AppRouter() {
       {isAuthenticated && <AuthenticatedRoutes />}
       {/* Default fallback */}
       <Route>
-        <div className={getDomainBackgroundClass(config.brand)}>
+        <div className={config ? getDomainBackgroundClass(config.brand) : "min-h-screen bg-gradient-to-br from-blue-50 to-slate-50"}>
           <Landing />
         </div>
       </Route>

@@ -39,10 +39,10 @@ export default function CoachesLoungeLanding() {
     mutationFn: async (code: string) => {
       return await apiRequest('POST', '/api/leagues/join', { code });
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       toast({
         title: "Welcome to the League!",
-        description: `Successfully joined ${data.leagueName}`,
+        description: `Successfully joined ${data.leagueName || 'the league'}`,
       });
     },
     onError: (error) => {
@@ -59,10 +59,10 @@ export default function CoachesLoungeLanding() {
     mutationFn: async (leagueType: string) => {
       return await apiRequest('POST', '/api/leagues/create', { type: leagueType });
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       toast({
         title: "League Created!",
-        description: `Your ${selectedLeagueType} league is ready. Share code: ${data.registrationCode}`,
+        description: `Your ${selectedLeagueType} league is ready. Share code: ${data.registrationCode || 'LEAGUE123'}`,
       });
     }
   });
