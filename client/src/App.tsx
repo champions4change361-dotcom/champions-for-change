@@ -26,6 +26,8 @@ import FantasyTournaments from './pages/FantasyTournaments';
 import CoachesLoungeLanding from './pages/CoachesLoungeLanding';
 import FantasyCoaching from './pages/FantasyCoaching';
 import CommissionerDashboard from './pages/CommissionerDashboard';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import RefundPolicy from './pages/RefundPolicy';
 import Register from './pages/Register';
 import RegistrationForm from './pages/RegistrationForm';
 import Pricing from './pages/Pricing';
@@ -75,6 +77,11 @@ function AuthenticatedRoutes() {
         {isFeatureEnabled('fantasyLeagues') && (
           <Route path="/commissioner" component={CommissionerDashboard} />
         )}
+        
+        {/* Legal Pages */}
+        <Route path="/privacy" component={PrivacyPolicy} />
+        <Route path="/refund-policy" component={RefundPolicy} />
+        <Route path="/terms" component={RefundPolicy} />
         
         <Route>
           {/* 404 - redirect to home */}

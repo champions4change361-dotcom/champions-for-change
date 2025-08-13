@@ -77,11 +77,24 @@ export default function Footer() {
 
         {/* Bottom Section */}
         <div className="border-t border-gray-800 mt-8 pt-6">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="text-sm text-gray-400 mb-4 md:mb-0">
-              <p>&copy; 2024 Champions for Change. Supporting education through sports management.</p>
+          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            <div className="text-sm text-gray-400">
+              <p>&copy; 2025 Champions for Change. Supporting education through sports management.</p>
             </div>
-            <div className="flex items-center text-sm text-gray-400">
+            <div className="flex items-center gap-6 text-sm">
+              <a href="/privacy" className="text-gray-400 hover:text-white transition-colors">
+                Privacy Policy
+              </a>
+              <a href="/refund-policy" className="text-gray-400 hover:text-white transition-colors">
+                Refund Policy
+              </a>
+              <a href="/terms" className="text-gray-400 hover:text-white transition-colors">
+                Terms of Service
+              </a>
+            </div>
+          </div>
+          <div className="text-center mt-4">
+            <div className="flex justify-center items-center text-sm text-gray-400">
               <Heart className="h-4 w-4 mr-2 text-red-400" />
               <span>Built with dedication for student success</span>
             </div>
