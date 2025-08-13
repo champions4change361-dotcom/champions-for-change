@@ -54,6 +54,24 @@ export const users = pgTable("users", {
   completedAITutorials: jsonb("completed_ai_tutorials").$type<string[]>(),
   aiInteractionCount: integer("ai_interaction_count").default(0),
   
+  // AI USAGE PREFERENCES
+  aiPreferences: jsonb("ai_preferences").$type<{
+    wantsProactiveHelp: boolean;
+    communicationStyle: 'friendly' | 'professional' | 'technical';
+    helpLevel: 'minimal' | 'guided' | 'comprehensive';
+    hasCompletedOnboarding: boolean;
+    
+    // AVATAR PREFERENCES
+    avatarEnabled: boolean;
+    avatarStyle: 'professional_coach' | 'friendly_advisor' | 'minimalist_icon' | 'sports_mascot';
+    
+    // USAGE REMINDER PREFERENCES
+    usageRemindersEnabled: boolean;
+    reminderFrequency: 'immediate' | 'daily' | 'weekly';
+    lastUsageReminderSent: string;
+    dismissedUpgradePrompts: string[]; // Track what they've already seen
+  }>(),
+  
   // SMART USAGE LIMITS FIELDS
   monthlyTournamentLimit: integer("monthly_tournament_limit").default(5),
   currentMonthTournaments: integer("current_month_tournaments").default(0),

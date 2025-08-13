@@ -8,6 +8,7 @@ import { setupDomainRoutes } from "./domainRoutes";
 import { AIContextService } from "./ai-context";
 import { UniversalRegistrationSystem } from "./universal-registration";
 import { UsageLimitService, TOURNAMENT_CREDIT_PACKAGES } from "./usageLimits";
+import { AIUsageAwarenessService, UsageReminderSystem, KeystoneAvatarService } from "./ai-usage-awareness";
 import Stripe from "stripe";
 import { z } from "zod";
 
@@ -406,6 +407,123 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Credit webhook error:", error);
       res.status(400).json({ error: "Webhook failed" });
+    }
+  });
+
+  // Enhanced AI chat endpoint with usage awareness and avatar support
+  app.post("/api/ai/keystone-chat", isAuthenticated, async (req: any, res) => {
+    try {
+      const { tournamentId, question, conversationHistory } = req.body;
+      const userId = req.user.claims.sub;
+      const domain = req.hostname;
+      const storage = await getStorage();
+      const aiService = new AIUsageAwarenessService(storage);
+
+      // Get comprehensive context including usage
+      const context = await aiService.getAIContext(userId, tournamentId);
+      
+      // Get user's avatar preferences
+      const avatarDefaults = KeystoneAvatarService.getDomainAvatarDefaults(domain);
+      const userAvatarPrefs = context.user.aiPreferences || {};
+      
+      // Generate usage-aware response
+      const aiResponse = await aiService.generateUsageAwareResponse(context, question);
+      
+      // Add avatar introduction if first interaction
+      if (!userAvatarPrefs.hasCompletedOnboarding) {
+        const avatarIntro = KeystoneAvatarService.generateAvatarIntroduction(domain, userAvatarPrefs);
+        aiResponse.response = `${avatarIntro}\n\n${aiResponse.response}`;
+      }
+      
+      // Check if usage reminder should be sent
+      const reminderCheck = await UsageReminderSystem.shouldSendUsageReminder(userId, storage);
+      
+      // Update interaction tracking
+      await storage.updateUser(userId, {
+        aiInteractionCount: (context.user.aiInteractionCount || 0) + 1,
+        updatedAt: new Date()
+      });
+
+      res.json({
+        success: true,
+        response: aiResponse.response,
+        usageAlert: aiResponse.usageAlert,
+        proactiveHelp: aiResponse.proactiveHelp,
+        usageReminder: reminderCheck.shouldSend ? {
+          type: reminderCheck.reminderType,
+          message: reminderCheck.message,
+          actionItems: reminderCheck.actionItems
+        } : null,
+        
+        // AVATAR INFORMATION
+        avatar: {
+          enabled: userAvatarPrefs.avatarEnabled ?? avatarDefaults.enabled,
+          style: userAvatarPrefs.avatarStyle ?? avatarDefaults.style,
+          showIntroduction: !userAvatarPrefs.hasCompletedOnboarding
+        },
+        
+        context: {
+          userLevel: context.user.techSkillLevel,
+          experienceLevel: context.user.totalTournamentsCreated > 2 ? 'experienced' : 'learning',
+          usageStatus: await aiService.analyzeUsageStatus(context.user)
+        }
+      });
+
+    } catch (error) {
+      console.error("Keystone AI chat error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Keystone AI temporarily unavailable",
+        fallbackResponse: "I'm having trouble right now, but I'm still here to help with your tournament questions!"
+      });
+    }
+  });
+
+  // Avatar preference update endpoint
+  app.post("/api/ai/avatar-preferences", isAuthenticated, async (req: any, res) => {
+    try {
+      const { avatarEnabled, avatarStyle } = req.body;
+      const userId = req.user.claims.sub;
+      const storage = await getStorage();
+      
+      await storage.updateUserAIPreferences(userId, {
+        avatarEnabled,
+        avatarStyle,
+        hasCompletedOnboarding: true
+      });
+      
+      res.json({
+        success: true,
+        message: "Avatar preferences updated",
+        preferences: { avatarEnabled, avatarStyle }
+      });
+      
+    } catch (error) {
+      console.error("Avatar preference update error:", error);
+      res.status(500).json({ success: false, error: "Update failed" });
+    }
+  });
+
+  // Proactive usage check endpoint (called periodically)
+  app.get("/api/ai/check-usage-reminders/:userId", isAuthenticated, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const storage = await getStorage();
+      
+      const reminderCheck = await UsageReminderSystem.shouldSendUsageReminder(userId, storage);
+      
+      if (reminderCheck.shouldSend) {
+        await UsageReminderSystem.sendUsageReminder(userId, reminderCheck, storage);
+      }
+      
+      res.json({
+        reminderSent: reminderCheck.shouldSend,
+        reminderType: reminderCheck.reminderType
+      });
+      
+    } catch (error) {
+      console.error("Usage reminder check error:", error);
+      res.status(500).json({ error: "Check failed" });
     }
   });
 
