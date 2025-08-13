@@ -1286,11 +1286,11 @@ export const userDashboardConfigs = pgTable("user_dashboard_configs", {
 });
 
 // Organization hierarchy management (Tournament Empire)
-export const tournamentOrganizations = pgTable("tournament_organizations", {
+export const tournamentOrganizations: any = pgTable("tournament_organizations", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   organizationName: varchar("organization_name").notNull(),
   organizationType: varchar("organization_type").notNull(), // district, school, club, community
-  parentOrganizationId: varchar("parent_organization_id").references(() => tournamentOrganizations.id),
+  parentOrganizationId: varchar("parent_organization_id"),
   subscriptionTier: varchar("subscription_tier").notNull(),
   whiteLabelConfig: jsonb("white_label_config"),
   brandingConfig: jsonb("branding_config"),
@@ -1302,10 +1302,10 @@ export const tournamentOrganizations = pgTable("tournament_organizations", {
 });
 
 // User-organization assignments
-export const userOrganizationRoles = pgTable("user_organization_roles", {
+export const userOrganizationRoles: any = pgTable("user_organization_roles", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id),
-  organizationId: varchar("organization_id").references(() => tournamentOrganizations.id),
+  organizationId: varchar("organization_id"),
   roleWithinOrg: varchar("role_within_org").notNull(),
   permissionsOverride: jsonb("permissions_override"),
   assignmentDate: timestamp("assignment_date").default(sql`now()`),
@@ -1406,8 +1406,6 @@ export type InsertDivisionScheduling = typeof divisionScheduling.$inferInsert;
 // Tournament Empire types
 export type UserDashboardConfig = typeof userDashboardConfigs.$inferSelect;
 export type InsertUserDashboardConfig = typeof userDashboardConfigs.$inferInsert;
-export type Organization = typeof organizations.$inferSelect;
-export type InsertOrganization = typeof organizations.$inferInsert;
 export type UserOrganizationRole = typeof userOrganizationRoles.$inferSelect;
 export type InsertUserOrganizationRole = typeof userOrganizationRoles.$inferInsert;
 export type PermissionAssignment = typeof permissionAssignments.$inferSelect;
@@ -2157,8 +2155,6 @@ export const eventScoresRelations = relations(eventScores, ({ one }) => ({
   }),
 }));
 
-export type ScorekeeperAssignment = typeof scorekeeperAssignments.$inferSelect;
-export type InsertScorekeeperAssignment = typeof scorekeeperAssignments.$inferInsert;
 export type EventScore = typeof eventScores.$inferSelect;
 export type InsertEventScore = typeof eventScores.$inferInsert;
 
