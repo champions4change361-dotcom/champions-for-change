@@ -1,0 +1,310 @@
+import { Request, Response, NextFunction } from 'express';
+import { getStorage } from './storage';
+
+export interface ComplianceRequest extends Request {
+  user: {
+    claims: {
+      sub: string;
+      email: string;
+    };
+  };
+  complianceContext?: {
+    hasHipaaAccess: boolean;
+    hasFerpaAccess: boolean;
+    complianceRole: string;
+    medicalDataAccess: boolean;
+  };
+}
+
+// Log all compliance-related data access
+export async function logComplianceAction(
+  userId: string,
+  actionType: 'data_access' | 'data_modification' | 'export' | 'view' | 'login' | 'permission_change',
+  resourceType: 'student_data' | 'health_data' | 'tournament_data' | 'administrative_data',
+  resourceId?: string,
+  req?: Request,
+  notes?: string
+) {
+  try {
+    const storage = await getStorage();
+    await storage.createComplianceAuditLog({
+      userId,
+      actionType,
+      resourceType,
+      resourceId: resourceId || null,
+      ipAddress: req?.ip || req?.socket?.remoteAddress || 'unknown',
+      userAgent: req?.get('User-Agent') || 'unknown',
+      complianceNotes: notes || null
+    });
+  } catch (error) {
+    console.error('Failed to log compliance action:', error);
+    // Continue execution - don't fail requests due to audit logging issues
+  }
+}
+
+// Middleware to check HIPAA compliance for health data access
+export function requireHipaaCompliance(req: ComplianceRequest, res: Response, next: NextFunction) {
+  if (!req.user?.claims?.sub) {
+    return res.status(401).json({ 
+      error: 'Authentication required for health data access',
+      complianceViolation: 'HIPAA authentication failure'
+    });
+  }
+
+  // Check user HIPAA training and role
+  const checkHipaaCompliance = async () => {
+    try {
+      const storage = await getStorage();
+      const user = await storage.getUser(req.user.claims.sub);
+      
+      if (!user) {
+        return res.status(401).json({ 
+          error: 'User not found',
+          complianceViolation: 'HIPAA user verification failure'
+        });
+      }
+
+      // Check HIPAA training completion
+      if (!user.hipaaTrainingCompleted) {
+        await logComplianceAction(
+          user.id, 
+          'data_access', 
+          'health_data', 
+          undefined, 
+          req,
+          'HIPAA access denied - training not completed'
+        );
+        return res.status(403).json({ 
+          error: 'HIPAA training required for health data access',
+          complianceViolation: 'HIPAA training incomplete',
+          redirectTo: '/compliance/hipaa-training'
+        });
+      }
+
+      // Check medical data access permission
+      if (!user.medicalDataAccess) {
+        await logComplianceAction(
+          user.id, 
+          'data_access', 
+          'health_data', 
+          undefined, 
+          req,
+          'HIPAA access denied - insufficient permissions'
+        );
+        return res.status(403).json({ 
+          error: 'Insufficient permissions for health data access',
+          complianceViolation: 'HIPAA permission denied'
+        });
+      }
+
+      // Check role hierarchy for medical access
+      const medicalRoles = ['district_athletic_trainer', 'athletic_director', 'athletic_trainer'];
+      if (!user.complianceRole || !medicalRoles.includes(user.complianceRole)) {
+        await logComplianceAction(
+          user.id, 
+          'data_access', 
+          'health_data', 
+          undefined, 
+          req,
+          'HIPAA access denied - insufficient role'
+        );
+        return res.status(403).json({ 
+          error: 'Role does not permit health data access',
+          complianceViolation: 'HIPAA role restriction'
+        });
+      }
+
+      // Log successful HIPAA access
+      await logComplianceAction(
+        user.id, 
+        'data_access', 
+        'health_data', 
+        undefined, 
+        req,
+        'HIPAA access granted'
+      );
+
+      // Add compliance context to request
+      req.complianceContext = {
+        hasHipaaAccess: true,
+        hasFerpaAccess: user.ferpaAgreementSigned || false,
+        complianceRole: user.complianceRole || 'scorekeeper',
+        medicalDataAccess: true
+      };
+
+      next();
+    } catch (error) {
+      console.error('HIPAA compliance check failed:', error);
+      res.status(500).json({ 
+        error: 'Compliance verification failed',
+        complianceViolation: 'HIPAA system error'
+      });
+    }
+  };
+
+  checkHipaaCompliance();
+}
+
+// Middleware to check FERPA compliance for student data access
+export function requireFerpaCompliance(req: ComplianceRequest, res: Response, next: NextFunction) {
+  if (!req.user?.claims?.sub) {
+    return res.status(401).json({ 
+      error: 'Authentication required for student data access',
+      complianceViolation: 'FERPA authentication failure'
+    });
+  }
+
+  const checkFerpaCompliance = async () => {
+    try {
+      const storage = await getStorage();
+      const user = await storage.getUser(req.user.claims.sub);
+      
+      if (!user) {
+        return res.status(401).json({ 
+          error: 'User not found',
+          complianceViolation: 'FERPA user verification failure'
+        });
+      }
+
+      // Check FERPA agreement signature
+      if (!user.ferpaAgreementSigned) {
+        await logComplianceAction(
+          user.id, 
+          'data_access', 
+          'student_data', 
+          undefined, 
+          req,
+          'FERPA access denied - agreement not signed'
+        );
+        return res.status(403).json({ 
+          error: 'FERPA agreement required for student data access',
+          complianceViolation: 'FERPA agreement unsigned',
+          redirectTo: '/compliance/ferpa-agreement'
+        });
+      }
+
+      // Check organizational authorization
+      if (!user.organizationId) {
+        await logComplianceAction(
+          user.id, 
+          'data_access', 
+          'student_data', 
+          undefined, 
+          req,
+          'FERPA access denied - no organization affiliation'
+        );
+        return res.status(403).json({ 
+          error: 'Organization affiliation required for student data access',
+          complianceViolation: 'FERPA organization requirement'
+        });
+      }
+
+      // Log successful FERPA access
+      await logComplianceAction(
+        user.id, 
+        'data_access', 
+        'student_data', 
+        undefined, 
+        req,
+        'FERPA access granted'
+      );
+
+      // Add compliance context to request
+      req.complianceContext = {
+        hasHipaaAccess: user.medicalDataAccess || false,
+        hasFerpaAccess: true,
+        complianceRole: user.complianceRole || 'scorekeeper',
+        medicalDataAccess: user.medicalDataAccess || false
+      };
+
+      next();
+    } catch (error) {
+      console.error('FERPA compliance check failed:', error);
+      res.status(500).json({ 
+        error: 'Compliance verification failed',
+        complianceViolation: 'FERPA system error'
+      });
+    }
+  };
+
+  checkFerpaCompliance();
+}
+
+// Combined middleware for routes requiring both HIPAA and FERPA compliance
+export function requireFullCompliance(req: ComplianceRequest, res: Response, next: NextFunction) {
+  requireFerpaCompliance(req, res, (ferpaError) => {
+    if (ferpaError) return;
+    
+    requireHipaaCompliance(req, res, next);
+  });
+}
+
+// Middleware to log all data access (for audit trails)
+export function auditDataAccess(
+  resourceType: 'student_data' | 'health_data' | 'tournament_data' | 'administrative_data'
+) {
+  return async (req: ComplianceRequest, res: Response, next: NextFunction) => {
+    if (req.user?.claims?.sub) {
+      await logComplianceAction(
+        req.user.claims.sub,
+        'data_access',
+        resourceType,
+        req.params.id || req.params.studentId || req.params.tournamentId,
+        req,
+        `${req.method} ${req.path}`
+      );
+    }
+    next();
+  };
+}
+
+// Middleware to enforce role-based access for different compliance levels
+export function requireComplianceRole(allowedRoles: string[]) {
+  return async (req: ComplianceRequest, res: Response, next: NextFunction) => {
+    if (!req.user?.claims?.sub) {
+      return res.status(401).json({ 
+        error: 'Authentication required',
+        complianceViolation: 'Role authentication failure'
+      });
+    }
+
+    try {
+      const storage = await getStorage();
+      const user = await storage.getUser(req.user.claims.sub);
+      
+      if (!user || !user.complianceRole || !allowedRoles.includes(user.complianceRole)) {
+        await logComplianceAction(
+          req.user.claims.sub, 
+          'data_access', 
+          'administrative_data', 
+          undefined, 
+          req,
+          `Role access denied - required: ${allowedRoles.join(', ')}, actual: ${user?.complianceRole || 'none'}`
+        );
+        return res.status(403).json({ 
+          error: 'Insufficient role permissions',
+          complianceViolation: 'Role restriction',
+          requiredRoles: allowedRoles,
+          userRole: user?.complianceRole || 'none'
+        });
+      }
+
+      await logComplianceAction(
+        user.id, 
+        'data_access', 
+        'administrative_data', 
+        undefined, 
+        req,
+        `Role access granted - ${user.complianceRole}`
+      );
+
+      next();
+    } catch (error) {
+      console.error('Role compliance check failed:', error);
+      res.status(500).json({ 
+        error: 'Role verification failed',
+        complianceViolation: 'Role system error'
+      });
+    }
+  };
+}

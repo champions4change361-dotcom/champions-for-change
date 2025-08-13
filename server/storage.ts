@@ -8,7 +8,7 @@ import {
   type SchoolEventAssignment, type InsertSchoolEventAssignment, type CoachEventAssignment, type InsertCoachEventAssignment,
   type Contact, type InsertContact, type EmailCampaign, type InsertEmailCampaign, type CampaignRecipient, type InsertCampaignRecipient,
   type Donor, type InsertDonor, type Donation, type InsertDonation, type RegistrationRequest, type InsertRegistrationRequest,
-  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests
+  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog
 } from "@shared/schema";
 
 type SportCategory = typeof sportCategories.$inferSelect;
@@ -20,11 +20,28 @@ import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import { eq, desc } from "drizzle-orm";
 
+// Compliance-related types
+export type ComplianceAuditLog = {
+  id?: string;
+  userId: string;
+  actionType: 'data_access' | 'data_modification' | 'export' | 'view' | 'login' | 'permission_change';
+  resourceType: 'student_data' | 'health_data' | 'tournament_data' | 'administrative_data';
+  resourceId: string | null;
+  ipAddress: string;
+  userAgent: string;
+  complianceNotes: string | null;
+  createdAt?: Date;
+};
+
 export interface IStorage {
   // User authentication methods
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
   updateUserStripeInfo(id: string, customerId: string, subscriptionId: string): Promise<User | undefined>;
+  
+  // Compliance operations
+  createComplianceAuditLog(log: ComplianceAuditLog): Promise<ComplianceAuditLog>;
+  getComplianceAuditLogs(userId?: string, limit?: number): Promise<ComplianceAuditLog[]>;
 
   // White-label methods
   createWhitelabelConfig(config: InsertWhitelabelConfig): Promise<WhitelabelConfig>;
@@ -294,6 +311,37 @@ export class DbStorage implements IStorage {
     } catch (error) {
       console.error("Database error:", error);
       return undefined;
+    }
+  }
+
+  // Compliance operations
+  async createComplianceAuditLog(log: ComplianceAuditLog): Promise<ComplianceAuditLog> {
+    try {
+      const logWithId = {
+        ...log,
+        id: randomUUID()
+      };
+      const result = await this.db.insert(complianceAuditLog).values(logWithId).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Compliance audit log error:", error);
+      throw new Error("Failed to create compliance audit log");
+    }
+  }
+
+  async getComplianceAuditLogs(userId?: string, limit: number = 100): Promise<ComplianceAuditLog[]> {
+    try {
+      let query = this.db.select().from(complianceAuditLog).orderBy(desc(complianceAuditLog.createdAt)).limit(limit);
+      
+      if (userId) {
+        query = query.where(eq(complianceAuditLog.userId, userId));
+      }
+      
+      const result = await query;
+      return result;
+    } catch (error) {
+      console.error("Compliance audit log retrieval error:", error);
+      return [];
     }
   }
 

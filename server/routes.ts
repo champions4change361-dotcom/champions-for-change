@@ -9,6 +9,15 @@ import { AIContextService } from "./ai-context";
 import { UniversalRegistrationSystem } from "./universal-registration";
 import { UsageLimitService, TOURNAMENT_CREDIT_PACKAGES } from "./usageLimits";
 import { AIUsageAwarenessService, UsageReminderSystem, KeystoneAvatarService } from "./ai-usage-awareness";
+import { 
+  requireHipaaCompliance, 
+  requireFerpaCompliance, 
+  requireFullCompliance,
+  requireComplianceRole,
+  auditDataAccess,
+  logComplianceAction,
+  type ComplianceRequest
+} from "./complianceMiddleware";
 import Stripe from "stripe";
 import { z } from "zod";
 
@@ -5199,6 +5208,128 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to fetch corporate analytics" });
     }
   });
+
+  // =============================================================================
+  // COMPLIANCE-PROTECTED ROUTES
+  // Demonstrate HIPAA/FERPA route-level protection
+  // =============================================================================
+
+  // HIPAA-Protected Health Data Access (Athletic Trainers only)
+  app.get("/api/health-data/:studentId", 
+    requireHipaaCompliance, 
+    auditDataAccess('health_data'),
+    async (req: ComplianceRequest, res) => {
+      try {
+        const { studentId } = req.params;
+        const storage = await getStorage();
+        
+        // This route would fetch actual health data with proper authorization
+        // Only users with HIPAA training and medical data access can reach this
+        res.json({
+          message: "HIPAA-protected health data access granted",
+          studentId,
+          userRole: req.complianceContext?.complianceRole,
+          hasHipaaAccess: req.complianceContext?.hasHipaaAccess
+        });
+      } catch (error) {
+        console.error("Health data access error:", error);
+        res.status(500).json({ error: "Failed to access health data" });
+      }
+    }
+  );
+
+  // FERPA-Protected Student Data Access (School Personnel only)
+  app.get("/api/student-data/:studentId",
+    requireFerpaCompliance,
+    auditDataAccess('student_data'),
+    async (req: ComplianceRequest, res) => {
+      try {
+        const { studentId } = req.params;
+        
+        res.json({
+          message: "FERPA-protected student data access granted",
+          studentId,
+          userRole: req.complianceContext?.complianceRole,
+          hasFerpaAccess: req.complianceContext?.hasFerpaAccess
+        });
+      } catch (error) {
+        console.error("Student data access error:", error);
+        res.status(500).json({ error: "Failed to access student data" });
+      }
+    }
+  );
+
+  // Full Compliance Required (Both HIPAA and FERPA)
+  app.get("/api/comprehensive-student-health/:studentId",
+    requireFullCompliance,
+    auditDataAccess('health_data'),
+    async (req: ComplianceRequest, res) => {
+      try {
+        const { studentId } = req.params;
+        
+        res.json({
+          message: "Full compliance verified - comprehensive access granted",
+          studentId,
+          userRole: req.complianceContext?.complianceRole,
+          hasFullAccess: req.complianceContext?.hasHipaaAccess && req.complianceContext?.hasFerpaAccess
+        });
+      } catch (error) {
+        console.error("Comprehensive data access error:", error);
+        res.status(500).json({ error: "Failed to access comprehensive data" });
+      }
+    }
+  );
+
+  // Role-Based Access (District Athletic Trainers and Athletic Directors only)
+  app.get("/api/district-medical-oversight",
+    requireComplianceRole(['district_athletic_trainer', 'athletic_director']),
+    auditDataAccess('administrative_data'),
+    async (req: ComplianceRequest, res) => {
+      try {
+        res.json({
+          message: "District-level medical oversight access granted",
+          authorizedRole: "High-level medical administration"
+        });
+      } catch (error) {
+        console.error("District oversight access error:", error);
+        res.status(500).json({ error: "Failed to access district oversight data" });
+      }
+    }
+  );
+
+  // Compliance Audit Log Access (Administrative oversight)
+  app.get("/api/compliance/audit-logs",
+    requireComplianceRole(['district_athletic_trainer', 'athletic_director']),
+    async (req: ComplianceRequest, res) => {
+      try {
+        const { userId, limit } = req.query;
+        const storage = await getStorage();
+        
+        const auditLogs = await storage.getComplianceAuditLogs(
+          userId as string, 
+          parseInt(limit as string) || 50
+        );
+        
+        await logComplianceAction(
+          req.user.claims.sub,
+          'data_access',
+          'administrative_data',
+          undefined,
+          req,
+          'Compliance audit log access'
+        );
+        
+        res.json({
+          success: true,
+          auditLogs,
+          count: auditLogs.length
+        });
+      } catch (error) {
+        console.error("Audit log access error:", error);
+        res.status(500).json({ error: "Failed to access audit logs" });
+      }
+    }
+  );
 
   const httpServer = createServer(app);
   return httpServer;

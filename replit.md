@@ -1,7 +1,7 @@
 # Tournament Bracket Manager
 
 ## Overview
-This full-stack tournament bracket management application functions as a white-label SaaS platform for the Champions for Change nonprofit. Its primary purpose is to generate funding for educational opportunities for underprivileged youth in Corpus Christi, Texas, by offering professional tournament management services. The platform enables users to create and manage single-elimination tournaments with interactive bracket visualization and real-time updates. Key capabilities include user authentication, payment integration, AI-powered tournament creation across various sports, custom branding, and a multi-tenant architecture with a five-tier user hierarchy mirroring school district structures. The project emphasizes its mission-driven approach, aiming to provide a comprehensive solution for managing competitive events while creating social impact and offering significant cost savings compared to competitors.
+This comprehensive district athletics management platform functions as a white-label SaaS platform for the Champions for Change nonprofit. Its primary purpose is to generate funding for educational opportunities for underprivileged youth in Corpus Christi, Texas, by offering professional tournament management and district athletic administration services. The platform enables full HIPAA/FERPA compliant management of student health and educational data, tournament creation, scheduling systems, and district-wide resource coordination. Key capabilities include enterprise-grade compliance infrastructure, role-based access controls, comprehensive audit trails, user authentication, payment integration, AI-powered tournament creation across various sports, custom branding, and a multi-tenant architecture with a six-tier user hierarchy (District Athletic Trainer → Athletic Director → Athletic Trainer → Head Coach → Assistant Coach → Scorekeeper). The project emphasizes its mission-driven approach while maintaining the highest standards of data protection and regulatory compliance for educational institutions.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
@@ -42,6 +42,7 @@ Guaranteed Pricing Model: "The price you pay at the time is the price you always
 - **Protected Routes**: Authentication middleware for tournament and payment endpoints.
 - **Security**: CORS, secure session handling, user profile management.
 - **User Hierarchy**: A six-tier role-based access control system including District Athletic Trainer, Athletic Director, Athletic Trainer, Head Coach, Assistant Coach, and Scorekeeper/Judge. This hierarchy also manages medical/tournament data partitioning to enforce HIPAA compliance.
+- **HIPAA/FERPA Compliance**: Enterprise-grade route-level compliance middleware with automatic audit logging, role-based medical data access controls, and comprehensive violation tracking. Includes training verification, permission validation, and complete forensic audit trails for all sensitive data access.
 
 ### Key Design Patterns & Features
 - **Shared Schema**: Common TypeScript types and Zod schemas shared between frontend and backend.
