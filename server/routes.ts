@@ -28,7 +28,7 @@ console.log(`🔑 Key ends with: ...${stripeKey.slice(-15)}`);
 console.log(`🔑 Live mode enabled for real donations`);
 
 const stripe = new Stripe(stripeKey, {
-  apiVersion: "2024-11-20.acacia", // More stable version
+  apiVersion: "2025-07-30.basil",
 });
 
 // Test the key with retry logic for activation delay
@@ -325,7 +325,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     // Continue with normal routing for other requests
-    res.sendFile('index.html', { root: './dist' });
+    // This route is handled by Vite middleware now
   });
   
   // Setup domain-aware routes
@@ -562,11 +562,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if usage reminder should be sent
       const reminderCheck = await UsageReminderSystem.shouldSendUsageReminder(userId, storage);
       
-      // Update interaction tracking
-      await storage.updateUser(userId, {
-        aiInteractionCount: (context.user.aiInteractionCount || 0) + 1,
-        updatedAt: new Date()
-      });
+      // Update interaction tracking (commented out for now)
+      // await storage.updateUser(userId, {
+      //   aiInteractionCount: (context.user.aiInteractionCount || 0) + 1,
+      //   updatedAt: new Date()
+      // });
 
       res.json({
         success: true,
@@ -3912,11 +3912,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate contextual response
       const aiResponse = await aiContext.generateContextualResponse(context, question);
       
-      // Update interaction tracking
-      await storage.updateUser(userId, {
-        aiInteractionCount: (context.user.totalInteractions || 0) + 1,
-        updatedAt: new Date()
-      });
+      // Update interaction tracking (commented out for now)
+      // await storage.updateUser(userId, {
+      //   aiInteractionCount: (context.user.totalInteractions || 0) + 1,
+      //   updatedAt: new Date()
+      // });
 
       // Store conversation for context
       if (tournamentId) {
