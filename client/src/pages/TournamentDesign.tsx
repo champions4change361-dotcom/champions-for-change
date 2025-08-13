@@ -5,8 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Trophy, Calendar, Users, MapPin, DollarSign, CheckCircle, ArrowRight } from 'lucide-react';
+import { Trophy, Calendar, Users, MapPin, DollarSign, CheckCircle, ArrowRight, Palette } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { MissionBranding } from '@/components/MissionBranding';
 
 export default function TournamentDesign() {
   const [step, setStep] = useState(1);
@@ -20,7 +21,9 @@ export default function TournamentDesign() {
     maxParticipants: '',
     entryFee: '',
     description: '',
-    prizes: ''
+    prizes: '',
+    mission: '',
+    branding: null
   });
 
   const sports = [
@@ -129,14 +132,14 @@ export default function TournamentDesign() {
         {/* Step Progress */}
         <div className="flex justify-center mb-8">
           <div className="flex items-center space-x-4">
-            {[1, 2].map((stepNum) => (
+            {[1, 2, 3].map((stepNum) => (
               <div key={stepNum} className="flex items-center">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
                   step >= stepNum ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-600'
                 }`}>
                   {stepNum}
                 </div>
-                {stepNum < 2 && <div className={`w-12 h-1 ${step > stepNum ? 'bg-green-600' : 'bg-gray-200'}`} />}
+                {stepNum < 3 && <div className={`w-12 h-1 ${step > stepNum ? 'bg-green-600' : 'bg-gray-200'}`} />}
               </div>
             ))}
           </div>
@@ -315,16 +318,67 @@ export default function TournamentDesign() {
               <div className="flex justify-between">
                 <Button variant="outline" onClick={() => setStep(1)}>Back</Button>
                 <Button 
-                  onClick={generateTournament}
+                  onClick={() => setStep(3)}
                   disabled={!tournament.format}
-                  className="bg-green-600 hover:bg-green-700"
-                  data-testid="button-create-tournament"
+                  data-testid="button-continue-step2"
                 >
-                  Create Tournament
+                  Continue <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
               </div>
             </CardContent>
           </Card>
+        )}
+
+        {step === 3 && (
+          <div className="space-y-6">
+            <MissionBranding
+              userMission="Example: Fund educational trips for our students through tournament excellence"
+              organizationName="Your Organization"
+              onSave={(branding) => setTournament(prev => ({ ...prev, branding }))}
+              mode="setup"
+            />
+            
+            <Card data-testid="step-finalize">
+              <CardHeader>
+                <CardTitle>Step 3: Finalize Tournament</CardTitle>
+                <CardDescription>Review and create your tournament with custom branding</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+                  <h4 className="font-semibold text-green-800 mb-2 flex items-center">
+                    <Trophy className="h-4 w-4 mr-2" />
+                    Tournament Preview
+                  </h4>
+                  <div className="grid md:grid-cols-2 gap-4 text-sm">
+                    <div><span className="font-medium">Name:</span> {tournament.name}</div>
+                    <div><span className="font-medium">Sport:</span> {tournament.sport}</div>
+                    <div><span className="font-medium">Format:</span> {formats.find(f => f.value === tournament.format)?.name}</div>
+                    <div><span className="font-medium">Participants:</span> {tournament.maxParticipants}</div>
+                    <div><span className="font-medium">Entry Fee:</span> {tournament.entryFee ? `$${tournament.entryFee}` : 'Free'}</div>
+                    <div><span className="font-medium">Dates:</span> {tournament.startDate} to {tournament.endDate}</div>
+                  </div>
+                  {tournament.branding && (
+                    <div className="mt-4 pt-4 border-t border-green-300">
+                      <p className="text-green-700 text-sm">
+                        <strong>Custom Branding:</strong> Applied with your mission and organizational colors
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-between">
+                  <Button variant="outline" onClick={() => setStep(2)}>Back</Button>
+                  <Button 
+                    onClick={generateTournament}
+                    className="bg-green-600 hover:bg-green-700"
+                    data-testid="button-create-tournament"
+                  >
+                    Create Tournament
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         )}
       </div>
     </div>

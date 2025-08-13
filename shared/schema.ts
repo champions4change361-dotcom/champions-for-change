@@ -34,6 +34,8 @@ export const users = pgTable("users", {
   }).default("fan"),
   organizationId: varchar("organization_id"), // School district, club, etc.
   organizationName: varchar("organization_name"), // Name of school/club they represent
+  mission: text("mission"), // Their goals and mission statement for branding
+  customBranding: jsonb("custom_branding"), // Logo, colors, website theming
   isWhitelabelClient: boolean("is_whitelabel_client").default(false),
   whitelabelDomain: varchar("whitelabel_domain"),
   whitelabelBranding: jsonb("whitelabel_branding"), // Custom colors, logos, etc
