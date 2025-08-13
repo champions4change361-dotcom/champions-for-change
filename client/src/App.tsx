@@ -26,6 +26,7 @@ import FantasyTournaments from './pages/FantasyTournaments';
 import CoachesLoungeLanding from './pages/CoachesLoungeLanding';
 import Register from './pages/Register';
 import RegistrationForm from './pages/RegistrationForm';
+import Pricing from './pages/Pricing';
 
 function AuthenticatedRoutes() {
   const { isFeatureEnabled, isFantasyDomain, config } = useDomain();
@@ -127,6 +128,7 @@ function AppRouter() {
       <Route path="/payment-methods" component={PaymentMethods} />
       <Route path="/checkout" component={Checkout} />
       <Route path="/donation-success" component={DonationSuccess} />
+      <Route path="/pricing" component={Pricing} />
       <Route path="/register" component={RegistrationForm} />
       <Route path="/register-old" component={Register} />
       {/* Show Coaches Lounge landing page */}
