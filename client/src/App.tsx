@@ -34,6 +34,7 @@ import RegistrationForm from './pages/RegistrationForm';
 import TournamentDesign from './pages/TournamentDesign';
 import Pricing from './pages/Pricing';
 import BusinessPricingTest from './pages/BusinessPricingTest';
+import YourWhy from './pages/YourWhy';
 
 function AuthenticatedRoutes() {
   const { isFeatureEnabled, isFantasyDomain, config } = useDomain();
@@ -148,6 +149,7 @@ function AppRouter() {
       <Route path="/donation-success" component={DonationSuccess} />
       <Route path="/pricing" component={Pricing} />
       <Route path="/business-pricing-test" component={BusinessPricingTest} />
+      <Route path="/your-why" component={YourWhy} />
       <Route path="/register" component={RegistrationForm} />
       <Route path="/tournament/design" component={TournamentDesign} />
       <Route path="/register-old" component={Register} />

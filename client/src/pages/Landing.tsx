@@ -88,7 +88,17 @@ export default function Landing() {
               <Button 
                 size="lg" 
                 variant="outline"
-                className="border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/10 hover:border-yellow-400 px-8 py-4 text-lg order-1 md:order-2"
+                className="border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10 hover:border-emerald-400 px-6 py-4 text-lg order-1 md:order-3"
+                onClick={() => window.location.href = "/your-why"}
+                data-testid="button-your-why"
+              >
+                <Heart className="h-5 w-5 mr-2" />
+                Your Why
+              </Button>
+              <Button 
+                size="lg" 
+                variant="outline"
+                className="border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/10 hover:border-yellow-400 px-8 py-4 text-lg order-2 md:order-2"
                 onClick={() => {
                   const impactSection = document.getElementById('impact-mission');
                   impactSection?.scrollIntoView({ behavior: 'smooth' });
@@ -99,7 +109,7 @@ export default function Landing() {
               </Button>
               <Button 
                 size="lg" 
-                className="bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-bold px-8 py-4 text-lg order-2 md:order-1"
+                className="bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-bold px-8 py-4 text-lg order-3 md:order-1"
                 onClick={() => window.location.href = "/register"}
                 data-testid="button-get-started"
               >
