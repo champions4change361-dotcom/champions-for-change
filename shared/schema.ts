@@ -1497,3 +1497,54 @@ export type InsertEmailCampaignType = z.infer<typeof insertEmailCampaignSchema>;
 // Campaign recipient types  
 export type CampaignRecipient = typeof campaignRecipients.$inferSelect;
 export type InsertCampaignRecipient = typeof campaignRecipients.$inferInsert;
+
+// UNIVERSAL REGISTRATION CODE SYSTEM
+export const registrationCodes = pgTable("registration_codes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  code: varchar("code").unique().notNull(), // The actual registration code
+  type: text("type", {
+    enum: ["tournament_manager", "district_admin", "business_user", "fantasy_commissioner", "gaming_commissioner"]
+  }).notNull(),
+  createdBy: varchar("created_by").notNull(), // User ID who created the code
+  organizationId: varchar("organization_id"), // Associated organization
+  leagueId: varchar("league_id"), // Associated league/tournament
+  permissions: jsonb("permissions").$type<string[]>().notNull(),
+  maxUses: integer("max_uses").default(1), // How many people can use this code
+  currentUses: integer("current_uses").default(0),
+  expiresAt: timestamp("expires_at"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// COACHES LOUNGE LEAGUES SYSTEM
+export const leagues = pgTable("leagues", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  type: text("type", {
+    enum: ["fantasy-sports", "gaming", "office", "custom", "general"]
+  }).notNull(),
+  commissionerId: varchar("commissioner_id").references(() => users.id).notNull(),
+  registrationCode: varchar("registration_code").unique().notNull(),
+  settings: jsonb("settings").$type<{
+    isPrivate: boolean;
+    maxParticipants: number;
+    season: string;
+    sport?: string;
+    game?: string;
+    rules: string;
+  }>(),
+  participants: jsonb("participants").$type<Array<{
+    userId: string;
+    joinedAt: string;
+    status: 'active' | 'inactive';
+  }>>().default([]),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type RegistrationCode = typeof registrationCodes.$inferSelect;
+export type InsertRegistrationCode = typeof registrationCodes.$inferInsert;
+export type League = typeof leagues.$inferSelect;
+export type InsertLeague = typeof leagues.$inferInsert;

@@ -6,6 +6,7 @@ import { analyzeTournamentQuery, generateTournamentStructure, generateIntelligen
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { setupDomainRoutes } from "./domainRoutes";
 import { AIContextService } from "./ai-context";
+import { UniversalRegistrationSystem } from "./universal-registration";
 import Stripe from "stripe";
 import { z } from "zod";
 
@@ -3633,6 +3634,205 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: false,
         message: "Failed to fetch AI context"
       });
+    }
+  });
+
+  // UNIVERSAL REGISTRATION CODE API ENDPOINTS
+  
+  // Generate registration code
+  app.post("/api/registration-codes/generate", isAuthenticated, async (req, res) => {
+    try {
+      const { type, organizationId, leagueId, permissions, maxUses, expiresAt } = req.body;
+      const userId = req.user?.claims?.sub;
+      
+      if (!userId) {
+        return res.status(401).json({ success: false, message: "User not authenticated" });
+      }
+      
+      const code = UniversalRegistrationSystem.generateRegistrationCode({
+        type,
+        userId,
+        organizationId,
+        leagueId,
+        permissions: permissions || [],
+        maxUses
+      });
+      
+      const storage = await getStorage();
+      const codeData = await storage.createRegistrationCode({
+        code,
+        type,
+        createdBy: userId,
+        organizationId,
+        leagueId,
+        permissions: permissions || [],
+        maxUses: maxUses || 1,
+        expiresAt: expiresAt ? new Date(expiresAt) : null,
+        currentUses: 0,
+        isActive: true
+      });
+      
+      const invitationLink = UniversalRegistrationSystem.generateInvitationLink(code);
+      
+      res.json({
+        success: true,
+        code: code,
+        invitationLink: invitationLink,
+        expiresAt: codeData.expiresAt,
+        type: codeData.type
+      });
+      
+    } catch (error) {
+      console.error("Code generation error:", error);
+      res.status(500).json({ success: false, message: "Failed to generate code" });
+    }
+  });
+
+  // Validate registration code
+  app.post("/api/registration-codes/validate", async (req, res) => {
+    try {
+      const { code } = req.body;
+      
+      if (!code) {
+        return res.status(400).json({ success: false, message: "Code is required" });
+      }
+      
+      const storage = await getStorage();
+      const validation = await UniversalRegistrationSystem.validateRegistrationCode(code, storage);
+      
+      res.json(validation);
+      
+    } catch (error) {
+      console.error("Code validation error:", error);
+      res.status(500).json({ success: false, message: "Validation failed" });
+    }
+  });
+
+  // Join league with registration code (for Coaches Lounge)
+  app.post("/api/leagues/join", isAuthenticated, async (req, res) => {
+    try {
+      const { code } = req.body;
+      const userId = req.user?.claims?.sub;
+      
+      if (!userId) {
+        return res.status(401).json({ success: false, message: "User not authenticated" });
+      }
+      
+      const storage = await getStorage();
+      
+      // First validate the code
+      const validation = await UniversalRegistrationSystem.validateRegistrationCode(code, storage);
+      
+      if (!validation.valid) {
+        return res.status(400).json(validation);
+      }
+      
+      // Get league by registration code
+      const league = await storage.getLeagueByCode(code);
+      
+      if (!league) {
+        return res.status(404).json({ success: false, message: "League not found" });
+      }
+      
+      // Add user to league participants
+      const currentParticipants = league.participants || [];
+      const isAlreadyMember = currentParticipants.some(p => p.userId === userId);
+      
+      if (isAlreadyMember) {
+        return res.json({ 
+          success: true, 
+          message: "Already a member",
+          leagueName: league.name 
+        });
+      }
+      
+      const updatedParticipants = [
+        ...currentParticipants,
+        {
+          userId,
+          joinedAt: new Date().toISOString(),
+          status: 'active'
+        }
+      ];
+      
+      await storage.updateLeague(league.id, { 
+        participants: updatedParticipants 
+      });
+      
+      // Use the registration code
+      await UniversalRegistrationSystem.useRegistrationCode(code, storage, userId);
+      
+      res.json({
+        success: true,
+        message: "Successfully joined league",
+        leagueName: league.name,
+        leagueType: league.type,
+        participantCount: updatedParticipants.length
+      });
+      
+    } catch (error) {
+      console.error("League join error:", error);
+      res.status(500).json({ success: false, message: "Failed to join league" });
+    }
+  });
+
+  // Create new league (for Coaches Lounge commissioners)
+  app.post("/api/leagues/create", isAuthenticated, async (req, res) => {
+    try {
+      const { type, name, settings } = req.body;
+      const userId = req.user?.claims?.sub;
+      
+      if (!userId) {
+        return res.status(401).json({ success: false, message: "User not authenticated" });
+      }
+      
+      const storage = await getStorage();
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ success: false, message: "User not found" });
+      }
+      
+      // Generate league registration code
+      const registrationCode = UniversalRegistrationSystem.generateLeagueCode(type, userId);
+      
+      const leagueData = {
+        name: name || `${user.firstName || 'Commissioner'}'s ${type} League`,
+        type,
+        commissionerId: userId,
+        registrationCode,
+        settings: {
+          isPrivate: false,
+          maxParticipants: 20,
+          season: new Date().getFullYear().toString(),
+          rules: `Welcome to ${name || 'the league'}! Commissioner will update rules soon.`,
+          ...settings
+        },
+        participants: [{
+          userId,
+          joinedAt: new Date().toISOString(),
+          status: 'active'
+        }],
+        isActive: true
+      };
+      
+      const league = await storage.createLeague(leagueData);
+      
+      res.json({
+        success: true,
+        league: {
+          id: league.id,
+          name: league.name,
+          type: league.type,
+          registrationCode: league.registrationCode,
+          participantCount: 1
+        },
+        invitationLink: `https://coaches.trantortournaments.org/join/${registrationCode}`
+      });
+      
+    } catch (error) {
+      console.error("League creation error:", error);
+      res.status(500).json({ success: false, message: "Failed to create league" });
     }
   });
 

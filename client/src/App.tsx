@@ -23,6 +23,7 @@ import Championships from './pages/Championships';
 import WebpageBuilder from './pages/WebpageBuilder';
 import TournamentEmpire from './pages/TournamentEmpire';
 import FantasyTournaments from './pages/FantasyTournaments';
+import CoachesLoungeLanding from './pages/CoachesLoungeLanding';
 import Register from './pages/Register';
 import RegistrationForm from './pages/RegistrationForm';
 
@@ -55,6 +56,11 @@ function AuthenticatedRoutes() {
         {/* Show Fantasy Tournaments only for fantasy and pro domains */}
         {isFeatureEnabled('fantasyLeagues') && (
           <Route path="/fantasy-tournaments" component={FantasyTournaments} />
+        )}
+        
+        {/* Coaches Lounge Landing for fantasy domains */}
+        {isFeatureEnabled('fantasyLeagues') && (
+          <Route path="/coaches-lounge" component={CoachesLoungeLanding} />
         )}
         
         <Route>
