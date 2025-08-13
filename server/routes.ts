@@ -4624,6 +4624,264 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // CORPORATE COMPETITIONS API ENDPOINTS
+  
+  // Get all companies
+  app.get("/api/corporate/companies", async (req, res) => {
+    try {
+      const storage = await getStorage();
+      // Mock companies for now since database isn't available
+      const companies = [
+        {
+          id: "comp-1",
+          name: "Acme Corporation",
+          industry: "tech",
+          contactEmail: "admin@acme.com",
+          estimatedEmployees: "51-500",
+          subscriptionTier: "professional",
+          codePrefix: "ACME2024",
+          departments: ["Sales", "Marketing", "Engineering"],
+          activeCompetitions: 2,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }
+      ];
+      res.json(companies);
+    } catch (error) {
+      console.error("Failed to fetch companies:", error);
+      res.status(500).json({ error: "Failed to fetch companies" });
+    }
+  });
+
+  // Register new company
+  app.post("/api/corporate/companies", async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const companyData = req.body;
+      
+      // Generate company ID and timestamps
+      const company = {
+        ...companyData,
+        id: `comp-${Date.now()}`,
+        activeCompetitions: 0,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      res.status(201).json(company);
+    } catch (error) {
+      console.error("Failed to register company:", error);
+      res.status(500).json({ error: "Failed to register company" });
+    }
+  });
+
+  // Get all corporate competitions
+  app.get("/api/corporate/competitions", async (req, res) => {
+    try {
+      const storage = await getStorage();
+      // Mock competitions for now since database isn't available
+      const competitions = [
+        {
+          id: "comp-comp-1",
+          companyId: "comp-1",
+          name: "Q1 Sales Championship",
+          competitionType: "sales",
+          trackingMetric: "revenue",
+          competitionFormat: "individual",
+          startDate: new Date("2024-01-01"),
+          endDate: new Date("2024-03-31"),
+          status: "active",
+          revenueGoal: 100000,
+          unitsSoldGoal: 500,
+          departments: ["Sales", "Marketing"],
+          description: "Quarter 1 sales competition to boost revenue and team motivation",
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }
+      ];
+      res.json(competitions);
+    } catch (error) {
+      console.error("Failed to fetch competitions:", error);
+      res.status(500).json({ error: "Failed to fetch competitions" });
+    }
+  });
+
+  // Create new corporate competition
+  app.post("/api/corporate/competitions", async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const competitionData = req.body;
+      
+      // Generate competition ID and set initial status
+      const competition = {
+        ...competitionData,
+        id: `comp-comp-${Date.now()}`,
+        status: "planning",
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      res.status(201).json(competition);
+    } catch (error) {
+      console.error("Failed to create competition:", error);
+      res.status(500).json({ error: "Failed to create competition" });
+    }
+  });
+
+  // Get competition details
+  app.get("/api/corporate/competitions/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const storage = await getStorage();
+      
+      // Mock competition detail for now
+      const competition = {
+        id,
+        companyId: "comp-1",
+        name: "Q1 Sales Championship",
+        competitionType: "sales",
+        trackingMetric: "revenue",
+        competitionFormat: "individual",
+        startDate: new Date("2024-01-01"),
+        endDate: new Date("2024-03-31"),
+        status: "active",
+        revenueGoal: 100000,
+        unitsSoldGoal: 500,
+        departments: ["Sales", "Marketing"],
+        description: "Quarter 1 sales competition to boost revenue and team motivation",
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      res.json(competition);
+    } catch (error) {
+      console.error("Failed to fetch competition:", error);
+      res.status(500).json({ error: "Failed to fetch competition" });
+    }
+  });
+
+  // Get competition participants
+  app.get("/api/corporate/competitions/:id/participants", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const storage = await getStorage();
+      
+      // Mock participants for now
+      const participants = [
+        {
+          id: "part-1",
+          competitionId: id,
+          userId: "user-1",
+          employeeId: "EMP001",
+          department: "Sales",
+          currentScore: 15000,
+          currentRank: 1,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        },
+        {
+          id: "part-2", 
+          competitionId: id,
+          userId: "user-2",
+          employeeId: "EMP002",
+          department: "Sales",
+          currentScore: 12500,
+          currentRank: 2,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }
+      ];
+      
+      res.json(participants);
+    } catch (error) {
+      console.error("Failed to fetch participants:", error);
+      res.status(500).json({ error: "Failed to fetch participants" });
+    }
+  });
+
+  // Add participant to competition
+  app.post("/api/corporate/competitions/:id/participants", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const participantData = req.body;
+      const storage = await getStorage();
+      
+      // Generate participant ID
+      const participant = {
+        ...participantData,
+        id: `part-${Date.now()}`,
+        competitionId: id,
+        currentScore: 0,
+        currentRank: null,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      res.status(201).json(participant);
+    } catch (error) {
+      console.error("Failed to add participant:", error);
+      res.status(500).json({ error: "Failed to add participant" });
+    }
+  });
+
+  // Update performance metric
+  app.post("/api/corporate/competitions/:id/metrics", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const metricData = req.body;
+      const storage = await getStorage();
+      
+      // Generate metric ID
+      const metric = {
+        ...metricData,
+        id: `metric-${Date.now()}`,
+        competitionId: id,
+        verificationStatus: "pending",
+        createdAt: new Date()
+      };
+      
+      res.status(201).json(metric);
+    } catch (error) {
+      console.error("Failed to update metric:", error);
+      res.status(500).json({ error: "Failed to update metric" });
+    }
+  });
+
+  // Get competition leaderboard
+  app.get("/api/corporate/competitions/:id/leaderboard", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const storage = await getStorage();
+      
+      // Mock leaderboard for now
+      const leaderboard = [
+        {
+          id: "lead-1",
+          competitionId: id,
+          participantId: "part-1",
+          currentRank: 1,
+          totalScore: 15000,
+          change: "+2",
+          updatedAt: new Date()
+        },
+        {
+          id: "lead-2",
+          competitionId: id,
+          participantId: "part-2",
+          currentRank: 2,
+          totalScore: 12500,
+          change: "-1",
+          updatedAt: new Date()
+        }
+      ];
+      
+      res.json(leaderboard);
+    } catch (error) {
+      console.error("Failed to fetch leaderboard:", error);
+      res.status(500).json({ error: "Failed to fetch leaderboard" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

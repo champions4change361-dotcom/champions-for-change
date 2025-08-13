@@ -35,6 +35,7 @@ import TournamentDesign from './pages/TournamentDesign';
 import Pricing from './pages/Pricing';
 import BusinessPricingTest from './pages/BusinessPricingTest';
 import YourWhy from './pages/YourWhy';
+import CorporateCompetitions from './pages/CorporateCompetitions';
 
 function AuthenticatedRoutes() {
   const { isFeatureEnabled, isFantasyDomain, config } = useDomain();
@@ -56,6 +57,7 @@ function AuthenticatedRoutes() {
         <Route path="/live-matches" component={LiveMatches} />
         <Route path="/championships" component={Championships} />
         <Route path="/webpage-builder" component={WebpageBuilder} />
+        <Route path="/corporate-competitions" component={CorporateCompetitions} />
         
         {/* Show Tournament Empire only for school-safe and pro domains */}
         {!isFantasyDomain() && (

@@ -694,6 +694,174 @@ export const tournaments = pgTable("tournaments", {
   updatedAt: timestamp("updated_at").notNull().default(sql`now()`),
 });
 
+// CORPORATE COMPETITION DATABASE SYSTEM
+// Comprehensive database for sales, production, and corporate tournaments
+
+// Company Management
+export const companies = pgTable("companies", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  industry: varchar("industry"), // retail, manufacturing, tech, healthcare
+  contactEmail: varchar("contact_email").notNull(),
+  estimatedEmployees: varchar("estimated_employees"),
+  subscriptionTier: varchar("subscription_tier").default("starter"), // starter, professional, enterprise
+  
+  // Registration code generation
+  codePrefix: varchar("code_prefix").notNull(), // WALMART2024, AMAZON2024
+  activeCompetitions: integer("active_competitions").default(0),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Corporate Competition Types - Sales, Production, Corporate Events
+export const corporateCompetitions = pgTable("corporate_competitions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  companyId: varchar("company_id").notNull().references(() => companies.id),
+  name: varchar("name").notNull(),
+  competitionType: varchar("competition_type").notNull(), // sales, production, corporate
+  trackingMetric: varchar("tracking_metric").notNull(), // revenue, units_sold, efficiency, quality, custom
+  competitionFormat: varchar("competition_format").notNull(), // individual, team, department
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  status: varchar("status").notNull().default("planning"), // planning, active, completed
+  
+  // Sales-specific fields
+  revenueGoal: numeric("revenue_goal"), // Target revenue for competition
+  unitsSoldGoal: integer("units_sold_goal"), // Target units to sell
+  salesTargets: jsonb("sales_targets").$type<{
+    individual?: number;
+    team?: number;
+    department?: number;
+    territory?: string[];
+  }>(),
+  
+  // Production-specific fields
+  productionTarget: integer("production_target"), // Units to produce
+  qualityThreshold: integer("quality_threshold"), // Quality percentage
+  efficiencyMetric: varchar("efficiency_metric"), // per_hour, per_day, per_unit
+  productionGoals: jsonb("production_goals").$type<{
+    dailyTarget?: number;
+    weeklyTarget?: number;
+    monthlyTarget?: number;
+    qualityStandard?: number;
+  }>(),
+  
+  // Corporate-specific fields
+  customMetrics: jsonb("custom_metrics").$type<Array<{
+    name: string;
+    type: 'number' | 'percentage' | 'time' | 'boolean';
+    target?: number;
+    description?: string;
+  }>>(),
+  
+  // Competition settings
+  departments: text("departments").array(), // ["Sales", "Manufacturing", "Quality Control"]
+  registrationCodes: jsonb("registration_codes").$type<Record<string, {
+    department: string;
+    maxParticipants?: number;
+    isActive: boolean;
+    generatedAt: string;
+  }>>(), // {"WALMART2024-SALES": {...}, "WALMART2024-PROD": {...}}
+  
+  // Prize structure
+  prizeStructure: jsonb("prize_structure").$type<{
+    firstPlace?: string;
+    topThree?: string[];
+    departmentWinner?: string;
+    participationReward?: string;
+  }>(),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Corporate Participants
+export const corporateParticipants = pgTable("corporate_participants", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  competitionId: varchar("competition_id").notNull().references(() => corporateCompetitions.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  employeeId: varchar("employee_id"), // company's internal employee ID
+  department: varchar("department").notNull(),
+  role: varchar("role").notNull(), // participant, supervisor, manager
+  teamName: varchar("team_name"), // for team-based competitions
+  registrationCode: varchar("registration_code").notNull(), // which code they used to join
+  
+  // Performance tracking
+  currentScore: numeric("current_score").default("0"),
+  currentRank: integer("current_rank"),
+  personalGoal: numeric("personal_goal"), // Individual target
+  
+  // Additional participant data
+  territory: varchar("territory"), // for sales competitions
+  shift: varchar("shift"), // for production competitions
+  startDate: timestamp("start_date"), // when they joined competition
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Performance Metrics Tracking
+export const performanceMetrics = pgTable("performance_metrics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  competitionId: varchar("competition_id").notNull().references(() => corporateCompetitions.id),
+  participantId: varchar("participant_id").notNull().references(() => corporateParticipants.id),
+  
+  metricType: varchar("metric_type").notNull(), // revenue, units_sold, production_count, quality_score
+  metricValue: numeric("metric_value").notNull(),
+  recordedDate: timestamp("recorded_date").notNull(),
+  
+  // Additional context
+  shift: varchar("shift"), // for production competitions
+  productType: varchar("product_type"), // for sales/production specificity
+  territory: varchar("territory"), // for sales competitions
+  customerType: varchar("customer_type"), // new, existing, premium
+  
+  // Quality metrics for production
+  qualityScore: integer("quality_score"), // percentage
+  defectCount: integer("defect_count").default(0),
+  
+  // Verification
+  verifiedBy: varchar("verified_by"), // supervisor/manager who verified
+  verificationStatus: varchar("verification_status").default("pending"), // pending, verified, disputed
+  verificationNotes: text("verification_notes"),
+  
+  // Metadata
+  source: varchar("source").default("manual"), // manual, system, integration
+  batchId: varchar("batch_id"), // for bulk imports
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Competition Leaderboards - Real-time rankings
+export const competitionLeaderboards = pgTable("competition_leaderboards", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  competitionId: varchar("competition_id").notNull().references(() => corporateCompetitions.id),
+  participantId: varchar("participant_id").notNull().references(() => corporateParticipants.id),
+  
+  // Ranking data
+  currentRank: integer("current_rank").notNull(),
+  previousRank: integer("previous_rank"),
+  totalScore: numeric("total_score").notNull(),
+  
+  // Performance breakdowns
+  dailyAverage: numeric("daily_average"),
+  weeklyTotal: numeric("weekly_total"),
+  monthlyTotal: numeric("monthly_total"),
+  
+  // Achievement tracking
+  goalProgress: numeric("goal_progress"), // percentage toward goal
+  streakDays: integer("streak_days").default(0), // consecutive days meeting target
+  personalBest: numeric("personal_best"),
+  
+  // Department/team context
+  departmentRank: integer("department_rank"),
+  teamRank: integer("team_rank"),
+  
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Sport Categories table
 export const sportCategories = pgTable("sport_categories", {
   id: varchar("id").primaryKey(),
@@ -2168,3 +2336,93 @@ export type RegistrationCode = typeof registrationCodes.$inferSelect;
 export type InsertRegistrationCode = typeof registrationCodes.$inferInsert;
 export type League = typeof leagues.$inferSelect;
 export type InsertLeague = typeof leagues.$inferInsert;
+
+// Corporate competition types
+export type Company = typeof companies.$inferSelect;
+export type InsertCompany = typeof companies.$inferInsert;
+export type CorporateCompetition = typeof corporateCompetitions.$inferSelect;
+export type InsertCorporateCompetition = typeof corporateCompetitions.$inferInsert;
+export type CorporateParticipant = typeof corporateParticipants.$inferSelect;
+export type InsertCorporateParticipant = typeof corporateParticipants.$inferInsert;
+export type PerformanceMetric = typeof performanceMetrics.$inferSelect;
+export type InsertPerformanceMetric = typeof performanceMetrics.$inferInsert;
+export type CompetitionLeaderboard = typeof competitionLeaderboards.$inferSelect;
+export type InsertCompetitionLeaderboard = typeof competitionLeaderboards.$inferInsert;
+
+// Create insert schemas for corporate tables
+export const insertCompanySchema = createInsertSchema(companies).omit({
+  id: true,
+  activeCompetitions: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCorporateCompetitionSchema = createInsertSchema(corporateCompetitions).omit({
+  id: true,
+  status: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCorporateParticipantSchema = createInsertSchema(corporateParticipants).omit({
+  id: true,
+  currentScore: true,
+  currentRank: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertPerformanceMetricSchema = createInsertSchema(performanceMetrics).omit({
+  id: true,
+  verificationStatus: true,
+  createdAt: true,
+});
+
+// Corporate relations
+export const companiesRelations = relations(companies, ({ many }) => ({
+  competitions: many(corporateCompetitions),
+}));
+
+export const corporateCompetitionsRelations = relations(corporateCompetitions, ({ one, many }) => ({
+  company: one(companies, {
+    fields: [corporateCompetitions.companyId],
+    references: [companies.id],
+  }),
+  participants: many(corporateParticipants),
+  metrics: many(performanceMetrics),
+  leaderboards: many(competitionLeaderboards),
+}));
+
+export const corporateParticipantsRelations = relations(corporateParticipants, ({ one, many }) => ({
+  competition: one(corporateCompetitions, {
+    fields: [corporateParticipants.competitionId],
+    references: [corporateCompetitions.id],
+  }),
+  user: one(users, {
+    fields: [corporateParticipants.userId],
+    references: [users.id],
+  }),
+  metrics: many(performanceMetrics),
+}));
+
+export const performanceMetricsRelations = relations(performanceMetrics, ({ one }) => ({
+  competition: one(corporateCompetitions, {
+    fields: [performanceMetrics.competitionId],
+    references: [corporateCompetitions.id],
+  }),
+  participant: one(corporateParticipants, {
+    fields: [performanceMetrics.participantId],
+    references: [corporateParticipants.id],
+  }),
+}));
+
+export const competitionLeaderboardsRelations = relations(competitionLeaderboards, ({ one }) => ({
+  competition: one(corporateCompetitions, {
+    fields: [competitionLeaderboards.competitionId],
+    references: [corporateCompetitions.id],
+  }),
+  participant: one(corporateParticipants, {
+    fields: [competitionLeaderboards.participantId],
+    references: [corporateParticipants.id],
+  }),
+}));
