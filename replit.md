@@ -1,104 +1,70 @@
 # Tournament Bracket Manager
 
 ## Overview
-
-This is a full-stack tournament bracket management application that allows users to create and manage single-elimination tournaments with interactive bracket visualization and real-time match updates. The application features a React frontend with a Node.js/Express backend, using PostgreSQL for data persistence and in-memory storage as a fallback.
-
-**Status**: Complete white-label tournament management SaaS platform for Champions for Change nonprofit. Revenue funds educational opportunities for underprivileged youth in Corpus Christi, Texas. Veteran-managed platform built by secondary athletic coaches with 39+ combined years coaching experience who identified real tournament management needs. Features user authentication with Replit OAuth, Stripe payment integration, AI-powered tournament creation across 65+ sports, custom branding with Champions for Change logo and color scheme, multi-tenant white-label architecture, five-tier user hierarchy reflecting real school district structure, and mission-focused user experience emphasizing educational impact. **Domain**: trantortournaments.org purchased and configured for deployment.
-
-**PRICING JUSTIFICATION COMPLETE (Aug 13, 2025)**: Comprehensive feature set now fully justifies pricing tiers across all domains. **Foundation (FREE)**: Basic tournaments + 50 messages/month + team registration + view-only live scoring. **Champion ($99/month)**: Unlimited tournaments + 500 messages/month + complete team management + designated scorekeeper assignments + instant live scoring + mobile push notifications + AI coaching messages. **Enterprise ($199-399/month)**: White-label mobile apps + 2000 messages/month + unlimited live scoring + custom consent forms + advanced analytics + multi-domain management. Value proposition: Professional tournament management with live scoring, instant messaging, team registration system, mobile app notifications, and strict access controls that eliminate common tournament administration pain points while funding Champions for Change educational trips.
-
-**Latest Update (Aug 13, 2025)**: GEOLOCATION-BASED EVENT TRACKING DEPLOYED! 🎯📍 Implemented comprehensive location verification system with geofencing capabilities, real-time location tracking, and venue proximity verification. Features location check-ins for scorekeepers/participants, geofenced scoring permissions (customizable radius), and automatic distance calculation from event venues. System includes location setup for tournament directors, address geocoding, current location detection, and location-based access controls. Combined with cross-domain messaging system extending to fantasy smack talk and business communications with director-only broadcast capabilities. **Technical Achievement**: Real-time location verification ensures scoring integrity while supporting remote management capabilities for Champions for Change tournament operations. **Previous**: TRANSPARENT PRICING DEPLOYMENT - Removed ALL "Contact Sales" friction, maintaining 100% transparent pricing with COMMISSIONER-POWERED COACHES LOUNGE featuring dual-league fantasy platform, ESPN API integration, and authentic coach-built approach supporting educational mission.
-
-**Previous Update (Aug 12, 2025)**: COMPETITION FORMAT OPTIMIZATION DEPLOYED - Platform now features the most comprehensive sport-specific configuration system available, with detailed templates for Basketball (age-appropriate game lengths, ball sizes, basket heights), Soccer (field sizes, player counts, FIFA standards), Tennis (court sizes, ball types, scoring systems), and Track & Field (IAAF standards, implement weights, timing protocols). System includes 4 competition format templates with complete age group configurations, gender division rules, team size specifications, equipment requirements, game format settings, scoring systems, series configurations, venue requirements, officiating protocols, and timing configurations. Additionally implements 7 series templates (Single Game, Best of 3/7 for Basketball, Single Match/Home & Away for Soccer, Match formats for Tennis) with game intervals and tiebreaker rules. This system provides sport-specific intelligence for tournament creation, enabling age-appropriate and professionally configured competitions that fund Champions for Change educational trips.
-
-**Previous Update (Aug 12, 2025)**: TOURNAMENT INTEGRATION SYSTEM DEPLOYED - Platform now features a complete tournament integration system with format configurations linking tournament structures to sport-specific settings. System includes 4 comprehensive format configurations (Single Elimination, Double Elimination, Round Robin, Track & Field Multi-Event) with detailed bracket generation rules, advancement rules, tiebreaker rules, scheduling requirements, venue requirements, and officiating requirements. Additionally implements 3 bracket templates for common participant counts (4-team, 8-team Single Elimination, 6-team Round Robin) with complete match sequences and advancement mapping. This system bridges the gap between tournament structures and actual tournament creation, enabling intelligent bracket generation based on participant count and sport category. Combined with Ultimate Track Events system and sport division rules, the platform now provides end-to-end tournament management capabilities that fund Champions for Change educational trips.
+This is a full-stack tournament bracket management application designed as a white-label SaaS platform for the Champions for Change nonprofit. The application enables users to create and manage single-elimination tournaments with interactive bracket visualization and real-time updates. Its core purpose is to fund educational opportunities for underprivileged youth in Corpus Christi, Texas, by offering professional tournament management services. Key capabilities include user authentication, payment integration, AI-powered tournament creation across various sports, custom branding, a multi-tenant architecture, and a five-tier user hierarchy mirroring school district structures. The platform emphasizes its mission-driven approach, providing a comprehensive solution for managing competitive events while generating social impact.
 
 ## User Preferences
-
 Preferred communication style: Simple, everyday language.
 Mission-focused: Platform serves Champions for Change nonprofit to fund student trips and educational opportunities for middle schools in Corpus Christi, Texas.
 Branding: Green and blue color scheme from Champions for Change logo, emphasis on educational impact and coach-built heritage.
 Competitive Strategy: Mission-driven advantage - "Let them copy, they'll always be behind and can't replicate the authentic educational mission."
-
-## Executive Director Information
-
-Name: Daniel Thornton, Executive Director of Champions for Change
-Background: 21 years military service (Marines then Army), retired and moved to Corpus Christi, Texas in 2016. 10 years secondary athletic coaching experience at Robert Driscoll Middle School since 2016. Platform is veteran-managed with combined team coaching experience of 39+ years specializing in secondary level athletics.
-Contact: Champions4change361@gmail.com, 361-300-1552
-Mission: Funding $2,600+ student trips through educational tour companies for underprivileged youth in Corpus Christi, Texas.
+District Value Proposition: At $2,490/year, districts save $31,010-$65,510 annually compared to current solutions while supporting educational mission. ROI of 1,244%-2,629% makes non-adoption fiscally irresponsible.
 
 ## System Architecture
 
 ### Frontend Architecture
-- **Framework**: React 18 with TypeScript, using Vite as the build tool
-- **Routing**: Wouter for lightweight client-side routing
-- **State Management**: TanStack Query (React Query) for server state management and caching
-- **UI Framework**: Shadcn/ui components built on Radix UI primitives with Tailwind CSS for styling
-- **Form Management**: React Hook Form with Zod validation for type-safe form handling
-- **Component Structure**: Modular component architecture with separate UI components, pages, and business logic components
+- **Framework**: React 18 with TypeScript, using Vite.
+- **Routing**: Wouter for lightweight routing.
+- **State Management**: TanStack Query (React Query) for server state and caching.
+- **UI Framework**: Shadcn/ui components built on Radix UI primitives with Tailwind CSS.
+- **Form Management**: React Hook Form with Zod validation.
+- **Component Structure**: Modular design with separate UI, pages, and business logic.
 
 ### Backend Architecture
-- **Runtime**: Node.js with Express.js framework
-- **Language**: TypeScript with ES modules
-- **API Design**: RESTful API with structured error handling and request logging middleware
-- **Development Setup**: Vite integration for development with HMR support
-- **Storage Abstraction**: Interface-based storage system supporting both in-memory and database implementations
+- **Runtime**: Node.js with Express.js.
+- **Language**: TypeScript with ES modules.
+- **API Design**: RESTful API with structured error handling and request logging.
+- **Development Setup**: Vite integration with HMR.
+- **Storage Abstraction**: Interface-based system supporting in-memory and database implementations.
 
 ### Data Storage Solutions
-- **Primary Database**: PostgreSQL with Drizzle ORM for type-safe database operations
-- **Database Provider**: Neon Database (@neondatabase/serverless) for serverless PostgreSQL
-- **Fallback Storage**: In-memory storage implementation for development/testing
-- **Schema Management**: Drizzle Kit for migrations and schema management
-- **Data Validation**: Zod schemas for runtime type validation and Drizzle-Zod integration
-- **ESPN API Integration**: Real-time NFL scoring, play-by-play analysis, and live player performance tracking
-- **Fantasy Coaching AI**: Advanced player tendency analysis, defensive matchups, and live game insights
+- **Primary Database**: PostgreSQL with Drizzle ORM.
+- **Database Provider**: Neon Database for serverless PostgreSQL.
+- **Fallback Storage**: In-memory storage.
+- **Schema Management**: Drizzle Kit for migrations.
+- **Data Validation**: Zod schemas for runtime type validation and Drizzle-Zod.
 
 ### Authentication and Authorization
-- **Authentication Provider**: Replit OAuth integration with openid-client
-- **Session Management**: Express sessions with PostgreSQL session store (connect-pg-simple)
-- **User Management**: Complete user registration, login, logout flows
-- **Protected Routes**: Authentication middleware for tournament and payment endpoints
-- **Security**: CORS configuration, secure session handling, and user profile management
-
-### External Dependencies
-- **Database**: Neon PostgreSQL (serverless)
-- **UI Components**: Radix UI primitives for accessible component foundations
-- **Styling**: Tailwind CSS with CSS custom properties for theming
-- **Icons**: Font Awesome and Lucide React icons
-- **Development**: Replit-specific development tools and error handling
-- **Validation**: Zod for schema validation across frontend and backend
-- **Date Handling**: date-fns for date manipulation utilities
+- **Authentication Provider**: Replit OAuth integration with openid-client.
+- **Session Management**: Express sessions with PostgreSQL session store.
+- **User Management**: Complete user registration, login, logout flows.
+- **Protected Routes**: Authentication middleware for tournament and payment endpoints.
+- **Security**: CORS, secure session handling, user profile management.
+- **Five-Tier User Hierarchy**: Tournament Manager/District Athletic Director, School Athletic Director, Coach, Scorekeeper/Judge, Athlete/Fan, with corresponding role-based access control.
 
 ### Key Design Patterns
-- **Shared Schema**: Common TypeScript types and Zod schemas shared between frontend and backend
-- **Repository Pattern**: Storage abstraction allowing for multiple storage implementations
-- **Component Composition**: Reusable UI components with consistent styling and behavior
-- **Type Safety**: End-to-end TypeScript with runtime validation using Zod
-- **Progressive Enhancement**: Fallback storage system ensures application works without database connection
-- **Multi-Sport Event Management**: Comprehensive event selection system covering Track & Field (30+ events), Swimming & Diving (25+ events), Golf (20+ events including youth skills), and Fishing & Hunting (20+ events)
-- **Advanced Event Selection**: Checkbox-based interface with category grouping, "Select All" functionality, and real-time event counters
-- **Sport-Specific Scoring**: Time-based (running/swimming), distance-based (throwing/jumping), stroke-based (golf), weight-based (fishing), and point-based (skills competitions) scoring systems
-- **Youth Program Support**: Specialized events for middle school programs including golf skills competitions and youth hunting/fishing derbies
-- **Mission Integration**: Platform branding reflects Champions for Change nonprofit mission with green/blue color scheme
-- **Educational Impact Focus**: User interface emphasizes funding student trips and educational opportunities
-- **Revenue-to-Education Model**: 100% of platform revenue directed to supporting underprivileged youth in Corpus Christi, Texas
-- **Coach-Built Heritage**: Platform messaging highlights development by coaches who understand tournament management needs
-- **Five-Tier School District Hierarchy**: Tournament Manager/District Athletic Director (creates tournaments, assigns schools to events) → School Athletic Director (assigns coaches within their school to specific events) → Coach (registers teams, manages team participation, works under school AD) → Scorekeeper/Judge (assigned by tournament manager to specific events, updates scores for assigned events only) → Athlete/Fan (views results, tracks performance, follows tournaments)
-- **Role-Based Access Control**: Dynamic navigation and features based on user roles and subscription levels
-- **Team Registration System**: Coaches can register teams with full player rosters, organization details, and event selections
-- **Registration Approval Workflow**: Tournament managers review and approve/reject team registrations with detailed player information
-- **Scorekeeper Assignment System**: Tournament managers assign scorekeepers to specific events within tournaments, critical for multi-event sports and competitions like BBQ cookoffs
-- **Event-Specific Score Management**: Scorekeepers can only update scores for events they are specifically assigned to, ensuring secure and organized score recording
-- **Score Verification Process**: Tournament managers can verify scores entered by scorekeepers to ensure accuracy and integrity
-- **District-to-School Assignment Flow**: District ADs assign schools to tournament events, School ADs then assign their coaches to specific events within those assignments
-- **Hierarchical Coach Management**: School Athletic Directors manage coaches from their specific school/organization, reflecting real-world structure like Corpus Christi ISD → Robert Driscoll Middle School
-- **Commissioner Power Structure**: Fantasy league hierarchy where Commissioners create leagues, generate registration codes, manage participants, and verify player data for AI coaching insights
-- **Dual League Format System**: PPR Leagues with Commissioner-verified data and AI coaching vs Knockout Pools with ESPN API integration and automated scoring
-- **Fantasy League Management**: Complete league creation, participant tracking, player database management, and community-verified data accuracy system
-- **Registration Code System**: Unique code generation for league access with usage tracking and participant management capabilities
-- **Geolocation-Based Event Tracking**: Real-time location verification with customizable geofencing for venue proximity validation
-- **Location Check-in System**: Scorekeeper and participant location verification with distance calculations and access control
-- **Venue Management**: Tournament directors can set up event locations with address geocoding and geofence radius configuration
-- **Remote Scoring Controls**: Configurable permissions for location-verified scoring vs remote scoring capabilities
-- **Cross-Domain Messaging**: Fantasy smack talk templates, business professional communications, and director broadcast messaging across all platform domains
+- **Shared Schema**: Common TypeScript types and Zod schemas shared between frontend and backend.
+- **Repository Pattern**: Storage abstraction for multiple implementations.
+- **Component Composition**: Reusable UI components.
+- **Type Safety**: End-to-end TypeScript with Zod runtime validation.
+- **Progressive Enhancement**: Fallback storage for application functionality without a database.
+- **Multi-Sport Event Management**: Comprehensive event selection for sports like Track & Field, Swimming & Diving, Golf, Fishing & Hunting with sport-specific scoring.
+- **Tournament Integration System**: Features comprehensive format configurations (Single Elimination, Double Elimination, Round Robin, Track & Field Multi-Event) with detailed bracket generation, advancement, and tiebreaker rules.
+- **Geolocation-Based Event Tracking**: Real-time location verification with customizable geofencing for venue proximity, location check-ins for scorekeepers/participants, and remote scoring controls.
+- **Team Registration and Management**: Coaches can register teams with player rosters; tournament managers approve registrations.
+- **Scorekeeper Assignment and Verification**: Tournament managers assign scorekeepers to specific events, with score verification processes.
+- **Hierarchical Coach Management**: Reflects real-world organizational structures for assigning coaches.
+- **Commissioner Power Structure**: Fantasy league hierarchy for league creation, participant management, and data verification.
+- **Cross-Domain Messaging**: Messaging capabilities for fantasy and business communications.
+
+## External Dependencies
+- **Database**: Neon PostgreSQL (serverless).
+- **UI Components**: Radix UI primitives.
+- **Styling**: Tailwind CSS.
+- **Icons**: Font Awesome and Lucide React.
+- **Development**: Replit-specific development tools.
+- **Validation**: Zod.
+- **Date Handling**: date-fns.
+- **Payment Integration**: Stripe.
+- **API Integration**: ESPN API (for NFL scoring, play-by-play, player performance).
+- **AI**: AI-powered tournament creation and AI coaching messages.
