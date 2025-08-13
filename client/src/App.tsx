@@ -31,6 +31,7 @@ import RefundPolicy from './pages/RefundPolicy';
 import TermsOfService from './pages/TermsOfService';
 import Register from './pages/Register';
 import RegistrationForm from './pages/RegistrationForm';
+import TournamentDesign from './pages/TournamentDesign';
 import Pricing from './pages/Pricing';
 import BusinessPricingTest from './pages/BusinessPricingTest';
 
@@ -148,6 +149,7 @@ function AppRouter() {
       <Route path="/pricing" component={Pricing} />
       <Route path="/business-pricing-test" component={BusinessPricingTest} />
       <Route path="/register" component={RegistrationForm} />
+      <Route path="/tournament/design" component={TournamentDesign} />
       <Route path="/register-old" component={Register} />
       {/* Show Coaches Lounge landing page */}
       <Route path="/coaches-lounge">

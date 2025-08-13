@@ -35,7 +35,7 @@ const registrationSchema = z.object({
     phone: z.string().optional(),
     relationship: z.string()
   })).optional(),
-  requestReason: z.string().min(10, 'Please explain why you need access (minimum 10 characters)'),
+  requestReason: z.string().min(10, 'Please describe your tournament goals (minimum 10 characters)'),
   selectedTier: z.enum(['foundation', 'champion', 'enterprise']),
   paymentMethod: z.enum(['stripe', 'check'])
 });
@@ -80,13 +80,17 @@ export default function RegistrationFormPage() {
     },
     onSuccess: async (data) => {
       if (paymentMethod === 'stripe' && selectedTier !== 'foundation') {
-        // For now, show success - Stripe integration can be added later
-        setStep(5);
+        // Route to tournament design page for paid tiers
         toast({
-          title: "Registration Submitted",
-          description: "We'll contact you about payment options for your selected tier.",
+          title: "Registration Approved!",
+          description: "Welcome to Champions for Change! Redirecting to tournament design...",
         });
+        // Delay to show toast, then redirect
+        setTimeout(() => {
+          window.location.href = '/tournament/design';
+        }, 1500);
       } else {
+        // Show success step for foundation tier
         setStep(5); // Success step
         toast({
           title: "Registration Submitted",
@@ -465,10 +469,10 @@ export default function RegistrationFormPage() {
                 </div>
 
                 <div>
-                  <Label>Why do you need access? *</Label>
+                  <Label>What are your tournament goals? *</Label>
                   <Textarea 
                     {...form.register('requestReason')} 
-                    placeholder="Explain how you'll use the platform to benefit your students..."
+                    placeholder="e.g., Host basketball tournaments to fund educational trips, organize track meets for middle school athletes, build community engagement through sports..."
                     rows={4}
                     data-testid="textarea-requestReason"
                   />
