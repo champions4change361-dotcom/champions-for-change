@@ -86,10 +86,14 @@ export function BusinessPricingSection() {
           <h2 className="text-3xl font-bold text-gray-900 mb-4">
             Professional Tournament Management
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-6">
             Start with 5 free tournaments, then scale to unlimited corporate events. 
             Grow with plans that match your business needs.
           </p>
+          <div className="inline-flex items-center gap-2 bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-semibold">
+            <Check className="h-4 w-4" />
+            Sales Competition Tournaments: Revenue & Units Sold Tracking
+          </div>
         </div>
         
         <div className="grid lg:grid-cols-3 gap-8 max-w-5xl mx-auto">

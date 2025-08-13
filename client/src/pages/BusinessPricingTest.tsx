@@ -200,19 +200,48 @@ export default function BusinessPricingTest() {
 
               <div className="space-y-3">
                 <Label>Tournament Types of Interest</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  {['Team Building', 'Sales Competitions', 'Fantasy Sports', 'Gaming Leagues', 'Wellness Challenges', 'Innovation Contests'].map((type) => (
-                    <Button
-                      key={type}
-                      variant="outline"
-                      size="sm"
-                      className="text-left justify-start"
-                      data-testid={`button-tournament-${type.toLowerCase().replace(' ', '-')}`}
-                    >
-                      <CheckCircle className="h-3 w-3 mr-2" />
-                      {type}
-                    </Button>
-                  ))}
+                <div className="space-y-3">
+                  {/* Featured: Sales Competitions */}
+                  <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Target className="h-4 w-4 text-green-600" />
+                      <span className="font-semibold text-green-900">Sales Competitions</span>
+                      <Badge className="bg-green-600 text-white text-xs">Popular</Badge>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="flex items-center gap-1 text-green-700">
+                        <CheckCircle className="h-3 w-3" />
+                        Revenue-based tournaments
+                      </div>
+                      <div className="flex items-center gap-1 text-green-700">
+                        <CheckCircle className="h-3 w-3" />
+                        Units sold competitions
+                      </div>
+                      <div className="flex items-center gap-1 text-green-700">
+                        <CheckCircle className="h-3 w-3" />
+                        Quarterly brackets
+                      </div>
+                      <div className="flex items-center gap-1 text-green-700">
+                        <CheckCircle className="h-3 w-3" />
+                        Team vs. individual tracking
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-2">
+                    {['Team Building', 'Fantasy Sports', 'Gaming Leagues', 'Wellness Challenges', 'Innovation Contests', 'Custom Tournaments'].map((type) => (
+                      <Button
+                        key={type}
+                        variant="outline"
+                        size="sm"
+                        className="text-left justify-start"
+                        data-testid={`button-tournament-${type.toLowerCase().replace(' ', '-')}`}
+                      >
+                        <CheckCircle className="h-3 w-3 mr-2" />
+                        {type}
+                      </Button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
@@ -292,28 +321,74 @@ export default function BusinessPricingTest() {
             </Button>
           </div>
 
+          {/* Sales Competition Spotlight */}
+          <div className="mb-8">
+            <Card className="bg-gradient-to-r from-green-50 via-emerald-50 to-green-50 border-green-300 shadow-lg">
+              <CardHeader className="text-center">
+                <div className="mx-auto mb-3 p-3 bg-green-100 rounded-full w-fit">
+                  <Target className="h-8 w-8 text-green-600" />
+                </div>
+                <CardTitle className="text-2xl text-green-900">Sales Competition Tournaments</CardTitle>
+                <CardDescription className="text-green-700">
+                  Turn your sales team into champions with gamified revenue competitions
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-3 gap-6 text-center">
+                  <div>
+                    <h4 className="font-semibold text-green-900 mb-2">Revenue Tournaments</h4>
+                    <ul className="text-sm text-green-800 space-y-1">
+                      <li>Monthly revenue brackets</li>
+                      <li>Quarterly championships</li>
+                      <li>Territory vs. territory</li>
+                      <li>Individual & team divisions</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-green-900 mb-2">Units Sold Competitions</h4>
+                    <ul className="text-sm text-green-800 space-y-1">
+                      <li>Product-specific contests</li>
+                      <li>Volume-based rankings</li>
+                      <li>New customer acquisition</li>
+                      <li>Cross-selling tournaments</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-green-900 mb-2">Advanced Metrics</h4>
+                    <ul className="text-sm text-green-800 space-y-1">
+                      <li>Real-time leaderboards</li>
+                      <li>Performance analytics</li>
+                      <li>Goal achievement tracking</li>
+                      <li>ROI & motivation metrics</li>
+                    </ul>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
           {/* Value Proposition Cards */}
           <div className="grid md:grid-cols-2 gap-6 mb-8">
             <Card className="bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-blue-900">
                   <Users className="h-5 w-5" />
-                  For Employees
+                  For Sales Teams
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="text-left space-y-2 text-blue-800">
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-blue-600" />
-                    30-second registration with company code
+                    Gamified sales competitions increase motivation
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-blue-600" />
-                    Team building through friendly competition
+                    Real-time performance tracking & rankings
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-blue-600" />
-                    Cross-department interaction opportunities
+                    Team building through friendly rivalry
                   </li>
                 </ul>
               </CardContent>
@@ -323,22 +398,22 @@ export default function BusinessPricingTest() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-green-900">
                   <Building2 className="h-5 w-5" />
-                  For HR & Management
+                  For Sales Management
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="text-left space-y-2 text-green-800">
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-green-600" />
-                    5-minute enterprise setup process
+                    Boost team performance & revenue targets
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-green-600" />
-                    Department-based registration codes
+                    Advanced analytics & ROI tracking
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-green-600" />
-                    Analytics & engagement tracking
+                    Automated tournament management
                   </li>
                 </ul>
               </CardContent>
