@@ -1,7 +1,8 @@
-// Keystone AI Avatar - Timeless Geometric Design
+// 🗿 KEYSTONE AI AVATAR - TIMELESS GEOMETRIC DESIGN
 // Professional, domain-aware avatar that will never look dated
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useDomain } from '@/hooks/useDomain';
 
 // =============================================================================
 // 1. KEYSTONE AVATAR COMPONENT
@@ -18,10 +19,12 @@ interface KeystoneAvatarProps {
 export function KeystoneAvatar({ 
   state = 'idle', 
   size = 'medium', 
-  domain = 'education',
+  domain,
   showPulse = true,
   className = '' 
 }: KeystoneAvatarProps) {
+  const { config } = useDomain();
+  const avatarDomain = domain || (config?.type || 'education');
   
   // Size configurations
   const sizes = {
@@ -54,7 +57,7 @@ export function KeystoneAvatar({
     }
   };
   
-  const colors = domainColors[domain] || domainColors.education;
+  const colors = domainColors[avatarDomain as keyof typeof domainColors] || domainColors.education;
   
   // Animation classes based on state
   const getAnimationClass = () => {
@@ -75,7 +78,7 @@ export function KeystoneAvatar({
   };
   
   return (
-    <div className={`inline-flex items-center justify-center ${className}`} data-testid="keystone-avatar">
+    <div className={`inline-flex items-center justify-center ${className}`}>
       <div className="relative">
         {/* Glow effect for special states */}
         {(state === 'success' || state === 'celebrating') && (
@@ -92,23 +95,22 @@ export function KeystoneAvatar({
           viewBox="0 0 48 54"
           className={`${getAnimationClass()} transition-all duration-300 ease-in-out`}
           style={{ filter: state === 'error' ? 'hue-rotate(45deg)' : 'none' }}
-          data-testid={`keystone-avatar-${domain}-${state}`}
         >
           {/* Gradient Definitions */}
           <defs>
-            <linearGradient id={`keystoneGradient-${domain}`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <linearGradient id={`keystoneGradient-${avatarDomain}`} x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor={colors.primary} />
               <stop offset="50%" stopColor={colors.secondary} />
               <stop offset="100%" stopColor={colors.accent} />
             </linearGradient>
             
-            <linearGradient id={`keystoneGlow-${domain}`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <linearGradient id={`keystoneGlow-${avatarDomain}`} x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor={colors.accent} stopOpacity="0.8" />
               <stop offset="100%" stopColor={colors.glow} stopOpacity="0.4" />
             </linearGradient>
             
             {/* Inner glow filter */}
-            <filter id={`innerGlow-${domain}`}>
+            <filter id={`innerGlow-${avatarDomain}`}>
               <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
               <feMerge> 
                 <feMergeNode in="coloredBlur"/>
@@ -129,10 +131,10 @@ export function KeystoneAvatar({
                L12 18 
                L8 18 
                L24 2 Z"
-            fill={`url(#keystoneGradient-${domain})`}
+            fill={`url(#keystoneGradient-${avatarDomain})`}
             stroke={colors.primary}
             strokeWidth={strokeWidth}
-            filter={state === 'success' ? `url(#innerGlow-${domain})` : 'none'}
+            filter={state === 'success' ? `url(#innerGlow-${avatarDomain})` : 'none'}
             className="transition-all duration-300"
           />
           
@@ -148,7 +150,7 @@ export function KeystoneAvatar({
                L16 18 
                L12 18 
                L24 6 Z"
-            fill={`url(#keystoneGlow-${domain})`}
+            fill={`url(#keystoneGlow-${avatarDomain})`}
             opacity="0.6"
             className={state === 'thinking' ? 'animate-pulse' : ''}
           />
@@ -217,7 +219,7 @@ export function AvatarChatMessage({
   message, 
   isTyping = false, 
   avatarState = 'speaking',
-  domain = 'education',
+  domain,
   showAvatar = true 
 }: AvatarChatProps) {
   const [displayedMessage, setDisplayedMessage] = useState('');
@@ -249,7 +251,7 @@ export function AvatarChatMessage({
   }, [message]);
   
   return (
-    <div className="flex items-start gap-3 p-4 bg-white rounded-lg shadow-sm border" data-testid="avatar-chat-message">
+    <div className="flex items-start gap-3 p-4 bg-white rounded-lg shadow-sm border">
       {showAvatar && (
         <div className="flex-shrink-0">
           <KeystoneAvatar 
@@ -271,7 +273,7 @@ export function AvatarChatMessage({
         
         <div className="text-gray-700 leading-relaxed">
           {currentState === 'thinking' ? (
-            <div className="flex items-center gap-1 text-gray-500" data-testid="thinking-indicator">
+            <div className="flex items-center gap-1 text-gray-500">
               <span>Thinking</span>
               <div className="flex gap-1">
                 <div className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
@@ -280,132 +282,9 @@ export function AvatarChatMessage({
               </div>
             </div>
           ) : (
-            <span data-testid="chat-message-text">{displayedMessage}</span>
+            <span>{displayedMessage}</span>
           )}
         </div>
-      </div>
-    </div>
-  );
-}
-
-// =============================================================================
-// 3. AVATAR PREFERENCE PREVIEW COMPONENT
-// =============================================================================
-
-interface AvatarPreferencePreviewProps {
-  avatarEnabled: boolean;
-  domain: 'education' | 'business' | 'coaches';
-  onToggleAvatar: (enabled: boolean) => void;
-}
-
-export function AvatarPreferencePreview({ 
-  avatarEnabled, 
-  domain, 
-  onToggleAvatar 
-}: AvatarPreferencePreviewProps) {
-  const [previewState, setPreviewState] = useState<'idle' | 'thinking' | 'speaking' | 'success'>('idle');
-  
-  const handlePreviewState = (state: typeof previewState) => {
-    setPreviewState(state);
-    setTimeout(() => setPreviewState('idle'), 2000);
-  };
-  
-  const getDomainMessage = () => {
-    switch (domain) {
-      case 'education':
-        return "Good morning. I'm here to assist you with your tournament management needs. How may I help you today?";
-      case 'business':
-        return "Hi there! I'm Keystone AI, your tournament assistant. Ready to create something amazing together?";
-      case 'coaches':
-        return "Hey coach! Let's fire up some epic tournaments and get this competition rolling! What's the game plan?";
-      default:
-        return "Tournament assistance available. How can I help?";
-    }
-  };
-  
-  return (
-    <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-lg border" data-testid="avatar-preference-preview">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Avatar Preferences</h3>
-      
-      {/* Avatar Toggle */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <label className="text-sm font-medium text-gray-700">Enable Avatar</label>
-          <p className="text-xs text-gray-500">Show Keystone AI's visual personality</p>
-        </div>
-        <button
-          onClick={() => onToggleAvatar(!avatarEnabled)}
-          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-            avatarEnabled ? 'bg-blue-600' : 'bg-gray-200'
-          }`}
-          data-testid="button-toggle-avatar"
-        >
-          <span
-            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-              avatarEnabled ? 'translate-x-6' : 'translate-x-1'
-            }`}
-          />
-        </button>
-      </div>
-      
-      {/* Avatar Preview */}
-      {avatarEnabled && (
-        <div className="space-y-4">
-          <div className="text-center">
-            <p className="text-sm font-medium text-gray-700 mb-3">Preview</p>
-            <KeystoneAvatar 
-              state={previewState} 
-              size="large" 
-              domain={domain}
-            />
-          </div>
-          
-          {/* State Demo Buttons */}
-          <div className="flex flex-wrap gap-2 justify-center">
-            <button
-              onClick={() => handlePreviewState('thinking')}
-              className="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 transition-colors"
-              data-testid="button-preview-thinking"
-            >
-              Thinking
-            </button>
-            <button
-              onClick={() => handlePreviewState('speaking')}
-              className="px-3 py-1 text-xs bg-green-100 text-green-700 rounded-full hover:bg-green-200 transition-colors"
-              data-testid="button-preview-speaking"
-            >
-              Speaking
-            </button>
-            <button
-              onClick={() => handlePreviewState('success')}
-              className="px-3 py-1 text-xs bg-yellow-100 text-yellow-700 rounded-full hover:bg-yellow-200 transition-colors"
-              data-testid="button-preview-success"
-            >
-              Success
-            </button>
-          </div>
-          
-          {/* Sample Message */}
-          <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-            <p className="text-xs text-gray-600 mb-2">Sample interaction:</p>
-            <AvatarChatMessage
-              message={getDomainMessage()}
-              domain={domain}
-              showAvatar={true}
-              avatarState="speaking"
-            />
-          </div>
-        </div>
-      )}
-      
-      {/* Domain Information */}
-      <div className="mt-6 p-3 bg-blue-50 rounded-lg">
-        <p className="text-xs font-medium text-blue-800 mb-1">Domain: {domain}</p>
-        <p className="text-xs text-blue-600">
-          {domain === 'education' && 'Professional tone for educational environments'}
-          {domain === 'business' && 'Friendly, helpful approach for business users'}
-          {domain === 'coaches' && 'Energetic, community-focused personality'}
-        </p>
       </div>
     </div>
   );
