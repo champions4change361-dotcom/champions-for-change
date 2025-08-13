@@ -205,12 +205,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   await setupAuth(app);
 
   // Server-side Miller VLC Demo route for district firewall compatibility
-  // Multiple route variations to bypass firewall URL filtering
-  app.get('/miller-vlc-demo', (req, res) => {
-    res.redirect('/demo');
-  });
-  
-  app.get('/demo', (req, res) => {
+  // Handle as query parameter to bypass URL path filtering
+  app.get('/', (req, res) => {
+    if (req.query.demo === 'miller' || req.query.vlc === 'true') {
     res.send(\`
 <!DOCTYPE html>
 <html lang="en">
@@ -324,6 +321,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 </body>
 </html>
     \`);
+      return;
+    }
+    
+    // Continue with normal routing for other requests
+    res.sendFile('index.html', { root: './dist' });
   });
   
   // Setup domain-aware routes
