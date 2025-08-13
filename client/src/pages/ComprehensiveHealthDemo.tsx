@@ -8,9 +8,80 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertTriangle, Activity, Shield, TrendingDown, Heart, Zap, Users, ClipboardCheck, Stethoscope, Trophy, Target, Timer } from "lucide-react";
 
+// Types for comprehensive sports data
+interface BasePlayer {
+  name: string;
+  jersey: string;
+  grade: number;
+  injuryRisk: number;
+  performanceTrend: number;
+}
+
+interface FootballPlayer extends BasePlayer {
+  position: string;
+}
+
+interface WrestlingPlayer extends BasePlayer {
+  weightClass: string;
+}
+
+interface VolleyballPlayer extends BasePlayer {
+  position: string;
+}
+
+interface TrackPlayer extends BasePlayer {
+  events: string;
+}
+
+interface GameResult {
+  opponent: string;
+  score: string;
+  date: string;
+  injuries: number;
+}
+
+interface TournamentResult {
+  tournament: string;
+  placement: string;
+  date: string;
+  injuries: number;
+}
+
+interface MatchResult {
+  opponent: string;
+  score: string;
+  date: string;
+  injuries: number;
+}
+
+interface MeetResult {
+  meet: string;
+  placement: string;
+  date: string;
+  injuries: number;
+}
+
+interface SportData {
+  name: string;
+  season: string;
+  teams: string[];
+  players: BasePlayer[];
+  recentGames?: GameResult[];
+  recentTournaments?: TournamentResult[];
+  recentMatches?: MatchResult[];
+  recentMeets?: MeetResult[];
+}
+
+type SportsDataType = {
+  football: SportData & { players: FootballPlayer[]; recentGames: GameResult[] };
+  wrestling: SportData & { players: WrestlingPlayer[]; recentTournaments: TournamentResult[] };
+  volleyball: SportData & { players: VolleyballPlayer[]; recentMatches: MatchResult[] };
+  track: SportData & { players: TrackPlayer[]; recentMeets: MeetResult[] };
+};
+
 // Mock comprehensive sports data for Athletic Director demo
-const generateComprehensiveSportsData = () => {
-  const sports = {
+const generateComprehensiveSportsData = (): SportsDataType => {
+  const sports: SportsDataType = {
     football: {
       name: "Football",
       season: "Fall 2024",
@@ -137,12 +208,12 @@ const generateAIRecommendations = (player: any, sport: string) => {
 
 export default function ComprehensiveHealthDemo() {
   const [sportsData] = useState(generateComprehensiveSportsData());
-  const [selectedSport, setSelectedSport] = useState("football");
-  const [selectedPlayer, setSelectedPlayer] = useState(null);
+  const [selectedSport, setSelectedSport] = useState<keyof SportsDataType>("football");
+  const [selectedPlayer, setSelectedPlayer] = useState<BasePlayer | null>(null);
   const [viewMode, setViewMode] = useState("overview");
 
   const currentSport = sportsData[selectedSport];
-  const allPlayers = Object.values(sportsData).flatMap(sport => sport.players);
+  const allPlayers: BasePlayer[] = Object.values(sportsData).flatMap(sport => sport.players as BasePlayer[]);
   const highRiskPlayers = allPlayers.filter(p => p.injuryRisk > 6);
   const decliningPlayers = allPlayers.filter(p => p.performanceTrend < -10);
 
@@ -199,7 +270,7 @@ export default function ComprehensiveHealthDemo() {
 
         {/* Controls */}
         <div className="mb-6 flex gap-4">
-          <Select value={selectedSport} onValueChange={setSelectedSport}>
+          <Select value={selectedSport} onValueChange={(value: string) => setSelectedSport(value as keyof SportsDataType)}>
             <SelectTrigger className="w-48 bg-white/10 border-white/20 text-white">
               <SelectValue />
             </SelectTrigger>
@@ -262,17 +333,27 @@ export default function ComprehensiveHealthDemo() {
                     <div className="mt-4">
                       <h4 className="font-semibold mb-2">Recent Competition Results</h4>
                       <div className="space-y-2">
-                        {(currentSport.recentGames || currentSport.recentTournaments || currentSport.recentMatches || currentSport.recentMeets)?.map((result, index) => (
-                          <div key={index} className="p-2 bg-white/5 rounded text-xs">
-                            <div className="flex justify-between">
-                              <span>{result.opponent || result.tournament || result.meet}</span>
-                              <span>{result.score || result.placement}</span>
+                        {(() => {
+                          const results = currentSport.recentGames || currentSport.recentTournaments || currentSport.recentMatches || currentSport.recentMeets;
+                          return results?.map((result, index) => (
+                            <div key={index} className="p-2 bg-white/5 rounded text-xs">
+                              <div className="flex justify-between">
+                                <span>
+                                  {'opponent' in result ? result.opponent : 
+                                   'tournament' in result ? result.tournament : 
+                                   'meet' in result ? result.meet : ''}
+                                </span>
+                                <span>
+                                  {'score' in result ? result.score : 
+                                   'placement' in result ? result.placement : ''}
+                                </span>
+                              </div>
+                              <div className="text-blue-200 mt-1">
+                                {result.date} • {result.injuries} injuries
+                              </div>
                             </div>
-                            <div className="text-blue-200 mt-1">
-                              {result.date} • {result.injuries} injuries
-                            </div>
-                          </div>
-                        ))}
+                          ));
+                        })()}
                       </div>
                     </div>
                   </div>
@@ -296,7 +377,11 @@ export default function ComprehensiveHealthDemo() {
                         <div>
                           <div className="font-semibold">{player.name}</div>
                           <div className="text-sm text-blue-200">
-                            #{player.jersey} • {player.position || player.weightClass || player.events}
+                            #{player.jersey} • {
+                              'position' in player ? (player as FootballPlayer | VolleyballPlayer).position :
+                              'weightClass' in player ? (player as WrestlingPlayer).weightClass :
+                              'events' in player ? (player as TrackPlayer).events : ''
+                            }
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
@@ -428,7 +513,7 @@ export default function ComprehensiveHealthDemo() {
                               <div className="font-semibold">{player.name}</div>
                               <div className="text-sm text-red-200">
                                 Sport: {Object.keys(sportsData).find(sport => 
-                                  sportsData[sport].players.includes(player)
+                                  sportsData[sport as keyof SportsDataType].players.includes(player as any)
                                 )?.toUpperCase()}
                               </div>
                             </div>
@@ -504,19 +589,25 @@ export default function ComprehensiveHealthDemo() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      {(sport.recentGames || sport.recentTournaments || sport.recentMatches || sport.recentMeets)?.map((result, index) => (
-                        <div key={index} className="p-2 bg-white/5 rounded">
-                          <div className="font-semibold text-sm">
-                            {result.opponent || result.tournament || result.meet}
+                      {(() => {
+                        const results = sport.recentGames || sport.recentTournaments || sport.recentMatches || sport.recentMeets;
+                        return results?.map((result, index) => (
+                          <div key={index} className="p-2 bg-white/5 rounded">
+                            <div className="font-semibold text-sm">
+                              {'opponent' in result ? result.opponent : 
+                               'tournament' in result ? result.tournament : 
+                               'meet' in result ? result.meet : ''}
+                            </div>
+                            <div className="text-xs text-blue-200">
+                              {'score' in result ? result.score : 
+                               'placement' in result ? result.placement : ''} • {result.date}
+                            </div>
+                            <div className="text-xs mt-1">
+                              Injuries: {result.injuries}
+                            </div>
                           </div>
-                          <div className="text-xs text-blue-200">
-                            {result.score || result.placement} • {result.date}
-                          </div>
-                          <div className="text-xs mt-1">
-                            Injuries: {result.injuries}
-                          </div>
-                        </div>
-                      ))}
+                        ));
+                      })()}
                     </div>
                   </CardContent>
                 </Card>

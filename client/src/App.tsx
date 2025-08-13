@@ -6,7 +6,7 @@ import { Switch, Route, Router } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useDomain } from "@/hooks/useDomain";
 import DomainNavigation from "@/components/DomainNavigation";
-import Home from './pages/home';
+import Home from './pages/Home';
 import Landing from './pages/Landing';
 import DonationFlow from './pages/DonationFlow';
 import PaymentMethods from './pages/PaymentMethods';
