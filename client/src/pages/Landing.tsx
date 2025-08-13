@@ -88,6 +88,10 @@ export default function Landing() {
                 size="lg" 
                 variant="outline"
                 className="border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/10 hover:border-yellow-400 px-8 py-4 text-lg order-1 md:order-2"
+                onClick={() => {
+                  const impactSection = document.getElementById('impact-mission');
+                  impactSection?.scrollIntoView({ behavior: 'smooth' });
+                }}
                 data-testid="button-learn-more"
               >
                 Learn More
@@ -95,7 +99,7 @@ export default function Landing() {
               <Button 
                 size="lg" 
                 className="bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-bold px-8 py-4 text-lg order-2 md:order-1"
-                onClick={() => window.location.href = "/api/login"}
+                onClick={() => window.location.href = "/register"}
                 data-testid="button-get-started"
               >
                 Start Supporting Students
@@ -105,7 +109,7 @@ export default function Landing() {
         </div>
         
         {/* Impact Mission Command Center */}
-        <div className="bg-slate-800 border border-emerald-500/30 rounded-2xl p-8 mb-12">
+        <div id="impact-mission" className="bg-slate-800 border border-emerald-500/30 rounded-2xl p-8 mb-12">
           <div className="text-center mb-8">
             <h3 className="text-3xl font-bold text-white mb-4">Our Impact Mission</h3>
             <p className="text-slate-300 text-lg max-w-3xl mx-auto">

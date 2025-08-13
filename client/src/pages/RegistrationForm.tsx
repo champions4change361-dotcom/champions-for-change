@@ -275,13 +275,13 @@ export default function RegistrationFormPage() {
                             <li key={idx}>• {req}</li>
                           ))}
                         </ul>
-                        {info.note && (
+                        {'note' in info && info.note && (
                           <p className="text-xs text-blue-600 italic mt-2">{info.note}</p>
                         )}
                         {isDisabled && (
                           <div className="bg-yellow-50 border border-yellow-200 rounded p-2 mt-2">
                             <p className="text-xs text-yellow-700 font-medium">
-                              {info.redirectMessage}
+                              {'redirectMessage' in info ? info.redirectMessage : 'Registration currently limited'}
                             </p>
                           </div>
                         )}
@@ -567,7 +567,8 @@ export default function RegistrationFormPage() {
           )}
         </form>
         
-        {/* Educational Mission Focus - District Registration Only */}
+        {/* Educational Mission Focus - Show only after form completion or at bottom */}
+        {step === 5 && (
         <div className="mt-12 bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-xl p-8">
           <div className="text-center mb-6">
             <h3 className="text-xl font-semibold text-green-800 mb-2">
@@ -619,6 +620,7 @@ export default function RegistrationFormPage() {
             </Card>
           </div>
         </div>
+        )}
       </div>
     </div>
   );
