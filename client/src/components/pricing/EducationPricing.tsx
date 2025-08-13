@@ -65,9 +65,9 @@ export function EducationPricingSection() {
         'FERPA compliance',
         'SLA guarantee'
       ],
-      cta: 'Contact Sales',
+      cta: 'Get District Access',
       buttonColor: 'bg-purple-600 hover:bg-purple-700',
-      note: 'Annual option: $3,990/year. Full enterprise support and custom development',
+      note: 'Annual option: $3,990/year. Setup & training included!',
       icon: Building,
       popular: false,
       badge: 'Enterprise'

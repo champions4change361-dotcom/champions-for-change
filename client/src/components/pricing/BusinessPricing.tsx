@@ -65,13 +65,13 @@ export function BusinessPricingSection() {
         'Advanced user management',
         'Custom reporting dashboard'
       ],
-      cta: 'Contact Sales',
+      cta: 'Get Enterprise Access',
       buttonColor: 'bg-purple-600 hover:bg-purple-700',
       icon: Building,
       popular: false,
       bestFor: 'Large corporations, enterprise needs',
       badge: 'Enterprise',
-      note: 'Annual option: $1,990/year (save $398)'
+      note: 'Annual option: $1,990/year (save $398). Setup included!'
     }
   ];
 
