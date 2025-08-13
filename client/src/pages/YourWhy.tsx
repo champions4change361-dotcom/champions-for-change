@@ -15,8 +15,95 @@ import {
   ArrowRight,
   Compass
 } from 'lucide-react';
+import { useDomain } from '@/hooks/useDomain';
 
 export default function YourWhy() {
+  const { config, isFantasyDomain, isProDomain, isSchoolDomain } = useDomain();
+
+  // Determine messaging based on domain
+  const getHeroContent = () => {
+    if (isFantasyDomain()) {
+      return {
+        title: "Your Fantasy Fun, Their Future",
+        subtitle: "Every game you play supports student educational opportunities. No cost to you, maximum impact for them.",
+        description: "We know you're here for the fantasy sports thrills. But what if your passion for competition could also champion real change? Every league, every trade, every victory dance helps fund educational trips for students who need them most."
+      };
+    }
+    
+    if (isProDomain()) {
+      return {
+        title: "Your Success, Their Dreams",
+        subtitle: "Join the business community that's making tournament management profitable and purposeful.",
+        description: "You're building something great in business. But what if your success could also build futures? Our enterprise platform doesn't just manage your tournaments - it connects your achievements to educational impact that matters."
+      };
+    }
+    
+    // Default school domain messaging
+    return {
+      title: "Your Why",
+      subtitle: "We know. Central office says it again. \"Don't forget your why.\" You might roll your eyes. But deep down, through all the challenges, you still have that why. That drive to do good.",
+      description: "Most of us in education have heard \"your why\" so many times we could groan. But we actually do have a why, even through the madness of increasing demands and challenging conditions. It's almost always intrinsic - that authentic desire to do good."
+    };
+  };
+
+  const getMissionContent = () => {
+    if (isFantasyDomain()) {
+      return {
+        impactTitle: "How Your Free Fantasy Leagues Fund Real Dreams",
+        impactDescription: "Our fantasy platform is completely free because generous districts and businesses cover the costs. Every league you join, every player you draft, every trade you make helps generate the data and community that makes our paid platforms valuable. Your engagement directly supports our mission.",
+        supportTitle: "What Your Fantasy Participation Supports"
+      };
+    }
+    
+    if (isProDomain()) {
+      return {
+        impactTitle: "How Your Business Success Creates Educational Impact",
+        impactDescription: "When you choose our enterprise tournament platform, you're not just investing in professional event management. You're joining a business community that believes success should serve something greater than profit margins.",
+        supportTitle: "What Your Business Partnership Supports"
+      };
+    }
+    
+    return {
+      impactTitle: "The Why Behind Champions for Change",
+      impactDescription: "39+ years of coaching experience. We've seen the look in a student's eyes when they realize they can't afford the educational trip that could change their perspective. We've watched talented kids miss opportunities because of circumstances beyond their control.",
+      supportTitle: "What Your District Partnership Supports"
+    };
+  };
+
+  const getCallToAction = () => {
+    if (isFantasyDomain()) {
+      return {
+        title: "Ready to Play Fantasy Sports That Fund Futures?",
+        description: "Join the fantasy community where your competition creates educational opportunities.",
+        buttonText: "Join Free Fantasy Leagues",
+        secondaryText: "Support Our Mission",
+        pricing: "100% Free - Supported by Community"
+      };
+    }
+    
+    if (isProDomain()) {
+      return {
+        title: "Ready to Lead Business Events That Leave a Legacy?",
+        description: "Join the enterprise community that turns professional success into educational impact.",
+        buttonText: "Start Enterprise Partnership",
+        secondaryText: "View Enterprise Options",
+        pricing: "Custom Enterprise Pricing - Maximum Impact"
+      };
+    }
+    
+    return {
+      title: "Ready to Turn Your Tournaments Into Educational Opportunities?",
+      description: "Join the districts that are saving money, improving their athletic programs, and funding student trips - all with one decision.",
+      buttonText: "Get Started Today",
+      secondaryText: "See All Options",
+      pricing: "Champions District: $2,490/year (locked through 2027)"
+    };
+  };
+
+  const heroContent = getHeroContent();
+  const missionContent = getMissionContent();
+  const ctaContent = getCallToAction();
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-green-50 to-blue-50">
       {/* Header */}
@@ -38,13 +125,15 @@ export default function YourWhy() {
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-center mb-6">
             <Compass className="h-12 w-12 text-green-600 mr-4" />
-            <h1 className="text-5xl font-bold text-gray-900">Your Why</h1>
+            <h1 className="text-5xl font-bold text-gray-900">{heroContent.title}</h1>
           </div>
           
           <p className="text-xl text-gray-700 mb-8 leading-relaxed">
-            We know. Central office says it again. "Don't forget your why." You roll your eyes. 
-            But deep down, through all the madness of demands and barely decent wages, 
-            you still have that why. That intrinsic desire to do good.
+            {heroContent.subtitle}
+          </p>
+          
+          <p className="text-lg text-gray-600 mb-8 leading-relaxed max-w-3xl mx-auto">
+            {heroContent.description}
           </p>
           
           <p className="text-2xl font-semibold text-green-700 mb-12">
@@ -60,15 +149,13 @@ export default function YourWhy() {
             <CardHeader className="bg-green-50 border-b border-green-200">
               <CardTitle className="text-2xl text-green-800 flex items-center">
                 <Heart className="h-6 w-6 mr-3 text-red-500" />
-                The Why Behind Champions for Change
+                {missionContent.impactTitle}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-8">
               <div className="prose prose-lg max-w-none">
                 <p className="text-gray-700 leading-relaxed mb-6">
-                  <strong>39+ years of coaching experience.</strong> We've seen the look in a student's eyes 
-                  when they realize they can't afford the educational trip that could change their perspective. 
-                  We've watched talented kids miss opportunities because of circumstances beyond their control.
+                  {missionContent.impactDescription}
                 </p>
                 
                 <p className="text-gray-700 leading-relaxed mb-6">
@@ -78,14 +165,19 @@ export default function YourWhy() {
                 </p>
                 
                 <p className="text-gray-700 leading-relaxed mb-6">
-                  <strong>Every tournament you run</strong> on our platform doesn't just organize your event - 
+                  <strong>Every interaction on our platform</strong> doesn't just serve your immediate needs - 
                   it funds a <span className="font-semibold text-green-700">$2,600+ educational trip</span> for 
                   an underprivileged middle school student in Corpus Christi, Texas.
                 </p>
                 
                 <div className="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-400 mt-8">
                   <p className="text-blue-800 italic text-lg">
-                    "Your tournament chaos becomes their life-changing opportunity."
+                    {isFantasyDomain() 
+                      ? "Your fantasy fun becomes their life-changing opportunity."
+                      : isProDomain()
+                      ? "Your business success becomes their life-changing opportunity."  
+                      : "Your tournament expertise becomes their life-changing opportunity."
+                    }
                   </p>
                 </div>
               </div>
@@ -157,7 +249,7 @@ export default function YourWhy() {
                 <div>
                   <h4 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
                     <Heart className="h-5 w-5 text-red-500 mr-2" />
-                    The Mission Impact
+                    {missionContent.supportTitle}
                   </h4>
                   <ul className="space-y-3 text-gray-700">
                     <li className="flex items-start">
@@ -191,30 +283,78 @@ export default function YourWhy() {
               </div>
               
               <div className="prose prose-lg max-w-none text-center">
-                <p className="text-gray-700 leading-relaxed mb-6">
-                  We know you're tired of being told about your why by people in suits who haven't 
-                  been in a classroom in decades. We know you're frustrated with systems that 
-                  promise the world and deliver complicated nonsense.
-                </p>
-                
-                <p className="text-gray-700 leading-relaxed mb-6">
-                  <strong>We're different because we're you.</strong> We're coaches. We've run 
-                  tournaments with clipboards and chaos. We've dealt with angry parents and 
-                  missing referees and scoreboards that don't work.
-                </p>
-                
-                <p className="text-xl font-semibold text-green-700 mb-6">
-                  We built this because we needed it. We made it fund education because that's our why.
-                </p>
-                
-                <p className="text-gray-700 leading-relaxed">
-                  Your why might be seeing kids succeed. Or giving them opportunities they wouldn't 
-                  have otherwise. Or just making sure your tournaments don't drive you completely insane.
-                </p>
-                
-                <p className="text-lg text-blue-700 font-medium mt-6">
-                  Whatever your why is, this platform serves it while funding ours.
-                </p>
+                {isFantasyDomain() ? (
+                  <>
+                    <p className="text-gray-700 leading-relaxed mb-6">
+                      We know fantasy sports are supposed to be just fun. And they are! But what if 
+                      your fun could also do some good? You don't have to change anything about how 
+                      you play - just knowing your participation helps real students matters.
+                    </p>
+                    
+                    <p className="text-gray-700 leading-relaxed mb-6">
+                      <strong>We're different because we're educators.</strong> We built fantasy leagues 
+                      that are completely free because we believe competition should be accessible to 
+                      everyone, while also serving a greater purpose.
+                    </p>
+                    
+                    <p className="text-xl font-semibold text-green-700 mb-6">
+                      We built this because fantasy should be fun AND meaningful.
+                    </p>
+                    
+                    <p className="text-lg text-blue-700 font-medium mt-6">
+                      Your fantasy passion fuels real-world educational opportunities.
+                    </p>
+                  </>
+                ) : isProDomain() ? (
+                  <>
+                    <p className="text-gray-700 leading-relaxed mb-6">
+                      We know business events are about results, efficiency, and return on investment. 
+                      You need platforms that work flawlessly and serve your professional goals. 
+                      We get that because we're business people too.
+                    </p>
+                    
+                    <p className="text-gray-700 leading-relaxed mb-6">
+                      <strong>We're different because we're also educators.</strong> We built enterprise 
+                      tournament management that delivers professional results while also creating 
+                      educational impact that extends far beyond your events.
+                    </p>
+                    
+                    <p className="text-xl font-semibold text-green-700 mb-6">
+                      We built this because business success should serve something greater.
+                    </p>
+                    
+                    <p className="text-lg text-blue-700 font-medium mt-6">
+                      Your business achievements become their educational opportunities.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-gray-700 leading-relaxed mb-6">
+                      We know you're tired of hearing about "your why" from people who haven't 
+                      been in your shoes. We know you're frustrated with systems that promise 
+                      the world and deliver complicated nonsense.
+                    </p>
+                    
+                    <p className="text-gray-700 leading-relaxed mb-6">
+                      <strong>We're different because we're you.</strong> We're coaches. We've run 
+                      tournaments with clipboards and chaos. We've dealt with all the challenges 
+                      that come with managing competitive events in education.
+                    </p>
+                    
+                    <p className="text-xl font-semibold text-green-700 mb-6">
+                      We built this because we needed it. We made it fund education because that's our why.
+                    </p>
+                    
+                    <p className="text-gray-700 leading-relaxed">
+                      Your why might be seeing kids succeed, giving them opportunities they wouldn't 
+                      have otherwise, or just making sure your tournaments run smoothly.
+                    </p>
+                    
+                    <p className="text-lg text-blue-700 font-medium mt-6">
+                      Whatever your why is, this platform serves it while funding ours.
+                    </p>
+                  </>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -224,30 +364,34 @@ export default function YourWhy() {
             <CardContent className="p-8 text-center">
               <Award className="h-16 w-16 text-green-600 mx-auto mb-6" />
               <h3 className="text-3xl font-bold text-gray-900 mb-4">
-                Ready to Turn Your Tournaments Into Educational Opportunities?
+                {ctaContent.title}
               </h3>
               <p className="text-xl text-gray-700 mb-8 max-w-2xl mx-auto">
-                Join the districts that are saving money, improving their athletic programs, 
-                and funding student trips - all with one decision.
+                {ctaContent.description}
               </p>
               
               <div className="space-y-4">
                 <div className="text-lg text-green-700 font-semibold mb-4">
-                  Champions District: $2,490/year (locked through 2027)
+                  {ctaContent.pricing}
                 </div>
-                <div className="text-sm text-gray-600 mb-6">
-                  Early adopter pricing - increases to $4,990-6,990/year when competitors arrive
-                </div>
+                {!isFantasyDomain() && (
+                  <div className="text-sm text-gray-600 mb-6">
+                    {isProDomain() 
+                      ? "Flexible enterprise solutions that scale with your success"
+                      : "Early adopter pricing - increases to $4,990-6,990/year when competitors arrive"
+                    }
+                  </div>
+                )}
                 
                 <div className="flex justify-center space-x-4">
                   <Link href="/">
                     <Button size="lg" className="bg-green-600 hover:bg-green-700 text-white px-8 py-3">
-                      Get Started Today
+                      {ctaContent.buttonText}
                     </Button>
                   </Link>
                   <Link href="/pricing">
                     <Button size="lg" variant="outline" className="border-green-600 text-green-600 hover:bg-green-50 px-8 py-3">
-                      See All Options
+                      {ctaContent.secondaryText}
                     </Button>
                   </Link>
                 </div>
