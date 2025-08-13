@@ -7,74 +7,80 @@ import { Check, Gamepad2, Trophy, Users, Star, Zap, Crown } from 'lucide-react';
 export function CoachesLoungePricingSection() {
   const coachesLoungeTiers = [
     {
-      name: 'Community',
+      name: 'Freemium',
       price: 'Free',
-      description: 'Perfect for small groups and friends',
+      description: 'Perfect for casual users and small tournaments',
       features: [
+        'Up to 3 tournaments per year',
+        'Basic bracket management',
+        'Score tracking',
+        'Community support',
         'Join unlimited leagues',
-        'Create 2 leagues per month',
-        'Up to 12 participants per league',
-        'Basic scoring & leaderboards',
-        'Mobile access',
-        'Email notifications',
-        'Community chat',
-        'Standard support'
+        'Create 2 leagues per month'
       ],
       cta: 'Join Free',
       buttonColor: 'bg-green-600 hover:bg-green-700',
       icon: Users,
       popular: false,
-      note: 'Perfect for friends and small office groups',
-      badge: 'Always Free'
+      note: 'After 3 tournaments, purchase tournament credits or upgrade',
+      badge: 'Free'
     },
     {
-      name: 'Commissioner Pro',
-      price: '$19',
-      period: '/month',
-      description: 'Advanced features for serious league commissioners',
+      name: 'Tournament Credits',
+      price: '$15',
+      period: '/tournament',
+      description: 'Pay-per-tournament for occasional organizers',
       features: [
-        'Everything in Community',
-        'Unlimited league creation',
-        'Up to 50 participants per league',
-        'Advanced analytics & reports',
-        'Custom scoring rules',
-        'Prize tracking tools',
-        'Priority support',
-        'Custom league branding',
-        'Export capabilities',
-        'Advanced chat features'
+        'Full tournament features per credit',
+        'No monthly commitment',
+        'Advanced bracket management',
+        'Email support',
+        'League creation tools'
       ],
-      cta: 'Upgrade to Pro',
+      cta: 'Buy Credits',
+      buttonColor: 'bg-green-600 hover:bg-green-700',
+      icon: Star,
+      popular: false,
+      note: 'Perfect for seasonal organizers'
+    },
+    {
+      name: 'Monthly Pro',
+      price: '$99',
+      period: '/month',
+      description: 'Regular tournament organizers and coaches',
+      features: [
+        'Unlimited tournaments',
+        'Advanced analytics',
+        'Team management',
+        'Priority support',
+        'Custom branding',
+        'Unlimited league creation'
+      ],
+      cta: 'Start Monthly',
       buttonColor: 'bg-purple-600 hover:bg-purple-700',
       icon: Crown,
       popular: true,
       note: 'Most commissioners choose this for advanced features',
-      badge: 'Most Popular'
+      badge: 'Popular'
     },
     {
-      name: 'Enterprise Leagues',
-      price: '$99',
-      period: '/month',
-      description: 'White-label solution for large organizations',
+      name: 'Annual Pro',
+      price: '$990',
+      period: '/year',
+      description: 'Best value for active tournament organizers',
       features: [
-        'Everything in Commissioner Pro',
-        'Unlimited participants',
-        'White-label branding',
-        'Custom subdomain',
+        'Everything in Monthly Pro',
+        'Save $198 per year',
+        'Enhanced analytics',
         'API access',
-        'SSO integration',
-        'Dedicated account manager',
-        'Phone support',
-        'Custom integrations',
-        'Advanced user management',
-        'Detailed reporting suite'
+        'Priority phone support'
       ],
-      cta: 'Contact Sales',
-      buttonColor: 'bg-blue-600 hover:bg-blue-700',
-      icon: Zap,
+      cta: 'Save with Annual',
+      buttonColor: 'bg-green-600 hover:bg-green-700',
+      icon: Star,
       popular: false,
-      note: 'Perfect for large corporations and organizations',
-      badge: 'Enterprise'
+      note: 'Save $198 compared to monthly billing',
+      badge: 'Best Value'
     }
   ];
 
@@ -95,7 +101,7 @@ export function CoachesLoungePricingSection() {
           </p>
         </div>
         
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-4 gap-6">
           {coachesLoungeTiers.map((tier) => {
             const IconComponent = tier.icon;
             return (

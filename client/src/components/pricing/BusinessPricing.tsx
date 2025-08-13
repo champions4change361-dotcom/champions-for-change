@@ -7,68 +7,79 @@ import { Check, Building, Star } from 'lucide-react';
 export function BusinessPricingSection() {
   const businessTiers = [
     {
-      name: 'Starter',
+      name: 'Freemium',
       price: 'Free',
-      description: 'Perfect for small office competitions and hackathons',
+      description: 'Perfect for casual users and small business tournaments',
       features: [
-        'Up to 5 tournaments per month',
+        'Up to 3 tournaments per year',
         'Basic bracket management',
-        'Score tracking & leaderboards',
-        'Email notifications',
-        'Registration fee collection (you keep 100%)',
-        'Team management tools',
+        'Score tracking',
+        'Community support',
         'Mobile access'
       ],
       cta: 'Start Free',
       buttonColor: 'bg-blue-600 hover:bg-blue-700',
       icon: Building,
       popular: false,
-      bestFor: 'Small teams, one-off events'
+      bestFor: 'Small teams, one-off events',
+      badge: 'Free'
     },
     {
-      name: 'Professional',
+      name: 'Tournament Credits',
+      price: '$15',
+      period: '/tournament',
+      description: 'Pay-per-tournament for occasional organizers',
+      features: [
+        'Full tournament features per credit',
+        'No monthly commitment',
+        'Advanced bracket management',
+        'Email support',
+        'Registration fee collection'
+      ],
+      cta: 'Buy Credits',
+      buttonColor: 'bg-green-600 hover:bg-green-700',
+      icon: Star,
+      popular: false,
+      bestFor: 'Seasonal organizers'
+    },
+    {
+      name: 'Monthly Pro',
       price: '$99',
       period: '/month',
-      description: 'Advanced features for growing businesses and regular competitions',
+      description: 'Regular tournament organizers and coaches',
       features: [
-        'Everything in Starter',
         'Unlimited tournaments',
-        'AI tournament setup assistance',
-        'Advanced analytics & insights',
-        'Custom branding options',
-        'Priority email support',
-        'API access for integrations',
-        'Export capabilities',
-        'Multi-location support'
+        'Advanced analytics',
+        'Team management',
+        'Priority support',
+        'Custom branding',
+        'AI tournament assistance'
       ],
-      cta: 'Upgrade to Pro',
+      cta: 'Start Monthly',
       buttonColor: 'bg-blue-600 hover:bg-blue-700',
       icon: Star,
       popular: true,
-      bestFor: 'Regular events, growing companies'
+      bestFor: 'Regular events, growing companies',
+      badge: 'Popular'
     },
     {
-      name: 'Enterprise',
-      price: '$199',
-      period: '/month',
-      description: 'Complete white-label solution for large organizations',
+      name: 'Annual Pro',
+      price: '$990',
+      period: '/year',
+      description: 'Best value for active tournament organizers',
       features: [
-        'Everything in Professional',
-        'White-label branding',
-        'Custom subdomain (yourcompany.tournaments.pro)',
-        'Dedicated account manager',
-        'Phone support',
-        'Custom integrations',
-        'Advanced user management',
-        'SSO integration',
-        'Custom reporting',
-        'Implementation support'
+        'Everything in Monthly Pro',
+        'Save $198 per year',
+        'Enhanced analytics',
+        'API access',
+        'Priority phone support'
       ],
-      cta: 'Contact Sales',
-      buttonColor: 'bg-purple-600 hover:bg-purple-700',
+      cta: 'Save with Annual',
+      buttonColor: 'bg-green-600 hover:bg-green-700',
       icon: Building,
       popular: false,
-      bestFor: 'Large corporations, white-label needs'
+      bestFor: 'Active organizers',
+      badge: 'Best Value'
     }
   ];
 
@@ -89,7 +100,7 @@ export function BusinessPricingSection() {
           </p>
         </div>
         
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-4 gap-6">
           {businessTiers.map((tier) => {
             const IconComponent = tier.icon;
             return (

@@ -7,49 +7,119 @@ import { Check, GraduationCap, Building, Star } from 'lucide-react';
 export function EducationPricingSection() {
   const educationTiers = [
     {
-      name: 'Foundation',
+      name: 'Freemium',
       price: 'Free',
-      description: 'Perfect for single schools and small tournaments',
+      description: 'Perfect for casual users and small business tournaments',
       features: [
-        'Up to 5 tournaments per month',
+        'Up to 3 tournaments per year',
         'Basic bracket management',
-        'Score tracking & live updates',
-        'Email notifications',
-        'Registration fee collection (you keep 100%)',
+        'Score tracking',
+        'Community support',
         'Tournament donation pages (you keep 100%)',
-        'Mobile-friendly interface',
-        'Community support'
+        'Mobile-friendly interface'
       ],
       cta: 'Get Started Free',
       buttonColor: 'bg-blue-600 hover:bg-blue-700',
-      note: 'Suggested $25 donation per tournament to support student educational trips',
+      note: 'After 3 tournaments, purchase tournament credits or upgrade',
+      icon: GraduationCap,
+      popular: false,
+      badge: 'Free'
+    },
+    {
+      name: 'Tournament Credits',
+      price: '$15',
+      period: '/tournament',
+      description: 'Pay-per-tournament for occasional organizers',
+      features: [
+        'Full tournament features per credit',
+        'No monthly commitment',
+        'Advanced bracket management',
+        'Email support',
+        'Registration fee collection',
+        'Score tracking & live updates'
+      ],
+      cta: 'Buy Credits',
+      buttonColor: 'bg-green-600 hover:bg-green-700',
+      note: 'Perfect for seasonal organizers',
       icon: GraduationCap,
       popular: false
     },
     {
-      name: 'District Enterprise',
-      price: '$399',
+      name: 'Monthly Pro',
+      price: '$99',
       period: '/month',
-      description: 'Complete solution for school districts and large organizations',
+      description: 'Regular tournament organizers and coaches',
       features: [
-        'Everything in Foundation',
         'Unlimited tournaments',
+        'Advanced analytics',
+        'Team management',
+        'Priority support',
+        'Custom branding',
+        'AI tournament assistance'
+      ],
+      cta: 'Start Monthly',
+      buttonColor: 'bg-blue-600 hover:bg-blue-700',
+      icon: Building,
+      popular: false
+    },
+    {
+      name: 'Annual Pro',
+      price: '$990',
+      period: '/year',
+      description: 'Best value for active tournament organizers',
+      features: [
+        'Everything in Monthly Pro',
+        'Save $198 per year',
+        'Enhanced analytics',
+        'API access',
+        'Priority phone support'
+      ],
+      cta: 'Save with Annual',
+      buttonColor: 'bg-green-600 hover:bg-green-700',
+      note: 'Save $198 compared to monthly billing',
+      icon: Star,
+      popular: true,
+      badge: 'Best Value'
+    },
+    {
+      name: 'Champions District',
+      price: '$2,490',
+      period: '/year',
+      description: 'Complete solution for school districts',
+      features: [
+        'Everything in Annual Pro',
         'Multi-school management',
-        'White-label branding with custom domain',
-        'Custom logos and color schemes',
-        'AI tournament setup assistance',
-        'Advanced analytics & reporting',
-        'Multi-organization support',
+        'District-wide analytics',
+        'FERPA compliance',
         'Dedicated account manager',
-        'Priority phone support',
-        'Staff training & onboarding',
-        'Custom integrations available'
+        'Staff training & onboarding'
       ],
       cta: 'Contact Sales',
-      buttonColor: 'bg-green-600 hover:bg-green-700',
+      buttonColor: 'bg-blue-600 hover:bg-blue-700',
       note: 'Includes implementation support and training for your entire district',
       icon: Building,
-      popular: true
+      popular: false,
+      badge: 'Popular'
+    },
+    {
+      name: 'Enterprise District',
+      price: '$3,990',
+      period: '/year',
+      description: 'Enterprise solution for large school districts',
+      features: [
+        'Everything in Champions',
+        'White-label platform',
+        'Custom integrations',
+        'Training included',
+        'SLA guarantee',
+        'Custom development'
+      ],
+      cta: 'Contact Sales',
+      buttonColor: 'bg-purple-600 hover:bg-purple-700',
+      note: 'Full enterprise support and custom development',
+      icon: Building,
+      popular: false,
+      badge: 'Premium'
     }
   ];
 
@@ -70,7 +140,7 @@ export function EducationPricingSection() {
           </p>
         </div>
         
-        <div className="grid lg:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div className="grid lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
           {educationTiers.map((tier) => {
             const IconComponent = tier.icon;
             return (
