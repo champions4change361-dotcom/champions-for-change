@@ -7,15 +7,17 @@ import { Check, Building, Star } from 'lucide-react';
 export function BusinessPricingSection() {
   const businessTiers = [
     {
-      name: 'Freemium',
+      name: 'Starter',
       price: 'Free',
-      description: 'Perfect for casual users and small business tournaments',
+      description: 'Perfect for small offices, one-off hackathons, testing platform',
       features: [
-        'Up to 3 tournaments per year',
+        'Up to 5 tournaments per year',
         'Basic bracket management',
-        'Score tracking',
-        'Community support',
-        'Mobile access'
+        'Registration fee collection',
+        'Score tracking & leaderboards',
+        'Email notifications',
+        'Mobile access',
+        'Community support'
       ],
       cta: 'Start Free',
       buttonColor: 'bg-blue-600 hover:bg-blue-700',
@@ -25,61 +27,51 @@ export function BusinessPricingSection() {
       badge: 'Free'
     },
     {
-      name: 'Tournament Credits',
-      price: '$15',
-      period: '/tournament',
-      description: 'Pay-per-tournament for occasional organizers',
-      features: [
-        'Full tournament features per credit',
-        'No monthly commitment',
-        'Advanced bracket management',
-        'Email support',
-        'Registration fee collection'
-      ],
-      cta: 'Buy Credits',
-      buttonColor: 'bg-green-600 hover:bg-green-700',
-      icon: Star,
-      popular: false,
-      bestFor: 'Seasonal organizers'
-    },
-    {
-      name: 'Monthly Pro',
+      name: 'Professional',
       price: '$99',
       period: '/month',
-      description: 'Regular tournament organizers and coaches',
+      description: 'Regular corporate events, growing companies',
       features: [
         'Unlimited tournaments',
-        'Advanced analytics',
-        'Team management',
-        'Priority support',
-        'Custom branding',
-        'AI tournament assistance'
+        'AI tournament assistance',
+        'Advanced analytics & insights',
+        'Custom branding options',
+        'Priority email support',
+        'Team management tools',
+        'Export capabilities',
+        'Multi-location support'
       ],
-      cta: 'Start Monthly',
-      buttonColor: 'bg-blue-600 hover:bg-blue-700',
+      cta: 'Start Professional',
+      buttonColor: 'bg-green-600 hover:bg-green-700',
       icon: Star,
       popular: true,
       bestFor: 'Regular events, growing companies',
-      badge: 'Popular'
+      badge: 'Most Popular',
+      note: 'Annual option: $990/year (save $198)'
     },
     {
-      name: 'Annual Pro',
-      price: '$990',
-      period: '/year',
-      description: 'Best value for active tournament organizers',
+      name: 'Enterprise',
+      price: '$199',
+      period: '/month',
+      description: 'Large corporations, enterprise-wide tournaments',
       features: [
-        'Everything in Monthly Pro',
-        'Save $198 per year',
-        'Enhanced analytics',
-        'API access',
-        'Priority phone support'
+        'Everything in Professional',
+        'White-label branding',
+        'Custom subdomain (yourcompany.tournaments.pro)',
+        'API access for integrations',
+        'Dedicated account manager',
+        'SSO integration',
+        'Priority phone support',
+        'Advanced user management',
+        'Custom reporting dashboard'
       ],
-      cta: 'Save with Annual',
-      buttonColor: 'bg-green-600 hover:bg-green-700',
+      cta: 'Contact Sales',
+      buttonColor: 'bg-purple-600 hover:bg-purple-700',
       icon: Building,
       popular: false,
-      bestFor: 'Active organizers',
-      badge: 'Best Value'
+      bestFor: 'Large corporations, enterprise needs',
+      badge: 'Enterprise',
+      note: 'Annual option: $1,990/year (save $398)'
     }
   ];
 
@@ -95,12 +87,12 @@ export function BusinessPricingSection() {
             Professional Tournament Management
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Scale from office competitions to enterprise-wide tournaments. 
+            Start with 5 free tournaments, then scale to unlimited corporate events. 
             Grow with plans that match your business needs.
           </p>
         </div>
         
-        <div className="grid lg:grid-cols-4 gap-6">
+        <div className="grid lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
           {businessTiers.map((tier) => {
             const IconComponent = tier.icon;
             return (
