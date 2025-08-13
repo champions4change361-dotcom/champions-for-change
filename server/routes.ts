@@ -208,7 +208,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Handle as query parameter to bypass URL path filtering
   app.get('/', (req, res) => {
     if (req.query.demo === 'miller' || req.query.vlc === 'true') {
-    res.send(\`
+      res.send(`
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -320,7 +320,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     </div>
 </body>
 </html>
-    \`);
+      `);
       return;
     }
     
