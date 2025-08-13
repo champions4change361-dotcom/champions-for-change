@@ -74,7 +74,7 @@ export default function Landing() {
               Supporting Student Education Through Sports
             </Badge>
             
-            <h1 className="text-6xl font-bold text-white mb-6">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
               Tournament Platform That <span className="text-yellow-400">Champions Change</span>
             </h1>
             
