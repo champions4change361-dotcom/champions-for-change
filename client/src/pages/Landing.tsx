@@ -7,7 +7,7 @@ import { DonationSection } from "@/components/DonationSection";
 import { SignupSection } from "@/components/SignupSection";
 import { CrossPlatformPromotion, FantasyPromotion } from "@/components/CrossPlatformPromotion";
 import Footer from "@/components/Footer";
-import { KeystoneAvatar, AvatarChatMessage } from "@/components/KeystoneAvatar";
+import { AIConsultant } from "@/components/AIConsultant";
 
 export default function Landing() {
   return (
@@ -112,10 +112,7 @@ export default function Landing() {
         {/* Impact Mission Command Center */}
         <div id="impact-mission" className="bg-slate-800 border border-emerald-500/30 rounded-2xl p-8 mb-12">
           <div className="text-center mb-8">
-            <div className="flex items-center justify-center gap-4 mb-4">
-              <KeystoneAvatar state="success" size="large" domain="education" />
-              <h3 className="text-3xl font-bold text-white">Our Impact Mission</h3>
-            </div>
+            <h3 className="text-3xl font-bold text-white mb-4">Our Impact Mission</h3>
             <p className="text-slate-300 text-lg max-w-3xl mx-auto">
               Revenue from this platform directly funds educational trips and opportunities for underprivileged youth. 
               When you choose our tournament management solution, you're not just organizing competitions—you're championing change in young lives.
@@ -347,6 +344,9 @@ export default function Landing() {
         <DonationSection />
       </main>
 
+      {/* AI Consultant */}
+      <AIConsultant domain="education" />
+      
       {/* Footer */}
       <Footer />
     </div>
