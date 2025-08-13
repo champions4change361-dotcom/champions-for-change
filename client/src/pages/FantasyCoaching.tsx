@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Brain, Trophy, TrendingUp, Users, Zap, Target, BarChart3 } from 'lucide-react';
 import { KeystoneAvatar } from '@/components/KeystoneAvatar';
 import { FantasyLineupCoach } from '@/components/FantasyLineupCoach';
+import { LiveScoring } from '@/components/LiveScoring';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function FantasyCoaching() {
@@ -141,10 +142,11 @@ export default function FantasyCoaching() {
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} data-testid="coaching-tabs">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="lineup" data-testid="tab-lineup">Lineup Coach</TabsTrigger>
             <TabsTrigger value="trends" data-testid="tab-trends">Weekly Trends</TabsTrigger>
-            <TabsTrigger value="live" data-testid="tab-live">Live Insights</TabsTrigger>
+            <TabsTrigger value="live" data-testid="tab-live">Live Scoring</TabsTrigger>
+            <TabsTrigger value="insights" data-testid="tab-insights">Game Insights</TabsTrigger>
           </TabsList>
 
           <TabsContent value="lineup" className="space-y-6" data-testid="lineup-content">
@@ -255,19 +257,36 @@ export default function FantasyCoaching() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Trophy className="h-5 w-5" />
-                  Live Game Insights
+                  Live NFL Scores
                 </CardTitle>
                 <CardDescription>
-                  Real-time coaching during games (Feature coming soon)
+                  Real-time scoring powered by ESPN API with fantasy coaching insights
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <LiveScoring />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="insights" className="space-y-6" data-testid="insights-content">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Brain className="h-5 w-5" />
+                  Real-Time Game Insights
+                </CardTitle>
+                <CardDescription>
+                  AI-powered analysis of live player performances and trends
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <Alert>
                   <Brain className="h-4 w-4" />
                   <AlertDescription>
-                    Live game coaching will provide real-time insights during NFL games, 
-                    tracking how pre-game predictions are playing out and suggesting 
-                    lineup adjustments for future weeks.
+                    Select a live game from the Live Scoring tab to see real-time player analysis, 
+                    including insights like "Player X has 3 carries to the left for 45 yards - 
+                    the pre-game analysis is holding perfectly!"
                   </AlertDescription>
                 </Alert>
               </CardContent>

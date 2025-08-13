@@ -4185,6 +4185,235 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ESPN API Integration Routes for Live Scoring
+  
+  // Get live NFL scores
+  app.get("/api/espn/live-scores", async (req, res) => {
+    try {
+      const response = await fetch('https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard');
+      
+      if (!response.ok) {
+        throw new Error(`ESPN API error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      // Transform ESPN data for our Fantasy Coaching Brain
+      const games = data.events?.map((game: any) => ({
+        gameId: game.id,
+        week: game.week?.number || 1,
+        status: game.status?.type?.description || 'Scheduled',
+        clock: game.status?.displayClock || '',
+        period: game.status?.period || 0,
+        homeTeam: {
+          id: game.competitions?.[0]?.competitors?.[1]?.id,
+          name: game.competitions?.[0]?.competitors?.[1]?.team?.displayName,
+          score: game.competitions?.[0]?.competitors?.[1]?.score || '0',
+          logo: game.competitions?.[0]?.competitors?.[1]?.team?.logo
+        },
+        awayTeam: {
+          id: game.competitions?.[0]?.competitors?.[0]?.id,
+          name: game.competitions?.[0]?.competitors?.[0]?.team?.displayName,
+          score: game.competitions?.[0]?.competitors?.[0]?.score || '0',
+          logo: game.competitions?.[0]?.competitors?.[0]?.team?.logo
+        },
+        venue: game.competitions?.[0]?.venue?.fullName,
+        startTime: game.date
+      })) || [];
+      
+      res.json({
+        success: true,
+        games,
+        lastUpdated: new Date().toISOString()
+      });
+      
+    } catch (error) {
+      console.error("ESPN live scores error:", error);
+      res.status(500).json({ 
+        success: false, 
+        error: "Failed to fetch live scores",
+        games: []
+      });
+    }
+  });
+
+  // Get detailed game information with live player performance
+  app.get("/api/espn/game/:gameId", async (req, res) => {
+    try {
+      const { gameId } = req.params;
+      
+      const [summaryResponse, playByPlayResponse] = await Promise.all([
+        fetch(`https://site.api.espn.com/apis/site/v2/sports/football/nfl/summary?event=${gameId}`),
+        fetch(`https://site.api.espn.com/apis/site/v2/sports/football/nfl/playbyplay?event=${gameId}`)
+      ]);
+      
+      if (!summaryResponse.ok || !playByPlayResponse.ok) {
+        throw new Error('ESPN API error');
+      }
+      
+      const [summary, playByPlay] = await Promise.all([
+        summaryResponse.json(),
+        playByPlayResponse.json()
+      ]);
+      
+      // Generate live coaching insights
+      const liveInsights = [];
+      
+      // Check for key player performances in recent plays
+      if (playByPlay.drives) {
+        const recentDrives = playByPlay.drives.slice(-3); // Last 3 drives
+        
+        for (const drive of recentDrives) {
+          if (drive.plays) {
+            for (const play of drive.plays) {
+              if (play.text) {
+                // Look for big plays that would interest fantasy coaches
+                if (play.text.includes('touchdown') || play.text.includes('TD')) {
+                  liveInsights.push({
+                    type: 'touchdown',
+                    message: `🚨 TOUCHDOWN ALERT: ${play.text}`,
+                    confidence: 95,
+                    fantasy_impact: 'high'
+                  });
+                }
+                
+                if (play.text.match(/\d+\s*yard.*gain/) && play.text.match(/(\d+)/)?.[1] && parseInt(play.text.match(/(\d+)/)[1]) >= 20) {
+                  liveInsights.push({
+                    type: 'big_play',
+                    message: `⚡ BIG PLAY: ${play.text}`,
+                    confidence: 85,
+                    fantasy_impact: 'medium'
+                  });
+                }
+              }
+            }
+          }
+        }
+      }
+      
+      res.json({
+        success: true,
+        gameInfo: {
+          id: gameId,
+          status: summary.header?.competitions?.[0]?.status?.type?.description,
+          clock: summary.header?.competitions?.[0]?.status?.displayClock,
+          period: summary.header?.competitions?.[0]?.status?.period,
+          weather: summary.gameInfo?.weather || { condition: 'Indoor' }
+        },
+        liveInsights: liveInsights.slice(0, 5), // Limit to 5 most recent insights
+        lastUpdated: new Date().toISOString()
+      });
+      
+    } catch (error) {
+      console.error("ESPN game details error:", error);
+      res.status(500).json({ 
+        success: false, 
+        error: "Failed to fetch game details" 
+      });
+    }
+  });
+
+  // Get live player performance analysis
+  app.get("/api/espn/player-performance/:gameId/:playerName", async (req, res) => {
+    try {
+      const { gameId, playerName } = req.params;
+      
+      const playByPlayResponse = await fetch(`https://site.api.espn.com/apis/site/v2/sports/football/nfl/playbyplay?event=${gameId}`);
+      
+      if (!playByPlayResponse.ok) {
+        throw new Error('ESPN API error');
+      }
+      
+      const playByPlay = await playByPlayResponse.json();
+      
+      // Extract plays involving the specified player
+      const playerPlays = [];
+      let rushingYards = 0;
+      let rushingAttempts = 0;
+      let receptions = 0;
+      let receivingYards = 0;
+      let touchdowns = 0;
+      
+      if (playByPlay.drives) {
+        for (const drive of playByPlay.drives) {
+          if (drive.plays) {
+            for (const play of drive.plays) {
+              if (play.text && play.text.toLowerCase().includes(playerName.toLowerCase())) {
+                playerPlays.push(play);
+                
+                const text = play.text.toLowerCase();
+                
+                // Parse rushing stats
+                if (text.includes('rush') || text.includes('carry')) {
+                  rushingAttempts++;
+                  const yardMatch = text.match(/(\d+)\s*yard/);
+                  if (yardMatch) {
+                    rushingYards += parseInt(yardMatch[1]);
+                  }
+                }
+                
+                // Parse receiving stats
+                if (text.includes('catch') || text.includes('reception')) {
+                  receptions++;
+                  const yardMatch = text.match(/(\d+)\s*yard/);
+                  if (yardMatch) {
+                    receivingYards += parseInt(yardMatch[1]);
+                  }
+                }
+                
+                // Count touchdowns
+                if (text.includes('touchdown') || text.includes('td')) {
+                  touchdowns++;
+                }
+              }
+            }
+          }
+        }
+      }
+      
+      // Generate coaching insight based on live performance
+      let insight = `📊 LIVE UPDATE: ${playerName} performance tracking`;
+      let confidence = 70;
+      
+      if (touchdowns > 0) {
+        insight = `🔥 TOUCHDOWN MACHINE: ${playerName} has ${touchdowns} TD${touchdowns > 1 ? 's' : ''}! Our pre-game analysis is paying off perfectly.`;
+        confidence = 95;
+      } else if (rushingAttempts >= 3) {
+        const yardsPerCarry = rushingYards / rushingAttempts;
+        if (yardsPerCarry > 5) {
+          insight = `⚡ EXPLOSIVE RUNNER: ${playerName} averaging ${yardsPerCarry.toFixed(1)} yards per carry on ${rushingAttempts} attempts. Dominating as predicted!`;
+          confidence = 90;
+        }
+      } else if (receptions >= 2) {
+        insight = `🎯 TARGET MACHINE: ${playerName} has ${receptions} catches for ${receivingYards} yards. High involvement as expected!`;
+        confidence = 85;
+      }
+      
+      res.json({
+        success: true,
+        playerName,
+        liveStats: {
+          rushingAttempts,
+          rushingYards,
+          receptions,
+          receivingYards,
+          touchdowns,
+          totalPlays: playerPlays.length
+        },
+        coachingInsight: insight,
+        confidence,
+        lastUpdated: new Date().toISOString()
+      });
+      
+    } catch (error) {
+      console.error("ESPN player performance error:", error);
+      res.status(500).json({ 
+        success: false, 
+        error: "Failed to analyze player performance" 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
