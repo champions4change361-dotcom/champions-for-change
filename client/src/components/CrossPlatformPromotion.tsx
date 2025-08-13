@@ -64,7 +64,7 @@ export function FantasyPromotion() {
             </div>
             <Button 
               className="bg-purple-600 hover:bg-purple-700 text-white w-full"
-              onClick={() => window.open('https://fantasy.trantortournaments.org', '_blank')}
+              onClick={() => window.location.href = '/coaches-lounge'}
               data-testid="button-fantasy-full-promo"
             >
               <Anchor className="mr-2 h-4 w-4" />
@@ -127,7 +127,7 @@ export function ProTournamentPromotion() {
           <div className="flex flex-col justify-center">
             <Button 
               className="bg-blue-600 hover:bg-blue-700 text-white w-full"
-              onClick={() => window.open('https://pro.trantortournaments.org', '_blank')}
+              onClick={() => window.location.href = '/business-pricing-test'}
               data-testid="button-pro-full-promo"
             >
               <Trophy className="mr-2 h-4 w-4" />
