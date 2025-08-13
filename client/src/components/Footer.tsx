@@ -1,4 +1,5 @@
 import { Heart, GraduationCap, MapPin, Mail, Phone, Award } from "lucide-react";
+import { Link } from "wouter";
 
 export default function Footer() {
   return (
@@ -82,15 +83,15 @@ export default function Footer() {
               <p>&copy; 2025 Champions for Change. Supporting education through sports management.</p>
             </div>
             <div className="flex items-center gap-6 text-sm">
-              <a href="/privacy" className="text-gray-400 hover:text-white transition-colors">
+              <Link href="/privacy" className="text-gray-400 hover:text-white transition-colors">
                 Privacy Policy
-              </a>
-              <a href="/refund-policy" className="text-gray-400 hover:text-white transition-colors">
+              </Link>
+              <Link href="/refund-policy" className="text-gray-400 hover:text-white transition-colors">
                 Refund Policy
-              </a>
-              <a href="/terms" className="text-gray-400 hover:text-white transition-colors">
+              </Link>
+              <Link href="/terms" className="text-gray-400 hover:text-white transition-colors">
                 Terms of Service
-              </a>
+              </Link>
             </div>
           </div>
           <div className="text-center mt-4">

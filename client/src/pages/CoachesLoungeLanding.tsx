@@ -506,10 +506,10 @@ export default function CoachesLoungeLanding() {
               Questions? Contact champions4change361@gmail.com
             </p>
             <div className="flex justify-center gap-4 mt-4 text-xs text-white/50">
-              <a href="/privacy" className="hover:text-white/80">Privacy Policy</a>
-              <a href="/refund-policy" className="hover:text-white/80">Refund Policy</a>
-              <a href="/terms" className="hover:text-white/80">Terms of Service</a>
-              <a href="/support" className="hover:text-white/80">Support</a>
+              <Link href="/privacy" className="hover:text-white/80">Privacy Policy</Link>
+              <Link href="/refund-policy" className="hover:text-white/80">Refund Policy</Link>
+              <Link href="/terms" className="hover:text-white/80">Terms of Service</Link>
+              <Link href="/support" className="hover:text-white/80">Support</Link>
             </div>
           </div>
         </div>

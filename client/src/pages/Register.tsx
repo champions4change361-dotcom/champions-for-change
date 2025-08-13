@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CheckCircle, AlertCircle, CreditCard, FileText, Users, GraduationCap, Trophy } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useDomain } from '@/hooks/useDomain';
@@ -29,7 +30,7 @@ const registrationSchema = z.object({
   certifications: z.string().optional(),
   requestReason: z.string().min(10, 'Please explain why you need access (minimum 10 characters)'),
   paymentMethod: z.enum(['stripe', 'check']),
-  subscriptionPlan: z.enum(['foundation', 'champion', 'enterprise', 'district_enterprise'])
+  subscriptionPlan: z.enum(['freemium', 'credits', 'monthly', 'annual', 'champions', 'enterprise'])
 });
 
 type RegistrationForm = z.infer<typeof registrationSchema>;
@@ -38,7 +39,7 @@ export default function Register() {
   const [step, setStep] = useState(1);
   const [selectedSports, setSelectedSports] = useState<string[]>([]);
   const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'check'>('stripe');
-  const [selectedPlan, setSelectedPlan] = useState<string>('foundation');
+  const [selectedPlan, setSelectedPlan] = useState<string>('freemium');
   const { isSchoolSafe } = useDomain();
 
   const form = useForm<RegistrationForm>({
@@ -46,7 +47,7 @@ export default function Register() {
     defaultValues: {
       sportsInvolved: [],
       paymentMethod: 'stripe',
-      subscriptionPlan: 'foundation'
+      subscriptionPlan: 'freemium'
     }
   });
 
@@ -79,52 +80,67 @@ export default function Register() {
       title: 'District Athletic Director',
       description: 'Oversee all athletic programs across multiple schools in your district. Create district-wide tournaments and assign schools to events.',
       requirements: ['District administrative role', 'Athletic program oversight', 'Multi-school coordination experience'],
-      recommendedPlan: 'district_enterprise'
+      recommendedPlan: 'enterprise'
     },
     school_admin: {
       title: 'School Athletic Director',
       description: 'Manage athletic programs for your specific school. Assign coaches to tournaments and oversee school participation.',
       requirements: ['School administrative role', 'Athletic program management', 'Coach coordination experience'],
-      recommendedPlan: 'enterprise'
+      recommendedPlan: 'champions'
     },
     coach: {
       title: 'Coach',
       description: 'Register teams, manage rosters, and participate in tournaments. Work under your school athletic director.',
       requirements: ['Coaching certification or experience', 'Team management experience', 'School affiliation'],
-      recommendedPlan: 'champion'
+      recommendedPlan: 'annual'
     },
     scorekeeper: {
       title: 'Scorekeeper/Judge',
       description: 'Update scores and results for assigned events. Help ensure accurate tournament management.',
       requirements: ['Event scoring experience', 'Attention to detail', 'Reliability and punctuality'],
-      recommendedPlan: 'foundation'
+      recommendedPlan: 'monthly'
     }
   };
 
   const subscriptionPlans = {
-    foundation: {
-      name: 'Foundation',
-      price: '$29/month',
-      description: 'Perfect for individual coaches and scorekeepers',
-      features: ['Basic tournament management', 'Team registration', 'Score tracking', 'Email support']
+    freemium: {
+      name: 'Freemium',
+      price: 'Free',
+      description: 'Perfect for casual users and small business tournaments',
+      features: ['Up to 3 tournaments per year', 'Basic bracket management', 'Score tracking', 'Community support'],
+      note: 'After 3 tournaments, purchase tournament credits or upgrade'
     },
-    champion: {
-      name: 'Champion',
-      price: '$79/month', 
-      description: 'Ideal for schools and small organizations',
-      features: ['Everything in Foundation', 'Multiple tournaments', 'Advanced analytics', 'Priority support', 'Custom branding']
+    credits: {
+      name: 'Tournament Credits',
+      price: '$15/tournament',
+      description: 'Pay-per-tournament for occasional organizers',
+      features: ['Full tournament features per credit', 'No monthly commitment', 'Advanced bracket management', 'Email support'],
+      note: 'Perfect for seasonal organizers'
+    },
+    monthly: {
+      name: 'Monthly Pro',
+      price: '$99/month',
+      description: 'Regular tournament organizers and coaches',
+      features: ['Unlimited tournaments', 'Advanced analytics', 'Team management', 'Priority support', 'Custom branding']
+    },
+    annual: {
+      name: 'Annual Pro',
+      price: '$990/year',
+      description: 'Best value for active tournament organizers',
+      features: ['Everything in Monthly Pro', 'Save $198 per year', 'Enhanced analytics', 'API access', 'Priority phone support'],
+      savings: 'Save $198 compared to monthly billing'
+    },
+    champions: {
+      name: 'Champions District',
+      price: '$2,490/year',
+      description: 'Complete solution for school districts',
+      features: ['Everything in Annual Pro', 'Multi-school management', 'District-wide analytics', 'FERPA compliance', 'Dedicated account manager']
     },
     enterprise: {
-      name: 'Enterprise',
-      price: '$199/month',
-      description: 'Best for school districts and large organizations',
-      features: ['Everything in Champion', 'Unlimited tournaments', 'Multi-school management', 'API access', 'Dedicated support']
-    },
-    district_enterprise: {
-      name: 'District Enterprise',
-      price: '$399/month',
-      description: 'Complete solution for entire school districts',
-      features: ['Everything in Enterprise', 'District-wide analytics', 'White-label options', 'Custom integrations', 'Training included']
+      name: 'Enterprise District',
+      price: '$3,990/year',
+      description: 'Enterprise solution for large school districts',
+      features: ['Everything in Champions', 'White-label platform', 'Custom integrations', 'Training included', 'SLA guarantee', 'Custom development']
     }
   };
 
@@ -427,28 +443,87 @@ export default function Register() {
               <CardContent className="space-y-6">
                 <div>
                   <Label>Subscription Plan</Label>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
-                    {Object.entries(subscriptionPlans).map(([planKey, plan]) => (
-                      <div 
-                        key={planKey}
-                        className={`p-4 border rounded-lg cursor-pointer transition-all ${
-                          selectedPlan === planKey 
-                            ? 'border-blue-500 bg-blue-50' 
-                            : 'border-gray-200 hover:border-gray-300'
-                        }`}
-                        onClick={() => setSelectedPlan(planKey)}
-                        data-testid={`plan-${planKey}`}
-                      >
-                        <h3 className="font-semibold text-lg">{plan.name}</h3>
-                        <p className="text-2xl font-bold text-blue-600 my-2">{plan.price}</p>
-                        <p className="text-gray-600 text-sm mb-3">{plan.description}</p>
-                        <ul className="text-xs text-gray-600 space-y-1">
-                          {plan.features.map((feature, idx) => (
-                            <li key={idx}>• {feature}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    ))}
+                  
+                  {/* Casual/Business Plans */}
+                  <div className="mt-6">
+                    <h3 className="text-lg font-semibold mb-4 text-gray-800">Casual & Business Users</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                      {Object.entries(subscriptionPlans).filter(([key]) => 
+                        ['freemium', 'credits', 'monthly', 'annual'].includes(key)
+                      ).map(([planKey, plan]) => (
+                        <div 
+                          key={planKey}
+                          className={`p-4 border rounded-lg cursor-pointer transition-all relative ${
+                            selectedPlan === planKey 
+                              ? 'border-green-500 bg-green-50 ring-2 ring-green-200' 
+                              : 'border-gray-200 hover:border-gray-300'
+                          } ${planKey === 'annual' ? 'border-green-400 border-2' : ''}`}
+                          onClick={() => setSelectedPlan(planKey)}
+                          data-testid={`plan-${planKey}`}
+                        >
+                          <div className="flex justify-between items-start mb-2">
+                            <h3 className="font-semibold text-lg">{plan.name}</h3>
+                            {planKey === 'annual' && <Badge className="bg-green-500 text-white">Best Value</Badge>}
+                            {planKey === 'freemium' && <Badge className="bg-blue-500 text-white">Free</Badge>}
+                          </div>
+                          <p className="text-2xl font-bold text-green-600 my-2">{plan.price}</p>
+                          <p className="text-gray-600 text-sm mb-3">{plan.description}</p>
+                          {plan.savings && (
+                            <p className="text-green-600 text-xs font-semibold mb-2">{plan.savings}</p>
+                          )}
+                          {plan.note && (
+                            <p className="text-gray-500 text-xs italic mb-2">{plan.note}</p>
+                          )}
+                          <ul className="text-xs text-gray-600 space-y-1">
+                            {plan.features.map((feature, idx) => (
+                              <li key={idx} className="flex items-start">
+                                <CheckCircle className="h-3 w-3 text-green-500 mr-1 mt-0.5 flex-shrink-0" />
+                                <span>{feature}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* District Plans */}
+                  <div className="mt-8">
+                    <h3 className="text-lg font-semibold mb-4 text-gray-800">School Districts</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {Object.entries(subscriptionPlans).filter(([key]) => 
+                        ['champions', 'enterprise'].includes(key)
+                      ).map(([planKey, plan]) => (
+                        <div 
+                          key={planKey}
+                          className={`p-6 border rounded-lg cursor-pointer transition-all relative ${
+                            selectedPlan === planKey 
+                              ? `${planKey === 'champions' ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200' : 'border-purple-500 bg-purple-50 ring-2 ring-purple-200'}` 
+                              : 'border-gray-200 hover:border-gray-300'
+                          } ${planKey === 'champions' ? 'border-blue-400 border-2' : 'border-purple-400 border-2'}`}
+                          onClick={() => setSelectedPlan(planKey)}
+                          data-testid={`plan-${planKey}`}
+                        >
+                          <div className="flex justify-between items-start mb-2">
+                            <h3 className="font-semibold text-xl">{plan.name}</h3>
+                            {planKey === 'champions' && <Badge className="bg-blue-500 text-white">Popular</Badge>}
+                            {planKey === 'enterprise' && <Badge className="bg-purple-500 text-white">Premium</Badge>}
+                          </div>
+                          <p className={`text-3xl font-bold my-3 ${planKey === 'champions' ? 'text-blue-600' : 'text-purple-600'}`}>
+                            {plan.price}
+                          </p>
+                          <p className="text-gray-600 text-sm mb-4">{plan.description}</p>
+                          <ul className="text-sm text-gray-700 space-y-2">
+                            {plan.features.map((feature, idx) => (
+                              <li key={idx} className="flex items-start">
+                                <CheckCircle className={`h-4 w-4 mr-2 mt-0.5 flex-shrink-0 ${planKey === 'champions' ? 'text-blue-500' : 'text-purple-500'}`} />
+                                <span>{feature}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
 
