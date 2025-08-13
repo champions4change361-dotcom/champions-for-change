@@ -32,6 +32,7 @@ import TermsOfService from './pages/TermsOfService';
 import Register from './pages/Register';
 import RegistrationForm from './pages/RegistrationForm';
 import Pricing from './pages/Pricing';
+import BusinessPricingTest from './pages/BusinessPricingTest';
 
 function AuthenticatedRoutes() {
   const { isFeatureEnabled, isFantasyDomain, config } = useDomain();
@@ -145,6 +146,7 @@ function AppRouter() {
       <Route path="/checkout" component={Checkout} />
       <Route path="/donation-success" component={DonationSuccess} />
       <Route path="/pricing" component={Pricing} />
+      <Route path="/business-pricing-test" component={BusinessPricingTest} />
       <Route path="/register" component={RegistrationForm} />
       <Route path="/register-old" component={Register} />
       {/* Show Coaches Lounge landing page */}
