@@ -158,7 +158,7 @@ export function BusinessPricingSection() {
             <Button 
               variant="outline" 
               className="border-purple-300 text-purple-700 hover:bg-purple-50"
-              onClick={() => window.open('https://coaches.trantortournaments.org', '_blank')}
+              onClick={() => window.location.href = '/coaches-lounge'}
               data-testid="button-coaches-lounge-crosssell"
             >
               Explore Coaches Lounge
