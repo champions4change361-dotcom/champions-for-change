@@ -18,6 +18,8 @@ This is a full-stack tournament bracket management application designed as a whi
 - Integrated medical safety protocols with automatic recommendations for declining performance patterns
 - Built comprehensive Health Analytics Dashboard for coaches to monitor athlete wellbeing and prevent serious health conditions
 - Enhanced competitive advantage: first platform to offer predictive health monitoring for student athletes
+- **Team Sports Analytics Expansion:** Developed position-specific monitoring for contact sports (football linemen, wrestling weight management) and endurance sports (soccer, basketball) to address traditional statistics blind spots
+- **Contact Sports Specialization:** Advanced concussion risk monitoring, impact load tracking, and opponent-adjusted performance analysis for football and wrestling programs
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
