@@ -129,6 +129,12 @@ function AppRouter() {
       <Route path="/donation-success" component={DonationSuccess} />
       <Route path="/register" component={RegistrationForm} />
       <Route path="/register-old" component={Register} />
+      {/* Show Coaches Lounge landing page */}
+      <Route path="/coaches-lounge">
+        <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900">
+          <CoachesLoungeLanding />
+        </div>
+      </Route>
       {/* Show Landing page if not authenticated or on school-safe domains */}
       {(!isAuthenticated || allowGuestAccess) && (
         <Route path="/">
