@@ -15,14 +15,24 @@ export default function Pricing() {
   const urlParams = new URLSearchParams(window.location.search);
   const pricingType = urlParams.get('type');
 
+  // Debug logging
+  console.log('Pricing page - Domain config:', config);
+  console.log('Pricing page - URL params type:', pricingType);
+  console.log('Pricing page - Is school domain:', isSchoolDomain());
+  console.log('Pricing page - Is pro domain:', isProDomain());
+  console.log('Pricing page - Is fantasy domain:', isFantasyDomain());
+
   // Show appropriate pricing based on domain context or URL override
   const renderPricingSection = () => {
     // Allow URL override for testing/demo purposes
     if (pricingType === 'business') {
+      console.log('Rendering BusinessPricingSection via URL override');
       return <BusinessPricingSection />;
     } else if (pricingType === 'education') {
+      console.log('Rendering EducationPricingSection via URL override');
       return <EducationPricingSection />;
     } else if (pricingType === 'coaches') {
+      console.log('Rendering CoachesLoungePricingSection via URL override');
       return <CoachesLoungePricingSection />;
     }
     
