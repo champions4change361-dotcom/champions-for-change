@@ -122,7 +122,7 @@ export function SignupSection() {
                   size="lg"
                   data-testid={`button-start-${tier.tier}`}
                 >
-                  {tier.tier === 'champions' ? 'Contact Sales' : 'Get Started'}
+                  Get Started
                 </Button>
               </CardContent>
             </Card>
