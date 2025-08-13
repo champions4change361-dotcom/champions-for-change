@@ -1315,10 +1315,159 @@ export const teamRegistrations = pgTable("team_registrations", {
   playerList: jsonb("player_list"), // Array of player details
   registeredEvents: jsonb("registered_events"), // Which events this team is competing in
   registrationStatus: text("registration_status", {
-    enum: ["pending", "approved", "rejected", "waitlisted"]
-  }).default("pending"),
+    enum: ["incomplete", "pending_approval", "approved", "rejected", "waitlisted"]
+  }).default("incomplete"),
+  
+  // Enhanced payment tracking
+  paymentStatus: text("payment_status", {
+    enum: ["unpaid", "partial", "paid", "refunded"]
+  }).default("unpaid"),
+  totalFee: decimal("total_fee", { precision: 10, scale: 2 }).default("0"),
+  paidAmount: decimal("paid_amount", { precision: 10, scale: 2 }).default("0"),
+  paymentBreakdown: jsonb("payment_breakdown").$type<Array<{
+    playerId: string;
+    playerName: string;
+    amount: number;
+    paidBy: string; // parent email or name
+    paidAt?: string;
+    paymentMethod?: string;
+    transactionId?: string;
+  }>>().default([]),
+  
+  // Document compliance tracking
+  requiredDocuments: jsonb("required_documents").$type<Array<{
+    type: string;
+    name: string;
+    required: boolean;
+    description?: string;
+  }>>().default([]),
+  documentComplianceStatus: text("document_compliance_status", {
+    enum: ["incomplete", "pending_review", "complete", "issues"]
+  }).default("incomplete"),
+  
   registrationDate: timestamp("registration_date").defaultNow(),
   notes: text("notes"),
+  approvalNotes: text("approval_notes"),
+  rejectionReason: text("rejection_reason"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Teams - core team entity for better organization
+export const teams = pgTable("teams", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  teamName: varchar("team_name").notNull(),
+  organizationName: varchar("organization_name"),
+  coachName: varchar("coach_name").notNull(),
+  coachEmail: varchar("coach_email").notNull(),
+  coachPhone: varchar("coach_phone"),
+  coachId: varchar("coach_id").references(() => users.id),
+  assistantCoaches: jsonb("assistant_coaches").$type<Array<{
+    name: string;
+    email?: string;
+    phone?: string;
+    role?: string;
+  }>>().default([]),
+  teamColor: varchar("team_color"),
+  homeVenue: varchar("home_venue"),
+  ageGroup: varchar("age_group"), // U12, U14, JV, Varsity, etc.
+  division: varchar("division"), // A, B, Recreational, etc.
+  status: text("status", { 
+    enum: ["active", "inactive", "suspended"] 
+  }).default("active"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Team players/athletes with comprehensive info
+export const teamPlayers = pgTable("team_players", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  teamId: varchar("team_id").notNull().references(() => teams.id, { onDelete: "cascade" }),
+  playerName: varchar("player_name").notNull(),
+  dateOfBirth: date("date_of_birth"),
+  jerseyNumber: varchar("jersey_number"),
+  position: varchar("position"),
+  parentGuardianName: varchar("parent_guardian_name"),
+  parentGuardianEmail: varchar("parent_guardian_email"),
+  parentGuardianPhone: varchar("parent_guardian_phone"),
+  emergencyContactName: varchar("emergency_contact_name"),
+  emergencyContactPhone: varchar("emergency_contact_phone"),
+  medicalNotes: text("medical_notes"),
+  allergies: text("allergies"),
+  medications: text("medications"),
+  physicianName: varchar("physician_name"),
+  physicianPhone: varchar("physician_phone"),
+  status: text("status", { 
+    enum: ["active", "inactive", "injured", "suspended"] 
+  }).default("active"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Team documents and consent forms with file management
+export const teamDocuments = pgTable("team_documents", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  teamId: varchar("team_id").references(() => teams.id, { onDelete: "cascade" }),
+  playerId: varchar("player_id").references(() => teamPlayers.id, { onDelete: "cascade" }),
+  documentType: text("document_type", {
+    enum: ["birth_certificate", "medical_form", "photo_consent", "liability_waiver", "emergency_contact", "insurance_card", "physical_form", "custom"]
+  }).notNull(),
+  documentName: varchar("document_name").notNull(),
+  documentUrl: varchar("document_url"), // Object storage path
+  uploadedBy: varchar("uploaded_by").references(() => users.id),
+  isRequired: boolean("is_required").default(true),
+  isApproved: boolean("is_approved").default(false),
+  approvedBy: varchar("approved_by").references(() => users.id),
+  approvalDate: timestamp("approval_date"),
+  expirationDate: date("expiration_date"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Consent form templates with legal compliance
+export const consentFormTemplates = pgTable("consent_form_templates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  formType: text("form_type", {
+    enum: ["liability_waiver", "medical_consent", "photo_release", "emergency_contact", "transportation_consent", "general_consent"]
+  }).notNull(),
+  htmlContent: text("html_content").notNull(),
+  requiredFields: jsonb("required_fields").$type<Array<{
+    fieldName: string;
+    fieldType: string;
+    required: boolean;
+    placeholder?: string;
+  }>>().default([]),
+  legalDisclaimer: text("legal_disclaimer"),
+  stateCompliance: jsonb("state_compliance").$type<{
+    applicableStates?: string[];
+    federalCompliance?: boolean;
+    lastReviewed?: string;
+    reviewedBy?: string;
+  }>(),
+  isActive: boolean("is_active").default(true),
+  isDefault: boolean("is_default").default(false),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Individual consent form responses with digital signatures
+export const consentFormResponses = pgTable("consent_form_responses", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  templateId: varchar("template_id").notNull().references(() => consentFormTemplates.id),
+  teamRegistrationId: varchar("team_registration_id").references(() => teamRegistrations.id, { onDelete: "cascade" }),
+  playerId: varchar("player_id").references(() => teamPlayers.id),
+  parentGuardianName: varchar("parent_guardian_name").notNull(),
+  parentGuardianEmail: varchar("parent_guardian_email").notNull(),
+  digitalSignature: varchar("digital_signature").notNull(),
+  signatureTimestamp: timestamp("signature_timestamp").notNull(),
+  responseData: jsonb("response_data").$type<Record<string, any>>().default({}),
+  ipAddress: varchar("ip_address"),
+  userAgent: text("user_agent"),
+  isComplete: boolean("is_complete").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
