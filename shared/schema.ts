@@ -93,6 +93,90 @@ export const users = pgTable("users", {
   tournamentCredits: integer("tournament_credits").default(0),
   creditsPurchased: decimal("credits_purchased", { precision: 10, scale: 2 }).default("0"),
   
+  // HIPAA/FERPA COMPLIANCE FIELDS
+  hipaaTrainingCompleted: boolean("hipaa_training_completed").default(false),
+  hipaaTrainingDate: timestamp("hipaa_training_date"),
+  ferpaAgreementSigned: boolean("ferpa_agreement_signed").default(false),
+  ferpaAgreementDate: timestamp("ferpa_agreement_date"),
+  complianceRole: text("compliance_role", {
+    enum: ["district_athletic_trainer", "athletic_director", "athletic_trainer", "head_coach", "assistant_coach", "scorekeeper"]
+  }),
+  medicalDataAccess: boolean("medical_data_access").default(false),
+  lastComplianceAudit: timestamp("last_compliance_audit"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// HIPAA/FERPA Compliance Audit Trail
+export const complianceAuditLog = pgTable("compliance_audit_log", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  actionType: text("action_type", {
+    enum: ["data_access", "data_modification", "export", "view", "login", "permission_change"]
+  }).notNull(),
+  resourceType: text("resource_type", {
+    enum: ["student_data", "health_data", "tournament_data", "administrative_data"]
+  }).notNull(),
+  resourceId: varchar("resource_id"), // ID of the specific record accessed
+  ipAddress: varchar("ip_address"),
+  userAgent: text("user_agent"),
+  complianceNotes: text("compliance_notes"), // Additional context for audit
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Student Privacy (FERPA) Protected Data
+export const studentData = pgTable("student_data", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  studentId: varchar("student_id").notNull(), // District student ID
+  firstName: varchar("first_name").notNull(),
+  lastName: varchar("last_name").notNull(),
+  grade: integer("grade"),
+  schoolId: varchar("school_id").notNull(),
+  districtId: varchar("district_id").notNull(),
+  emergencyContact: jsonb("emergency_contact").$type<{
+    name: string;
+    phone: string;
+    relationship: string;
+  }>(),
+  parentalConsent: boolean("parental_consent").default(false),
+  ferpaReleaseForm: varchar("ferpa_release_form"), // File path/URL to signed form
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Health Data (HIPAA) Protected Information
+export const healthData = pgTable("health_data", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  studentId: varchar("student_id").notNull().references(() => studentData.id),
+  athleticTrainerId: varchar("athletic_trainer_id").notNull().references(() => users.id),
+  medicalConditions: text("medical_conditions"), // Encrypted field
+  medications: text("medications"), // Encrypted field
+  allergies: text("allergies"), // Encrypted field
+  injuryHistory: jsonb("injury_history"), // Encrypted field
+  physicalsOnFile: boolean("physicals_on_file").default(false),
+  physicalExpirationDate: date("physical_expiration_date"),
+  concussionBaseline: jsonb("concussion_baseline"), // Encrypted baseline test results
+  lastMedicalUpdate: timestamp("last_medical_update"),
+  hipaaAuthorizationForm: varchar("hipaa_authorization_form"), // File path to signed form
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Data Processing Agreements for Districts
+export const dataProcessingAgreements = pgTable("data_processing_agreements", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").notNull().references(() => organizations.id),
+  agreementType: text("agreement_type", {
+    enum: ["ferpa_dpa", "hipaa_baa", "state_privacy_agreement"]
+  }).notNull(),
+  signedDate: timestamp("signed_date"),
+  expirationDate: timestamp("expiration_date"),
+  agreementDocument: varchar("agreement_document"), // File path to signed agreement
+  signatoryName: varchar("signatory_name"),
+  signatoryTitle: varchar("signatory_title"),
+  isActive: boolean("is_active").default(true),
+  complianceNotes: text("compliance_notes"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
