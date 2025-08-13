@@ -14,7 +14,7 @@ The cross-platform promotion system implements tasteful promotion of fantasy spo
    - Focus on educational mission and student benefits
 
 2. **fantasy.trantortournaments.org** - Adult fantasy sports domain
-   - Captain's Lounge branding
+   - Coaches Lounge branding
    - Professional fantasy leagues with real money prizes
    - Age-verified adult community
 
@@ -35,19 +35,19 @@ The cross-platform promotion system implements tasteful promotion of fantasy spo
 #### 1. Banner Promotion (Landing Pages)
 - **Location**: Top of pro.trantortournaments.org landing page
 - **Target**: Professional/business domain visitors
-- **Content**: "Captain's Lounge Fantasy Sports - Professional fantasy leagues with real money prizes"
-- **CTA**: "Try Captain's Lounge" button
+- **Content**: "Coaches Lounge Fantasy Sports - Professional fantasy leagues with real money prizes"
+- **CTA**: "Try Coaches Lounge" button
 
 #### 2. Sidebar Promotion (Internal Pages)
 - **Location**: Settings, dashboard, and tournament management pages
 - **Target**: Authenticated business users
 - **Content**: Feature highlights (real money prizes, professional players, age-verified leagues)
-- **Design**: Purple gradient matching Captain's Lounge branding
+- **Design**: Purple gradient matching Coaches Lounge branding
 
 #### 3. Signup Flow Promotion
 - **Location**: Bottom of registration forms
 - **Target**: New business users completing registration
-- **Content**: "Also Try Captain's Lounge" with fantasy platform overview
+- **Content**: "Also Try Coaches Lounge" with fantasy platform overview
 - **Timing**: After successful registration completion
 
 #### 4. Account Linking System

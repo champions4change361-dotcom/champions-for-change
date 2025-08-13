@@ -23,7 +23,7 @@ export function FantasyPromotion() {
           </div>
           <div>
             <CardTitle className="text-xl text-purple-900">
-              Captain's Lounge Fantasy Sports
+              Coaches Lounge Fantasy Sports
             </CardTitle>
             <CardDescription className="text-purple-700">
               Professional fantasy analytics for data-driven teams
@@ -68,7 +68,7 @@ export function FantasyPromotion() {
               data-testid="button-fantasy-full-promo"
             >
               <Anchor className="mr-2 h-4 w-4" />
-              Visit Captain's Lounge
+              Visit Coaches Lounge
             </Button>
           </div>
         </div>
@@ -159,7 +159,7 @@ export function CrossPlatformPromotion({ placement }: CrossPlatformPromotionProp
           <div className="flex items-center space-x-3">
             <Crown className="h-6 w-6 text-purple-400" />
             <div>
-              <h3 className="text-white font-semibold">Captain's Lounge Fantasy Sports</h3>
+              <h3 className="text-white font-semibold">Coaches Lounge Fantasy Sports</h3>
               <p className="text-purple-300 text-sm">Professional fantasy leagues with real money prizes</p>
             </div>
           </div>
@@ -168,7 +168,7 @@ export function CrossPlatformPromotion({ placement }: CrossPlatformPromotionProp
             className="bg-purple-600 hover:bg-purple-700 text-white"
             data-testid="button-fantasy-promo"
           >
-            Try Captain's Lounge
+            Try Coaches Lounge
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </div>
@@ -182,7 +182,7 @@ export function CrossPlatformPromotion({ placement }: CrossPlatformPromotionProp
         <CardHeader className="pb-3">
           <div className="flex items-center space-x-2">
             <Crown className="h-5 w-5 text-purple-400" />
-            <CardTitle className="text-white text-lg">Captain's Lounge</CardTitle>
+            <CardTitle className="text-white text-lg">Coaches Lounge</CardTitle>
           </div>
           <CardDescription className="text-purple-300">
             Adult fantasy sports platform with professional leagues

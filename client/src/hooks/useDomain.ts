@@ -30,7 +30,7 @@ export function useDomain() {
     if (hostname.includes('fantasy')) {
       config = {
         type: 'fantasy',
-        brand: 'CAPTAINS_LOUNGE',
+        brand: 'COACHES_LOUNGE',
         theme: 'entertainment',
         allowFantasyPromo: false, // Already on fantasy
         allowProPromo: true,      // Can promote pro tournaments

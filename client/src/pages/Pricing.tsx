@@ -82,7 +82,7 @@ export default function Pricing() {
     if (config.brand === 'SCHOLASTIC_TOURNAMENTS') {
       return "min-h-screen bg-gradient-to-br from-green-50 to-blue-50";
     }
-    if (config.brand === 'CAPTAINS_LOUNGE') {
+    if (config.brand === 'COACHES_LOUNGE') {
       return "min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900";
     }
     if (config.brand === 'TOURNAMENT_PRO') {

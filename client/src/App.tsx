@@ -98,7 +98,7 @@ function getDomainBackgroundClass(brand: string) {
   if (brand === 'SCHOLASTIC_TOURNAMENTS') {
     return "min-h-screen bg-gradient-to-br from-blue-50 to-slate-50";
   }
-  if (brand === 'CAPTAINS_LOUNGE') {
+  if (brand === 'COACHES_LOUNGE') {
     return "min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900";
   }
   if (brand === 'TOURNAMENT_PRO') {
