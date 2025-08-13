@@ -14,7 +14,7 @@ import { useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useDomain } from '@/hooks/useDomain';
-import { CrossPlatformPromotion, FantasyPromotion } from '@/components/CrossPlatformPromotion';
+// Removed fantasy promotions - district registration is educational only
 
 const registrationSchema = z.object({
   requestType: z.enum(['district_admin', 'school_admin', 'coach', 'scorekeeper']),
@@ -567,64 +567,57 @@ export default function RegistrationFormPage() {
           )}
         </form>
         
-        {/* Enhanced Cross-Platform Promotion - Only on business domains */}
-        <FantasyPromotion />
-        <CrossPlatformPromotion placement="signup" />
-        
-        {/* Complete Tournament Ecosystem - NEVER show on school domains */}
-        {!isSchoolDomain() && (
-        <div className="mt-12 bg-slate-800 border border-slate-600 rounded-xl p-8">
+        {/* Educational Mission Focus - District Registration Only */}
+        <div className="mt-12 bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-xl p-8">
           <div className="text-center mb-6">
-            <h3 className="text-xl font-semibold text-white mb-2">
-              Complete Your Tournament Ecosystem
+            <h3 className="text-xl font-semibold text-green-800 mb-2">
+              Champions for Change Educational Mission
             </h3>
-            <p className="text-slate-400">
-              Get the most out of our platform with complementary services
+            <p className="text-green-700">
+              Every tournament helps fund $2,600+ student educational trips
             </p>
           </div>
           
           <div className="grid md:grid-cols-2 gap-6">
-            <Card className="bg-slate-700 border-purple-500/30">
+            <Card className="bg-white border-green-200">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-purple-300">
-                  <Anchor className="h-5 w-5" />
-                  Captain's Lounge Fantasy
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-slate-300 mb-4">
-                  Add fantasy sports to your office culture with our ad-free platform
-                </p>
-                <Button 
-                  variant="outline" 
-                  className="w-full border-purple-500/50 text-purple-400 hover:bg-purple-500/10"
-                  onClick={() => window.open('https://fantasy.trantortournaments.org', '_blank')}
-                  data-testid="button-fantasy-ecosystem"
-                >
-                  Learn More
-                </Button>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-slate-700 border-green-500/30">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-green-300">
+                <CardTitle className="flex items-center gap-2 text-green-800">
                   <Trophy className="h-5 w-5" />
                   Educational Impact
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-slate-300 mb-4">
-                  Your subscription helps fund student educational trips in Corpus Christi
+                <p className="text-sm text-green-700 mb-4">
+                  100% of platform revenue funds educational opportunities for underprivileged youth in Corpus Christi, Texas
                 </p>
-                <div className="text-xs text-green-400 font-semibold">
-                  ✓ $15,000+ already funded for students
+                <div className="text-xs text-green-600">
+                  <p>✓ Educational tour companies</p>
+                  <p>✓ Student travel experiences</p>
+                  <p>✓ Learning opportunities</p>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-white border-blue-200">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-blue-800">
+                  <CheckCircle className="h-5 w-5" />
+                  Coach-Built Platform
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-blue-700 mb-4">
+                  Built by coaches who understand real tournament management needs
+                </p>
+                <div className="text-xs text-blue-600">
+                  <p>✓ 21 years coaching experience</p>
+                  <p>✓ Robert Driscoll Middle School</p>
+                  <p>✓ Corpus Christi, Texas</p>
                 </div>
               </CardContent>
             </Card>
           </div>
         </div>
-        )}
       </div>
     </div>
   );
