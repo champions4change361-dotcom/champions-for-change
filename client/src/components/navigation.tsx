@@ -11,7 +11,9 @@ import {
   School,
   Users,
   Target,
-  UserPlus
+  UserPlus,
+  BarChart3,
+  Building2
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -23,7 +25,9 @@ export function Navigation() {
     const baseItems = [
       { path: "/", label: "Home", icon: Home },
       { path: "/contacts", label: "Contacts", icon: UserPlus },
-      { path: "/fantasy-tournaments", label: "Fantasy Sports", icon: Target }
+      { path: "/fantasy-tournaments", label: "Fantasy Sports", icon: Target },
+      { path: "/athlete-analytics", label: "Athlete Analytics", icon: BarChart3 },
+      { path: "/corporate-analytics", label: "Corporate Analytics", icon: Building2 }
     ];
 
     // Add role-specific navigation items

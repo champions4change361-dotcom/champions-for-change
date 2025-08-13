@@ -36,6 +36,8 @@ import Pricing from './pages/Pricing';
 import BusinessPricingTest from './pages/BusinessPricingTest';
 import YourWhy from './pages/YourWhy';
 import CorporateCompetitions from './pages/CorporateCompetitions';
+import AthleteAnalytics from './pages/AthleteAnalytics';
+import CorporateAnalytics from './pages/CorporateAnalytics';
 
 function AuthenticatedRoutes() {
   const { isFeatureEnabled, isFantasyDomain, config } = useDomain();
@@ -58,6 +60,8 @@ function AuthenticatedRoutes() {
         <Route path="/championships" component={Championships} />
         <Route path="/webpage-builder" component={WebpageBuilder} />
         <Route path="/corporate-competitions" component={CorporateCompetitions} />
+        <Route path="/athlete-analytics" component={() => <AthleteAnalytics isCoachView={true} />} />
+        <Route path="/corporate-analytics" component={() => <CorporateAnalytics isPublic={true} />} />
         
         {/* Show Tournament Empire only for school-safe and pro domains */}
         {!isFantasyDomain() && (

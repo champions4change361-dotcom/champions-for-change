@@ -4882,6 +4882,200 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ANALYTICS API ENDPOINTS
+  
+  // Get athlete performance data
+  app.get("/api/analytics/performance/:athleteId", async (req, res) => {
+    try {
+      const { athleteId } = req.params;
+      const { event, season } = req.query;
+      
+      // Mock swimming performance data with realistic progression
+      const performanceData = [
+        {
+          id: "perf-1",
+          athleteId,
+          athleteName: "Sarah Johnson",
+          eventName: "50m Freestyle",
+          eventType: "freestyle",
+          meetName: "Winter Invitational",
+          meetDate: "2024-12-12",
+          timeInSeconds: 26.45,
+          formattedTime: "26.45",
+          placement: 2,
+          personalBest: true,
+          seasonBest: true
+        },
+        {
+          id: "perf-2",
+          athleteId,
+          athleteName: "Sarah Johnson",
+          eventName: "50m Backstroke",
+          eventType: "backstroke",
+          meetName: "Winter Invitational",
+          meetDate: "2024-12-12",
+          timeInSeconds: 29.12,
+          formattedTime: "29.12",
+          placement: 3,
+          personalBest: false,
+          seasonBest: true
+        },
+        {
+          id: "perf-3",
+          athleteId,
+          athleteName: "Sarah Johnson",
+          eventName: "100m Butterfly",
+          eventType: "butterfly",
+          meetName: "Winter Invitational", 
+          meetDate: "2024-12-12",
+          timeInSeconds: 62.89,
+          formattedTime: "1:02.89",
+          placement: 1,
+          personalBest: true,
+          seasonBest: true
+        },
+        // After winter break - slower times showing impact of break
+        {
+          id: "perf-4",
+          athleteId,
+          athleteName: "Sarah Johnson",
+          eventName: "50m Freestyle",
+          eventType: "freestyle",
+          meetName: "Spring District Meet",
+          meetDate: "2025-01-18",
+          timeInSeconds: 27.12,
+          formattedTime: "27.12",
+          placement: 4,
+          personalBest: false,
+          seasonBest: false
+        },
+        {
+          id: "perf-5",
+          athleteId,
+          athleteName: "Sarah Johnson",
+          eventName: "50m Backstroke",
+          eventType: "backstroke",
+          meetName: "Spring District Meet",
+          meetDate: "2025-01-18",
+          timeInSeconds: 30.05,
+          formattedTime: "30.05",
+          placement: 5,
+          personalBest: false,
+          seasonBest: false
+        },
+        // Recovery showing improvement
+        {
+          id: "perf-6",
+          athleteId,
+          athleteName: "Sarah Johnson",
+          eventName: "50m Freestyle",
+          eventType: "freestyle",
+          meetName: "Regional Championships",
+          meetDate: "2025-02-15",
+          timeInSeconds: 26.12,
+          formattedTime: "26.12",
+          placement: 1,
+          personalBest: true,
+          seasonBest: true
+        }
+      ];
+      
+      res.json(performanceData);
+    } catch (error) {
+      console.error("Failed to fetch performance data:", error);
+      res.status(500).json({ error: "Failed to fetch performance data" });
+    }
+  });
+
+  // Get athletes list for coach view
+  app.get("/api/athletes", async (req, res) => {
+    try {
+      // Mock athletes data
+      const athletes = [
+        { id: "athlete-1", name: "Sarah Johnson", sport: "Swimming", grade: "11th" },
+        { id: "athlete-2", name: "Mike Chen", sport: "Swimming", grade: "10th" },
+        { id: "athlete-3", name: "Emma Davis", sport: "Track & Field", grade: "12th" },
+        { id: "athlete-4", name: "Jake Wilson", sport: "Swimming", grade: "9th" }
+      ];
+      
+      res.json(athletes);
+    } catch (error) {
+      console.error("Failed to fetch athletes:", error);
+      res.status(500).json({ error: "Failed to fetch athletes" });
+    }
+  });
+
+  // Get corporate analytics performance data
+  app.get("/api/corporate/analytics/performance", async (req, res) => {
+    try {
+      const { competitionId, department } = req.query;
+      
+      // Mock sales performance data showing realistic patterns
+      const performanceData = [
+        {
+          id: "sales-1",
+          participantId: "emp-001",
+          participantName: "John Martinez",
+          department: "Sales",
+          date: "2024-01-05",
+          revenue: 12500,
+          unitsSold: 25,
+          competitionId: "comp-comp-1",
+          competitionName: "Q1 Sales Championship"
+        },
+        {
+          id: "sales-2",
+          participantId: "emp-002", 
+          participantName: "Lisa Thompson",
+          department: "Marketing",
+          date: "2024-01-05",
+          revenue: 8300,
+          unitsSold: 18,
+          competitionId: "comp-comp-1",
+          competitionName: "Q1 Sales Championship"
+        },
+        {
+          id: "sales-3",
+          participantId: "emp-001",
+          participantName: "John Martinez",
+          department: "Sales",
+          date: "2024-01-12",
+          revenue: 15200,
+          unitsSold: 32,
+          competitionId: "comp-comp-1",
+          competitionName: "Q1 Sales Championship"
+        },
+        {
+          id: "sales-4",
+          participantId: "emp-002",
+          participantName: "Lisa Thompson", 
+          department: "Marketing",
+          date: "2024-01-12",
+          revenue: 9800,
+          unitsSold: 22,
+          competitionId: "comp-comp-1", 
+          competitionName: "Q1 Sales Championship"
+        },
+        {
+          id: "sales-5",
+          participantId: "emp-003",
+          participantName: "David Park",
+          department: "Engineering",
+          date: "2024-01-12",
+          revenue: 5400,
+          unitsSold: 8,
+          competitionId: "comp-comp-1",
+          competitionName: "Q1 Sales Championship"
+        }
+      ];
+      
+      res.json(performanceData);
+    } catch (error) {
+      console.error("Failed to fetch corporate analytics:", error);
+      res.status(500).json({ error: "Failed to fetch corporate analytics" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
