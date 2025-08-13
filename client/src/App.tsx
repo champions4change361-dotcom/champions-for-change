@@ -43,6 +43,7 @@ import FootballHealthMonitoring from './pages/FootballHealthMonitoring';
 import DefensiveHealthMonitoring from './pages/DefensiveHealthMonitoring';
 import ComprehensiveHealthDemo from './pages/ComprehensiveHealthDemo';
 import CCISDDocumentIntegration from './pages/CCISDDocumentIntegration';
+import AthleticTrainerScheduler from './pages/AthleticTrainerScheduler';
 
 function AuthenticatedRoutes() {
   const { isFeatureEnabled, isFantasyDomain, config } = useDomain();
@@ -72,6 +73,7 @@ function AuthenticatedRoutes() {
         <Route path="/defensive-health" component={DefensiveHealthMonitoring} />
         <Route path="/comprehensive-health-demo" component={ComprehensiveHealthDemo} />
         <Route path="/ccisd-document-integration" component={CCISDDocumentIntegration} />
+        <Route path="/athletic-trainer-scheduler" component={AthleticTrainerScheduler} />
         
         {/* Show Tournament Empire only for school-safe and pro domains */}
         {!isFantasyDomain() && (
