@@ -212,9 +212,9 @@ export function AIConsultant({ domain = 'education' }: AIConsultantProps) {
               </div>
 
               <div>
-                <label className="text-sm font-medium">Additional Goals</label>
+                <label className="text-sm font-medium">Your Mission & Goals</label>
                 <Textarea 
-                  placeholder="e.g., Raise funds for student trips, Build community engagement..."
+                  placeholder="Share your mission - examples: Fund educational trips, Generate revenue, Spread faith through sports, Build community, Support local athletes, Create competitive opportunities..."
                   value={consultation.goals}
                   onChange={(e) => setConsultation(prev => ({ ...prev, goals: e.target.value }))}
                   data-testid="textarea-goals"

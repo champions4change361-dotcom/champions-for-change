@@ -217,9 +217,9 @@ export default function TournamentDesign() {
               </div>
 
               <div>
-                <Label>Description</Label>
+                <Label>Tournament Description & Mission</Label>
                 <Textarea 
-                  placeholder="Provide additional details about your tournament..."
+                  placeholder="Describe your tournament and its purpose - whether for educational funding, community building, faith outreach, revenue generation, or athletic development..."
                   rows={3}
                   value={tournament.description}
                   onChange={(e) => handleInputChange('description', e.target.value)}

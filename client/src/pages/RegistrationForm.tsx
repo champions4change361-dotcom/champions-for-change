@@ -35,7 +35,7 @@ const registrationSchema = z.object({
     phone: z.string().optional(),
     relationship: z.string()
   })).optional(),
-  requestReason: z.string().min(10, 'Please describe your tournament goals (minimum 10 characters)'),
+  requestReason: z.string().min(10, 'Please describe your goals and mission (minimum 10 characters)'),
   selectedTier: z.enum(['foundation', 'champion', 'enterprise']),
   paymentMethod: z.enum(['stripe', 'check'])
 });
@@ -469,10 +469,10 @@ export default function RegistrationFormPage() {
                 </div>
 
                 <div>
-                  <Label>What are your tournament goals? *</Label>
+                  <Label>What are your goals and mission? *</Label>
                   <Textarea 
                     {...form.register('requestReason')} 
-                    placeholder="e.g., Host basketball tournaments to fund educational trips, organize track meets for middle school athletes, build community engagement through sports..."
+                    placeholder="Share your mission and goals - examples: Fund student educational trips, Generate revenue for our organization, Build community through faith-based sports programs, Support local athletes, Spread our message through athletics, Create competitive opportunities..."
                     rows={4}
                     data-testid="textarea-requestReason"
                   />
