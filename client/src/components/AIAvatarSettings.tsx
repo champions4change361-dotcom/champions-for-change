@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Bot, Users, Briefcase, Minimize, Trophy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
+import { KeystoneAvatar } from '@/components/KeystoneAvatar';
 
 interface AvatarPreferences {
   avatarEnabled: boolean;
@@ -213,22 +214,28 @@ export function AIAvatarSettings() {
               <CardTitle className="text-base text-blue-800">Preview</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
-                  <Bot className="h-6 w-6 text-white" />
+              <div className="space-y-4">
+                <div className="text-center">
+                  <KeystoneAvatar 
+                    state="idle" 
+                    size="large" 
+                    domain={
+                      currentPrefs.avatarStyle === 'professional_coach' ? 'education' :
+                      currentPrefs.avatarStyle === 'friendly_advisor' ? 'business' :
+                      currentPrefs.avatarStyle === 'sports_mascot' ? 'coaches' :
+                      'education'
+                    }
+                  />
                 </div>
-                <div className="flex-1 space-y-1">
-                  <div className="font-medium text-blue-900">Keystone AI</div>
-                  <div className="text-sm text-blue-800">
-                    {currentPrefs.avatarStyle === 'professional_coach' && 
-                      "Good morning. I'm here to assist you with your tournament management needs. How may I help you today?"}
-                    {currentPrefs.avatarStyle === 'friendly_advisor' && 
-                      "Hi there! 👋 I'm Keystone AI, your tournament assistant. Ready to create something amazing together?"}
-                    {currentPrefs.avatarStyle === 'sports_mascot' && 
-                      "Hey coach! 🏆 Let's fire up some epic tournaments and get this competition rolling! What's the game plan?"}
-                    {currentPrefs.avatarStyle === 'minimalist_icon' && 
-                      "Tournament assistance available. How can I help?"}
-                  </div>
+                <div className="text-sm text-blue-800">
+                  {currentPrefs.avatarStyle === 'professional_coach' && 
+                    "Good morning. I'm here to assist you with your tournament management needs. How may I help you today?"}
+                  {currentPrefs.avatarStyle === 'friendly_advisor' && 
+                    "Hi there! I'm Keystone AI, your tournament assistant. Ready to create something amazing together?"}
+                  {currentPrefs.avatarStyle === 'sports_mascot' && 
+                    "Hey coach! Let's fire up some epic tournaments and get this competition rolling! What's the game plan?"}
+                  {currentPrefs.avatarStyle === 'minimalist_icon' && 
+                    "Tournament assistance available. How can I help?"}
                 </div>
               </div>
             </CardContent>
