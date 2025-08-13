@@ -1,0 +1,99 @@
+{
+  "millerVlcCluster": {
+    "name": "Miller Vertical Learning Community",
+    "description": "Miller VLC demonstration cluster for CCISD tournament management",
+    "schools": [
+      {
+        "id": "roy-miller-hs",
+        "name": "Roy Miller High School",
+        "fullName": "Roy Miller High School and Metropolitan School of Design", 
+        "level": "high-school",
+        "address": "1 Battlin Buc Blvd, Corpus Christi, TX 78408",
+        "phone": "(361) 878-5100",
+        "principal": "Sandy Salinas-Deleon",
+        "mascot": "Buccaneers",
+        "nickname": "Bucs",
+        "slogan": "Battlin' Bucs",
+        "colors": {
+          "primary": "#1e3a8a",
+          "secondary": "#ffffff",
+          "accent": "#dc2626"
+        },
+        "established": 1894,
+        "history": "Oldest high school in Corpus Christi, originally Corpus Christi High School until 1950",
+        "classification": "UIL 5A",
+        "sports": [
+          "volleyball", "cross-country", "football", "basketball", 
+          "soccer", "golf", "tennis", "track", "baseball", "softball",
+          "lacrosse", "water-polo", "wrestling"
+        ],
+        "championships": [
+          {"year": "1960-61", "sport": "football", "level": "state"},
+          {"year": "1938-39", "sport": "football", "level": "state"}
+        ],
+        "specialPrograms": ["Metropolitan School of Design", "Advanced Placement"],
+        "website": "https://miller.ccisd.us/"
+      },
+      {
+        "id": "robert-driscoll-ms", 
+        "name": "Robert Driscoll Middle School",
+        "level": "middle-school",
+        "address": "3501 Kenwood Dr, Corpus Christi, TX 78408",
+        "phone": "(361) 878-4660",
+        "principal": "Chris Hall",
+        "mascot": "Rangers",
+        "nickname": "Rangers",
+        "slogan": "Go Rangers!",
+        "colors": {
+          "primary": "#059669",
+          "secondary": "#ffffff", 
+          "accent": "#374151"
+        },
+        "grades": "6-8",
+        "feedsTo": "roy-miller-hs",
+        "sports": [
+          "volleyball", "football", "basketball", "track", 
+          "cross-country", "tennis", "soccer"
+        ],
+        "website": "https://driscoll.ccisd.us/"
+      },
+      {
+        "id": "sterling-martin-ms",
+        "name": "Sterling B. Martin Middle School", 
+        "level": "middle-school",
+        "address": "3502 Greenwood Drive, Corpus Christi, TX 78416",
+        "phone": "(361) 878-4690",
+        "principal": "Jolanda Vasquez",
+        "mascot": "Trojans",
+        "nickname": "Trojans",
+        "slogan": "Welcome Trojans!",
+        "colors": {
+          "primary": "#7c2d12",
+          "secondary": "#fbbf24",
+          "accent": "#ffffff"
+        },
+        "grades": "6-8", 
+        "feedsTo": "roy-miller-hs",
+        "specialFeatures": ["O.B. Garcia Library (recently renovated)"],
+        "sports": [
+          "volleyball", "football", "basketball", "track",
+          "cross-country", "tennis", "soccer"
+        ],
+        "website": "https://martin.ccisd.us/"
+      }
+    ],
+    "tournamentCapabilities": {
+      "crossSchoolTournaments": true,
+      "pipelineTracking": true,
+      "multiLevelManagement": true,
+      "combinedBrackets": true,
+      "feederSchoolIntegration": true
+    },
+    "combinedAthletics": {
+      "totalSports": 13,
+      "sharedSports": ["volleyball", "football", "basketball", "track", "cross-country", "tennis", "soccer"],
+      "highSchoolOnly": ["lacrosse", "water-polo", "wrestling", "golf", "baseball", "softball"],
+      "studentAthletePipeline": "Middle schools feed into Miller High School athletic programs"
+    }
+  }
+}

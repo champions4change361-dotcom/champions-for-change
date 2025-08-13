@@ -3,6 +3,14 @@
 ## Overview
 This is a full-stack tournament bracket management application designed as a white-label SaaS platform for the Champions for Change nonprofit. The application enables users to create and manage single-elimination tournaments with interactive bracket visualization and real-time updates. Its core purpose is to fund educational opportunities for underprivileged youth in Corpus Christi, Texas, by offering professional tournament management services. Key capabilities include user authentication, payment integration, AI-powered tournament creation across various sports, custom branding, a multi-tenant architecture, and a five-tier user hierarchy mirroring school district structures. The platform emphasizes its mission-driven approach, providing a comprehensive solution for managing competitive events while generating social impact.
 
+## Recent Miller VLC Demo Development
+- Built comprehensive Miller VLC (Vertical Learning Community) demonstration platform targeting 3 CCISD schools
+- Pre-loaded authentic school data: Roy Miller High (Buccaneers, est. 1894), Robert Driscoll Middle (Rangers), Sterling B. Martin Middle (Trojans)  
+- Integrated real school information: addresses, phone numbers, principals, mascots, colors, sports programs, championships
+- Created cross-school tournament capabilities demonstrating pipeline integration from middle schools to high school
+- Military-grade organization features reflecting team's combined 41+ years experience (10 years coaching + 21 years military + additional coaching staff)
+- Cost analysis showing $47,510 annual savings vs. competitors for immediate CCISD value proposition
+
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 Mission-focused: Platform serves Champions for Change nonprofit to fund student trips and educational opportunities for middle schools in Corpus Christi, Texas.

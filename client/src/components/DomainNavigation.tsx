@@ -61,6 +61,13 @@ export default function DomainNavigation() {
             </Link>
           )}
 
+          {/* Miller VLC Demo - CCISD Showcase */}
+          {config.brand !== 'FANTASY_LEAGUE_CENTRAL' && (
+            <Link href="/miller-vlc-demo">
+              <a className={getNavItemClass("/miller-vlc-demo")}>Miller VLC</a>
+            </Link>
+          )}
+
           {/* Show Fantasy only for fantasy and pro domains */}
           {isFeatureEnabled('fantasyLeagues') && (
             <Link href="/fantasy-tournaments">
