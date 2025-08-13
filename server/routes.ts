@@ -7,6 +7,7 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { setupDomainRoutes } from "./domainRoutes";
 import { AIContextService } from "./ai-context";
 import { UniversalRegistrationSystem } from "./universal-registration";
+import { UsageLimitService, TOURNAMENT_CREDIT_PACKAGES } from "./usageLimits";
 import Stripe from "stripe";
 import { z } from "zod";
 
@@ -246,20 +247,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create tournament
+  // Check tournament creation limits
+  app.get("/api/usage/can-create-tournament", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const limitCheck = await UsageLimitService.canCreateTournament(userId);
+      res.json(limitCheck);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to check usage limits" });
+    }
+  });
+
+  // Get user usage statistics
+  app.get("/api/usage/stats", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const stats = await UsageLimitService.getUserUsageStats(userId);
+      res.json(stats);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch usage statistics" });
+    }
+  });
+
+  // Create tournament (with usage limit checking)
   app.post("/api/tournaments", isAuthenticated, async (req: any, res) => {
     try {
+      const userId = req.user.claims.sub;
+      const clientIP = req.ip || req.connection.remoteAddress;
+      
+      // Check if user can create tournament
+      const limitCheck = await UsageLimitService.canCreateTournament(userId);
+      if (!limitCheck.allowed) {
+        return res.status(429).json({ 
+          error: limitCheck.reason,
+          suggestedAction: limitCheck.suggestedAction 
+        });
+      }
+      
       const validatedData = insertTournamentSchema.parse(req.body);
       const storage = await getStorage();
       
       // Add user ID to tournament data
       const tournamentData = {
         ...validatedData,
-        userId: req.user.claims.sub
+        userId
       };
       
       // Create tournament
       const tournament = await storage.createTournament(tournamentData);
+      
+      // Use tournament slot (decrement limit or credit)
+      await UsageLimitService.useTournamentSlot(userId, clientIP);
       
       // Generate bracket matches based on tournament type
       const matches = validatedData.tournamentType === "double" 
@@ -288,6 +326,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Invalid tournament data", details: error.errors });
       }
       res.status(500).json({ error: "Failed to create tournament" });
+    }
+  });
+
+  // Purchase tournament credits
+  app.post("/api/tournament-credits/purchase", isAuthenticated, async (req: any, res) => {
+    try {
+      const { packageId } = req.body;
+      const userId = req.user.claims.sub;
+      
+      const packageInfo = TOURNAMENT_CREDIT_PACKAGES[packageId as keyof typeof TOURNAMENT_CREDIT_PACKAGES];
+      if (!packageInfo) {
+        return res.status(400).json({ error: "Invalid package" });
+      }
+      
+      // Create Stripe checkout session
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: [
+          {
+            price_data: {
+              currency: 'usd',
+              product_data: {
+                name: packageInfo.name,
+                description: `${packageInfo.credits} tournament credits - ${packageInfo.description}`,
+              },
+              unit_amount: packageInfo.price * 100,
+            },
+            quantity: 1,
+          },
+        ],
+        mode: 'payment',
+        success_url: `${req.headers.origin}/dashboard?credits_purchased=true`,
+        cancel_url: `${req.headers.origin}/dashboard?credits_cancelled=true`,
+        metadata: {
+          userId,
+          packageId,
+          creditsAmount: packageInfo.credits.toString(),
+        },
+      });
+
+      res.json({ checkoutUrl: session.url });
+    } catch (error) {
+      console.error("Credit purchase error:", error);
+      res.status(500).json({ error: "Purchase failed" });
+    }
+  });
+
+  // Webhook to handle successful credit purchases
+  app.post("/api/webhooks/stripe-credits", async (req, res) => {
+    try {
+      const sig = req.headers['stripe-signature'] as string;
+      let event;
+
+      try {
+        event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET as string);
+      } catch (err: any) {
+        console.log(`Webhook signature verification failed:`, err.message);
+        return res.status(400).send(`Webhook Error: ${err.message}`);
+      }
+
+      if (event.type === 'checkout.session.completed') {
+        const session = event.data.object as any;
+        const { userId, packageId, creditsAmount } = session.metadata;
+        
+        // Add credits to user account
+        await UsageLimitService.addCreditsToUser(
+          userId,
+          parseInt(creditsAmount),
+          packageId,
+          session.amount_total / 100,
+          session.payment_intent
+        );
+        
+        console.log(`✅ Added ${creditsAmount} credits to user ${userId}`);
+      }
+
+      res.json({ received: true });
+    } catch (error) {
+      console.error("Credit webhook error:", error);
+      res.status(400).json({ error: "Webhook failed" });
     }
   });
 

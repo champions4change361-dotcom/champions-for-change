@@ -27,8 +27,8 @@ export const users = pgTable("users", {
     enum: ["active", "inactive", "trialing", "past_due", "canceled", "unpaid"] 
   }).default("inactive"),
   subscriptionPlan: text("subscription_plan", { 
-    enum: ["free", "foundation", "champion", "enterprise", "district_enterprise"] 
-  }).default("free"),
+    enum: ["free", "foundation", "starter", "professional", "champion", "enterprise", "district_enterprise"] 
+  }).default("foundation"),
   userRole: text("user_role", {
     enum: ["tournament_manager", "district_athletic_director", "school_athletic_director", "coach", "scorekeeper", "athlete", "fan"]
   }).default("fan"),
@@ -53,6 +53,25 @@ export const users = pgTable("users", {
   // LEARNING PROGRESS
   completedAITutorials: jsonb("completed_ai_tutorials").$type<string[]>(),
   aiInteractionCount: integer("ai_interaction_count").default(0),
+  
+  // SMART USAGE LIMITS FIELDS
+  monthlyTournamentLimit: integer("monthly_tournament_limit").default(5),
+  currentMonthTournaments: integer("current_month_tournaments").default(0),
+  lastMonthReset: timestamp("last_month_reset").defaultNow(),
+  
+  // ABUSE PREVENTION
+  registrationFingerprint: varchar("registration_fingerprint"),
+  registrationIP: varchar("registration_ip"),
+  verifiedPhone: varchar("verified_phone"),
+  organizationVerified: boolean("organization_verified").default(false),
+  
+  // USAGE TRACKING
+  totalTournamentsCreated: integer("total_tournaments_created").default(0),
+  lifetimeUsageValue: decimal("lifetime_usage_value", { precision: 10, scale: 2 }).default("0"),
+  
+  // PAY-PER-TOURNAMENT CREDITS
+  tournamentCredits: integer("tournament_credits").default(0),
+  creditsPurchased: decimal("credits_purchased", { precision: 10, scale: 2 }).default("0"),
   
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -1445,6 +1464,42 @@ export const coachEventAssignmentsRelations = relations(coachEventAssignments, (
 
 export type SchoolEventAssignment = typeof schoolEventAssignments.$inferSelect;
 export type InsertSchoolEventAssignment = typeof schoolEventAssignments.$inferInsert;
+
+// Tournament credits purchases tracking
+export const tournamentCredits = pgTable("tournament_credits", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  packageType: text("package_type", {
+    enum: ["single_tournament", "tournament_5_pack", "tournament_10_pack", "monthly_boost"]
+  }).notNull(),
+  creditsAmount: integer("credits_amount").notNull(),
+  priceAmount: decimal("price_amount", { precision: 10, scale: 2 }).notNull(),
+  stripePaymentId: varchar("stripe_payment_id"),
+  purchaseDate: timestamp("purchase_date").defaultNow(),
+  expiresAt: timestamp("expires_at"), // Credits can expire
+  status: text("status", {
+    enum: ["pending", "completed", "failed", "refunded"]
+  }).default("pending"),
+});
+
+// Usage analytics for fraud detection
+export const usageAnalytics = pgTable("usage_analytics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  actionType: text("action_type", {
+    enum: ["tournament_created", "login", "credit_purchased", "limit_reached"]
+  }).notNull(),
+  ipAddress: varchar("ip_address"),
+  userAgent: varchar("user_agent"),
+  deviceFingerprint: varchar("device_fingerprint"),
+  timestamp: timestamp("timestamp").defaultNow(),
+  metadata: jsonb("metadata"), // Additional context
+});
+
+export type TournamentCredit = typeof tournamentCredits.$inferSelect;
+export type InsertTournamentCredit = typeof tournamentCredits.$inferInsert;
+export type UsageAnalytic = typeof usageAnalytics.$inferSelect;
+export type InsertUsageAnalytic = typeof usageAnalytics.$inferInsert;
 export type CoachEventAssignment = typeof coachEventAssignments.$inferSelect;
 export type InsertCoachEventAssignment = typeof coachEventAssignments.$inferInsert;
 export type InsertUser = z.infer<typeof insertUserSchema>;
