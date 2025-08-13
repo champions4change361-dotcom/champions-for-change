@@ -607,10 +607,11 @@ export default function RegistrationFormPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-blue-700 mb-4">
-                  Built by coaches who understand real tournament management needs
+                  Veteran-managed platform built by secondary athletic coaches who understand real tournament management needs
                 </p>
                 <div className="text-xs text-blue-600">
-                  <p>✓ 21 years coaching experience</p>
+                  <p>✓ 21 years military service + 10 years coaching</p>
+                  <p>✓ 39+ combined team coaching experience</p>
                   <p>✓ Robert Driscoll Middle School</p>
                   <p>✓ Corpus Christi, Texas</p>
                 </div>

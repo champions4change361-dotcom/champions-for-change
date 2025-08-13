@@ -35,7 +35,7 @@ export default function Footer() {
               </p>
               <p className="text-xs text-gray-400">
                 21 years military service (Marines & Army)<br />
-                Teaching & coaching since 2016<br />
+                10 years secondary athletic coaching<br />
                 Robert Driscoll Middle School, Corpus Christi
               </p>
               <div className="flex items-center mt-3">

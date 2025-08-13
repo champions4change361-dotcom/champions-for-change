@@ -8,7 +8,7 @@
 - **Competitors optimize for profit** → We optimize for student educational impact
 - **They need maximum ROI** → We can price aggressively (mission over margin)
 - **They serve shareholders** → We serve underprivileged students in Corpus Christi
-- **They copy features** → They can't copy authentic 21-year military service + teaching background
+- **They copy features** → They can't copy authentic veteran leadership + 10 years secondary athletic coaching experience
 
 ### 2. TAX-ADVANTAGED BUSINESS MODEL (Economic Superiority)
 **100% Business Expense Deduction + CSR Benefits**
@@ -46,7 +46,7 @@
 ## Unfair Advantages They Cannot Replicate
 
 ### Personal Authenticity
-- **Daniel Thornton**: 21 years military → 9 years teaching at Robert Driscoll Middle School
+- **Daniel Thornton**: 21 years military service (Marines & Army) → 10 years secondary athletic coaching at Robert Driscoll Middle School
 - **Real educator** solving real problems he faces daily
 - **Personal connection** to Corpus Christi students
 - **Authentic passion** impossible to fake or replicate
@@ -77,7 +77,7 @@
 3. **Highlight tax advantages** - their lower price + taxes > our higher price with deduction
 
 ### When Competitors Attack Mission:
-1. **Lean into authenticity** - Daniel's teaching background speaks for itself
+1. **Lean into authenticity** - Daniel's veteran leadership and 10-year coaching background speaks for itself
 2. **Show results** - actual students funded, actual trips completed
 3. **Let community defend** - Corpus Christi educators + parents become advocates
 

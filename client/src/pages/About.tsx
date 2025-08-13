@@ -81,7 +81,7 @@ export default function About() {
                   </h3>
                   <p className="text-gray-600 dark:text-gray-300 text-sm">
                     21 years of distinguished military service, beginning with the Marines before transferring to the Army. 
-                    This experience instilled the leadership, discipline, and dedication that drives our mission today.
+                    This veteran leadership experience instilled the discipline and dedication that drives our mission today.
                   </p>
                 </div>
                 
@@ -92,7 +92,7 @@ export default function About() {
                   </h3>
                   <p className="text-gray-600 dark:text-gray-300 text-sm">
                     After retiring from military service, Daniel earned his teaching certificate and moved to Corpus Christi, Texas in 2016. 
-                    Since then, he's been teaching and coaching at Robert Driscoll Middle School, directly impacting student lives daily.
+                    Since then, he's accumulated 10 years of secondary athletic coaching experience at Robert Driscoll Middle School, directly impacting student lives daily.
                   </p>
                 </div>
               </div>

@@ -123,7 +123,7 @@ export default function Landing() {
               <div className="text-slate-300">
                 <p className="font-semibold text-white text-lg">Daniel Thornton</p>
                 <p className="text-yellow-400 font-medium mb-2">Executive Director of Champions for Change</p>
-                <p className="text-sm">21 years military service (Marines & Army) • Teaching & coaching at Robert Driscoll Middle School since 2016</p>
+                <p className="text-sm">21 years military service (Marines & Army) • 10 years secondary athletic coaching • Robert Driscoll Middle School since 2016</p>
               </div>
             </div>
             
