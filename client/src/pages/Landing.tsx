@@ -116,6 +116,24 @@ export default function Landing() {
                 Start Supporting Students
               </Button>
             </div>
+            
+            {/* Enterprise/Nonprofit Access */}
+            <div className="mt-8 p-6 bg-slate-700/50 border border-slate-600 rounded-xl">
+              <p className="text-slate-300 text-center mb-4">
+                Not a school or district but need reduced price and free tournament solutions 
+                for your nonprofit or company, with access to our 65+ competitions?
+              </p>
+              <div className="text-center">
+                <Button 
+                  variant="outline"
+                  className="border-emerald-400 text-emerald-400 hover:bg-emerald-400/10 hover:border-emerald-300"
+                  onClick={() => window.location.href = "/business-pricing-test"}
+                  data-testid="button-enterprise-help"
+                >
+                  Click Here - We Can Help
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
         
