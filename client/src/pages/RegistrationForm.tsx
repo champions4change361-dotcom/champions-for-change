@@ -114,26 +114,41 @@ export default function RegistrationFormPage() {
     });
   };
 
+  // Define which roles can register districts vs must join existing districts
+  const districtRegistrationRoles = ['district_admin', 'school_admin'];
+  const joinOnlyRoles = ['coach', 'scorekeeper'];
+
   const roleDescriptions = {
     district_admin: {
       title: 'District Athletic Director',
-      description: 'Oversee all athletic programs across multiple schools in your district.',
-      requirements: ['District administrative role', 'Athletic program oversight', 'Multi-school coordination']
+      description: 'CREATE DISTRICTS - Oversee all athletic programs across multiple schools in your district.',
+      requirements: ['District administrative authority', 'Multi-school management oversight', 'Budget and policy control'],
+      canRegisterDistrict: true,
+      badge: 'District Creator'
     },
     school_admin: {
-      title: 'School Athletic Director', 
-      description: 'Manage athletic programs for your specific school.',
-      requirements: ['School administrative role', 'Athletic program management', 'Coach coordination']
+      title: 'School Athletic Coordinator', 
+      description: 'JOIN DISTRICTS - Manage athletic programs for your specific school within an existing district.',
+      requirements: ['School administrative role', 'Reports to District Athletic Director', 'Single-school focus'],
+      canRegisterDistrict: true,
+      badge: 'District Member',
+      note: 'District size affects autonomy: Small districts = more independence, Large districts = less autonomy'
     },
     coach: {
       title: 'Coach',
-      description: 'Register teams, manage rosters, and participate in tournaments.',
-      requirements: ['Coaching certification', 'Team management experience', 'School affiliation']
+      description: 'JOIN SCHOOLS - Register teams, manage rosters, and participate in tournaments under a School Athletic Coordinator.',
+      requirements: ['Coaching certification', 'Reports to School Athletic Coordinator', 'Team-level focus'],
+      canRegisterDistrict: false,
+      badge: 'Team Level',
+      redirectMessage: 'Coaches must be invited by their School Athletic Coordinator'
     },
     scorekeeper: {
       title: 'Scorekeeper/Judge',
-      description: 'Update scores and results for assigned events.',
-      requirements: ['Event scoring experience', 'Attention to detail', 'Reliability']
+      description: 'EVENT ASSIGNMENT - Update scores and results for specific events assigned by Tournament Managers.',
+      requirements: ['Event scoring experience', 'Assigned by Tournament Manager', 'Event-specific access'],
+      canRegisterDistrict: false,
+      badge: 'Event Level', 
+      redirectMessage: 'Scorekeepers are assigned by Tournament Managers to specific events'
     }
   };
 
@@ -225,33 +240,78 @@ export default function RegistrationFormPage() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {Object.entries(roleDescriptions).map(([role, info]) => (
-                    <div 
-                      key={role}
-                      className={`p-4 border rounded-lg cursor-pointer transition-all ${
-                        form.watch('requestType') === role 
-                          ? 'border-blue-500 bg-blue-50' 
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                      onClick={() => form.setValue('requestType', role as any)}
-                      data-testid={`role-${role}`}
-                    >
-                      <h3 className="font-semibold text-lg mb-2">{info.title}</h3>
-                      <p className="text-gray-600 text-sm mb-3">{info.description}</p>
-                      <ul className="text-xs text-gray-600 space-y-1">
-                        {info.requirements.map((req, idx) => (
-                          <li key={idx}>• {req}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
+                  {Object.entries(roleDescriptions).map(([role, info]) => {
+                    const isDisabled = !info.canRegisterDistrict;
+                    return (
+                      <div 
+                        key={role}
+                        className={`p-4 border rounded-lg transition-all relative ${
+                          isDisabled 
+                            ? 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed'
+                            : form.watch('requestType') === role 
+                              ? 'border-blue-500 bg-blue-50 cursor-pointer' 
+                              : 'border-gray-200 hover:border-gray-300 cursor-pointer'
+                        }`}
+                        onClick={() => {
+                          if (!isDisabled) {
+                            form.setValue('requestType', role as any);
+                          }
+                        }}
+                        data-testid={`role-${role}`}
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 className="font-semibold text-lg">{info.title}</h3>
+                          <span className={`text-xs px-2 py-1 rounded-full ${
+                            info.canRegisterDistrict 
+                              ? 'bg-green-100 text-green-700' 
+                              : 'bg-red-100 text-red-700'
+                          }`}>
+                            {info.badge}
+                          </span>
+                        </div>
+                        <p className="text-gray-600 text-sm mb-3">{info.description}</p>
+                        <ul className="text-xs text-gray-600 space-y-1 mb-2">
+                          {info.requirements.map((req, idx) => (
+                            <li key={idx}>• {req}</li>
+                          ))}
+                        </ul>
+                        {info.note && (
+                          <p className="text-xs text-blue-600 italic mt-2">{info.note}</p>
+                        )}
+                        {isDisabled && (
+                          <div className="bg-yellow-50 border border-yellow-200 rounded p-2 mt-2">
+                            <p className="text-xs text-yellow-700 font-medium">
+                              {info.redirectMessage}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
                 
+                {/* Role Hierarchy Information */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <h4 className="font-semibold text-blue-900 mb-2">User Role Hierarchy</h4>
+                  <div className="text-sm text-blue-800">
+                    <p className="mb-2"><strong>District Registration Authority:</strong></p>
+                    <ul className="space-y-1 ml-4">
+                      <li>• <strong>District Athletic Director:</strong> Creates and manages entire districts</li>
+                      <li>• <strong>School Athletic Coordinator:</strong> Joins existing districts, manages their school</li>
+                    </ul>
+                    <p className="mt-3 mb-2"><strong>Must Be Invited/Assigned:</strong></p>
+                    <ul className="space-y-1 ml-4">
+                      <li>• <strong>Coaches:</strong> Invited by School Athletic Coordinators</li>
+                      <li>• <strong>Scorekeepers:</strong> Assigned by Tournament Managers to specific events</li>
+                    </ul>
+                  </div>
+                </div>
+
                 <div className="flex justify-end">
                   <Button 
                     type="button" 
                     onClick={() => setStep(2)}
-                    disabled={!form.watch('requestType')}
+                    disabled={!form.watch('requestType') || !roleDescriptions[form.watch('requestType') as keyof typeof roleDescriptions]?.canRegisterDistrict}
                     data-testid="button-continue-step1"
                   >
                     Continue
