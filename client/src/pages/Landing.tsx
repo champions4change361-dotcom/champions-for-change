@@ -120,8 +120,9 @@ export default function Landing() {
             {/* Enterprise/Nonprofit Access */}
             <div className="mt-8 p-6 bg-slate-700/50 border border-slate-600 rounded-xl">
               <p className="text-slate-300 text-center mb-4">
-                Not a school or district but need reduced price and free tournament solutions 
-                for your nonprofit or company, with access to our 65+ competitions?
+                Not a school or district but need reduced price and ad-free tournament solutions 
+                for your nonprofit or company? Our donation-based revenue model keeps the fun going 
+                while giving you access to our 65+ competitions!
               </p>
               <div className="text-center">
                 <Button 
