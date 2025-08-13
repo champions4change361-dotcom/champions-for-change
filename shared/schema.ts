@@ -295,6 +295,134 @@ export const campaignRecipients = pgTable("campaign_recipients", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Internal messaging system for tournaments and teams
+export const messages = pgTable("messages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  senderId: varchar("sender_id").notNull().references(() => users.id),
+  messageType: text("message_type", {
+    enum: ["tournament_update", "team_notification", "payment_reminder", "document_deadline", "game_schedule", "broadcast", "direct_message"]
+  }).notNull(),
+  subject: varchar("subject").notNull(),
+  content: text("content").notNull(),
+  priority: text("priority", {
+    enum: ["low", "normal", "high", "urgent"]
+  }).default("normal"),
+  
+  // Target audience
+  tournamentId: varchar("tournament_id").references(() => tournaments.id),
+  teamId: varchar("team_id").references(() => teams.id),
+  targetRoles: jsonb("target_roles").$type<string[]>().default([]), // ["coach", "parent", "player"]
+  
+  // Delivery tracking
+  totalRecipients: integer("total_recipients").default(0),
+  deliveredCount: integer("delivered_count").default(0),
+  readCount: integer("read_count").default(0),
+  
+  // Push notification data
+  pushNotificationSent: boolean("push_notification_sent").default(false),
+  pushNotificationData: jsonb("push_notification_data").$type<{
+    title: string;
+    body: string;
+    icon?: string;
+    badge?: number;
+    sound?: string;
+    clickAction?: string;
+  }>(),
+  
+  // Scheduling
+  scheduledFor: timestamp("scheduled_for"),
+  sentAt: timestamp("sent_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Message recipients tracking for mobile app notifications
+export const messageRecipients = pgTable("message_recipients", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  messageId: varchar("message_id").notNull().references(() => messages.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  userRole: text("user_role", {
+    enum: ["tournament_manager", "coach", "parent", "player", "scorekeeper"]
+  }).notNull(),
+  
+  // Delivery status
+  deliveryStatus: text("delivery_status", {
+    enum: ["pending", "delivered", "read", "failed"]
+  }).default("pending"),
+  deliveredAt: timestamp("delivered_at"),
+  readAt: timestamp("read_at"),
+  
+  // Mobile app tracking
+  pushTokens: jsonb("push_tokens").$type<string[]>().default([]), // FCM tokens
+  pushDeliveryStatus: text("push_delivery_status", {
+    enum: ["not_sent", "sent", "delivered", "failed"]
+  }).default("not_sent"),
+  pushDeliveredAt: timestamp("push_delivered_at"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Mobile app device registration for push notifications
+export const mobileDevices = pgTable("mobile_devices", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  deviceId: varchar("device_id").notNull(), // Unique device identifier
+  platform: text("platform", {
+    enum: ["ios", "android", "web"]
+  }).notNull(),
+  fcmToken: varchar("fcm_token"), // Firebase Cloud Messaging token
+  apnsToken: varchar("apns_token"), // Apple Push Notification token
+  
+  // App info
+  appVersion: varchar("app_version"),
+  osVersion: varchar("os_version"),
+  deviceModel: varchar("device_model"),
+  
+  // Notification preferences
+  notificationSettings: jsonb("notification_settings").$type<{
+    tournamentUpdates: boolean;
+    teamNotifications: boolean;
+    paymentReminders: boolean;
+    gameSchedules: boolean;
+    generalAnnouncements: boolean;
+    quietHours?: {
+      enabled: boolean;
+      startTime: string; // "22:00"
+      endTime: string; // "08:00"
+    };
+  }>().default({
+    tournamentUpdates: true,
+    teamNotifications: true,
+    paymentReminders: true,
+    gameSchedules: true,
+    generalAnnouncements: true
+  }),
+  
+  isActive: boolean("is_active").default(true),
+  lastActiveAt: timestamp("last_active_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Message usage tracking for tier limits
+export const messageUsage = pgTable("message_usage", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  month: varchar("month").notNull(), // "2025-01"
+  messagesUsed: integer("messages_used").default(0),
+  messageLimit: integer("message_limit").default(50), // Based on subscription tier
+  
+  // Breakdown by message type
+  tournamentUpdates: integer("tournament_updates").default(0),
+  teamNotifications: integer("team_notifications").default(0),
+  paymentReminders: integer("payment_reminders").default(0),
+  broadcasts: integer("broadcasts").default(0),
+  directMessages: integer("direct_messages").default(0),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Educational Impact Tracking for Champions for Change Mission
 export const educationalImpactMetrics = pgTable("educational_impact_metrics", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
