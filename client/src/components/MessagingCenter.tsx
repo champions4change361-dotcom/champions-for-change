@@ -49,14 +49,42 @@ export function MessagingCenter({
   const [scheduledFor, setScheduledFor] = useState('');
   const [sendPushNotification, setSendPushNotification] = useState(true);
 
-  const messageTypes = [
-    { value: 'tournament_update', label: 'Tournament Update', icon: Trophy },
-    { value: 'team_notification', label: 'Team Notification', icon: Users },
-    { value: 'payment_reminder', label: 'Payment Reminder', icon: DollarSign },
-    { value: 'document_deadline', label: 'Document Deadline', icon: AlertCircle },
-    { value: 'game_schedule', label: 'Game Schedule', icon: Calendar },
-    { value: 'broadcast', label: 'Broadcast Message', icon: Bell },
-  ];
+  const getMessageTypesForDomain = (domainType: string) => {
+    const baseTypes = [
+      { value: 'broadcast', label: 'Broadcast Message', icon: Bell },
+    ];
+    
+    if (domainType === 'tournament') {
+      return [
+        { value: 'tournament_update', label: 'Tournament Update', icon: Trophy },
+        { value: 'team_notification', label: 'Team Notification', icon: Users },
+        { value: 'payment_reminder', label: 'Payment Reminder', icon: DollarSign },
+        { value: 'document_deadline', label: 'Document Deadline', icon: AlertCircle },
+        { value: 'game_schedule', label: 'Game Schedule', icon: Calendar },
+        ...baseTypes,
+      ];
+    }
+    
+    if (domainType === 'fantasy') {
+      return [
+        { value: 'league_update', label: 'League Update', icon: Trophy },
+        { value: 'fantasy_smack_talk', label: 'Smack Talk', icon: MessageSquare },
+        ...baseTypes,
+      ];
+    }
+    
+    if (domainType === 'business') {
+      return [
+        { value: 'business_announcement', label: 'Business Announcement', icon: Bell },
+        { value: 'tournament_update', label: 'Company Tournament Update', icon: Trophy },
+        ...baseTypes,
+      ];
+    }
+    
+    return baseTypes;
+  };
+  
+  const messageTypes = getMessageTypesForDomain('tournament'); // Default to tournament
 
   const targetRoleOptions = [
     { value: 'coach', label: 'Coaches' },
@@ -69,7 +97,7 @@ export function MessagingCenter({
   const remainingMessages = messageLimit - messagesUsed;
 
   const getMessageTemplate = (type: string) => {
-    const templates = {
+    const templates: Record<string, { subject: string; content: string }> = {
       tournament_update: {
         subject: 'Tournament Update: [Tournament Name]',
         content: 'Important update regarding your upcoming tournament...'
@@ -93,6 +121,20 @@ export function MessagingCenter({
       broadcast: {
         subject: 'Important Announcement',
         content: 'We wanted to share this important information with everyone...'
+      },
+      // Fantasy Sports Templates
+      fantasy_smack_talk: {
+        subject: 'Fantasy Smack Talk',
+        content: 'My team is crushing yours this week! 😎 Hope you\'re ready for the beatdown...'
+      },
+      league_update: {
+        subject: 'Fantasy League Update',
+        content: 'Important update for our fantasy league members...'
+      },
+      // Business Templates  
+      business_announcement: {
+        subject: 'Company Announcement',
+        content: 'Important announcement for all team members...'
       }
     };
     return templates[type] || { subject: '', content: '' };
@@ -308,7 +350,7 @@ export function MessagingCenter({
               <Checkbox
                 id="push-notification"
                 checked={sendPushNotification}
-                onCheckedChange={setSendPushNotification}
+                onCheckedChange={(checked) => setSendPushNotification(checked === true)}
                 data-testid="checkbox-push-notification"
               />
               <div className="flex items-center gap-2">

@@ -300,7 +300,7 @@ export const messages = pgTable("messages", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   senderId: varchar("sender_id").notNull().references(() => users.id),
   messageType: text("message_type", {
-    enum: ["tournament_update", "team_notification", "payment_reminder", "document_deadline", "game_schedule", "broadcast", "direct_message"]
+    enum: ["tournament_update", "team_notification", "payment_reminder", "document_deadline", "game_schedule", "broadcast", "direct_message", "fantasy_smack_talk", "business_announcement", "league_update"]
   }).notNull(),
   subject: varchar("subject").notNull(),
   content: text("content").notNull(),
@@ -311,7 +311,15 @@ export const messages = pgTable("messages", {
   // Target audience
   tournamentId: varchar("tournament_id").references(() => tournaments.id),
   teamId: varchar("team_id").references(() => teams.id),
-  targetRoles: jsonb("target_roles").$type<string[]>().default([]), // ["coach", "parent", "player"]
+  fantasyLeagueId: varchar("fantasy_league_id"), // For fantasy sports messaging
+  businessOrgId: varchar("business_org_id"), // For business organization messaging
+  targetRoles: jsonb("target_roles").$type<string[]>().default([]), // ["coach", "parent", "player", "fantasy_member", "business_employee"]
+  
+  // Cross-domain messaging support
+  domainType: text("domain_type", {
+    enum: ["tournament", "fantasy", "business"]
+  }).default("tournament"),
+  isDirectorBlast: boolean("is_director_blast").default(false), // Director-only broadcast messages
   
   // Delivery tracking
   totalRecipients: integer("total_recipients").default(0),
@@ -1764,22 +1772,25 @@ export const usersRelations = relations(users, ({ one, many }) => ({
 
 export type TeamRegistration = typeof teamRegistrations.$inferSelect;
 export type InsertTeamRegistration = typeof teamRegistrations.$inferInsert;
-export type Organization = typeof organizations.$inferSelect;
-export type InsertOrganization = typeof organizations.$inferInsert;
-// Scorekeeper assignments - tournament managers assign scorekeepers to specific events
-export const scorekeeperAssignments = pgTable("scorekeeper_assignments", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  tournamentId: varchar("tournament_id").notNull().references(() => tournaments.id),
-  scorekeeperId: varchar("scorekeeper_id").notNull().references(() => users.id),
-  assignedById: varchar("assigned_by_id").notNull().references(() => users.id), // Tournament manager who made assignment
-  eventName: varchar("event_name").notNull(), // Specific event/competition within tournament
-  eventDescription: text("event_description"),
-  canUpdateScores: boolean("can_update_scores").default(true),
-  isActive: boolean("is_active").default(true),
-  assignmentDate: timestamp("assignment_date").defaultNow(),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
+// Live scoring and messaging system types
+export type LiveScore = typeof liveScores.$inferSelect;
+export type InsertLiveScore = typeof liveScores.$inferInsert;
+export type ScorekeeperAssignment = typeof scorekeeperAssignments.$inferSelect;
+export type InsertScorekeeperAssignment = typeof scorekeeperAssignments.$inferInsert;
+export type LiveScoreMessage = typeof liveScoreMessages.$inferSelect;
+export type InsertLiveScoreMessage = typeof liveScoreMessages.$inferInsert;
+
+// Relations for live scoring system
+export const liveScoresRelations = relations(liveScores, ({ one }) => ({
+  tournament: one(tournaments, {
+    fields: [liveScores.tournamentId],
+    references: [tournaments.id],
+  }),
+  assignedScorekeeper: one(users, {
+    fields: [liveScores.assignedScorekeeperId],
+    references: [users.id],
+  }),
+}));
 
 export const scorekeeperAssignmentsRelations = relations(scorekeeperAssignments, ({ one }) => ({
   tournament: one(tournaments, {
@@ -1791,7 +1802,18 @@ export const scorekeeperAssignmentsRelations = relations(scorekeeperAssignments,
     references: [users.id],
   }),
   assignedBy: one(users, {
-    fields: [scorekeeperAssignments.assignedById],
+    fields: [scorekeeperAssignments.assignedBy],
+    references: [users.id],
+  }),
+}));
+
+export const liveScoreMessagesRelations = relations(liveScoreMessages, ({ one }) => ({
+  liveScore: one(liveScores, {
+    fields: [liveScoreMessages.liveScoreId],
+    references: [liveScores.id],
+  }),
+  sender: one(users, {
+    fields: [liveScoreMessages.senderId],
     references: [users.id],
   }),
 }));
