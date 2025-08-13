@@ -42,6 +42,7 @@ import MillerVLCDemo from './pages/MillerVLCDemo';
 import FootballHealthMonitoring from './pages/FootballHealthMonitoring';
 import DefensiveHealthMonitoring from './pages/DefensiveHealthMonitoring';
 import ComprehensiveHealthDemo from './pages/ComprehensiveHealthDemo';
+import CCISDDocumentIntegration from './pages/CCISDDocumentIntegration';
 
 function AuthenticatedRoutes() {
   const { isFeatureEnabled, isFantasyDomain, config } = useDomain();
@@ -70,6 +71,7 @@ function AuthenticatedRoutes() {
         <Route path="/football-health" component={FootballHealthMonitoring} />
         <Route path="/defensive-health" component={DefensiveHealthMonitoring} />
         <Route path="/comprehensive-health-demo" component={ComprehensiveHealthDemo} />
+        <Route path="/ccisd-document-integration" component={CCISDDocumentIntegration} />
         
         {/* Show Tournament Empire only for school-safe and pro domains */}
         {!isFantasyDomain() && (
