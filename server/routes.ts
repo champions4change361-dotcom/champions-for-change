@@ -4414,6 +4414,216 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Commissioner Management Routes
+  
+  // Get commissioner dashboard data
+  app.get("/api/commissioner/dashboard", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    try {
+      const userId = req.user?.claims?.sub;
+      
+      // Mock dashboard data for demonstration
+      const dashboardData = {
+        leagues: [
+          {
+            id: "league-1",
+            name: "Champions Fantasy Football",
+            leagueType: "ppr_league",
+            registrationCode: "COACH2024-CHAMP123",
+            currentParticipants: 8,
+            maxParticipants: 12,
+            status: "active",
+            entryFee: "50.00",
+            prizePool: "600.00",
+            createdAt: new Date().toISOString()
+          }
+        ],
+        analytics: {
+          totalLeaguesCreated: 3,
+          activeLeagues: 2,
+          totalParticipantsManaged: 24,
+          dataAccuracyScore: "94.50",
+          helpfulVotes: 12,
+          donationsToChampions: "125.00"
+        },
+        recentActivities: [
+          {
+            id: "activity-1",
+            description: "Updated player stats for Jahmyr Gibbs",
+            createdAt: new Date().toISOString()
+          }
+        ],
+        totalParticipants: 24
+      };
+
+      res.json(dashboardData);
+    } catch (error) {
+      console.error("Commissioner dashboard error:", error);
+      res.status(500).json({ message: "Failed to load dashboard" });
+    }
+  });
+
+  // Create new fantasy league
+  app.post("/api/commissioner/leagues", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    try {
+      const userId = req.user?.claims?.sub;
+      const userName = req.user?.claims?.first_name || "Commissioner";
+      const { name, leagueType, maxParticipants, entryFee, isPublic } = req.body;
+
+      if (!name || !leagueType) {
+        return res.status(400).json({ message: "League name and type are required" });
+      }
+
+      // Generate registration code
+      const generateCode = (leagueName: string): string => {
+        const prefix = "COACH";
+        const year = new Date().getFullYear();
+        const nameCode = leagueName
+          .replace(/[^a-zA-Z0-9]/g, '')
+          .substring(0, 6)
+          .toUpperCase();
+        const suffix = Math.random().toString(36).substring(2, 5).toUpperCase();
+        return `${prefix}${year}-${nameCode}${suffix}`;
+      };
+
+      const registrationCode = generateCode(name);
+
+      // Mock league creation - in real implementation would save to database
+      const newLeague = {
+        id: `league-${Date.now()}`,
+        name,
+        leagueType,
+        commissionerId: userId,
+        commissionerName: userName,
+        registrationCode,
+        maxParticipants: parseInt(maxParticipants) || 12,
+        currentParticipants: 1, // Commissioner counts
+        entryFee: parseFloat(entryFee) || 0,
+        prizePool: (parseFloat(entryFee) || 0) * (parseInt(maxParticipants) || 12),
+        status: "draft",
+        isPublic: Boolean(isPublic),
+        createdAt: new Date().toISOString()
+      };
+
+      res.json({
+        success: true,
+        league: newLeague,
+        registrationCode,
+        message: "League created successfully"
+      });
+
+    } catch (error) {
+      console.error("Create league error:", error);
+      res.status(500).json({ message: "Failed to create league" });
+    }
+  });
+
+  // Join league with registration code
+  app.post("/api/commissioner/join-league", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    try {
+      const userId = req.user?.claims?.sub;
+      const userName = req.user?.claims?.first_name || "Player";
+      const userEmail = req.user?.claims?.email;
+      const { registrationCode } = req.body;
+
+      if (!registrationCode) {
+        return res.status(400).json({ message: "Registration code is required" });
+      }
+
+      // Validate code format
+      const codePattern = /^COACH\d{4}-[A-Z0-9]{6,10}$/;
+      if (!codePattern.test(registrationCode)) {
+        return res.status(400).json({ message: "Invalid registration code format" });
+      }
+
+      // Mock league joining - in real implementation would find league and add participant
+      const mockLeague = {
+        id: "league-demo",
+        name: "Demo Fantasy League",
+        leagueType: "ppr_league",
+        commissionerId: "commissioner-123",
+        registrationCode,
+        currentParticipants: 4,
+        maxParticipants: 12,
+        status: "draft"
+      };
+
+      const participant = {
+        id: `participant-${Date.now()}`,
+        leagueId: mockLeague.id,
+        userId,
+        userName,
+        userEmail,
+        teamName: `${userName}'s Team`,
+        status: "active",
+        isCommissioner: false,
+        joinedAt: new Date().toISOString()
+      };
+
+      res.json({
+        success: true,
+        league: mockLeague,
+        participant,
+        message: `Successfully joined ${mockLeague.name}!`
+      });
+
+    } catch (error) {
+      console.error("Join league error:", error);
+      res.status(500).json({ message: "Failed to join league" });
+    }
+  });
+
+  // Get league details
+  app.get("/api/commissioner/leagues/:leagueId", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    try {
+      const { leagueId } = req.params;
+      
+      // Mock league details
+      const league = {
+        id: leagueId,
+        name: "Champions Fantasy Football",
+        leagueType: "ppr_league",
+        registrationCode: "COACH2024-CHAMP123",
+        participants: [
+          {
+            id: "p1",
+            userName: "Mike Thompson",
+            teamName: "Thompson's Titans",
+            wins: 7,
+            losses: 4,
+            pointsFor: 1456.75,
+            isCommissioner: true
+          }
+        ],
+        settings: {
+          scoringSystem: 'ppr',
+          maxParticipants: 12,
+          currentParticipants: 8
+        }
+      };
+
+      res.json({ success: true, league });
+    } catch (error) {
+      console.error("Get league error:", error);
+      res.status(500).json({ message: "Failed to get league details" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

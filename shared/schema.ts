@@ -921,8 +921,8 @@ export const updateMatchSchema = createInsertSchema(matches).omit({
 // User types
 export type User = typeof users.$inferSelect;
 
-// Import fantasy coaching schema separately to avoid conflicts
-// export * from './fantasy-coaching-schema';
+// Import commissioner schema for fantasy league management
+export * from './commissioner-schema';
 
 // Track Events types
 export type TrackEventData = typeof trackEvents.$inferSelect;

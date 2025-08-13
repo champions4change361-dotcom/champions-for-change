@@ -28,6 +28,7 @@ import { useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { Link } from 'wouter';
+import { LeagueJoinForm } from '@/components/LeagueJoinForm';
 
 export default function CoachesLoungeLanding() {
   const { user } = useAuth();
