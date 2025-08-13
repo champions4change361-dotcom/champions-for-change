@@ -28,6 +28,7 @@ import FantasyCoaching from './pages/FantasyCoaching';
 import CommissionerDashboard from './pages/CommissionerDashboard';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import RefundPolicy from './pages/RefundPolicy';
+import TermsOfService from './pages/TermsOfService';
 import Register from './pages/Register';
 import RegistrationForm from './pages/RegistrationForm';
 import Pricing from './pages/Pricing';
@@ -81,7 +82,7 @@ function AuthenticatedRoutes() {
         {/* Legal Pages */}
         <Route path="/privacy" component={PrivacyPolicy} />
         <Route path="/refund-policy" component={RefundPolicy} />
-        <Route path="/terms" component={RefundPolicy} />
+        <Route path="/terms" component={TermsOfService} />
         
         <Route>
           {/* 404 - redirect to home */}
