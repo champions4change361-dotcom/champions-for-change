@@ -20,12 +20,14 @@ import {
   AlertTriangle,
   CheckCircle,
   Star,
-  Zap
+  Zap,
+  Brain
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import { Link } from 'wouter';
 
 export default function CoachesLoungeLanding() {
   const { user } = useAuth();
@@ -207,6 +209,41 @@ export default function CoachesLoungeLanding() {
                   </li>
                 </ul>
               </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Featured: Fantasy Coaching AI */}
+        <Card className="mb-8 bg-gradient-to-r from-purple-100 via-blue-100 to-green-100 border-purple-300">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-purple-900">
+              <Brain className="h-6 w-6" />
+              🧠 KEYSTONE AI FANTASY COACHING BRAIN
+            </CardTitle>
+            <CardDescription className="text-purple-700">
+              The smartest fantasy coaching system ever built - Get AI insights like "Jahmyr Gibbs runs left 75% of the time"
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-sm text-purple-800">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+                <span>Player tendency analysis & defensive matchup insights</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-purple-800">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+                <span>Real-time coaching during games with confidence scores</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-purple-800">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+                <span>Educational tool - Professional sports data only (Texas compliant)</span>
+              </div>
+              <Link href="/fantasy-coaching">
+                <Button className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white">
+                  <Brain className="h-4 w-4 mr-2" />
+                  Access Fantasy Coaching AI
+                </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>

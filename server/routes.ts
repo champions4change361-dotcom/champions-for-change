@@ -4072,6 +4072,119 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Fantasy Coaching AI Routes
+  app.get("/api/fantasy/player-insight/:playerId/:week", async (req, res) => {
+    try {
+      const { playerId, week } = req.params;
+      
+      // Sample insight for demonstration - replace with actual AI analysis
+      const insight = {
+        insight: `🔥 TRENDING: Jahmyr Gibbs runs to the left side 75% of the time, and this week's opponent allows 145 yards per game on left-side runs (67% above league average). This matchup screams breakout performance!`,
+        confidence: 85,
+        recommendation: "START WITH HIGH CONFIDENCE",
+        riskLevel: "low",
+        upside: "20+ fantasy points with multiple touchdown potential",
+        downside: "Still solid floor due to high usage rate",
+        supportingData: {
+          playerTendency: "75% left-side carries",
+          defenseWeakness: "145 yards allowed left side",
+          leagueAverage: "72 yards allowed left side",
+          advantage: "67% above average vulnerability"
+        }
+      };
+      
+      res.json({
+        success: true,
+        insight
+      });
+    } catch (error) {
+      console.error("Player insight error:", error);
+      res.status(500).json({ success: false, error: "Failed to generate insight" });
+    }
+  });
+
+  // Get full lineup coaching
+  app.get("/api/fantasy/coaching/:userId/:week", async (req, res) => {
+    try {
+      const { userId, week } = req.params;
+      
+      // Sample coaching data for demonstration
+      const coaching = {
+        overallStrategy: "🔥 AGGRESSIVE WEEK: Multiple high-confidence plays detected. This lineup has serious upside potential!",
+        playerInsights: [
+          {
+            insight: "🔥 TRENDING: Jahmyr Gibbs runs to the left side 75% of the time, and this week's opponent allows 145 yards per game on left-side runs (67% above league average). This matchup screams breakout performance!",
+            confidence: 85,
+            recommendation: "START WITH HIGH CONFIDENCE",
+            riskLevel: "low",
+            upside: "20+ fantasy points with multiple touchdown potential",
+            downside: "Still solid floor due to high usage rate",
+            supportingData: {
+              playerTendency: "75% left-side carries",
+              defenseWeakness: "145 yards allowed left side",
+              leagueAverage: "72 yards allowed left side",
+              advantage: "67% above average vulnerability"
+            },
+            playerName: "Jahmyr Gibbs",
+            position: "RB"
+          },
+          {
+            insight: "🎯 RED ZONE GOLD: Puka Nacua commands 28% of red zone targets, and this week's opponent allows the most red zone receptions to WRs (9.2 per game). Touchdown upside is MASSIVE this week!",
+            confidence: 78,
+            recommendation: "STRONG START - TOUCHDOWN POTENTIAL",
+            riskLevel: "medium",
+            upside: "Multiple touchdown ceiling in red zone heavy game",
+            downside: "TD dependent for ceiling performance",
+            supportingData: {
+              targetShare: "28% red zone share",
+              defenseRank: "32nd vs WRs",
+              touchdownOdds: "Above average"
+            },
+            playerName: "Puka Nacua",
+            position: "WR"
+          }
+        ],
+        riskAssessment: "LOW RISK - High floor lineup",
+        confidence: 82,
+        stackRecommendations: [
+          "🔗 STACK ALERT: QB + WR combo in projected 55+ pass attempt game",
+          "🎯 GAME STACK: Multiple players from high-pace offensive matchup"
+        ],
+        pivots: [
+          {
+            originalPlayer: "Risky Player",
+            suggestedPivot: "Safer Alternative",
+            reason: "Higher confidence play available in similar price range",
+            confidence: 75
+          }
+        ]
+      };
+      
+      res.json({
+        success: true,
+        ...coaching
+      });
+    } catch (error) {
+      console.error("Lineup coaching error:", error);
+      res.status(500).json({ success: false, error: "Failed to generate coaching" });
+    }
+  });
+
+  // Submit coaching feedback
+  app.post("/api/fantasy/coaching-feedback", async (req, res) => {
+    try {
+      const { insightId, helpful, feedback } = req.body;
+      
+      // In a real implementation, this would save to database
+      console.log(`Coaching feedback received: ${insightId}, helpful: ${helpful}, feedback: ${feedback}`);
+      
+      res.json({ success: true, message: "Feedback recorded" });
+    } catch (error) {
+      console.error("Coaching feedback error:", error);
+      res.status(500).json({ success: false, error: "Failed to record feedback" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

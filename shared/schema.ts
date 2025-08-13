@@ -54,8 +54,8 @@ export const users = pgTable("users", {
   completedAITutorials: jsonb("completed_ai_tutorials").$type<string[]>(),
   aiInteractionCount: integer("ai_interaction_count").default(0),
   
-  // AI USAGE PREFERENCES
-  aiPreferences: jsonb("ai_preferences").$type<{
+  // ENHANCED AI USAGE PREFERENCES
+  enhancedAiPreferences: jsonb("enhanced_ai_preferences").$type<{
     wantsProactiveHelp: boolean;
     communicationStyle: 'friendly' | 'professional' | 'technical';
     helpLevel: 'minimal' | 'guided' | 'comprehensive';
@@ -920,6 +920,9 @@ export const updateMatchSchema = createInsertSchema(matches).omit({
 
 // User types
 export type User = typeof users.$inferSelect;
+
+// Import fantasy coaching schema separately to avoid conflicts
+// export * from './fantasy-coaching-schema';
 
 // Track Events types
 export type TrackEventData = typeof trackEvents.$inferSelect;
