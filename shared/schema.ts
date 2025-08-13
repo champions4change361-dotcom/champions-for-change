@@ -423,6 +423,145 @@ export const messageUsage = pgTable("message_usage", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Live scoring system with strict access control
+export const liveScores = pgTable("live_scores", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tournamentId: varchar("tournament_id").notNull().references(() => tournaments.id),
+  matchId: varchar("match_id").notNull(), // Reference to specific bracket match
+  eventName: varchar("event_name"), // For track & field: "Shot Put", "100m Dash", etc.
+  
+  // Participant info
+  participant1Id: varchar("participant1_id"), // Team or individual athlete
+  participant1Name: varchar("participant1_name").notNull(),
+  participant1Score: numeric("participant1_score").default("0"),
+  
+  participant2Id: varchar("participant2_id"), // Team or individual athlete  
+  participant2Name: varchar("participant2_name"),
+  participant2Score: numeric("participant2_score").default("0"),
+  
+  // Score details for different sports
+  scoreType: text("score_type", {
+    enum: ["points", "time", "distance", "games", "sets", "goals", "runs", "custom"]
+  }).default("points"),
+  scoreUnit: varchar("score_unit"), // "seconds", "feet", "meters", "points"
+  
+  // Match status
+  matchStatus: text("match_status", {
+    enum: ["scheduled", "in_progress", "completed", "cancelled", "postponed"]
+  }).default("scheduled"),
+  winnerId: varchar("winner_id"), // ID of winning participant
+  
+  // Timing and location
+  startTime: timestamp("start_time"),
+  endTime: timestamp("end_time"),
+  venue: varchar("venue"),
+  field: varchar("field"), // "Field 1", "Court A", "Track Lane 3"
+  
+  // Access control - WHO CAN UPDATE SCORES
+  assignedScorekeeperId: varchar("assigned_scorekeeper_id").notNull().references(() => users.id),
+  lastUpdatedBy: varchar("last_updated_by").references(() => users.id),
+  
+  // Real-time features
+  isLive: boolean("is_live").default(false), // Currently happening
+  liveUpdateCount: integer("live_update_count").default(0),
+  lastScoreUpdate: timestamp("last_score_update"),
+  
+  // Additional match data (for complex scoring)
+  additionalData: jsonb("additional_data").$type<{
+    sets?: Array<{setNumber: number; participant1Score: number; participant2Score: number}>;
+    periods?: Array<{period: number; participant1Score: number; participant2Score: number}>;
+    attempts?: Array<{participantId: string; attempt: number; result: string; distance?: number; time?: number}>;
+    notes?: string;
+  }>(),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Scorekeeper assignments - WHO can update which events
+export const scorekeeperAssignments = pgTable("scorekeeper_assignments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tournamentId: varchar("tournament_id").notNull().references(() => tournaments.id),
+  scorekeeperId: varchar("scorekeeper_id").notNull().references(() => users.id),
+  assignedBy: varchar("assigned_by").notNull().references(() => users.id), // Tournament/Athletic Director
+  
+  // What they can score
+  assignedEvents: jsonb("assigned_events").$type<string[]>().default([]), // Event names or IDs
+  assignedVenues: jsonb("assigned_venues").$type<string[]>().default([]), // "Field 1", "Court A"
+  
+  // Permission level
+  canUpdateScores: boolean("can_update_scores").default(true),
+  canMarkMatchComplete: boolean("can_mark_match_complete").default(true),
+  canSendMessages: boolean("can_send_messages").default(false), // Send live updates to coaches/parents
+  
+  // Status
+  isActive: boolean("is_active").default(true),
+  assignmentNotes: text("assignment_notes"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Live score updates log for audit trail
+export const scoreUpdateLog = pgTable("score_update_log", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  liveScoreId: varchar("live_score_id").notNull().references(() => liveScores.id),
+  updatedBy: varchar("updated_by").notNull().references(() => users.id),
+  
+  // What changed
+  updateType: text("update_type", {
+    enum: ["score_change", "status_change", "participant_change", "match_start", "match_end", "manual_correction"]
+  }).notNull(),
+  previousData: jsonb("previous_data"), // What it was before
+  newData: jsonb("new_data"), // What it is now
+  updateReason: varchar("update_reason"), // "Corrected scoring error", "Match completed"
+  
+  // Automatic bracket progression
+  triggeredBracketUpdate: boolean("triggered_bracket_update").default(false),
+  bracketUpdateDetails: jsonb("bracket_update_details").$type<{
+    nextMatchId?: string;
+    advancedParticipant?: string;
+    eliminatedParticipant?: string;
+  }>(),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Instant messaging triggered by score events
+export const liveScoreMessages = pgTable("live_score_messages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  liveScoreId: varchar("live_score_id").notNull().references(() => liveScores.id),
+  senderId: varchar("sender_id").notNull().references(() => users.id),
+  recipientId: varchar("recipient_id").references(() => users.id), // If direct message
+  
+  // Message details
+  messageType: text("message_type", {
+    enum: ["encouragement", "congratulations", "technique_tip", "performance_update", "coaching_note"]
+  }).notNull(),
+  content: text("content").notNull(),
+  
+  // Context from score
+  relatedParticipantId: varchar("related_participant_id"), // Which athlete/team
+  performanceContext: jsonb("performance_context").$type<{
+    eventName: string;
+    result?: string;
+    isPersonalBest?: boolean;
+    placement?: number;
+    improvement?: string;
+  }>(),
+  
+  // Auto-generation (AI coaching messages)
+  isAutoGenerated: boolean("is_auto_generated").default(false),
+  autoMessageTrigger: text("auto_message_trigger"), // "personal_best", "first_place", "improvement"
+  
+  // Delivery
+  sentAt: timestamp("sent_at").defaultNow(),
+  readAt: timestamp("read_at"),
+  deliveredViaPush: boolean("delivered_via_push").default(false),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Educational Impact Tracking for Champions for Change Mission
 export const educationalImpactMetrics = pgTable("educational_impact_metrics", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),

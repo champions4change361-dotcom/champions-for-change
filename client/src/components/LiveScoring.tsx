@@ -1,302 +1,551 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Progress } from '@/components/ui/progress';
 import { 
-  Activity, 
-  Clock, 
-  TrendingUp, 
-  RefreshCw, 
+  Trophy, 
+  Timer, 
+  Target, 
+  User, 
+  MessageSquare, 
+  CheckCircle, 
+  Play, 
+  Pause, 
+  StopCircle,
+  Edit,
+  Send,
+  Clock,
+  MapPin,
+  Users,
+  Shield,
   Zap,
-  Target,
-  Trophy
+  Medal
 } from 'lucide-react';
 
-interface LiveGame {
-  gameId: string;
-  week: number;
-  status: string;
-  clock: string;
-  period: number;
-  homeTeam: {
-    id: string;
-    name: string;
-    score: string;
-    logo: string;
-  };
-  awayTeam: {
-    id: string;
-    name: string;
-    score: string;
-    logo: string;
-  };
+interface LiveScore {
+  id: string;
+  tournamentId: string;
+  matchId: string;
+  eventName: string;
+  participant1Name: string;
+  participant1Score: number;
+  participant2Name?: string;
+  participant2Score?: number;
+  scoreType: 'points' | 'time' | 'distance' | 'games' | 'sets' | 'goals' | 'runs';
+  scoreUnit: string;
+  matchStatus: 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
   venue: string;
-  startTime: string;
+  field: string;
+  isLive: boolean;
+  lastScoreUpdate?: string;
 }
 
-interface LiveInsight {
-  type: string;
-  message: string;
-  confidence: number;
-  fantasy_impact: string;
+interface LiveScoringProps {
+  userRole: string;
+  userId: string;
+  canUpdateScores: boolean;
+  assignedEvents: string[];
+  assignedVenues: string[];
+  tournamentName: string;
 }
 
-export function LiveScoring() {
-  const [games, setGames] = useState<LiveGame[]>([]);
-  const [selectedGame, setSelectedGame] = useState<string | null>(null);
-  const [gameInsights, setGameInsights] = useState<LiveInsight[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [lastUpdated, setLastUpdated] = useState<string>('');
-  const [autoRefresh, setAutoRefresh] = useState(true);
+export function LiveScoring({
+  userRole,
+  userId,
+  canUpdateScores,
+  assignedEvents,
+  assignedVenues,
+  tournamentName
+}: LiveScoringProps) {
+  const [scores, setScores] = useState<LiveScore[]>([]);
+  const [selectedMatch, setSelectedMatch] = useState<LiveScore | null>(null);
+  const [newScore1, setNewScore1] = useState('');
+  const [newScore2, setNewScore2] = useState('');
+  const [matchStatus, setMatchStatus] = useState<string>('in_progress');
+  const [updateReason, setUpdateReason] = useState('');
+  
+  // Instant messaging state
+  const [showMessagePanel, setShowMessagePanel] = useState(false);
+  const [messageContent, setMessageContent] = useState('');
+  const [messageType, setMessageType] = useState<string>('encouragement');
+  const [targetParticipant, setTargetParticipant] = useState('');
 
-  const fetchLiveScores = async () => {
-    try {
-      const response = await fetch('/api/espn/live-scores');
-      const data = await response.json();
-      
-      if (data.success) {
-        setGames(data.games);
-        setLastUpdated(data.lastUpdated);
-      }
-    } catch (error) {
-      console.error('Failed to fetch live scores:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchGameInsights = async (gameId: string) => {
-    try {
-      const response = await fetch(`/api/espn/game/${gameId}`);
-      const data = await response.json();
-      
-      if (data.success) {
-        setGameInsights(data.liveInsights || []);
-      }
-    } catch (error) {
-      console.error('Failed to fetch game insights:', error);
-    }
-  };
-
-  useEffect(() => {
-    fetchLiveScores();
+  // Access control check
+  const canUpdateThisMatch = (match: LiveScore) => {
+    if (!canUpdateScores) return false;
     
-    // Auto-refresh every 30 seconds
-    const interval = setInterval(() => {
-      if (autoRefresh) {
-        fetchLiveScores();
-        if (selectedGame) {
-          fetchGameInsights(selectedGame);
-        }
-      }
-    }, 30000);
+    // Tournament directors and athletic directors can update any match
+    if (userRole === 'tournament_manager' || userRole === 'district_athletic_director') {
+      return true;
+    }
     
-    return () => clearInterval(interval);
-  }, [autoRefresh, selectedGame]);
-
-  const getGameStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'in progress':
-      case 'halftime':
-        return 'bg-green-600';
-      case 'final':
-        return 'bg-gray-600';
-      case 'scheduled':
-        return 'bg-blue-600';
-      default:
-        return 'bg-gray-400';
+    // Scorekeepers can only update their assigned events/venues
+    if (userRole === 'scorekeeper') {
+      const hasEventAccess = assignedEvents.includes(match.eventName);
+      const hasVenueAccess = assignedVenues.includes(match.venue) || assignedVenues.includes(match.field);
+      return hasEventAccess || hasVenueAccess;
     }
+    
+    return false;
   };
 
-  const getInsightIcon = (type: string) => {
-    switch (type) {
-      case 'touchdown':
-        return <Trophy className="h-4 w-4 text-yellow-500" />;
-      case 'big_play':
-        return <Zap className="h-4 w-4 text-blue-500" />;
-      default:
-        return <Target className="h-4 w-4 text-gray-500" />;
-    }
-  };
-
-  const formatTime = (dateString: string) => {
-    return new Date(dateString).toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      timeZoneName: 'short'
+  const handleScoreUpdate = (match: LiveScore) => {
+    if (!canUpdateThisMatch(match)) return;
+    
+    const updatedMatch = {
+      ...match,
+      participant1Score: parseFloat(newScore1) || match.participant1Score,
+      participant2Score: parseFloat(newScore2) || match.participant2Score,
+      matchStatus: matchStatus as any,
+      lastScoreUpdate: new Date().toISOString(),
+      liveUpdateCount: (match as any).liveUpdateCount + 1
+    };
+    
+    // Update local state
+    setScores(scores.map(s => s.id === match.id ? updatedMatch : s));
+    
+    // Log the update
+    console.log('Score update:', {
+      matchId: match.id,
+      updatedBy: userId,
+      updateType: 'score_change',
+      previousData: {
+        participant1Score: match.participant1Score,
+        participant2Score: match.participant2Score,
+        matchStatus: match.matchStatus
+      },
+      newData: {
+        participant1Score: updatedMatch.participant1Score,
+        participant2Score: updatedMatch.participant2Score,
+        matchStatus: updatedMatch.matchStatus
+      },
+      updateReason
     });
+    
+    // Clear form
+    setNewScore1('');
+    setNewScore2('');
+    setUpdateReason('');
+    setSelectedMatch(null);
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center p-8" data-testid="live-scoring-loading">
-        <Activity className="h-6 w-6 animate-pulse mr-2" />
-        <span>Loading live scores...</span>
-      </div>
-    );
-  }
+  const sendInstantMessage = (match: LiveScore) => {
+    if (!messageContent.trim()) return;
+    
+    const performanceContext = {
+      eventName: match.eventName,
+      result: targetParticipant === 'participant1' 
+        ? `${match.participant1Score} ${match.scoreUnit}`
+        : `${match.participant2Score} ${match.scoreUnit}`,
+      placement: determineCurrentPlacement(match, targetParticipant)
+    };
+    
+    console.log('Sending instant message:', {
+      liveScoreId: match.id,
+      senderId: userId,
+      messageType,
+      content: messageContent,
+      relatedParticipantId: targetParticipant,
+      performanceContext,
+      deliveredViaPush: true
+    });
+    
+    // Clear message form
+    setMessageContent('');
+    setShowMessagePanel(false);
+  };
+
+  const determineCurrentPlacement = (match: LiveScore, participant: string) => {
+    // Simple placement logic - could be enhanced with tournament-wide data
+    if (match.scoreType === 'time') {
+      // Lower time is better
+      const score1 = match.participant1Score;
+      const score2 = match.participant2Score || 0;
+      if (participant === 'participant1') return score1 < score2 ? 1 : 2;
+      return score2 < score1 ? 1 : 2;
+    } else {
+      // Higher score is better
+      const score1 = match.participant1Score;
+      const score2 = match.participant2Score || 0;
+      if (participant === 'participant1') return score1 > score2 ? 1 : 2;
+      return score2 > score1 ? 1 : 2;
+    }
+  };
+
+  const getScoreTypeIcon = (scoreType: string) => {
+    switch (scoreType) {
+      case 'time': return Timer;
+      case 'distance': return Target;
+      case 'points': return Trophy;
+      default: return Trophy;
+    }
+  };
+
+  const formatScore = (score: number, scoreType: string, scoreUnit: string) => {
+    if (scoreType === 'time') {
+      // Convert seconds to MM:SS format if needed
+      if (scoreUnit === 'seconds' && score >= 60) {
+        const minutes = Math.floor(score / 60);
+        const seconds = (score % 60).toFixed(2);
+        return `${minutes}:${seconds.padStart(5, '0')}`;
+      }
+    }
+    return `${score} ${scoreUnit}`;
+  };
+
+  // Mock data for demonstration
+  useEffect(() => {
+    setScores([
+      {
+        id: '1',
+        tournamentId: 'tourney-1',
+        matchId: 'match-1',
+        eventName: 'Shot Put',
+        participant1Name: 'Sarah Johnson',
+        participant1Score: 32.5,
+        participant2Name: 'Mike Chen',
+        participant2Score: 28.7,
+        scoreType: 'distance',
+        scoreUnit: 'feet',
+        matchStatus: 'in_progress',
+        venue: 'Field 1',
+        field: 'Throwing Circle A',
+        isLive: true,
+        lastScoreUpdate: new Date().toISOString()
+      },
+      {
+        id: '2',
+        tournamentId: 'tourney-1',
+        matchId: 'match-2',
+        eventName: '100m Dash',
+        participant1Name: 'Alex Rivera',
+        participant1Score: 12.45,
+        participant2Name: 'Jordan Smith',
+        participant2Score: 12.78,
+        scoreType: 'time',
+        scoreUnit: 'seconds',
+        matchStatus: 'completed',
+        venue: 'Track',
+        field: 'Lane 4-5',
+        isLive: false
+      }
+    ]);
+  }, []);
 
   return (
     <div className="space-y-6" data-testid="live-scoring">
-      {/* Header with refresh controls */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Live NFL Scores</h2>
-          <p className="text-sm text-gray-600">
-            Last updated: {lastUpdated ? formatTime(lastUpdated) : 'Never'}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setAutoRefresh(!autoRefresh)}
-            data-testid="toggle-auto-refresh"
-          >
-            <RefreshCw className={`h-4 w-4 mr-1 ${autoRefresh ? 'animate-spin' : ''}`} />
-            Auto Refresh: {autoRefresh ? 'ON' : 'OFF'}
-          </Button>
-          <Button
-            size="sm"
-            onClick={fetchLiveScores}
-            data-testid="manual-refresh"
-          >
-            <RefreshCw className="h-4 w-4 mr-1" />
-            Refresh Now
-          </Button>
-        </div>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Zap className="h-5 w-5" />
+            Live Scoring - {tournamentName}
+          </CardTitle>
+          <CardDescription>
+            Real-time score updates with automatic bracket progression
+          </CardDescription>
+          
+          {/* Access Control Info */}
+          <div className="flex items-center gap-4 text-sm">
+            <Badge variant={canUpdateScores ? "default" : "secondary"}>
+              <Shield className="h-3 w-3 mr-1" />
+              {canUpdateScores ? 'Scoring Enabled' : 'View Only'}
+            </Badge>
+            
+            {assignedEvents.length > 0 && (
+              <div className="text-gray-600">
+                Events: {assignedEvents.join(', ')}
+              </div>
+            )}
+            
+            {assignedVenues.length > 0 && (
+              <div className="text-gray-600">
+                Venues: {assignedVenues.join(', ')}
+              </div>
+            )}
+          </div>
+        </CardHeader>
+      </Card>
 
-      {/* Games Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {games.map((game) => (
-          <Card 
-            key={game.gameId} 
-            className={`cursor-pointer transition-all hover:shadow-lg ${
-              selectedGame === game.gameId ? 'ring-2 ring-blue-500' : ''
-            }`}
-            onClick={() => {
-              setSelectedGame(game.gameId);
-              fetchGameInsights(game.gameId);
-            }}
-            data-testid={`game-card-${game.gameId}`}
-          >
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
-                <Badge className={`${getGameStatusColor(game.status)} text-white`}>
-                  {game.status}
-                </Badge>
-                {game.clock && (
-                  <div className="flex items-center text-sm text-gray-600">
-                    <Clock className="h-3 w-3 mr-1" />
-                    {game.clock}
+      {/* Live Scores Grid */}
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {scores.map((match) => {
+          const ScoreIcon = getScoreTypeIcon(match.scoreType);
+          const canUpdate = canUpdateThisMatch(match);
+          
+          return (
+            <Card key={match.id} className={`${match.isLive ? 'border-green-500 shadow-lg' : ''}`}>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <ScoreIcon className="h-4 w-4" />
+                    <span className="font-medium text-sm">{match.eventName}</span>
                   </div>
-                )}
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {/* Away Team */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  {game.awayTeam.logo && (
-                    <img 
-                      src={game.awayTeam.logo} 
-                      alt={game.awayTeam.name}
-                      className="w-6 h-6"
-                    />
-                  )}
-                  <span className="font-medium text-sm">{game.awayTeam.name}</span>
+                  
+                  <div className="flex items-center gap-2">
+                    <Badge variant={match.isLive ? "default" : "secondary"} className="text-xs">
+                      {match.isLive ? (
+                        <>
+                          <Play className="h-3 w-3 mr-1" />
+                          LIVE
+                        </>
+                      ) : (
+                        match.matchStatus.toUpperCase()
+                      )}
+                    </Badge>
+                  </div>
                 </div>
-                <span className="text-xl font-bold">{game.awayTeam.score}</span>
-              </div>
-              
-              {/* Home Team */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  {game.homeTeam.logo && (
-                    <img 
-                      src={game.homeTeam.logo} 
-                      alt={game.homeTeam.name}
-                      className="w-6 h-6"
-                    />
-                  )}
-                  <span className="font-medium text-sm">{game.homeTeam.name}</span>
+                
+                <div className="flex items-center gap-2 text-xs text-gray-600">
+                  <MapPin className="h-3 w-3" />
+                  {match.venue} - {match.field}
                 </div>
-                <span className="text-xl font-bold">{game.homeTeam.score}</span>
-              </div>
+              </CardHeader>
               
-              {/* Game Info */}
-              <div className="text-xs text-gray-500 border-t pt-2">
-                <div>Week {game.week}</div>
-                {game.venue && <div>{game.venue}</div>}
-                {game.status === 'Scheduled' && (
-                  <div>{formatTime(game.startTime)}</div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              <CardContent className="space-y-4">
+                {/* Participants and Scores */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">{match.participant1Name}</span>
+                    <span className="text-lg font-bold text-blue-600">
+                      {formatScore(match.participant1Score, match.scoreType, match.scoreUnit)}
+                    </span>
+                  </div>
+                  
+                  {match.participant2Name && (
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">{match.participant2Name}</span>
+                      <span className="text-lg font-bold text-green-600">
+                        {formatScore(match.participant2Score || 0, match.scoreType, match.scoreUnit)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Action Buttons */}
+                <div className="flex gap-2">
+                  {canUpdate && (
+                    <>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSelectedMatch(match)}
+                        data-testid={`button-update-score-${match.id}`}
+                      >
+                        <Edit className="h-3 w-3 mr-1" />
+                        Update Score
+                      </Button>
+                      
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setTargetParticipant('participant1');
+                          setShowMessagePanel(true);
+                          setSelectedMatch(match);
+                        }}
+                        data-testid={`button-message-${match.id}`}
+                      >
+                        <MessageSquare className="h-3 w-3 mr-1" />
+                        Message
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
-      {/* Live Insights for Selected Game */}
-      {selectedGame && gameInsights.length > 0 && (
-        <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+      {/* Score Update Modal */}
+      {selectedMatch && !showMessagePanel && (
+        <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-blue-900">
-              <TrendingUp className="h-5 w-5" />
-              Live Fantasy Coaching Insights
-            </CardTitle>
+            <CardTitle>Update Score - {selectedMatch.eventName}</CardTitle>
             <CardDescription>
-              Real-time analysis for the selected game
+              {selectedMatch.venue} - {selectedMatch.field}
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
-            {gameInsights.map((insight, index) => (
-              <Alert key={index} className="border-blue-200 bg-white">
-                <div className="flex items-start gap-3">
-                  {getInsightIcon(insight.type)}
-                  <div className="flex-1">
-                    <AlertDescription className="text-blue-900">
-                      {insight.message}
-                    </AlertDescription>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Badge 
-                        variant="outline" 
-                        className={`text-xs ${
-                          insight.confidence >= 90 ? 'border-green-500 text-green-700' :
-                          insight.confidence >= 70 ? 'border-yellow-500 text-yellow-700' :
-                          'border-red-500 text-red-700'
-                        }`}
-                      >
-                        {insight.confidence}% Confidence
-                      </Badge>
-                      <Badge 
-                        variant="outline" 
-                        className={`text-xs ${
-                          insight.fantasy_impact === 'high' ? 'border-red-500 text-red-700' :
-                          insight.fantasy_impact === 'medium' ? 'border-yellow-500 text-yellow-700' :
-                          'border-green-500 text-green-700'
-                        }`}
-                      >
-                        {insight.fantasy_impact.toUpperCase()} Impact
-                      </Badge>
-                    </div>
-                  </div>
+          <CardContent className="space-y-4">
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <Label>{selectedMatch.participant1Name}</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={newScore1}
+                  onChange={(e) => setNewScore1(e.target.value)}
+                  placeholder={`Current: ${selectedMatch.participant1Score} ${selectedMatch.scoreUnit}`}
+                  data-testid="input-score-1"
+                />
+              </div>
+              
+              {selectedMatch.participant2Name && (
+                <div>
+                  <Label>{selectedMatch.participant2Name}</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={newScore2}
+                    onChange={(e) => setNewScore2(e.target.value)}
+                    placeholder={`Current: ${selectedMatch.participant2Score} ${selectedMatch.scoreUnit}`}
+                    data-testid="input-score-2"
+                  />
                 </div>
-              </Alert>
-            ))}
+              )}
+            </div>
+            
+            <div>
+              <Label>Match Status</Label>
+              <Select value={matchStatus} onValueChange={setMatchStatus}>
+                <SelectTrigger data-testid="select-match-status">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="scheduled">Scheduled</SelectItem>
+                  <SelectItem value="in_progress">In Progress</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="postponed">Postponed</SelectItem>
+                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label>Update Reason (Optional)</Label>
+              <Input
+                value={updateReason}
+                onChange={(e) => setUpdateReason(e.target.value)}
+                placeholder="e.g., Corrected measurement, Match completed"
+                data-testid="input-update-reason"
+              />
+            </div>
+            
+            <div className="flex justify-between">
+              <Button
+                variant="outline"
+                onClick={() => setSelectedMatch(null)}
+                data-testid="button-cancel-update"
+              >
+                Cancel
+              </Button>
+              
+              <Button
+                onClick={() => handleScoreUpdate(selectedMatch)}
+                className="bg-green-600 hover:bg-green-700"
+                data-testid="button-save-score"
+              >
+                <CheckCircle className="h-4 w-4 mr-2" />
+                Update Score & Advance Bracket
+              </Button>
+            </div>
           </CardContent>
         </Card>
       )}
 
-      {/* No games message */}
-      {games.length === 0 && (
-        <Alert>
-          <AlertDescription>
-            No live games available. Check back during NFL game days for real-time scoring and fantasy insights.
-          </AlertDescription>
-        </Alert>
+      {/* Instant Message Panel */}
+      {showMessagePanel && selectedMatch && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Send Instant Message</CardTitle>
+            <CardDescription>
+              Quick message to participant or coach - delivered via push notification
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <Label>Message To</Label>
+                <Select value={targetParticipant} onValueChange={setTargetParticipant}>
+                  <SelectTrigger data-testid="select-target-participant">
+                    <SelectValue placeholder="Select participant" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="participant1">{selectedMatch.participant1Name}</SelectItem>
+                    {selectedMatch.participant2Name && (
+                      <SelectItem value="participant2">{selectedMatch.participant2Name}</SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Label>Message Type</Label>
+                <Select value={messageType} onValueChange={setMessageType}>
+                  <SelectTrigger data-testid="select-message-type">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="encouragement">Encouragement</SelectItem>
+                    <SelectItem value="congratulations">Congratulations</SelectItem>
+                    <SelectItem value="technique_tip">Technique Tip</SelectItem>
+                    <SelectItem value="performance_update">Performance Update</SelectItem>
+                    <SelectItem value="coaching_note">Coaching Note</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            
+            <div>
+              <Label>Message</Label>
+              <Textarea
+                value={messageContent}
+                onChange={(e) => setMessageContent(e.target.value)}
+                placeholder={
+                  messageType === 'encouragement' 
+                    ? "Great job! Keep working on technique - it's your first year and we can work on it later."
+                    : "Type your message here..."
+                }
+                rows={3}
+                maxLength={200}
+                data-testid="textarea-message"
+              />
+              <div className="text-xs text-gray-500 mt-1">
+                {messageContent.length}/200 characters
+              </div>
+            </div>
+            
+            {/* Performance Context */}
+            {targetParticipant && (
+              <Alert>
+                <Medal className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>Performance Context:</strong> {selectedMatch.eventName} - Current result: {' '}
+                  {targetParticipant === 'participant1' 
+                    ? formatScore(selectedMatch.participant1Score, selectedMatch.scoreType, selectedMatch.scoreUnit)
+                    : formatScore(selectedMatch.participant2Score || 0, selectedMatch.scoreType, selectedMatch.scoreUnit)
+                  } (Currently in {determineCurrentPlacement(selectedMatch, targetParticipant)} place)
+                </AlertDescription>
+              </Alert>
+            )}
+            
+            <div className="flex justify-between">
+              <Button
+                variant="outline"
+                onClick={() => setShowMessagePanel(false)}
+                data-testid="button-cancel-message"
+              >
+                Cancel
+              </Button>
+              
+              <Button
+                onClick={() => sendInstantMessage(selectedMatch)}
+                disabled={!targetParticipant || !messageContent.trim()}
+                className="bg-blue-600 hover:bg-blue-700"
+                data-testid="button-send-message"
+              >
+                <Send className="h-4 w-4 mr-2" />
+                Send Push Notification
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       )}
     </div>
   );
