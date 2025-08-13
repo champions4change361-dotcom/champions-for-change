@@ -25,9 +25,10 @@ export function useDomain() {
 
   useEffect(() => {
     const hostname = window.location.hostname;
+    console.log('Domain detection - hostname:', hostname); // Debug logging
     let config: DomainConfig;
 
-    if (hostname.includes('fantasy')) {
+    if (hostname.includes('fantasy') || hostname.includes('coaches')) {
       config = {
         type: 'fantasy',
         brand: 'COACHES_LOUNGE',
@@ -44,7 +45,7 @@ export function useDomain() {
           registration: true
         }
       };
-    } else if (hostname.includes('pro')) {
+    } else if (hostname.includes('pro') || hostname.includes('business')) {
       config = {
         type: 'pro',
         brand: 'TOURNAMENT_PRO',
@@ -61,26 +62,45 @@ export function useDomain() {
           registration: true
         }
       };
-    } else {
-      // Default to school-safe (tournaments.trantortournaments.org)
+    } else if (hostname.includes('trantortournaments.org') || hostname.includes('tournaments')) {
+      // Main Champions for Change domain - educational focus
       config = {
         type: 'school',
-        brand: 'SCHOLASTIC_TOURNAMENTS',
+        brand: 'CHAMPIONS_FOR_CHANGE',
         theme: 'educational',
         allowFantasyPromo: false, // NEVER show fantasy to schools
         allowProPromo: false,     // NEVER show pro to schools
-        allowSchoolPromo: false,  // Already on school domain
+        allowSchoolPromo: false,  // Already on main domain
         primaryColor: 'green',
         features: {
           fantasyLeagues: false,
           ageVerification: false,
-          crossSelling: false,    // NO cross-selling on school domain
+          crossSelling: false,    // NO cross-selling on main domain
+          guestAccess: true,
+          registration: true
+        }
+      };
+    } else {
+      // Default to main Champions for Change brand for development/unknown domains
+      config = {
+        type: 'school',
+        brand: 'CHAMPIONS_FOR_CHANGE',
+        theme: 'educational',
+        allowFantasyPromo: false,
+        allowProPromo: false,
+        allowSchoolPromo: false,
+        primaryColor: 'green',
+        features: {
+          fantasyLeagues: false,
+          ageVerification: false,
+          crossSelling: false,
           guestAccess: true,
           registration: true
         }
       };
     }
 
+    console.log('Domain config set:', config); // Debug logging
     setDomainConfig(config);
   }, []);
 

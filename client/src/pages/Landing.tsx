@@ -328,6 +328,7 @@ export default function Landing() {
         </div>
 
         {/* Enhanced Cross-Platform Promotion */}
+        {/* Cross-platform promotions - conditionally rendered based on domain */}
         <FantasyPromotion />
         <CrossPlatformPromotion placement="banner" />
 
