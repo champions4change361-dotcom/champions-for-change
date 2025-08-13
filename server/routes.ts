@@ -18,47 +18,14 @@ import {
   logComplianceAction,
   type ComplianceRequest
 } from "./complianceMiddleware";
-import Stripe from "stripe";
+// No payment processing needed for district operations
 import { z } from "zod";
 
-// Initialize Stripe
-if (!process.env.STRIPE_SECRET_KEY) {
-  console.log('⚠️  No Stripe account configured for Champions for Change');
-  console.log('📋 Please create a new Stripe account at https://stripe.com');
-  console.log('📧 Use champions4change361@gmail.com for the business email');
-  console.log('🏢 Business: Champions for Change (Nonprofit)');
-  throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY - See STRIPE_SETUP_GUIDE.md');
-}
-
-// Champions for Change live key (override environment caching)
-const stripeKey = "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";
-console.log(`🔑 Champions for Change payment system ready`);
-console.log(`🔑 Key ends with: ...${stripeKey.slice(-15)}`);
-console.log(`🔑 Live mode enabled for real donations`);
-
-const stripe = new Stripe(stripeKey, {
-  apiVersion: "2025-07-30.basil",
-});
-
-// Test the key with retry logic for activation delay
-let validationAttempts = 0;
-const validateStripeKey = async () => {
-  try {
-    await stripe.accounts.retrieve();
-    console.log('✅ Stripe key validation successful');
-  } catch (err: any) {
-    validationAttempts++;
-    console.error(`❌ Stripe validation attempt ${validationAttempts}:`, err.message);
-    
-    if (err.message.includes('Expired API Key') && validationAttempts < 3) {
-      console.log('🔄 Retrying validation in 30 seconds (account may still be activating)...');
-      setTimeout(validateStripeKey, 30000);
-    } else if (err.message.includes('account') || err.message.includes('activate')) {
-      console.log('⏳ Stripe account is activating - payment processing may be delayed');
-    }
-  }
-};
-validateStripeKey();
+// District athletics management platform - no payment processing needed
+// Districts handle student fees through existing systems
+console.log('🏫 District athletics management platform initialized');
+console.log('📋 HIPAA/FERPA compliance active');
+console.log('🎯 Focus: Athletic administration, scheduling, health monitoring');
 
 function generateSingleEliminationBracket(teamSize: number, tournamentId: string) {
   const rounds = Math.ceil(Math.log2(teamSize));
@@ -464,84 +431,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Purchase tournament credits
-  app.post("/api/tournament-credits/purchase", isAuthenticated, async (req: any, res) => {
-    try {
-      const { packageId } = req.body;
-      const userId = req.user.claims.sub;
-      
-      const packageInfo = TOURNAMENT_CREDIT_PACKAGES[packageId as keyof typeof TOURNAMENT_CREDIT_PACKAGES];
-      if (!packageInfo) {
-        return res.status(400).json({ error: "Invalid package" });
-      }
-      
-      // Create Stripe checkout session
-      const session = await stripe.checkout.sessions.create({
-        payment_method_types: ['card'],
-        line_items: [
-          {
-            price_data: {
-              currency: 'usd',
-              product_data: {
-                name: packageInfo.name,
-                description: `${packageInfo.credits} tournament credits - ${packageInfo.description}`,
-              },
-              unit_amount: packageInfo.price * 100,
-            },
-            quantity: 1,
-          },
-        ],
-        mode: 'payment',
-        success_url: `${req.headers.origin}/dashboard?credits_purchased=true`,
-        cancel_url: `${req.headers.origin}/dashboard?credits_cancelled=true`,
-        metadata: {
-          userId,
-          packageId,
-          creditsAmount: packageInfo.credits.toString(),
-        },
-      });
-
-      res.json({ checkoutUrl: session.url });
-    } catch (error) {
-      console.error("Credit purchase error:", error);
-      res.status(500).json({ error: "Purchase failed" });
-    }
-  });
+  // District athletics management - no payment processing needed
+  // Credits allocated by district athletic directors through administrative controls
 
   // Webhook to handle successful credit purchases
-  app.post("/api/webhooks/stripe-credits", async (req, res) => {
-    try {
-      const sig = req.headers['stripe-signature'] as string;
-      let event;
-
-      try {
-        event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET as string);
-      } catch (err: any) {
-        console.log(`Webhook signature verification failed:`, err.message);
-        return res.status(400).send(`Webhook Error: ${err.message}`);
-      }
-
-      if (event.type === 'checkout.session.completed') {
-        const session = event.data.object as any;
-        const { userId, packageId, creditsAmount } = session.metadata;
-        
-        // Add credits to user account
-        await UsageLimitService.addCreditsToUser(
-          userId,
-          parseInt(creditsAmount),
-          packageId,
-          session.amount_total / 100,
-          session.payment_intent
-        );
-        
-        console.log(`✅ Added ${creditsAmount} credits to user ${userId}`);
-      }
-
-      res.json({ received: true });
-    } catch (error) {
-      console.error("Credit webhook error:", error);
-      res.status(400).json({ error: "Webhook failed" });
-    }
-  });
+  // No payment webhooks needed - district manages usage allocation internally
 
   // Enhanced AI chat endpoint with usage awareness and avatar support
   app.post("/api/ai/keystone-chat", isAuthenticated, async (req: any, res) => {
@@ -3653,31 +3547,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Stripe payment routes (public endpoint for donations)
-  app.post("/api/create-payment-intent", async (req, res) => {
-    try {
-      const { amount, description = "Payment" } = req.body;
-      
-      if (!amount || amount < 1) {
-        return res.status(400).json({ message: "Valid amount required" });
-      }
-      
-      const paymentIntent = await stripe.paymentIntents.create({
-        amount: Math.round(amount * 100), // Convert to cents
-        currency: "usd",
-        description: description,
-        metadata: {
-          source: 'Champions for Change Platform'
-        }
-      });
-      
-      res.json({ clientSecret: paymentIntent.client_secret });
-    } catch (error: any) {
-      console.error("Payment intent error:", error);
-      res.status(500).json({ 
-        message: "Error creating payment intent: " + error.message 
-      });
-    }
-  });
+  // No payment processing - districts handle student fees through existing systems
 
   // Create donation with donor information
   app.post("/api/create-donation", async (req, res) => {
