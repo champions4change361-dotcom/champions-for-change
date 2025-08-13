@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check, Star, Zap } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { useDomain } from '@/hooks/useDomain';
 
 export function SignupSection() {
@@ -15,52 +16,54 @@ export function SignupSection() {
 
   const tiers = [
     {
-      name: 'Foundation',
+      name: 'Freemium',
       price: 'Free',
-      description: 'Perfect for single schools and small tournaments',
+      description: 'Perfect for casual users and small business tournaments',
       features: [
-        'Up to 5 tournaments per month',
+        'Up to 3 tournaments per year',
         'Basic bracket management',
         'Score tracking',
-        'Email notifications',
         'Community support'
       ],
-      tier: 'foundation',
+      tier: 'freemium',
       buttonColor: 'bg-blue-600 hover:bg-blue-700',
-      popular: false
+      popular: false,
+      badge: 'Free'
     },
     {
-      name: 'Champion',
-      price: '$29',
-      period: '/month',
-      description: 'Multi-school districts and advanced features',
+      name: 'Annual Pro',
+      price: '$990',
+      period: '/year',
+      description: 'Best value for active tournament organizers',
       features: [
         'Unlimited tournaments',
-        'Multi-school management',
-        'Custom branding',
-        'AI tournament suggestions',
+        'Advanced analytics',
+        'Team management',
         'Priority support',
-        'Advanced analytics'
+        'Custom branding',
+        'Save $198 per year'
       ],
-      tier: 'champion',
-      buttonColor: 'bg-blue-600 hover:bg-blue-700',
-      popular: true
+      tier: 'annual',
+      buttonColor: 'bg-green-600 hover:bg-green-700',
+      popular: true,
+      badge: 'Best Value'
     },
     {
-      name: 'District Enterprise',
-      price: 'Custom',
-      description: 'White-label solution for large districts',
+      name: 'Champions District',
+      price: '$2,490',
+      period: '/year',
+      description: 'Complete solution for school districts',
       features: [
-        'Everything in Champion',
-        'Custom domain',
-        'White-label branding',
-        'Multi-organization support',
-        'Dedicated account manager',
-        'Custom integrations'
+        'Everything in Annual Pro',
+        'Multi-school management',
+        'District-wide analytics',
+        'FERPA compliance',
+        'Dedicated account manager'
       ],
-      tier: 'enterprise',
-      buttonColor: 'bg-green-600 hover:bg-green-700',
-      popular: false
+      tier: 'champions',
+      buttonColor: 'bg-blue-600 hover:bg-blue-700',
+      popular: false,
+      badge: 'Popular'
     }
   ];
 
@@ -85,14 +88,17 @@ export function SignupSection() {
               data-testid={`tier-${tier.tier}`}
             >
               {tier.popular && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-semibold flex items-center gap-1">
+                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-1 rounded-full text-sm font-semibold flex items-center gap-1">
                   <Star className="h-3 w-3" />
-                  Most Popular
+                  {tier.badge}
                 </div>
               )}
               
               <CardHeader className="text-center pb-6">
-                <CardTitle className="text-2xl font-bold mb-2">{tier.name}</CardTitle>
+                <div className="flex justify-between items-start mb-2">
+                  <CardTitle className="text-2xl font-bold">{tier.name}</CardTitle>
+                  {tier.badge && !tier.popular && <Badge className="bg-blue-500 text-white">{tier.badge}</Badge>}
+                </div>
                 <div className="mb-4">
                   <span className="text-4xl font-bold text-gray-900">{tier.price}</span>
                   {tier.period && <span className="text-lg text-gray-600">{tier.period}</span>}
@@ -116,7 +122,7 @@ export function SignupSection() {
                   size="lg"
                   data-testid={`button-start-${tier.tier}`}
                 >
-                  {tier.tier === 'enterprise' ? 'Contact Sales' : 'Get Started'}
+                  {tier.tier === 'champions' ? 'Contact Sales' : 'Get Started'}
                 </Button>
               </CardContent>
             </Card>
