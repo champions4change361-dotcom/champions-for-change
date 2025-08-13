@@ -104,7 +104,84 @@ export const aiHealthRecommendations = pgTable("ai_health_recommendations", {
   implementationPriority: varchar("implementation_priority"), // immediate, soon, monitor
   coachNotified: boolean("coach_notified").default(false),
   parentNotified: boolean("parent_notified").default(false),
+  athleticTrainerReviewed: boolean("athletic_trainer_reviewed").default(false),
+  hipaaCompliant: boolean("hipaa_compliant").default(true),
   createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Performance Drill Data (beyond counting stats)
+export const performanceDrillData = pgTable("performance_drill_data", {
+  id: varchar("id").primaryKey(),
+  sessionId: varchar("session_id").notNull(),
+  athleteId: varchar("athlete_id").notNull(),
+  sport: varchar("sport").notNull(),
+  position: varchar("position").notNull(),
+  drillType: varchar("drill_type").notNull(), // forty_yard_dash, bench_press, vertical_jump, etc.
+  result: decimal("result", { precision: 6, scale: 3 }), // time, weight, distance
+  baseline: decimal("baseline", { precision: 6, scale: 3 }), // athlete's personal baseline
+  percentileRank: integer("percentile_rank"), // compared to position peers
+  performanceTrend: decimal("performance_trend", { precision: 5, scale: 2 }), // % change from baseline
+  compensatoryMovements: boolean("compensatory_movements").default(false),
+  injuryRiskIndicator: decimal("injury_risk_indicator", { precision: 3, scale: 2 }),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Athletic Trainer Medical Records
+export const athleticTrainerRecords = pgTable("athletic_trainer_records", {
+  id: varchar("id").primaryKey(),
+  athleteId: varchar("athlete_id").notNull(),
+  trainerId: varchar("trainer_id").notNull(),
+  evaluationType: varchar("evaluation_type").notNull(), // screening, injury_assessment, follow_up, clearance
+  findings: text("findings"),
+  recommendations: text("recommendations"),
+  restrictionLevel: varchar("restriction_level"), // none, limited, restricted, no_participation
+  followUpRequired: boolean("follow_up_required").default(false),
+  followUpDate: timestamp("follow_up_date"),
+  parentNotified: boolean("parent_notified").default(false),
+  coachNotified: boolean("coach_notified").default(false),
+  hipaaConsentDate: timestamp("hipaa_consent_date").notNull(),
+  consentGivenBy: varchar("consent_given_by").notNull(), // parent/guardian name
+  isConfidential: boolean("is_confidential").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Practice Schedule Integration
+export const practiceSchedule = pgTable("practice_schedule", {
+  id: varchar("id").primaryKey(),
+  teamId: varchar("team_id").notNull(),
+  sport: varchar("sport").notNull(),
+  practiceDate: timestamp("practice_date").notNull(),
+  drillsPlanned: jsonb("drills_planned").$type<{
+    drillName: string;
+    duration: number; // minutes
+    intensity: 'low' | 'medium' | 'high';
+    focus: string; // conditioning, technique, scrimmage, etc.
+  }[]>(),
+  healthMonitoringEnabled: boolean("health_monitoring_enabled").default(true),
+  athleticTrainerPresent: boolean("athletic_trainer_present").default(false),
+  environmentalConditions: jsonb("environmental_conditions").$type<{
+    temperature: number;
+    humidity: number;
+    heatIndex: number;
+    airQuality: 'good' | 'moderate' | 'unhealthy';
+  }>(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// HIPAA Compliance Audit Log
+export const hipaaAuditLog = pgTable("hipaa_audit_log", {
+  id: varchar("id").primaryKey(),
+  userId: varchar("user_id").notNull(),
+  userRole: varchar("user_role").notNull(),
+  athleteId: varchar("athlete_id").notNull(),
+  actionType: varchar("action_type").notNull(), // view, create, update, delete, export
+  dataAccessed: varchar("data_accessed").notNull(), // health_alert, medical_record, performance_data
+  ipAddress: varchar("ip_address"),
+  userAgent: varchar("user_agent"),
+  justification: text("justification"), // reason for accessing PHI
+  consentVerified: boolean("consent_verified").default(false),
+  timestamp: timestamp("timestamp").defaultNow(),
 });
 
 // Position-Specific Performance Baselines
@@ -145,6 +222,18 @@ export type InsertAIHealthRecommendation = typeof aiHealthRecommendations.$infer
 export type PositionBaseline = typeof positionBaselines.$inferSelect;
 export type InsertPositionBaseline = typeof positionBaselines.$inferInsert;
 
+export type PerformanceDrillData = typeof performanceDrillData.$inferSelect;
+export type InsertPerformanceDrillData = typeof performanceDrillData.$inferInsert;
+
+export type AthleticTrainerRecord = typeof athleticTrainerRecords.$inferSelect;
+export type InsertAthleticTrainerRecord = typeof athleticTrainerRecords.$inferInsert;
+
+export type PracticeSchedule = typeof practiceSchedule.$inferSelect;
+export type InsertPracticeSchedule = typeof practiceSchedule.$inferInsert;
+
+export type HipaaAuditLog = typeof hipaaAuditLog.$inferSelect;
+export type InsertHipaaAuditLog = typeof hipaaAuditLog.$inferInsert;
+
 // Zod schemas for validation
 export const insertAthleteHealthProfileSchema = createInsertSchema(athleteHealthProfiles);
 export const insertPerformanceMonitoringSessionSchema = createInsertSchema(performanceMonitoringSessions);
@@ -154,3 +243,7 @@ export const insertSoccerMovementDataSchema = createInsertSchema(soccerMovementD
 export const insertHealthAlertSchema = createInsertSchema(healthAlerts);
 export const insertAIHealthRecommendationSchema = createInsertSchema(aiHealthRecommendations);
 export const insertPositionBaselineSchema = createInsertSchema(positionBaselines);
+export const insertPerformanceDrillDataSchema = createInsertSchema(performanceDrillData);
+export const insertAthleticTrainerRecordSchema = createInsertSchema(athleticTrainerRecords);
+export const insertPracticeScheduleSchema = createInsertSchema(practiceSchedule);
+export const insertHipaaAuditLogSchema = createInsertSchema(hipaaAuditLog);

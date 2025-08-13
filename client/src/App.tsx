@@ -40,6 +40,7 @@ import AthleteAnalytics from './pages/AthleteAnalytics';
 import CorporateAnalytics from './pages/CorporateAnalytics';
 import MillerVLCDemo from './pages/MillerVLCDemo';
 import FootballHealthMonitoring from './pages/FootballHealthMonitoring';
+import DefensiveHealthMonitoring from './pages/DefensiveHealthMonitoring';
 
 function AuthenticatedRoutes() {
   const { isFeatureEnabled, isFantasyDomain, config } = useDomain();
@@ -66,6 +67,7 @@ function AuthenticatedRoutes() {
         <Route path="/corporate-analytics" component={() => <CorporateAnalytics isPublic={true} />} />
         <Route path="/miller-vlc-demo" component={MillerVLCDemo} />
         <Route path="/football-health" component={FootballHealthMonitoring} />
+        <Route path="/defensive-health" component={DefensiveHealthMonitoring} />
         
         {/* Show Tournament Empire only for school-safe and pro domains */}
         {!isFantasyDomain() && (
