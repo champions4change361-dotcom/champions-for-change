@@ -83,22 +83,22 @@ export default function Landing() {
               Every subscription helps fund student trips and educational opportunities for middle schools in Corpus Christi, Texas.
             </p>
 
-            <div className="flex gap-6 justify-center">
+            <div className="flex flex-col md:flex-row gap-4 md:gap-6 justify-center items-center">
               <Button 
                 size="lg" 
-                className="bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-bold px-8 py-4 text-lg"
+                variant="outline"
+                className="border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/10 hover:border-yellow-400 px-8 py-4 text-lg order-1 md:order-2"
+                data-testid="button-learn-more"
+              >
+                Learn More
+              </Button>
+              <Button 
+                size="lg" 
+                className="bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-bold px-8 py-4 text-lg order-2 md:order-1"
                 onClick={() => window.location.href = "/api/login"}
                 data-testid="button-get-started"
               >
                 Start Supporting Students
-              </Button>
-              <Button 
-                size="lg" 
-                variant="outline"
-                className="border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/10 hover:border-yellow-400 px-8 py-4 text-lg"
-                data-testid="button-learn-more"
-              >
-                Learn More
               </Button>
             </div>
           </div>
