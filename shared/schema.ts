@@ -1780,6 +1780,66 @@ export type InsertScorekeeperAssignment = typeof scorekeeperAssignments.$inferIn
 export type LiveScoreMessage = typeof liveScoreMessages.$inferSelect;
 export type InsertLiveScoreMessage = typeof liveScoreMessages.$inferInsert;
 
+// Geolocation-based event tracking
+export const eventLocations = pgTable("event_locations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tournamentId: varchar("tournament_id").notNull().references(() => tournaments.id),
+  eventName: varchar("event_name").notNull(),
+  venueName: varchar("venue_name").notNull(),
+  address: text("address").notNull(),
+  latitude: numeric("latitude", { precision: 10, scale: 8 }).notNull(),
+  longitude: numeric("longitude", { precision: 11, scale: 8 }).notNull(),
+  geofenceRadius: integer("geofence_radius").default(100), // meters
+  allowRemoteScoring: boolean("allow_remote_scoring").default(false),
+  requireLocationVerification: boolean("require_location_verification").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Location check-ins for participants and scorekeepers
+export const locationCheckIns = pgTable("location_check_ins", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  eventLocationId: varchar("event_location_id").notNull().references(() => eventLocations.id),
+  tournamentId: varchar("tournament_id").notNull().references(() => tournaments.id),
+  checkInLatitude: numeric("check_in_latitude", { precision: 10, scale: 8 }).notNull(),
+  checkInLongitude: numeric("check_in_longitude", { precision: 11, scale: 8 }).notNull(),
+  distanceFromVenue: integer("distance_from_venue"), // meters
+  checkInType: text("check_in_type", {
+    enum: ["participant_arrival", "scorekeeper_arrival", "event_start", "event_end", "score_update"]
+  }).notNull(),
+  verificationStatus: text("verification_status", {
+    enum: ["verified", "outside_range", "manual_override", "failed"]
+  }).default("verified"),
+  checkInTime: timestamp("check_in_time").defaultNow(),
+  notes: text("notes"),
+});
+
+// Location-based scoring permissions
+export const locationScoringPermissions = pgTable("location_scoring_permissions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  scorekeeperId: varchar("scorekeeper_id").notNull().references(() => users.id),
+  eventLocationId: varchar("event_location_id").notNull().references(() => eventLocations.id),
+  tournamentId: varchar("tournament_id").notNull().references(() => tournaments.id),
+  isLocationVerified: boolean("is_location_verified").default(false),
+  lastLocationCheck: timestamp("last_location_check"),
+  locationCheckLatitude: numeric("location_check_latitude", { precision: 10, scale: 8 }),
+  locationCheckLongitude: numeric("location_check_longitude", { precision: 11, scale: 8 }),
+  distanceFromVenue: integer("distance_from_venue"), // meters
+  canScoreRemotely: boolean("can_score_remotely").default(false),
+  permissionGrantedBy: varchar("permission_granted_by").references(() => users.id),
+  permissionNotes: text("permission_notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type EventLocation = typeof eventLocations.$inferSelect;
+export type InsertEventLocation = typeof eventLocations.$inferInsert;
+export type LocationCheckIn = typeof locationCheckIns.$inferSelect;
+export type InsertLocationCheckIn = typeof locationCheckIns.$inferInsert;
+export type LocationScoringPermission = typeof locationScoringPermissions.$inferSelect;
+export type InsertLocationScoringPermission = typeof locationScoringPermissions.$inferInsert;
+
 // Relations for live scoring system
 export const liveScoresRelations = relations(liveScores, ({ one }) => ({
   tournament: one(tournaments, {
@@ -1814,6 +1874,50 @@ export const liveScoreMessagesRelations = relations(liveScoreMessages, ({ one })
   }),
   sender: one(users, {
     fields: [liveScoreMessages.senderId],
+    references: [users.id],
+  }),
+}));
+
+// Geolocation relations
+export const eventLocationsRelations = relations(eventLocations, ({ one, many }) => ({
+  tournament: one(tournaments, {
+    fields: [eventLocations.tournamentId],
+    references: [tournaments.id],
+  }),
+  checkIns: many(locationCheckIns),
+  scoringPermissions: many(locationScoringPermissions),
+}));
+
+export const locationCheckInsRelations = relations(locationCheckIns, ({ one }) => ({
+  user: one(users, {
+    fields: [locationCheckIns.userId],
+    references: [users.id],
+  }),
+  eventLocation: one(eventLocations, {
+    fields: [locationCheckIns.eventLocationId],
+    references: [eventLocations.id],
+  }),
+  tournament: one(tournaments, {
+    fields: [locationCheckIns.tournamentId],
+    references: [tournaments.id],
+  }),
+}));
+
+export const locationScoringPermissionsRelations = relations(locationScoringPermissions, ({ one }) => ({
+  scorekeeper: one(users, {
+    fields: [locationScoringPermissions.scorekeeperId],
+    references: [users.id],
+  }),
+  eventLocation: one(eventLocations, {
+    fields: [locationScoringPermissions.eventLocationId],
+    references: [eventLocations.id],
+  }),
+  tournament: one(tournaments, {
+    fields: [locationScoringPermissions.tournamentId],
+    references: [tournaments.id],
+  }),
+  permissionGrantedByUser: one(users, {
+    fields: [locationScoringPermissions.permissionGrantedBy],
     references: [users.id],
   }),
 }));
