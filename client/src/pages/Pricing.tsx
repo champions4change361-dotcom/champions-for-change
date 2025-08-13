@@ -11,8 +11,22 @@ export default function Pricing() {
   const { config, isSchoolDomain, isFantasyDomain, isProDomain } = useDomain();
   const [, navigate] = useLocation();
 
-  // Show appropriate pricing based on domain context
+  // Check for pricing type override via URL params
+  const urlParams = new URLSearchParams(window.location.search);
+  const pricingType = urlParams.get('type');
+
+  // Show appropriate pricing based on domain context or URL override
   const renderPricingSection = () => {
+    // Allow URL override for testing/demo purposes
+    if (pricingType === 'business') {
+      return <BusinessPricingSection />;
+    } else if (pricingType === 'education') {
+      return <EducationPricingSection />;
+    } else if (pricingType === 'coaches') {
+      return <CoachesLoungePricingSection />;
+    }
+    
+    // Default domain-based routing
     if (isSchoolDomain()) {
       return <EducationPricingSection />;
     } else if (isProDomain()) {
