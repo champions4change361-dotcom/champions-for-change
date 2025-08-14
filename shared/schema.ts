@@ -259,6 +259,102 @@ export const donations = pgTable("donations", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Tax Exemption Documents for Nonprofit Organizations
+export const taxExemptionDocuments = pgTable("tax_exemption_documents", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").notNull().references(() => organizations.id),
+  uploaderUserId: varchar("uploader_user_id").notNull().references(() => users.id),
+  documentType: text("document_type", {
+    enum: ["501c3_determination_letter", "state_tax_exemption", "sales_tax_exemption", "other"]
+  }).notNull(),
+  documentName: varchar("document_name").notNull(),
+  documentPath: varchar("document_path").notNull(), // File storage path
+  fileSize: integer("file_size"),
+  mimeType: varchar("mime_type"),
+  expirationDate: date("expiration_date"), // Some exemptions expire
+  verificationStatus: text("verification_status", {
+    enum: ["pending", "verified", "rejected", "expired"]
+  }).default("pending"),
+  verificationNotes: text("verification_notes"),
+  verifiedBy: varchar("verified_by").references(() => users.id),
+  verifiedAt: timestamp("verified_at"),
+  issuingState: varchar("issuing_state"), // For state-specific exemptions
+  federalEIN: varchar("federal_ein"), // Federal Employer ID Number
+  taxExemptNumber: varchar("tax_exempt_number"), // State tax exempt number
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Flat Rate Billing System for Nonprofits (No Tax Collection)
+export const nonprofitSubscriptions = pgTable("nonprofit_subscriptions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").notNull().references(() => organizations.id),
+  billingContactUserId: varchar("billing_contact_user_id").notNull().references(() => users.id),
+  subscriptionTier: text("subscription_tier", {
+    enum: ["foundation", "champion", "enterprise", "district_enterprise"]
+  }).notNull(),
+  flatRateAmount: numeric("flat_rate_amount", { precision: 10, scale: 2 }).notNull(),
+  billingCycle: text("billing_cycle", {
+    enum: ["monthly", "quarterly", "annual"]
+  }).default("annual"),
+  subscriptionStatus: text("subscription_status", {
+    enum: ["active", "inactive", "suspended", "canceled", "past_due"]
+  }).default("active"),
+  taxExemptStatus: text("tax_exempt_status", {
+    enum: ["exempt", "pending_verification", "not_exempt"]
+  }).default("pending_verification"),
+  exemptionDocumentId: varchar("exemption_document_id").references(() => taxExemptionDocuments.id),
+  
+  // Billing details
+  nextBillingDate: timestamp("next_billing_date"),
+  lastBillingDate: timestamp("last_billing_date"),
+  billingAddress: jsonb("billing_address").$type<{
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+  }>(),
+  
+  // Payment method (simplified for nonprofits)
+  paymentMethod: text("payment_method", {
+    enum: ["check", "ach", "wire", "stripe"]
+  }).default("check"),
+  paymentInstructions: text("payment_instructions"), // Where to send checks, etc.
+  
+  // Compliance tracking
+  nonprofitVerificationRequired: boolean("nonprofit_verification_required").default(true),
+  complianceNotes: text("compliance_notes"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Billing Invoices for Nonprofit Flat Rate System
+export const nonprofitInvoices = pgTable("nonprofit_invoices", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  subscriptionId: varchar("subscription_id").notNull().references(() => nonprofitSubscriptions.id),
+  invoiceNumber: varchar("invoice_number").notNull().unique(),
+  invoiceDate: timestamp("invoice_date").defaultNow(),
+  dueDate: timestamp("due_date").notNull(),
+  billingPeriodStart: date("billing_period_start").notNull(),
+  billingPeriodEnd: date("billing_period_end").notNull(),
+  subtotal: numeric("subtotal", { precision: 10, scale: 2 }).notNull(),
+  taxAmount: numeric("tax_amount", { precision: 10, scale: 2 }).default("0.00"), // Always $0 for tax-exempt
+  totalAmount: numeric("total_amount", { precision: 10, scale: 2 }).notNull(),
+  paymentStatus: text("payment_status", {
+    enum: ["pending", "paid", "overdue", "canceled"]
+  }).default("pending"),
+  paymentDate: timestamp("payment_date"),
+  paymentMethod: text("payment_method", {
+    enum: ["check", "ach", "wire", "stripe"]
+  }),
+  paymentReference: varchar("payment_reference"), // Check number, transaction ID, etc.
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Organization registration and management
 export const organizations = pgTable("organizations", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -1446,6 +1542,46 @@ export const updateMatchSchema = createInsertSchema(matches).omit({
   createdAt: true,
   updatedAt: true,
 }).partial();
+
+// Tax Exemption Document schemas
+export const insertTaxExemptionDocumentSchema = createInsertSchema(taxExemptionDocuments).omit({
+  id: true,
+  verificationStatus: true,
+  verificationNotes: true,
+  verifiedBy: true,
+  verifiedAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertNonprofitSubscriptionSchema = createInsertSchema(nonprofitSubscriptions).omit({
+  id: true,
+  subscriptionStatus: true,
+  taxExemptStatus: true,
+  nextBillingDate: true,
+  lastBillingDate: true,
+  nonprofitVerificationRequired: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertNonprofitInvoiceSchema = createInsertSchema(nonprofitInvoices).omit({
+  id: true,
+  invoiceNumber: true,
+  invoiceDate: true,
+  paymentStatus: true,
+  paymentDate: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Nonprofit types
+export type TaxExemptionDocument = typeof taxExemptionDocuments.$inferSelect;
+export type InsertTaxExemptionDocument = z.infer<typeof insertTaxExemptionDocumentSchema>;
+export type NonprofitSubscription = typeof nonprofitSubscriptions.$inferSelect;
+export type InsertNonprofitSubscription = z.infer<typeof insertNonprofitSubscriptionSchema>;
+export type NonprofitInvoice = typeof nonprofitInvoices.$inferSelect;
+export type InsertNonprofitInvoice = z.infer<typeof insertNonprofitInvoiceSchema>;
 
 // User types
 export type User = typeof users.$inferSelect;

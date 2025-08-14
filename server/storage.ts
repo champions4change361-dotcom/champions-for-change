@@ -8,7 +8,8 @@ import {
   type SchoolEventAssignment, type InsertSchoolEventAssignment, type CoachEventAssignment, type InsertCoachEventAssignment,
   type Contact, type InsertContact, type EmailCampaign, type InsertEmailCampaign, type CampaignRecipient, type InsertCampaignRecipient,
   type Donor, type InsertDonor, type Donation, type InsertDonation, type RegistrationRequest, type InsertRegistrationRequest,
-  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog
+  type TaxExemptionDocument, type InsertTaxExemptionDocument, type NonprofitSubscription, type InsertNonprofitSubscription, type NonprofitInvoice, type InsertNonprofitInvoice,
+  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog, taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices
 } from "@shared/schema";
 
 type SportCategory = typeof sportCategories.$inferSelect;
@@ -248,6 +249,24 @@ export interface IStorage {
   createLeaderboardEntry(entry: any): Promise<any>;
   getLeaderboardEntries(tournamentId: string): Promise<any[]>;
   updateLeaderboardEntry(id: string, updates: any): Promise<any>;
+
+  // Nonprofit Tax Exemption and Billing methods
+  createTaxExemptionDocument(document: InsertTaxExemptionDocument): Promise<TaxExemptionDocument>;
+  getTaxExemptionDocument(id: string): Promise<TaxExemptionDocument | undefined>;
+  getTaxExemptionDocumentsByOrganization(organizationId: string): Promise<TaxExemptionDocument[]>;
+  updateTaxExemptionDocument(id: string, updates: Partial<TaxExemptionDocument>): Promise<TaxExemptionDocument | undefined>;
+  verifyTaxExemptionDocument(id: string, verifiedBy: string, status: 'verified' | 'rejected', notes?: string): Promise<TaxExemptionDocument | undefined>;
+
+  createNonprofitSubscription(subscription: InsertNonprofitSubscription): Promise<NonprofitSubscription>;
+  getNonprofitSubscription(id: string): Promise<NonprofitSubscription | undefined>;
+  getNonprofitSubscriptionByOrganization(organizationId: string): Promise<NonprofitSubscription | undefined>;
+  updateNonprofitSubscription(id: string, updates: Partial<NonprofitSubscription>): Promise<NonprofitSubscription | undefined>;
+
+  createNonprofitInvoice(invoice: InsertNonprofitInvoice): Promise<NonprofitInvoice>;
+  getNonprofitInvoice(id: string): Promise<NonprofitInvoice | undefined>;
+  getNonprofitInvoicesBySubscription(subscriptionId: string): Promise<NonprofitInvoice[]>;
+  updateNonprofitInvoice(id: string, updates: Partial<NonprofitInvoice>): Promise<NonprofitInvoice | undefined>;
+  markInvoiceAsPaid(id: string, paymentMethod: string, paymentReference?: string): Promise<NonprofitInvoice | undefined>;
 }
 
 export class DbStorage implements IStorage {

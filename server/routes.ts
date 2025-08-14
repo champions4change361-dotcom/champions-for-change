@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage, getStorage } from "./storage";
 import { insertTournamentSchema, updateMatchSchema, insertRegistrationRequestSchema } from "@shared/schema";
 import { analyzeTournamentQuery, generateTournamentStructure, generateIntelligentTournamentStructure, generateWebpageTemplate, type KeystoneConsultationResult } from "./ai-consultation";
+import { NonprofitBillingService } from "./nonprofitBilling";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { setupDomainRoutes } from "./domainRoutes";
 import { AIContextService } from "./ai-context";
@@ -179,6 +180,200 @@ function generateDoubleEliminationBracket(teamSize: number, tournamentId: string
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication middleware
   await setupAuth(app);
+
+  // Initialize nonprofit billing service
+  const nonprofitBilling = new NonprofitBillingService();
+
+  // Nonprofit Billing API Routes
+  // Create or update nonprofit profile
+  app.post("/api/nonprofit/profile", isAuthenticated, async (req, res) => {
+    try {
+      const { ein, organizationName, contactEmail, address, phone, website, description } = req.body;
+      const userId = req.user?.claims?.sub;
+
+      if (!userId || !ein || !organizationName || !contactEmail) {
+        return res.status(400).json({ error: "Required fields missing" });
+      }
+
+      const profile = await nonprofitBilling.createNonprofitProfile({
+        ein,
+        organizationName,
+        contactEmail,
+        address,
+        phone,
+        website,
+        description,
+        ownerId: userId,
+      });
+
+      res.json(profile);
+    } catch (error) {
+      console.error("Error creating nonprofit profile:", error);
+      res.status(500).json({ error: "Failed to create nonprofit profile" });
+    }
+  });
+
+  // Get nonprofit profile
+  app.get("/api/nonprofit/profile", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const profile = await nonprofitBilling.getNonprofitProfile(userId);
+      
+      if (!profile) {
+        return res.status(404).json({ error: "Nonprofit profile not found" });
+      }
+
+      res.json(profile);
+    } catch (error) {
+      console.error("Error fetching nonprofit profile:", error);
+      res.status(500).json({ error: "Failed to fetch nonprofit profile" });
+    }
+  });
+
+  // Upload tax exemption document
+  app.post("/api/nonprofit/tax-exemption", isAuthenticated, async (req, res) => {
+    try {
+      const { nonprofitId, documentType, filename, fileContent } = req.body;
+      
+      if (!nonprofitId || !documentType || !filename || !fileContent) {
+        return res.status(400).json({ error: "Required fields missing" });
+      }
+
+      const document = await nonprofitBilling.uploadTaxExemptionDocument({
+        nonprofitId,
+        documentType: documentType as 'irs_determination' | 'state_certificate' | 'other',
+        filename,
+        fileContent: Buffer.from(fileContent, 'base64'),
+      });
+
+      res.json(document);
+    } catch (error) {
+      console.error("Error uploading tax exemption document:", error);
+      res.status(500).json({ error: "Failed to upload document" });
+    }
+  });
+
+  // Get tax exemption documents
+  app.get("/api/nonprofit/:id/tax-documents", isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const documents = await nonprofitBilling.getTaxExemptionDocuments(id);
+      res.json(documents);
+    } catch (error) {
+      console.error("Error fetching tax documents:", error);
+      res.status(500).json({ error: "Failed to fetch tax documents" });
+    }
+  });
+
+  // Create subscription
+  app.post("/api/nonprofit/subscription", isAuthenticated, async (req, res) => {
+    try {
+      const { nonprofitId, billingCycle } = req.body;
+      
+      if (!nonprofitId || !billingCycle) {
+        return res.status(400).json({ error: "Required fields missing" });
+      }
+
+      if (!['monthly', 'quarterly', 'annual'].includes(billingCycle)) {
+        return res.status(400).json({ error: "Invalid billing cycle" });
+      }
+
+      const subscription = await nonprofitBilling.createSubscription(nonprofitId, billingCycle as 'monthly' | 'quarterly' | 'annual');
+      res.json(subscription);
+    } catch (error) {
+      console.error("Error creating subscription:", error);
+      res.status(500).json({ error: "Failed to create subscription" });
+    }
+  });
+
+  // Get subscription details
+  app.get("/api/nonprofit/:id/subscription", isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const subscription = await nonprofitBilling.getSubscription(id);
+      
+      if (!subscription) {
+        return res.status(404).json({ error: "Subscription not found" });
+      }
+
+      res.json(subscription);
+    } catch (error) {
+      console.error("Error fetching subscription:", error);
+      res.status(500).json({ error: "Failed to fetch subscription" });
+    }
+  });
+
+  // Generate invoice
+  app.post("/api/nonprofit/invoice", isAuthenticated, async (req, res) => {
+    try {
+      const { subscriptionId } = req.body;
+      
+      if (!subscriptionId) {
+        return res.status(400).json({ error: "Subscription ID required" });
+      }
+
+      const invoice = await nonprofitBilling.generateInvoice(subscriptionId);
+      res.json(invoice);
+    } catch (error) {
+      console.error("Error generating invoice:", error);
+      res.status(500).json({ error: "Failed to generate invoice" });
+    }
+  });
+
+  // Mark invoice as paid
+  app.post("/api/nonprofit/invoice/:id/paid", isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { paymentMethod, paymentReference } = req.body;
+      
+      if (!paymentMethod || !['check', 'ach', 'wire', 'stripe'].includes(paymentMethod)) {
+        return res.status(400).json({ error: "Valid payment method required" });
+      }
+
+      const invoice = await nonprofitBilling.markInvoiceAsPaid(id, paymentMethod, paymentReference);
+      res.json(invoice);
+    } catch (error) {
+      console.error("Error marking invoice as paid:", error);
+      res.status(500).json({ error: "Failed to update invoice" });
+    }
+  });
+
+  // Get invoices for nonprofit
+  app.get("/api/nonprofit/:id/invoices", isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const invoices = await nonprofitBilling.getInvoices(id);
+      res.json(invoices);
+    } catch (error) {
+      console.error("Error fetching invoices:", error);
+      res.status(500).json({ error: "Failed to fetch invoices" });
+    }
+  });
+
+  // Update nonprofit tax-exempt status
+  app.post("/api/nonprofit/:id/tax-status", isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { isTaxExempt, exemptionValidUntil } = req.body;
+      
+      const profile = await nonprofitBilling.updateTaxExemptStatus(id, isTaxExempt, exemptionValidUntil ? new Date(exemptionValidUntil) : undefined);
+      res.json(profile);
+    } catch (error) {
+      console.error("Error updating tax status:", error);
+      res.status(500).json({ error: "Failed to update tax status" });
+    }
+  });
+
+  // Get pricing tiers
+  app.get("/api/nonprofit/pricing", async (req, res) => {
+    try {
+      const pricing = nonprofitBilling.getPricingTiers();
+      res.json(pricing);
+    } catch (error) {
+      console.error("Error fetching pricing:", error);
+      res.status(500).json({ error: "Failed to fetch pricing" });
+    }
+  });
 
   // Server-side Miller VLC Demo route for district firewall compatibility
   // Handle as query parameter to bypass URL path filtering
