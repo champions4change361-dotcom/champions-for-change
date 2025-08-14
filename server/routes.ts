@@ -178,16 +178,35 @@ function generateDoubleEliminationBracket(teamSize: number, tournamentId: string
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Health check route for deployment monitoring (only /health endpoint)
-  app.get('/health', (req, res) => {
-    res.json({ 
+  // Health check routes for deployment monitoring
+  // Replit deployments require the root path to respond for health checks
+  const healthResponse = (req: Request, res: Response) => {
+    res.status(200).json({ 
       status: 'healthy', 
       service: 'District Athletics Management',
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
       environment: process.env.NODE_ENV || 'development'
     });
+  };
+
+  // Handle health checks on both root and /health paths
+  app.get('/', (req, res, next) => {
+    // If request accepts JSON or is from deployment health check, return health status
+    const acceptsJson = req.headers.accept?.includes('application/json');
+    const isHealthCheck = req.headers['user-agent']?.includes('GoogleHC') || 
+                         req.headers['user-agent']?.includes('kube-probe') ||
+                         acceptsJson;
+    
+    if (isHealthCheck) {
+      return healthResponse(req, res);
+    }
+    
+    // Otherwise, let it fall through to serve the frontend
+    next();
   });
+
+  app.get('/health', healthResponse);
 
   // Setup authentication middleware
   await setupAuth(app);
