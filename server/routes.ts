@@ -178,6 +178,17 @@ function generateDoubleEliminationBracket(teamSize: number, tournamentId: string
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Health check route for deployment monitoring (only /health endpoint)
+  app.get('/health', (req, res) => {
+    res.json({ 
+      status: 'healthy', 
+      service: 'District Athletics Management',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      environment: process.env.NODE_ENV || 'development'
+    });
+  });
+
   // Setup authentication middleware
   await setupAuth(app);
 
@@ -5404,6 +5415,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       environment: process.env.NODE_ENV || 'development'
     });
   });
+
+  // Health check routes moved to beginning of function
 
   const httpServer = createServer(app);
   return httpServer;

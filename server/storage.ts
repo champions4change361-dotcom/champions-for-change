@@ -1,8 +1,8 @@
 import { 
-  type User, type UpsertUser, type WhitelabelConfig, type InsertWhitelabelConfig,
+  type User, type UpsertUser, type WhitelabelConfigRecord as WhitelabelConfig, type InsertWhitelabelConfigRecord as InsertWhitelabelConfig,
   type Tournament, type InsertTournament, type Match, type InsertMatch, type UpdateMatch,
   type SportOption, type InsertSportOption, type TournamentStructure, type InsertTournamentStructure,
-  type TrackEvent, type InsertTrackEvent, type Page, type InsertPage,
+  type TrackEventRecord as TrackEvent, type InsertTrackEventRecord as InsertTrackEvent, type Page, type InsertPage,
   type TeamRegistration, type InsertTeamRegistration, type Organization, type InsertOrganization,
   type ScorekeeperAssignment, type InsertScorekeeperAssignment, type EventScore, type InsertEventScore,
   type SchoolEventAssignment, type InsertSchoolEventAssignment, type CoachEventAssignment, type InsertCoachEventAssignment,
@@ -170,53 +170,54 @@ export interface IStorage {
   getTrackEvents(): Promise<TrackEvent[]>;
   getTrackEventsByCategory(category: string): Promise<TrackEvent[]>;
   getTrackEvent(id: string): Promise<TrackEvent | undefined>;
-  getTrackEventTiming(): Promise<TrackEventTiming[]>;
-  getTrackEventTimingByEventId(trackEventId: string): Promise<TrackEventTiming[]>;
+  // Track timing methods temporarily disabled due to schema updates
+  // getTrackEventTiming(): Promise<TrackEventTiming[]>;
+  // getTrackEventTimingByEventId(trackEventId: string): Promise<TrackEventTiming[]>;
   getSportDivisionRules(): Promise<SportDivisionRules[]>;
   getSportDivisionRulesBySport(sportId: string): Promise<SportDivisionRules[]>;
   createSportDivisionRules(rules: InsertSportDivisionRules): Promise<SportDivisionRules>;
   
-  // Tournament Integration methods
-  getTournamentFormatConfigs(): Promise<TournamentFormatConfig[]>;
-  getTournamentFormatConfigsByStructure(structureId: string): Promise<TournamentFormatConfig[]>;
-  getTournamentFormatConfigsBySport(sportCategory: string): Promise<TournamentFormatConfig[]>;
-  getBracketTemplates(): Promise<BracketTemplate[]>;
-  getBracketTemplatesByStructure(structureId: string): Promise<BracketTemplate[]>;
-  getBracketTemplateByParticipants(structureId: string, participantCount: number): Promise<BracketTemplate | undefined>;
-  createTournamentGenerationLog(log: InsertTournamentGenerationLog): Promise<TournamentGenerationLog>;
-  getTournamentGenerationLogsByTournament(tournamentId: string): Promise<TournamentGenerationLog[]>;
+  // Tournament Integration methods (temporarily disabled due to schema updates)
+  // getTournamentFormatConfigs(): Promise<TournamentFormatConfig[]>;
+  // getTournamentFormatConfigsByStructure(structureId: string): Promise<TournamentFormatConfig[]>;
+  // getTournamentFormatConfigsBySport(sportCategory: string): Promise<TournamentFormatConfig[]>;
+  // getBracketTemplates(): Promise<BracketTemplate[]>;
+  // getBracketTemplatesByStructure(structureId: string): Promise<BracketTemplate[]>;
+  // getBracketTemplateByParticipants(structureId: string, participantCount: number): Promise<BracketTemplate | undefined>;
+  // createTournamentGenerationLog(log: InsertTournamentGenerationLog): Promise<TournamentGenerationLog>;
+  // getTournamentGenerationLogsByTournament(tournamentId: string): Promise<TournamentGenerationLog[]>;
 
-  // Competition Format Templates methods
-  getCompetitionFormatTemplates(): Promise<CompetitionFormatTemplate[]>;
-  getCompetitionFormatTemplatesBySport(sportId: string): Promise<CompetitionFormatTemplate[]>;
-  getDefaultCompetitionFormatTemplate(sportId: string): Promise<CompetitionFormatTemplate | undefined>;
-  getSeriesTemplates(): Promise<SeriesTemplate[]>;
-  getSeriesTemplatesBySport(sportId: string): Promise<SeriesTemplate[]>;
-  getGameLengthTemplates(): Promise<GameLengthTemplate[]>;
-  getGameLengthTemplatesBySport(sportId: string): Promise<GameLengthTemplate[]>;
+  // Competition Format Templates methods (temporarily disabled due to schema updates)
+  // getCompetitionFormatTemplates(): Promise<CompetitionFormatTemplate[]>;
+  // getCompetitionFormatTemplatesBySport(sportId: string): Promise<CompetitionFormatTemplate[]>;
+  // getDefaultCompetitionFormatTemplate(sportId: string): Promise<CompetitionFormatTemplate | undefined>;
+  // getSeriesTemplates(): Promise<SeriesTemplate[]>;
+  // getSeriesTemplatesBySport(sportId: string): Promise<SeriesTemplate[]>;
+  // getGameLengthTemplates(): Promise<GameLengthTemplate[]>;
+  // getGameLengthTemplatesBySport(sportId: string): Promise<GameLengthTemplate[]>;
 
-  // KRAKEN MULTI-DIVISION SYSTEM METHODS 🐙💥
-  getDivisionTemplates(): Promise<DivisionTemplate[]>;
-  getDivisionTemplatesBySport(sportCategory: string): Promise<DivisionTemplate[]>;
-  getDivisionTemplate(id: string): Promise<DivisionTemplate | undefined>;
-  createDivisionTemplate(template: InsertDivisionTemplate): Promise<DivisionTemplate>;
-  getTournamentDivisions(): Promise<TournamentDivision[]>;
-  getTournamentDivisionsByTournament(tournamentId: string): Promise<TournamentDivision[]>;
-  getTournamentDivision(id: string): Promise<TournamentDivision | undefined>;
-  createTournamentDivision(division: InsertTournamentDivision): Promise<TournamentDivision>;
-  updateTournamentDivision(id: string, updates: Partial<TournamentDivision>): Promise<TournamentDivision | undefined>;
-  getDivisionParticipants(): Promise<DivisionParticipant[]>;
-  getDivisionParticipantsByDivision(divisionId: string): Promise<DivisionParticipant[]>;
-  getDivisionParticipant(id: string): Promise<DivisionParticipant | undefined>;
-  createDivisionParticipant(participant: InsertDivisionParticipant): Promise<DivisionParticipant>;
-  updateDivisionParticipant(id: string, updates: Partial<DivisionParticipant>): Promise<DivisionParticipant | undefined>;
-  getDivisionGenerationRules(): Promise<DivisionGenerationRule[]>;
-  getDivisionGenerationRulesByTournament(tournamentId: string): Promise<DivisionGenerationRule[]>;
-  createDivisionGenerationRule(rule: InsertDivisionGenerationRule): Promise<DivisionGenerationRule>;
-  generateDivisionsFromTemplate(tournamentId: string, templateId: string, config?: any): Promise<TournamentDivision[]>;
-  getDivisionScheduling(): Promise<DivisionScheduling[]>;
-  getDivisionSchedulingByTournament(tournamentId: string): Promise<DivisionScheduling[]>;
-  createDivisionScheduling(scheduling: InsertDivisionScheduling): Promise<DivisionScheduling>;
+  // KRAKEN MULTI-DIVISION SYSTEM METHODS (temporarily disabled due to schema updates)
+  // getDivisionTemplates(): Promise<DivisionTemplate[]>;
+  // getDivisionTemplatesBySport(sportCategory: string): Promise<DivisionTemplate[]>;
+  // getDivisionTemplate(id: string): Promise<DivisionTemplate | undefined>;
+  // createDivisionTemplate(template: InsertDivisionTemplate): Promise<DivisionTemplate>;
+  // getTournamentDivisions(): Promise<TournamentDivision[]>;
+  // getTournamentDivisionsByTournament(tournamentId: string): Promise<TournamentDivision[]>;
+  // getTournamentDivision(id: string): Promise<TournamentDivision | undefined>;
+  // createTournamentDivision(division: InsertTournamentDivision): Promise<TournamentDivision>;
+  // updateTournamentDivision(id: string, updates: Partial<TournamentDivision>): Promise<TournamentDivision | undefined>;
+  // getDivisionParticipants(): Promise<DivisionParticipant[]>;
+  // getDivisionParticipantsByDivision(divisionId: string): Promise<DivisionParticipant[]>;
+  // getDivisionParticipant(id: string): Promise<DivisionParticipant | undefined>;
+  // createDivisionParticipant(participant: InsertDivisionParticipant): Promise<DivisionParticipant>;
+  // updateDivisionParticipant(id: string, updates: Partial<DivisionParticipant>): Promise<DivisionParticipant | undefined>;
+  // getDivisionGenerationRules(): Promise<DivisionGenerationRule[]>;
+  // getDivisionGenerationRulesByTournament(tournamentId: string): Promise<DivisionGenerationRule[]>;
+  // createDivisionGenerationRule(rule: InsertDivisionGenerationRule): Promise<DivisionGenerationRule>;
+  // generateDivisionsFromTemplate(tournamentId: string, templateId: string, config?: any): Promise<TournamentDivision[]>;
+  // getDivisionScheduling(): Promise<DivisionScheduling[]>;
+  // getDivisionSchedulingByTournament(tournamentId: string): Promise<DivisionScheduling[]>;
+  // createDivisionScheduling(scheduling: InsertDivisionScheduling): Promise<DivisionScheduling>;
   createSportDivisionRules(rules: InsertSportDivisionRules): Promise<SportDivisionRules>;
 
   // Sport Events methods
@@ -2372,29 +2373,7 @@ export class MemStorage implements IStorage {
     console.log(`🏃‍♂️ Ultimate Track Events initialized: ${ultimateTrackEvents.length} events loaded`);
   }
 
-  // Track Events methods
-  async getTrackEvents(): Promise<TrackEvent[]> {
-    return Array.from(this.trackEvents.values());
-  }
-
-  async getTrackEventsByCategory(category: string): Promise<TrackEvent[]> {
-    return Array.from(this.trackEvents.values()).filter(e => e.eventCategory === category);
-  }
-
-  async getTrackEvent(id: string): Promise<TrackEvent | undefined> {
-    return this.trackEvents.get(id);
-  }
-
-  async createTrackEvent(event: InsertTrackEvent): Promise<TrackEvent> {
-    const id = randomUUID();
-    const created: TrackEvent = {
-      ...event,
-      id,
-      createdAt: new Date(),
-    };
-    this.trackEvents.set(id, created);
-    return created;
-  }
+  // Track Events methods are already defined above
 
   async getTrackEventTiming(): Promise<TrackEventTiming[]> {
     return Array.from(this.trackEventTiming.values());
