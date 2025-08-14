@@ -18,7 +18,7 @@ type InsertSportDivisionRules = typeof sportDivisionRules.$inferInsert;
 import { randomUUID } from "crypto";
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 
 // Compliance-related types
 export type ComplianceAuditLog = {
@@ -4057,8 +4057,8 @@ async function initializeStorage(): Promise<IStorage> {
   if (process.env.DATABASE_URL) {
     try {
       const dbStorage = new DbStorage();
-      // Test connection by attempting to fetch tournaments
-      await dbStorage.getTournaments();
+      // Simple connection test without expensive operations
+      await dbStorage.db.execute(sql`SELECT 1`);
       console.log("✅ Database connection successful, using DbStorage");
       return dbStorage;
     } catch (error) {
