@@ -329,9 +329,9 @@ export default function Landing() {
         {/* District Registration Section */}
         <div className="bg-slate-800 border border-blue-500/30 rounded-2xl p-8 mb-12">
           <div className="text-center mb-8">
-            <h3 className="text-3xl font-bold text-white mb-4">District Registration</h3>
+            <h3 className="text-3xl font-bold text-white mb-4">Organization Registration</h3>
             <p className="text-slate-300 text-lg max-w-3xl mx-auto">
-              Schools and districts can register for tournament management access. We support both digital payments and traditional check payments to accommodate all district policies.
+              Districts, charter schools, private schools, pony leagues, pop warner, and youth organizations can register for tournament management access. We support both digital payments and traditional check payments to accommodate all organizational policies.
             </p>
           </div>
           
@@ -362,22 +362,34 @@ export default function Landing() {
           </div>
 
           <div className="text-center">
-            <Button 
-              size="lg" 
-              className="bg-blue-500 hover:bg-blue-600 text-white font-bold px-8 py-4 text-lg mr-4"
-              onClick={() => window.location.href = "/register"}
-              data-testid="button-register-district"
-            >
-              Register Your District
-            </Button>
-            <Button 
-              size="lg" 
-              variant="outline"
-              className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10 hover:border-blue-400 px-8 py-4 text-lg"
-              data-testid="button-learn-more-registration"
-            >
-              Learn More
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
+              <Button 
+                size="lg" 
+                className="bg-blue-500 hover:bg-blue-600 text-white font-bold px-8 py-4 text-lg"
+                onClick={() => window.location.href = "/register"}
+                data-testid="button-register-district"
+              >
+                Register My District
+              </Button>
+              <Button 
+                size="lg" 
+                className="bg-green-500 hover:bg-green-600 text-white font-bold px-8 py-4 text-lg"
+                onClick={() => window.location.href = "/register-organization"}
+                data-testid="button-register-organization"
+              >
+                Register My Organization
+              </Button>
+            </div>
+            <div className="text-center">
+              <Button 
+                size="lg" 
+                variant="outline"
+                className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10 hover:border-blue-400 px-8 py-4 text-lg"
+                data-testid="button-learn-more-registration"
+              >
+                Learn More
+              </Button>
+            </div>
           </div>
         </div>
 
