@@ -19,6 +19,7 @@ Organization Expansion: Include charter schools, private schools, pony leagues, 
 - **Routing**: Wouter.
 - **State Management**: TanStack Query (React Query) for server state and caching.
 - **UI Framework**: Shadcn/ui components built on Radix UI primitives with Tailwind CSS.
+- **Custom Design System**: Extended Tailwind configuration with custom CSS variables, utility classes, animations, and React components for branded athletics platform styling.
 - **Form Management**: React Hook Form with Zod validation.
 - **Component Structure**: Modular design for UI, pages, and business logic.
 
@@ -48,6 +49,13 @@ Organization Expansion: Include charter schools, private schools, pony leagues, 
   - **Team Level**: Head Coach (Team Manager), Assistant Coaches (Limited Team Access), Athletic Training Students (Read-only Health Data)
   This hierarchy manages medical/tournament data partitioning to enforce HIPAA compliance with proper organizational authority structure.
 - **HIPAA/FERPA Compliance**: Enterprise-grade route-level compliance middleware with automatic audit logging, role-based medical data access controls, and comprehensive violation tracking. Includes training verification, permission validation, and complete forensic audit trails for all sensitive data access.
+
+### Custom Design System
+- **CSS Variables**: Custom properties for consistent theming and dark mode support.
+- **Tailwind Extensions**: Custom colors, animations, spacing, and shadows integrated with Tailwind configuration.
+- **Component Library**: Custom React components (CustomCard, CustomButton, AnimatedText, FloatingElement) with variants and animations.
+- **Demo Page**: `/custom-design-demo` showcases all custom design components and styling capabilities.
+- **Design Guide**: Complete documentation in `CUSTOM_DESIGN_GUIDE.md` for creating custom CSS and Tailwind components.
 
 ### Key Design Patterns & Features
 - **Shared Schema**: Common TypeScript types and Zod schemas shared between frontend and backend.

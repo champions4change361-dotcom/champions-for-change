@@ -69,6 +69,18 @@ export default {
         "active": "var(--active)",
         "in-progress": "var(--in-progress)",
         "completed": "var(--completed)",
+        // Your custom colors
+        "custom": {
+          "primary": "var(--custom-primary)",
+          "secondary": "var(--custom-secondary)",
+          "gradient-start": "var(--custom-gradient-start)",
+          "gradient-end": "var(--custom-gradient-end)",
+        },
+        "glass": {
+          "50": "rgba(255, 255, 255, 0.05)",
+          "100": "rgba(255, 255, 255, 0.1)",
+          "200": "rgba(255, 255, 255, 0.2)",
+        },
       },
       fontFamily: {
         sans: ["var(--font-sans)"],
@@ -93,10 +105,37 @@ export default {
             height: "0",
           },
         },
+        // Your custom keyframes
+        "float": {
+          "0%, 100%": { transform: "translateY(0px)" },
+          "50%": { transform: "translateY(-10px)" },
+        },
+        "pulse-glow": {
+          "0%, 100%": { opacity: "1", boxShadow: "0 0 20px rgba(59, 130, 246, 0.5)" },
+          "50%": { opacity: "0.8", boxShadow: "0 0 40px rgba(59, 130, 246, 0.8)" },
+        },
+        "slide-in": {
+          "0%": { transform: "translateX(-100%)", opacity: "0" },
+          "100%": { transform: "translateX(0)", opacity: "1" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        // Your custom animations
+        "float": "float 6s ease-in-out infinite",
+        "pulse-glow": "pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        "slide-in": "slide-in 0.3s ease-out",
+      },
+      // Add custom spacing, shadows, etc.
+      spacing: {
+        '18': '4.5rem',
+        '88': '22rem',
+        '128': '32rem',
+      },
+      boxShadow: {
+        'glow': '0 0 20px rgba(59, 130, 246, 0.5)',
+        'glow-lg': '0 0 40px rgba(59, 130, 246, 0.6)',
       },
     },
   },

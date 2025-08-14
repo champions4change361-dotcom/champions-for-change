@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Trophy, Zap, Users, Calendar, Settings, Award, Timer, Star, ChevronRight, LogOut } from 'lucide-react';
+import { Trophy, Zap, Users, Calendar, Settings, Award, Timer, Star, ChevronRight, LogOut, Palette } from 'lucide-react';
 import { Link } from "wouter";
 import MoxyMessage from "../components/MoxyMessage";
 
@@ -109,7 +109,7 @@ export default function Home() {
         </div>
 
         {/* Arena Command Center */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 mb-8">
           {/* Create Tournament */}
           <Link href="/create">
             <div data-testid="card-create-tournament" className="lg:col-span-1 bg-slate-800 border border-emerald-500/30 rounded-xl p-6 hover:border-emerald-400/50 transition-all cursor-pointer group">
@@ -171,6 +171,19 @@ export default function Home() {
                 </div>
                 <h3 className="text-lg font-bold text-white mb-2">Arena Settings</h3>
                 <p className="text-sm text-slate-400">Account & preferences</p>
+              </div>
+            </div>
+          </Link>
+
+          {/* Custom Design Demo */}
+          <Link href="/custom-design-demo">
+            <div data-testid="card-custom-design" className="lg:col-span-1 bg-slate-800 border border-pink-500/30 rounded-xl p-6 hover:border-pink-400/50 transition-all cursor-pointer group">
+              <div className="text-center">
+                <div className="w-12 h-12 bg-gradient-to-br from-pink-500/20 to-purple-500/20 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:from-pink-500/30 group-hover:to-purple-500/30 transition-colors">
+                  <Palette className="h-6 w-6 text-pink-400" />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">Design Demo</h3>
+                <p className="text-sm text-slate-400">Custom UI showcase</p>
               </div>
             </div>
           </Link>
