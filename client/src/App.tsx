@@ -48,6 +48,7 @@ import AdminRoleManagement from './pages/AdminRoleManagement';
 import GamePracticeScheduler from './pages/GamePracticeScheduler';
 import NonprofitBilling from './pages/NonprofitBilling';
 import HealthBenefits from './pages/HealthBenefits';
+import GrantFunding from './pages/GrantFunding';
 
 function AuthenticatedRoutes() {
   const { isFeatureEnabled, isFantasyDomain, config } = useDomain();
@@ -180,6 +181,7 @@ function AppRouter() {
       <Route path="/register-old" component={Register} />
       <Route path="/miller-vlc-demo" component={MillerVLCDemo} />
       <Route path="/health-benefits" component={HealthBenefits} />
+      <Route path="/grant-funding" component={GrantFunding} />
       {/* Show Coaches Lounge landing page */}
       <Route path="/coaches-lounge">
         <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900">
