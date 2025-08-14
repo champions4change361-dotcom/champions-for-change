@@ -196,9 +196,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const acceptsJson = req.headers.accept?.includes('application/json');
     const isHealthCheck = req.headers['user-agent']?.includes('GoogleHC') || 
                          req.headers['user-agent']?.includes('kube-probe') ||
+                         req.headers['user-agent']?.includes('Replit') ||
+                         req.query.healthcheck ||
                          acceptsJson;
     
-    if (isHealthCheck) {
+    // Always return health check for deployment systems and API requests
+    if (isHealthCheck || req.path === '/' && !req.headers.accept?.includes('text/html')) {
       return healthResponse(req, res);
     }
     
@@ -207,6 +210,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.get('/health', healthResponse);
+  
+  // Additional health check endpoints for deployment compatibility
+  app.get('/healthz', healthResponse);
+  app.get('/api/health', healthResponse);
 
   // Setup authentication middleware
   await setupAuth(app);

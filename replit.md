@@ -69,3 +69,33 @@ Organization Expansion: Include charter schools, private schools, pony leagues, 
 - **Payment Integration**: Stripe.
 - **API Integration**: ESPN API (for NFL scoring, play-by-play, player performance).
 - **AI**: AI-powered tournament creation and AI coaching messages.
+
+## Recent Changes
+
+### Deployment Health Check Fixes (August 14, 2025)
+Applied fixes for deployment health check failures:
+
+**Root Cause**: 
+- Error handler was throwing exceptions after sending responses, causing server crashes
+- Missing proper deployment health check detection
+- Insufficient graceful shutdown handling
+
+**Solutions Applied**:
+1. **Fixed Error Handling**: Removed `throw err` from global error handler to prevent process crashes. Added proper logging and conditional response sending.
+
+2. **Enhanced Health Check Detection**: Improved root endpoint (`/`) to better detect deployment health checks by adding Replit user-agent detection and query parameter support.
+
+3. **Multiple Health Endpoints**: Added multiple health check endpoints for deployment compatibility:
+   - `/` (root with smart detection)
+   - `/health` (standard)
+   - `/healthz` (Kubernetes-style)
+   - `/api/health` (API-specific)
+
+4. **Improved Server Configuration**: 
+   - Added graceful shutdown handling for SIGTERM and SIGINT signals
+   - Enhanced error recovery with delayed exits instead of immediate crashes
+   - Better logging for deployment monitoring
+
+5. **Server Startup Improvements**: Added clearer logging messages showing health check endpoint availability.
+
+**Result**: Server now properly responds to deployment health checks with 200 status codes and maintains stability during errors. All health endpoints verified working.

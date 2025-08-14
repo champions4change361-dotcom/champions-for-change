@@ -39,12 +39,20 @@ app.use((req, res, next) => {
 (async () => {
   const server = await registerRoutes(app);
 
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+  app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
 
-    res.status(status).json({ message });
-    throw err;
+    // Log error for debugging but don't crash the process
+    console.error(`Error ${status} on ${req.method} ${req.path}:`, message);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Stack trace:', err.stack);
+    }
+
+    // Send error response if not already sent
+    if (!res.headersSent) {
+      res.status(status).json({ message });
+    }
   });
 
   // Force development mode for Vite setup
@@ -58,19 +66,41 @@ app.use((req, res, next) => {
   
   server.on('error', (err: any) => {
     if (err.code === 'EADDRINUSE') {
-      console.error(`❌ Port ${port} is already in use. Restarting may resolve this issue.`);
-      process.exit(1);
+      console.error(`❌ Port ${port} is already in use. Trying to restart...`);
+      // Don't exit immediately, let the deployment system handle restart
+      setTimeout(() => process.exit(1), 1000);
     } else {
       console.error('❌ Server error:', err);
-      throw err;
+      // Log but don't crash for other errors during startup
+      if (err.code !== 'ENOTFOUND' && err.code !== 'ECONNREFUSED') {
+        setTimeout(() => process.exit(1), 1000);
+      }
     }
+  });
+  
+  // Add graceful shutdown handling
+  process.on('SIGTERM', () => {
+    console.log('Received SIGTERM, shutting down gracefully...');
+    server.close(() => {
+      console.log('Server closed');
+      process.exit(0);
+    });
+  });
+
+  process.on('SIGINT', () => {
+    console.log('Received SIGINT, shutting down gracefully...');
+    server.close(() => {
+      console.log('Server closed');
+      process.exit(0);
+    });
   });
   
   server.listen({
     port,
     host: "0.0.0.0",
-    reusePort: true,
   }, () => {
     log(`serving on port ${port}`);
+    console.log(`✅ Health check endpoint available at http://0.0.0.0:${port}/`);
+    console.log(`✅ API documentation at http://0.0.0.0:${port}/health`);
   });
 })();
