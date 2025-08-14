@@ -50,6 +50,7 @@ import NonprofitBilling from './pages/NonprofitBilling';
 import HealthBenefits from './pages/HealthBenefits';
 import GrantFunding from './pages/GrantFunding';
 import OrganizationRegistration from './pages/OrganizationRegistration';
+import RoleHierarchy from './pages/RoleHierarchy';
 
 function AuthenticatedRoutes() {
   const { isFeatureEnabled, isFantasyDomain, config } = useDomain();
@@ -83,6 +84,7 @@ function AuthenticatedRoutes() {
         <Route path="/admin-role-management" component={AdminRoleManagement} />
         <Route path="/game-practice-scheduler" component={GamePracticeScheduler} />
         <Route path="/nonprofit-billing" component={NonprofitBilling} />
+        <Route path="/role-hierarchy" component={RoleHierarchy} />
         
         {/* Show Tournament Empire only for school-safe and pro domains */}
         {!isFantasyDomain() && (

@@ -30,7 +30,23 @@ export const users = pgTable("users", {
     enum: ["free", "foundation", "starter", "professional", "champion", "enterprise", "district_enterprise"] 
   }).default("foundation"),
   userRole: text("user_role", {
-    enum: ["tournament_manager", "district_athletic_director", "school_athletic_director", "coach", "scorekeeper", "athlete", "fan"]
+    enum: [
+      // District Level
+      "district_athletic_director", 
+      "district_head_athletic_trainer",
+      // School Level  
+      "school_athletic_director",
+      "school_athletic_trainer", 
+      "school_principal",
+      // Team Level
+      "head_coach",
+      "assistant_coach", 
+      "athletic_training_student",
+      // General Access
+      "scorekeeper", 
+      "athlete", 
+      "fan"
+    ]
   }).default("fan"),
   organizationId: varchar("organization_id"), // School district, club, etc.
   organizationName: varchar("organization_name"), // Name of school/club they represent
@@ -99,7 +115,21 @@ export const users = pgTable("users", {
   ferpaAgreementSigned: boolean("ferpa_agreement_signed").default(false),
   ferpaAgreementDate: timestamp("ferpa_agreement_date"),
   complianceRole: text("compliance_role", {
-    enum: ["district_athletic_trainer", "athletic_director", "athletic_trainer", "head_coach", "assistant_coach", "scorekeeper"]
+    enum: [
+      // District Level
+      "district_athletic_director", 
+      "district_head_athletic_trainer",
+      // School Level  
+      "school_athletic_director",
+      "school_athletic_trainer", 
+      "school_principal",
+      // Team Level
+      "head_coach",
+      "assistant_coach", 
+      "athletic_training_student",
+      // General Access
+      "scorekeeper"
+    ]
   }),
   medicalDataAccess: boolean("medical_data_access").default(false),
   lastComplianceAudit: timestamp("last_compliance_audit"),
@@ -784,7 +814,23 @@ export const platformAnalytics = pgTable("platform_analytics", {
 export const rolePermissions = pgTable("role_permissions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userRole: text("user_role", {
-    enum: ["tournament_manager", "district_athletic_director", "school_athletic_director", "coach", "scorekeeper", "athlete", "fan"]
+    enum: [
+      // District Level
+      "district_athletic_director", 
+      "district_head_athletic_trainer",
+      // School Level  
+      "school_athletic_director",
+      "school_athletic_trainer", 
+      "school_principal",
+      // Team Level
+      "head_coach",
+      "assistant_coach", 
+      "athletic_training_student",
+      // General Access
+      "scorekeeper", 
+      "athlete", 
+      "fan"
+    ]
   }).notNull(),
   permission: text("permission", {
     enum: [

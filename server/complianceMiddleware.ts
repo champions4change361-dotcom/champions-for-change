@@ -97,8 +97,13 @@ export function requireHipaaCompliance(req: ComplianceRequest, res: Response, ne
         });
       }
 
-      // Check role hierarchy for medical access
-      const medicalRoles = ['district_athletic_trainer', 'athletic_director', 'athletic_trainer'];
+      // Check role hierarchy for medical access - District and School level health roles
+      const medicalRoles = [
+        'district_athletic_director', 
+        'district_head_athletic_trainer',
+        'school_athletic_director',
+        'school_athletic_trainer'
+      ];
       if (!user.complianceRole || !medicalRoles.includes(user.complianceRole)) {
         await logComplianceAction(
           user.id, 

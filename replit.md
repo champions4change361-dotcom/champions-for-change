@@ -42,7 +42,11 @@ Organization Expansion: Include charter schools, private schools, pony leagues, 
 - **User Management**: Complete user registration, login, logout flows.
 - **Protected Routes**: Authentication middleware for tournament and payment endpoints.
 - **Security**: CORS, secure session handling, user profile management.
-- **User Hierarchy**: A six-tier role-based access control system including District Athletic Trainer, Athletic Director, Athletic Trainer, Head Coach, Assistant Coach, and Scorekeeper/Judge. This hierarchy also manages medical/tournament data partitioning to enforce HIPAA compliance.
+- **User Hierarchy**: A three-tiered role-based access control system for proper district athletics management:
+  - **District Level**: District Athletic Director (Super Admin), District Head Athletic Trainer (Health Admin)
+  - **School Level**: School Athletic Director (School Admin), School Athletic Trainer (Health Monitor), School Principal (Oversight Access)
+  - **Team Level**: Head Coach (Team Manager), Assistant Coaches (Limited Team Access), Athletic Training Students (Read-only Health Data)
+  This hierarchy manages medical/tournament data partitioning to enforce HIPAA compliance with proper organizational authority structure.
 - **HIPAA/FERPA Compliance**: Enterprise-grade route-level compliance middleware with automatic audit logging, role-based medical data access controls, and comprehensive violation tracking. Includes training verification, permission validation, and complete forensic audit trails for all sensitive data access.
 
 ### Key Design Patterns & Features
