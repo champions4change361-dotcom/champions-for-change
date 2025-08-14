@@ -12,6 +12,17 @@ District Value Proposition: At $2,490/year, districts save $31,010-$65,510 annua
 Guaranteed Pricing Model: "The price you pay at the time is the price you always pay" - creates permanent cost advantage for early adopters and eliminates budget uncertainty.
 Organization Expansion: Include charter schools, private schools, pony leagues, pop warner, and youth organizations with dedicated registration path alongside districts.
 
+### CSS and Tailwind Coding Preferences
+- **Custom Design System**: Extensive use of CSS variables for consistent theming and dark mode support
+- **Tailwind Extensions**: Custom colors, animations, spacing, and utility classes integrated with Tailwind configuration
+- **Component Styling**: Preference for custom React components with variants (CustomCard, CustomButton, AnimatedText, FloatingElement)
+- **Design Patterns**: Use of glass morphism, gradients, floating animations, and glow effects
+- **Utility Classes**: Custom classes like `.btn-custom`, `.card-custom`, `.text-gradient`, `.glass-morphism`
+- **Color System**: Tournament-themed colors (primary, secondary, accent) with proper HSL format
+- **Animation Approach**: CSS-based animations with custom keyframes for float, pulse-glow, and slide-in effects
+- **Responsive Design**: Mobile-first approach with consistent spacing and shadow systems
+- **Documentation**: Maintain comprehensive design guide at `/custom-design-demo` for reference
+
 ## System Architecture
 
 ### Frontend
