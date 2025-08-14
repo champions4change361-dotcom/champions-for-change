@@ -192,16 +192,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Handle health checks on both root and /health paths
   app.get('/', (req, res, next) => {
-    // If request accepts JSON or is from deployment health check, return health status
-    const acceptsJson = req.headers.accept?.includes('application/json');
-    const isHealthCheck = req.headers['user-agent']?.includes('GoogleHC') || 
-                         req.headers['user-agent']?.includes('kube-probe') ||
-                         req.headers['user-agent']?.includes('Replit') ||
-                         req.query.healthcheck ||
-                         acceptsJson;
+    // Only return health check for explicit health check requests
+    const userAgent = req.headers['user-agent'] || '';
+    const isHealthCheck = userAgent.includes('GoogleHC') || 
+                         userAgent.includes('kube-probe') ||
+                         userAgent.includes('Replit') ||
+                         req.query.healthcheck;
     
-    // Always return health check for deployment systems and API requests
-    if (isHealthCheck || req.path === '/' && !req.headers.accept?.includes('text/html')) {
+    // Return health check only for deployment systems, not for browsers
+    if (isHealthCheck) {
       return healthResponse(req, res);
     }
     
@@ -217,6 +216,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Setup authentication middleware
   await setupAuth(app);
+
+  // Setup district and school management routes
+  const { registerDistrictRoutes } = await import("./districtRoutes");
+  registerDistrictRoutes(app);
 
   // Initialize nonprofit billing service
   const nonprofitBilling = new NonprofitBillingService();

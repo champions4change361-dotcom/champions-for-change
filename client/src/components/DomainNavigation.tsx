@@ -59,6 +59,13 @@ export default function DomainNavigation() {
             </Link>
           )}
 
+          {/* Schools - District Management */}
+          {config.brand !== 'COACHES_LOUNGE' && (
+            <Link href="/schools">
+              <a className={getNavItemClass("/schools")}>Schools</a>
+            </Link>
+          )}
+
           {/* Role Hierarchy - District Administration */}
           {config.brand !== 'COACHES_LOUNGE' && (
             <Link href="/role-hierarchy">

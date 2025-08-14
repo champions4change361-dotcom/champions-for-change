@@ -229,6 +229,121 @@ export const whitelabelConfigs = pgTable("whitelabel_configs", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// District Information with VLC-based organization
+export const districts = pgTable("districts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(), // "Corpus Christi Independent School District"
+  abbreviation: varchar("abbreviation").notNull(), // "CCISD"
+  districtCode: varchar("district_code").notNull().unique(), // Official district identifier
+  state: varchar("state").notNull().default("TX"),
+  city: varchar("city").notNull(),
+  zipCode: varchar("zip_code"),
+  superintendentName: varchar("superintendent_name"),
+  athleticDirectorId: varchar("athletic_director_id").references(() => users.id),
+  headAthleticTrainerId: varchar("head_athletic_trainer_id").references(() => users.id),
+  website: varchar("website"),
+  phone: varchar("phone"),
+  logoUrl: varchar("logo_url"),
+  brandColors: jsonb("brand_colors").$type<{
+    primary: string;
+    secondary: string;
+    accent?: string;
+  }>(),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Schools within Districts with VLC (Venue Location Code) system
+export const schools = pgTable("schools", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  districtId: varchar("district_id").notNull().references(() => districts.id),
+  name: varchar("name").notNull(), // "Roy Miller High School"
+  abbreviation: varchar("abbreviation").notNull(), // "RMHS"
+  schoolType: text("school_type", {
+    enum: ["elementary", "middle", "high", "alternative", "specialty"]
+  }).notNull(),
+  vlcCode: varchar("vlc_code").notNull().unique(), // Venue Location Code for athletics
+  ncessId: varchar("ncess_id"), // National Center for Education Statistics ID
+  address: varchar("address").notNull(),
+  city: varchar("city").notNull(),
+  state: varchar("state").notNull().default("TX"),
+  zipCode: varchar("zip_code").notNull(),
+  phone: varchar("phone"),
+  website: varchar("website"),
+  
+  // School leadership
+  principalName: varchar("principal_name"),
+  principalId: varchar("principal_id").references(() => users.id),
+  athleticDirectorId: varchar("athletic_director_id").references(() => users.id),
+  athleticTrainerId: varchar("athletic_trainer_id").references(() => users.id),
+  
+  // School branding and assets
+  logoUrl: varchar("logo_url"),
+  bannerImageUrl: varchar("banner_image_url"), // For school-specific pages like Roy Miller
+  mascotName: varchar("mascot_name"), // "Buccaneers"
+  schoolColors: jsonb("school_colors").$type<{
+    primary: string;
+    secondary: string;
+    accent?: string;
+  }>(),
+  
+  // Athletic facilities
+  gymCapacity: integer("gym_capacity"),
+  footballStadium: varchar("football_stadium"),
+  trackFacility: varchar("track_facility"),
+  hasPool: boolean("has_pool").default(false),
+  
+  // Enrollment and demographics
+  totalEnrollment: integer("total_enrollment"),
+  athleticParticipation: integer("athletic_participation"),
+  grades: jsonb("grades").$type<string[]>(), // ["9", "10", "11", "12"]
+  
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Athletic Venues and Facilities with VLC tracking
+export const athleticVenues = pgTable("athletic_venues", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  schoolId: varchar("school_id").notNull().references(() => schools.id),
+  venueName: varchar("venue_name").notNull(), // "Roy Miller Stadium"
+  venueType: text("venue_type", {
+    enum: ["gymnasium", "football_stadium", "baseball_field", "softball_field", "track", "tennis_courts", "soccer_field", "pool", "wrestling_room", "other"]
+  }).notNull(),
+  vlcCode: varchar("vlc_code").notNull().unique(), // Specific VLC for this venue
+  capacity: integer("capacity"),
+  address: varchar("address"),
+  isHomeVenue: boolean("is_home_venue").default(true),
+  surfaceType: varchar("surface_type"), // "grass", "turf", "hardwood", "track"
+  hasLights: boolean("has_lights").default(false),
+  hasScoreboard: boolean("has_scoreboard").default(false),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// School Assets (Images, Documents, Media) organized by VLC
+export const schoolAssets = pgTable("school_assets", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  schoolId: varchar("school_id").notNull().references(() => schools.id),
+  assetType: text("asset_type", {
+    enum: ["logo", "banner", "facility_photo", "team_photo", "document", "media", "other"]
+  }).notNull(),
+  fileName: varchar("file_name").notNull(),
+  filePath: varchar("file_path").notNull(), // Object storage path
+  fileSize: integer("file_size"),
+  mimeType: varchar("mime_type"),
+  uploadedById: varchar("uploaded_by_id").notNull().references(() => users.id),
+  description: text("description"),
+  tags: jsonb("tags").$type<string[]>(), // ["athletics", "facilities", "2024"]
+  isPublic: boolean("is_public").default(true),
+  displayOrder: integer("display_order").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Contact database for marketing and outreach
 export const contacts = pgTable("contacts", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -471,6 +586,43 @@ export type RegistrationRequest = typeof registrationRequests.$inferSelect;
 export type InsertRegistrationRequest = z.infer<typeof insertRegistrationRequestSchema>;
 export type Organization = typeof organizations.$inferSelect;
 export type InsertOrganization = z.infer<typeof insertOrganizationSchema>;
+
+// District schema and types
+export const insertDistrictSchema = createInsertSchema(districts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// School schema and types
+export const insertSchoolSchema = createInsertSchema(schools).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Athletic Venue schema and types
+export const insertAthleticVenueSchema = createInsertSchema(athleticVenues).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// School Asset schema and types
+export const insertSchoolAssetSchema = createInsertSchema(schoolAssets).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type District = typeof districts.$inferSelect;
+export type InsertDistrict = z.infer<typeof insertDistrictSchema>;
+export type School = typeof schools.$inferSelect;
+export type InsertSchool = z.infer<typeof insertSchoolSchema>;
+export type AthleticVenue = typeof athleticVenues.$inferSelect;
+export type InsertAthleticVenue = z.infer<typeof insertAthleticVenueSchema>;
+export type SchoolAsset = typeof schoolAssets.$inferSelect;
+export type InsertSchoolAsset = z.infer<typeof insertSchoolAssetSchema>;
 
 // Email campaigns for marketing
 export const emailCampaigns = pgTable("email_campaigns", {
@@ -2719,5 +2871,57 @@ export const competitionLeaderboardsRelations = relations(competitionLeaderboard
   participant: one(corporateParticipants, {
     fields: [competitionLeaderboards.participantId],
     references: [corporateParticipants.id],
+  }),
+}));
+
+// District and School Relations
+export const districtsRelations = relations(districts, ({ one, many }) => ({
+  athleticDirector: one(users, {
+    fields: [districts.athleticDirectorId],
+    references: [users.id],
+  }),
+  headAthleticTrainer: one(users, {
+    fields: [districts.headAthleticTrainerId],
+    references: [users.id],
+  }),
+  schools: many(schools),
+}));
+
+export const schoolsRelations = relations(schools, ({ one, many }) => ({
+  district: one(districts, {
+    fields: [schools.districtId],
+    references: [districts.id],
+  }),
+  principal: one(users, {
+    fields: [schools.principalId],
+    references: [users.id],
+  }),
+  athleticDirector: one(users, {
+    fields: [schools.athleticDirectorId],
+    references: [users.id],
+  }),
+  athleticTrainer: one(users, {
+    fields: [schools.athleticTrainerId],
+    references: [users.id],
+  }),
+  venues: many(athleticVenues),
+  assets: many(schoolAssets),
+}));
+
+export const athleticVenuesRelations = relations(athleticVenues, ({ one }) => ({
+  school: one(schools, {
+    fields: [athleticVenues.schoolId],
+    references: [schools.id],
+  }),
+}));
+
+export const schoolAssetsRelations = relations(schoolAssets, ({ one }) => ({
+  school: one(schools, {
+    fields: [schoolAssets.schoolId],
+    references: [schools.id],
+  }),
+  uploadedBy: one(users, {
+    fields: [schoolAssets.uploadedById],
+    references: [users.id],
   }),
 }));
