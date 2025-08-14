@@ -53,6 +53,7 @@ import OrganizationRegistration from './pages/OrganizationRegistration';
 import RoleHierarchy from './pages/RoleHierarchy';
 import CustomDesignDemo from './pages/CustomDesignDemo';
 import Schools from './pages/Schools';
+import MillerHomepage from './pages/MillerHomepage';
 
 function AuthenticatedRoutes() {
   const { isFeatureEnabled, isFantasyDomain, config } = useDomain();
@@ -89,6 +90,7 @@ function AuthenticatedRoutes() {
         <Route path="/role-hierarchy" component={RoleHierarchy} />
         <Route path="/custom-design-demo" component={CustomDesignDemo} />
         <Route path="/schools" component={Schools} />
+        <Route path="/miller-homepage" component={MillerHomepage} />
         
         {/* Show Tournament Empire only for school-safe and pro domains */}
         {!isFantasyDomain() && (
