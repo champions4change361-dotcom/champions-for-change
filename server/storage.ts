@@ -44,6 +44,15 @@ export interface IStorage {
   createComplianceAuditLog(log: ComplianceAuditLog): Promise<ComplianceAuditLog>;
   getComplianceAuditLogs(userId?: string, limit?: number): Promise<ComplianceAuditLog[]>;
 
+  // Profile picture operations (optional - may not be implemented by all storage types)
+  createProfilePictureUpload?(upload: any): Promise<any>;
+  getProfilePictureUpload?(uploadId: string): Promise<any>;
+  updateProfilePictureUpload?(uploadId: string, updates: any): Promise<any>;
+  updateUserProfile?(userId: string, updates: any): Promise<void>;
+  getFlaggedProfilePictures?(): Promise<any[]>;
+  getUserProfilePictureUploads?(userId: string): Promise<any[]>;
+  createImageReport?(report: any): Promise<void>;
+
   // White-label methods
   createWhitelabelConfig(config: InsertWhitelabelConfig): Promise<WhitelabelConfig>;
   getWhitelabelConfig(id: string): Promise<WhitelabelConfig | undefined>;

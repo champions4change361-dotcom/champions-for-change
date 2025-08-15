@@ -215,7 +215,7 @@ export default function AthleticTrainerDashboard() {
               </table>
             </div>
           </CardContent>
-        </div>
+        </Card>
 
         {/* Coach Communications */}
         <Card className="mt-6">

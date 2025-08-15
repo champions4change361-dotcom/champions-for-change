@@ -8,6 +8,7 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { setupDomainRoutes } from "./domainRoutes";
 import { registerStaffRoutes } from "./staffRoutes";
 import { registerHealthCommunicationRoutes } from "./healthCommunicationRoutes";
+import { registerProfilePictureRoutes } from "./profilePictureRoutes";
 import { AIContextService } from "./ai-context";
 import { UniversalRegistrationSystem } from "./universal-registration";
 import { UsageLimitService, TOURNAMENT_CREDIT_PACKAGES } from "./usageLimits";
@@ -234,6 +235,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup comprehensive academic competition routes (50+ UIL competitions)
   const { registerAcademicRoutes } = await import("./academicRoutes");
   registerAcademicRoutes(app);
+  
+  // Setup profile picture management with content moderation
+  registerProfilePictureRoutes(app);
 
   // Initialize nonprofit billing service
   const nonprofitBilling = new NonprofitBillingService();
