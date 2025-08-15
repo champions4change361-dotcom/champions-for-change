@@ -90,7 +90,6 @@ function AuthenticatedRoutes() {
         <Route path="/role-hierarchy" component={RoleHierarchy} />
         <Route path="/custom-design-demo" component={CustomDesignDemo} />
         <Route path="/schools" component={Schools} />
-        <Route path="/miller-homepage" component={MillerHomepage} />
         
         {/* Show Tournament Empire only for school-safe and pro domains */}
         {!isFantasyDomain() && (
@@ -192,6 +191,8 @@ function AppRouter() {
       <Route path="/health-benefits" component={HealthBenefits} />
       <Route path="/grant-funding" component={GrantFunding} />
       <Route path="/register-organization" component={OrganizationRegistration} />
+      {/* Miller White-Label Homepage */}
+      <Route path="/miller-homepage" component={MillerHomepage} />
       {/* Show Coaches Lounge landing page */}
       <Route path="/coaches-lounge">
         <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900">
