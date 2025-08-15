@@ -219,6 +219,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication middleware
   await setupAuth(app);
 
+  // Register subdomain tournament routes - solves connection and role confusion issues
+  const { registerSubdomainTournamentRoutes } = await import("./subdomainTournamentRoutes");
+  registerSubdomainTournamentRoutes(app);
+
   // Setup district and school management routes
   const { registerDistrictRoutes } = await import("./districtRoutes");
   registerDistrictRoutes(app);

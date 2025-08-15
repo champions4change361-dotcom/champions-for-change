@@ -137,3 +137,31 @@ Applied fixes for deployment health check failures:
 5. **Server Startup Improvements**: Added clearer logging messages showing health check endpoint availability.
 
 **Result**: Server now properly responds to deployment health checks with 200 status codes and maintains stability during errors. All health endpoints verified working.
+
+### Subdomain Tournament Architecture Separation (August 15, 2025)
+Successfully implemented subdomain-based tournament database separation to resolve connection issues and role confusion:
+
+**Problem Resolved**: 
+- Single tournament system trying to serve enterprise tournament organizers AND district athletics stakeholders caused role conflicts and connection issues
+- Users experienced confusion between casual tournament features vs district athletics features
+
+**Architecture Solution**:
+1. **Enterprise Subdomain** (`trantortournaments.org`): Full tournament management for casual organizers and businesses
+2. **District Subdomain**: Athletic administration for district athletic directors and trainers
+3. **School Subdomain**: School-level athletics for coaches and school staff  
+4. **Shared Access**: Cross-role tournament schedule visibility for athletic coordination
+
+**Implementation Components**:
+- `server/subdomainTournamentService.ts`: Service layer providing subdomain-specific tournament contexts with role-based filtering
+- `server/subdomainTournamentRoutes.ts`: Separate API endpoints for each subdomain context with appropriate permissions
+- Tournament prefix system (ENT_, DIST_, SCH_) for clear data separation
+- Cross-subdomain shared data access for scheduling coordination
+
+**Key Benefits**:
+- Eliminates role confusion between enterprise vs district users
+- Resolves server connection issues by removing conflicting authentication flows  
+- Athletic trainers and coaches maintain schedule visibility for coordination
+- Each user base gets appropriate features without irrelevant functionality
+- Data partitioning prevents access conflicts while maintaining necessary shared visibility
+
+**Result**: Tournament system now successfully serves three distinct user bases without conflicts. Enterprise users get full tournament features, district staff get athletics administration tools, and coaches/trainers get schedule access for coordination.
