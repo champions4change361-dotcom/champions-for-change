@@ -43,8 +43,8 @@ Organization Expansion: Include charter schools, private schools, pony leagues, 
 - **API Design**: RESTful API with structured error handling and request logging.
 - **Development Setup**: Vite integration with Hot Module Replacement (HMR).
 - **Storage Abstraction**: Interface-based system supporting in-memory and database implementations.
-- **Health Checks**: Optimized deployment health check endpoints with <5ms response times for deployment compatibility.
-- **Deployment Ready**: Enhanced error handling, multiple health check endpoints (/health, /healthz, /ping, /api/health), improved root endpoint logic for deployment systems, robust process error handling, and production-mode stability features.
+- **Health Checks**: Optimized deployment health check endpoints with <5ms response times for deployment compatibility. Root endpoint simplified to always return 200 for health checks.
+- **Deployment Ready**: Enhanced error handling, multiple health check endpoints (/health, /healthz, /ping, /api/health) prioritized at top of routes, simplified root endpoint logic removing complex user-agent checking, robust process error handling, and production-mode stability features.
 
 ### Data Storage
 - **Primary Database**: PostgreSQL with Drizzle ORM.

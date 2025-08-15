@@ -183,21 +183,26 @@ function generateDoubleEliminationBracket(teamSize: number, tournamentId: string
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Detailed health endpoint for monitoring/debugging
-  const detailedHealthResponse = (req: Request, res: Response) => {
+  // PRIORITY: Move all health check endpoints to the very top for fastest response
+  app.get('/api/health', (req, res) => {
     res.status(200).json({ 
       status: 'healthy', 
       service: 'District Athletics Management',
       timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
       environment: process.env.NODE_ENV || 'development'
     });
-  };
+  });
 
-  // API health endpoint for detailed monitoring
-  app.get('/api/health', detailedHealthResponse);
+  // Additional health endpoints
+  app.get('/health', (req, res) => {
+    res.status(200).send('ok');
+  });
 
-  // Now setup authentication and other middleware
+  app.get('/healthz', (req, res) => {
+    res.status(200).send('ok');
+  });
+
+  // Setup authentication after health checks to avoid delays
   await setupAuth(app);
 
   // Register subdomain tournament routes - solves connection and role confusion issues
@@ -5501,15 +5506,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
   );
-
-  // Health check endpoint
-  app.get("/health", (req, res) => {
-    res.status(200).json({ 
-      status: "healthy",
-      timestamp: new Date().toISOString(),
-      environment: process.env.NODE_ENV || 'development'
-    });
-  });
 
   // Health check routes moved to beginning of function
   

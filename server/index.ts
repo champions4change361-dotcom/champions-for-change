@@ -23,30 +23,10 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Simple root health check for deployment systems - always return 200 for deployment compatibility
+// Simplified root endpoint - always return 200 for deployment health checks
 app.get('/', (req, res, next) => {
-  const userAgent = req.headers['user-agent'] || '';
-  // Check if this is a health check request or deployment probe
-  if (userAgent.includes('GoogleHC') || 
-      userAgent.includes('kube-probe') ||
-      userAgent.includes('Replit') ||
-      userAgent.includes('curl') ||
-      userAgent.includes('wget') ||
-      userAgent.includes('health') ||
-      req.query.healthcheck ||
-      req.path === '/health' ||
-      req.path === '/healthz') {
-    return res.status(200).send('ok');
-  }
-  
-  // For deployment systems, also return 200 if no specific frontend route is requested
-  if (req.accepts('html') && !req.path.startsWith('/api/')) {
-    // This ensures deployment health checks get a 200 response
-    next(); // Continue to frontend for browser requests
-  } else {
-    // For non-browser requests to root, return health check response
-    return res.status(200).send('ok');
-  }
+  // Immediately return 200 for all deployment health checks
+  return res.status(200).send('ok');
 });
 
 app.use(express.json());
