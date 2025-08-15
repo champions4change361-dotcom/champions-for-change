@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Trophy, Users, Zap, Globe, CreditCard, Star, Heart, GraduationCap, MapPin, Award, Mail, Phone, Timer, UserCheck, Shield, Target } from "lucide-react";
 import championLogo from "@assets/IMG_1442_1754896656003.jpeg";
 import championVideo from "@assets/Champions for Change Logo_1755291031903.mp4";
-import championLogoNew from "@assets/Champions for Change Logo (2)_1755291245650.webp";
+import championLogoNew from "@assets/Unanimated Logo Chanmpions for Change_1755291625609.png";
 import { DonationSection } from "@/components/DonationSection";
 import { SignupSection } from "@/components/SignupSection";
 import { CrossPlatformPromotion, FantasyPromotion } from "@/components/CrossPlatformPromotion";
@@ -22,8 +22,8 @@ export default function Landing() {
             <div className="flex items-center justify-between h-16">
               {/* Arena Logo */}
               <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 rounded-lg overflow-hidden shadow-lg">
-                  <img src={championLogoNew} alt="Champions for Change" className="w-full h-full object-cover" />
+                <div className="w-12 h-12 flex items-center justify-center">
+                  <img src={championLogoNew} alt="Champions for Change" className="w-full h-full object-contain" />
                 </div>
                 <div>
                   <h1 className="text-xl font-bold text-white">Champions for Change</h1>
