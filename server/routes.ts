@@ -6,6 +6,7 @@ import { analyzeTournamentQuery, generateTournamentStructure, generateIntelligen
 import { NonprofitBillingService } from "./nonprofitBilling";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { setupDomainRoutes } from "./domainRoutes";
+import { registerStaffRoutes } from "./staffRoutes";
 import { AIContextService } from "./ai-context";
 import { UniversalRegistrationSystem } from "./universal-registration";
 import { UsageLimitService, TOURNAMENT_CREDIT_PACKAGES } from "./usageLimits";
@@ -5446,6 +5447,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Health check routes moved to beginning of function
+  
+  // Setup staff management routes
+  registerStaffRoutes(app);
 
   const httpServer = createServer(app);
   return httpServer;

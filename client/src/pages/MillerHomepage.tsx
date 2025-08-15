@@ -60,7 +60,7 @@ export default function MillerHomepage() {
         
         {/* Pirate Banner Container - positioned below header */}
         <div className="container mx-auto px-4 pt-8 relative z-10">
-          <div className="flex justify-center">
+          <div className="flex justify-center mb-8">
             <div className="pirate-image">
               <img 
                 src={millerBannerPath} 
@@ -68,6 +68,23 @@ export default function MillerHomepage() {
                 className="max-w-sm h-auto transition-transform duration-300 hover:scale-105 hover:brightness-110"
                 data-testid="img-buc-nation-banner"
               />
+            </div>
+          </div>
+          
+          {/* Login Section */}
+          <div className="flex justify-center">
+            <div className="bg-black bg-opacity-20 p-8 rounded-lg backdrop-blur-sm">
+              <h2 className="text-xl font-bold text-white mb-6 text-center">Staff Login</h2>
+              <button
+                onClick={() => window.location.href = '/api/login?returnTo=/dashboard'}
+                className="w-full px-8 py-4 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-bold rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
+                data-testid="button-staff-login"
+              >
+                Login to Miller Athletics System
+              </button>
+              <p className="text-purple-200 text-sm mt-4 text-center">
+                Coaches and Athletic Trainers - Access your dashboard
+              </p>
             </div>
           </div>
         </div>
