@@ -231,6 +231,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const { registerAthleteRoutes } = await import("./athleteRoutes");
   registerAthleteRoutes(app);
 
+  // Setup comprehensive academic competition routes (50+ UIL competitions)
+  const { registerAcademicRoutes } = await import("./academicRoutes");
+  registerAcademicRoutes(app);
+
   // Initialize nonprofit billing service
   const nonprofitBilling = new NonprofitBillingService();
 

@@ -1784,6 +1784,9 @@ export type InsertNonprofitInvoice = z.infer<typeof insertNonprofitInvoiceSchema
 // User types
 export type User = typeof users.$inferSelect;
 
+// Import academic competition schema
+export * from "./academicSchema";
+
 // Import commissioner schema for fantasy league management
 export * from './commissioner-schema';
 
