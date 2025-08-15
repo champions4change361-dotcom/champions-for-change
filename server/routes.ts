@@ -183,9 +183,8 @@ function generateDoubleEliminationBracket(teamSize: number, tournamentId: string
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Health check routes for deployment monitoring
-  // Replit deployments require the root path to respond for health checks
-  const healthResponse = (req: Request, res: Response) => {
+  // Detailed health endpoint for monitoring/debugging
+  const detailedHealthResponse = (req: Request, res: Response) => {
     res.status(200).json({ 
       status: 'healthy', 
       service: 'District Athletics Management',
@@ -195,31 +194,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   };
 
-  // Handle health checks on both root and /health paths
-  app.get('/', (req, res, next) => {
-    // Only return health check for explicit health check requests
-    const userAgent = req.headers['user-agent'] || '';
-    const isHealthCheck = userAgent.includes('GoogleHC') || 
-                         userAgent.includes('kube-probe') ||
-                         userAgent.includes('Replit') ||
-                         req.query.healthcheck;
-    
-    // Return health check only for deployment systems, not for browsers
-    if (isHealthCheck) {
-      return healthResponse(req, res);
-    }
-    
-    // Otherwise, let it fall through to serve the frontend
-    next();
-  });
+  // API health endpoint for detailed monitoring
+  app.get('/api/health', detailedHealthResponse);
 
-  app.get('/health', healthResponse);
-  
-  // Additional health check endpoints for deployment compatibility
-  app.get('/healthz', healthResponse);
-  app.get('/api/health', healthResponse);
-
-  // Setup authentication middleware
+  // Now setup authentication and other middleware
   await setupAuth(app);
 
   // Register subdomain tournament routes - solves connection and role confusion issues

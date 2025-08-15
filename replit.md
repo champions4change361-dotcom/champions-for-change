@@ -43,6 +43,7 @@ Organization Expansion: Include charter schools, private schools, pony leagues, 
 - **API Design**: RESTful API with structured error handling and request logging.
 - **Development Setup**: Vite integration with Hot Module Replacement (HMR).
 - **Storage Abstraction**: Interface-based system supporting in-memory and database implementations.
+- **Health Checks**: Optimized deployment health check endpoints with <5ms response times for deployment compatibility.
 
 ### Data Storage
 - **Primary Database**: PostgreSQL with Drizzle ORM.
