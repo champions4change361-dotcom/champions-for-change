@@ -82,6 +82,7 @@ Organization Expansion: Include charter schools, private schools, pony leagues, 
 - **Team Registration and Management**: Coaches register teams with rosters; tournament managers approve.
 - **Scorekeeper Assignment and Verification**: Managers assign scorekeepers with verification processes.
 - **Health & Safety Analytics**: Proactive athlete health monitoring, AI-powered recommendations, medical safety protocols, and health alert systems, including injury simulation and HIPAA-compliant medical document management.
+- **Athletic Trainer Dashboard**: Comprehensive athlete health management system with multi-sport athlete tracking, injury care plans, medical document uploads (X-rays, MRIs), communication tools for parents/coaches/doctors, supply inventory management, AED checks, and certification reminders.
 - **Scheduling Systems**: Comprehensive scheduling for athletic trainers and game/practice scheduling for coaches, including team roster integration, parent notifications, transportation, and weather monitoring.
 - **Academic Competition System**: Integration for 50+ UIL academic competitions (High School and A+ Academics), covering grades 2-12 with district, regional, and state advancement. Includes role hierarchy for academic stakeholders, TEKS alignment, and academic achievement tracking.
 - **Subdomain-Based Architecture**: Separation of tournament management into distinct subdomains for enterprise users, district athletics, and school-level athletics to resolve role conflicts and connection issues, while maintaining cross-role schedule visibility.

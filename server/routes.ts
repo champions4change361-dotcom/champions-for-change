@@ -9,6 +9,7 @@ import { setupDomainRoutes } from "./domainRoutes";
 import { registerStaffRoutes } from "./staffRoutes";
 import { registerHealthCommunicationRoutes } from "./healthCommunicationRoutes";
 import { registerProfilePictureRoutes } from "./profilePictureRoutes";
+import { registerAthleticTrainerRoutes } from "./athleticTrainerRoutes";
 import { AIContextService } from "./ai-context";
 import { UniversalRegistrationSystem } from "./universal-registration";
 import { UsageLimitService, TOURNAMENT_CREDIT_PACKAGES } from "./usageLimits";
@@ -238,6 +239,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Setup profile picture management with content moderation
   registerProfilePictureRoutes(app);
+  
+  // Setup Athletic Trainer module - comprehensive athlete health management
+  registerAthleticTrainerRoutes(app);
 
   // Initialize nonprofit billing service
   const nonprofitBilling = new NonprofitBillingService();
