@@ -23,7 +23,7 @@ export default function Landing() {
               {/* Arena Logo */}
               <div className="flex items-center space-x-3">
                 <div className="w-12 h-12 flex items-center justify-center">
-                  <img src={championLogoNew} alt="Champions for Change" className="w-full h-full object-contain" />
+                  <img src={championLogoNew} alt="Champions for Change" className="w-full h-full object-contain logo-flip" />
                 </div>
                 <div>
                   <h1 className="text-xl font-bold text-white">Champions for Change</h1>

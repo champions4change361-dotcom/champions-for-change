@@ -328,4 +328,26 @@
   .glass-morphism {
     @apply backdrop-blur-md bg-white/10 border border-white/20;
   }
+
+  /* Champions logo coin flip animation */
+  @keyframes coinFlip {
+    0% {
+      transform: perspective(400px) rotateY(0deg);
+    }
+    50% {
+      transform: perspective(400px) rotateY(90deg);
+    }
+    100% {
+      transform: perspective(400px) rotateY(0deg);
+    }
+  }
+
+  .logo-flip {
+    animation: coinFlip 3s ease-in-out infinite;
+    transform-style: preserve-3d;
+  }
+
+  .logo-flip:hover {
+    animation-duration: 1s;
+  }
 }
