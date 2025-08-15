@@ -5,6 +5,7 @@ import type { Express } from "express";
 import { isAuthenticated } from "./replitAuth";
 import { getStorage } from "./storage";
 import { AcademicCompetitionService } from "./academicService";
+import { CrossDashboardAccessService } from "./crossDashboardAccess";
 import { 
   requireFerpaCompliance,
   auditDataAccess,
@@ -14,6 +15,7 @@ import {
 export function registerAcademicRoutes(app: Express) {
   console.log('🎓 Setting up comprehensive academic competition routes');
   const academicService = new AcademicCompetitionService();
+  const crossDashboardService = new CrossDashboardAccessService();
 
   // ===============================
   // DISTRICT ACADEMIC MANAGEMENT
@@ -351,6 +353,152 @@ export function registerAcademicRoutes(app: Express) {
     }
   });
 
+  // ===============================
+  // CROSS-DASHBOARD ACCESS ROUTES (Academic Achievement Portfolios)
+  // ===============================
+
+  // Coach access to student achievement portfolios
+  app.get("/api/academic/coach/student-dashboards", isAuthenticated, requireFerpaCompliance, async (req: ComplianceRequest, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      
+      await auditDataAccess(userId, 'student_achievement_data', 'coach_dashboard_access', req);
+      
+      const studentDashboards = await crossDashboardService.getCoachStudentDashboards(userId);
+      
+      res.json({
+        coachId: userId,
+        studentCount: studentDashboards.length,
+        students: studentDashboards,
+        description: "Complete academic and athletic achievement portfolios for your students"
+      });
+    } catch (error) {
+      console.error("Coach student dashboards error:", error);
+      res.status(500).json({ error: "Failed to fetch student dashboards" });
+    }
+  });
+
+  // Parent access to child achievement portfolios
+  app.get("/api/academic/parent/student-dashboards", isAuthenticated, requireFerpaCompliance, async (req: ComplianceRequest, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      
+      await auditDataAccess(userId, 'student_achievement_data', 'parent_dashboard_access', req);
+      
+      const childrenDashboards = await crossDashboardService.getParentStudentDashboards(userId);
+      
+      res.json({
+        parentId: userId,
+        childrenCount: childrenDashboards.length,
+        children: childrenDashboards,
+        description: "Complete academic and athletic achievement portfolios for your children - perfect for college applications"
+      });
+    } catch (error) {
+      console.error("Parent student dashboards error:", error);
+      res.status(500).json({ error: "Failed to fetch children dashboards" });
+    }
+  });
+
+  // Get specific student achievement profile (with access validation)
+  app.get("/api/academic/student/:studentId/achievement-profile", isAuthenticated, requireFerpaCompliance, async (req: ComplianceRequest, res) => {
+    try {
+      const { studentId } = req.params;
+      const userId = req.user?.claims?.sub;
+      const userRole = req.user?.role || 'student';
+      
+      // Validate access permissions
+      let hasAccess = false;
+      
+      if (userRole === 'student' && studentId === userId) {
+        hasAccess = true; // Students can access their own data
+      } else if (userRole.includes('coach') || userRole.includes('sponsor')) {
+        hasAccess = await crossDashboardService.validateCoachAccess(userId, studentId);
+      } else if (userRole === 'parent') {
+        hasAccess = await crossDashboardService.validateParentAccess(userId, studentId);
+      } else if (userRole.includes('coordinator') || userRole.includes('director')) {
+        hasAccess = true; // District/school administrators have broader access
+      }
+      
+      if (!hasAccess) {
+        return res.status(403).json({ error: "Access denied to this student's achievement profile" });
+      }
+      
+      await auditDataAccess(userId, 'student_achievement_data', 'individual_profile_access', req);
+      
+      const achievementProfile = await crossDashboardService.buildStudentAchievementProfile(studentId);
+      
+      res.json({
+        studentId,
+        accessType: userRole,
+        profile: achievementProfile,
+        generatedAt: new Date(),
+        description: "Complete academic and athletic achievement portfolio - like Rotowire for academics"
+      });
+    } catch (error) {
+      console.error("Student achievement profile error:", error);
+      res.status(500).json({ error: "Failed to fetch student achievement profile" });
+    }
+  });
+
+  // College recruitment export (verified achievement portfolio)
+  app.get("/api/academic/student/:studentId/college-recruitment-export", isAuthenticated, requireFerpaCompliance, async (req: ComplianceRequest, res) => {
+    try {
+      const { studentId } = req.params;
+      const userId = req.user?.claims?.sub;
+      
+      // Validate parent/student access for college recruitment
+      const hasParentAccess = await crossDashboardService.validateParentAccess(userId, studentId);
+      const isOwnProfile = studentId === userId;
+      
+      if (!hasParentAccess && !isOwnProfile) {
+        return res.status(403).json({ error: "Access denied - college recruitment export requires parent or student access" });
+      }
+      
+      await auditDataAccess(userId, 'student_achievement_data', 'college_recruitment_export', req);
+      
+      const achievementProfile = await crossDashboardService.buildStudentAchievementProfile(studentId);
+      
+      // Format for college applications
+      const collegeExport = {
+        studentProfile: {
+          studentId,
+          exportDate: new Date(),
+          verificationStatus: "Platform Verified",
+          dataSource: "Champions for Change Tournament Platform"
+        },
+        academicAchievements: {
+          totalCompetitions: achievementProfile.academics.totalCompetitions,
+          subjects: achievementProfile.academics.subjects,
+          topPerformances: achievementProfile.academics.topPerformances,
+          advancementHistory: achievementProfile.academics.advancementHistory,
+          strengths: achievementProfile.collegeProfile.academicStrengths
+        },
+        athleticAchievements: {
+          totalSports: achievementProfile.athletics.totalSports,
+          sports: achievementProfile.athletics.sports,
+          topPerformances: achievementProfile.athletics.topPerformances,
+          athleticProfile: achievementProfile.collegeProfile.athleticProfile
+        },
+        leadershipAndCharacter: {
+          leadershipRoles: achievementProfile.collegeProfile.leadershipRoles,
+          wellRoundedScore: achievementProfile.collegeProfile.wellRoundedScore,
+          collegeReadinessIndicators: achievementProfile.collegeProfile.collegeReadinessIndicators
+        },
+        competitiveTimeline: achievementProfile.timeline,
+        platformVerification: {
+          dataIntegrity: "All achievements tracked in real-time through official competition platform",
+          complianceNote: "FERPA compliant data management",
+          contact: "Champions for Change Tournament Platform"
+        }
+      };
+      
+      res.json(collegeExport);
+    } catch (error) {
+      console.error("College recruitment export error:", error);
+      res.status(500).json({ error: "Failed to generate college recruitment export" });
+    }
+  });
+
   console.log('✅ Academic competition routes configured');
   console.log('   🏫 District Level: Academic coordinators, meet directors');
   console.log('   🎓 School Level: Academic coordinators, principals');  
@@ -361,4 +509,10 @@ export function registerAcademicRoutes(app: Express) {
   console.log('   🎖️ Full advancement tracking: District → Regional → State');
   console.log('   📚 TEKS alignment for educational value');
   console.log('   🔒 FERPA compliant academic data access');
+  console.log('   🎓 CROSS-DASHBOARD ACCESS:');
+  console.log('      🏅 Coaches can view all student achievement portfolios');
+  console.log('      👨‍👩‍👧‍👦 Parents can access children\'s complete academic resumes');
+  console.log('      🎯 Students get comprehensive achievement profiles');
+  console.log('      🏛️ College recruitment-ready verified portfolios');
+  console.log('      📈 Like "Rotowire for academics" - complete competitive intelligence');
 }
