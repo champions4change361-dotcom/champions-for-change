@@ -6,6 +6,7 @@ import { isAuthenticated } from "./replitAuth";
 import { getStorage } from "./storage";
 import { AcademicCompetitionService } from "./academicService";
 import { CrossDashboardAccessService } from "./crossDashboardAccess";
+import { AcademicResumeBuilderService } from "./academicResumeBuilder";
 import { 
   requireFerpaCompliance,
   auditDataAccess,
@@ -16,6 +17,7 @@ export function registerAcademicRoutes(app: Express) {
   console.log('🎓 Setting up comprehensive academic competition routes');
   const academicService = new AcademicCompetitionService();
   const crossDashboardService = new CrossDashboardAccessService();
+  const resumeBuilderService = new AcademicResumeBuilderService();
 
   // ===============================
   // DISTRICT ACADEMIC MANAGEMENT
@@ -499,7 +501,167 @@ export function registerAcademicRoutes(app: Express) {
     }
   });
 
+  // ===============================
+  // ACADEMIC RESUME BUILDER ROUTES
+  // ===============================
+
+  // Get available resume templates
+  app.get("/api/academic/resume/templates", async (req, res) => {
+    try {
+      const templates = resumeBuilderService.getResumeTemplates();
+      res.json({
+        templates,
+        description: "Professional resume templates for academic achievement portfolios"
+      });
+    } catch (error) {
+      console.error("Resume templates error:", error);
+      res.status(500).json({ error: "Failed to fetch resume templates" });
+    }
+  });
+
+  // Generate academic resume for student
+  app.post("/api/academic/student/:studentId/resume", isAuthenticated, requireFerpaCompliance, async (req: ComplianceRequest, res) => {
+    try {
+      const { studentId } = req.params;
+      const { templateId, customizations } = req.body;
+      const userId = req.user?.claims?.sub;
+      const userRole = req.user?.role || 'student';
+      
+      // Validate access permissions (student, parent, coach, or administrator)
+      let hasAccess = false;
+      
+      if (userRole === 'student' && studentId === userId) {
+        hasAccess = true;
+      } else if (userRole.includes('coach') || userRole.includes('sponsor')) {
+        hasAccess = await crossDashboardService.validateCoachAccess(userId, studentId);
+      } else if (userRole === 'parent') {
+        hasAccess = await crossDashboardService.validateParentAccess(userId, studentId);
+      } else if (userRole.includes('coordinator') || userRole.includes('director')) {
+        hasAccess = true;
+      }
+      
+      if (!hasAccess) {
+        return res.status(403).json({ error: "Access denied to generate resume for this student" });
+      }
+      
+      await auditDataAccess(userId, 'student_achievement_data', 'resume_generation', req);
+      
+      const resume = await resumeBuilderService.generateResume(studentId, templateId, customizations);
+      
+      res.json({
+        studentId,
+        templateUsed: templateId,
+        generatedBy: userRole,
+        resume,
+        exportFormats: ['json', 'markdown'],
+        description: "Professional academic achievement resume generated from verified competition data"
+      });
+    } catch (error) {
+      console.error("Resume generation error:", error);
+      res.status(500).json({ error: "Failed to generate academic resume" });
+    }
+  });
+
+  // Export resume in different formats
+  app.get("/api/academic/resume/:studentId/export/:format", isAuthenticated, requireFerpaCompliance, async (req: ComplianceRequest, res) => {
+    try {
+      const { studentId, format } = req.params;
+      const { templateId = 'college_application' } = req.query;
+      const userId = req.user?.claims?.sub;
+      const userRole = req.user?.role || 'student';
+      
+      // Validate access permissions
+      let hasAccess = false;
+      
+      if (userRole === 'student' && studentId === userId) {
+        hasAccess = true;
+      } else if (userRole === 'parent') {
+        hasAccess = await crossDashboardService.validateParentAccess(userId, studentId);
+      } else if (userRole.includes('coach') || userRole.includes('coordinator')) {
+        hasAccess = await crossDashboardService.validateCoachAccess(userId, studentId) || 
+                   userRole.includes('coordinator');
+      }
+      
+      if (!hasAccess) {
+        return res.status(403).json({ error: "Access denied to export resume for this student" });
+      }
+      
+      await auditDataAccess(userId, 'student_achievement_data', 'resume_export', req);
+      
+      const resume = await resumeBuilderService.generateResume(studentId, templateId as string);
+      
+      if (format === 'json') {
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Content-Disposition', `attachment; filename="academic-resume-${studentId}.json"`);
+        res.send(resumeBuilderService.exportResumeAsJSON(resume));
+      } else if (format === 'markdown') {
+        res.setHeader('Content-Type', 'text/markdown');
+        res.setHeader('Content-Disposition', `attachment; filename="academic-resume-${studentId}.md"`);
+        res.send(resumeBuilderService.exportResumeAsMarkdown(resume));
+      } else if (format === 'pdf') {
+        res.status(501).json({ 
+          error: "PDF export not yet implemented",
+          message: "PDF generation will be available in future update",
+          availableFormats: ['json', 'markdown']
+        });
+      } else {
+        res.status(400).json({ error: "Unsupported export format", supportedFormats: ['json', 'markdown'] });
+      }
+      
+    } catch (error) {
+      console.error("Resume export error:", error);
+      res.status(500).json({ error: "Failed to export resume" });
+    }
+  });
+
+  // Get resume preview (for template selection)
+  app.get("/api/academic/resume/preview/:templateId", isAuthenticated, async (req, res) => {
+    try {
+      const { templateId } = req.params;
+      const templates = resumeBuilderService.getResumeTemplates();
+      const template = templates.find(t => t.id === templateId);
+      
+      if (!template) {
+        return res.status(404).json({ error: "Resume template not found" });
+      }
+      
+      res.json({
+        template,
+        sampleSections: template.sections.map(section => ({
+          title: section.title,
+          type: section.type,
+          required: section.required,
+          description: getSectionDescription(section.id)
+        })),
+        targetAudience: template.targetAudience,
+        description: template.description
+      });
+    } catch (error) {
+      console.error("Resume preview error:", error);
+      res.status(500).json({ error: "Failed to generate resume preview" });
+    }
+  });
+
   console.log('✅ Academic competition routes configured');
+
+// Helper function for section descriptions
+function getSectionDescription(sectionId: string): string {
+  const descriptions: { [key: string]: string } = {
+    academic_achievements: "Top academic competition results and placements",
+    leadership_roles: "Leadership positions and character development activities",
+    athletic_participation: "Athletic involvement and sports achievements",
+    advancement_history: "District, Regional, and State advancement records",
+    academic_strengths: "Subject area expertise and competitive strengths",
+    top_achievements: "Highest competitive accomplishments across all areas",
+    subject_expertise: "Deep knowledge demonstration in specific academic subjects",
+    consistency_record: "Track record of consistent competitive performance",
+    leadership_positions: "Formal leadership roles and responsibilities",
+    team_achievements: "Team-based competitive successes and collaboration",
+    achievement_timeline: "Chronological view of competitive development",
+    well_rounded_score: "Overall development profile and college readiness indicators"
+  };
+  return descriptions[sectionId] || "Academic achievement section";
+}
   console.log('   🏫 District Level: Academic coordinators, meet directors');
   console.log('   🎓 School Level: Academic coordinators, principals');  
   console.log('   👨‍🏫 Coach Level: Academic sponsors, coaches');
@@ -515,4 +677,10 @@ export function registerAcademicRoutes(app: Express) {
   console.log('      🎯 Students get comprehensive achievement profiles');
   console.log('      🏛️ College recruitment-ready verified portfolios');
   console.log('      📈 Like "Rotowire for academics" - complete competitive intelligence');
+  console.log('   📄 ACADEMIC RESUME BUILDER:');
+  console.log('      📋 4 professional resume templates (College, Scholarship, Leadership, Well-Rounded)');
+  console.log('      🎯 Auto-generated from verified competition data');
+  console.log('      📊 Achievement analysis and competitive intelligence');
+  console.log('      📁 Export formats: JSON, Markdown (PDF coming soon)');
+  console.log('      🏆 Perfect for college applications and scholarship submissions');
 }
