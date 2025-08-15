@@ -26,12 +26,15 @@ import {
 } from "./complianceMiddleware";
 // No payment processing needed for district operations
 import { z } from "zod";
+import { NonprofitStripeService } from "./nonprofitStripeConfig";
 
 // District athletics management platform - no payment processing needed
 // Districts handle student fees through existing systems
 console.log('🏫 District athletics management platform initialized');
 console.log('📋 HIPAA/FERPA compliance active');
 console.log('🎯 Focus: Athletic administration, scheduling, health monitoring');
+console.log('💚 Champions for Change nonprofit mission active');
+console.log('💳 Stripe configured for nonprofit discounted rates');
 
 function generateSingleEliminationBracket(teamSize: number, tournamentId: string) {
   const rounds = Math.ceil(Math.log2(teamSize));
@@ -311,6 +314,114 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching tax documents:", error);
       res.status(500).json({ error: "Failed to fetch tax documents" });
+    }
+  });
+
+  // Champions for Change Donation Processing (qualifies for Stripe nonprofit rates)
+  app.post("/api/nonprofit/donation", async (req, res) => {
+    try {
+      const { amount, donorEmail, cause, targetProgram } = req.body;
+      
+      if (!amount || !donorEmail || !cause) {
+        return res.status(400).json({ error: "Required fields missing" });
+      }
+
+      const paymentIntent = await NonprofitStripeService.createDonationPaymentIntent(
+        amount,
+        donorEmail,
+        cause,
+        targetProgram
+      );
+
+      res.json({ 
+        clientSecret: paymentIntent.client_secret,
+        amount: paymentIntent.amount / 100,
+        description: paymentIntent.description,
+        nonprofit_qualified: true,
+        stripe_rate: "2.2% + $0.30 (nonprofit discount)"
+      });
+    } catch (error) {
+      console.error("Error creating donation payment intent:", error);
+      res.status(500).json({ error: "Failed to create donation payment intent" });
+    }
+  });
+
+  // Educational Program Fee Processing (counts toward 20% allowance)
+  app.post("/api/nonprofit/program-fee", async (req, res) => {
+    try {
+      const { amount, studentEmail, programName, description } = req.body;
+      
+      if (!amount || !studentEmail || !programName || !description) {
+        return res.status(400).json({ error: "Required fields missing" });
+      }
+
+      const paymentIntent = await NonprofitStripeService.createProgramFeePaymentIntent(
+        amount,
+        studentEmail,
+        programName,
+        description
+      );
+
+      res.json({ 
+        clientSecret: paymentIntent.client_secret,
+        amount: paymentIntent.amount / 100,
+        description: paymentIntent.description,
+        nonprofit_qualified: true,
+        note: "Program fees count toward 20% non-donation allowance"
+      });
+    } catch (error) {
+      console.error("Error creating program fee payment intent:", error);
+      res.status(500).json({ error: "Failed to create program fee payment intent" });
+    }
+  });
+
+  // Nonprofit Payment Analytics (monitors 80/20 donation compliance)
+  app.get("/api/nonprofit/analytics", isAuthenticated, async (req, res) => {
+    try {
+      const { startDate, endDate } = req.query;
+      
+      if (!startDate || !endDate) {
+        return res.status(400).json({ error: "Start date and end date required" });
+      }
+
+      const analytics = await NonprofitStripeService.getNonprofitPaymentAnalytics(
+        new Date(startDate as string),
+        new Date(endDate as string)
+      );
+
+      res.json({
+        ...analytics,
+        stripe_compliance: analytics.qualifiesForNonprofitRates ? "COMPLIANT" : "AT RISK",
+        recommendation: analytics.donationPercentage < 80 
+          ? "Increase donation ratio to maintain nonprofit rates"
+          : "Excellent compliance with Stripe nonprofit requirements"
+      });
+    } catch (error) {
+      console.error("Error fetching nonprofit analytics:", error);
+      res.status(500).json({ error: "Failed to fetch nonprofit analytics" });
+    }
+  });
+
+  // Quarterly Compliance Report for Stripe
+  app.get("/api/nonprofit/compliance-report/:quarter/:year", isAuthenticated, async (req, res) => {
+    try {
+      const { quarter, year } = req.params;
+      
+      const report = await NonprofitStripeService.generateNonprofitComplianceReport(
+        parseInt(quarter),
+        parseInt(year)
+      );
+
+      res.json({
+        champions_for_change: {
+          ein: "81-3834471",
+          mission: "Educational opportunities for underprivileged youth",
+          ...report
+        }
+      });
+    } catch (error) {
+      console.error("Error generating compliance report:", error);
+      res.status(500).json({ error: "Failed to generate compliance report" });
     }
   });
 

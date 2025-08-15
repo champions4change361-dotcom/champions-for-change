@@ -96,6 +96,7 @@ Organization Expansion: Include charter schools, private schools, pony leagues, 
 - **Icons**: Font Awesome and Lucide React.
 - **Validation**: Zod.
 - **Date Handling**: date-fns.
-- **Payment Integration**: Stripe.
+- **Payment Integration**: Stripe with nonprofit discount rates (2.2% + $0.30 vs standard 2.9% + $0.30).
+- **Nonprofit Status**: Champions for Change (EIN: 81-3834471) qualified for Stripe nonprofit program with 80/20 donation compliance tracking.
 - **API Integration**: ESPN API (for NFL scoring, play-by-play, player performance).
 - **AI**: AI-powered tournament creation and AI coaching messages.

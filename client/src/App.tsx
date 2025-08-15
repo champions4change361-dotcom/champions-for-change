@@ -66,6 +66,8 @@ import LoginPortal from './pages/LoginPortal';
 import AdminManagement from './pages/AdminManagement';
 import LoginSupport from './pages/LoginSupport';
 import RoleBasedDashboards from './pages/RoleBasedDashboards';
+import NonprofitDonation from './pages/NonprofitDonation';
+import NonprofitAnalytics from './pages/NonprofitAnalytics';
 
 function AuthenticatedRoutes() {
   const { isFeatureEnabled, isFantasyDomain, config } = useDomain();
@@ -199,6 +201,8 @@ function AppRouter() {
       <Route path="/payment-methods" component={PaymentMethods} />
       <Route path="/checkout" component={Checkout} />
       <Route path="/donation-success" component={DonationSuccess} />
+      <Route path="/nonprofit/donate" component={NonprofitDonation} />
+      <Route path="/nonprofit/analytics" component={NonprofitAnalytics} />
       <Route path="/pricing" component={Pricing} />
       <Route path="/business-pricing-test" component={BusinessPricingTest} />
       <Route path="/your-why" component={YourWhy} />
