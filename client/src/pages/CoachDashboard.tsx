@@ -1,498 +1,299 @@
-import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Users, Trophy, Calendar, CheckCircle, Clock, XCircle } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
-
-const teamRegistrationSchema = z.object({
-  teamName: z.string().min(1, "Team name is required"),
-  organizationName: z.string().min(1, "Organization name is required"),
-  playerList: z.array(z.object({
-    name: z.string().min(1, "Player name is required"),
-    grade: z.string().optional(),
-    position: z.string().optional(),
-    parentContact: z.string().optional()
-  })).min(1, "At least one player is required"),
-  registeredEvents: z.array(z.string()).min(1, "At least one event must be selected"),
-  notes: z.string().optional()
-});
-
-type TeamRegistrationFormData = z.infer<typeof teamRegistrationSchema>;
-
-const defaultPlayer = { name: "", grade: "", position: "", parentContact: "" };
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
+import { Heart, AlertTriangle, Users, FileText, Activity, MessageSquare } from "lucide-react";
 
 export default function CoachDashboard() {
-  const { user, isAuthenticated } = useAuth();
-  const { toast } = useToast();
-  const [selectedTournament, setSelectedTournament] = useState<string | null>(null);
-  const [showRegistrationDialog, setShowRegistrationDialog] = useState(false);
+  const { user } = useAuth();
 
-  const form = useForm<TeamRegistrationFormData>({
-    resolver: zodResolver(teamRegistrationSchema),
-    defaultValues: {
-      teamName: "",
-      organizationName: user?.organizationName || "",
-      playerList: [defaultPlayer],
-      registeredEvents: [],
-      notes: ""
-    }
+  // Fetch teams managed by this coach
+  const { data: teams, isLoading: teamsLoading } = useQuery({
+    queryKey: ['/api/coach/teams'],
+    enabled: !!user?.id
   });
 
-  // Get available tournaments
-  const { data: tournaments = [], isLoading: tournamentsLoading } = useQuery({
-    queryKey: ["/api/tournaments"],
-    enabled: isAuthenticated
+  // Fetch player health status summaries (cleared/not cleared only)
+  const { data: playerHealthStatus, isLoading: healthStatusLoading } = useQuery({
+    queryKey: ['/api/coach/player-health-status'],
+    enabled: !!user?.id
   });
 
-  // Get my team registrations
-  const { data: registrations = [], isLoading: registrationsLoading } = useQuery({
-    queryKey: ["/api/team-registrations/mine"],
-    enabled: isAuthenticated
+  // Fetch health alerts affecting coach's players
+  const { data: healthAlerts, isLoading: alertsLoading } = useQuery({
+    queryKey: ['/api/coach/health-alerts'],
+    enabled: !!user?.id
   });
 
-  // Get tournament details for registration
-  const { data: tournamentDetails } = useQuery({
-    queryKey: ["/api/tournaments", selectedTournament],
-    enabled: !!selectedTournament
+  // Fetch communications with athletic trainer
+  const { data: trainerCommunications, isLoading: communicationsLoading } = useQuery({
+    queryKey: ['/api/coach/trainer-communications'],
+    enabled: !!user?.id
   });
 
-  const registerTeamMutation = useMutation({
-    mutationFn: async (data: TeamRegistrationFormData & { tournamentId: string }) => {
-      return apiRequest("POST", "/api/team-registrations", data);
-    },
-    onSuccess: () => {
-      toast({
-        title: "Team Registered",
-        description: "Your team has been registered successfully. Awaiting approval."
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/team-registrations/mine"] });
-      setShowRegistrationDialog(false);
-      form.reset();
-    },
-    onError: () => {
-      toast({
-        title: "Registration Failed",
-        description: "Failed to register team. Please try again.",
-        variant: "destructive"
-      });
-    }
-  });
-
-  const onSubmit = (data: TeamRegistrationFormData) => {
-    if (!selectedTournament) return;
-    
-    registerTeamMutation.mutate({
-      ...data,
-      tournamentId: selectedTournament
-    });
-  };
-
-  const addPlayer = () => {
-    const currentPlayers = form.getValues("playerList");
-    form.setValue("playerList", [...currentPlayers, defaultPlayer]);
-  };
-
-  const removePlayer = (index: number) => {
-    const currentPlayers = form.getValues("playerList");
-    if (currentPlayers.length > 1) {
-      form.setValue("playerList", currentPlayers.filter((_, i) => i !== index));
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "approved":
-        return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case "pending":
-        return <Clock className="h-4 w-4 text-yellow-600" />;
-      case "rejected":
-        return <XCircle className="h-4 w-4 text-red-600" />;
-      default:
-        return <Clock className="h-4 w-4 text-gray-600" />;
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "approved":
-        return "bg-green-100 text-green-800";
-      case "pending":
-        return "bg-yellow-100 text-yellow-800";
-      case "rejected":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  if (!isAuthenticated) {
+  if (teamsLoading || healthStatusLoading || alertsLoading || communicationsLoading) {
     return (
-      <div className="container mx-auto p-8 text-center">
-        <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
-        <p>You need to be logged in to access the coach dashboard.</p>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-3 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+          <p className="text-slate-600">Loading your dashboard...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto p-8 max-w-7xl">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold">Coach Dashboard</h1>
-          <p className="text-muted-foreground">
-            Register your teams for tournaments and manage player rosters
-          </p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-50">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-800">Coach Dashboard</h1>
+            <p className="text-slate-600">Welcome, {user?.firstName} {user?.lastName}</p>
+            <p className="text-sm text-slate-500">{user?.organizationName}</p>
+          </div>
+          <Button 
+            variant="outline" 
+            onClick={() => window.location.href = '/api/logout'}
+            data-testid="button-logout"
+          >
+            Logout
+          </Button>
         </div>
-        <Dialog open={showRegistrationDialog} onOpenChange={setShowRegistrationDialog}>
-          <DialogTrigger asChild>
-            <Button data-testid="button-register-team">
-              <Plus className="h-4 w-4 mr-2" />
-              Register Team
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Register Team for Tournament</DialogTitle>
-              <DialogDescription>
-                Register your team and players for an upcoming tournament
-              </DialogDescription>
-            </DialogHeader>
 
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="teamName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Team Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Eagles Varsity" {...field} data-testid="input-team-name" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="organizationName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>School/Organization</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Lincoln High School" {...field} data-testid="input-organization" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Overview Stats */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                Team Overview
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Total Teams:</span>
+                  <span className="font-semibold">{teams?.length || 0}</span>
                 </div>
-
-                <div>
-                  <FormLabel>Select Tournament</FormLabel>
-                  <Select onValueChange={setSelectedTournament} value={selectedTournament || ""}>
-                    <SelectTrigger data-testid="select-tournament">
-                      <SelectValue placeholder="Choose a tournament" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(tournaments as any[]).map((tournament: any) => (
-                        <SelectItem key={tournament.id} value={tournament.id}>
-                          {tournament.name} - {tournament.sport}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Total Players:</span>
+                  <span className="font-semibold">{playerHealthStatus?.totalPlayers || 0}</span>
                 </div>
-
-                {tournamentDetails && (
-                  <div className="p-4 border rounded-lg bg-muted/50">
-                    <h3 className="font-medium mb-2">Tournament Details</h3>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span className="font-medium">Sport:</span> {(tournamentDetails as any).sport}
-                      </div>
-                      <div>
-                        <span className="font-medium">Format:</span> {(tournamentDetails as any).tournamentType}
-                      </div>
-                      <div>
-                        <span className="font-medium">Team Size:</span> {(tournamentDetails as any).teamSize} players
-                      </div>
-                      <div>
-                        <span className="font-medium">Entry Fee:</span> ${(tournamentDetails as any).entryFee || "Free"}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <FormLabel>Player Roster</FormLabel>
-                    <Button type="button" variant="outline" size="sm" onClick={addPlayer} data-testid="button-add-player">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Player
-                    </Button>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    {form.watch("playerList").map((_, index) => (
-                      <div key={index} className="grid grid-cols-5 gap-2 items-end">
-                        <FormField
-                          control={form.control}
-                          name={`playerList.${index}.name`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-xs">Player Name</FormLabel>
-                              <FormControl>
-                                <Input placeholder="John Smith" {...field} data-testid={`input-player-name-${index}`} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <FormField
-                          control={form.control}
-                          name={`playerList.${index}.grade`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-xs">Grade</FormLabel>
-                              <FormControl>
-                                <Input placeholder="10th" {...field} data-testid={`input-player-grade-${index}`} />
-                              </FormControl>
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={form.control}
-                          name={`playerList.${index}.position`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-xs">Position</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Forward" {...field} data-testid={`input-player-position-${index}`} />
-                              </FormControl>
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={form.control}
-                          name={`playerList.${index}.parentContact`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-xs">Parent Contact</FormLabel>
-                              <FormControl>
-                                <Input placeholder="555-0123" {...field} data-testid={`input-player-contact-${index}`} />
-                              </FormControl>
-                            </FormItem>
-                          )}
-                        />
-
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => removePlayer(index)}
-                          disabled={form.watch("playerList").length === 1}
-                          data-testid={`button-remove-player-${index}`}
-                        >
-                          Remove
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Cleared to Play:</span>
+                  <span className="font-semibold text-green-600">{playerHealthStatus?.cleared || 0}</span>
                 </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Health Restrictions:</span>
+                  <span className="font-semibold text-red-600">{playerHealthStatus?.restricted || 0}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Pending Review:</span>
+                  <span className="font-semibold text-yellow-600">{playerHealthStatus?.pending || 0}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-                <FormField
-                  control={form.control}
-                  name="notes"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Notes (Optional)</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Any additional information about your team..."
-                          {...field}
-                          data-testid="textarea-notes"
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Include any special requirements, dietary restrictions, or other important information
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="flex justify-end gap-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setShowRegistrationDialog(false)}
-                    data-testid="button-cancel-registration"
+          {/* Player Health Alerts */}
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5" />
+                Player Health Status Updates
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3 max-h-96 overflow-y-auto">
+                {healthAlerts?.map((alert: any) => (
+                  <div 
+                    key={alert.id}
+                    className={`p-3 rounded-lg border ${
+                      alert.severity === 'critical' ? 'bg-red-50 border-red-200' :
+                      alert.severity === 'high' ? 'bg-orange-50 border-orange-200' :
+                      alert.severity === 'medium' ? 'bg-yellow-50 border-yellow-200' :
+                      'bg-blue-50 border-blue-200'
+                    }`}
                   >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={registerTeamMutation.isPending}
-                    data-testid="button-submit-registration"
-                  >
-                    {registerTeamMutation.isPending ? "Registering..." : "Register Team"}
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      <Tabs defaultValue="registrations" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="registrations">My Registrations</TabsTrigger>
-          <TabsTrigger value="tournaments">Available Tournaments</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="registrations" className="space-y-6">
-          <div className="grid gap-4">
-            {(registrations as any[]).map((registration: any) => (
-              <Card key={registration.id}>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="flex items-center gap-2">
-                        <Users className="h-5 w-5" />
-                        {registration.teamName}
-                      </CardTitle>
-                      <CardDescription>
-                        {registration.organizationName} • Tournament: {registration.tournament?.name}
-                      </CardDescription>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {getStatusIcon(registration.registrationStatus)}
-                      <Badge className={getStatusColor(registration.registrationStatus)}>
-                        {registration.registrationStatus}
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <h4 className="font-semibold">{alert.playerName}</h4>
+                        <p className="text-sm text-slate-600">{alert.teamName} • #{alert.jerseyNumber}</p>
+                      </div>
+                      <Badge 
+                        variant={alert.clearanceStatus === 'cleared' ? 'default' : alert.clearanceStatus === 'restricted' ? 'destructive' : 'secondary'}
+                      >
+                        {alert.clearanceStatus?.toUpperCase()}
                       </Badge>
                     </div>
+                    <p className="text-sm mb-2">{alert.coachMessage}</p>
+                    <div className="flex gap-2">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => window.location.href = `/trainer-communication/${alert.id}`}
+                        data-testid={`button-message-trainer-${alert.id}`}
+                      >
+                        Message Trainer
+                      </Button>
+                      {alert.clearanceStatus === 'cleared' && (
+                        <Button 
+                          size="sm"
+                          onClick={() => window.location.href = `/player/${alert.playerId}/return-to-play`}
+                          data-testid={`button-return-to-play-${alert.playerId}`}
+                        >
+                          Return to Play
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-3 gap-4 text-sm">
-                    <div>
-                      <span className="font-medium">Players:</span> {registration.playerList?.length || 0}
-                    </div>
-                    <div>
-                      <span className="font-medium">Sport:</span> {registration.tournament?.sport}
-                    </div>
-                    <div>
-                      <span className="font-medium">Registered:</span> {new Date(registration.registrationDate).toLocaleDateString()}
-                    </div>
-                  </div>
-                  {registration.notes && (
-                    <div className="mt-2 p-2 bg-muted rounded text-sm">
-                      <span className="font-medium">Notes:</span> {registration.notes}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
-            {registrations.length === 0 && (
-              <Card>
-                <CardContent className="text-center py-8">
-                  <Trophy className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <h3 className="text-lg font-medium mb-2">No Team Registrations</h3>
-                  <p className="text-muted-foreground mb-4">
-                    You haven't registered any teams yet. Click "Register Team" to get started.
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </TabsContent>
+        {/* Team Roster with Health Status */}
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Team Roster - Health Status
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left p-2">Player Name</th>
+                    <th className="text-left p-2">Jersey #</th>
+                    <th className="text-left p-2">Position</th>
+                    <th className="text-left p-2">Health Status</th>
+                    <th className="text-left p-2">Last Update</th>
+                    <th className="text-left p-2">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {playerHealthStatus?.players?.map((player: any) => (
+                    <tr key={player.id} className="border-b hover:bg-slate-50">
+                      <td className="p-2 font-medium">{player.name}</td>
+                      <td className="p-2">#{player.jerseyNumber}</td>
+                      <td className="p-2">{player.position}</td>
+                      <td className="p-2">
+                        <Badge 
+                          variant={
+                            player.healthStatus === 'cleared' ? 'default' :
+                            player.healthStatus === 'restricted' ? 'destructive' :
+                            'secondary'
+                          }
+                        >
+                          {player.healthStatus?.toUpperCase() || 'PENDING'}
+                        </Badge>
+                      </td>
+                      <td className="p-2">{player.lastHealthUpdate || 'No updates'}</td>
+                      <td className="p-2">
+                        {player.healthStatus === 'restricted' && (
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => window.location.href = '/health-communication?player=' + player.id}
+                            data-testid={`button-health-inquiry-${player.id}`}
+                          >
+                            Health Inquiry
+                          </Button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
 
-        <TabsContent value="tournaments" className="space-y-6">
-          <div className="grid gap-4">
-            {(tournaments as any[]).map((tournament: any) => (
-              <Card key={tournament.id}>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
+        {/* Trainer Communications */}
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <MessageSquare className="h-5 w-5" />
+              Recent Trainer Communications
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3 max-h-64 overflow-y-auto">
+              {trainerCommunications?.map((comm: any) => (
+                <div key={comm.id} className="p-3 border rounded-lg bg-white">
+                  <div className="flex justify-between items-start mb-2">
                     <div>
-                      <CardTitle className="flex items-center gap-2">
-                        <Trophy className="h-5 w-5" />
-                        {tournament.name}
-                      </CardTitle>
-                      <CardDescription>
-                        {tournament.sport} • {tournament.tournamentType} • Team Size: {tournament.teamSize}
-                      </CardDescription>
+                      <h4 className="font-semibold">Trainer {comm.trainerName}</h4>
+                      <p className="text-sm text-slate-600">{comm.subject}</p>
                     </div>
-                    <Badge variant="outline">
-                      {tournament.status}
-                    </Badge>
+                    <span className="text-xs text-slate-500">{comm.timeAgo}</span>
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-4 gap-4 text-sm">
-                    <div>
-                      <span className="font-medium">Entry Fee:</span> ${tournament.entryFee || "Free"}
-                    </div>
-                    <div>
-                      <span className="font-medium">Max Teams:</span> {tournament.maxParticipants || "Unlimited"}
-                    </div>
-                    <div>
-                      <span className="font-medium">Registration Deadline:</span> {
-                        tournament.registrationDeadline 
-                          ? new Date(tournament.registrationDeadline).toLocaleDateString()
-                          : "Not set"
-                      }
-                    </div>
-                    <div>
-                      <span className="font-medium">Tournament Date:</span> {
-                        tournament.tournamentDate 
-                          ? new Date(tournament.tournamentDate).toLocaleDateString()
-                          : "TBD"
-                      }
-                    </div>
-                  </div>
-                  {tournament.description && (
-                    <div className="mt-2 text-sm text-muted-foreground">
-                      {tournament.description}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
+                  <p className="text-sm mb-2">Re: {comm.playerName}</p>
+                  <p className="text-sm text-slate-600">{comm.preview}</p>
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="mt-2"
+                    onClick={() => window.location.href = '/health-communication'}
+                    data-testid={`button-view-thread-${comm.id}`}
+                  >
+                    View Thread
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
-            {tournaments.length === 0 && (
-              <Card>
-                <CardContent className="text-center py-8">
-                  <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <h3 className="text-lg font-medium mb-2">No Tournaments Available</h3>
-                  <p className="text-muted-foreground">
-                    There are no tournaments available for registration at this time.
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </TabsContent>
-      </Tabs>
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+          <Button 
+            className="h-16"
+            onClick={() => window.location.href = '/team-management'}
+            data-testid="button-team-management"
+          >
+            <div className="text-center">
+              <Users className="h-6 w-6 mx-auto mb-1" />
+              Team Management
+            </div>
+          </Button>
+          <Button 
+            className="h-16"
+            onClick={() => window.location.href = '/health-communication'}
+            data-testid="button-health-communication"
+          >
+            <div className="text-center">
+              <MessageSquare className="h-6 w-6 mx-auto mb-1" />
+              Health Communication
+            </div>
+          </Button>
+          <Button 
+            className="h-16"
+            onClick={() => window.location.href = '/practice-schedule'}
+            data-testid="button-practice-schedule"
+          >
+            <div className="text-center">
+              <Activity className="h-6 w-6 mx-auto mb-1" />
+              Practice Schedule
+            </div>
+          </Button>
+          <Button 
+            className="h-16"
+            onClick={() => window.location.href = '/tournaments'}
+            data-testid="button-tournaments"
+          >
+            <div className="text-center">
+              <FileText className="h-6 w-6 mx-auto mb-1" />
+              Tournaments
+            </div>
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

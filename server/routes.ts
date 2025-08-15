@@ -7,6 +7,7 @@ import { NonprofitBillingService } from "./nonprofitBilling";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { setupDomainRoutes } from "./domainRoutes";
 import { registerStaffRoutes } from "./staffRoutes";
+import { registerHealthCommunicationRoutes } from "./healthCommunicationRoutes";
 import { AIContextService } from "./ai-context";
 import { UniversalRegistrationSystem } from "./universal-registration";
 import { UsageLimitService, TOURNAMENT_CREDIT_PACKAGES } from "./usageLimits";
@@ -5450,6 +5451,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Setup staff management routes
   registerStaffRoutes(app);
+  
+  // Setup health communication routes
+  registerHealthCommunicationRoutes(app);
 
   const httpServer = createServer(app);
   return httpServer;
