@@ -85,7 +85,7 @@ async function upsertUser(
     ...(isOwner && {
       subscriptionPlan: 'district_enterprise',
       subscriptionStatus: 'active',
-      userRole: 'tournament_manager',
+      complianceRole: 'district_athletic_director',
       organizationId: 'champions-for-change',
       organizationName: 'Champions for Change',
       isWhitelabelClient: true,
@@ -171,7 +171,7 @@ export async function setupAuth(app: Express) {
         profileImageUrl: null,
         subscriptionPlan: 'district_enterprise',
         subscriptionStatus: 'active',
-        userRole: 'tournament_manager',
+        complianceRole: 'district_athletic_director',
         organizationId: 'champions-for-change',
         organizationName: 'Champions for Change',
         isWhitelabelClient: true,
