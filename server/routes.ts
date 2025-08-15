@@ -3107,6 +3107,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin routes for master admin
+  app.get('/api/admin/users', async (req: any, res) => {
+    try {
+      if (!req.isAuthenticated() || !req.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const userId = req.user.claims.sub;
+      
+      // Only allow master admin access
+      if (userId !== 'master-admin-danielthornton') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      
+      const storage = await getStorage();
+      const users = await storage.getAllUsers();
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  app.post('/api/admin/create-fake-user', async (req: any, res) => {
+    try {
+      if (!req.isAuthenticated() || !req.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const userId = req.user.claims.sub;
+      
+      // Only allow master admin access
+      if (userId !== 'master-admin-danielthornton') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      
+      const { firstName, lastName, email, role, subscriptionPlan, organizationName, userType } = req.body;
+      
+      const fakeUserId = `fake-${userType}-${Date.now()}`;
+      const storage = await getStorage();
+      const fakeUser = await storage.upsertUser({
+        id: fakeUserId,
+        email,
+        firstName,
+        lastName,
+        profileImageUrl: null,
+        subscriptionPlan,
+        subscriptionStatus: 'active',
+        complianceRole: role,
+        organizationId: `${userType}-${organizationName.toLowerCase().replace(/\s+/g, '-')}`,
+        organizationName,
+        isWhitelabelClient: userType === 'district',
+        whitelabelDomain: userType === 'district' ? 'trantortournaments.org' : null
+      });
+      
+      res.json(fakeUser);
+    } catch (error) {
+      console.error("Error creating fake user:", error);
+      res.status(500).json({ message: "Failed to create fake user" });
+    }
+  });
+
   // Registration API endpoints - Professional Self-Registration System
   app.post("/api/registration/request", async (req, res) => {
     try {

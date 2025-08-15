@@ -63,6 +63,7 @@ import DistrictLogin from './pages/DistrictLogin';
 import TournamentOrganizerLogin from './pages/TournamentOrganizerLogin';
 import BusinessLogin from './pages/BusinessLogin';
 import LoginPortal from './pages/LoginPortal';
+import AdminManagement from './pages/AdminManagement';
 
 function AuthenticatedRoutes() {
   const { isFeatureEnabled, isFantasyDomain, config } = useDomain();
@@ -211,6 +212,9 @@ function AppRouter() {
       <Route path="/login/district" component={DistrictLogin} />
       <Route path="/login/organizer" component={TournamentOrganizerLogin} />
       <Route path="/login/business" component={BusinessLogin} />
+      
+      {/* Admin Management Portal */}
+      <Route path="/admin" component={AdminManagement} />
       {/* Miller White-Label Homepage */}
       <Route path="/miller-homepage" component={MillerHomepage} />
       {/* Show Coaches Lounge landing page */}

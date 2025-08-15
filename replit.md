@@ -56,7 +56,9 @@ Organization Expansion: Include charter schools, private schools, pony leagues, 
 - **Session Management**: Express sessions with PostgreSQL session store.
 - **User Management**: Complete user registration, login, logout flows with user type-based portals.
 - **Login Portals**: Separate login experiences for Districts (/login/district), Tournament Organizers (/login/organizer), and Business Enterprise (/login/business).
+- **Master Admin Portal**: Full access admin management system (/admin) for creating test users and accessing all platform features.
 - **Role-Based Access**: Automatic role assignment based on user type selection with appropriate subscription plans and organizational context.
+- **Admin Management**: Comprehensive admin tools for creating fake user profiles, viewing all users, and accessing platform analytics.
 - **Protected Routes**: Authentication middleware for tournament and payment endpoints.
 - **Security**: CORS, secure session handling, user profile management.
 - **User Hierarchy**: A multi-tiered role-based access control system including District, School, and Team levels, with specific roles like Athletic Director, Trainer, Principal, Head Coach, etc. This hierarchy enforces HIPAA compliance for medical/tournament data partitioning.

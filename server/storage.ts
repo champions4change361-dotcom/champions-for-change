@@ -37,6 +37,7 @@ export type ComplianceAuditLog = {
 export interface IStorage {
   // User authentication methods
   getUser(id: string): Promise<User | undefined>;
+  getAllUsers(): Promise<User[]>;
   upsertUser(user: UpsertUser): Promise<User>;
   updateUserStripeInfo(id: string, customerId: string, subscriptionId: string): Promise<User | undefined>;
   
@@ -302,6 +303,16 @@ export class DbStorage implements IStorage {
     } catch (error) {
       console.error("Database error:", error);
       return undefined;
+    }
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    try {
+      const result = await this.db.select().from(users);
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
     }
   }
 
@@ -1393,6 +1404,10 @@ export class MemStorage implements IStorage {
   // User authentication methods
   async getUser(id: string): Promise<User | undefined> {
     return this.users.get(id);
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return Array.from(this.users.values());
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {

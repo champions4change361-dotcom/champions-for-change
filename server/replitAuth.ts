@@ -68,56 +68,18 @@ function updateUserSession(
 }
 
 function getUserConfig(userType: string) {
-  switch (userType) {
-    case 'district':
-      return {
-        id: 'district-admin-1',
-        email: 'district@championsforchange.org',
-        firstName: 'District',
-        lastName: 'Administrator',
-        subscriptionPlan: 'district_enterprise' as const,
-        organizationId: 'champions-for-change-district',
-        organizationName: 'Champions for Change District',
-        isWhitelabelClient: true,
-        whitelabelDomain: 'trantortournaments.org'
-      };
-    case 'organizer':
-      return {
-        id: 'organizer-admin-1',
-        email: 'organizer@tournamentpro.org',
-        firstName: 'Tournament',
-        lastName: 'Organizer',
-        subscriptionPlan: 'professional' as const,
-        organizationId: 'tournament-organizers',
-        organizationName: 'Professional Tournament Organizers',
-        isWhitelabelClient: false,
-        whitelabelDomain: null
-      };
-    case 'business':
-      return {
-        id: 'business-admin-1',
-        email: 'enterprise@business.org',
-        firstName: 'Business',
-        lastName: 'Enterprise',
-        subscriptionPlan: 'enterprise' as const,
-        organizationId: 'business-enterprise',
-        organizationName: 'Business Enterprise Solutions',
-        isWhitelabelClient: false,
-        whitelabelDomain: null
-      };
-    default:
-      return {
-        id: 'default-user-1',
-        email: 'user@example.org',
-        firstName: 'General',
-        lastName: 'User',
-        subscriptionPlan: 'foundation' as const,
-        organizationId: 'general-users',
-        organizationName: 'General Users',
-        isWhitelabelClient: false,
-        whitelabelDomain: null
-      };
-  }
+  // Master admin gets access to all platforms regardless of user type
+  return {
+    id: 'master-admin-danielthornton',
+    email: 'champions4change361@gmail.com',
+    firstName: 'Daniel',
+    lastName: 'Thornton',
+    subscriptionPlan: 'district_enterprise' as const,
+    organizationId: 'champions-for-change-master',
+    organizationName: 'Champions for Change - Master Admin',
+    isWhitelabelClient: true,
+    whitelabelDomain: 'trantortournaments.org'
+  };
 }
 
 async function upsertUser(
@@ -219,15 +181,9 @@ export async function setupAuth(app: Express) {
     try {
       const storage = await getStorage();
       
-      // Create user in storage with role based on user type
-      const roleMapping = {
-        'district': 'district_athletic_director' as const,
-        'organizer': 'scorekeeper' as const, 
-        'business': 'scorekeeper' as const
-      };
-      
-      const userRole = roleMapping[userType as keyof typeof roleMapping] || 'scorekeeper' as const;
-      console.log(`Assigning role: ${userRole} for user type: ${userType}`);
+      // Master admin gets district_athletic_director role for full access
+      const userRole = 'district_athletic_director' as const;
+      console.log(`Master admin login - granting full access with role: ${userRole}`);
       
       // Create user in storage with role-specific configuration
       const userConfig = getUserConfig(userType);

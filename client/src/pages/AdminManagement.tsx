@@ -1,0 +1,406 @@
+import { useState } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { Settings, Users, Trophy, Building2, Plus, Eye } from "lucide-react";
+
+interface FakeUser {
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: string;
+  subscriptionPlan: string;
+  organizationName: string;
+  userType: 'district' | 'organizer' | 'business';
+}
+
+export default function AdminManagement() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [newUser, setNewUser] = useState<FakeUser>({
+    firstName: '',
+    lastName: '',
+    email: '',
+    role: 'scorekeeper',
+    subscriptionPlan: 'foundation',
+    organizationName: '',
+    userType: 'district'
+  });
+
+  // Fetch existing users
+  const { data: users, isLoading } = useQuery({
+    queryKey: ["/api/admin/users"],
+  });
+
+  // Create fake user mutation
+  const createUserMutation = useMutation({
+    mutationFn: async (userData: FakeUser) => {
+      return apiRequest("/api/admin/create-fake-user", {
+        method: "POST",
+        body: userData,
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Fake user created successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      setNewUser({
+        firstName: '',
+        lastName: '',
+        email: '',
+        role: 'scorekeeper',
+        subscriptionPlan: 'foundation',
+        organizationName: '',
+        userType: 'district'
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    createUserMutation.mutate(newUser);
+  };
+
+  const getRoleOptions = (userType: string) => {
+    switch (userType) {
+      case 'district':
+        return [
+          { value: 'district_athletic_director', label: 'District Athletic Director' },
+          { value: 'district_head_athletic_trainer', label: 'District Head Athletic Trainer' },
+          { value: 'school_athletic_director', label: 'School Athletic Director' },
+          { value: 'school_athletic_trainer', label: 'School Athletic Trainer' },
+          { value: 'school_principal', label: 'School Principal' },
+          { value: 'head_coach', label: 'Head Coach' },
+          { value: 'assistant_coach', label: 'Assistant Coach' },
+        ];
+      case 'organizer':
+        return [
+          { value: 'scorekeeper', label: 'Tournament Organizer' },
+          { value: 'head_coach', label: 'Event Coordinator' },
+        ];
+      case 'business':
+        return [
+          { value: 'scorekeeper', label: 'Business Manager' },
+          { value: 'head_coach', label: 'Operations Director' },
+        ];
+      default:
+        return [{ value: 'scorekeeper', label: 'General User' }];
+    }
+  };
+
+  const getSubscriptionOptions = (userType: string) => {
+    switch (userType) {
+      case 'district':
+        return [
+          { value: 'district_enterprise', label: 'District Enterprise ($4,500/year)' },
+          { value: 'enterprise', label: 'Enterprise' },
+        ];
+      case 'organizer':
+        return [
+          { value: 'professional', label: 'Tournament Pro ($39/month)' },
+          { value: 'champion', label: 'Champion' },
+        ];
+      case 'business':
+        return [
+          { value: 'enterprise', label: 'Business Enterprise ($149/month)' },
+          { value: 'professional', label: 'Professional' },
+        ];
+      default:
+        return [{ value: 'foundation', label: 'Foundation' }];
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Header */}
+        <div className="text-center space-y-4">
+          <div className="flex items-center justify-center space-x-3">
+            <Settings className="h-10 w-10 text-blue-600" />
+            <div>
+              <h1 className="text-4xl font-bold text-slate-900">Master Admin Portal</h1>
+              <p className="text-lg text-slate-600">Manage and test all platform features</p>
+            </div>
+          </div>
+          <Badge variant="secondary" className="text-lg px-4 py-2">
+            Full Access Across All Platforms
+          </Badge>
+        </div>
+
+        <Tabs defaultValue="create-users" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="create-users">Create Test Users</TabsTrigger>
+            <TabsTrigger value="view-users">View Users</TabsTrigger>
+            <TabsTrigger value="platform-access">Platform Access</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          </TabsList>
+
+          {/* Create Test Users Tab */}
+          <TabsContent value="create-users">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Plus className="h-5 w-5" />
+                  <span>Create Fake User Profiles</span>
+                </CardTitle>
+                <CardDescription>
+                  Add test users to different platforms for testing features and workflows
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Basic Info */}
+                    <div className="space-y-4">
+                      <h3 className="font-semibold text-slate-900">Basic Information</h3>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="firstName">First Name</Label>
+                          <Input
+                            id="firstName"
+                            value={newUser.firstName}
+                            onChange={(e) => setNewUser({ ...newUser, firstName: e.target.value })}
+                            placeholder="John"
+                            data-testid="input-firstname"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="lastName">Last Name</Label>
+                          <Input
+                            id="lastName"
+                            value={newUser.lastName}
+                            onChange={(e) => setNewUser({ ...newUser, lastName: e.target.value })}
+                            placeholder="Smith"
+                            data-testid="input-lastname"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="email">Email</Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          value={newUser.email}
+                          onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                          placeholder="john.smith@example.com"
+                          data-testid="input-email"
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="organizationName">Organization</Label>
+                        <Input
+                          id="organizationName"
+                          value={newUser.organizationName}
+                          onChange={(e) => setNewUser({ ...newUser, organizationName: e.target.value })}
+                          placeholder="Example School District"
+                          data-testid="input-organization"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Platform & Role */}
+                    <div className="space-y-4">
+                      <h3 className="font-semibold text-slate-900">Platform & Access</h3>
+                      
+                      <div>
+                        <Label htmlFor="userType">Platform Type</Label>
+                        <Select 
+                          value={newUser.userType} 
+                          onValueChange={(value: 'district' | 'organizer' | 'business') => 
+                            setNewUser({ ...newUser, userType: value, role: 'scorekeeper', subscriptionPlan: 'foundation' })
+                          }
+                        >
+                          <SelectTrigger data-testid="select-usertype">
+                            <SelectValue placeholder="Select platform" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="district">District Platform</SelectItem>
+                            <SelectItem value="organizer">Tournament Organizer</SelectItem>
+                            <SelectItem value="business">Business Enterprise</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="role">Role</Label>
+                        <Select value={newUser.role} onValueChange={(value) => setNewUser({ ...newUser, role: value })}>
+                          <SelectTrigger data-testid="select-role">
+                            <SelectValue placeholder="Select role" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {getRoleOptions(newUser.userType).map((option) => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="subscriptionPlan">Subscription Plan</Label>
+                        <Select 
+                          value={newUser.subscriptionPlan} 
+                          onValueChange={(value) => setNewUser({ ...newUser, subscriptionPlan: value })}
+                        >
+                          <SelectTrigger data-testid="select-subscription">
+                            <SelectValue placeholder="Select subscription" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {getSubscriptionOptions(newUser.userType).map((option) => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Button 
+                    type="submit" 
+                    className="w-full" 
+                    disabled={createUserMutation.isPending}
+                    data-testid="button-create-user"
+                  >
+                    {createUserMutation.isPending ? "Creating..." : "Create Test User"}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* View Users Tab */}
+          <TabsContent value="view-users">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Eye className="h-5 w-5" />
+                  <span>Existing Users</span>
+                </CardTitle>
+                <CardDescription>
+                  View and manage all users across platforms
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <div className="text-center py-8">Loading users...</div>
+                ) : (
+                  <div className="space-y-4">
+                    {users?.length ? (
+                      users.map((user: any) => (
+                        <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
+                          <div>
+                            <h4 className="font-semibold">{user.firstName} {user.lastName}</h4>
+                            <p className="text-sm text-slate-600">{user.email}</p>
+                            <p className="text-xs text-slate-500">{user.organizationName}</p>
+                          </div>
+                          <div className="flex space-x-2">
+                            <Badge variant="outline">{user.complianceRole || user.userRole}</Badge>
+                            <Badge variant="secondary">{user.subscriptionPlan}</Badge>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8 text-slate-600">No users found</div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Platform Access Tab */}
+          <TabsContent value="platform-access">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card className="border-blue-200">
+                <CardHeader className="text-center">
+                  <Users className="h-8 w-8 text-blue-600 mx-auto" />
+                  <CardTitle className="text-blue-900">District Platform</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <p className="text-sm text-slate-600">Full access to district management features</p>
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700" data-testid="button-access-district">
+                    Access District Features
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="border-purple-200">
+                <CardHeader className="text-center">
+                  <Trophy className="h-8 w-8 text-purple-600 mx-auto" />
+                  <CardTitle className="text-purple-900">Tournament Platform</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <p className="text-sm text-slate-600">Professional tournament management tools</p>
+                  <Button className="w-full bg-purple-600 hover:bg-purple-700" data-testid="button-access-tournament">
+                    Access Tournament Features
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="border-slate-200">
+                <CardHeader className="text-center">
+                  <Building2 className="h-8 w-8 text-slate-600 mx-auto" />
+                  <CardTitle className="text-slate-900">Business Platform</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <p className="text-sm text-slate-600">Enterprise-grade business solutions</p>
+                  <Button className="w-full bg-slate-600 hover:bg-slate-700" data-testid="button-access-business">
+                    Access Business Features
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Analytics Tab */}
+          <TabsContent value="analytics">
+            <Card>
+              <CardHeader>
+                <CardTitle>Platform Analytics</CardTitle>
+                <CardDescription>Overview of user activity and platform usage</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="text-center p-4 bg-blue-50 rounded-lg">
+                    <h3 className="text-2xl font-bold text-blue-600">{users?.filter((u: any) => u.subscriptionPlan === 'district_enterprise').length || 0}</h3>
+                    <p className="text-sm text-slate-600">District Users</p>
+                  </div>
+                  <div className="text-center p-4 bg-purple-50 rounded-lg">
+                    <h3 className="text-2xl font-bold text-purple-600">{users?.filter((u: any) => u.subscriptionPlan === 'professional').length || 0}</h3>
+                    <p className="text-sm text-slate-600">Tournament Organizers</p>
+                  </div>
+                  <div className="text-center p-4 bg-slate-50 rounded-lg">
+                    <h3 className="text-2xl font-bold text-slate-600">{users?.filter((u: any) => u.subscriptionPlan === 'enterprise').length || 0}</h3>
+                    <p className="text-sm text-slate-600">Business Users</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+}
