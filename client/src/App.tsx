@@ -56,6 +56,9 @@ import Schools from './pages/Schools';
 import MillerHomepage from './pages/MillerHomepage';
 import RoleDashboard from './pages/RoleDashboard';
 import BulkRegistration from './pages/BulkRegistration';
+import AthleteDashboard from './pages/AthleteDashboard';
+import CoachDashboard from './pages/CoachDashboard';
+import AthleticTrainerDashboard from './pages/AthleticTrainerDashboard';
 
 function AuthenticatedRoutes() {
   const { isFeatureEnabled, isFantasyDomain, config } = useDomain();
@@ -93,6 +96,9 @@ function AuthenticatedRoutes() {
         <Route path="/custom-design-demo" component={CustomDesignDemo} />
         <Route path="/schools" component={Schools} />
         <Route path="/dashboard" component={RoleDashboard} />
+        <Route path="/athlete-dashboard" component={AthleteDashboard} />
+        <Route path="/coach-dashboard" component={CoachDashboard} />
+        <Route path="/athletic-trainer-dashboard" component={AthleticTrainerDashboard} />
         <Route path="/bulk-registration" component={BulkRegistration} />
         
         {/* Show Tournament Empire only for school-safe and pro domains */}
