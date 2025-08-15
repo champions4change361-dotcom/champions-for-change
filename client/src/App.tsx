@@ -64,6 +64,7 @@ import TournamentOrganizerLogin from './pages/TournamentOrganizerLogin';
 import BusinessLogin from './pages/BusinessLogin';
 import LoginPortal from './pages/LoginPortal';
 import AdminManagement from './pages/AdminManagement';
+import LoginSupport from './pages/LoginSupport';
 
 function AuthenticatedRoutes() {
   const { isFeatureEnabled, isFantasyDomain, config } = useDomain();
@@ -215,6 +216,9 @@ function AppRouter() {
       
       {/* Admin Management Portal */}
       <Route path="/admin" component={AdminManagement} />
+      
+      {/* Login Support */}
+      <Route path="/login-support" component={LoginSupport} />
       {/* Miller White-Label Homepage */}
       <Route path="/miller-homepage" component={MillerHomepage} />
       {/* Show Coaches Lounge landing page */}

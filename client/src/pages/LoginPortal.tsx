@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { GraduationCap, Trophy, Building2, ArrowRight } from "lucide-react";
+import { GraduationCap, Trophy, Building2, ArrowRight, HelpCircle } from "lucide-react";
 import { Link } from "wouter";
 
 export default function LoginPortal() {
@@ -190,6 +190,24 @@ export default function LoginPortal() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Help Section */}
+        <Card className="border border-blue-200 bg-blue-50">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-center space-x-4">
+              <HelpCircle className="h-6 w-6 text-blue-600" />
+              <div className="text-center">
+                <h3 className="font-semibold text-blue-900">Need Help Logging In?</h3>
+                <p className="text-blue-700 text-sm">Your account uses secure OAuth authentication through Replit</p>
+              </div>
+              <Link href="/login-support">
+                <Button variant="outline" className="border-blue-300 text-blue-700 hover:bg-blue-100" data-testid="button-login-help">
+                  Get Help
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Footer */}
         <div className="text-center space-y-2">
