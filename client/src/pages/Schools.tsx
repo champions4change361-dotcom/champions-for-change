@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2, MapPin, Phone, Globe, Users, GraduationCap } from "lucide-react";
 import type { District, School, SchoolAsset } from "@shared/schema";
+import millerBannerPath from "@assets/IMG_0178_1755214650992.jpeg";
 
 export default function Schools() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
@@ -208,16 +209,41 @@ export default function Schools() {
 
           {/* Selected School Details */}
           {selectedSchool && (
-            <Card>
-              <CardHeader>
-                <CardTitle>
-                  {selectedSchool.name} - Detailed View
-                </CardTitle>
-                <div className="text-sm text-muted-foreground">
-                  VLC Code: {selectedSchool.vlcCode}
+            <>
+              {/* Special Miller VLC Homepage Mockup */}
+              {selectedSchool.vlcCode === 'MILLER' ? (
+                <div className="rounded-lg overflow-hidden">
+                  <div className="bg-gray-50 p-4 border-b">
+                    <h3 className="text-lg font-semibold">Miller VLC Homepage Mockup</h3>
+                    <p className="text-sm text-muted-foreground">
+                      VLC Code: {selectedSchool.vlcCode} - Custom School Branding Demo
+                    </p>
+                  </div>
+                  <div 
+                    className="relative h-96 flex items-center justify-center"
+                    style={{ backgroundColor: '#6a0dad' }}
+                  >
+                    <div className="text-center">
+                      <img 
+                        src={millerBannerPath} 
+                        alt="Welcome to Buc Nation" 
+                        className="max-w-xs h-auto mx-auto transition-transform duration-300 hover:scale-110 hover:brightness-110"
+                        data-testid="img-miller-buc-nation-banner"
+                      />
+                    </div>
+                  </div>
                 </div>
-              </CardHeader>
-              <CardContent>
+              ) : (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>
+                      {selectedSchool.name} - Detailed View
+                    </CardTitle>
+                    <div className="text-sm text-muted-foreground">
+                      VLC Code: {selectedSchool.vlcCode}
+                    </div>
+                  </CardHeader>
+                  <CardContent>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
                     <h4 className="font-semibold mb-3">School Information</h4>
@@ -310,8 +336,10 @@ export default function Schools() {
                     </div>
                   </div>
                 )}
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
+              )}
+            </>
           )}
         </div>
       )}
