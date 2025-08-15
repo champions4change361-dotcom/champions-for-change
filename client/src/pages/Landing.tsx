@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Trophy, Users, Zap, Globe, CreditCard, Star, Heart, GraduationCap, MapPin, Award, Mail, Phone, Timer, UserCheck, Shield, Target } from "lucide-react";
 import championLogo from "@assets/IMG_1442_1754896656003.jpeg";
 import championVideo from "@assets/Champions for Change Logo_1755291031903.mp4";
+import championLogoNew from "@assets/Champions for Change Logo (2)_1755291245650.webp";
 import { DonationSection } from "@/components/DonationSection";
 import { SignupSection } from "@/components/SignupSection";
 import { CrossPlatformPromotion, FantasyPromotion } from "@/components/CrossPlatformPromotion";
@@ -16,17 +17,17 @@ export default function Landing() {
       {/* Stadium Lighting Header */}
       <div className="relative">
         <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/5 via-transparent to-yellow-400/5"></div>
-        <header className="relative border-b border-blue-500/20 bg-slate-900/80 backdrop-blur-sm">
+        <header className="relative border-b border-orange-500/20 bg-slate-900/80 backdrop-blur-sm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               {/* Arena Logo */}
               <div className="flex items-center space-x-3">
-                <div className="bg-gradient-to-br from-blue-400 to-blue-600 p-2 rounded-lg shadow-lg">
-                  <Trophy className="h-6 w-6 text-white" />
+                <div className="w-12 h-12 rounded-lg overflow-hidden shadow-lg">
+                  <img src={championLogoNew} alt="Champions for Change" className="w-full h-full object-cover" />
                 </div>
                 <div>
                   <h1 className="text-xl font-bold text-white">Champions for Change</h1>
-                  <p className="text-xs text-blue-400">Tournament Management Platform</p>
+                  <p className="text-xs text-orange-400">Tournament Management Platform</p>
                 </div>
               </div>
 
@@ -41,7 +42,7 @@ export default function Landing() {
               {/* Login Button */}
               <Button 
                 onClick={() => window.location.href = "/api/login"}
-                className="bg-blue-500 hover:bg-blue-600 text-white font-semibold"
+                className="bg-orange-500 hover:bg-orange-600 text-white font-semibold"
                 data-testid="button-login"
               >
                 Enter Arena
@@ -65,10 +66,10 @@ export default function Landing() {
       {/* Hero Section */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {/* Champions Welcome with Video */}
-        <div className="relative overflow-hidden bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 rounded-2xl border border-blue-500/30 mb-12">
+        <div className="relative overflow-hidden bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 rounded-2xl border border-orange-500/30 mb-12">
           <div className="absolute inset-0">
-            <div className="absolute top-4 left-4 w-32 h-32 bg-blue-400/5 rounded-full blur-3xl"></div>
-            <div className="absolute bottom-4 right-4 w-40 h-40 bg-emerald-400/3 rounded-full blur-3xl"></div>
+            <div className="absolute top-4 left-4 w-32 h-32 bg-orange-400/5 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-4 right-4 w-40 h-40 bg-red-400/3 rounded-full blur-3xl"></div>
           </div>
           <div className="relative p-12">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -93,13 +94,13 @@ export default function Landing() {
               
               {/* Content Section */}
               <div className="order-1 lg:order-2 text-center lg:text-left">
-                <Badge className="mb-6 bg-emerald-500/20 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20">
+                <Badge className="mb-6 bg-orange-500/20 text-orange-400 border-orange-500/30 hover:bg-orange-500/20">
                   <GraduationCap className="h-3 w-3 mr-1" />
                   Supporting Student Education Through Sports
                 </Badge>
                 
                 <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
-                  Tournament Platform That <span className="text-blue-400">Champions Change</span>
+                  Tournament Platform That <span className="text-orange-400">Champions Change</span>
                 </h1>
             
                 <p className="text-xl text-slate-300 mb-8 max-w-4xl">
@@ -144,7 +145,7 @@ export default function Landing() {
                   <div className="flex flex-col sm:flex-row gap-4">
                     <Button 
                       size="lg" 
-                      className="bg-blue-500 hover:bg-blue-600 text-white font-bold px-8 py-4 text-lg"
+                      className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-8 py-4 text-lg"
                       onClick={() => window.location.href = "/register"}
                       data-testid="button-get-started"
                     >
@@ -153,7 +154,7 @@ export default function Landing() {
                     <Button 
                       size="lg" 
                       variant="outline"
-                      className="border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10 hover:border-emerald-400 px-6 py-4 text-lg"
+                      className="border-red-500/50 text-red-400 hover:bg-red-500/10 hover:border-red-400 px-6 py-4 text-lg"
                       onClick={() => {
                         const impactSection = document.getElementById('impact-mission');
                         impactSection?.scrollIntoView({ behavior: 'smooth' });
@@ -201,12 +202,12 @@ export default function Landing() {
           <div className="grid md:grid-cols-2 gap-8">
             <div className="bg-slate-700 border border-slate-600 rounded-xl p-6">
               <h4 className="text-lg font-bold text-white mb-4 flex items-center">
-                <Award className="h-5 w-5 mr-3 text-blue-400" />
+                <Award className="h-5 w-5 mr-3 text-orange-400" />
                 Leadership
               </h4>
               <div className="text-slate-300">
                 <p className="font-semibold text-white text-lg">Daniel Thornton</p>
-                <p className="text-blue-400 font-medium mb-2">Executive Director of Champions for Change</p>
+                <p className="text-orange-400 font-medium mb-2">Executive Director of Champions for Change</p>
                 <p className="text-sm">21 years military service (Marines & Army) • 10 years secondary athletic coaching • Robert Driscoll Middle School since 2016</p>
               </div>
             </div>

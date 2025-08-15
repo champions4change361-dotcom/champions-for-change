@@ -48,10 +48,14 @@
   --tournament-primary: hsl(207.69 90.20% 54.12%);
   --tournament-secondary: hsl(142.10 76.36% 36.27%);
   --tournament-accent: hsl(142.10 76.36% 36.27%);
-  --champions-blue: hsl(207.69 90.20% 54.12%);
-  --champions-green: hsl(142.10 76.36% 36.27%);
-  --champions-blue-light: hsl(207.69 90.20% 64.12%);
-  --champions-green-light: hsl(142.10 76.36% 46.27%);
+  --champions-navy: hsl(210 100% 15%);
+  --champions-burgundy: hsl(340 60% 35%);
+  --champions-gold: hsl(35 90% 55%);
+  --champions-teal: hsl(185 60% 45%);
+  --champions-navy-light: hsl(210 80% 25%);
+  --champions-burgundy-light: hsl(340 50% 45%);
+  --champions-gold-light: hsl(35 80% 65%);
+  --champions-teal-light: hsl(185 50% 55%);
   --shadow-2xs: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00);
   --shadow-xs: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00);
   --shadow-sm: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00), 0px 1px 2px -1px hsl(202.8169 89.1213% 53.1373% / 0.00);
@@ -248,36 +252,52 @@
   }
   
   /* Champions for Change brand colors */
-  .text-champions-blue {
-    color: var(--champions-blue);
+  .text-champions-navy {
+    color: var(--champions-navy);
   }
   
-  .text-champions-green {
-    color: var(--champions-green);
+  .text-champions-burgundy {
+    color: var(--champions-burgundy);
   }
   
-  .text-champions-blue-light {
-    color: var(--champions-blue-light);
+  .text-champions-gold {
+    color: var(--champions-gold);
   }
   
-  .text-champions-green-light {
-    color: var(--champions-green-light);
+  .text-champions-teal {
+    color: var(--champions-teal);
   }
   
-  .bg-champions-blue {
-    background-color: var(--champions-blue);
+  .bg-champions-navy {
+    background-color: var(--champions-navy);
   }
   
-  .bg-champions-green {
-    background-color: var(--champions-green);
+  .bg-champions-burgundy {
+    background-color: var(--champions-burgundy);
   }
   
-  .border-champions-blue {
-    border-color: var(--champions-blue);
+  .bg-champions-gold {
+    background-color: var(--champions-gold);
   }
   
-  .border-champions-green {
-    border-color: var(--champions-green);
+  .bg-champions-teal {
+    background-color: var(--champions-teal);
+  }
+  
+  .border-champions-navy {
+    border-color: var(--champions-navy);
+  }
+  
+  .border-champions-burgundy {
+    border-color: var(--champions-burgundy);
+  }
+  
+  .border-champions-gold {
+    border-color: var(--champions-gold);
+  }
+  
+  .border-champions-teal {
+    border-color: var(--champions-teal);
   }
 
   /* Your custom utility classes */
