@@ -59,6 +59,10 @@ import BulkRegistration from './pages/BulkRegistration';
 import AthleteDashboard from './pages/AthleteDashboard';
 import CoachDashboard from './pages/CoachDashboard';
 import AthleticTrainerDashboard from './pages/AthleticTrainerDashboard';
+import DistrictLogin from './pages/DistrictLogin';
+import TournamentOrganizerLogin from './pages/TournamentOrganizerLogin';
+import BusinessLogin from './pages/BusinessLogin';
+import LoginPortal from './pages/LoginPortal';
 
 function AuthenticatedRoutes() {
   const { isFeatureEnabled, isFantasyDomain, config } = useDomain();
@@ -201,6 +205,12 @@ function AppRouter() {
       <Route path="/health-benefits" component={HealthBenefits} />
       <Route path="/grant-funding" component={GrantFunding} />
       <Route path="/register-organization" component={OrganizationRegistration} />
+      {/* Main Login Portal - User Type Selection */}
+      <Route path="/login" component={LoginPortal} />
+      {/* User Type Login Portals */}
+      <Route path="/login/district" component={DistrictLogin} />
+      <Route path="/login/organizer" component={TournamentOrganizerLogin} />
+      <Route path="/login/business" component={BusinessLogin} />
       {/* Miller White-Label Homepage */}
       <Route path="/miller-homepage" component={MillerHomepage} />
       {/* Show Coaches Lounge landing page */}

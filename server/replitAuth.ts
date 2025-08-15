@@ -67,6 +67,59 @@ function updateUserSession(
   user.expires_at = user.claims?.exp;
 }
 
+function getUserConfig(userType: string) {
+  switch (userType) {
+    case 'district':
+      return {
+        id: 'district-admin-1',
+        email: 'district@championsforchange.org',
+        firstName: 'District',
+        lastName: 'Administrator',
+        subscriptionPlan: 'district_enterprise' as const,
+        organizationId: 'champions-for-change-district',
+        organizationName: 'Champions for Change District',
+        isWhitelabelClient: true,
+        whitelabelDomain: 'trantortournaments.org'
+      };
+    case 'organizer':
+      return {
+        id: 'organizer-admin-1',
+        email: 'organizer@tournamentpro.org',
+        firstName: 'Tournament',
+        lastName: 'Organizer',
+        subscriptionPlan: 'professional' as const,
+        organizationId: 'tournament-organizers',
+        organizationName: 'Professional Tournament Organizers',
+        isWhitelabelClient: false,
+        whitelabelDomain: null
+      };
+    case 'business':
+      return {
+        id: 'business-admin-1',
+        email: 'enterprise@business.org',
+        firstName: 'Business',
+        lastName: 'Enterprise',
+        subscriptionPlan: 'enterprise' as const,
+        organizationId: 'business-enterprise',
+        organizationName: 'Business Enterprise Solutions',
+        isWhitelabelClient: false,
+        whitelabelDomain: null
+      };
+    default:
+      return {
+        id: 'default-user-1',
+        email: 'user@example.org',
+        firstName: 'General',
+        lastName: 'User',
+        subscriptionPlan: 'foundation' as const,
+        organizationId: 'general-users',
+        organizationName: 'General Users',
+        isWhitelabelClient: false,
+        whitelabelDomain: null
+      };
+  }
+}
+
 async function upsertUser(
   claims: any,
 ) {
@@ -143,9 +196,13 @@ export async function setupAuth(app: Express) {
   passport.serializeUser((user: Express.User, cb) => cb(null, user));
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
-  // OAuth and fallback login endpoint
+  // OAuth and fallback login endpoint with user type support
   app.get("/api/login", async (req, res, next) => {
     console.log(`Login attempt for hostname: ${req.hostname}, IP: ${req.ip}, User-Agent: ${req.get('User-Agent')}`);
+    
+    // Get user type from query parameter
+    const userType = req.query.user_type as string;
+    console.log(`User type specified: ${userType}`);
     
     // Check if OAuth is configured for this domain
     const strategyName = `replitauth:${req.hostname}`;
@@ -158,24 +215,35 @@ export async function setupAuth(app: Express) {
     // OAuth will be enabled after deployment to production domains
     
     // Fallback to simplified authentication for development/testing
-    console.log(`Using fallback authentication for ${req.hostname}`);
+    console.log(`Using fallback authentication for ${req.hostname} with user type: ${userType}`);
     try {
       const storage = await getStorage();
       
-      // Create user in storage first with full administrator privileges
+      // Create user in storage with role based on user type
+      const roleMapping = {
+        'district': 'district_athletic_director' as const,
+        'organizer': 'scorekeeper' as const, 
+        'business': 'scorekeeper' as const
+      };
+      
+      const userRole = roleMapping[userType as keyof typeof roleMapping] || 'scorekeeper' as const;
+      console.log(`Assigning role: ${userRole} for user type: ${userType}`);
+      
+      // Create user in storage with role-specific configuration
+      const userConfig = getUserConfig(userType);
       const adminUser = await storage.upsertUser({
-        id: 'champions-admin-1',
-        email: 'champions4change361@gmail.com',
-        firstName: 'Daniel',
-        lastName: 'Thornton',
+        id: userConfig.id,
+        email: userConfig.email,
+        firstName: userConfig.firstName,
+        lastName: userConfig.lastName,
         profileImageUrl: null,
-        subscriptionPlan: 'district_enterprise',
+        subscriptionPlan: userConfig.subscriptionPlan,
         subscriptionStatus: 'active',
-        complianceRole: 'district_athletic_director',
-        organizationId: 'champions-for-change',
-        organizationName: 'Champions for Change',
-        isWhitelabelClient: true,
-        whitelabelDomain: 'trantortournaments.org'
+        complianceRole: userRole,
+        organizationId: userConfig.organizationId,
+        organizationName: userConfig.organizationName,
+        isWhitelabelClient: userConfig.isWhitelabelClient,
+        whitelabelDomain: userConfig.whitelabelDomain
       });
       
       // Create authenticated session
