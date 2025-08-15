@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Trophy, Users, Zap, Globe, CreditCard, Star, Heart, GraduationCap, MapPin, Award, Mail, Phone, Timer, UserCheck, Shield, Target } from "lucide-react";
 import championLogo from "@assets/IMG_1442_1754896656003.jpeg";
+import championVideo from "@assets/Champions for Change Logo_1755291031903.mp4";
 import { DonationSection } from "@/components/DonationSection";
 import { SignupSection } from "@/components/SignupSection";
 import { CrossPlatformPromotion, FantasyPromotion } from "@/components/CrossPlatformPromotion";
@@ -15,17 +16,17 @@ export default function Landing() {
       {/* Stadium Lighting Header */}
       <div className="relative">
         <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/5 via-transparent to-yellow-400/5"></div>
-        <header className="relative border-b border-yellow-500/20 bg-slate-900/80 backdrop-blur-sm">
+        <header className="relative border-b border-blue-500/20 bg-slate-900/80 backdrop-blur-sm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               {/* Arena Logo */}
               <div className="flex items-center space-x-3">
-                <div className="bg-gradient-to-br from-yellow-400 to-yellow-600 p-2 rounded-lg shadow-lg">
-                  <Trophy className="h-6 w-6 text-slate-900" />
+                <div className="bg-gradient-to-br from-blue-400 to-blue-600 p-2 rounded-lg shadow-lg">
+                  <Trophy className="h-6 w-6 text-white" />
                 </div>
                 <div>
                   <h1 className="text-xl font-bold text-white">Champions for Change</h1>
-                  <p className="text-xs text-yellow-400">Tournament Management Platform</p>
+                  <p className="text-xs text-blue-400">Tournament Management Platform</p>
                 </div>
               </div>
 
@@ -40,7 +41,7 @@ export default function Landing() {
               {/* Login Button */}
               <Button 
                 onClick={() => window.location.href = "/api/login"}
-                className="bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-semibold"
+                className="bg-blue-500 hover:bg-blue-600 text-white font-semibold"
                 data-testid="button-login"
               >
                 Enter Arena
@@ -63,78 +64,107 @@ export default function Landing() {
 
       {/* Hero Section */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        {/* Champions Welcome */}
-        <div className="relative overflow-hidden bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 rounded-2xl border border-yellow-500/30 mb-12">
+        {/* Champions Welcome with Video */}
+        <div className="relative overflow-hidden bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 rounded-2xl border border-blue-500/30 mb-12">
           <div className="absolute inset-0">
-            <div className="absolute top-4 left-4 w-32 h-32 bg-yellow-400/5 rounded-full blur-3xl"></div>
-            <div className="absolute bottom-4 right-4 w-40 h-40 bg-yellow-400/3 rounded-full blur-3xl"></div>
+            <div className="absolute top-4 left-4 w-32 h-32 bg-blue-400/5 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-4 right-4 w-40 h-40 bg-emerald-400/3 rounded-full blur-3xl"></div>
           </div>
-          <div className="relative p-12 text-center">
-            <Badge className="mb-6 bg-yellow-500/20 text-yellow-400 border-yellow-500/30 hover:bg-yellow-500/20">
-              <GraduationCap className="h-3 w-3 mr-1" />
-              Supporting Student Education Through Sports
-            </Badge>
+          <div className="relative p-12">
+            <div className="grid lg:grid-cols-2 gap-12 items-center">
+              {/* Video Section */}
+              <div className="order-2 lg:order-1">
+                <div className="relative rounded-xl overflow-hidden shadow-2xl border border-blue-400/20">
+                  <video 
+                    autoPlay 
+                    loop 
+                    muted 
+                    playsInline
+                    className="w-full h-auto"
+                    data-testid="champions-logo-video"
+                  >
+                    <source src={championVideo} type="video/mp4" />
+                    <div className="bg-slate-600 p-8 flex items-center justify-center">
+                      <img src={championLogo} alt="Champions for Change" className="max-w-full h-auto" />
+                    </div>
+                  </video>
+                </div>
+              </div>
+              
+              {/* Content Section */}
+              <div className="order-1 lg:order-2 text-center lg:text-left">
+                <Badge className="mb-6 bg-emerald-500/20 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20">
+                  <GraduationCap className="h-3 w-3 mr-1" />
+                  Supporting Student Education Through Sports
+                </Badge>
+                
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
+                  Tournament Platform That <span className="text-blue-400">Champions Change</span>
+                </h1>
             
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
-              Tournament Platform That <span className="text-yellow-400">Champions Change</span>
-            </h1>
-            
-            <p className="text-xl text-slate-300 mb-8 max-w-4xl mx-auto">
-              Professional tournament management platform built by coaches who identified needs in the tournament world. 
-              Every subscription helps fund student trips and educational opportunities for middle schools in Corpus Christi, Texas.
-            </p>
+                <p className="text-xl text-slate-300 mb-8 max-w-4xl">
+                  Professional tournament management platform built by coaches who identified needs in the tournament world. 
+                  Every subscription helps fund student trips and educational opportunities for middle schools in Corpus Christi, Texas.
+                </p>
 
-            <div className="flex flex-col md:flex-row gap-4 md:gap-6 justify-center items-center">
-              <Button 
-                size="lg" 
-                variant="outline"
-                className="border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10 hover:border-emerald-400 px-6 py-4 text-lg order-1 md:order-5"
-                onClick={() => window.location.href = "/your-why"}
-                data-testid="button-your-why"
-              >
-                <Heart className="h-5 w-5 mr-2" />
-                Your Why
-              </Button>
-              <Button 
-                size="lg" 
-                variant="outline"
-                className="border-orange-500/50 text-orange-400 hover:bg-orange-500/10 hover:border-orange-400 px-6 py-4 text-lg order-2 md:order-4"
-                onClick={() => window.location.href = "/grant-funding"}
-                data-testid="button-grant-funding"
-              >
-                <Target className="h-5 w-5 mr-2" />
-                Grant Funding
-              </Button>
-              <Button 
-                size="lg" 
-                variant="outline"
-                className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10 hover:border-blue-400 px-6 py-4 text-lg order-3 md:order-3"
-                onClick={() => window.location.href = "/health-benefits"}
-                data-testid="button-health-benefits"
-              >
-                <Shield className="h-5 w-5 mr-2" />
-                Health & Wellness
-              </Button>
-              <Button 
-                size="lg" 
-                variant="outline"
-                className="border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/10 hover:border-yellow-400 px-8 py-4 text-lg order-4 md:order-2"
-                onClick={() => {
-                  const impactSection = document.getElementById('impact-mission');
-                  impactSection?.scrollIntoView({ behavior: 'smooth' });
-                }}
-                data-testid="button-learn-more"
-              >
-                Learn More
-              </Button>
-              <Button 
-                size="lg" 
-                className="bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-bold px-8 py-4 text-lg order-5 md:order-1"
-                onClick={() => window.location.href = "/register"}
-                data-testid="button-get-started"
-              >
-                Start Supporting Students
-              </Button>
+                <div className="flex flex-col gap-4 justify-center lg:justify-start items-center lg:items-start">
+                  <div className="flex flex-wrap gap-3 mb-6">
+                    <Button 
+                      size="lg" 
+                      variant="outline"
+                      className="border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10 hover:border-emerald-400 px-4 py-3 text-base"
+                      onClick={() => window.location.href = "/your-why"}
+                      data-testid="button-your-why"
+                    >
+                      <Heart className="h-4 w-4 mr-2" />
+                      Your Why
+                    </Button>
+                    <Button 
+                      size="lg" 
+                      variant="outline"
+                      className="border-orange-500/50 text-orange-400 hover:bg-orange-500/10 hover:border-orange-400 px-4 py-3 text-base"
+                      onClick={() => window.location.href = "/grant-funding"}
+                      data-testid="button-grant-funding"
+                    >
+                      <Target className="h-4 w-4 mr-2" />
+                      Grant Funding
+                    </Button>
+                    <Button 
+                      size="lg" 
+                      variant="outline"
+                      className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10 hover:border-blue-400 px-4 py-3 text-base"
+                      onClick={() => window.location.href = "/health-benefits"}
+                      data-testid="button-health-benefits"
+                    >
+                      <Shield className="h-4 w-4 mr-2" />
+                      Health & Wellness
+                    </Button>
+                  </div>
+                  
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <Button 
+                      size="lg" 
+                      className="bg-blue-500 hover:bg-blue-600 text-white font-bold px-8 py-4 text-lg"
+                      onClick={() => window.location.href = "/register"}
+                      data-testid="button-get-started"
+                    >
+                      Start Supporting Students
+                    </Button>
+                    <Button 
+                      size="lg" 
+                      variant="outline"
+                      className="border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10 hover:border-emerald-400 px-6 py-4 text-lg"
+                      onClick={() => {
+                        const impactSection = document.getElementById('impact-mission');
+                        impactSection?.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                      data-testid="button-learn-more"
+                    >
+                      Learn More
+                    </Button>
+                  </div>
+                </div>
+              </div>
             </div>
             
             {/* Enterprise/Nonprofit Access */}
@@ -171,12 +201,12 @@ export default function Landing() {
           <div className="grid md:grid-cols-2 gap-8">
             <div className="bg-slate-700 border border-slate-600 rounded-xl p-6">
               <h4 className="text-lg font-bold text-white mb-4 flex items-center">
-                <Award className="h-5 w-5 mr-3 text-yellow-400" />
+                <Award className="h-5 w-5 mr-3 text-blue-400" />
                 Leadership
               </h4>
               <div className="text-slate-300">
                 <p className="font-semibold text-white text-lg">Daniel Thornton</p>
-                <p className="text-yellow-400 font-medium mb-2">Executive Director of Champions for Change</p>
+                <p className="text-blue-400 font-medium mb-2">Executive Director of Champions for Change</p>
                 <p className="text-sm">21 years military service (Marines & Army) • 10 years secondary athletic coaching • Robert Driscoll Middle School since 2016</p>
               </div>
             </div>

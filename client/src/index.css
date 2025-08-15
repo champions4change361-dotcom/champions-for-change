@@ -16,7 +16,7 @@
   --secondary-foreground: hsl(0 0% 100%);
   --muted: hsl(240 1.9608% 90%);
   --muted-foreground: hsl(210 25% 7.8431%);
-  --accent: hsl(32.73 94.74% 49.02%);
+  --accent: hsl(142.10 76.36% 36.27%);
   --accent-foreground: hsl(0 0% 100%);
   --destructive: hsl(356.3033 90.5579% 54.3137%);
   --destructive-foreground: hsl(0 0% 100%);
@@ -47,7 +47,11 @@
   --completed: hsl(0 0% 61.96%);
   --tournament-primary: hsl(207.69 90.20% 54.12%);
   --tournament-secondary: hsl(142.10 76.36% 36.27%);
-  --tournament-accent: hsl(32.73 94.74% 49.02%);
+  --tournament-accent: hsl(142.10 76.36% 36.27%);
+  --champions-blue: hsl(207.69 90.20% 54.12%);
+  --champions-green: hsl(142.10 76.36% 36.27%);
+  --champions-blue-light: hsl(207.69 90.20% 64.12%);
+  --champions-green-light: hsl(142.10 76.36% 46.27%);
   --shadow-2xs: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00);
   --shadow-xs: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00);
   --shadow-sm: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00), 0px 1px 2px -1px hsl(202.8169 89.1213% 53.1373% / 0.00);
@@ -241,6 +245,39 @@
   
   .hover\:text-tournament-primary:hover {
     color: var(--tournament-primary);
+  }
+  
+  /* Champions for Change brand colors */
+  .text-champions-blue {
+    color: var(--champions-blue);
+  }
+  
+  .text-champions-green {
+    color: var(--champions-green);
+  }
+  
+  .text-champions-blue-light {
+    color: var(--champions-blue-light);
+  }
+  
+  .text-champions-green-light {
+    color: var(--champions-green-light);
+  }
+  
+  .bg-champions-blue {
+    background-color: var(--champions-blue);
+  }
+  
+  .bg-champions-green {
+    background-color: var(--champions-green);
+  }
+  
+  .border-champions-blue {
+    border-color: var(--champions-blue);
+  }
+  
+  .border-champions-green {
+    border-color: var(--champions-green);
   }
 
   /* Your custom utility classes */
