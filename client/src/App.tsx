@@ -38,7 +38,7 @@ import YourWhy from './pages/YourWhy';
 import CorporateCompetitions from './pages/CorporateCompetitions';
 import AthleteAnalytics from './pages/AthleteAnalytics';
 import CorporateAnalytics from './pages/CorporateAnalytics';
-import MillerVLCDemo from './pages/MillerVLCDemo';
+
 import FootballHealthMonitoring from './pages/FootballHealthMonitoring';
 import DefensiveHealthMonitoring from './pages/DefensiveHealthMonitoring';
 import ComprehensiveHealthDemo from './pages/ComprehensiveHealthDemo';
@@ -83,7 +83,7 @@ function AuthenticatedRoutes() {
         <Route path="/corporate-competitions" component={CorporateCompetitions} />
         <Route path="/athlete-analytics" component={() => <AthleteAnalytics isCoachView={true} />} />
         <Route path="/corporate-analytics" component={() => <CorporateAnalytics isPublic={true} />} />
-        <Route path="/miller-vlc-demo" component={MillerVLCDemo} />
+
         <Route path="/football-health" component={FootballHealthMonitoring} />
         <Route path="/defensive-health" component={DefensiveHealthMonitoring} />
         <Route path="/comprehensive-health-demo" component={ComprehensiveHealthDemo} />
@@ -197,7 +197,7 @@ function AppRouter() {
       <Route path="/register" component={RegistrationForm} />
       <Route path="/tournament/design" component={TournamentDesign} />
       <Route path="/register-old" component={Register} />
-      <Route path="/miller-vlc-demo" component={MillerVLCDemo} />
+
       <Route path="/health-benefits" component={HealthBenefits} />
       <Route path="/grant-funding" component={GrantFunding} />
       <Route path="/register-organization" component={OrganizationRegistration} />
