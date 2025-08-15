@@ -65,6 +65,7 @@ import BusinessLogin from './pages/BusinessLogin';
 import LoginPortal from './pages/LoginPortal';
 import AdminManagement from './pages/AdminManagement';
 import LoginSupport from './pages/LoginSupport';
+import RoleBasedDashboards from './pages/RoleBasedDashboards';
 
 function AuthenticatedRoutes() {
   const { isFeatureEnabled, isFantasyDomain, config } = useDomain();
@@ -105,6 +106,7 @@ function AuthenticatedRoutes() {
         <Route path="/athlete-dashboard" component={AthleteDashboard} />
         <Route path="/coach-dashboard" component={CoachDashboard} />
         <Route path="/athletic-trainer-dashboard" component={AthleticTrainerDashboard} />
+        <Route path="/role-dashboard" component={RoleBasedDashboards} />
         <Route path="/bulk-registration" component={BulkRegistration} />
         
         {/* Show Tournament Empire only for school-safe and pro domains */}
