@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, Eye, Save, Globe, Palette, Code } from "lucide-react";
+import { Upload, Eye, Save, Globe, Palette, Code, Mail, FileText, BarChart3, Settings as SettingsIcon, Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
@@ -24,8 +24,17 @@ const whitelabelConfigSchema = z.object({
   logoUrl: z.string().url().optional().or(z.literal("")),
   faviconUrl: z.string().url().optional().or(z.literal("")),
   customCss: z.string().optional(),
+  customHeaderHtml: z.string().optional(),
+  customFooterHtml: z.string().optional(),
+  customFonts: z.string().optional(),
+  backgroundImageUrl: z.string().url().optional().or(z.literal("")),
+  backgroundType: z.enum(["color", "gradient", "image"]).default("color"),
+  gradientColors: z.array(z.string()).optional(),
   allowedFeatures: z.array(z.string()).optional(),
   revenueSharePercentage: z.number().min(0).max(100),
+  merchandiseEnabled: z.boolean().default(false),
+  emailTemplatesEnabled: z.boolean().default(true),
+  advancedAnalytics: z.boolean().default(false),
   isActive: z.boolean()
 });
 
@@ -46,8 +55,17 @@ export default function WhiteLabelAdmin() {
       logoUrl: "",
       faviconUrl: "",
       customCss: "",
+      customHeaderHtml: "",
+      customFooterHtml: "",
+      customFonts: "",
+      backgroundImageUrl: "",
+      backgroundType: "color" as const,
+      gradientColors: [],
       allowedFeatures: ["tournaments", "analytics", "payments"],
       revenueSharePercentage: 0,
+      merchandiseEnabled: false,
+      emailTemplatesEnabled: true,
+      advancedAnalytics: false,
       isActive: true
     }
   });
@@ -200,10 +218,12 @@ export default function WhiteLabelAdmin() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <Tabs defaultValue="basic" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-6">
               <TabsTrigger value="basic">Basic Settings</TabsTrigger>
               <TabsTrigger value="branding">Branding</TabsTrigger>
               <TabsTrigger value="advanced">Advanced</TabsTrigger>
+              <TabsTrigger value="emails">Email Templates</TabsTrigger>
+              <TabsTrigger value="analytics">Analytics</TabsTrigger>
               <TabsTrigger value="preview">Preview</TabsTrigger>
             </TabsList>
 
@@ -535,6 +555,218 @@ export default function WhiteLabelAdmin() {
                       </div>
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="emails" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Mail className="h-5 w-5" />
+                    Email Template Management
+                  </CardTitle>
+                  <CardDescription>
+                    Customize email templates sent to your tournament participants
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Card className="border-blue-200">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-base">Registration Confirmation</CardTitle>
+                        <CardDescription className="text-sm">Sent when users register for tournaments</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          <p className="text-sm font-medium">Variables Available:</p>
+                          <div className="flex flex-wrap gap-1">
+                            {['participant_name', 'tournament_name', 'tournament_date', 'registration_id'].map(variable => (
+                              <Badge key={variable} variant="outline" className="text-xs">
+                                {variable}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                        <Button variant="outline" size="sm" className="mt-4" data-testid="edit-registration-email">
+                          <Edit className="h-3 w-3 mr-1" />
+                          Customize
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-green-200">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-base">Payment Confirmation</CardTitle>
+                        <CardDescription className="text-sm">Sent after successful payments</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          <p className="text-sm font-medium">Variables Available:</p>
+                          <div className="flex flex-wrap gap-1">
+                            {['participant_name', 'amount_paid', 'transaction_id', 'payment_date'].map(variable => (
+                              <Badge key={variable} variant="outline" className="text-xs">
+                                {variable}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                        <Button variant="outline" size="sm" className="mt-4" data-testid="edit-payment-email">
+                          <Edit className="h-3 w-3 mr-1" />
+                          Customize
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-purple-200">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-base">Tournament Updates</CardTitle>
+                        <CardDescription className="text-sm">Bracket updates and results</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          <p className="text-sm font-medium">Variables Available:</p>
+                          <div className="flex flex-wrap gap-1">
+                            {['tournament_name', 'bracket_url', 'next_game_time', 'current_round'].map(variable => (
+                              <Badge key={variable} variant="outline" className="text-xs">
+                                {variable}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                        <Button variant="outline" size="sm" className="mt-4" data-testid="edit-update-email">
+                          <Edit className="h-3 w-3 mr-1" />
+                          Customize
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-orange-200">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-base">Merchandise Orders</CardTitle>
+                        <CardDescription className="text-sm">Order confirmations and shipping updates</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          <p className="text-sm font-medium">Variables Available:</p>
+                          <div className="flex flex-wrap gap-1">
+                            {['customer_name', 'order_id', 'items_ordered', 'shipping_address'].map(variable => (
+                              <Badge key={variable} variant="outline" className="text-xs">
+                                {variable}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                        <Button variant="outline" size="sm" className="mt-4" data-testid="edit-merch-email">
+                          <Edit className="h-3 w-3 mr-1" />
+                          Customize
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="analytics" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5" />
+                    Advanced Analytics & Reporting
+                  </CardTitle>
+                  <CardDescription>
+                    Enterprise-grade analytics and custom reporting capabilities
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <Card className="border-indigo-200">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <div className="w-3 h-3 bg-indigo-500 rounded-full"></div>
+                          Revenue Analytics
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <ul className="space-y-2 text-sm">
+                          <li>• Tournament revenue tracking</li>
+                          <li>• Merchandise sales analytics</li>
+                          <li>• Payment method breakdown</li>
+                          <li>• Revenue sharing reports</li>
+                          <li>• Seasonal performance trends</li>
+                        </ul>
+                        <Badge className="mt-3 bg-indigo-100 text-indigo-800">Enterprise Feature</Badge>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-emerald-200">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
+                          Participant Analytics
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <ul className="space-y-2 text-sm">
+                          <li>• Registration conversion rates</li>
+                          <li>• Participant demographics</li>
+                          <li>• Return participant analysis</li>
+                          <li>• Geographic distribution</li>
+                          <li>• Engagement scoring</li>
+                        </ul>
+                        <Badge className="mt-3 bg-emerald-100 text-emerald-800">Enterprise Feature</Badge>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-amber-200">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
+                          Website Analytics
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <ul className="space-y-2 text-sm">
+                          <li>• Page view analytics</li>
+                          <li>• Conversion funnels</li>
+                          <li>• User journey mapping</li>
+                          <li>• Mobile vs desktop usage</li>
+                          <li>• A/B testing results</li>
+                        </ul>
+                        <Badge className="mt-3 bg-amber-100 text-amber-800">Enterprise Feature</Badge>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">Custom Reporting Dashboard</CardTitle>
+                      <CardDescription>Build custom reports for stakeholders and investors</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <p className="text-sm font-medium">Available Report Types:</p>
+                          <ul className="space-y-1 text-sm text-muted-foreground">
+                            <li>• Executive Summary Reports</li>
+                            <li>• Financial Performance Reports</li>
+                            <li>• Tournament Success Metrics</li>
+                            <li>• User Engagement Reports</li>
+                          </ul>
+                        </div>
+                        <div className="space-y-2">
+                          <p className="text-sm font-medium">Export Options:</p>
+                          <ul className="space-y-1 text-sm text-muted-foreground">
+                            <li>• PDF with branded headers</li>
+                            <li>• Excel with custom charts</li>
+                            <li>• CSV for data analysis</li>
+                            <li>• Automated email delivery</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </CardContent>
               </Card>
             </TabsContent>

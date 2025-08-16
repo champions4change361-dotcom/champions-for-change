@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Edit, Trash2, Eye, Save, Layout, Image, Type, Link } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, Save, Layout, Image, Type, Link, ShoppingCart, Users, Calendar, BarChart3 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
@@ -318,10 +318,16 @@ export default function WebsiteBuilder() {
           <h1 className="text-3xl font-bold">Website Builder</h1>
           <p className="text-muted-foreground">Create and manage custom pages for your white-label platform</p>
         </div>
-        <Button onClick={handleNewPage} data-testid="button-new-page">
-          <Plus className="h-4 w-4 mr-2" />
-          New Page
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={handleNewPage} data-testid="button-new-page">
+            <Plus className="h-4 w-4 mr-2" />
+            New Page
+          </Button>
+          <Button variant="outline" data-testid="button-tournament-integration">
+            <Calendar className="h-4 w-4 mr-2" />
+            Tournament Integration
+          </Button>
+        </div>
       </div>
 
       <div className="grid lg:grid-cols-4 gap-8">
