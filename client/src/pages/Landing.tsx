@@ -22,8 +22,18 @@ export default function Landing() {
             <div className="flex items-center justify-between h-16">
               {/* Arena Logo */}
               <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 flex items-center justify-center">
-                  <img src={championLogoNew} alt="Champions for Change" className="w-full h-full object-contain logo-flip" />
+                <div className="w-16 h-16 flex items-center justify-center">
+                  <video 
+                    autoPlay 
+                    loop 
+                    muted 
+                    playsInline
+                    className="w-full h-full object-cover rounded-full logo-flip"
+                    data-testid="champions-logo-video-header"
+                  >
+                    <source src={championVideo} type="video/mp4" />
+                    <img src={championLogo} alt="Champions for Change" className="w-full h-full object-cover rounded-full" />
+                  </video>
                 </div>
                 <div>
                   <h1 className="text-xl font-bold text-white">Champions for Change</h1>
@@ -73,22 +83,12 @@ export default function Landing() {
           </div>
           <div className="relative p-12">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
-              {/* Video Section */}
+              {/* Logo Section */}
               <div className="order-2 lg:order-1">
-                <div className="relative rounded-xl overflow-hidden shadow-2xl border border-blue-400/20">
-                  <video 
-                    autoPlay 
-                    loop 
-                    muted 
-                    playsInline
-                    className="w-full h-auto"
-                    data-testid="champions-logo-video"
-                  >
-                    <source src={championVideo} type="video/mp4" />
-                    <div className="bg-slate-600 p-8 flex items-center justify-center">
-                      <img src={championLogo} alt="Champions for Change" className="max-w-full h-auto" />
-                    </div>
-                  </video>
+                <div className="relative w-80 h-80 mx-auto rounded-full overflow-hidden shadow-2xl border border-blue-400/20">
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-700 via-slate-600 to-slate-800">
+                    <img src={championLogoNew} alt="Champions for Change" className="w-3/4 h-3/4 object-contain" />
+                  </div>
                 </div>
               </div>
               
