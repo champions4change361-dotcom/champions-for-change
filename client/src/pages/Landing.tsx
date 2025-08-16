@@ -416,6 +416,7 @@ export default function Landing() {
                 size="lg" 
                 variant="outline"
                 className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10 hover:border-blue-400 px-8 py-4 text-lg"
+                onClick={() => window.location.href = "/pricing"}
                 data-testid="button-learn-more-registration"
               >
                 Learn More
