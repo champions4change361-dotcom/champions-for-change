@@ -4079,12 +4079,17 @@ async function initializeStorage(): Promise<IStorage> {
   if (process.env.DATABASE_URL) {
     try {
       const dbStorage = new DbStorage();
-      // Simple connection test without expensive operations
+      // Test both connection and table existence
       await dbStorage.db.execute(sql`SELECT 1`);
+      
+      // Check if required tables exist
+      await dbStorage.db.execute(sql`SELECT 1 FROM users LIMIT 1`);
+      await dbStorage.db.execute(sql`SELECT 1 FROM sessions LIMIT 1`);
+      
       console.log("✅ Database connection successful, using DbStorage");
       return dbStorage;
     } catch (error) {
-      console.warn("⚠️  Database connection failed, falling back to MemStorage:", (error as Error).message);
+      console.warn("⚠️  Database connection failed or tables missing, falling back to MemStorage:", (error as Error).message);
     }
   }
   
