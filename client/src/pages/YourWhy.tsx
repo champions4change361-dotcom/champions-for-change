@@ -19,6 +19,11 @@ import { useDomain } from '@/hooks/useDomain';
 
 export default function YourWhy() {
   const { config, isFantasyDomain, isProDomain, isSchoolDomain } = useDomain();
+  
+  // Scroll to top when component mounts
+  React.useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   // Determine messaging based on domain
   const getHeroContent = () => {
@@ -41,7 +46,7 @@ export default function YourWhy() {
     // Default school domain messaging
     return {
       title: "Your Why",
-      subtitle: "We know. Central office says it again. \"Don't forget your why.\" You might roll your eyes. But deep down, through all the challenges, you still have that why. That drive to do good.",
+      subtitle: "We know, you are always told, \"Don't Forget Your Why\". You might roll your eyes. But deep down, through all the challenges, you never forgot your why. You never lost the drive to do good.",
       description: "Most of us in education have heard \"your why\" so many times we could groan. But we actually do have a why, even through the madness of increasing demands and challenging conditions. It's almost always intrinsic - that authentic desire to do good."
     };
   };
@@ -129,7 +134,7 @@ export default function YourWhy() {
           </div>
           
           <p className="text-xl text-gray-700 mb-8 leading-relaxed">
-            {heroContent.subtitle}
+            We know, you are always told, <em>"Don't Forget Your Why"</em>. You might roll your eyes. But deep down, through all the challenges, you never forgot your why. You never lost the drive to do good.
           </p>
           
           <p className="text-lg text-gray-600 mb-8 leading-relaxed max-w-3xl mx-auto">
