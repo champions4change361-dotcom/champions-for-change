@@ -1,7 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { setupDomainRoutes } from "./domainRoutes";
 
 console.log('🏫 District athletics management platform initialized');
 console.log('💚 Champions for Change nonprofit mission active');
@@ -76,9 +75,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       next();
     }
   });
-  
-  // Setup domain-aware routes
-  setupDomainRoutes(app);
 
   // Basic user authentication endpoint
   app.get("/api/auth/user", isAuthenticated, async (req: any, res) => {
