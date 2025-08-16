@@ -3,9 +3,6 @@ import { createServer, type Server } from "http";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { setupDomainRoutes } from "./domainRoutes";
 
-console.log('🏫 District athletics management platform initialized');
-console.log('💚 Champions for Change nonprofit mission active');
-
 export async function registerRoutes(app: Express): Promise<Server> {
   // PRIORITY: Health check endpoints first for fastest response
   app.get('/api/health', (req, res) => {
