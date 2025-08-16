@@ -81,8 +81,13 @@ app.use((req, res, next) => {
     }
   });
 
-  // Setup Vite after server is listening to avoid startup delays
-  await setupVite(app, server);
+  // Setup Vite only in development mode to avoid production deployment issues
+  if (process.env.NODE_ENV === 'development') {
+    await setupVite(app, server);
+  } else {
+    // In production, serve static files from the build directory
+    serveStatic(app);
+  }
   
   server.on('error', (err: any) => {
     console.error('❌ Server error:', err);
