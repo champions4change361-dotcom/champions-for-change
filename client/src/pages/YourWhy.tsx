@@ -267,7 +267,7 @@ export default function YourWhy() {
                   <ul className="space-y-3 text-gray-700">
                     <li className="flex items-start">
                       <ArrowRight className="h-5 w-5 text-blue-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Your athletic fees directly fund student educational opportunities</span>
+                      <span>Your district subscription funds student educational opportunities (optional concession integration available)</span>
                     </li>
                     <li className="flex items-start">
                       <ArrowRight className="h-5 w-5 text-blue-600 mr-2 mt-0.5 flex-shrink-0" />
