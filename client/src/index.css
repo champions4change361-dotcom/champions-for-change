@@ -350,4 +350,28 @@
   .logo-flip:hover {
     animation-duration: 1s;
   }
+
+  /* Hero logo spinning animation - spins 4 times then stops */
+  @keyframes spin4Times {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(1440deg); /* 4 full rotations (360deg × 4) */
+    }
+  }
+
+  .spin-4x {
+    animation: spin4Times 1.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    transform-origin: center;
+  }
+
+  /* Hero logo hover effect */
+  .hero-logo-spin {
+    transition: transform 0.3s ease;
+  }
+
+  .hero-logo-spin:hover {
+    transform: scale(1.05);
+  }
 }

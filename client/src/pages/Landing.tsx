@@ -31,7 +31,7 @@ export default function Landing() {
                     loop 
                     muted 
                     playsInline
-                    className="w-full h-full object-cover rounded-full logo-flip"
+                    className="w-full h-full object-cover rounded-full"
                     data-testid="champions-logo-video-header"
                   >
                     <source src={championVideo} type="video/mp4" />
@@ -98,9 +98,36 @@ export default function Landing() {
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               {/* Logo Section */}
               <div className="order-2 lg:order-1">
-                <div className="relative w-80 h-80 mx-auto rounded-full overflow-hidden shadow-2xl border border-blue-400/20">
+                <div 
+                  className="relative w-80 h-80 mx-auto rounded-full overflow-hidden shadow-2xl border border-blue-400/20 cursor-pointer hero-logo-spin"
+                  onClick={(e) => {
+                    const element = e.currentTarget;
+                    // Add spinning animation
+                    element.classList.add('spin-4x');
+                    
+                    // Check if this is the second click (element already has clicked state)
+                    if (element.classList.contains('clicked-once')) {
+                      // Second click - spin then redirect
+                      setTimeout(() => {
+                        window.location.href = '/register';
+                      }, 1600); // Wait for spin to complete
+                    } else {
+                      // First click - just spin and mark as clicked
+                      element.classList.add('clicked-once');
+                      // Remove spin class after animation completes
+                      setTimeout(() => {
+                        element.classList.remove('spin-4x');
+                      }, 1600);
+                    }
+                  }}
+                  data-testid="hero-logo-spinner"
+                >
                   <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-700 via-slate-600 to-slate-800">
                     <img src={championLogoNew} alt="Champions for Change" className="w-3/4 h-3/4 object-contain" />
+                  </div>
+                  {/* Hover indication */}
+                  <div className="absolute inset-0 bg-white/10 opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                    <span className="text-white font-semibold bg-black/50 px-3 py-1 rounded-full text-sm">Click to Spin</span>
                   </div>
                 </div>
               </div>
