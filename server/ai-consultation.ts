@@ -989,8 +989,8 @@ export function analyzeWebsiteBuilderQuery(userInput: string): KeystoneConsultat
       "Players/fans get read-only access to view results and schedules",
       "Champions for Change branding and educational impact messaging integrated throughout"
     ],
-    venue_suggestions: generateVenueSuggestions(sport),
-    schedule_template: generateScheduleTemplate(sport, participants)
+    venue_suggestions: generateVenueSuggestions(sport, ageGroup),
+    schedule_template: generateScheduleTemplate(sport, format, participants)
   };
 }
 

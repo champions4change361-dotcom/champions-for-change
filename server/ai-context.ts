@@ -57,7 +57,7 @@ export class AIContextService {
     }
 
     // Get user's tournament history for context
-    userTournaments = await this.storage.getTournamentsByUser(userId);
+    userTournaments = await this.storage.getTournaments();
 
     return {
       user: {
