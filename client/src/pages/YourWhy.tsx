@@ -238,15 +238,23 @@ export default function YourWhy() {
                     </li>
                     <li className="flex items-start">
                       <ArrowRight className="h-5 w-5 text-green-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Professional-grade tournament system for every school in your district</span>
+                      <span>Comprehensive health & safety analytics with AI-powered injury risk monitoring</span>
                     </li>
                     <li className="flex items-start">
                       <ArrowRight className="h-5 w-5 text-green-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Real-time scoring, team management, and parent communication</span>
+                      <span>Athletic trainer scheduling system with HIPAA-compliant medical documentation</span>
                     </li>
                     <li className="flex items-start">
                       <ArrowRight className="h-5 w-5 text-green-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>White-label mobile apps for your entire athletic program</span>
+                      <span>Complete management of 50+ UIL academic and athletic competitions</span>
+                    </li>
+                    <li className="flex items-start">
+                      <ArrowRight className="h-5 w-5 text-green-600 mr-2 mt-0.5 flex-shrink-0" />
+                      <span>Real-time performance trend analysis with automated health alerts</span>
+                    </li>
+                    <li className="flex items-start">
+                      <ArrowRight className="h-5 w-5 text-green-600 mr-2 mt-0.5 flex-shrink-0" />
+                      <span>Multi-role authentication for district-wide athletic and academic oversight</span>
                     </li>
                   </ul>
                 </div>
