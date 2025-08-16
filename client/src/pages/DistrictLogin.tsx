@@ -21,7 +21,7 @@ export default function DistrictLogin() {
             </div>
           </div>
           <Badge variant="secondary" className="text-lg px-4 py-2">
-            Serving 50+ Schools Across Texas
+            Ready to Serve Texas School Districts
           </Badge>
         </div>
 
@@ -83,7 +83,7 @@ export default function DistrictLogin() {
             {/* Login Button */}
             <Button 
               onClick={handleLogin}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-lg py-6"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-lg py-6 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:drop-shadow-lg district-portal-glow"
               data-testid="button-district-login"
             >
               Access District Portal

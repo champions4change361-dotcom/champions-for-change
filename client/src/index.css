@@ -409,6 +409,12 @@
     filter: drop-shadow(0 10px 20px rgba(249, 115, 22, 0.3));
   }
 
+  /* District portal glow effect */
+  .district-portal-glow:hover {
+    filter: drop-shadow(0 8px 16px rgba(37, 99, 235, 0.4));
+    box-shadow: 0 0 20px rgba(37, 99, 235, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
   /* Hide development error overlay to prevent blocking view */
   div[data-vite-plugin] {
     display: none !important;
