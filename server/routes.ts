@@ -537,7 +537,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Server-side Miller VLC Demo route for district firewall compatibility
   // Handle as query parameter to bypass URL path filtering
-  app.get('/', (req, res) => {
+  app.get('/', (req, res, next) => {
     if (req.query.demo === 'miller' || req.query.vlc === 'true') {
       res.send(`
 <!DOCTYPE html>
@@ -653,10 +653,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 </html>
       `);
       return;
+    } else {
+      // Continue with normal routing for other requests
+      // Let Vite middleware handle the React app
+      next();
     }
-    
-    // Continue with normal routing for other requests
-    // This route is handled by Vite middleware now
   });
   
   // Setup domain-aware routes
