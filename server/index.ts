@@ -23,11 +23,7 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Simplified root endpoint - always return 200 for deployment health checks
-app.get('/', (req, res, next) => {
-  // Immediately return 200 for all deployment health checks
-  return res.status(200).send('ok');
-});
+// Root endpoint will be handled by Vite/React app after setupVite() is called
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
