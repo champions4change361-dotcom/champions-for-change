@@ -5,7 +5,7 @@ import { Trophy, Users, Zap, Globe, CreditCard, Star, Heart, GraduationCap, MapP
 import { useLocation } from "wouter";
 import championLogo from "@assets/IMG_1442_1754896656003.jpeg";
 import championVideo from "@assets/Champions for Change Logo_1755291031903.mp4";
-import championLogoNew from "@assets/Unanimated Logo Chanmpions for Change_1755291625609.png";
+import championLogoNew from "@assets/Untitled design_1755380695198.png";
 import { DonationSection } from "@/components/DonationSection";
 import { SignupSection } from "@/components/SignupSection";
 import { CrossPlatformPromotion, FantasyPromotion } from "@/components/CrossPlatformPromotion";
@@ -99,7 +99,7 @@ export default function Landing() {
               {/* Logo Section */}
               <div className="order-2 lg:order-1">
                 <div 
-                  className="relative w-80 h-80 mx-auto rounded-full overflow-hidden shadow-2xl border border-blue-400/20 cursor-pointer hero-logo-spin"
+                  className="relative w-80 h-80 mx-auto cursor-pointer hero-logo-coin"
                   onClick={(e) => {
                     const element = e.currentTarget;
                     // Add spinning animation
@@ -107,7 +107,7 @@ export default function Landing() {
                     
                     // Check if this is the second click (element already has clicked state)
                     if (element.classList.contains('clicked-once')) {
-                      // Second click - spin then redirect
+                      // Second click - spin then redirect to onboarding
                       setTimeout(() => {
                         window.location.href = '/register';
                       }, 1600); // Wait for spin to complete
@@ -120,14 +120,18 @@ export default function Landing() {
                       }, 1600);
                     }
                   }}
-                  data-testid="hero-logo-spinner"
+                  data-testid="hero-logo-coin"
                 >
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-700 via-slate-600 to-slate-800">
-                    <img src={championLogoNew} alt="Champions for Change" className="w-3/4 h-3/4 object-contain" />
+                  <div className="w-full h-full rounded-full overflow-hidden shadow-2xl border-4 border-orange-400/30 coin-flip-entrance">
+                    <img 
+                      src={championLogoNew} 
+                      alt="Champions for Change" 
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   {/* Hover indication */}
-                  <div className="absolute inset-0 bg-white/10 opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                    <span className="text-white font-semibold bg-black/50 px-3 py-1 rounded-full text-sm">Click to Spin</span>
+                  <div className="absolute inset-0 bg-gradient-to-br from-orange-400/20 to-emerald-400/20 opacity-0 hover:opacity-100 transition-all duration-300 flex items-center justify-center rounded-full">
+                    <span className="text-white font-semibold bg-black/60 px-4 py-2 rounded-full text-sm shadow-lg">Click for Onboarding</span>
                   </div>
                 </div>
               </div>

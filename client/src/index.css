@@ -351,28 +351,62 @@
     animation-duration: 1s;
   }
 
-  /* Hero logo spinning animation - spins 4 times then stops */
-  @keyframes spin4Times {
+  /* Hero logo coin flip animation - 4 full 3D coin flips */
+  @keyframes coinFlip4Times {
     0% {
-      transform: rotate(0deg);
+      transform: perspective(800px) rotateY(0deg) scale(1);
+    }
+    25% {
+      transform: perspective(800px) rotateY(360deg) scale(1.1);
+    }
+    50% {
+      transform: perspective(800px) rotateY(720deg) scale(1);
+    }
+    75% {
+      transform: perspective(800px) rotateY(1080deg) scale(1.1);
     }
     100% {
-      transform: rotate(1440deg); /* 4 full rotations (360deg × 4) */
+      transform: perspective(800px) rotateY(1440deg) scale(1); /* 4 full rotations */
     }
   }
 
   .spin-4x {
-    animation: spin4Times 1.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    animation: coinFlip4Times 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    transform-style: preserve-3d;
     transform-origin: center;
   }
 
-  /* Hero logo hover effect */
-  .hero-logo-spin {
-    transition: transform 0.3s ease;
+  /* Coin flip entrance animation - fades in and rotates 360° on page load */
+  @keyframes coinFlipEntrance {
+    0% {
+      opacity: 0;
+      transform: perspective(800px) rotateY(-180deg) scale(0.8);
+    }
+    50% {
+      opacity: 0.7;
+      transform: perspective(800px) rotateY(90deg) scale(0.95);
+    }
+    100% {
+      opacity: 1;
+      transform: perspective(800px) rotateY(0deg) scale(1);
+    }
   }
 
-  .hero-logo-spin:hover {
-    transform: scale(1.05);
+  .coin-flip-entrance {
+    animation: coinFlipEntrance 2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    transform-style: preserve-3d;
+    animation-delay: 0.5s;
+    opacity: 0; /* Start invisible until animation begins */
+  }
+
+  /* Hero logo hover effect */
+  .hero-logo-coin {
+    transition: all 0.3s ease;
+  }
+
+  .hero-logo-coin:hover {
+    transform: scale(1.05) perspective(800px) rotateY(5deg);
+    filter: drop-shadow(0 10px 20px rgba(249, 115, 22, 0.3));
   }
 
   /* Hide development error overlay to prevent blocking view */
