@@ -4,25 +4,7 @@ import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
 
-// Add immediate health check endpoints BEFORE any middleware for fastest response
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'healthy', timestamp: new Date().toISOString() });
-});
-app.get('/healthz', (req, res) => {
-  res.status(200).json({ status: 'healthy', timestamp: new Date().toISOString() });
-});
-app.get('/ping', (req, res) => res.status(200).send('pong'));
-
-// Replit deployment health check - simple and reliable
-app.get('/api/health', (req, res) => {
-  res.status(200).json({ 
-    status: 'healthy', 
-    service: 'UIL Academic Competition Platform',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
-  });
-});
-
+// Health check endpoints are handled in routes.ts to avoid conflicts
 // Root endpoint will be handled by Vite/React app after setupVite() is called
 
 app.use(express.json());
@@ -90,8 +72,8 @@ app.use((req, res, next) => {
 
     // Send error response if not already sent
     if (!res.headersSent) {
-      // For health check endpoints, always return 200 even on errors
-      if (req.path === '/' || req.path === '/health' || req.path === '/healthz' || req.path === '/ping') {
+      // For root endpoint, always return 200 even on errors (health checks handled in routes.ts)
+      if (req.path === '/') {
         res.status(200).send('ok');
       } else {
         res.status(status).json({ message });

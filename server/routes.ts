@@ -24,6 +24,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.status(200).send('ok');
   });
 
+  app.get('/ping', (req, res) => {
+    res.status(200).send('pong');
+  });
+
   // Setup authentication
   await setupAuth(app);
 
