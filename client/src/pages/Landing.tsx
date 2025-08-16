@@ -131,7 +131,7 @@ export default function Landing() {
                       data-testid="button-grant-funding"
                     >
                       <Target className="h-4 w-4 mr-2" />
-                      Grant Funding
+                      Grant Opportunities
                     </Button>
                     <Button 
                       size="lg" 

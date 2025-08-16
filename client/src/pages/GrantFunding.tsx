@@ -37,14 +37,14 @@ export default function GrantFunding() {
             Grant Funding Opportunities
           </h1>
           <p className="text-xl max-w-3xl mx-auto mb-8" data-testid="text-hero-subtitle">
-            Help your district secure funding for athletic safety technology that prevents injuries and protects student athletes
+            We've identified grant opportunities that support athletic safety technology. Use these resources to fund your platform.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Button size="lg" className="bg-yellow-500 hover:bg-yellow-600 text-blue-900" data-testid="button-download-guide">
               Download Grant Guide
             </Button>
-            <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-blue-900" data-testid="button-contact-support">
-              Grant Application Support
+            <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-blue-900" data-testid="button-grant-resources">
+              View Grant Resources
             </Button>
           </div>
         </div>
@@ -347,8 +347,8 @@ export default function GrantFunding() {
                 Our safety technology is an investment in student welfare that saves money and protects futures.
               </p>
               <div className="flex flex-wrap justify-center gap-4">
-                <Button size="lg" className="bg-green-600 hover:bg-green-700" data-testid="button-request-support">
-                  Request Grant Writing Support
+                <Button size="lg" className="bg-green-600 hover:bg-green-700" data-testid="button-grant-platforms">
+                  Find Grant Writing Services
                 </Button>
                 <Button size="lg" variant="outline" data-testid="button-download-template">
                   Download Application Template
@@ -359,19 +359,78 @@ export default function GrantFunding() {
         </div>
       </section>
 
+      {/* Grant Writing Resources */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white dark:bg-slate-800">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12" data-testid="text-resources-title">
+            Trusted Grant Writing Resources
+          </h2>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <Card className="border-t-4 border-blue-500" data-testid="card-instrumentl">
+              <CardHeader>
+                <CardTitle className="text-blue-900 dark:text-blue-100">Instrumentl</CardTitle>
+                <CardDescription>Grant discovery and management platform</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                  Professional grant search engine with application tracking. Used by thousands of nonprofits and schools.
+                </p>
+                <Button variant="outline" size="sm" className="w-full" onClick={() => window.open('https://instrumentl.com', '_blank')}>
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Visit Instrumentl
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="border-t-4 border-green-500" data-testid="card-grantwatch">
+              <CardHeader>
+                <CardTitle className="text-green-900 dark:text-green-100">GrantWatch</CardTitle>
+                <CardDescription>Comprehensive grant database</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                  Extensive database of federal, state, and private foundation grants with search filters.
+                </p>
+                <Button variant="outline" size="sm" className="w-full" onClick={() => window.open('https://grantwatch.com', '_blank')}>
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Visit GrantWatch
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="border-t-4 border-purple-500" data-testid="card-upwork">
+              <CardHeader>
+                <CardTitle className="text-purple-900 dark:text-purple-100">Professional Grant Writers</CardTitle>
+                <CardDescription>Freelance grant writing specialists</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                  Find experienced grant writers on platforms like Upwork and Fiverr who specialize in educational funding.
+                </p>
+                <Button variant="outline" size="sm" className="w-full" onClick={() => window.open('https://upwork.com/freelance-jobs/grant-writing/', '_blank')}>
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Find Grant Writers
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
       {/* Contact Section */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-900 dark:bg-slate-950 text-white">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl font-bold mb-6" data-testid="text-contact-title">
-            Need Help with Your Grant Application?
+            Need Professional Grant Writing Help?
           </h2>
           <p className="text-xl text-gray-300 mb-8" data-testid="text-contact-description">
-            Our team has experience helping districts secure grant funding for athletic safety technology. 
-            We provide application support, documentation, and ROI calculations for your grant submissions.
+            While we can't write grants for you, we've identified trusted grant writing services that specialize in educational technology funding. 
+            We provide the platform documentation and ROI data you'll need for your applications.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Button size="lg" className="bg-yellow-500 hover:bg-yellow-600 text-gray-900" data-testid="button-grant-consultation">
-              Schedule Grant Consultation
+            <Button size="lg" className="bg-yellow-500 hover:bg-yellow-600 text-gray-900" data-testid="button-trusted-writers">
+              Find Trusted Grant Writers
             </Button>
             <Link href="/">
               <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-gray-900" data-testid="button-return-home">
