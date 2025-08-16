@@ -94,6 +94,18 @@ export default function FantasyCoaching() {
         </div>
       </div>
 
+      {/* AI Disclaimer */}
+      <div className="max-w-7xl mx-auto px-4 pt-6">
+        <Alert className="border-amber-200 bg-amber-50" data-testid="ai-disclaimer">
+          <Brain className="h-4 w-4 text-amber-600" />
+          <AlertDescription className="text-amber-900">
+            <strong>Foundation AI Disclaimer:</strong> Foundation AI can get things wrong - do your own research. 
+            "We can tell you the Cowboys secondary is hurt and the Browns QB is trending up… 
+            but we can't predict when someone's about to have their 'Matt Ryan moment.'"
+          </AlertDescription>
+        </Alert>
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Week Selection */}
         <Card className="mb-6" data-testid="week-selection">
