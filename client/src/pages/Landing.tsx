@@ -53,13 +53,23 @@ export default function Landing() {
               </div>
 
               {/* Login Button */}
-              <Button 
-                onClick={() => window.location.href = "/api/login"}
-                className="bg-orange-500 hover:bg-orange-600 text-white font-semibold"
-                data-testid="button-login"
-              >
-                Enter Arena
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button 
+                  onClick={() => window.location.href = "/api/login"}
+                  className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-6 py-3"
+                  data-testid="button-login"
+                >
+                  Login to Arena
+                </Button>
+                <Button 
+                  onClick={() => window.location.href = "/api/login?user_type=new"}
+                  variant="outline"
+                  className="border-orange-500 text-orange-400 hover:bg-orange-500/10 hover:border-orange-400 px-6 py-3 font-semibold"
+                  data-testid="button-signup"
+                >
+                  Sign Up Free
+                </Button>
+              </div>
             </div>
           </div>
         </header>
