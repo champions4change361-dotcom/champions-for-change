@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'wouter';
 import { ArrowLeft, Trophy, Settings as SettingsIcon, Shield, Crown, Palette, Globe, CreditCard } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from "@/hooks/useAuth";
 import { AccountLinking } from "@/components/AccountLinking";
 import { CrossPlatformPromotion } from "@/components/CrossPlatformPromotion";

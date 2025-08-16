@@ -276,7 +276,14 @@ export default function FantasyCoaching() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <LiveScoring />
+                <LiveScoring 
+                  userRole="fantasy-coach"
+                  userId={user?.id || "guest"}
+                  canUpdateScores={false}
+                  assignedEvents={[]}
+                  assignedVenues={[]}
+                  tournamentName="Fantasy Coaching"
+                />
               </CardContent>
             </Card>
           </TabsContent>
