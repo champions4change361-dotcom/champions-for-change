@@ -89,7 +89,7 @@ export function DomainAwareNavbar() {
                   <Button 
                     variant="ghost" 
                     size="sm"
-                    onClick={() => window.open('https://fantasy.trantortournaments.org', '_blank')}
+                    onClick={() => window.location.href = '/coaches-lounge'}
                     className="text-purple-600 hover:text-purple-700"
                     data-testid="navbar-link-fantasy"
                   >

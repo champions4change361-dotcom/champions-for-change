@@ -164,7 +164,7 @@ export function CrossPlatformPromotion({ placement }: CrossPlatformPromotionProp
             </div>
           </div>
           <Button 
-            onClick={() => window.open('https://fantasy.trantortournaments.org', '_blank')}
+            onClick={() => window.location.href = '/coaches-lounge'}
             className="bg-purple-600 hover:bg-purple-700 text-white"
             data-testid="button-fantasy-promo"
           >
@@ -203,7 +203,7 @@ export function CrossPlatformPromotion({ placement }: CrossPlatformPromotionProp
               <span className="text-white text-sm">Age-verified leagues</span>
             </div>
             <Button 
-              onClick={() => window.open('https://fantasy.trantortournaments.org', '_blank')}
+              onClick={() => window.location.href = '/coaches-lounge'}
               className="w-full bg-purple-600 hover:bg-purple-700 text-white"
               data-testid="button-fantasy-sidebar"
             >
@@ -225,7 +225,7 @@ export function CrossPlatformPromotion({ placement }: CrossPlatformPromotionProp
             Professional fantasy sports with real money leagues
           </p>
           <Button 
-            onClick={() => window.open('https://fantasy.trantortournaments.org', '_blank')}
+            onClick={() => window.location.href = '/coaches-lounge'}
             variant="outline"
             className="border-purple-500/50 text-purple-400 hover:bg-purple-500/10"
             data-testid="button-fantasy-signup"
