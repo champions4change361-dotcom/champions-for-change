@@ -21,56 +21,56 @@ export function EducationPricingSection() {
       ],
       cta: 'Get Started Free',
       buttonColor: 'bg-blue-600 hover:bg-blue-700',
-      note: '$25 suggested donation per tournament to support student educational trips',
+      note: '$25 suggested donation per tournament to support Champions for Change student trips',
       icon: GraduationCap,
       popular: false,
       badge: 'Free'
     },
     {
-      name: 'Champion',
-      price: '$99',
+      name: 'Tournament Organizer',
+      price: '$39',
       period: '/month',
-      description: 'Perfect for active schools, growing nonprofits',
+      description: 'Perfect for individual tournament organizers and coaches',
       features: [
         'Unlimited tournaments',
-        'Multi-school management',
         'AI tournament assistance',
         'Advanced analytics & reporting',
         'Custom branding options',
         'Priority email support',
         'Team management tools',
-        'Enhanced donation features'
+        'CSV bulk import/export',
+        '5-step tournament wizard'
       ],
-      cta: 'Start Champion',
+      cta: 'Start Tournament Organizer',
       buttonColor: 'bg-green-600 hover:bg-green-700',
-      note: 'Annual option: $990/year (save $198)',
+      note: 'Annual option: $399/year (save 2 months)',
       icon: Star,
       popular: true,
       badge: 'Most Popular'
     },
     {
       name: 'District Enterprise',
-      price: '$399',
-      period: '/month',
-      description: 'Perfect for large districts, major nonprofits',
+      price: '$4,500',
+      period: '/year',
+      description: 'Complete district-wide athletic management platform',
       features: [
-        'Everything in Champion',
-        'White-label branding',
-        'Custom domain support',
-        'Multi-organization support',
+        'Everything in Tournament Organizer',
+        'District-wide management for 50+ UIL competitions',
+        'HIPAA/FERPA compliant data management',
+        'Multi-school administration',
+        'Role-based access controls (Athletic Director to Student)',
+        'Comprehensive audit trails',
+        'White-label branding & custom domain',
         'Dedicated account manager',
-        'Priority phone support',
         'Staff training & onboarding',
-        'Custom integrations available',
-        'FERPA compliance',
-        'SLA guarantee'
+        'Save $26,000+ annually vs current solutions'
       ],
-      cta: 'Get District Access',
+      cta: 'Contact for District Pricing',
       buttonColor: 'bg-purple-600 hover:bg-purple-700',
-      note: 'Annual option: $3,990/year. Setup & training included!',
+      note: 'ROI: Fiscally irresponsible not to adopt. Price locked forever.',
       icon: Building,
       popular: false,
-      badge: 'Enterprise'
+      badge: 'Massive Savings'
     }
   ];
 

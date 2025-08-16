@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Users, Zap, Globe, CreditCard, Star, Heart, GraduationCap, MapPin, Award, Mail, Phone, Timer, UserCheck, Shield, Target } from "lucide-react";
+import { Trophy, Users, Zap, Globe, CreditCard, Star, Heart, GraduationCap, MapPin, Award, Mail, Phone, Timer, UserCheck, Shield, Target, Building } from "lucide-react";
 import { useLocation } from "wouter";
 import championLogo from "@assets/IMG_1442_1754896656003.jpeg";
 import championVideo from "@assets/Champions for Change Logo_1755291031903.mp4";
@@ -360,71 +360,129 @@ export default function Landing() {
           </div>
         </div>
 
-        {/* District Registration Section */}
+        {/* Pricing & Registration Section */}
         <div className="bg-slate-800 border border-blue-500/30 rounded-2xl p-8 mb-12">
           <div className="text-center mb-8">
-            <h3 className="text-3xl font-bold text-white mb-4">Organization Registration</h3>
+            <h3 className="text-3xl font-bold text-white mb-4">Choose Your Platform</h3>
             <p className="text-slate-300 text-lg max-w-3xl mx-auto">
-              Districts, charter schools, private schools, pony leagues, pop warner, and youth organizations can register for tournament management access. We support both digital payments and traditional check payments to accommodate all organizational policies.
+              Professional tournament management with pricing designed for educational organizations and enterprises. Every subscription supports Champions for Change student trips.
             </p>
           </div>
-          
+
+          {/* Pricing Cards */}
           <div className="grid md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-slate-700 border border-slate-600 rounded-xl p-6">
-              <h4 className="text-lg font-bold text-white mb-3 flex items-center">
-                <UserCheck className="h-5 w-5 mr-3 text-blue-400" />
-                District Admin
-              </h4>
-              <p className="text-slate-300 text-sm">Create tournaments, assign schools to events, manage district-wide competitions</p>
+            <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl p-6 text-white">
+              <div className="text-center">
+                <h4 className="text-2xl font-bold mb-2">Tournament Organizer</h4>
+                <div className="text-4xl font-bold mb-2">$39<span className="text-lg font-normal">/month</span></div>
+                <div className="text-blue-200 mb-4">or $399/year (save 2 months)</div>
+                <Button 
+                  className="w-full bg-white text-blue-600 hover:bg-blue-50 font-semibold"
+                  onClick={() => setLocation("/pricing?type=education")}
+                >
+                  Start Free Trial
+                </Button>
+                <p className="text-blue-200 text-sm mt-3">Perfect for coaches & individual organizers</p>
+              </div>
             </div>
-            
-            <div className="bg-slate-700 border border-slate-600 rounded-xl p-6">
-              <h4 className="text-lg font-bold text-white mb-3 flex items-center">
-                <Users className="h-5 w-5 mr-3 text-green-400" />
-                School Admin
-              </h4>
-              <p className="text-slate-300 text-sm">Assign coaches within your school to specific events, manage school participation</p>
+
+            <div className="bg-gradient-to-br from-green-600 to-green-700 rounded-xl p-6 text-white border-2 border-yellow-400">
+              <div className="text-center">
+                <Badge className="bg-yellow-400 text-green-800 mb-3">Most Popular</Badge>
+                <h4 className="text-2xl font-bold mb-2">Business Enterprise</h4>
+                <div className="text-4xl font-bold mb-2">$149<span className="text-lg font-normal">/month</span></div>
+                <div className="text-green-200 mb-4">or $1,499/year (save 2 months)</div>
+                <Button 
+                  className="w-full bg-white text-green-600 hover:bg-green-50 font-semibold"
+                  onClick={() => setLocation("/pricing?type=business")}
+                >
+                  Start Enterprise
+                </Button>
+                <p className="text-green-200 text-sm mt-3">Flexible solutions for any organization</p>
+              </div>
             </div>
-            
-            <div className="bg-slate-700 border border-slate-600 rounded-xl p-6">
-              <h4 className="text-lg font-bold text-white mb-3 flex items-center">
-                <Shield className="h-5 w-5 mr-3 text-purple-400" />
-                Coach
-              </h4>
-              <p className="text-slate-300 text-sm">Register teams, manage rosters, track your team's tournament participation</p>
+
+            <div className="bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl p-6 text-white">
+              <div className="text-center">
+                <h4 className="text-2xl font-bold mb-2">District Enterprise</h4>
+                <div className="text-4xl font-bold mb-2">$4,500<span className="text-lg font-normal">/year</span></div>
+                <div className="text-purple-200 mb-4">Save $26,000+ annually vs alternatives</div>
+                <Button 
+                  className="w-full bg-white text-purple-600 hover:bg-purple-50 font-semibold"
+                  onClick={() => setLocation("/login/district")}
+                >
+                  Contact for District Access
+                </Button>
+                <p className="text-purple-200 text-sm mt-3">Complete district-wide management</p>
+              </div>
+            </div>
+          </div>
+          
+          {/* Registration Workflows */}
+          <div className="text-center mb-6">
+            <h4 className="text-2xl font-bold text-white mb-4">Registration Workflows</h4>
+            <p className="text-slate-300 mb-6">Choose the right registration path for your organization type</p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6 mb-8">
+            {/* District Registration Workflow */}
+            <div className="bg-gradient-to-br from-purple-800 to-purple-900 rounded-xl p-6 border border-purple-500/30">
+              <div className="text-center mb-4">
+                <GraduationCap className="h-12 w-12 text-purple-400 mx-auto mb-3" />
+                <h4 className="text-xl font-bold text-white mb-2">District Registration</h4>
+                <p className="text-purple-200 text-sm">Complete district-wide management for K-12 schools</p>
+              </div>
+              <div className="space-y-3 text-sm text-purple-100 mb-6">
+                <div className="flex items-center"><UserCheck className="h-4 w-4 mr-2" />District Athletic Directors</div>
+                <div className="flex items-center"><Users className="h-4 w-4 mr-2" />Multi-school coordination</div>
+                <div className="flex items-center"><Shield className="h-4 w-4 mr-2" />HIPAA/FERPA compliance</div>
+                <div className="flex items-center"><Target className="h-4 w-4 mr-2" />50+ UIL competitions</div>
+              </div>
+              <Button 
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold"
+                onClick={() => setLocation("/login/district")}
+              >
+                District Login Portal
+              </Button>
+            </div>
+
+            {/* Enterprise Registration Workflow */}
+            <div className="bg-gradient-to-br from-green-800 to-green-900 rounded-xl p-6 border border-green-500/30">
+              <div className="text-center mb-4">
+                <Building className="h-12 w-12 text-green-400 mx-auto mb-3" />
+                <h4 className="text-xl font-bold text-white mb-2">Enterprise Registration</h4>
+                <p className="text-green-200 text-sm">Corporate, nonprofit, and organization tournaments</p>
+              </div>
+              <div className="space-y-3 text-sm text-green-100 mb-6">
+                <div className="flex items-center"><Users className="h-4 w-4 mr-2" />Corporate team building</div>
+                <div className="flex items-center"><Trophy className="h-4 w-4 mr-2" />Professional competitions</div>
+                <div className="flex items-center"><Zap className="h-4 w-4 mr-2" />AI tournament creation</div>
+                <div className="flex items-center"><CreditCard className="h-4 w-4 mr-2" />Flexible billing</div>
+              </div>
+              <Button 
+                className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold"
+                onClick={() => setLocation("/login/business")}
+              >
+                Enterprise Login Portal
+              </Button>
             </div>
           </div>
 
           <div className="text-center">
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
-              <Button 
-                size="lg" 
-                className="bg-blue-500 hover:bg-blue-600 text-white font-bold px-8 py-4 text-lg"
-                onClick={() => setLocation("/register")}
-                data-testid="button-register-district"
-              >
-                Register My District
-              </Button>
-              <Button 
-                size="lg" 
-                className="bg-green-500 hover:bg-green-600 text-white font-bold px-8 py-4 text-lg"
-                onClick={() => setLocation("/register-organization")}
-                data-testid="button-register-organization"
-              >
-                Register My Organization
-              </Button>
-            </div>
-            <div className="text-center">
+            <div className="mb-6">
               <Button 
                 size="lg" 
                 variant="outline"
-                className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10 hover:border-blue-400 px-8 py-4 text-lg"
-                onClick={() => setLocation("/pricing")}
-                data-testid="button-learn-more-registration"
+                className="border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/10 hover:border-yellow-400 px-8 py-4 text-lg"
+                onClick={() => window.open('https://fantasy.trantortournaments.org', '_blank')}
+                data-testid="button-fantasy-domain"
               >
-                Learn More
+                🎮 Fantasy Sports Domain →
               </Button>
             </div>
+            <p className="text-slate-400 text-sm">
+              Looking for fantasy sports? Visit our dedicated fantasy domain for adult entertainment features, professional leagues, and fantasy competitions.
+            </p>
           </div>
         </div>
 

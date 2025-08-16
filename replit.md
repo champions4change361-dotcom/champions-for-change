@@ -3,6 +3,19 @@
 ## Overview
 This platform is a white-label SaaS solution for the Champions for Change nonprofit, aiming to generate funding for educational opportunities for underprivileged youth. It serves as a comprehensive district academic and athletic management platform, covering all 50+ UIL competitions (academic and athletic). Its core purpose is to provide professional tournament management and district-wide administration services. Key capabilities include HIPAA/FERPA compliant data management, tournament creation, scheduling, enterprise-grade compliance, role-based access controls, comprehensive audit trails, user authentication, AI-powered tournament creation, custom branding, and a multi-tenant architecture with an expanded role hierarchy from district to student level. The platform enables full management of student health and educational data, emphasizing its mission-driven approach alongside data protection and regulatory compliance for educational institutions.
 
+## Recent Updates - December 2024: Enhanced Tournament Creation & Domain Architecture
+
+### Corrected Domain & Pricing Architecture
+- **Main Landing Domain**: `tournaments.trantortournaments.org` - District and Enterprise user registration
+- **Fantasy Domain**: `fantasy.trantortournaments.org` - Adult fantasy sports features ✅
+- **Professional Domain**: `pro.trantortournaments.org` - Corporate tournament solutions
+- **Corrected Pricing Strategy**:
+  - Tournament Organizer: $39/month ($399/year, save 2 months)
+  - Business Enterprise: $149/month ($1,499/year, save 2 months)  
+  - District Enterprise: $4,500/year (saves $26,000+ annually vs alternatives)
+- **Guaranteed Pricing Model**: "The price you pay at the time is the price you always pay"
+- **Registration Workflows**: Separate login portals for District (`/login/district`) and Enterprise (`/login/business`) users
+
 ## Recent Updates - December 2024: Enhanced Tournament Creation System
 ### 5-Step Tournament Creation Wizard
 - **Step 1**: Choose sport and format (with "Second Chance Bracket" terminology for double elimination)

@@ -27,10 +27,10 @@ export function BusinessPricingSection() {
       badge: 'Free'
     },
     {
-      name: 'Professional',
-      price: '$99',
+      name: 'Business Enterprise',
+      price: '$149',
       period: '/month',
-      description: 'Regular corporate events, growing companies',
+      description: 'Flexible enterprise solutions for any organization',
       features: [
         'Unlimited tournaments',
         'AI tournament assistance',
@@ -38,16 +38,17 @@ export function BusinessPricingSection() {
         'Custom branding options',
         'Priority email support',
         'Team management tools',
-        'Export capabilities',
-        'Multi-location support'
+        'CSV bulk import/export',
+        'Multi-location support',
+        'API access available'
       ],
-      cta: 'Start Professional',
+      cta: 'Start Enterprise',
       buttonColor: 'bg-green-600 hover:bg-green-700',
       icon: Star,
       popular: true,
       bestFor: 'Regular events, growing companies',
       badge: 'Most Popular',
-      note: 'Annual option: $990/year (save $198)'
+      note: 'Annual option: $1,499/year (save 2 months)'
     },
     {
       name: 'Enterprise',
