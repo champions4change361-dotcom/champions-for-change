@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Trophy, Users, Zap, Globe, CreditCard, Star, Heart, GraduationCap, MapPin, Award, Mail, Phone, Timer, UserCheck, Shield, Target } from "lucide-react";
+import { useLocation } from "wouter";
 import championLogo from "@assets/IMG_1442_1754896656003.jpeg";
 import championVideo from "@assets/Champions for Change Logo_1755291031903.mp4";
 import championLogoNew from "@assets/Unanimated Logo Chanmpions for Change_1755291625609.png";
@@ -12,6 +13,8 @@ import Footer from "@/components/Footer";
 import { AIConsultant } from "@/components/AIConsultant";
 
 export default function Landing() {
+  const [, setLocation] = useLocation();
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
       {/* Stadium Lighting Header */}
@@ -114,7 +117,7 @@ export default function Landing() {
                       size="lg" 
                       variant="outline"
                       className="border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10 hover:border-emerald-400 px-4 py-3 text-base"
-                      onClick={() => window.location.href = "/your-why"}
+                      onClick={() => setLocation("/your-why")}
                       data-testid="button-your-why"
                     >
                       <Heart className="h-4 w-4 mr-2" />
@@ -124,7 +127,7 @@ export default function Landing() {
                       size="lg" 
                       variant="outline"
                       className="border-orange-500/50 text-orange-400 hover:bg-orange-500/10 hover:border-orange-400 px-4 py-3 text-base"
-                      onClick={() => window.location.href = "/grant-funding"}
+                      onClick={() => setLocation("/grant-funding")}
                       data-testid="button-grant-funding"
                     >
                       <Target className="h-4 w-4 mr-2" />
@@ -134,7 +137,7 @@ export default function Landing() {
                       size="lg" 
                       variant="outline"
                       className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10 hover:border-blue-400 px-4 py-3 text-base"
-                      onClick={() => window.location.href = "/health-benefits"}
+                      onClick={() => setLocation("/health-benefits")}
                       data-testid="button-health-benefits"
                     >
                       <Shield className="h-4 w-4 mr-2" />
@@ -146,7 +149,7 @@ export default function Landing() {
                     <Button 
                       size="lg" 
                       className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-8 py-4 text-lg"
-                      onClick={() => window.location.href = "/register"}
+                      onClick={() => setLocation("/register")}
                       data-testid="button-get-started"
                     >
                       Start Supporting Students
@@ -179,7 +182,7 @@ export default function Landing() {
                 <Button 
                   variant="outline"
                   className="border-emerald-400 text-emerald-400 hover:bg-emerald-400/10 hover:border-emerald-300"
-                  onClick={() => window.location.href = "/business-pricing-test"}
+                  onClick={() => setLocation("/business-pricing-test")}
                   data-testid="button-enterprise-help"
                 >
                   Click Here - We Can Help
@@ -397,7 +400,7 @@ export default function Landing() {
               <Button 
                 size="lg" 
                 className="bg-blue-500 hover:bg-blue-600 text-white font-bold px-8 py-4 text-lg"
-                onClick={() => window.location.href = "/register"}
+                onClick={() => setLocation("/register")}
                 data-testid="button-register-district"
               >
                 Register My District
@@ -405,7 +408,7 @@ export default function Landing() {
               <Button 
                 size="lg" 
                 className="bg-green-500 hover:bg-green-600 text-white font-bold px-8 py-4 text-lg"
-                onClick={() => window.location.href = "/register-organization"}
+                onClick={() => setLocation("/register-organization")}
                 data-testid="button-register-organization"
               >
                 Register My Organization
@@ -416,7 +419,7 @@ export default function Landing() {
                 size="lg" 
                 variant="outline"
                 className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10 hover:border-blue-400 px-8 py-4 text-lg"
-                onClick={() => window.location.href = "/pricing"}
+                onClick={() => setLocation("/pricing")}
                 data-testid="button-learn-more-registration"
               >
                 Learn More
