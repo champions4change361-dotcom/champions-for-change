@@ -342,7 +342,7 @@ export default function TournamentCreationForm({ onClose, aiRecommendations }: T
           <Label htmlFor="sport" className="block text-sm font-medium text-gray-700 mb-2">
             Sport
           </Label>
-          <Select onValueChange={(value) => form.setValue("sport", value)} value={form.watch("sport")}>
+          <Select onValueChange={(value) => form.setValue("sport", value)} value={form.watch("sport") || ""}>
             <SelectTrigger data-testid="select-sport">
               <SelectValue placeholder="Choose a sport" />
             </SelectTrigger>
@@ -573,7 +573,7 @@ export default function TournamentCreationForm({ onClose, aiRecommendations }: T
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="single" data-testid="option-single">Single Elimination</SelectItem>
-                <SelectItem value="double" data-testid="option-double">Double Elimination</SelectItem>
+                <SelectItem value="double" data-testid="option-double">Double Elimination (Second Chance Bracket)</SelectItem>
                 <SelectItem value="pool-play" data-testid="option-pool-play">Pool Play → Bracket</SelectItem>
                 <SelectItem value="round-robin" data-testid="option-round-robin">Round Robin</SelectItem>
                 <SelectItem value="swiss-system" data-testid="option-swiss">Swiss System</SelectItem>

@@ -3,6 +3,34 @@
 ## Overview
 This platform is a white-label SaaS solution for the Champions for Change nonprofit, aiming to generate funding for educational opportunities for underprivileged youth. It serves as a comprehensive district academic and athletic management platform, covering all 50+ UIL competitions (academic and athletic). Its core purpose is to provide professional tournament management and district-wide administration services. Key capabilities include HIPAA/FERPA compliant data management, tournament creation, scheduling, enterprise-grade compliance, role-based access controls, comprehensive audit trails, user authentication, AI-powered tournament creation, custom branding, and a multi-tenant architecture with an expanded role hierarchy from district to student level. The platform enables full management of student health and educational data, emphasizing its mission-driven approach alongside data protection and regulatory compliance for educational institutions.
 
+## Recent Updates - December 2024: Enhanced Tournament Creation System
+### 5-Step Tournament Creation Wizard
+- **Step 1**: Choose sport and format (with "Second Chance Bracket" terminology for double elimination)
+- **Step 2**: Set tournament size (8, 16, 32 teams/participants)
+- **Step 3**: Enter team names with manual input, bulk text entry, and CSV import/export
+- **Step 4**: Generate bracket/leaderboard with actual team names
+- **Step 5**: Start tournament with real teams ready to compete
+
+### CSV Bulk Import/Export System
+- **Subdomain-Specific Templates**: Automatically adapts to user type
+  - **District**: Includes school, division, captain name, contact email, notes fields
+  - **Enterprise**: Includes department, employee ID, captain name, contact email fields
+  - **Free/General**: Basic team name, captain name, contact email, notes fields
+- **Advanced Features**: Automatic validation, duplicate detection, sample data generation
+- **Download Templates**: CSV templates with proper database headers for bulk data entry
+- **Error Handling**: Comprehensive validation with detailed error reporting
+
+### Enhanced Team Management
+- **Live Updates**: Team name editing with real-time bracket/leaderboard synchronization
+- **Multiple Input Methods**: Manual entry, bulk text input, CSV import, random name generation
+- **Smart Validation**: Duplicate team name detection, email format validation, character limits
+- **Sport-Specific Names**: Random name generation adapted to competition format (teams vs participants)
+
+### AI Integration
+- **3-Tier AI Consultation**: Consultation, Generation, and Full-Service AI recommendations
+- **Seamless Workflow**: AI recommendations automatically populate the 5-step wizard
+- **Personalized Suggestions**: Based on user history, sport selection, and tournament context
+
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 Mission-focused: Platform serves Champions for Change nonprofit to fund student trips and educational opportunities for middle schools in Corpus Christi, Texas.
