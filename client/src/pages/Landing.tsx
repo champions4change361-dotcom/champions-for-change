@@ -508,14 +508,14 @@ export default function Landing() {
                 size="lg" 
                 variant="outline"
                 className="border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/10 hover:border-yellow-400 px-8 py-4 text-lg"
-                onClick={() => window.open('https://fantasy.trantortournaments.org', '_blank')}
+                onClick={() => setLocation("/fantasy-coaching")}
                 data-testid="button-fantasy-domain"
               >
-                🎮 Fantasy Sports Domain →
+                🎮 Fantasy Sports Features →
               </Button>
             </div>
             <p className="text-slate-400 text-sm">
-              Looking for fantasy sports? Visit our dedicated fantasy domain for adult entertainment features, professional leagues, and fantasy competitions.
+              Looking for fantasy sports? Access our fantasy coaching features, professional leagues, and fantasy competitions right here.
             </p>
           </div>
         </div>
