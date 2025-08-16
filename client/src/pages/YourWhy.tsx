@@ -70,7 +70,7 @@ export default function YourWhy() {
     
     return {
       impactTitle: "The Why Behind Champions for Change",
-      impactDescription: "39+ years of combined teaching and coaching experience. We've seen the look in a student's eyes when they realize they can't afford the educational trip that could change their perspective. We've watched talented kids miss opportunities because of circumstances beyond their control.",
+      impactDescription: "30+ years of combined teaching and coaching experience. We've seen the look in a student's eyes when they realize they can't afford the educational trip that could change their perspective. We've watched talented kids miss opportunities because of circumstances beyond their control.",
       supportTitle: "What Your District Partnership Supports"
     };
   };
