@@ -374,4 +374,21 @@
   .hero-logo-spin:hover {
     transform: scale(1.05);
   }
+
+  /* Hide development error overlay to prevent blocking view */
+  div[data-vite-plugin] {
+    display: none !important;
+  }
+  
+  /* Alternative selectors for runtime error overlay */
+  [class*="runtime-error"], 
+  [class*="error-overlay"],
+  div[style*="position: fixed"][style*="z-index"] {
+    display: none !important;
+  }
+  
+  /* Target Replit's specific error modal */
+  div[class*="modal"][style*="background-color: rgba"] {
+    display: none !important;
+  }
 }
