@@ -13,6 +13,7 @@ export interface DomainFeatures {
   dailyFantasy?: boolean;
   professionalSports?: boolean;
   advancedAnalytics?: boolean;
+  minimumAge?: number;
 }
 
 export interface DomainBranding {
@@ -73,7 +74,8 @@ export const DOMAIN_CONFIGS: Record<string, DomainConfig> = {
       gambling: false, // Still no gambling, just fantasy fun
       survivalLeagues: true,
       dailyFantasy: true,
-      professionalSports: true
+      professionalSports: true,
+      minimumAge: 21
     },
     userRoles: ['Fantasy Commissioner', 'Fantasy Participant'],
     allowedSports: ['nfl', 'nba', 'mlb', 'nhl', 'esports', 'college_sports'],
@@ -99,7 +101,8 @@ export const DOMAIN_CONFIGS: Record<string, DomainConfig> = {
       ageVerification: true,
       gambling: false,
       survivalLeagues: true,
-      advancedAnalytics: true
+      advancedAnalytics: true,
+      minimumAge: 21
     },
     userRoles: ['Tournament Manager', 'League Commissioner', 'Team Manager', 'Player', 'Fantasy Commissioner'],
     allowedSports: ['all_adult_sports', 'esports', 'professional_leagues'],
@@ -177,7 +180,17 @@ export class DomainManager {
 
   // FEATURE GATE SYSTEM
   isFeatureEnabled(featureName: keyof DomainFeatures): boolean {
-    return this.config.features[featureName] || false;
+    const feature = this.config.features[featureName];
+    if (typeof feature === 'boolean') {
+      return feature;
+    }
+    // For non-boolean features like minimumAge, return true if they exist
+    return feature !== undefined && feature !== null;
+  }
+
+  // AGE REQUIREMENT SYSTEM
+  getMinimumAge(): number {
+    return this.config.features.minimumAge || 18;
   }
 
   // BRAND CONFIGURATION

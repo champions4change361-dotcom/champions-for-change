@@ -5,10 +5,17 @@ This platform is a white-label SaaS solution for the Champions for Change nonpro
 
 ## Recent Updates - December 2024: Enhanced Tournament Creation & Domain Architecture
 
+### Age Verification System (21+ Requirement)
+- **Fantasy Domain Age Verification**: Implemented comprehensive 21+ age verification system
+- **Legal Compliance**: Age verification addresses multi-jurisdiction fantasy sports regulations
+- **Secure Implementation**: Local storage-based verification with 30-day validity period
+- **Graceful Denial**: Users under 21 receive clear explanation and are redirected to main site
+- **Fantasy Age Gate**: Reusable component for all fantasy sports features
+
 ### Corrected Domain & Pricing Architecture
 - **Main Landing Domain**: `tournaments.trantortournaments.org` - District and Enterprise user registration
-- **Fantasy Domain**: `fantasy.trantortournaments.org` - Adult fantasy sports features ✅
-- **Professional Domain**: `pro.trantortournaments.org` - Corporate tournament solutions
+- **Fantasy Domain**: `fantasy.trantortournaments.org` - Adult fantasy sports features ✅ (21+ Only)
+- **Professional Domain**: `pro.trantortournaments.org` - Corporate tournament solutions (21+ Only)
 - **Corrected Pricing Strategy**:
   - Tournament Organizer: $39/month ($399/year, save 2 months)
   - Business Enterprise: $149/month ($1,499/year, save 2 months)  

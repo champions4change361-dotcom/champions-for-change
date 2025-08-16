@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { GamepadIcon, Shield, Trophy, Users, Star, Clock, Target, Zap } from "lucide-react";
 import { useState } from "react";
+import { FantasyAgeGate } from "@/components/FantasyAgeGate";
 
 interface FantasyStatus {
   fantasy_status: string;
@@ -104,7 +105,8 @@ export default function FantasyTournaments() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <FantasyAgeGate platform="Fantasy Sports Platform" requiredAge={21}>
+      <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center space-x-2">
@@ -123,7 +125,7 @@ export default function FantasyTournaments() {
               Status: {fantasyStatus.fantasy_status}
             </Badge>
             <Badge variant="outline" className="text-sm text-red-600">
-              Age 18+ Required
+              Age 21+ Required
             </Badge>
           </div>
         )}
@@ -140,7 +142,7 @@ export default function FantasyTournaments() {
         <CardContent>
           <div className="space-y-3">
             <p className="text-red-600 font-medium">
-              🔞 This platform is strictly for adults 18 years and older
+              🔞 This platform is strictly for adults 21 years and older
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
               <div className="flex items-center space-x-2">
@@ -200,7 +202,7 @@ export default function FantasyTournaments() {
                 <p className="text-sm text-muted-foreground">Sports Supported</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl font-bold text-red-600">{fantasyStatus.stats.min_age_requirement}+</p>
+                <p className="text-2xl font-bold text-red-600">21+</p>
                 <p className="text-sm text-muted-foreground">Age Requirement</p>
               </div>
             </div>
@@ -395,7 +397,7 @@ export default function FantasyTournaments() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-3">
-              Strict 18+ age verification with identity confirmation required for all participants
+              Strict 21+ age verification with identity confirmation required for all participants
             </p>
             <Badge variant="outline" className="text-red-600">
               ID Verification Required
@@ -436,7 +438,8 @@ export default function FantasyTournaments() {
             </Badge>
           </CardContent>
         </Card>
+        </div>
       </div>
-    </div>
+    </FantasyAgeGate>
   );
 }
