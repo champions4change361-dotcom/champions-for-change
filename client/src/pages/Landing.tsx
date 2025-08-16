@@ -102,23 +102,16 @@ export default function Landing() {
                   className="relative w-80 h-80 mx-auto cursor-pointer hero-logo-coin"
                   onClick={(e) => {
                     const element = e.currentTarget;
-                    // Add spinning animation
-                    element.classList.add('spin-4x');
+                    // Prevent multiple clicks during animation
+                    if (element.classList.contains('spinning')) return;
                     
-                    // Check if this is the second click (element already has clicked state)
-                    if (element.classList.contains('clicked-once')) {
-                      // Second click - spin then redirect to onboarding
-                      setTimeout(() => {
-                        window.location.href = '/register';
-                      }, 1600); // Wait for spin to complete
-                    } else {
-                      // First click - just spin and mark as clicked
-                      element.classList.add('clicked-once');
-                      // Remove spin class after animation completes
-                      setTimeout(() => {
-                        element.classList.remove('spin-4x');
-                      }, 1600);
-                    }
+                    // Add spinning animation and mark as spinning
+                    element.classList.add('spin-4x', 'spinning');
+                    
+                    // After spin completes, redirect to onboarding
+                    setTimeout(() => {
+                      window.location.href = '/register';
+                    }, 1800); // Wait for coin flip animation to complete
                   }}
                   data-testid="hero-logo-coin"
                 >
