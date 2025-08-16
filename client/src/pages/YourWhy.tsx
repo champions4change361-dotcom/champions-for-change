@@ -349,9 +349,15 @@ export default function YourWhy() {
                     </p>
                     
                     <p className="text-gray-700 leading-relaxed mb-6">
-                      <strong>We're different because we're you.</strong> We're coaches. We've run 
-                      tournaments with clipboards and chaos. We've dealt with all the challenges 
-                      that come with managing competitive events in education.
+                      <strong>We're different because we're you.</strong> We're educators and coaches with 30+ years 
+                      of combined teaching and coaching experience. We've run tournaments with clipboards and chaos. 
+                      We've dealt with all the challenges that come with managing competitive events in education.
+                    </p>
+
+                    <p className="text-gray-700 leading-relaxed mb-6">
+                      <strong>We take seriously the "student" in "student athlete."</strong> Every feature we build 
+                      considers both athletic performance and academic success. That's why our platform manages 
+                      50+ UIL academic competitions alongside athletics - because we know education comes first.
                     </p>
                     
                     <p className="text-xl font-semibold text-green-700 mb-6">
@@ -359,8 +365,8 @@ export default function YourWhy() {
                     </p>
                     
                     <p className="text-gray-700 leading-relaxed">
-                      Your why might be seeing kids succeed, giving them opportunities they wouldn't 
-                      have otherwise, or just making sure your tournaments run smoothly.
+                      Your why might be seeing kids succeed academically and athletically, giving them opportunities 
+                      they wouldn't have otherwise, or ensuring your students get the comprehensive support they deserve.
                     </p>
                     
                     <p className="text-lg text-blue-700 font-medium mt-6">
