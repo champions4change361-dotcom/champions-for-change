@@ -472,17 +472,17 @@ export default function CoachesLoungeLanding() {
           </CardHeader>
           <CardContent>
             <div className="grid md:grid-cols-2 gap-6 text-gray-200">
-              <div className="bg-white/5 p-4 rounded-lg">
+              <div className="bg-slate-800/80 backdrop-blur-sm border border-green-500/20 p-4 rounded-lg">
                 <h4 className="font-medium text-green-300 mb-2">Robert Driscoll Middle School</h4>
-                <p className="text-sm">
+                <p className="text-sm text-white">
                   "Platform donations helped fund our Washington D.C. trip for 25 students. 
                   Amazing to see gaming and fantasy sports supporting education!"
                 </p>
                 <p className="text-xs text-green-400 mt-2">- Coach Martinez, Athletic Director</p>
               </div>
-              <div className="bg-white/5 p-4 rounded-lg">
+              <div className="bg-slate-800/80 backdrop-blur-sm border border-blue-500/20 p-4 rounded-lg">
                 <h4 className="font-medium text-blue-300 mb-2">Office League Success</h4>
-                <p className="text-sm">
+                <p className="text-sm text-white">
                   "Our NBA fantasy league raised $500 for Champions for Change while having a blast. 
                   Great way to combine competition with giving back."
                 </p>
