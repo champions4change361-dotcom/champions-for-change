@@ -234,7 +234,9 @@ export async function setupAuth(app: Express) {
             sameSite: 'none'
           });
           
-          return res.redirect('/');
+          // Redirect based on user type to appropriate dashboard
+          const redirectPath = userType === 'district' ? '/admin' : '/';
+          return res.redirect(redirectPath);
         });
       });
     } catch (error) {
@@ -264,7 +266,7 @@ export async function setupAuth(app: Express) {
     }
     
     passport.authenticate(strategyName, {
-      successReturnToOrRedirect: "/",
+      successReturnToOrRedirect: "/admin",
       failureRedirect: "/api/login",
     })(req, res, next);
   });
