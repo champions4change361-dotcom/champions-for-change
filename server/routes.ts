@@ -277,9 +277,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       console.log("✅ User created:", jolynnUser);
-      console.log("📧 About to send welcome email...");
+      console.log("📧 About to send REAL welcome email to Jolynn at the bar...");
       
-      // Send REAL welcome email to Jolynn via SendGrid
+      // Send REAL welcome email to Jolynn via SendGrid (live test!)
       const emailResult = await emailService.sendWelcomeEmail(
         "snwbunny99504@aol.com", 
         "Jolynn", 
