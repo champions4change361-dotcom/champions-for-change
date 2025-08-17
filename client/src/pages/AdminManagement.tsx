@@ -35,17 +35,26 @@ export default function AdminManagement() {
   });
 
   // Fetch existing users
-  const { data: users, isLoading } = useQuery({
+  const { data: users = [], isLoading } = useQuery({
     queryKey: ["/api/admin/users"],
   });
 
   // Create fake user mutation
   const createUserMutation = useMutation({
     mutationFn: async (userData: FakeUser) => {
-      return apiRequest("/api/admin/create-fake-user", {
+      const response = await fetch("/api/admin/create-fake-user", {
         method: "POST",
-        body: userData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(userData),
       });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to create user: ${response.statusText}`);
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       toast({
@@ -307,7 +316,7 @@ export default function AdminManagement() {
                   <div className="text-center py-8">Loading users...</div>
                 ) : (
                   <div className="space-y-4">
-                    {users?.length ? (
+                    {Array.isArray(users) && users.length ? (
                       users.map((user: any) => (
                         <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
                           <div>
@@ -384,15 +393,15 @@ export default function AdminManagement() {
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <h3 className="text-2xl font-bold text-blue-600">{users?.filter((u: any) => u.subscriptionPlan === 'district_enterprise').length || 0}</h3>
+                    <h3 className="text-2xl font-bold text-blue-600">{Array.isArray(users) ? users.filter((u: any) => u.subscriptionPlan === 'district_enterprise').length : 0}</h3>
                     <p className="text-sm text-slate-600">District Users</p>
                   </div>
                   <div className="text-center p-4 bg-purple-50 rounded-lg">
-                    <h3 className="text-2xl font-bold text-purple-600">{users?.filter((u: any) => u.subscriptionPlan === 'professional').length || 0}</h3>
+                    <h3 className="text-2xl font-bold text-purple-600">{Array.isArray(users) ? users.filter((u: any) => u.subscriptionPlan === 'professional').length : 0}</h3>
                     <p className="text-sm text-slate-600">Tournament Organizers</p>
                   </div>
                   <div className="text-center p-4 bg-slate-50 rounded-lg">
-                    <h3 className="text-2xl font-bold text-slate-600">{users?.filter((u: any) => u.subscriptionPlan === 'enterprise').length || 0}</h3>
+                    <h3 className="text-2xl font-bold text-slate-600">{Array.isArray(users) ? users.filter((u: any) => u.subscriptionPlan === 'enterprise').length : 0}</h3>
                     <p className="text-sm text-slate-600">Business Users</p>
                   </div>
                 </div>
