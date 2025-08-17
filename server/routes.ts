@@ -90,12 +90,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         email: email,
         passwordLength: password ? password.length : 0,
         userType: userType,
-        emailMatch: email === 'champions4change361@gmail.com',
+        emailMatch: email?.toLowerCase() === 'champions4change361@gmail.com',
         passwordMatch: password === 'master-admin-danielthornton'
       });
       
-      // Check for master admin credentials
-      if (email === 'champions4change361@gmail.com' && password === 'master-admin-danielthornton') {
+      // Check for master admin credentials (case-insensitive email)
+      if (email?.toLowerCase() === 'champions4change361@gmail.com' && password === 'master-admin-danielthornton') {
         // Create master admin user session
         const masterAdmin = {
           id: 'master-admin-danielthornton',
