@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
@@ -257,16 +257,22 @@ export default function StaffRegistration() {
                 </div>
                 <div>
                   <Label htmlFor="role">Role</Label>
-                  <Select value={individualUser.role} onValueChange={(value) => setIndividualUser({...individualUser, role: value})}>
-                    <SelectTrigger data-testid="select-role">
+                  <Select value={individualUser.role} onValueChange={(value) => {
+                    console.log('Selected role:', value);
+                    setIndividualUser({...individualUser, role: value});
+                  }}>
+                    <SelectTrigger data-testid="select-role" className="w-full">
                       <SelectValue placeholder="Select role" />
                     </SelectTrigger>
-                    <SelectContent>
-                      {roles.map(role => (
-                        <SelectItem key={role.value} value={role.value}>
-                          {role.label}
-                        </SelectItem>
-                      ))}
+                    <SelectContent position="popper" side="bottom" align="start" className="z-[100] max-h-96 overflow-auto">
+                      <SelectItem value="district_athletic_director">District Athletic Director</SelectItem>
+                      <SelectItem value="district_head_athletic_trainer">District Head Athletic Trainer</SelectItem>
+                      <SelectItem value="school_athletic_director">School Athletic Director</SelectItem>
+                      <SelectItem value="school_athletic_trainer">School Athletic Trainer</SelectItem>
+                      <SelectItem value="school_principal">School Principal</SelectItem>
+                      <SelectItem value="head_coach">Head Coach</SelectItem>
+                      <SelectItem value="assistant_coach">Assistant Coach</SelectItem>
+                      <SelectItem value="athletic_training_student">Athletic Training Student</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
