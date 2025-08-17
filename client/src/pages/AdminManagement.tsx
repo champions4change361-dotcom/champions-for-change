@@ -140,8 +140,8 @@ export default function AdminManagement() {
         ];
       case 'organizer':
         return [
-          { value: 'professional', label: 'Tournament Pro ($39/month)' },
-          { value: 'champion', label: 'Champion' },
+          { value: 'tournament_organizer', label: 'Tournament Organizer ($39/month)' },
+          { value: 'tournament_organizer_annual', label: 'Tournament Organizer Annual ($399/year)' },
         ];
       case 'business':
         return [
