@@ -12,7 +12,22 @@ class EmailService {
 
   private async setupTransporter() {
     try {
-      // Create test account for development
+      // Check if SendGrid API key is available for production email
+      if (process.env.SENDGRID_API_KEY) {
+        this.transporter = nodemailer.createTransport({
+          host: 'smtp.sendgrid.net',
+          port: 587,
+          secure: false,
+          auth: {
+            user: 'apikey',
+            pass: process.env.SENDGRID_API_KEY,
+          },
+        });
+        console.log('📧 Email service initialized with SendGrid (production)');
+        return;
+      }
+
+      // Fallback to test account for development
       const testAccount = await nodemailer.createTestAccount();
       
       this.transporter = nodemailer.createTransport({
@@ -25,7 +40,7 @@ class EmailService {
         },
       });
 
-      console.log('📧 Email service initialized with test account');
+      console.log('📧 Email service initialized with test account (development)');
     } catch (error) {
       console.error('Failed to setup email transporter:', error);
       // Fallback to console logging in development
@@ -45,18 +60,28 @@ class EmailService {
         return { success: true, method: 'console' };
       }
 
+      // Use a verified sender address for SendGrid
+      const fromAddress = process.env.SENDGRID_FROM_EMAIL || '"Champions for Change Athletics" <athletics@championsforchange.org>';
+      
       const info = await this.transporter.sendMail({
-        from: '"Champions for Change Athletics" <athletics@championsforchange.org>',
+        from: fromAddress,
         to: userEmail,
         subject: emailContent.subject,
         html: emailContent.html,
       });
 
-      console.log('📧 Welcome email sent:', nodemailer.getTestMessageUrl(info));
+      // Different logging for production vs test
+      if (process.env.SENDGRID_API_KEY) {
+        console.log(`📧 REAL Welcome email sent to ${userEmail} via SendGrid:`, info.messageId);
+      } else {
+        console.log('📧 Test welcome email sent:', nodemailer.getTestMessageUrl(info));
+      }
+      
       return { 
         success: true, 
         messageId: info.messageId,
-        previewUrl: nodemailer.getTestMessageUrl(info)
+        previewUrl: process.env.SENDGRID_API_KEY ? null : nodemailer.getTestMessageUrl(info),
+        method: process.env.SENDGRID_API_KEY ? 'sendgrid' : 'ethereal'
       };
     } catch (error) {
       console.error('Failed to send welcome email:', error);

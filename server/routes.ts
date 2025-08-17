@@ -244,6 +244,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Special route to create Jolynn's real account with email
+  app.post("/api/create-jolynn-real-account", async (req: any, res) => {
+    console.log("🎯 Creating Jolynn's real account - START");
+    console.log("Request body:", req.body);
+    console.log("SendGrid API Key present:", !!process.env.SENDGRID_API_KEY);
+    
+    try {
+      const { firstName, lastName, email } = req.body;
+      
+      if (email !== "snwbunny99504@aol.com") {
+        console.log("❌ Unauthorized email attempt:", email);
+        return res.status(403).json({ error: "This endpoint is only for Jolynn's account" });
+      }
+
+      const storage = await getStorage();
+      console.log("✅ Storage obtained");
+      
+      const jolynnUser = await storage.upsertUser({
+        id: `real-athletic-trainer-jolynn`,
+        email: "snwbunny99504@aol.com",
+        firstName: "Jolynn",
+        lastName: "Millette",
+        profileImageUrl: null,
+        subscriptionPlan: "district",
+        subscriptionStatus: "active",
+        complianceRole: "school_athletic_trainer",
+        organizationId: "ccisd-carroll-high",
+        organizationName: "CCISD Carroll High School",
+        isWhitelabelClient: false,
+        whitelabelDomain: null
+      });
+      
+      console.log("✅ User created:", jolynnUser);
+      console.log("📧 About to send welcome email...");
+      
+      // Send REAL welcome email to Jolynn via SendGrid
+      const emailResult = await emailService.sendWelcomeEmail(
+        "snwbunny99504@aol.com", 
+        "Jolynn", 
+        "school_athletic_trainer", 
+        "CCISD Carroll High School"
+      );
+      
+      console.log(`🎯 REAL Welcome email result:`, emailResult);
+      
+      const response = { 
+        success: true, 
+        user: jolynnUser, 
+        email: emailResult,
+        message: "Real account created and welcome email sent to Jolynn!",
+        sendgridActive: !!process.env.SENDGRID_API_KEY
+      };
+      
+      console.log("📤 Sending response:", response);
+      res.json(response);
+    } catch (error) {
+      console.error("❌ Error creating Jolynn's real account:", error);
+      res.status(500).json({ error: "Failed to create Jolynn's account", details: error.message });
+    }
+  });
+
   // Create and return server
   const server = createServer(app);
   return server;
