@@ -39,11 +39,15 @@ export default function AdminManagement() {
     const roleOptions = getRoleOptions(newUser.userType);
     const subscriptionOptions = getSubscriptionOptions(newUser.userType);
     
-    if (roleOptions.length > 0 && !newUser.role) {
+    // Only set defaults if current values are invalid for the new userType
+    const isRoleValid = roleOptions.some(option => option.value === newUser.role);
+    const isSubscriptionValid = subscriptionOptions.some(option => option.value === newUser.subscriptionPlan);
+    
+    if (!isRoleValid && roleOptions.length > 0) {
       setNewUser(prev => ({ ...prev, role: roleOptions[0].value }));
     }
     
-    if (subscriptionOptions.length > 0 && !newUser.subscriptionPlan) {
+    if (!isSubscriptionValid && subscriptionOptions.length > 0) {
       setNewUser(prev => ({ ...prev, subscriptionPlan: subscriptionOptions[0].value }));
     }
   }, [newUser.userType]);
@@ -276,7 +280,7 @@ export default function AdminManagement() {
                         <Label htmlFor="role">Role</Label>
                         <Select 
                           key={`role-${newUser.userType}`}
-                          value={newUser.role || undefined} 
+                          value={newUser.role} 
                           onValueChange={(value) => {
                             console.log("Role selected:", value);
                             setNewUser(prev => ({ ...prev, role: value }));
@@ -299,7 +303,7 @@ export default function AdminManagement() {
                         <Label htmlFor="subscriptionPlan">Subscription Plan</Label>
                         <Select 
                           key={`subscription-${newUser.userType}`}
-                          value={newUser.subscriptionPlan || undefined} 
+                          value={newUser.subscriptionPlan} 
                           onValueChange={(value) => {
                             console.log("Subscription selected:", value);
                             setNewUser(prev => ({ ...prev, subscriptionPlan: value }));
