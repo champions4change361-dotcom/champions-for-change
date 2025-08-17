@@ -96,7 +96,6 @@ export default function RoleDashboard() {
         );
 
       case 'school_athletic_director':
-      case 'school_athletic_trainer':
         return (
           <div className="space-y-6">
             <Card>
@@ -112,6 +111,38 @@ export default function RoleDashboard() {
                 </Button>
                 <Button className="w-full" data-testid="button-school-events">
                   School Athletics Events
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        );
+
+      case 'school_athletic_trainer':
+        return (
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Athletic Training Management</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Button 
+                  className="w-full bg-blue-600 hover:bg-blue-700" 
+                  onClick={() => navigate('/athletic-trainer-demo')}
+                  data-testid="button-trainer-dashboard"
+                >
+                  Access Athletic Trainer Dashboard
+                </Button>
+                <Button className="w-full" data-testid="button-athlete-health">
+                  Athlete Health Management
+                </Button>
+                <Button className="w-full" data-testid="button-injury-tracking">
+                  Injury Tracking & Care Plans
+                </Button>
+                <Button className="w-full" data-testid="button-medical-docs">
+                  Medical Documentation
+                </Button>
+                <Button className="w-full" data-testid="button-equipment-check">
+                  Equipment & Supply Management
                 </Button>
               </CardContent>
             </Card>

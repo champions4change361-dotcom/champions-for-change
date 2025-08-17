@@ -72,6 +72,7 @@ import NonprofitAnalytics from './pages/NonprofitAnalytics';
 import StaffRegistration from './pages/StaffRegistration';
 import StaffRoles from './pages/StaffRoles';
 import DistrictOverview from './pages/DistrictOverview';
+import AthleticTrainerDemo from './pages/AthleticTrainerDemo';
 
 function AuthenticatedRoutes() {
   const { isFeatureEnabled, isFantasyDomain, config } = useDomain();
@@ -117,6 +118,7 @@ function AuthenticatedRoutes() {
         <Route path="/staff-registration" component={StaffRegistration} />
         <Route path="/staff-roles" component={StaffRoles} />
         <Route path="/district-overview" component={DistrictOverview} />
+        <Route path="/athletic-trainer-demo" component={AthleticTrainerDemo} />
         
         {/* Show Tournament Empire only for school-safe and pro domains */}
         {!isFantasyDomain() && (
