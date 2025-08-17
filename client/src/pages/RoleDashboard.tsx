@@ -53,10 +53,11 @@ export default function RoleDashboard() {
     return roleMap[role] || { label: role, color: 'bg-gray-500' };
   };
 
-  const roleInfo = getRoleDisplay(user.userRole);
+  const roleInfo = getRoleDisplay(user.role || user.userRole || 'unknown');
 
   const getDashboardContent = () => {
-    switch (user.userRole) {
+    const userRole = user.role || user.userRole;
+    switch (userRole) {
       case 'district_athletic_director':
       case 'district_head_athletic_trainer':
         return (
