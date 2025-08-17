@@ -105,7 +105,6 @@ export default function AdminManagement() {
   };
 
   const getRoleOptions = (userType: string) => {
-    console.log("getRoleOptions called with userType:", userType);
     switch (userType) {
       case 'district':
         return [
@@ -133,7 +132,6 @@ export default function AdminManagement() {
   };
 
   const getSubscriptionOptions = (userType: string) => {
-    console.log("getSubscriptionOptions called with userType:", userType);
     switch (userType) {
       case 'district':
         return [
@@ -279,19 +277,24 @@ export default function AdminManagement() {
                       <div>
                         <Label htmlFor="role">Role</Label>
                         <Select 
-                          key={`role-${newUser.userType}`}
                           value={newUser.role} 
                           onValueChange={(value) => {
-                            console.log("Role selected:", value);
                             setNewUser(prev => ({ ...prev, role: value }));
                           }}
                         >
-                          <SelectTrigger data-testid="select-role">
+                          <SelectTrigger 
+                            data-testid="select-role"
+                            className="focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                          >
                             <SelectValue placeholder="Select role" />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="z-50 max-h-96 overflow-auto">
                             {getRoleOptions(newUser.userType).map((option) => (
-                              <SelectItem key={`${newUser.userType}-${option.value}`} value={option.value}>
+                              <SelectItem 
+                                key={option.value} 
+                                value={option.value}
+                                className="cursor-pointer hover:bg-blue-50 focus:bg-blue-50"
+                              >
                                 {option.label}
                               </SelectItem>
                             ))}
@@ -302,19 +305,24 @@ export default function AdminManagement() {
                       <div>
                         <Label htmlFor="subscriptionPlan">Subscription Plan</Label>
                         <Select 
-                          key={`subscription-${newUser.userType}`}
                           value={newUser.subscriptionPlan} 
                           onValueChange={(value) => {
-                            console.log("Subscription selected:", value);
                             setNewUser(prev => ({ ...prev, subscriptionPlan: value }));
                           }}
                         >
-                          <SelectTrigger data-testid="select-subscription">
+                          <SelectTrigger 
+                            data-testid="select-subscription"
+                            className="focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                          >
                             <SelectValue placeholder="Select subscription" />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="z-50 max-h-96 overflow-auto">
                             {getSubscriptionOptions(newUser.userType).map((option) => (
-                              <SelectItem key={`${newUser.userType}-${option.value}`} value={option.value}>
+                              <SelectItem 
+                                key={option.value} 
+                                value={option.value}
+                                className="cursor-pointer hover:bg-blue-50 focus:bg-blue-50"
+                              >
                                 {option.label}
                               </SelectItem>
                             ))}
