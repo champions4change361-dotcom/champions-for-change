@@ -52,15 +52,18 @@ Documentation: Maintain comprehensive design guide at `/custom-design-demo` for 
 - **Data Validation**: Zod schemas for runtime type validation and Drizzle-Zod.
 
 ### Authentication and Authorization
-- **Authentication Provider**: Replit OAuth integration with openid-client.
-- **Session Management**: Express sessions with PostgreSQL session store.
+- **Dual Authentication System**: Supports both Replit OAuth integration and form-based authentication with session management.
+- **Form-Based Login**: Complete login interface at `/login` with master admin credentials (champions4change361@gmail.com / master-admin-danielthornton).
+- **Case-Insensitive Authentication**: Email authentication handles both uppercase and lowercase variations for better user experience.
+- **Session Management**: Express sessions with PostgreSQL session store, supporting both OAuth and form-based auth flows.
 - **User Management**: Complete user registration, login, logout flows with user type-based portals.
 - **Login Portals**: Separate login experiences for Districts (`/login/district`), Tournament Organizers (`/login/organizer`), and Business Enterprise (`/login/business`).
 - **Master Admin Portal**: Full access admin management system (`/admin`) for creating test users and accessing all platform features.
+- **Auto-Fill Credentials**: Convenient master admin credential auto-fill functionality for testing and development.
 - **Role-Based Access**: Automatic role assignment based on user type selection with appropriate subscription plans and organizational context.
 - **Admin Management**: Comprehensive admin tools for creating fake user profiles, viewing all users, and accessing platform analytics.
-- **Protected Routes**: Authentication middleware for tournament and payment endpoints.
-- **Security**: CORS, secure session handling, user profile management.
+- **Protected Routes**: Authentication middleware for tournament and payment endpoints with session-based and OAuth validation.
+- **Security**: CORS, secure session handling, user profile management, comprehensive debug logging for authentication flows.
 - **User Hierarchy**: A multi-tiered role-based access control system including District, School, and Team levels, with specific roles like Athletic Director, Trainer, Principal, Head Coach, etc. This hierarchy enforces HIPAA compliance for medical/tournament data partitioning.
 - **HIPAA/FERPA Compliance**: Enterprise-grade route-level compliance middleware with automatic audit logging, role-based medical data access controls, and comprehensive violation tracking.
 

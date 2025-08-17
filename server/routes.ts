@@ -179,8 +179,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const storage = await getStorage();
       const { firstName, lastName, email, role, subscriptionPlan, organizationName, userType } = req.body;
       
-      if (!firstName || !lastName || !email || !role || !subscriptionPlan) {
-        return res.status(400).json({ error: "Missing required fields" });
+      console.log('Create user request data:', { firstName, lastName, email, role, subscriptionPlan, organizationName, userType });
+      
+      const missingFields = [];
+      if (!firstName) missingFields.push('firstName');
+      if (!lastName) missingFields.push('lastName');
+      if (!email) missingFields.push('email');
+      if (!role) missingFields.push('role');
+      if (!subscriptionPlan) missingFields.push('subscriptionPlan');
+      
+      if (missingFields.length > 0) {
+        return res.status(400).json({ 
+          error: `Missing required fields: ${missingFields.join(', ')}` 
+        });
       }
 
       const fakeUser = await storage.upsertUser({
