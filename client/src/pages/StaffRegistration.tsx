@@ -257,24 +257,26 @@ export default function StaffRegistration() {
                 </div>
                 <div>
                   <Label htmlFor="role">Role</Label>
-                  <Select value={individualUser.role} onValueChange={(value) => {
-                    console.log('Selected role:', value);
-                    setIndividualUser({...individualUser, role: value});
-                  }}>
-                    <SelectTrigger data-testid="select-role" className="w-full">
-                      <SelectValue placeholder="Select role" />
-                    </SelectTrigger>
-                    <SelectContent position="popper" side="bottom" align="start" className="z-[100] max-h-96 overflow-auto">
-                      <SelectItem value="district_athletic_director">District Athletic Director</SelectItem>
-                      <SelectItem value="district_head_athletic_trainer">District Head Athletic Trainer</SelectItem>
-                      <SelectItem value="school_athletic_director">School Athletic Director</SelectItem>
-                      <SelectItem value="school_athletic_trainer">School Athletic Trainer</SelectItem>
-                      <SelectItem value="school_principal">School Principal</SelectItem>
-                      <SelectItem value="head_coach">Head Coach</SelectItem>
-                      <SelectItem value="assistant_coach">Assistant Coach</SelectItem>
-                      <SelectItem value="athletic_training_student">Athletic Training Student</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select 
+                    id="role"
+                    value={individualUser.role}
+                    onChange={(e) => {
+                      console.log('Selected role:', e.target.value);
+                      setIndividualUser({...individualUser, role: e.target.value});
+                    }}
+                    className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                    data-testid="select-role"
+                  >
+                    <option value="">Select role</option>
+                    <option value="district_athletic_director">District Athletic Director</option>
+                    <option value="district_head_athletic_trainer">District Head Athletic Trainer</option>
+                    <option value="school_athletic_director">School Athletic Director</option>
+                    <option value="school_athletic_trainer">School Athletic Trainer</option>
+                    <option value="school_principal">School Principal</option>
+                    <option value="head_coach">Head Coach</option>
+                    <option value="assistant_coach">Assistant Coach</option>
+                    <option value="athletic_training_student">Athletic Training Student</option>
+                  </select>
                 </div>
                 <div>
                   <Label htmlFor="school">School/Department</Label>
