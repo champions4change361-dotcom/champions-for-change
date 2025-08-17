@@ -22,68 +22,75 @@ export default function Landing() {
         <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/5 via-transparent to-yellow-400/5"></div>
         <header className="relative border-b border-orange-500/20 bg-slate-900/80 backdrop-blur-sm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              {/* Arena Logo */}
-              <div className="flex items-center space-x-3">
-                <div className="w-16 h-16 flex items-center justify-center">
-                  <video 
-                    autoPlay 
-                    loop 
-                    muted 
-                    playsInline
-                    className="w-full h-full object-cover rounded-full"
-                    data-testid="champions-logo-video-header"
+            {/* Mobile-optimized layout */}
+            <div className="lg:flex lg:items-center lg:justify-between lg:h-16">
+              {/* Mobile: Stacked Layout, Desktop: Horizontal */}
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between w-full py-4 lg:py-0 space-y-4 lg:space-y-0">
+                
+                {/* Logo Section with proper spacing */}
+                <div className="flex items-center space-x-3 mb-5 lg:mb-0">
+                  <div className="w-16 h-16 flex items-center justify-center">
+                    <video 
+                      autoPlay 
+                      loop 
+                      muted 
+                      playsInline
+                      className="w-full h-full object-cover rounded-full"
+                      data-testid="champions-logo-video-header"
+                    >
+                      <source src={championVideo} type="video/mp4" />
+                      <img src={championLogo} alt="Champions for Change" className="w-full h-full object-cover rounded-full" />
+                    </video>
+                  </div>
+                  <div>
+                    <h1 className="text-xl font-bold text-white">Champions for Change</h1>
+                    <p className="text-xs text-orange-400">Tournament Management Platform</p>
+                  </div>
+                </div>
+
+                {/* Live Status Bar - Desktop only */}
+                <div className="hidden lg:flex items-center space-x-6">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                    <span className="text-sm text-slate-300">Live Platform</span>
+                  </div>
+                </div>
+
+                {/* Login Buttons with optimized mobile spacing */}
+                <div className="flex flex-col space-y-3 lg:flex-row lg:space-y-0 lg:space-x-3 lg:ml-auto">
+                  <Button 
+                    onClick={() => setLocation('/login')}
+                    className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-6 py-3 w-full lg:w-auto"
+                    data-testid="button-login"
                   >
-                    <source src={championVideo} type="video/mp4" />
-                    <img src={championLogo} alt="Champions for Change" className="w-full h-full object-cover rounded-full" />
-                  </video>
+                    Login to Arena
+                  </Button>
+                  <Button 
+                    onClick={() => setLocation('/register')}
+                    variant="outline"
+                    className="border-orange-500 text-orange-400 hover:bg-orange-500/10 hover:border-orange-400 px-6 py-3 font-semibold w-full lg:w-auto"
+                    data-testid="button-signup"
+                  >
+                    Sign Up Free
+                  </Button>
                 </div>
-                <div>
-                  <h1 className="text-xl font-bold text-white">Champions for Change</h1>
-                  <p className="text-xs text-orange-400">Tournament Management Platform</p>
-                </div>
-              </div>
-
-              {/* Live Status Bar */}
-              <div className="hidden md:flex items-center space-x-6">
-                <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-                  <span className="text-sm text-slate-300">Live Platform</span>
-                </div>
-              </div>
-
-              {/* Login Button */}
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Button 
-                  onClick={() => setLocation('/login')}
-                  className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-6 py-3"
-                  data-testid="button-login"
-                >
-                  Login to Arena
-                </Button>
-                <Button 
-                  onClick={() => setLocation('/register')}
-                  variant="outline"
-                  className="border-orange-500 text-orange-400 hover:bg-orange-500/10 hover:border-orange-400 px-6 py-3 font-semibold"
-                  data-testid="button-signup"
-                >
-                  Sign Up Free
-                </Button>
               </div>
             </div>
           </div>
         </header>
       </div>
 
-      {/* Mission Banner */}
-      <section className="bg-gradient-to-r from-emerald-600 via-emerald-500 to-emerald-600 text-white py-4">
+      {/* Mission Banner with optimized mobile spacing */}
+      <section className="bg-gradient-to-r from-emerald-600 via-emerald-500 to-emerald-600 text-white py-6 lg:py-4">
         <div className="container mx-auto px-4 text-center">
-          <div className="flex items-center justify-center space-x-2 text-sm">
-            <Heart className="h-4 w-4" />
-            <span>Built by coaches to fund educational opportunities for underprivileged youth in Corpus Christi, Texas</span>
-            <MapPin className="h-4 w-4" />
+          <div className="flex items-center justify-center space-x-2 text-sm lg:text-sm text-xs sm:text-sm">
+            <Heart className="h-4 w-4 flex-shrink-0" />
+            <span className="text-center leading-relaxed">Built by coaches to fund educational opportunities for underprivileged youth in Corpus Christi, Texas</span>
+            <MapPin className="h-4 w-4 flex-shrink-0" />
           </div>
         </div>
+        {/* Add breathing room below tagline - 40-60px spacing */}
+        <div className="h-12 lg:h-8"></div>
       </section>
 
       {/* Hero Section */}
