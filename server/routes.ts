@@ -86,6 +86,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { email, password, userType } = req.body;
       
+      console.log('Login attempt:', {
+        email: email,
+        passwordLength: password ? password.length : 0,
+        userType: userType,
+        emailMatch: email === 'champions4change361@gmail.com',
+        passwordMatch: password === 'master-admin-danielthornton'
+      });
+      
       // Check for master admin credentials
       if (email === 'champions4change361@gmail.com' && password === 'master-admin-danielthornton') {
         // Create master admin user session

@@ -20,6 +20,8 @@ export default function Login() {
     e.preventDefault();
     setIsLoading(true);
 
+    console.log('Frontend form data:', formData);
+
     try {
       // Send login request to backend
       const response = await fetch('/api/auth/login', {
@@ -46,6 +48,7 @@ export default function Login() {
         }
       } else {
         const error = await response.json();
+        console.log('Login error response:', error);
         toast({
           title: "Login Failed",
           description: error.message || "Invalid credentials",
@@ -134,15 +137,29 @@ export default function Login() {
                 />
               </div>
 
-              {/* Master Admin Info */}
+              {/* Master Admin Info with Auto-Fill Button */}
               <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
                 <div className="flex items-center space-x-2 mb-2">
                   <AlertCircle className="h-4 w-4 text-blue-600" />
                   <span className="text-sm font-medium text-blue-900">Master Admin Access</span>
                 </div>
-                <p className="text-xs text-blue-700">
-                  Use champions4change361@gmail.com with password: master-admin-danielthornton
+                <p className="text-xs text-blue-700 mb-2">
+                  Champions4change361@gmail.com / master-admin-danielthornton
                 </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setFormData({
+                    email: 'champions4change361@gmail.com',
+                    password: 'master-admin-danielthornton',
+                    userType: 'district'
+                  })}
+                  className="text-xs"
+                  data-testid="button-autofill"
+                >
+                  Auto-fill Credentials
+                </Button>
               </div>
 
               {/* Login Button */}
