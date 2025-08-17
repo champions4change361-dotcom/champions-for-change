@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,11 +28,25 @@ export default function AdminManagement() {
     firstName: '',
     lastName: '',
     email: '',
-    role: 'scorekeeper',
-    subscriptionPlan: 'foundation',
+    role: '',
+    subscriptionPlan: '',
     organizationName: '',
     userType: 'district'
   });
+
+  // Initialize role and subscription when userType changes
+  useEffect(() => {
+    const roleOptions = getRoleOptions(newUser.userType);
+    const subscriptionOptions = getSubscriptionOptions(newUser.userType);
+    
+    if (roleOptions.length > 0 && !newUser.role) {
+      setNewUser(prev => ({ ...prev, role: roleOptions[0].value }));
+    }
+    
+    if (subscriptionOptions.length > 0 && !newUser.subscriptionPlan) {
+      setNewUser(prev => ({ ...prev, subscriptionPlan: subscriptionOptions[0].value }));
+    }
+  }, [newUser.userType]);
 
   // Fetch existing users
   const { data: users = [], isLoading } = useQuery({
@@ -236,9 +250,16 @@ export default function AdminManagement() {
                         <Label htmlFor="userType">Platform Type</Label>
                         <Select 
                           value={newUser.userType} 
-                          onValueChange={(value: 'district' | 'organizer' | 'business') => 
-                            setNewUser({ ...newUser, userType: value, role: 'scorekeeper', subscriptionPlan: 'foundation' })
-                          }
+                          onValueChange={(value: 'district' | 'organizer' | 'business') => {
+                            const roleOptions = getRoleOptions(value);
+                            const subscriptionOptions = getSubscriptionOptions(value);
+                            setNewUser({ 
+                              ...newUser, 
+                              userType: value, 
+                              role: roleOptions[0]?.value || '', 
+                              subscriptionPlan: subscriptionOptions[0]?.value || '' 
+                            });
+                          }}
                         >
                           <SelectTrigger data-testid="select-usertype">
                             <SelectValue placeholder="Select platform" />
@@ -255,7 +276,7 @@ export default function AdminManagement() {
                         <Label htmlFor="role">Role</Label>
                         <Select 
                           key={`role-${newUser.userType}`}
-                          value={newUser.role} 
+                          value={newUser.role || undefined} 
                           onValueChange={(value) => {
                             console.log("Role selected:", value);
                             setNewUser(prev => ({ ...prev, role: value }));
@@ -278,7 +299,7 @@ export default function AdminManagement() {
                         <Label htmlFor="subscriptionPlan">Subscription Plan</Label>
                         <Select 
                           key={`subscription-${newUser.userType}`}
-                          value={newUser.subscriptionPlan} 
+                          value={newUser.subscriptionPlan || undefined} 
                           onValueChange={(value) => {
                             console.log("Subscription selected:", value);
                             setNewUser(prev => ({ ...prev, subscriptionPlan: value }));
