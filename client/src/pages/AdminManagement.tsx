@@ -276,58 +276,42 @@ export default function AdminManagement() {
 
                       <div>
                         <Label htmlFor="role">Role</Label>
-                        <Select 
-                          value={newUser.role} 
-                          onValueChange={(value) => {
-                            setNewUser(prev => ({ ...prev, role: value }));
+                        <select
+                          id="role"
+                          value={newUser.role}
+                          onChange={(e) => {
+                            setNewUser(prev => ({ ...prev, role: e.target.value }));
                           }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                          data-testid="select-role"
                         >
-                          <SelectTrigger 
-                            data-testid="select-role"
-                            className="focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                          >
-                            <SelectValue placeholder="Select role" />
-                          </SelectTrigger>
-                          <SelectContent className="z-50 max-h-96 overflow-auto">
-                            {getRoleOptions(newUser.userType).map((option) => (
-                              <SelectItem 
-                                key={option.value} 
-                                value={option.value}
-                                className="cursor-pointer hover:bg-blue-50 focus:bg-blue-50"
-                              >
-                                {option.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                          <option value="">Select role</option>
+                          {getRoleOptions(newUser.userType).map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
                       </div>
 
                       <div>
                         <Label htmlFor="subscriptionPlan">Subscription Plan</Label>
-                        <Select 
-                          value={newUser.subscriptionPlan} 
-                          onValueChange={(value) => {
-                            setNewUser(prev => ({ ...prev, subscriptionPlan: value }));
+                        <select
+                          id="subscriptionPlan"
+                          value={newUser.subscriptionPlan}
+                          onChange={(e) => {
+                            setNewUser(prev => ({ ...prev, subscriptionPlan: e.target.value }));
                           }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                          data-testid="select-subscription"
                         >
-                          <SelectTrigger 
-                            data-testid="select-subscription"
-                            className="focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                          >
-                            <SelectValue placeholder="Select subscription" />
-                          </SelectTrigger>
-                          <SelectContent className="z-50 max-h-96 overflow-auto">
-                            {getSubscriptionOptions(newUser.userType).map((option) => (
-                              <SelectItem 
-                                key={option.value} 
-                                value={option.value}
-                                className="cursor-pointer hover:bg-blue-50 focus:bg-blue-50"
-                              >
-                                {option.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                          <option value="">Select subscription</option>
+                          {getSubscriptionOptions(newUser.userType).map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
                       </div>
                     </div>
                   </div>
