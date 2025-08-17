@@ -305,6 +305,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Athletic Director Onboarding Link Generation
+  app.post("/api/generate-staff-invitation", isAuthenticated, async (req: any, res) => {
+    try {
+      const { staffRole, maxUses = 1, expirationDays = 7 } = req.body;
+      const userId = req.user?.claims?.sub;
+      
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      // Import the UniversalRegistrationSystem
+      const { UniversalRegistrationSystem } = require('./universal-registration');
+      const storage = await getStorage();
+      
+      // Generate a registration code for the staff role
+      const codeData = {
+        type: staffRole === 'athletic_trainer' ? 'district_admin' : 'district_admin',
+        userId: userId,
+        organizationId: req.user?.organizationId || 'ccisd',
+        permissions: [staffRole],
+        expiresAt: new Date(Date.now() + (expirationDays * 24 * 60 * 60 * 1000)),
+        maxUses: maxUses
+      };
+      
+      const registrationCode = UniversalRegistrationSystem.generateRegistrationCode(codeData);
+      const invitationLink = UniversalRegistrationSystem.generateInvitationLink(registrationCode);
+      
+      // Store the code in storage (if storage supports it)
+      // await storage.saveRegistrationCode(registrationCode, codeData);
+      
+      res.json({
+        success: true,
+        code: registrationCode,
+        link: invitationLink,
+        expiresAt: codeData.expiresAt,
+        maxUses: maxUses,
+        staffRole: staffRole
+      });
+      
+    } catch (error) {
+      console.error("Error generating staff invitation:", error);
+      res.status(500).json({ error: "Failed to generate staff invitation" });
+    }
+  });
+
+  // Validate invitation code before registration
+  app.get("/api/validate-invitation/:code", async (req: any, res) => {
+    try {
+      const { code } = req.params;
+      const { UniversalRegistrationSystem } = require('./universal-registration');
+      const storage = await getStorage();
+      
+      const validation = await UniversalRegistrationSystem.validateRegistrationCode(code, storage);
+      
+      res.json({
+        valid: validation.valid,
+        type: validation.type,
+        permissions: validation.permissions,
+        organizationId: validation.organizationId,
+        error: validation.error
+      });
+      
+    } catch (error) {
+      console.error("Error validating invitation code:", error);
+      res.status(500).json({ error: "Failed to validate invitation code" });
+    }
+  });
+
   // Create and return server
   const server = createServer(app);
   return server;

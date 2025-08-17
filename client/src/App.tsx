@@ -73,6 +73,7 @@ import StaffRegistration from './pages/StaffRegistration';
 import StaffRoles from './pages/StaffRoles';
 import DistrictOverview from './pages/DistrictOverview';
 import AthleticTrainerDemo from './pages/AthleticTrainerDemo';
+import { StaffOnboarding } from './components/StaffOnboarding';
 
 function AuthenticatedRoutes() {
   const { isFeatureEnabled, isFantasyDomain, config } = useDomain();
@@ -118,6 +119,7 @@ function AuthenticatedRoutes() {
         <Route path="/role-dashboard" component={RoleBasedDashboards} />
         <Route path="/bulk-registration" component={BulkRegistration} />
         <Route path="/staff-registration" component={StaffRegistration} />
+        <Route path="/staff-onboarding" component={StaffOnboarding} />
         <Route path="/staff-roles" component={StaffRoles} />
         <Route path="/district-overview" component={DistrictOverview} />
         <Route path="/athletic-trainer-demo" component={AthleticTrainerDemo} />

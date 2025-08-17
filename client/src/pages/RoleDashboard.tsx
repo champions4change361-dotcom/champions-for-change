@@ -70,6 +70,13 @@ export default function RoleDashboard() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <Button 
+                  className="w-full bg-emerald-600 hover:bg-emerald-700" 
+                  onClick={() => navigate('/staff-onboarding')}
+                  data-testid="button-staff-onboarding"
+                >
+                  Generate Staff Invitation Links
+                </Button>
+                <Button 
                   className="w-full" 
                   onClick={() => navigate('/staff-registration')}
                   data-testid="button-bulk-registration"
@@ -103,6 +110,13 @@ export default function RoleDashboard() {
                 <CardTitle>School Management</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                <Button 
+                  className="w-full bg-emerald-600 hover:bg-emerald-700" 
+                  onClick={() => navigate('/staff-onboarding')}
+                  data-testid="button-staff-onboarding"
+                >
+                  Generate Staff Invitation Links
+                </Button>
                 <Button className="w-full" data-testid="button-school-teams">
                   Manage School Teams
                 </Button>
