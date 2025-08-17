@@ -59,6 +59,7 @@ import BulkRegistration from './pages/BulkRegistration';
 import AthleteDashboard from './pages/AthleteDashboard';
 import CoachDashboard from './pages/CoachDashboard';
 import AthleticTrainerDashboard from './pages/AthleticTrainerDashboard';
+import Login from './pages/Login';
 import DistrictLogin from './pages/DistrictLogin';
 import TournamentOrganizerLogin from './pages/TournamentOrganizerLogin';
 import BusinessLogin from './pages/BusinessLogin';
@@ -213,8 +214,10 @@ function AppRouter() {
       <Route path="/health-benefits" component={HealthBenefits} />
       <Route path="/grant-funding" component={GrantFunding} />
       <Route path="/register-organization" component={OrganizationRegistration} />
-      {/* Main Login Portal - User Type Selection */}
-      <Route path="/login" component={LoginPortal} />
+      {/* Main Login Form */}
+      <Route path="/login" component={Login} />
+      {/* User Type Selection Portal */}
+      <Route path="/login-portal" component={LoginPortal} />
       {/* User Type Login Portals */}
       <Route path="/login/district" component={DistrictLogin} />
       <Route path="/login/organizer" component={TournamentOrganizerLogin} />

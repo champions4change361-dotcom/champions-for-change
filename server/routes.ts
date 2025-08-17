@@ -81,9 +81,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Basic user authentication endpoint
-  app.get("/api/auth/user", isAuthenticated, async (req: any, res) => {
+  // Login endpoint for form-based authentication
+  app.post('/api/auth/login', async (req, res) => {
     try {
+      const { email, password, userType } = req.body;
+      
+      // Check for master admin credentials
+      if (email === 'champions4change361@gmail.com' && password === 'master-admin-danielthornton') {
+        // Create master admin user session
+        const masterAdmin = {
+          id: 'master-admin-danielthornton',
+          email: email,
+          firstName: 'Daniel',
+          lastName: 'Thornton',
+          role: 'district_athletic_director',
+          subscriptionPlan: 'district_enterprise',
+          organizationName: 'Champions for Change',
+          userType: userType || 'district',
+          isAdmin: true
+        };
+
+        // Store in session
+        (req as any).session.user = masterAdmin;
+        
+        console.log('Master admin session created successfully');
+        res.json({ 
+          success: true, 
+          user: masterAdmin,
+          message: 'Login successful' 
+        });
+      } else {
+        res.status(401).json({ message: 'Invalid credentials' });
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      res.status(500).json({ message: 'Authentication service error' });
+    }
+  });
+
+  // Basic user authentication endpoint - modified to check session
+  app.get("/api/auth/user", async (req: any, res) => {
+    try {
+      // Check session-based auth first
+      if (req.session?.user) {
+        return res.json(req.session.user);
+      }
+      
+      // Then check OAuth auth
       if (req.user && req.user.claims) {
         res.json({
           id: req.user.claims.sub,
@@ -93,7 +137,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           profileImageUrl: req.user.claims.profile_image_url,
         });
       } else {
-        res.status(401).json({ message: "No user data available" });
+        res.status(401).json({ message: "Unauthorized" });
       }
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -101,8 +145,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Session-based auth check middleware
+  const checkAuth = (req: any, res: any, next: any) => {
+    if (req.session?.user || (req.user && req.user.claims)) {
+      next();
+    } else {
+      res.status(401).json({ message: "Unauthorized" });
+    }
+  };
+
   // Admin endpoints
-  app.get("/api/admin/users", isAuthenticated, async (req: any, res) => {
+  app.get("/api/admin/users", checkAuth, async (req: any, res) => {
     try {
       const storage = await getStorage();
       const users = await storage.getAllUsers();
@@ -113,7 +166,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/create-fake-user", isAuthenticated, async (req: any, res) => {
+  app.post("/api/admin/create-fake-user", checkAuth, async (req: any, res) => {
     try {
       const storage = await getStorage();
       const { firstName, lastName, email, role, subscriptionPlan, organizationName, userType } = req.body;
