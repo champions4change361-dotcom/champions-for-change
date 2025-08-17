@@ -18,6 +18,15 @@ export default function StaffRegistration() {
   const [location, navigate] = useLocation();
   const [csvData, setCsvData] = useState("");
   const [bulkUsers, setBulkUsers] = useState<any[]>([]);
+  
+  // Individual user form state
+  const [individualUser, setIndividualUser] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    role: '',
+    school: ''
+  });
 
   const roles = [
     { value: 'district_athletic_director', label: 'District Athletic Director' },
@@ -75,6 +84,32 @@ export default function StaffRegistration() {
       toast({
         title: "Error",
         description: "Failed to register staff members",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const individualCreateMutation = useMutation({
+    mutationFn: async (user: any) => {
+      return apiRequest('/api/admin/fake-user', 'POST', user);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Staff member registered successfully",
+      });
+      setIndividualUser({
+        firstName: '',
+        lastName: '',
+        email: '',
+        role: '',
+        school: ''
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to register staff member",
         variant: "destructive",
       });
     },
@@ -193,20 +228,36 @@ export default function StaffRegistration() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="firstName">First Name</Label>
-                    <Input id="firstName" data-testid="input-first-name" />
+                    <Input 
+                      id="firstName" 
+                      value={individualUser.firstName}
+                      onChange={(e) => setIndividualUser({...individualUser, firstName: e.target.value})}
+                      data-testid="input-first-name" 
+                    />
                   </div>
                   <div>
                     <Label htmlFor="lastName">Last Name</Label>
-                    <Input id="lastName" data-testid="input-last-name" />
+                    <Input 
+                      id="lastName" 
+                      value={individualUser.lastName}
+                      onChange={(e) => setIndividualUser({...individualUser, lastName: e.target.value})}
+                      data-testid="input-last-name" 
+                    />
                   </div>
                 </div>
                 <div>
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" data-testid="input-email" />
+                  <Input 
+                    id="email" 
+                    type="email" 
+                    value={individualUser.email}
+                    onChange={(e) => setIndividualUser({...individualUser, email: e.target.value})}
+                    data-testid="input-email" 
+                  />
                 </div>
                 <div>
                   <Label htmlFor="role">Role</Label>
-                  <Select>
+                  <Select value={individualUser.role} onValueChange={(value) => setIndividualUser({...individualUser, role: value})}>
                     <SelectTrigger data-testid="select-role">
                       <SelectValue placeholder="Select role" />
                     </SelectTrigger>
@@ -221,10 +272,27 @@ export default function StaffRegistration() {
                 </div>
                 <div>
                   <Label htmlFor="school">School/Department</Label>
-                  <Input id="school" data-testid="input-school" />
+                  <Input 
+                    id="school" 
+                    value={individualUser.school}
+                    onChange={(e) => setIndividualUser({...individualUser, school: e.target.value})}
+                    data-testid="input-school" 
+                  />
                 </div>
-                <Button className="w-full" data-testid="button-register-individual">
-                  Register Staff Member
+                <Button 
+                  className="w-full" 
+                  onClick={() => individualCreateMutation.mutate({
+                    firstName: individualUser.firstName,
+                    lastName: individualUser.lastName,
+                    email: individualUser.email,
+                    role: individualUser.role,
+                    organizationName: individualUser.school,
+                    userType: 'district'
+                  })}
+                  disabled={individualCreateMutation.isPending || !individualUser.firstName || !individualUser.lastName || !individualUser.email || !individualUser.role}
+                  data-testid="button-register-individual"
+                >
+                  {individualCreateMutation.isPending ? 'Registering...' : 'Register Staff Member'}
                 </Button>
               </CardContent>
             </Card>
