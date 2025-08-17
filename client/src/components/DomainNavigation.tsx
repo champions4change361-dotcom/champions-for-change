@@ -10,7 +10,7 @@ export default function DomainNavigation() {
 
   const getNavItemClass = (path: string) => {
     const isActive = location === path || (path !== "/" && location.startsWith(path));
-    return `px-4 py-2 rounded-lg transition-colors ${
+    return `px-3 py-1 rounded-md transition-colors text-sm ${
       isActive 
         ? "bg-white/20 text-white font-medium" 
         : "text-white/80 hover:text-white hover:bg-white/10"
@@ -18,24 +18,24 @@ export default function DomainNavigation() {
   };
 
   const getDonateButtonClass = () => {
-    return "bg-yellow-500 hover:bg-yellow-400 text-black font-medium px-4 py-2 rounded-lg transition-colors";
+    return "bg-yellow-500 hover:bg-yellow-400 text-black font-medium px-3 py-1 rounded-md transition-colors text-sm";
   };
 
   return (
     <nav 
-      className="fixed top-0 left-0 right-0 z-50 w-full py-4 px-6 shadow-lg"
+      className="fixed top-0 left-0 right-0 z-50 w-full py-2 px-4 shadow-lg"
       style={{ backgroundColor: config.primaryColor }}
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Brand Section */}
-        <div className="flex items-center space-x-4">
-          <div className="h-10 w-10 bg-white/20 rounded-lg flex items-center justify-center text-white text-xl">
+        <div className="flex items-center space-x-3">
+          <div className="h-8 w-8 bg-white/20 rounded-lg flex items-center justify-center text-white text-lg">
             {config.brand === 'CHAMPIONS_FOR_CHANGE' ? '🏆' : 
              config.brand === 'COACHES_LOUNGE' ? '🎮' : '⚡'}
           </div>
           <div>
-            <h1 className="text-xl font-bold text-white">{config.brand.replace(/_/g, ' ')}</h1>
-            <p className="text-sm text-white/70">District Athletics Management</p>
+            <h1 className="text-lg font-bold text-white">{config.brand.replace(/_/g, ' ')}</h1>
+            <p className="text-xs text-white/70">District Athletics Management</p>
           </div>
         </div>
 
