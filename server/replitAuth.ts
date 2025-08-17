@@ -44,15 +44,15 @@ export function getSession() {
   });
   
   return session({
-    secret: process.env.SESSION_SECRET!,
+    secret: process.env.SESSION_SECRET || 'champions-for-change-secret-key',
     store: sessionStore,
-    resave: true,
-    saveUninitialized: true,
+    resave: false,
+    saveUninitialized: false,
     cookie: {
-      httpOnly: false, // Allow client access for mobile compatibility
-      secure: false, // Allow HTTP for development and mobile testing
+      httpOnly: true,
+      secure: false, // Allow HTTP for development
       maxAge: sessionTtl,
-      sameSite: 'none', // More permissive for cross-origin access
+      sameSite: 'lax', // More compatible for same-site requests
     },
   });
 }

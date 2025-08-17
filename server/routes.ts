@@ -109,8 +109,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           isAdmin: true
         };
 
-        // Store in session
+        // Store in session with callback to ensure it's saved
         (req as any).session.user = masterAdmin;
+        (req as any).session.save((err: any) => {
+          if (err) {
+            console.error('Session save error:', err);
+          } else {
+            console.log('Session saved successfully for master admin');
+          }
+        });
         
         console.log('Master admin session created successfully');
         res.json({ 
@@ -153,11 +160,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Session-based auth check middleware
+  // Enhanced authentication check middleware
   const checkAuth = (req: any, res: any, next: any) => {
+    console.log('Auth check - Session user:', req.session?.user ? 'present' : 'missing');
+    console.log('Auth check - OAuth user:', req.user ? 'present' : 'missing');
+    console.log('Auth check - Session ID:', req.sessionID);
+    
+    // Check for session-based auth (form login) OR OAuth-based auth
     if (req.session?.user || (req.user && req.user.claims)) {
       next();
     } else {
+      console.log('Authentication failed - no valid session or OAuth');
       res.status(401).json({ message: "Unauthorized" });
     }
   };
