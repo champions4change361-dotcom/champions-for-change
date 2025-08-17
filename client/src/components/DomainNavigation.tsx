@@ -23,7 +23,7 @@ export default function DomainNavigation() {
 
   return (
     <nav 
-      className="w-full py-4 px-6 shadow-lg"
+      className="fixed top-0 left-0 right-0 z-50 w-full py-4 px-6 shadow-lg"
       style={{ backgroundColor: config.primaryColor }}
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between">

@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { getStorage } from "./storage";
+import { emailService } from "./emailService";
 
 console.log('🏫 District athletics management platform initialized');
 console.log('💚 Champions for Change nonprofit mission active');
@@ -221,6 +222,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isWhitelabelClient: false,
         whitelabelDomain: null
       });
+      
+      // Send welcome email notification to new user
+      try {
+        const emailResult = await emailService.sendWelcomeEmail(
+          email, 
+          firstName, 
+          role, 
+          organizationName
+        );
+        console.log(`📧 Welcome email sent to ${firstName} (${email}):`, emailResult);
+      } catch (emailError) {
+        console.error('Failed to send welcome email:', emailError);
+        // Don't fail the user creation if email fails
+      }
       
       res.json({ success: true, user: fakeUser });
     } catch (error) {
