@@ -87,6 +87,7 @@ export default function AdminManagement() {
   };
 
   const getRoleOptions = (userType: string) => {
+    console.log("getRoleOptions called with userType:", userType);
     switch (userType) {
       case 'district':
         return [
@@ -114,6 +115,7 @@ export default function AdminManagement() {
   };
 
   const getSubscriptionOptions = (userType: string) => {
+    console.log("getSubscriptionOptions called with userType:", userType);
     switch (userType) {
       case 'district':
         return [
@@ -252,6 +254,7 @@ export default function AdminManagement() {
                       <div>
                         <Label htmlFor="role">Role</Label>
                         <Select 
+                          key={`role-${newUser.userType}`}
                           value={newUser.role} 
                           onValueChange={(value) => {
                             console.log("Role selected:", value);
@@ -263,7 +266,7 @@ export default function AdminManagement() {
                           </SelectTrigger>
                           <SelectContent>
                             {getRoleOptions(newUser.userType).map((option) => (
-                              <SelectItem key={option.value} value={option.value}>
+                              <SelectItem key={`${newUser.userType}-${option.value}`} value={option.value}>
                                 {option.label}
                               </SelectItem>
                             ))}
@@ -274,6 +277,7 @@ export default function AdminManagement() {
                       <div>
                         <Label htmlFor="subscriptionPlan">Subscription Plan</Label>
                         <Select 
+                          key={`subscription-${newUser.userType}`}
                           value={newUser.subscriptionPlan} 
                           onValueChange={(value) => {
                             console.log("Subscription selected:", value);
@@ -285,7 +289,7 @@ export default function AdminManagement() {
                           </SelectTrigger>
                           <SelectContent>
                             {getSubscriptionOptions(newUser.userType).map((option) => (
-                              <SelectItem key={option.value} value={option.value}>
+                              <SelectItem key={`${newUser.userType}-${option.value}`} value={option.value}>
                                 {option.label}
                               </SelectItem>
                             ))}
