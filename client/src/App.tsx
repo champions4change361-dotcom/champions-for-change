@@ -242,6 +242,7 @@ function AppRouter() {
       
       {/* Athletic Trainer Dashboard */}
       <Route path="/athletic-trainer" component={AthleticTrainerDashboard} />
+      <Route path="/athletic-trainer-demo" component={AthleticTrainerDemo} />
       {/* Miller White-Label Homepage */}
       <Route path="/miller-homepage" component={MillerHomepage} />
       {/* Show Coaches Lounge landing page */}
