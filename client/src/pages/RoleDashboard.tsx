@@ -3,9 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 
 export default function RoleDashboard() {
   const { user, isLoading, isAuthenticated } = useAuth();
+  const [location, navigate] = useLocation();
 
   if (isLoading) {
     return (
@@ -53,10 +55,10 @@ export default function RoleDashboard() {
     return roleMap[role] || { label: role, color: 'bg-gray-500' };
   };
 
-  const roleInfo = getRoleDisplay(user.role || user.userRole || 'unknown');
+  const roleInfo = getRoleDisplay((user as any).role || (user as any).userRole || 'unknown');
 
   const getDashboardContent = () => {
-    const userRole = user.role || user.userRole;
+    const userRole = (user as any).role || (user as any).userRole;
     switch (userRole) {
       case 'district_athletic_director':
       case 'district_head_athletic_trainer':
@@ -69,15 +71,23 @@ export default function RoleDashboard() {
               <CardContent className="space-y-4">
                 <Button 
                   className="w-full" 
-                  onClick={() => window.location.href = '/bulk-registration'}
+                  onClick={() => navigate('/staff-registration')}
                   data-testid="button-bulk-registration"
                 >
                   Bulk Staff Registration
                 </Button>
-                <Button className="w-full" data-testid="button-role-assignment">
+                <Button 
+                  className="w-full" 
+                  onClick={() => navigate('/staff-roles')}
+                  data-testid="button-role-assignment"
+                >
                   Manage Staff Roles
                 </Button>
-                <Button className="w-full" data-testid="button-district-overview">
+                <Button 
+                  className="w-full" 
+                  onClick={() => navigate('/district-overview')}
+                  data-testid="button-district-overview"
+                >
                   District Athletics Overview
                 </Button>
               </CardContent>

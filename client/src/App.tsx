@@ -69,6 +69,9 @@ import LoginSupport from './pages/LoginSupport';
 import RoleBasedDashboards from './pages/RoleBasedDashboards';
 import NonprofitDonation from './pages/NonprofitDonation';
 import NonprofitAnalytics from './pages/NonprofitAnalytics';
+import StaffRegistration from './pages/StaffRegistration';
+import StaffRoles from './pages/StaffRoles';
+import DistrictOverview from './pages/DistrictOverview';
 
 function AuthenticatedRoutes() {
   const { isFeatureEnabled, isFantasyDomain, config } = useDomain();
@@ -111,6 +114,9 @@ function AuthenticatedRoutes() {
         <Route path="/athletic-trainer-dashboard" component={AthleticTrainerDashboard} />
         <Route path="/role-dashboard" component={RoleBasedDashboards} />
         <Route path="/bulk-registration" component={BulkRegistration} />
+        <Route path="/staff-registration" component={StaffRegistration} />
+        <Route path="/staff-roles" component={StaffRoles} />
+        <Route path="/district-overview" component={DistrictOverview} />
         
         {/* Show Tournament Empire only for school-safe and pro domains */}
         {!isFantasyDomain() && (
