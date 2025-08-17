@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { getStorage } from "./storage";
 
 console.log('🏫 District athletics management platform initialized');
 console.log('💚 Champions for Change nonprofit mission active');
@@ -97,6 +98,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ error: "Failed to fetch user" });
+    }
+  });
+
+  // Admin endpoints
+  app.get("/api/admin/users", isAuthenticated, async (req: any, res) => {
+    try {
+      const storage = await getStorage();
+      const users = await storage.getAllUsers();
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ error: "Failed to fetch users" });
+    }
+  });
+
+  app.post("/api/admin/create-fake-user", isAuthenticated, async (req: any, res) => {
+    try {
+      const storage = await getStorage();
+      const { firstName, lastName, email, role, subscriptionPlan, organizationName, userType } = req.body;
+      
+      if (!firstName || !lastName || !email || !role || !subscriptionPlan) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+
+      const fakeUser = await storage.upsertUser({
+        id: `fake-${Date.now()}-${email.replace('@', '-at-')}`,
+        email,
+        firstName,
+        lastName,
+        profileImageUrl: null,
+        subscriptionPlan,
+        subscriptionStatus: 'active',
+        complianceRole: role,
+        organizationId: organizationName.toLowerCase().replace(/\s+/g, '-'),
+        organizationName,
+        isWhitelabelClient: false,
+        whitelabelDomain: null
+      });
+      
+      res.json({ success: true, user: fakeUser });
+    } catch (error) {
+      console.error("Error creating fake user:", error);
+      res.status(500).json({ error: "Failed to create fake user" });
     }
   });
 

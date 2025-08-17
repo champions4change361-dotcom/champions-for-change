@@ -251,7 +251,13 @@ export default function AdminManagement() {
 
                       <div>
                         <Label htmlFor="role">Role</Label>
-                        <Select value={newUser.role} onValueChange={(value) => setNewUser({ ...newUser, role: value })}>
+                        <Select 
+                          value={newUser.role} 
+                          onValueChange={(value) => {
+                            console.log("Role selected:", value);
+                            setNewUser(prev => ({ ...prev, role: value }));
+                          }}
+                        >
                           <SelectTrigger data-testid="select-role">
                             <SelectValue placeholder="Select role" />
                           </SelectTrigger>
@@ -269,7 +275,10 @@ export default function AdminManagement() {
                         <Label htmlFor="subscriptionPlan">Subscription Plan</Label>
                         <Select 
                           value={newUser.subscriptionPlan} 
-                          onValueChange={(value) => setNewUser({ ...newUser, subscriptionPlan: value })}
+                          onValueChange={(value) => {
+                            console.log("Subscription selected:", value);
+                            setNewUser(prev => ({ ...prev, subscriptionPlan: value }));
+                          }}
                         >
                           <SelectTrigger data-testid="select-subscription">
                             <SelectValue placeholder="Select subscription" />
