@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Settings, Users, Trophy, Building2, Plus, Eye } from "lucide-react";
+import { useLocation } from "wouter";
 
 interface FakeUser {
   firstName: string;
@@ -24,6 +25,7 @@ interface FakeUser {
 export default function AdminManagement() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [location, navigate] = useLocation();
   const [newUser, setNewUser] = useState<FakeUser>({
     firstName: '',
     lastName: '',
@@ -378,7 +380,11 @@ export default function AdminManagement() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <p className="text-sm text-slate-600">Full access to district management features</p>
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700" data-testid="button-access-district">
+                  <Button 
+                    className="w-full bg-blue-600 hover:bg-blue-700" 
+                    data-testid="button-access-district"
+                    onClick={() => navigate('/dashboard')}
+                  >
                     Access District Features
                   </Button>
                 </CardContent>
@@ -391,7 +397,11 @@ export default function AdminManagement() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <p className="text-sm text-slate-600">Professional tournament management tools</p>
-                  <Button className="w-full bg-purple-600 hover:bg-purple-700" data-testid="button-access-tournament">
+                  <Button 
+                    className="w-full bg-purple-600 hover:bg-purple-700" 
+                    data-testid="button-access-tournament"
+                    onClick={() => navigate('/create')}
+                  >
                     Access Tournament Features
                   </Button>
                 </CardContent>
@@ -404,7 +414,11 @@ export default function AdminManagement() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <p className="text-sm text-slate-600">Enterprise-grade business solutions</p>
-                  <Button className="w-full bg-slate-600 hover:bg-slate-700" data-testid="button-access-business">
+                  <Button 
+                    className="w-full bg-slate-600 hover:bg-slate-700" 
+                    data-testid="button-access-business"
+                    onClick={() => navigate('/corporate-competitions')}
+                  >
                     Access Business Features
                   </Button>
                 </CardContent>
