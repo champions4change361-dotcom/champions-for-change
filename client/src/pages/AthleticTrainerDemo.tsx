@@ -62,10 +62,54 @@ const messages = [
 ];
 
 const supplies = [
-  { item: "Elastic Bandages", current: 15, minimum: 10, status: "adequate" },
-  { item: "Ice Packs", current: 8, minimum: 12, status: "low" },
-  { item: "Antiseptic Wipes", current: 45, minimum: 20, status: "adequate" },
-  { item: "Tape (Athletic)", current: 3, minimum: 8, status: "critical" }
+  { 
+    item: "Elastic Bandages (4-inch)", 
+    current: 15, 
+    minimum: 10, 
+    status: "adequate",
+    location: "Cabinet B-2",
+    barcode: "UPC: 072140002428",
+    supplier: "BSN Medical",
+    trackingMethod: "Manual Count + Phone Scanner",
+    lastReorder: "2 weeks ago",
+    notes: "ACE brand - most common, scan UPC with phone"
+  },
+  { 
+    item: "Ice Packs (Instant)", 
+    current: 8, 
+    minimum: 12, 
+    status: "low",
+    location: "Freezer Unit A", 
+    barcode: "UPC: 074676671208",
+    supplier: "Mueller Sports Medicine",
+    trackingMethod: "Manual Count (expiration tracking)",
+    lastReorder: "1 week ago",
+    notes: "Check expiration dates monthly - disposable packs"
+  },
+  { 
+    item: "Antiseptic Wipes", 
+    current: 45, 
+    minimum: 20, 
+    status: "adequate",
+    location: "Medical Cabinet A",
+    barcode: "UPC: 092265221344", 
+    supplier: "First Aid Only",
+    trackingMethod: "QR Code System",
+    lastReorder: "3 weeks ago",
+    notes: "Custom QR labels - scan to update count"
+  },
+  { 
+    item: "Athletic Tape (1.5-inch)", 
+    current: 3, 
+    minimum: 8, 
+    status: "critical",
+    location: "Tape Station",
+    barcode: "UPC: 074676642109",
+    supplier: "Cramer Products", 
+    trackingMethod: "Inventory App (TeamSideline)",
+    lastReorder: "4 weeks ago",
+    notes: "White tape - most used, tracked via mobile app"
+  }
 ];
 
 export default function AthleticTrainerDemo() {
@@ -274,40 +318,110 @@ export default function AthleticTrainerDemo() {
 
           {/* Supplies Tab */}
           <TabsContent value="supplies">
-            <Card>
-              <CardHeader>
-                <CardTitle>Medical Supply Inventory</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {supplies.map((supply, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex-1">
-                        <h4 className="font-semibold">{supply.item}</h4>
-                        <p className="text-sm text-slate-600">
-                          Current: {supply.current} | Minimum: {supply.minimum}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Badge className={getSupplyStatusColor(supply.status)}>
-                          {supply.status}
-                        </Badge>
-                        {supply.status === 'critical' && (
-                          <Button size="sm" variant="destructive">
-                            Order Now
-                          </Button>
-                        )}
-                        {supply.status === 'low' && (
-                          <Button size="sm" variant="outline">
-                            Reorder
-                          </Button>
-                        )}
-                      </div>
+            <div className="space-y-6">
+              {/* Inventory Tracking Methods Info */}
+              <Card className="bg-blue-50 border-blue-200">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Package className="h-5 w-5 text-blue-600" />
+                    Supply Tracking Methods
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <h4 className="font-semibold text-blue-800 mb-2">📱 Phone Scanner Methods:</h4>
+                      <ul className="space-y-1 text-slate-700">
+                        <li>• <strong>UPC Barcode Scanner:</strong> Use phone camera to scan manufacturer barcodes</li>
+                        <li>• <strong>Inventory Apps:</strong> TeamSideline, Sortly, or similar apps</li>
+                        <li>• <strong>Custom QR Codes:</strong> Create and print QR labels for custom tracking</li>
+                      </ul>
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                    <div>
+                      <h4 className="font-semibold text-blue-800 mb-2">📝 Manual & Hybrid Methods:</h4>
+                      <ul className="space-y-1 text-slate-700">
+                        <li>• <strong>Manual Count:</strong> Traditional clipboard and pencil inventory</li>
+                        <li>• <strong>Spreadsheet Tracking:</strong> Digital forms with manual entry</li>
+                        <li>• <strong>Color-Coded Labels:</strong> Visual management system</li>
+                      </ul>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Current Inventory */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Medical Supply Inventory</CardTitle>
+                  <CardContent className="text-sm text-slate-600 mt-2">
+                    Multiple tracking methods in use - from phone scanners to manual counts
+                  </CardContent>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {supplies.map((supply, index) => (
+                      <div key={index} className="border rounded-lg p-4 hover:bg-slate-50">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <h4 className="font-semibold">{supply.item}</h4>
+                              <Badge className={getSupplyStatusColor(supply.status)}>
+                                {supply.status}
+                              </Badge>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                              <div>
+                                <p><span className="font-medium">Current Stock:</span> {supply.current}</p>
+                                <p><span className="font-medium">Minimum Level:</span> {supply.minimum}</p>
+                                <p><span className="font-medium">Location:</span> {supply.location}</p>
+                                <p><span className="font-medium">Supplier:</span> {supply.supplier}</p>
+                              </div>
+                              <div>
+                                <p><span className="font-medium">Tracking Method:</span> {supply.trackingMethod}</p>
+                                <p><span className="font-medium">Barcode:</span> <code className="bg-gray-100 px-1 rounded text-xs">{supply.barcode}</code></p>
+                                <p><span className="font-medium">Last Reorder:</span> {supply.lastReorder}</p>
+                              </div>
+                            </div>
+                            
+                            <div className="mt-2 p-2 bg-slate-50 rounded text-xs text-slate-600">
+                              <strong>Tracking Notes:</strong> {supply.notes}
+                            </div>
+                          </div>
+                          
+                          <div className="flex flex-col gap-2 ml-4">
+                            {supply.status === 'critical' && (
+                              <Button size="sm" variant="destructive">
+                                🚨 Order Now
+                              </Button>
+                            )}
+                            {supply.status === 'low' && (
+                              <Button size="sm" variant="outline">
+                                📦 Reorder
+                              </Button>
+                            )}
+                            <Button size="sm" variant="outline">
+                              📱 Scan Update
+                            </Button>
+                            <Button size="sm" variant="outline">
+                              📝 Manual Count
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <h4 className="font-semibold text-green-800 mb-2">💡 Pro Tip: Mixed Tracking Approach</h4>
+                    <p className="text-sm text-green-700">
+                      Most athletic trainers use a combination: UPC scanning for manufactured items, custom QR codes for bulk supplies, 
+                      and manual counts for consumables. Apps like <strong>TeamSideline</strong> or <strong>Sortly</strong> work great with phone cameras.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           {/* Schedule Tab */}
