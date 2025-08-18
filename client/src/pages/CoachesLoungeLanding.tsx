@@ -35,6 +35,8 @@ export default function CoachesLoungeLanding() {
   const { toast } = useToast();
   const [loginCode, setLoginCode] = useState('');
   const [showDonation, setShowDonation] = useState(false);
+  const [customAmount, setCustomAmount] = useState('');
+  const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [selectedLeagueType, setSelectedLeagueType] = useState<string | null>(null);
 
   // Join league mutation
@@ -152,7 +154,7 @@ export default function CoachesLoungeLanding() {
                   <Button 
                     onClick={() => setShowDonation(true)}
                     variant="outline" 
-                    className="w-full border-green-300 text-green-200 hover:bg-green-700/30"
+                    className="w-full border-green-300 text-black hover:bg-green-50"
                     data-testid="button-show-donation"
                   >
                     <Heart className="mr-2 h-4 w-4" />
@@ -160,28 +162,54 @@ export default function CoachesLoungeLanding() {
                   </Button>
                 ) : (
                   <div className="space-y-2">
-                    <div className="flex gap-2">
+                    <div className="grid grid-cols-2 gap-1">
                       {[5, 10, 25, 50].map(amount => (
                         <Button 
                           key={amount}
                           size="sm" 
-                          variant="outline"
-                          className="text-xs border-green-300 text-green-700 hover:bg-green-50"
+                          variant={selectedAmount === amount ? "default" : "outline"}
+                          className={selectedAmount === amount 
+                            ? "text-xs bg-green-600 text-white hover:bg-green-700" 
+                            : "text-xs border-green-300 text-green-700 hover:bg-green-50"
+                          }
+                          onClick={() => {
+                            setSelectedAmount(amount);
+                            setCustomAmount('');
+                          }}
                           data-testid={`button-donate-${amount}`}
                         >
                           ${amount}
                         </Button>
                       ))}
                     </div>
+                    
+                    <div className="flex gap-2">
+                      <input 
+                        type="number" 
+                        min="5"
+                        placeholder="Custom ($5 min)"
+                        value={customAmount}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setCustomAmount(value);
+                          if (value && parseInt(value) >= 5) {
+                            setSelectedAmount(null);
+                          }
+                        }}
+                        className="flex-1 px-2 py-1 text-xs border border-green-300 rounded focus:outline-none focus:ring-1 focus:ring-green-500"
+                      />
+                    </div>
+                    
                     <Button 
                       size="sm" 
                       className="w-full bg-green-600 hover:bg-green-700 text-white"
+                      disabled={!selectedAmount && (!customAmount || parseInt(customAmount) < 5)}
                       data-testid="button-donate-now"
                     >
                       <Heart className="mr-2 h-3 w-3" />
-                      Donate to Champions for Change
+                      Donate ${selectedAmount || customAmount || '0'} to Champions for Change
                     </Button>
-                    <p className="text-xs text-green-600 text-center">100% goes to student educational trips</p>
+                    <p className="text-xs text-green-200 text-center">100% goes to student educational trips</p>
                   </div>
                 )}
               </div>
