@@ -112,6 +112,14 @@ export function AIConsultant({ domain = 'education' }: AIConsultantProps) {
             'Coding Competition', 'Cybersecurity Challenge', 'Physics Olympiad',
             'Chemistry Olympiad', 'Biology Olympiad', 'Environmental Science'
           ]
+        },
+        intellectual_games: {
+          name: 'Intellectual Games & Strategy',
+          sports: [
+            'Chess', 'Academic Decathlon', 'Quiz Bowl', 'Bridge', 'Checkers',
+            'Scrabble', 'Academic Bowl', 'Knowledge Bowl', 'Trivia Competition',
+            'Strategy Games', 'Logic Puzzles', 'Memory Competition'
+          ]
         }
       }
     },
