@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 import { Badge } from "@/components/ui/badge";
 import { Brain, MessageSquare, Trophy, Users, Calendar, DollarSign, Globe, ArrowRight, CheckCircle } from "lucide-react";
 
@@ -131,20 +131,19 @@ export function AIConsultant({ domain = 'education' }: AIConsultantProps) {
               
               <div>
                 <label className="text-sm font-medium">Sport/Activity</label>
-                <Select value={consultation.sport} onValueChange={(value) => 
-                  setConsultation(prev => ({ ...prev, sport: value }))
-                }>
-                  <SelectTrigger data-testid="select-sport">
-                    <SelectValue placeholder="Select sport" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="basketball">Basketball</SelectItem>
-                    <SelectItem value="soccer">Soccer</SelectItem>
-                    <SelectItem value="baseball">Baseball</SelectItem>
-                    <SelectItem value="track">Track & Field</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
+                <select 
+                  value={consultation.sport} 
+                  onChange={(e) => setConsultation(prev => ({ ...prev, sport: e.target.value }))}
+                  className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  data-testid="select-sport"
+                >
+                  <option value="">Select sport</option>
+                  <option value="basketball">Basketball</option>
+                  <option value="soccer">Soccer</option>
+                  <option value="baseball">Baseball</option>
+                  <option value="track">Track & Field</option>
+                  <option value="other">Other</option>
+                </select>
               </div>
 
               <div>
@@ -159,19 +158,18 @@ export function AIConsultant({ domain = 'education' }: AIConsultantProps) {
 
               <div>
                 <label className="text-sm font-medium">Budget Range</label>
-                <Select value={consultation.budget} onValueChange={(value) => 
-                  setConsultation(prev => ({ ...prev, budget: value }))
-                }>
-                  <SelectTrigger data-testid="select-budget">
-                    <SelectValue placeholder="Select budget" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="free">Free (Foundation Tier)</SelectItem>
-                    <SelectItem value="99">$99/month (Professional)</SelectItem>
-                    <SelectItem value="399">$399/month (Enterprise)</SelectItem>
-                    <SelectItem value="custom">Custom Enterprise</SelectItem>
-                  </SelectContent>
-                </Select>
+                <select 
+                  value={consultation.budget} 
+                  onChange={(e) => setConsultation(prev => ({ ...prev, budget: e.target.value }))}
+                  className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  data-testid="select-budget"
+                >
+                  <option value="">Select budget</option>
+                  <option value="free">Free (Foundation Tier)</option>
+                  <option value="99">$99/month (Professional)</option>
+                  <option value="399">$399/month (Enterprise)</option>
+                  <option value="custom">Custom Enterprise</option>
+                </select>
               </div>
 
               <Button 
