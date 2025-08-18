@@ -336,18 +336,23 @@ export default function Register() {
                   <div>
                     <Label htmlFor="phone">Phone Number</Label>
                     <Input {...form.register('phone')} data-testid="input-phone" />
+                  <div>
+                    <Label htmlFor="organizationType">Organization Type *</Label>
+                    <select 
+                      {...form.register('organizationType')}
+                      className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      data-testid="select-organizationType"
+                    >
+                      <option value="">Select type</option>
+                      <option value="school_district">School District</option>
+                      <option value="school">School</option>
+                      <option value="club">Club/Organization</option>
+                      <option value="nonprofit">Nonprofit</option>
+                    </select>
+                    {form.formState.errors.organizationType && (
+                      <p className="text-red-500 text-sm mt-1">{form.formState.errors.organizationType.message}</p>
+                    )}
                   </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="position">Position/Title *</Label>
-                  <Input {...form.register('position')} placeholder="e.g., Athletic Director, Head Coach, etc." data-testid="input-position" />
-                  {form.formState.errors.position && (
-                    <p className="text-red-500 text-sm mt-1">{form.formState.errors.position.message}</p>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="organizationName">Organization Name *</Label>
                     <Input {...form.register('organizationName')} placeholder="e.g., Robert Driscoll Middle School" data-testid="input-organizationName" />
