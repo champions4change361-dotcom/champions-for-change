@@ -149,7 +149,7 @@ export default function Landing() {
             
                 <p className="text-xl text-slate-300 mb-8 max-w-4xl">
                   Professional tournament management platform built by coaches who identified needs in the tournament world. 
-                  Every subscription helps fund student trips and educational opportunities for middle schools in Corpus Christi, Texas.
+                  Every subscription helps fund student trips and educational opportunities for underprivileged youth.
                 </p>
 
                 <div className="flex flex-col gap-4 justify-center lg:justify-start items-center lg:items-start">

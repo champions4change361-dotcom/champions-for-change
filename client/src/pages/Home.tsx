@@ -86,7 +86,7 @@ export default function Home() {
                   Welcome Back, <span className="text-yellow-400">Champion</span>
                 </h2>
                 <p className="text-xl text-slate-300 mb-4">
-                  Every tournament creates opportunities for student athletes in Corpus Christi, Texas
+                  Every tournament creates opportunities for underprivileged youth
                 </p>
                 <div className="flex items-center space-x-6">
                   <div className="flex items-center space-x-2 text-yellow-400">

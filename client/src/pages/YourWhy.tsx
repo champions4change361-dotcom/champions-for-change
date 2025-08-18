@@ -172,7 +172,7 @@ export default function YourWhy() {
                 <p className="text-gray-700 leading-relaxed mb-6">
                   <strong>Every interaction on our platform</strong> doesn't just serve your immediate needs - 
                   it funds a <span className="font-semibold text-green-700">$2,600+ educational trip</span> for 
-                  an underprivileged middle school student in Corpus Christi, Texas.
+                  an underprivileged youth.
                 </p>
                 
                 <div className="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-400 mt-8">
