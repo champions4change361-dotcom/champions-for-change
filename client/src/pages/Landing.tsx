@@ -56,8 +56,16 @@ export default function Landing() {
                   </div>
                 </div>
 
-                {/* Login Buttons with optimized mobile spacing */}
+                {/* Donation and Login Buttons with optimized mobile spacing */}
                 <div className="flex flex-col space-y-3 lg:flex-row lg:space-y-0 lg:space-x-3 lg:ml-auto">
+                  <Button 
+                    onClick={() => setLocation('/donate')}
+                    className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 w-full lg:w-auto"
+                    data-testid="button-donate-header"
+                  >
+                    <Heart className="mr-2 h-4 w-4" />
+                    Donate
+                  </Button>
                   <Button 
                     onClick={() => setLocation('/login')}
                     className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-6 py-3 w-full lg:w-auto"
@@ -194,6 +202,15 @@ export default function Landing() {
                       data-testid="button-get-started"
                     >
                       Start Supporting Students
+                    </Button>
+                    <Button 
+                      size="lg" 
+                      className="bg-green-600 hover:bg-green-700 text-white font-bold px-8 py-4 text-lg"
+                      onClick={() => setLocation("/donate")}
+                      data-testid="button-donate-hero"
+                    >
+                      <Heart className="mr-2 h-5 w-5" />
+                      Fund Student Education
                     </Button>
                     <Button 
                       size="lg" 

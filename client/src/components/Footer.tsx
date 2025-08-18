@@ -68,6 +68,10 @@ export default function Footer() {
             </div>
             <div className="mt-6 text-xs text-gray-500">
               <p>Platform built by coaches who understand tournament management needs</p>
+              <div className="mt-3 pt-3 border-t border-gray-700">
+                <p>Champions for Change is a 501(c)(3) nonprofit organization</p>
+                <p>Tax ID/EIN: [Please provide your EIN to replace this]</p>
+              </div>
             </div>
           </div>
         </div>
