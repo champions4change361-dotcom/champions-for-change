@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CheckSquare, Square, Timer, Ruler, TrendingUp } from "lucide-react";
 import { type SportEvent, type TournamentEvent } from "@shared/schema";
@@ -109,15 +109,15 @@ export default function TrackFieldSetup({ tournamentId, sportId, onComplete }: T
         <CardContent>
           <div className="flex items-center space-x-4 mb-6">
             <Label htmlFor="measurement-system">Measurement System:</Label>
-            <Select value={measurementSystem} onValueChange={(value: "metric" | "imperial") => setMeasurementSystem(value)}>
-              <SelectTrigger className="w-48" data-testid="select-measurement-system">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="metric">Metric (meters, seconds)</SelectItem>
-                <SelectItem value="imperial">Imperial (feet, seconds)</SelectItem>
-              </SelectContent>
-            </Select>
+            <select 
+              value={measurementSystem} 
+              onChange={(e) => setMeasurementSystem(e.target.value as "metric" | "imperial")}
+              className="w-48 h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              data-testid="select-measurement-system"
+            >
+              <option value="metric">Metric (meters, seconds)</option>
+              <option value="imperial">Imperial (feet, seconds)</option>
+            </select>
           </div>
 
           <Tabs defaultValue="running" className="w-full">

@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -358,17 +358,17 @@ export default function Register() {
                   
                   <div>
                     <Label htmlFor="organizationType">Organization Type *</Label>
-                    <Select onValueChange={(value) => form.setValue('organizationType', value as any)} data-testid="select-organizationType">
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="school_district">School District</SelectItem>
-                        <SelectItem value="school">School</SelectItem>
-                        <SelectItem value="club">Club/Organization</SelectItem>
-                        <SelectItem value="nonprofit">Nonprofit</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <select 
+                      onChange={(e) => form.setValue('organizationType', e.target.value as any)}
+                      className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      data-testid="select-organizationType"
+                    >
+                      <option value="">Select type</option>
+                      <option value="school_district">School District</option>
+                      <option value="school">School</option>
+                      <option value="club">Club/Organization</option>
+                      <option value="nonprofit">Nonprofit</option>
+                    </select>
                   </div>
                 </div>
 

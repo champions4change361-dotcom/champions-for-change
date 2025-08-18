@@ -8,7 +8,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -247,65 +247,52 @@ export default function EnhancedTournamentWizard({
                 <Label htmlFor="sport" className="block text-sm font-medium text-gray-700 mb-2">
                   Sport *
                 </Label>
-                <Select 
-                  onValueChange={(value) => form.setValue("sport", value)} 
+                <select 
+                  onChange={(e) => form.setValue("sport", e.target.value)} 
                   value={form.watch("sport") || ""}
+                  className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  data-testid="select-sport"
                 >
-                  <SelectTrigger data-testid="select-sport">
-                    <SelectValue placeholder="Choose a sport" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {sports.map((sport) => (
-                      <SelectItem key={sport.id} value={sport.sportName}>
-                        <div className="flex items-center gap-2">
-                          {sport.sportName}
-                          <Badge variant={sport.competitionType === "leaderboard" ? "outline" : "default"}>
-                            {sport.competitionType === "leaderboard" ? "Leaderboard" : "Bracket"}
-                          </Badge>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  <option value="">Choose a sport</option>
+                  {sports.map((sport) => (
+                    <option key={sport.id} value={sport.sportName}>
+                      {sport.sportName} - {sport.competitionType === "leaderboard" ? "Leaderboard" : "Bracket"}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div>
                 <Label htmlFor="competitionFormat" className="block text-sm font-medium text-gray-700 mb-2">
                   Competition Format *
                 </Label>
-                <Select 
+                <select 
                   value={form.watch("competitionFormat")} 
-                  onValueChange={(value) => form.setValue("competitionFormat", value as any)}
+                  onChange={(e) => form.setValue("competitionFormat", e.target.value as any)}
+                  className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choose format" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="bracket">Bracket Tournament</SelectItem>
-                    <SelectItem value="leaderboard">Leaderboard Competition</SelectItem>
-                    <SelectItem value="series">Best-of Series</SelectItem>
-                    <SelectItem value="bracket-to-series">Bracket + Championship Series</SelectItem>
-                  </SelectContent>
-                </Select>
+                  <option value="">Choose format</option>
+                  <option value="bracket">Bracket Tournament</option>
+                  <option value="leaderboard">Leaderboard Competition</option>
+                  <option value="series">Best-of Series</option>
+                  <option value="bracket-to-series">Bracket + Championship Series</option>
+                </select>
               </div>
 
               <div>
                 <Label htmlFor="tournamentType" className="block text-sm font-medium text-gray-700 mb-2">
                   Tournament Type
                 </Label>
-                <Select 
+                <select 
                   value={form.watch("tournamentType")}
-                  onValueChange={(value) => form.setValue("tournamentType", value as any)}
+                  onChange={(e) => form.setValue("tournamentType", e.target.value as any)}
+                  className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select tournament type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="single">Single Elimination</SelectItem>
-                    <SelectItem value="double">Double Elimination (Second Chance Bracket)</SelectItem>
-                    <SelectItem value="round-robin">Round Robin</SelectItem>
-                  </SelectContent>
-                </Select>
+                  <option value="">Select tournament type</option>
+                  <option value="single">Single Elimination</option>
+                  <option value="double">Double Elimination (Second Chance Bracket)</option>
+                  <option value="round-robin">Round Robin</option>
+                </select>
               </div>
 
               <div className="grid grid-cols-2 gap-4">

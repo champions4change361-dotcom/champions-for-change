@@ -8,7 +8,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 import { Badge } from "@/components/ui/badge";
 import { insertTournamentSchema } from "@shared/schema";
 import EventSelectionModal from "@/components/event-selection-modal";
@@ -342,29 +342,22 @@ export default function TournamentCreationForm({ onClose, aiRecommendations }: T
           <Label htmlFor="sport" className="block text-sm font-medium text-gray-700 mb-2">
             Sport
           </Label>
-          <Select onValueChange={(value) => form.setValue("sport", value)} value={form.watch("sport") || ""}>
-            <SelectTrigger data-testid="select-sport">
-              <SelectValue placeholder="Choose a sport" />
-            </SelectTrigger>
-            <SelectContent>
-              {sports.map((sport) => (
-                <SelectItem key={sport.id} value={sport.sportName} data-testid={`option-sport-${sport.id}`}>
-                  <div className="flex items-center gap-2">
-                    {sport.sportName}
-                    <Badge variant={sport.competitionType === "leaderboard" ? "outline" : 
-                                   sport.competitionType === "series" ? "destructive" :
-                                   sport.competitionType === "bracket-to-series" ? "default" :
-                                   sport.competitionType === "both" ? "secondary" : "default"}>
-                      {sport.competitionType === "leaderboard" ? "Leaderboard" : 
-                       sport.competitionType === "series" ? "Series" :
-                       sport.competitionType === "bracket-to-series" ? "Bracket + Series" :
-                       sport.competitionType === "both" ? "Both" : "Bracket"}
-                    </Badge>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <select 
+            onChange={(e) => form.setValue("sport", e.target.value)} 
+            value={form.watch("sport") || ""}
+            className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            data-testid="select-sport"
+          >
+            <option value="">Choose a sport</option>
+            {sports.map((sport) => (
+              <option key={sport.id} value={sport.sportName} data-testid={`option-sport-${sport.id}`}>
+                {sport.sportName} - {sport.competitionType === "leaderboard" ? "Leaderboard" : 
+                     sport.competitionType === "series" ? "Series" :
+                     sport.competitionType === "bracket-to-series" ? "Bracket + Series" :
+                     sport.competitionType === "both" ? "Both" : "Bracket"}
+              </option>
+            ))}
+          </select>
           {selectedSport && (
             <p className="text-sm text-gray-600 mt-1">
               {selectedSport.competitionType === "leaderboard" 

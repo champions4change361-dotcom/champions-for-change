@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Copy, UserPlus, Link as LinkIcon, CheckCircle, Clock, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -112,21 +112,20 @@ export function StaffOnboarding() {
           <CardContent className="space-y-4">
             <div>
               <Label htmlFor="role-select" className="text-slate-300">Staff Role</Label>
-              <Select value={selectedRole} onValueChange={setSelectedRole} data-testid="select-staff-role">
-                <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                  <SelectValue placeholder="Select a role" />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-600">
-                  {staffRoles.map((role) => (
-                    <SelectItem key={role.value} value={role.value} className="text-slate-300 hover:bg-slate-700">
-                      <div>
-                        <div className="font-medium text-white">{role.label}</div>
-                        <div className="text-sm text-slate-400">{role.description}</div>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <select 
+                id="role-select"
+                value={selectedRole} 
+                onChange={(e) => setSelectedRole(e.target.value)}
+                className="w-full h-10 px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                data-testid="select-staff-role"
+              >
+                <option value="">Select a role</option>
+                {staffRoles.map((role) => (
+                  <option key={role.value} value={role.value}>
+                    {role.label} - {role.description}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
