@@ -9,7 +9,8 @@ import {
   type Contact, type InsertContact, type EmailCampaign, type InsertEmailCampaign, type CampaignRecipient, type InsertCampaignRecipient,
   type Donor, type InsertDonor, type Donation, type InsertDonation, type RegistrationRequest, type InsertRegistrationRequest,
   type TaxExemptionDocument, type InsertTaxExemptionDocument, type NonprofitSubscription, type InsertNonprofitSubscription, type NonprofitInvoice, type InsertNonprofitInvoice,
-  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog, taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices
+  type SupportTeam, type InsertSupportTeam, type SupportTeamMember, type InsertSupportTeamMember, type SupportTeamInjury, type InsertSupportTeamInjury, type SupportTeamAiConsultation, type InsertSupportTeamAiConsultation,
+  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog, taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices, supportTeams, supportTeamMembers, supportTeamInjuries, supportTeamAiConsultations
 } from "@shared/schema";
 
 type SportCategory = typeof sportCategories.$inferSelect;

@@ -35,6 +35,7 @@ import {
   Zap
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { CheerleadingInjuryAssessment } from "@/components/CheerleadingInjuryAssessment";
 
 export default function AthleticTrainerDashboard() {
   const { user } = useAuth();
@@ -42,6 +43,7 @@ export default function AthleticTrainerDashboard() {
   const [showAddAthlete, setShowAddAthlete] = useState(false);
   const [showMessageComposer, setShowMessageComposer] = useState(false);
   const [showAIConsultant, setShowAIConsultant] = useState(false);
+  const [showCheerInjuryAssessment, setShowCheerInjuryAssessment] = useState(false);
   const [aiConsultation, setAiConsultation] = useState({
     athleteName: '',
     sport: '',
@@ -556,7 +558,7 @@ export default function AthleticTrainerDashboard() {
                     </div>
 
                     <Button 
-                      onClick={() => setShowAIConsultant(true)}
+                      onClick={() => setShowCheerInjuryAssessment(true)}
                       className="w-full bg-purple-600 hover:bg-purple-700"
                       data-testid="button-cheer-ai-consultant"
                     >
@@ -2203,6 +2205,12 @@ export default function AthleticTrainerDashboard() {
             </div>
           </div>
         )}
+
+        {/* Cheerleading Injury Assessment Modal */}
+        <CheerleadingInjuryAssessment 
+          isOpen={showCheerInjuryAssessment}
+          onClose={() => setShowCheerInjuryAssessment(false)}
+        />
       </div>
     </div>
   );

@@ -1781,6 +1781,228 @@ export type InsertNonprofitSubscription = z.infer<typeof insertNonprofitSubscrip
 export type NonprofitInvoice = typeof nonprofitInvoices.$inferSelect;
 export type InsertNonprofitInvoice = z.infer<typeof insertNonprofitInvoiceSchema>;
 
+// Athletic Support Teams (Cheerleading, Dance, Band, Color Guard)
+export const supportTeams = pgTable("support_teams", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  schoolId: varchar("school_id").notNull().references(() => schools.id),
+  name: varchar("name").notNull(), // "Varsity Cheerleading", "Dance Team", etc.
+  teamType: text("team_type", {
+    enum: ["cheerleading", "dance_team", "color_guard", "marching_band", "pep_squad", "mascot_team"]
+  }).notNull(),
+  season: text("season", {
+    enum: ["fall", "winter", "spring", "summer", "year_round"]
+  }).default("fall"),
+  coachId: varchar("coach_id").references(() => users.id),
+  assistantCoachId: varchar("assistant_coach_id").references(() => users.id),
+  
+  // Team specifications
+  teamSize: integer("team_size").default(0),
+  competitionLevel: text("competition_level", {
+    enum: ["varsity", "junior_varsity", "freshman", "middle_school", "elementary", "recreational"]
+  }).default("varsity"),
+  
+  // Safety and compliance
+  usaCheersafety: boolean("usa_cheer_safety").default(false), // USA Cheer Safety certification
+  usasfCompliant: boolean("usasf_compliant").default(false), // USASF rules compliance
+  nfhsRules: boolean("nfhs_rules").default(false), // NFHS Spirit Rules
+  
+  // Performance details for cheerleading/dance
+  stuntsAllowed: boolean("stunts_allowed").default(false),
+  tumblingAllowed: boolean("tumbling_allowed").default(false),
+  basketTossAllowed: boolean("basket_toss_allowed").default(false),
+  pyramidsAllowed: boolean("pyramids_allowed").default(false),
+  
+  // Equipment and surfaces
+  practicesOnMats: boolean("practices_on_mats").default(true),
+  competesOnMats: boolean("competes_on_mats").default(true),
+  hasSpringFloor: boolean("has_spring_floor").default(false),
+  
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Support Team Members (individual cheerleaders, dancers, band members, etc.)
+export const supportTeamMembers = pgTable("support_team_members", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  supportTeamId: varchar("support_team_id").notNull().references(() => supportTeams.id),
+  studentId: varchar("student_id").references(() => users.id), // If they have a user account
+  firstName: varchar("first_name").notNull(),
+  lastName: varchar("last_name").notNull(),
+  grade: integer("grade"), // 6-12
+  dateOfBirth: date("date_of_birth"),
+  
+  // Position/Role specific to team type
+  position: text("position", {
+    enum: [
+      // Cheerleading positions
+      "base", "flyer", "back_spot", "front_spot", "tumbler", "captain", "co_captain",
+      // Dance positions
+      "captain", "co_captain", "soloist", "ensemble", "choreographer",
+      // Band positions
+      "section_leader", "drum_major", "color_guard_captain", "equipment_manager",
+      // General
+      "member", "alternate"
+    ]
+  }).default("member"),
+  
+  // Experience and skills
+  yearsExperience: integer("years_experience").default(0),
+  skillLevel: text("skill_level", {
+    enum: ["beginner", "intermediate", "advanced", "elite"]
+  }).default("beginner"),
+  
+  // Cheerleading/Dance specific skills
+  canStunt: boolean("can_stunt").default(false),
+  canTumble: boolean("can_tumble").default(false),
+  canFly: boolean("can_fly").default(false),
+  canBase: boolean("can_base").default(false),
+  canSpot: boolean("can_spot").default(false),
+  
+  // Health and medical clearance
+  medicalClearance: boolean("medical_clearance").default(false),
+  clearanceDate: date("clearance_date"),
+  clearanceExpiresAt: date("clearance_expires_at"),
+  hasInjuryHistory: boolean("has_injury_history").default(false),
+  
+  // Parent/Guardian info
+  parentEmail: varchar("parent_email"),
+  parentPhone: varchar("parent_phone"),
+  emergencyContactName: varchar("emergency_contact_name"),
+  emergencyContactPhone: varchar("emergency_contact_phone"),
+  
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Support Team Injury Tracking
+export const supportTeamInjuries = pgTable("support_team_injuries", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  memberId: varchar("member_id").notNull().references(() => supportTeamMembers.id),
+  athleticTrainerId: varchar("athletic_trainer_id").references(() => users.id),
+  
+  // Injury details
+  injuryDate: date("injury_date").notNull(),
+  injuryLocation: text("injury_location", {
+    enum: ["ankle", "knee", "wrist", "shoulder", "neck", "back", "hip", "elbow", "finger", "other"]
+  }).notNull(),
+  injuryType: text("injury_type", {
+    enum: ["sprain", "strain", "fracture", "concussion", "contusion", "laceration", "dislocation", "other"]
+  }).notNull(),
+  
+  // Activity when injured
+  activityWhenInjured: text("activity_when_injured", {
+    enum: ["stunting", "tumbling", "dancing", "jumping", "running", "marching", "lifting_equipment", "practice", "performance", "other"]
+  }),
+  
+  // Cheerleading specific
+  stuntingPosition: text("stunting_position", {
+    enum: ["base", "flyer", "back_spot", "front_spot", "none"]
+  }),
+  surfaceType: text("surface_type", {
+    enum: ["mats", "spring_floor", "gym_floor", "outdoor_surface", "football_field", "track", "other"]
+  }),
+  
+  // Severity and treatment
+  severity: text("severity", {
+    enum: ["minor", "moderate", "severe", "catastrophic"]
+  }).default("minor"),
+  description: text("description"),
+  treatmentProvided: text("treatment_provided"),
+  returnToPlayCleared: boolean("return_to_play_cleared").default(false),
+  returnToPlayDate: date("return_to_play_date"),
+  
+  // Follow-up care
+  requiresFollowUp: boolean("requires_follow_up").default(false),
+  followUpNotes: text("follow_up_notes"),
+  parentNotified: boolean("parent_notified").default(false),
+  doctorReferral: boolean("doctor_referral").default(false),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Support Team AI Consultation History
+export const supportTeamAiConsultations = pgTable("support_team_ai_consultations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  athleticTrainerId: varchar("athletic_trainer_id").notNull().references(() => users.id),
+  memberId: varchar("member_id").references(() => supportTeamMembers.id),
+  supportTeamId: varchar("support_team_id").references(() => supportTeams.id),
+  
+  // Consultation details
+  consultationType: text("consultation_type", {
+    enum: ["injury_assessment", "prevention_protocol", "return_to_play", "safety_review", "skill_progression"]
+  }).notNull(),
+  sport: text("sport", {
+    enum: ["cheerleading", "dance_team", "color_guard", "marching_band", "other"]
+  }).notNull(),
+  injuryLocation: text("injury_location", {
+    enum: ["ankle", "knee", "wrist", "shoulder", "neck", "back", "hip", "elbow", "other"]
+  }),
+  
+  // Input data
+  symptoms: text("symptoms"),
+  activityDescription: text("activity_description"),
+  riskFactors: jsonb("risk_factors").$type<string[]>(),
+  
+  // AI response
+  aiRecommendations: text("ai_recommendations"),
+  riskLevel: text("risk_level", {
+    enum: ["low", "moderate", "high", "critical"]
+  }).default("low"),
+  redFlags: jsonb("red_flags").$type<string[]>(),
+  recommendedActions: jsonb("recommended_actions").$type<string[]>(),
+  
+  // Cheerleading specific data
+  stuntingActivity: boolean("stunting_activity").default(false),
+  basketTossInvolved: boolean("basket_toss_involved").default(false),
+  surfaceType: text("surface_type", {
+    enum: ["mats", "spring_floor", "gym_floor", "outdoor_surface", "other"]
+  }),
+  
+  // Follow-up tracking
+  followUpRequired: boolean("follow_up_required").default(false),
+  followUpCompleted: boolean("follow_up_completed").default(false),
+  followUpDate: date("follow_up_date"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Schema and type exports for support teams
+export const insertSupportTeamSchema = createInsertSchema(supportTeams).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSupportTeamMemberSchema = createInsertSchema(supportTeamMembers).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSupportTeamInjurySchema = createInsertSchema(supportTeamInjuries).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSupportTeamAiConsultationSchema = createInsertSchema(supportTeamAiConsultations).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Support team types
+export type SupportTeam = typeof supportTeams.$inferSelect;
+export type InsertSupportTeam = z.infer<typeof insertSupportTeamSchema>;
+export type SupportTeamMember = typeof supportTeamMembers.$inferSelect;
+export type InsertSupportTeamMember = z.infer<typeof insertSupportTeamMemberSchema>;
+export type SupportTeamInjury = typeof supportTeamInjuries.$inferSelect;
+export type InsertSupportTeamInjury = z.infer<typeof insertSupportTeamInjurySchema>;
+export type SupportTeamAiConsultation = typeof supportTeamAiConsultations.$inferSelect;
+export type InsertSupportTeamAiConsultation = z.infer<typeof insertSupportTeamAiConsultationSchema>;
+
 // User types
 export type User = typeof users.$inferSelect;
 

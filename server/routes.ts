@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { getStorage } from "./storage";
 import { emailService } from "./emailService";
+import supportTeamRoutes from "./supportTeamRoutes";
 import Stripe from "stripe";
 
 console.log('🏫 District athletics management platform initialized');
@@ -41,6 +42,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Setup authentication
   await setupAuth(app);
+
+  // Support team routes for cheerleading, dance teams, marching band, color guard
+  app.use('/api', supportTeamRoutes);
 
   // Miller VLC Demo route for district firewall compatibility
   app.get('/', (req, res, next) => {
