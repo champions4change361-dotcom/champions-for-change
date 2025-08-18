@@ -68,6 +68,7 @@ Organization Expansion: Include charter schools, private schools, pony leagues, 
 - **CSV Bulk Import/Export System**: Subdomain-specific templates, automatic validation, duplicate detection, sample data generation, and error handling.
 - **Enhanced Team Management**: Live updates, multiple input methods, smart validation, and sport-specific name generation.
 - **AI Integration**: 3-Tier AI Consultation (Consultation, Generation, Full-Service) providing recommendations based on user history and context.
+- **Perfect Tournament Flow Logic**: Universal complexity analysis system that routes users based on competition type, participant count, budget, and compliance needs. Simple tournaments (≤50 participants, free tier, minimal features, individual/simple team sports) get direct tournament creation access, while complex tournaments get professional setup support.
 - **Comprehensive Sports Injury AI**: Evidence-based AI consultation covering all major sports injuries (ACL, ankle, concussion, hamstring, back, hip, knee) with 95-96% diagnostic accuracy, plus specialized protocols for cheerleading (ankle injuries 44.9% prevalence, concussion risk 96% from stunts), dance teams, and marching band support groups.
 - **Multi-Sport Event Management**: Comprehensive event selection with sport-specific scoring and analytics.
 - **Tournament Integration System**: Comprehensive format configurations with bracket generation and tiebreaker rules.

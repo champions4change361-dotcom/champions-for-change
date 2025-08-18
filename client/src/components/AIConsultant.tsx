@@ -194,13 +194,39 @@ export function AIConsultant({ domain = 'education' }: AIConsultantProps) {
     }));
   };
 
-  // Determine the best flow based on consultation data
-  const handleStartTournamentCreation = () => {
-    const isSimpleTournament = consultation.budget === 'free' && 
-                              parseInt(consultation.participantCount) <= 50 &&
-                              consultation.features.length <= 2;
+  // Determine complexity based on multiple factors
+  const getCompetitionComplexity = () => {
+    const participantCount = parseInt(consultation.participantCount || '0');
+    const isFree = consultation.budget === 'free';
+    const hasMinimalFeatures = consultation.features.length <= 2;
     
-    if (isSimpleTournament) {
+    // Competition type complexity factors
+    const sport = consultation.sport.toLowerCase();
+    const isIndividualCompetition = sport.includes('chess') || sport.includes('quiz') || 
+                                   sport.includes('academic') || sport.includes('trivia') ||
+                                   sport.includes('scrabble') || sport.includes('checkers');
+    
+    const isSimpleTeamSport = sport.includes('basketball') || sport.includes('volleyball') ||
+                             sport.includes('soccer') || sport.includes('tennis');
+    
+    const requiresComplexSetup = sport.includes('track') || sport.includes('swimming') ||
+                                sport.includes('gymnastics') || consultation.features.includes('FERPA Compliance') ||
+                                consultation.features.includes('HIPAA Compliance');
+    
+    return {
+      isSimple: isFree && participantCount <= 50 && hasMinimalFeatures && 
+                (isIndividualCompetition || isSimpleTeamSport) && !requiresComplexSetup,
+      participantCount,
+      isIndividualCompetition,
+      requiresComplexSetup
+    };
+  };
+
+  // Determine the best flow based on comprehensive analysis
+  const handleStartTournamentCreation = () => {
+    const complexity = getCompetitionComplexity();
+    
+    if (complexity.isSimple) {
       // Direct to tournament creation with pre-filled data
       const params = new URLSearchParams({
         sport: consultation.sport,
@@ -448,32 +474,55 @@ export function AIConsultant({ domain = 'education' }: AIConsultantProps) {
               </h4>
 
               <div className="space-y-3">
-                <div className="p-3 bg-gray-50 rounded-lg">
-                  <div className="text-sm font-medium text-gray-900">Recommended Structure</div>
-                  <div className="text-sm text-gray-600">
-                    {consultation.sport.toLowerCase().includes('chess') 
-                      ? 'Swiss System Tournament (perfect for chess)'
-                      : 'Single Elimination with Consolation Bracket'
+                {(() => {
+                  const complexity = getCompetitionComplexity();
+                  const sport = consultation.sport.toLowerCase();
+                  
+                  // Smart tournament structure recommendations
+                  const getRecommendedStructure = () => {
+                    if (sport.includes('chess') || sport.includes('scrabble') || sport.includes('checkers')) {
+                      return 'Swiss System Tournament (optimal for skill-based games)';
                     }
-                  </div>
-                </div>
-
-                <div className="p-3 bg-gray-50 rounded-lg">
-                  <div className="text-sm font-medium text-gray-900">What You'll Get</div>
-                  <div className="text-sm text-gray-600">
-                    {consultation.budget === 'free' && parseInt(consultation.participantCount || '0') <= 50
-                      ? 'Go straight to building your tournament - no signup needed!'
-                      : 'Full setup with our team support'
+                    if (sport.includes('quiz') || sport.includes('academic') || sport.includes('trivia')) {
+                      return 'Round Robin with Finals (ensures everyone competes)';
                     }
-                  </div>
-                </div>
+                    if (sport.includes('track') || sport.includes('swimming')) {
+                      return 'Heat-based Competition with Finals';
+                    }
+                    if (complexity.isIndividualCompetition) {
+                      return 'Single Elimination with Consolation';
+                    }
+                    return 'Single Elimination with Consolation Bracket';
+                  };
 
-                <div className="p-3 bg-gray-50 rounded-lg">
-                  <div className="text-sm font-medium text-gray-900">Cost</div>
-                  <div className="text-sm text-gray-600">
-                    {consultation.budget === 'free' ? 'Free (up to 3 tournaments)' : `$${consultation.budget}/month`}
-                  </div>
-                </div>
+                  return (
+                    <>
+                      <div className="p-3 bg-gray-50 rounded-lg">
+                        <div className="text-sm font-medium text-gray-900">Recommended Structure</div>
+                        <div className="text-sm text-gray-600">{getRecommendedStructure()}</div>
+                      </div>
+
+                      <div className="p-3 bg-gray-50 rounded-lg">
+                        <div className="text-sm font-medium text-gray-900">What You'll Get</div>
+                        <div className="text-sm text-gray-600">
+                          {complexity.isSimple
+                            ? 'Go straight to building your tournament - no signup needed!'
+                            : complexity.requiresComplexSetup
+                            ? 'Professional setup with compliance support'
+                            : 'Full setup with our team support'
+                          }
+                        </div>
+                      </div>
+
+                      <div className="p-3 bg-gray-50 rounded-lg">
+                        <div className="text-sm font-medium text-gray-900">Cost</div>
+                        <div className="text-sm text-gray-600">
+                          {consultation.budget === 'free' ? 'Free (up to 3 tournaments)' : `$${consultation.budget}/month`}
+                        </div>
+                      </div>
+                    </>
+                  );
+                })()}
 
                 <div className="p-3 bg-gray-50 rounded-lg">
                   <div className="text-sm font-medium text-gray-900">Included Features</div>
@@ -498,7 +547,7 @@ export function AIConsultant({ domain = 'education' }: AIConsultantProps) {
                   onClick={() => handleStartTournamentCreation()}
                   data-testid="button-start-setup"
                 >
-                  {consultation.budget === 'free' && parseInt(consultation.participantCount || '0') <= 50 
+                  {getCompetitionComplexity().isSimple
                     ? 'Create Tournament Now' 
                     : 'Start Setup Process'
                   }
