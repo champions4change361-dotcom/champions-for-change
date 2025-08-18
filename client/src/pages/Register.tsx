@@ -336,6 +336,10 @@ export default function Register() {
                   <div>
                     <Label htmlFor="phone">Phone Number</Label>
                     <Input {...form.register('phone')} data-testid="input-phone" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="organizationType">Organization Type *</Label>
                     <select 
@@ -359,21 +363,6 @@ export default function Register() {
                     {form.formState.errors.organizationName && (
                       <p className="text-red-500 text-sm mt-1">{form.formState.errors.organizationName.message}</p>
                     )}
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="organizationType">Organization Type *</Label>
-                    <select 
-                      onChange={(e) => form.setValue('organizationType', e.target.value as any)}
-                      className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      data-testid="select-organizationType"
-                    >
-                      <option value="">Select type</option>
-                      <option value="school_district">School District</option>
-                      <option value="school">School</option>
-                      <option value="club">Club/Organization</option>
-                      <option value="nonprofit">Nonprofit</option>
-                    </select>
                   </div>
                 </div>
 
@@ -473,11 +462,11 @@ export default function Register() {
                           </div>
                           <p className="text-2xl font-bold text-green-600 my-2">{plan.price}</p>
                           <p className="text-gray-600 text-sm mb-3">{plan.description}</p>
-                          {plan.savings && (
-                            <p className="text-green-600 text-xs font-semibold mb-2">{plan.savings}</p>
+                          {(plan as any).savings && (
+                            <p className="text-green-600 text-xs font-semibold mb-2">{(plan as any).savings}</p>
                           )}
-                          {plan.note && (
-                            <p className="text-gray-500 text-xs italic mb-2">{plan.note}</p>
+                          {(plan as any).note && (
+                            <p className="text-gray-500 text-xs italic mb-2">{(plan as any).note}</p>
                           )}
                           <ul className="text-xs text-gray-600 space-y-1">
                             {plan.features.map((feature, idx) => (
