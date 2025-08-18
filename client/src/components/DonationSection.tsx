@@ -130,7 +130,7 @@ export function DonationSection({ variant = 'full', className = '' }: DonationSe
           Support Champions for Change
         </CardTitle>
         <CardDescription className="text-lg text-gray-700">
-          Enjoying our platform? Help us fund educational opportunities for underprivileged youth in Corpus Christi, Texas
+          Enjoying our platform? Help us fund educational opportunities for underprivileged youth
         </CardDescription>
       </CardHeader>
       
@@ -143,8 +143,8 @@ export function DonationSection({ variant = 'full', className = '' }: DonationSe
           </div>
           <div className="flex flex-col items-center space-y-2">
             <MapPin className="h-8 w-8 text-green-600" />
-            <h4 className="font-semibold">Corpus Christi Focus</h4>
-            <p className="text-sm text-gray-600">Supporting Robert Driscoll Middle School students</p>
+            <h4 className="font-semibold">Educational Focus</h4>
+            <p className="text-sm text-gray-600">Supporting underprivileged youth education</p>
           </div>
           <div className="flex flex-col items-center space-y-2">
             <Users className="h-8 w-8 text-purple-600" />
