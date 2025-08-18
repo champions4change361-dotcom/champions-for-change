@@ -462,31 +462,36 @@ export default function CoachesLoungeLanding() {
           </Card>
         </div>
 
-        {/* Success Stories */}
+        {/* Mission Statement */}
         <Card className="mt-12 bg-gradient-to-br from-green-500/10 to-blue-500/10 backdrop-blur-sm border-green-200/30">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-green-100">
               <GraduationCap className="h-5 w-5" />
-              Educational Impact Stories
+              Our Educational Mission
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid md:grid-cols-2 gap-6 text-gray-200">
-              <div className="bg-slate-800/80 backdrop-blur-sm border border-green-500/20 p-4 rounded-lg">
-                <h4 className="font-medium text-green-300 mb-2">Robert Driscoll Middle School</h4>
-                <p className="text-sm text-white">
-                  "Platform donations helped fund our Washington D.C. trip for 25 students. 
-                  Amazing to see gaming and fantasy sports supporting education!"
-                </p>
-                <p className="text-xs text-green-400 mt-2">- Coach Martinez, Athletic Director</p>
-              </div>
-              <div className="bg-slate-800/80 backdrop-blur-sm border border-blue-500/20 p-4 rounded-lg">
-                <h4 className="font-medium text-blue-300 mb-2">Office League Success</h4>
-                <p className="text-sm text-white">
-                  "Our NBA fantasy league raised $500 for Champions for Change while having a blast. 
-                  Great way to combine competition with giving back."
-                </p>
-                <p className="text-xs text-blue-400 mt-2">- Sarah Chen, League Commissioner</p>
+            <div className="text-center text-gray-200">
+              <p className="text-lg text-white mb-4">
+                Every fantasy league and tournament on our platform directly supports educational opportunities for underprivileged youth.
+              </p>
+              <p className="text-sm text-gray-300">
+                We believe competition and education go hand in hand. Your participation helps fund student trips, 
+                educational experiences, and opportunities that inspire learning and broaden horizons.
+              </p>
+              <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                <div className="bg-slate-800/60 p-4 rounded-lg">
+                  <div className="text-2xl font-bold text-green-400">$2,600+</div>
+                  <div className="text-sm text-gray-300">Per Student Trip</div>
+                </div>
+                <div className="bg-slate-800/60 p-4 rounded-lg">
+                  <div className="text-2xl font-bold text-blue-400">100%</div>
+                  <div className="text-sm text-gray-300">Revenue to Education</div>
+                </div>
+                <div className="bg-slate-800/60 p-4 rounded-lg">
+                  <div className="text-2xl font-bold text-yellow-400">Future</div>
+                  <div className="text-sm text-gray-300">Impact Stories</div>
+                </div>
               </div>
             </div>
           </CardContent>
@@ -502,7 +507,7 @@ export default function CoachesLoungeLanding() {
             </p>
             <p className="text-white/60 text-xs">
               Platform operated by Champions for Change nonprofit (EIN: pending) • 
-              Educational mission: funding student trips in Corpus Christi, Texas • 
+              Educational mission: funding student trips for underprivileged youth • 
               Questions? Contact champions4change361@gmail.com
             </p>
             <div className="flex justify-center gap-4 mt-4 text-xs text-white/50">

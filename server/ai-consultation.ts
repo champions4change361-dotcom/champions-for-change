@@ -748,7 +748,7 @@ export function generateWebpageTemplate(sport: string, ageGroup: string, format:
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${sport} ${ageGroup} Tournament | Champions for Change</title>
-    <meta name="description" content="Join our ${sport} tournament supporting educational trips for Corpus Christi youth">
+    <meta name="description" content="Join our ${sport} tournament supporting educational trips for underprivileged youth">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; line-height: 1.6; color: #1f2937; }
@@ -784,7 +784,7 @@ export function generateWebpageTemplate(sport: string, ageGroup: string, format:
             
             <h2>Join the ${sport} Championship</h2>
             <p style="font-size: 18px; color: #6b7280; max-width: 600px; margin: 1rem auto;">
-                Experience competitive ${sport} while funding educational opportunities for underprivileged youth in Corpus Christi, Texas.
+                Experience competitive ${sport} while funding educational opportunities for underprivileged youth.
             </p>
             <div style="margin: 2rem 0;">
                 <button class="registration-btn" onclick="registerTeam()">Register Your Team</button>
@@ -809,7 +809,7 @@ export function generateWebpageTemplate(sport: string, ageGroup: string, format:
                     <div>Trips Completed</div>
                 </div>
             </div>
-            <p style="font-size: 18px; opacity: 0.9;">Every tournament registration directly funds educational travel experiences that inspire learning and broaden horizons for middle school students in Corpus Christi.</p>
+            <p style="font-size: 18px; opacity: 0.9;">Every tournament registration directly funds educational travel experiences that inspire learning and broaden horizons for underprivileged youth.</p>
         </div>
     </section>
     
