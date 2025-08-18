@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'wouter';
 import { ArrowLeft, Zap, Users, Trophy, Settings, Sparkles, LogOut, Brain, FileText } from 'lucide-react';
 import { useAuth } from "@/hooks/useAuth";
@@ -9,6 +9,29 @@ export default function CreateTournament() {
   const { user } = useAuth();
   const [creationMode, setCreationMode] = useState<'menu' | 'wizard' | 'ai'>('menu');
   const [aiRecommendations, setAiRecommendations] = useState<any>(null);
+
+  // Check for URL parameters from AI consultant
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const fromConsultant = urlParams.get('fromConsultant');
+    
+    if (fromConsultant === 'true') {
+      const sport = urlParams.get('sport');
+      const participants = urlParams.get('participants');
+      const goals = urlParams.get('goals');
+      
+      // Set AI recommendations based on URL parameters
+      setAiRecommendations({
+        sport,
+        participantCount: participants,
+        goals,
+        fromConsultant: true
+      });
+      
+      // Go directly to wizard mode
+      setCreationMode('wizard');
+    }
+  }, []);
 
   const handleAiRecommendations = (recommendations: any) => {
     setAiRecommendations(recommendations);

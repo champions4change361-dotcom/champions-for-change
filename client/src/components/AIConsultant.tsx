@@ -234,7 +234,7 @@ export function AIConsultant({ domain = 'education' }: AIConsultantProps) {
         goals: consultation.goals,
         fromConsultant: 'true'
       });
-      window.location.href = `/create-tournament?${params.toString()}`;
+      window.location.href = `/create?${params.toString()}`;
     } else {
       // For complex needs, guide to appropriate registration
       window.location.href = '/register';
