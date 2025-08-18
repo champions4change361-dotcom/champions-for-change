@@ -57,29 +57,31 @@ export default function Landing() {
                 </div>
 
                 {/* Donation and Login Buttons with optimized mobile spacing */}
-                <div className="flex flex-col space-y-3 lg:flex-row lg:space-y-0 lg:space-x-3 lg:ml-auto">
+                <div className="flex flex-col space-y-2 lg:flex-row lg:space-y-0 lg:space-x-3 lg:ml-auto">
                   <Button 
                     onClick={() => setLocation('/donate')}
-                    className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 w-full lg:w-auto"
+                    className="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base w-full lg:w-auto"
                     data-testid="button-donate-header"
                   >
-                    <Heart className="mr-2 h-4 w-4" />
+                    <Heart className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4" />
                     Donate
                   </Button>
                   <Button 
                     onClick={() => setLocation('/login')}
-                    className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-6 py-3 w-full lg:w-auto"
+                    className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base w-full lg:w-auto"
                     data-testid="button-login"
                   >
-                    Login to Arena
+                    <span className="lg:hidden">Login</span>
+                    <span className="hidden lg:inline">Login to Arena</span>
                   </Button>
                   <Button 
                     onClick={() => setLocation('/register')}
                     variant="outline"
-                    className="border-orange-500 text-orange-400 hover:bg-orange-500/10 hover:border-orange-400 px-6 py-3 font-semibold w-full lg:w-auto"
+                    className="border-orange-500 text-orange-400 hover:bg-orange-500/10 hover:border-orange-400 px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base font-semibold w-full lg:w-auto"
                     data-testid="button-signup"
                   >
-                    Sign Up Free
+                    <span className="lg:hidden">Sign Up</span>
+                    <span className="hidden lg:inline">Sign Up Free</span>
                   </Button>
                 </div>
               </div>
@@ -89,16 +91,19 @@ export default function Landing() {
       </div>
 
       {/* Mission Banner with optimized mobile spacing */}
-      <section className="bg-gradient-to-r from-emerald-600 via-emerald-500 to-emerald-600 text-white py-6 lg:py-4">
+      <section className="bg-gradient-to-r from-emerald-600 via-emerald-500 to-emerald-600 text-white py-4 lg:py-4">
         <div className="container mx-auto px-4 text-center">
-          <div className="flex items-center justify-center space-x-2 text-sm lg:text-sm text-xs sm:text-sm">
-            <Heart className="h-4 w-4 flex-shrink-0" />
-            <span className="text-center leading-relaxed">Built by coaches to fund educational opportunities for underprivileged student competitors</span>
-            <MapPin className="h-4 w-4 flex-shrink-0" />
+          <div className="flex items-center justify-center space-x-2 text-xs sm:text-sm lg:text-sm">
+            <Heart className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+            <span className="text-center leading-relaxed px-2">
+              <span className="hidden sm:inline">Built by coaches to fund educational opportunities for underprivileged student competitors</span>
+              <span className="sm:hidden">Funding student educational opportunities</span>
+            </span>
+            <MapPin className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
           </div>
         </div>
-        {/* Add breathing room below tagline - 40-60px spacing */}
-        <div className="h-12 lg:h-8"></div>
+        {/* Add breathing room below tagline - reduced for mobile */}
+        <div className="h-6 sm:h-8 lg:h-8"></div>
       </section>
 
       {/* Hero Section */}
@@ -109,12 +114,12 @@ export default function Landing() {
             <div className="absolute top-4 left-4 w-32 h-32 bg-orange-400/5 rounded-full blur-3xl"></div>
             <div className="absolute bottom-4 right-4 w-40 h-40 bg-red-400/3 rounded-full blur-3xl"></div>
           </div>
-          <div className="relative p-12">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="relative p-6 sm:p-8 lg:p-12">
+            <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
               {/* Logo Section */}
               <div className="order-2 lg:order-1">
                 <div 
-                  className="relative w-80 h-80 mx-auto cursor-pointer hero-logo-coin"
+                  className="relative w-48 h-48 sm:w-64 sm:h-64 lg:w-80 lg:h-80 mx-auto cursor-pointer hero-logo-coin"
                   onClick={(e) => {
                     const element = e.currentTarget;
                     // Prevent multiple clicks during animation
@@ -151,71 +156,76 @@ export default function Landing() {
                   Supporting Student Education Through Sports
                 </Badge>
                 
-                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-4 lg:mb-6 leading-tight">
                   Tournament Platform That <span className="text-orange-400">Champions Change</span>
                 </h1>
             
-                <p className="text-xl text-slate-300 mb-8 max-w-4xl">
+                <p className="text-base sm:text-lg lg:text-xl text-slate-300 mb-6 lg:mb-8 max-w-4xl leading-relaxed">
                   Professional tournament management platform built by coaches who identified needs in the tournament world. 
                   Every subscription helps fund student trips and educational opportunities for underprivileged youth.
                 </p>
 
                 <div className="flex flex-col gap-4 justify-center lg:justify-start items-center lg:items-start">
-                  <div className="flex flex-wrap gap-3 mb-6">
+                  <div className="flex flex-wrap gap-2 sm:gap-3 mb-4 lg:mb-6 justify-center lg:justify-start">
                     <Button 
-                      size="lg" 
+                      size="sm"
                       variant="outline"
-                      className="border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10 hover:border-emerald-400 px-4 py-3 text-base"
+                      className="border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10 hover:border-emerald-400 px-3 py-2 text-sm lg:px-4 lg:py-3 lg:text-base"
                       onClick={() => setLocation("/your-why")}
                       data-testid="button-your-why"
                     >
-                      <Heart className="h-4 w-4 mr-2" />
-                      Your Why
+                      <Heart className="h-3 w-3 lg:h-4 lg:w-4 mr-1 lg:mr-2" />
+                      <span className="hidden sm:inline">Your Why</span>
+                      <span className="sm:hidden">Why</span>
                     </Button>
                     <Button 
-                      size="lg" 
+                      size="sm"
                       variant="outline"
-                      className="border-orange-500/50 text-orange-400 hover:bg-orange-500/10 hover:border-orange-400 px-4 py-3 text-base"
+                      className="border-orange-500/50 text-orange-400 hover:bg-orange-500/10 hover:border-orange-400 px-3 py-2 text-sm lg:px-4 lg:py-3 lg:text-base"
                       onClick={() => setLocation("/grant-funding")}
                       data-testid="button-grant-funding"
                     >
-                      <Target className="h-4 w-4 mr-2" />
-                      Grant Opportunities
+                      <Target className="h-3 w-3 lg:h-4 lg:w-4 mr-1 lg:mr-2" />
+                      <span className="hidden sm:inline">Grant Opportunities</span>
+                      <span className="sm:hidden">Grants</span>
                     </Button>
                     <Button 
-                      size="lg" 
+                      size="sm"
                       variant="outline"
-                      className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10 hover:border-blue-400 px-4 py-3 text-base"
+                      className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10 hover:border-blue-400 px-3 py-2 text-sm lg:px-4 lg:py-3 lg:text-base"
                       onClick={() => setLocation("/health-benefits")}
                       data-testid="button-health-benefits"
                     >
-                      <Shield className="h-4 w-4 mr-2" />
-                      Health & Wellness
+                      <Shield className="h-3 w-3 lg:h-4 lg:w-4 mr-1 lg:mr-2" />
+                      <span className="hidden sm:inline">Health & Wellness</span>
+                      <span className="sm:hidden">Health</span>
                     </Button>
                   </div>
                   
-                  <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                     <Button 
                       size="lg" 
-                      className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-8 py-4 text-lg"
+                      className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-6 py-3 text-base lg:px-8 lg:py-4 lg:text-lg w-full sm:w-auto"
                       onClick={() => setLocation("/register")}
                       data-testid="button-get-started"
                     >
-                      Start Supporting Students
+                      <span className="hidden sm:inline">Start Supporting Students</span>
+                      <span className="sm:hidden">Get Started</span>
                     </Button>
                     <Button 
                       size="lg" 
-                      className="bg-green-600 hover:bg-green-700 text-white font-bold px-8 py-4 text-lg"
+                      className="bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-3 text-base lg:px-8 lg:py-4 lg:text-lg w-full sm:w-auto"
                       onClick={() => setLocation("/donate")}
                       data-testid="button-donate-hero"
                     >
-                      <Heart className="mr-2 h-5 w-5" />
-                      Fund Student Education
+                      <Heart className="mr-1 lg:mr-2 h-4 w-4 lg:h-5 lg:w-5" />
+                      <span className="hidden sm:inline">Fund Student Education</span>
+                      <span className="sm:hidden">Donate</span>
                     </Button>
                     <Button 
                       size="lg" 
                       variant="outline"
-                      className="border-red-500/50 text-red-400 hover:bg-red-500/10 hover:border-red-400 px-6 py-4 text-lg"
+                      className="border-red-500/50 text-red-400 hover:bg-red-500/10 hover:border-red-400 px-6 py-3 text-base lg:px-6 lg:py-4 lg:text-lg w-full sm:w-auto"
                       onClick={() => {
                         const impactSection = document.getElementById('impact-mission');
                         impactSection?.scrollIntoView({ behavior: 'smooth' });

@@ -68,14 +68,14 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full space-y-8">
+      <div className="max-w-md w-full space-y-6 lg:space-y-8">
         {/* Header */}
-        <div className="text-center space-y-4">
-          <div className="flex items-center justify-center space-x-3">
-            <GraduationCap className="h-12 w-12 text-blue-600" />
-            <div>
-              <h1 className="text-3xl font-bold text-slate-900">Champions for Change</h1>
-              <p className="text-lg text-slate-600">Tournament Platform Login</p>
+        <div className="text-center space-y-3 lg:space-y-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-3">
+            <GraduationCap className="h-10 w-10 sm:h-12 sm:w-12 text-blue-600" />
+            <div className="text-center sm:text-left">
+              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Champions for Change</h1>
+              <p className="text-sm sm:text-lg text-slate-600">Tournament Platform Login</p>
             </div>
           </div>
           <Badge variant="secondary" className="text-sm px-3 py-1">
@@ -85,13 +85,13 @@ export default function Login() {
 
         {/* Login Form */}
         <Card className="border-2 border-blue-200 shadow-xl">
-          <CardHeader className="text-center space-y-2">
-            <CardTitle className="text-2xl text-slate-900">Platform Access</CardTitle>
-            <CardDescription>
+          <CardHeader className="text-center space-y-2 p-4 lg:p-6">
+            <CardTitle className="text-xl lg:text-2xl text-slate-900">Platform Access</CardTitle>
+            <CardDescription className="text-sm lg:text-base">
               Enter your credentials to access the tournament management system
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 lg:p-6">
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* User Type Selection */}
               <div>

@@ -96,7 +96,7 @@ export function DonationSection({ variant = 'full', className = '' }: DonationSe
             <h3 className="font-semibold text-green-800">Support Our Mission</h3>
           </div>
           <p className="text-sm text-gray-700 mb-3">
-            Help fund educational trips for Corpus Christi students
+            Help fund educational trips for student competitors nationwide
           </p>
           <div className="flex gap-2">
             <Button 
