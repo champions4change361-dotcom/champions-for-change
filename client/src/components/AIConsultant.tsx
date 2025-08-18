@@ -65,7 +65,7 @@ export function AIConsultant({ domain = 'education' }: AIConsultantProps) {
           name: 'Individual Sports',
           sports: [
             'Track & Field', 'Cross Country', 'Swimming', 'Diving', 'Tennis',
-            'Golf', 'Wrestling', 'Gymnastics', 'Powerlifting', 'Bowling'
+            'Golf', 'Wrestling', 'Gymnastics', 'Powerlifting', 'Bowling', 'Pickleball'
           ]
         },
         competitive_spirit: {
