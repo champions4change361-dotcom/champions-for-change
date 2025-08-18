@@ -352,11 +352,11 @@ function generateVenueSuggestions(sport: string, ageGroup: string): string[] {
     venues.push("Municipal sports complex");
   }
   
-  // Corpus Christi specific venues for Champions for Change
+  // Community venues for Champions for Change tournaments
   if (ageGroup === 'Middle School' || ageGroup === 'High School') {
-    venues.push("Robert Driscoll Middle School (Champions for Change home base)");
-    venues.push("Corpus Christi ISD athletic facilities");
-    venues.push("Texas A&M University-Corpus Christi facilities");
+    venues.push("Local middle school facilities");
+    venues.push("School district athletic facilities");
+    venues.push("Community college facilities");
   }
   
   return venues;

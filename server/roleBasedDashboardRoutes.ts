@@ -33,7 +33,7 @@ export function registerRoleBasedDashboardRoutes(app: Express) {
             },
             {
               id: 'driscoll-middle',
-              name: 'Robert Driscoll Middle School',
+              name: 'Central Middle School',
               athletes: 156,
               coaches: 12,
               activeSports: ['Football', 'Basketball', 'Track', 'Soccer'],
@@ -108,7 +108,7 @@ export function registerRoleBasedDashboardRoutes(app: Express) {
             {
               id: 'trainer-2', 
               name: 'Mike Rodriguez',
-              school: 'Robert Driscoll Middle School',
+              school: 'Central Middle School',
               certification: 'Licensed Athletic Trainer',
               expirationDate: '2025-08-22',
               currentCaseload: 15,

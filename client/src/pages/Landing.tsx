@@ -85,7 +85,7 @@ export default function Landing() {
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center space-x-2 text-sm lg:text-sm text-xs sm:text-sm">
             <Heart className="h-4 w-4 flex-shrink-0" />
-            <span className="text-center leading-relaxed">Built by coaches to fund educational opportunities for underprivileged youth in Corpus Christi, Texas</span>
+            <span className="text-center leading-relaxed">Built by coaches to fund educational opportunities for underprivileged youth</span>
             <MapPin className="h-4 w-4 flex-shrink-0" />
           </div>
         </div>
@@ -252,7 +252,7 @@ export default function Landing() {
               <div className="text-slate-300">
                 <p className="font-semibold text-white text-lg">Daniel Thornton</p>
                 <p className="text-orange-400 font-medium mb-2">Executive Director of Champions for Change</p>
-                <p className="text-sm">21 years military service (Marines & Army) • 10 years secondary athletic coaching • Robert Driscoll Middle School since 2016</p>
+                <p className="text-sm">21 years military service (Marines & Army) • 10 years secondary athletic coaching • Dedicated educator since 2016</p>
               </div>
             </div>
             
@@ -394,7 +394,7 @@ export default function Landing() {
                 </div>
                 <h3 className="text-xl font-bold text-white mb-3">Champion Impact</h3>
                 <p className="text-slate-400">
-                  Every tournament directly funds educational opportunities for Corpus Christi youth
+                  Every tournament directly funds educational opportunities for underprivileged youth
                 </p>
               </div>
             </div>
