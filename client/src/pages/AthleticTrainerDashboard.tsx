@@ -211,10 +211,14 @@ export default function AthleticTrainerDashboard() {
 
         {/* Main Dashboard Tabs */}
         <Tabs defaultValue="athletes" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="athletes" data-testid="tab-athletes">
               <Users className="h-4 w-4 mr-2" />
               Athletes
+            </TabsTrigger>
+            <TabsTrigger value="cheerleading" data-testid="tab-cheerleading">
+              <Zap className="h-4 w-4 mr-2" />
+              Support Teams
             </TabsTrigger>
             <TabsTrigger value="communications" data-testid="tab-communications">
               <MessageSquare className="h-4 w-4 mr-2" />
@@ -322,6 +326,319 @@ export default function AthleticTrainerDashboard() {
                   </CardContent>
                 </Card>
               ))}
+            </div>
+          </TabsContent>
+
+          {/* Cheerleading & Athletic Support Teams Tab */}
+          <TabsContent value="cheerleading" className="space-y-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-lg font-semibold">Athletic Support Teams</h3>
+                <p className="text-sm text-slate-600">Cheerleaders, Dance Teams, Band, and Support Groups</p>
+              </div>
+              <Button 
+                onClick={() => setShowAddAthlete(true)}
+                data-testid="button-add-support-member"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Team Member
+              </Button>
+            </div>
+
+            {/* Support Team Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center space-x-2">
+                    <Zap className="h-5 w-5 text-purple-600" />
+                    <div>
+                      <p className="text-sm text-slate-600">Cheerleaders</p>
+                      <p className="text-2xl font-bold">18</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center space-x-2">
+                    <Activity className="h-5 w-5 text-pink-600" />
+                    <div>
+                      <p className="text-sm text-slate-600">Dance Team</p>
+                      <p className="text-2xl font-bold">12</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center space-x-2">
+                    <Heart className="h-5 w-5 text-blue-600" />
+                    <div>
+                      <p className="text-sm text-slate-600">Band Members</p>
+                      <p className="text-2xl font-bold">45</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center space-x-2">
+                    <AlertTriangle className="h-5 w-5 text-orange-600" />
+                    <div>
+                      <p className="text-sm text-slate-600">Active Injuries</p>
+                      <p className="text-2xl font-bold">2</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Support Teams Roster */}
+              <div className="lg:col-span-2 space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Active Support Team Members</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {/* Cheerleading Team */}
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2 border-b pb-2">
+                        <Zap className="h-4 w-4 text-purple-600" />
+                        <h4 className="font-medium text-purple-900">Varsity Cheerleading</h4>
+                        <Badge className="bg-purple-100 text-purple-800">18 Members</Badge>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="p-3 border rounded-lg hover:bg-slate-50 cursor-pointer">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h5 className="font-medium">Madison Torres (Captain)</h5>
+                              <p className="text-sm text-slate-600">Senior • Base/Flyer</p>
+                              <p className="text-xs text-slate-500">4 years experience</p>
+                            </div>
+                            <Badge variant="outline" className="text-xs">Cleared</Badge>
+                          </div>
+                        </div>
+                        
+                        <div className="p-3 border rounded-lg hover:bg-slate-50 cursor-pointer">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h5 className="font-medium">Jessica Kim</h5>
+                              <p className="text-sm text-slate-600">Junior • Tumbler</p>
+                              <p className="text-xs text-slate-500">3 years experience</p>
+                            </div>
+                            <Badge variant="destructive" className="text-xs">Injured</Badge>
+                          </div>
+                        </div>
+
+                        <div className="p-3 border rounded-lg hover:bg-slate-50 cursor-pointer">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h5 className="font-medium">Ashley Rodriguez</h5>
+                              <p className="text-sm text-slate-600">Sophomore • Back Spot</p>
+                              <p className="text-xs text-slate-500">2 years experience</p>
+                            </div>
+                            <Badge variant="outline" className="text-xs">Cleared</Badge>
+                          </div>
+                        </div>
+
+                        <div className="p-3 border rounded-lg hover:bg-slate-50 cursor-pointer">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h5 className="font-medium">Taylor Johnson</h5>
+                              <p className="text-sm text-slate-600">Senior • Stunt Base</p>
+                              <p className="text-xs text-slate-500">4 years experience</p>
+                            </div>
+                            <Badge variant="secondary" className="text-xs">Return to Play</Badge>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Dance Team */}
+                    <div className="space-y-2 pt-4">
+                      <div className="flex items-center space-x-2 border-b pb-2">
+                        <Activity className="h-4 w-4 text-pink-600" />
+                        <h4 className="font-medium text-pink-900">Dance Team</h4>
+                        <Badge className="bg-pink-100 text-pink-800">12 Members</Badge>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="p-3 border rounded-lg hover:bg-slate-50 cursor-pointer">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h5 className="font-medium">Sophia Chen (Captain)</h5>
+                              <p className="text-sm text-slate-600">Senior • Contemporary/Jazz</p>
+                              <p className="text-xs text-slate-500">Regional Champion 2023</p>
+                            </div>
+                            <Badge variant="outline" className="text-xs">Cleared</Badge>
+                          </div>
+                        </div>
+                        
+                        <div className="p-3 border rounded-lg hover:bg-slate-50 cursor-pointer">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h5 className="font-medium">Emma Williams</h5>
+                              <p className="text-sm text-slate-600">Junior • Hip-Hop/Pom</p>
+                              <p className="text-xs text-slate-500">State qualifier 2024</p>
+                            </div>
+                            <Badge variant="outline" className="text-xs">Cleared</Badge>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Band Members at Risk */}
+                    <div className="space-y-2 pt-4">
+                      <div className="flex items-center space-x-2 border-b pb-2">
+                        <Heart className="h-4 w-4 text-blue-600" />
+                        <h4 className="font-medium text-blue-900">Marching Band (Injury Risk)</h4>
+                        <Badge className="bg-blue-100 text-blue-800">45 Total</Badge>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="p-3 border rounded-lg hover:bg-slate-50 cursor-pointer">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h5 className="font-medium">Marcus Thompson</h5>
+                              <p className="text-sm text-slate-600">Sousaphone • Back strain risk</p>
+                              <p className="text-xs text-slate-500">Heavy instrument carrier</p>
+                            </div>
+                            <Badge variant="secondary" className="text-xs">Monitoring</Badge>
+                          </div>
+                        </div>
+                        
+                        <div className="p-3 border rounded-lg hover:bg-slate-50 cursor-pointer">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h5 className="font-medium">Sarah Martinez</h5>
+                              <p className="text-sm text-slate-600">Color Guard • Shoulder fatigue</p>
+                              <p className="text-xs text-slate-500">Flag routine intensive</p>
+                            </div>
+                            <Badge variant="secondary" className="text-xs">Monitoring</Badge>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Cheerleading Safety & AI Consultation */}
+              <div className="space-y-4">
+                <Card className="border-purple-200 bg-purple-50">
+                  <CardHeader>
+                    <CardTitle className="text-base flex items-center">
+                      <Brain className="h-4 w-4 mr-2 text-purple-600" />
+                      Cheerleading Safety AI
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3 text-sm">
+                    <div className="bg-white p-3 rounded border">
+                      <h5 className="font-medium text-purple-900 mb-2">Current Safety Metrics</h5>
+                      <div className="space-y-1">
+                        <p>• Injury rate: 1.05 per 1,000 exposures (17th lowest)</p>
+                        <p>• Catastrophic injuries: 85% reduction since 2014</p>
+                        <p>• Concussion risk: 96% from stunting activities</p>
+                        <p>• Team has certified athletic trainer ✓</p>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-white p-3 rounded border">
+                      <h5 className="font-medium text-orange-900 mb-2">Risk Factors to Monitor</h5>
+                      <div className="space-y-1 text-orange-800">
+                        <p>• Basket tosses on inappropriate surfaces</p>
+                        <p>• Complex stunts without proper progression</p>
+                        <p>• Ankle injuries (44.9% prevalence)</p>
+                        <p>• Fatigue during extended practices</p>
+                      </div>
+                    </div>
+
+                    <Button 
+                      onClick={() => setShowAIConsultant(true)}
+                      className="w-full bg-purple-600 hover:bg-purple-700"
+                      data-testid="button-cheer-ai-consultant"
+                    >
+                      <Brain className="h-4 w-4 mr-2" />
+                      Cheerleading Injury Consultant
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Upcoming Events</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3 text-sm">
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-start p-2 bg-purple-50 rounded">
+                        <div>
+                          <p className="font-medium">Homecoming Routine</p>
+                          <p className="text-xs text-slate-600">New pyramid formation</p>
+                        </div>
+                        <div className="text-xs">
+                          <p>Aug 23</p>
+                          <Badge variant="secondary" className="text-xs">High Risk</Badge>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-between items-start p-2 bg-pink-50 rounded">
+                        <div>
+                          <p className="font-medium">Dance Competition</p>
+                          <p className="text-xs text-slate-600">Regional qualifying</p>
+                        </div>
+                        <div className="text-xs">
+                          <p>Aug 30</p>
+                          <Badge variant="outline" className="text-xs">Standard</Badge>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-between items-start p-2 bg-blue-50 rounded">
+                        <div>
+                          <p className="font-medium">Marching Band Competition</p>
+                          <p className="text-xs text-slate-600">State qualifier</p>
+                        </div>
+                        <div className="text-xs">
+                          <p>Sep 7</p>
+                          <Badge variant="outline" className="text-xs">Standard</Badge>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Team Certifications</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3 text-sm">
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span>USA Cheer Safety Certification</span>
+                        <Badge variant="default">Current</Badge>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span>NFHS Spirit Rules Training</span>
+                        <Badge variant="default">Current</Badge>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span>Concussion Protocol Training</span>
+                        <Badge variant="destructive">Expires Soon</Badge>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span>Emergency Response Drill</span>
+                        <Badge variant="secondary">Due</Badge>
+                      </div>
+                    </div>
+
+                    <Button size="sm" className="w-full" data-testid="button-certification-renewal">
+                      <Bell className="h-4 w-4 mr-2" />
+                      Schedule Renewals
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </TabsContent>
 
@@ -943,6 +1260,9 @@ export default function AthleticTrainerDashboard() {
                           <SelectValue placeholder="Select sport" />
                         </SelectTrigger>
                         <SelectContent>
+                          <SelectItem value="cheerleading">Cheerleading</SelectItem>
+                          <SelectItem value="dance_team">Dance Team</SelectItem>
+                          <SelectItem value="color_guard">Color Guard</SelectItem>
                           <SelectItem value="baseball">Baseball</SelectItem>
                           <SelectItem value="softball">Softball</SelectItem>
                           <SelectItem value="tennis">Tennis</SelectItem>
@@ -951,7 +1271,8 @@ export default function AthleticTrainerDashboard() {
                           <SelectItem value="track_throwing">Track & Field (Throwing)</SelectItem>
                           <SelectItem value="football">Football (Quarterback)</SelectItem>
                           <SelectItem value="basketball">Basketball</SelectItem>
-                          <SelectItem value="other">Other Throwing Sport</SelectItem>
+                          <SelectItem value="marching_band">Marching Band</SelectItem>
+                          <SelectItem value="other">Other Sport/Activity</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -1561,8 +1882,266 @@ export default function AthleticTrainerDashboard() {
                       </div>
                     )}
 
+                    {/* Cheerleading-Specific Injury Assessment */}
+                    {aiConsultation.sport === 'cheerleading' && (
+                      <div className="space-y-4">
+                        <div className="bg-purple-50 p-4 rounded-lg border-l-4 border-purple-500">
+                          <div className="flex items-start space-x-3">
+                            <Zap className="h-5 w-5 text-purple-600 mt-1" />
+                            <div>
+                              <h4 className="font-medium text-purple-900">Cheerleading Injury Protocol</h4>
+                              <p className="text-sm text-purple-700 mt-1">
+                                Evidence-based assessment for {aiConsultation.injuryLocation} injuries in cheerleading athletes. 
+                                {aiConsultation.injuryLocation === 'ankle' && 'Ankle injuries represent 44.9% of all cheerleading injuries.'}
+                                {aiConsultation.injuryLocation === 'neck' && '96% of concussions in cheerleading occur during stunting.'}
+                                {aiConsultation.injuryLocation === 'wrist' && 'Wrist injuries common in tumbling and landing activities.'}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <Card className="border-purple-200 bg-purple-50">
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-sm flex items-center">
+                                <Target className="h-4 w-4 mr-2 text-purple-600" />
+                                Cheerleading Assessment Protocol
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="pt-0 text-sm space-y-2">
+                              {aiConsultation.injuryLocation === 'ankle' && (
+                                <>
+                                  <p>• Most common cheerleading injury (44.9%)</p>
+                                  <p>• Assess landing mechanics from jumps/tumbling</p>
+                                  <p>• Check for chronic ankle instability</p>
+                                  <p>• Evaluate proprioception and balance</p>
+                                  <p>• Ottawa Ankle Rules for fracture screening</p>
+                                </>
+                              )}
+                              {aiConsultation.injuryLocation === 'neck' && (
+                                <>
+                                  <p>• 96% of cheer concussions occur during stunts</p>
+                                  <p>• Assess stunt partner collision history</p>
+                                  <p>• Evaluate cervical spine clearance first</p>
+                                  <p>• SCAT5 baseline comparison mandatory</p>
+                                  <p>• Check for delayed symptom presentation</p>
+                                </>
+                              )}
+                              {aiConsultation.injuryLocation === 'wrist' && (
+                                <>
+                                  <p>• Common in tumbling and floor routines</p>
+                                  <p>• Assess weight-bearing tolerance</p>
+                                  <p>• Check for TFCC injury (triangular disk)</p>
+                                  <p>• Evaluate grip strength and ROM</p>
+                                  <p>• Scaphoid fracture screening</p>
+                                </>
+                              )}
+                              {aiConsultation.injuryLocation === 'shoulder' && (
+                                <>
+                                  <p>• Often from tumbling or stunt positioning</p>
+                                  <p>• Assess overhead motion capability</p>
+                                  <p>• Check for impingement during stunts</p>
+                                  <p>• Evaluate rotator cuff strength</p>
+                                  <p>• Test for labral tear signs</p>
+                                </>
+                              )}
+                              {aiConsultation.injuryLocation === 'knee' && (
+                                <>
+                                  <p>• Landing injuries from jumps/dismounts</p>
+                                  <p>• ACL risk higher in cheerleading</p>
+                                  <p>• Assess quad/hamstring strength ratio</p>
+                                  <p>• Check for patellofemoral pain</p>
+                                  <p>• Evaluate jump landing mechanics</p>
+                                </>
+                              )}
+                              {aiConsultation.injuryLocation === 'lower_back' && (
+                                <>
+                                  <p>• Hyperextension from tumbling/stunts</p>
+                                  <p>• Check for spondylolisthesis risk</p>
+                                  <p>• Assess core stability deficits</p>
+                                  <p>• Evaluate flexibility imbalances</p>
+                                  <p>• Screen for stress fractures</p>
+                                </>
+                              )}
+                            </CardContent>
+                          </Card>
+
+                          <Card className="border-green-200 bg-green-50">
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-sm flex items-center">
+                                <TrendingUp className="h-4 w-4 mr-2 text-green-600" />
+                                Cheer-Specific Rehabilitation
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="pt-0 text-sm space-y-2">
+                              <p>• Progressive skill reintegration (USASF guidelines)</p>
+                              <p>• Sport-specific movement patterns</p>
+                              <p>• Stunt progression protocols</p>
+                              <p>• Balance and proprioceptive training</p>
+                              <p>• Team coordination and timing work</p>
+                              <p>• Surface-specific training (mats vs. floor)</p>
+                            </CardContent>
+                          </Card>
+                        </div>
+
+                        <Card className="border-orange-200 bg-orange-50">
+                          <CardHeader className="pb-3">
+                            <CardTitle className="text-sm flex items-center">
+                              <AlertTriangle className="h-4 w-4 mr-2 text-orange-600" />
+                              Cheerleading Red Flags - Immediate Action Required
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="pt-0 text-sm space-y-1">
+                            <p>• Any head/neck injury during stunting</p>
+                            <p>• Inability to bear weight after landing</p>
+                            <p>• Loss of consciousness during practice</p>
+                            <p>• Severe pain preventing skill execution</p>
+                            <p>• Visible deformity or swelling</p>
+                            <p>• Neurological symptoms (numbness, tingling)</p>
+                          </CardContent>
+                        </Card>
+
+                        <Card className="border-blue-200 bg-blue-50">
+                          <CardHeader className="pb-3">
+                            <CardTitle className="text-sm flex items-center">
+                              <Shield className="h-4 w-4 mr-2 text-blue-600" />
+                              Prevention Based on USA Cheer Guidelines
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="pt-0 text-sm space-y-1">
+                            <p>• Proper surface requirements (basket tosses on mats only)</p>
+                            <p>• Progressive skill development (USASF age-appropriate rules)</p>
+                            <p>• Certified coaching and safety training</p>
+                            <p>• Regular strength and flexibility maintenance</p>
+                            <p>• Emergency action plan rehearsal</p>
+                            <p>• Equipment inspection and maintenance</p>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    )}
+
+                    {/* Dance Team Injury Assessment */}
+                    {aiConsultation.sport === 'dance_team' && (
+                      <div className="space-y-4">
+                        <div className="bg-pink-50 p-4 rounded-lg border-l-4 border-pink-500">
+                          <div className="flex items-start space-x-3">
+                            <Activity className="h-5 w-5 text-pink-600 mt-1" />
+                            <div>
+                              <h4 className="font-medium text-pink-900">Dance Team Injury Assessment</h4>
+                              <p className="text-sm text-pink-700 mt-1">
+                                Specialized protocols for dance-specific movement patterns and performance demands.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <Card className="border-pink-200 bg-pink-50">
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-sm flex items-center">
+                                <Stethoscope className="h-4 w-4 mr-2 text-pink-600" />
+                                Dance-Specific Assessment
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="pt-0 text-sm space-y-2">
+                              <p>• Assess turnout and hip mobility</p>
+                              <p>• Evaluate foot and ankle alignment</p>
+                              <p>• Check for overuse patterns in repetitive movements</p>
+                              <p>• Assess core stability for lifts and jumps</p>
+                              <p>• Test balance and proprioception</p>
+                              <p>• Evaluate flexibility requirements for style</p>
+                            </CardContent>
+                          </Card>
+
+                          <Card className="border-green-200 bg-green-50">
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-sm flex items-center">
+                                <TrendingUp className="h-4 w-4 mr-2 text-green-600" />
+                                Dance Rehabilitation Focus
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="pt-0 text-sm space-y-2">
+                              <p>• Progressive dance-specific movements</p>
+                              <p>• Technique refinement to prevent re-injury</p>
+                              <p>• Cross-training for muscular balance</p>
+                              <p>• Performance conditioning protocols</p>
+                              <p>• Competition preparation timeline</p>
+                              <p>• Style-specific movement integration</p>
+                            </CardContent>
+                          </Card>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Color Guard/Marching Band Assessment */}
+                    {(aiConsultation.sport === 'color_guard' || aiConsultation.sport === 'marching_band') && (
+                      <div className="space-y-4">
+                        <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
+                          <div className="flex items-start space-x-3">
+                            <Heart className="h-5 w-5 text-blue-600 mt-1" />
+                            <div>
+                              <h4 className="font-medium text-blue-900">
+                                {aiConsultation.sport === 'color_guard' ? 'Color Guard' : 'Marching Band'} Injury Protocol
+                              </h4>
+                              <p className="text-sm text-blue-700 mt-1">
+                                Assessment protocols for {aiConsultation.sport === 'color_guard' ? 'flag/rifle/saber work' : 'instrument-related and marching injuries'}.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <Card className="border-blue-200 bg-blue-50">
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-sm flex items-center">
+                                <Stethoscope className="h-4 w-4 mr-2 text-blue-600" />
+                                Specialized Assessment
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="pt-0 text-sm space-y-2">
+                              {aiConsultation.sport === 'color_guard' ? (
+                                <>
+                                  <p>• Shoulder and rotator cuff evaluation</p>
+                                  <p>• Wrist and forearm strength testing</p>
+                                  <p>• Grip strength and endurance</p>
+                                  <p>• Catching and tossing mechanics</p>
+                                  <p>• Visual tracking and coordination</p>
+                                </>
+                              ) : (
+                                <>
+                                  <p>• Postural assessment for instrument weight</p>
+                                  <p>• Respiratory function evaluation</p>
+                                  <p>• Lower extremity endurance testing</p>
+                                  <p>• Cervical spine and TMJ assessment</p>
+                                  <p>• Heat illness risk factors</p>
+                                </>
+                              )}
+                            </CardContent>
+                          </Card>
+
+                          <Card className="border-green-200 bg-green-50">
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-sm flex items-center">
+                                <TrendingUp className="h-4 w-4 mr-2 text-green-600" />
+                                Rehabilitation Approach
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="pt-0 text-sm space-y-2">
+                              <p>• Activity-specific movement patterns</p>
+                              <p>• Ergonomic equipment modifications</p>
+                              <p>• Progressive loading protocols</p>
+                              <p>• Performance endurance building</p>
+                              <p>• Competition season preparation</p>
+                              <p>• Heat acclimatization protocols</p>
+                            </CardContent>
+                          </Card>
+                        </div>
+                      </div>
+                    )}
+
                     {/* General Evidence-Based Recommendations */}
-                    {!['knee', 'ankle', 'neck', 'hip', 'lower_back'].includes(aiConsultation.injuryLocation) && (
+                    {!['knee', 'ankle', 'neck', 'hip', 'lower_back'].includes(aiConsultation.injuryLocation) && 
+                     !['cheerleading', 'dance_team', 'color_guard', 'marching_band'].includes(aiConsultation.sport) && (
                       <div className="bg-gray-50 p-4 rounded-lg">
                         <div className="flex items-start space-x-3">
                           <Brain className="h-5 w-5 text-gray-600 mt-1" />

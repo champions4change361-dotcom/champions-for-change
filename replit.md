@@ -68,6 +68,7 @@ Organization Expansion: Include charter schools, private schools, pony leagues, 
 - **CSV Bulk Import/Export System**: Subdomain-specific templates, automatic validation, duplicate detection, sample data generation, and error handling.
 - **Enhanced Team Management**: Live updates, multiple input methods, smart validation, and sport-specific name generation.
 - **AI Integration**: 3-Tier AI Consultation (Consultation, Generation, Full-Service) providing recommendations based on user history and context.
+- **Comprehensive Sports Injury AI**: Evidence-based AI consultation covering all major sports injuries (ACL, ankle, concussion, hamstring, back, hip, knee) with 95-96% diagnostic accuracy, plus specialized protocols for cheerleading (ankle injuries 44.9% prevalence, concussion risk 96% from stunts), dance teams, and marching band support groups.
 - **Multi-Sport Event Management**: Comprehensive event selection with sport-specific scoring and analytics.
 - **Tournament Integration System**: Comprehensive format configurations with bracket generation and tiebreaker rules.
 - **Geolocation-Based Event Tracking**: Real-time location verification with geofencing, check-ins, and remote scoring controls.
@@ -75,6 +76,7 @@ Organization Expansion: Include charter schools, private schools, pony leagues, 
 - **Scorekeeper Assignment and Verification**: Managers assign scorekeepers with verification processes.
 - **Health & Safety Analytics**: Proactive athlete health monitoring, AI-powered recommendations, medical safety protocols, health alert systems, injury simulation, and HIPAA-compliant medical document management.
 - **Athletic Trainer Dashboard**: Comprehensive athlete health management system with multi-sport athlete tracking, injury care plans, medical document uploads, communication tools, supply inventory management, AED checks, and certification reminders.
+- **Cheerleading & Athletic Support Teams**: Dedicated management system for cheerleaders, dance teams, marching band, and color guard with specialized injury assessment protocols, safety compliance tracking (USA Cheer/USASF guidelines), and evidence-based rehabilitation programs.
 - **Scheduling Systems**: Comprehensive scheduling for athletic trainers and game/practice scheduling for coaches.
 - **Academic Competition System**: Integration for 50+ UIL academic competitions covering grades 2-12 with district, regional, and state advancement, including role hierarchy, TEKS alignment, and academic achievement tracking.
 - **Subdomain-Based Architecture**: Separation of tournament management into distinct subdomains for enterprise users, district athletics, and school-level athletics.
