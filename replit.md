@@ -7,6 +7,7 @@ This platform is a white-label SaaS solution for the Champions for Change nonpro
 Preferred communication style: Simple, everyday language.
 Mission-focused: Platform serves Champions for Change nonprofit to fund student trips and educational opportunities for underprivileged youth.
 Branding: Green and blue color scheme from Champions for Change logo, emphasis on educational impact and coach-built heritage.
+Domain Strategy: Primary domain will be championsforchange.net hosted on Replit. All existing business cards and QR codes should redirect seamlessly to the new Replit-hosted tournament platform.
 Transparency Policy: Absolute commitment to honest marketing - no fake reviews, testimonials, or misleading claims. Platform will earn authentic reviews through real user experiences.
 Competitive Strategy: Mission-driven advantage - "Let them copy, they'll always be behind and can't replicate the authentic educational mission."
 District Value Proposition: At $4,500-5,000/year, districts save $26,000+ annually compared to current solutions while supporting educational mission. ROI still massive and fiscally irresponsible not to adopt. Districts handle student fees through existing systems - no payment processing burden on platform.
