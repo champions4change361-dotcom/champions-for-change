@@ -116,9 +116,10 @@ export function AIConsultant({ domain = 'education' }: AIConsultantProps) {
         intellectual_games: {
           name: 'Intellectual Games & Strategy',
           sports: [
-            'Chess', 'Academic Decathlon', 'Quiz Bowl', 'Bridge', 'Checkers',
-            'Scrabble', 'Academic Bowl', 'Knowledge Bowl', 'Trivia Competition',
-            'Strategy Games', 'Logic Puzzles', 'Memory Competition'
+            'Chess Tournament', 'Chess Club Championship', 'Academic Decathlon', 'Quiz Bowl', 
+            'Bridge Tournament', 'Checkers Tournament', 'Scrabble Competition', 'Academic Bowl', 
+            'Knowledge Bowl', 'Trivia Competition', 'Strategy Games Tournament', 'Logic Puzzles',
+            'Board Game Tournament', 'Memory Competition'
           ]
         }
       }
@@ -191,6 +192,27 @@ export function AIConsultant({ domain = 'education' }: AIConsultantProps) {
         ? prev.features.filter(f => f !== feature)
         : [...prev.features, feature]
     }));
+  };
+
+  // Determine the best flow based on consultation data
+  const handleStartTournamentCreation = () => {
+    const isSimpleTournament = consultation.budget === 'free' && 
+                              parseInt(consultation.participantCount) <= 50 &&
+                              consultation.features.length <= 2;
+    
+    if (isSimpleTournament) {
+      // Direct to tournament creation with pre-filled data
+      const params = new URLSearchParams({
+        sport: consultation.sport,
+        participants: consultation.participantCount,
+        goals: consultation.goals,
+        fromConsultant: 'true'
+      });
+      window.location.href = `/create-tournament?${params.toString()}`;
+    } else {
+      // For complex needs, guide to appropriate registration
+      window.location.href = '/register';
+    }
   };
 
   const generateRecommendations = () => {
@@ -324,7 +346,7 @@ export function AIConsultant({ domain = 'education' }: AIConsultantProps) {
                       data-testid="select-sport"
                     >
                       <option value="">Select competition...</option>
-                      {getAvailableSports().map((sport) => (
+                      {getAvailableSports().map((sport: string) => (
                         <option key={sport} value={sport}>{sport}</option>
                       ))}
                     </select>
@@ -428,17 +450,29 @@ export function AIConsultant({ domain = 'education' }: AIConsultantProps) {
               <div className="space-y-3">
                 <div className="p-3 bg-gray-50 rounded-lg">
                   <div className="text-sm font-medium text-gray-900">Recommended Structure</div>
-                  <div className="text-sm text-gray-600">Single Elimination with Consolation Bracket</div>
+                  <div className="text-sm text-gray-600">
+                    {consultation.sport.toLowerCase().includes('chess') 
+                      ? 'Swiss System Tournament (perfect for chess)'
+                      : 'Single Elimination with Consolation Bracket'
+                    }
+                  </div>
                 </div>
 
                 <div className="p-3 bg-gray-50 rounded-lg">
-                  <div className="text-sm font-medium text-gray-900">Estimated Cost</div>
-                  <div className="text-sm text-gray-600">{consultation.budget === 'free' ? 'Free (up to 3 tournaments)' : `$${consultation.budget}/month`}</div>
+                  <div className="text-sm font-medium text-gray-900">What You'll Get</div>
+                  <div className="text-sm text-gray-600">
+                    {consultation.budget === 'free' && parseInt(consultation.participantCount || '0') <= 50
+                      ? 'Go straight to building your tournament - no signup needed!'
+                      : 'Full setup with our team support'
+                    }
+                  </div>
                 </div>
 
                 <div className="p-3 bg-gray-50 rounded-lg">
-                  <div className="text-sm font-medium text-gray-900">Setup Timeline</div>
-                  <div className="text-sm text-gray-600">2-3 weeks with our team</div>
+                  <div className="text-sm font-medium text-gray-900">Cost</div>
+                  <div className="text-sm text-gray-600">
+                    {consultation.budget === 'free' ? 'Free (up to 3 tournaments)' : `$${consultation.budget}/month`}
+                  </div>
                 </div>
 
                 <div className="p-3 bg-gray-50 rounded-lg">
@@ -461,10 +495,13 @@ export function AIConsultant({ domain = 'education' }: AIConsultantProps) {
                     config.primaryColor === 'blue' ? 'bg-blue-600 hover:bg-blue-700' :
                     'bg-purple-600 hover:bg-purple-700'
                   }`}
-                  onClick={() => window.location.href = '/register'}
+                  onClick={() => handleStartTournamentCreation()}
                   data-testid="button-start-setup"
                 >
-                  Start Setup Process
+                  {consultation.budget === 'free' && parseInt(consultation.participantCount || '0') <= 50 
+                    ? 'Create Tournament Now' 
+                    : 'Start Setup Process'
+                  }
                 </Button>
               </div>
             </div>
