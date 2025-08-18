@@ -143,7 +143,7 @@ export default function DonationFlow() {
           Support Champions for Change
         </CardTitle>
         <CardDescription className="text-lg text-slate-600">
-          Help fund $2,600+ educational trips for underprivileged youth in Corpus Christi, Texas
+          Help fund $2,600+ educational trips for underprivileged student competitors nationwide
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -193,23 +193,24 @@ export default function DonationFlow() {
           </div>
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
           <Button 
             variant="outline" 
             onClick={() => setLocation('/')}
-            className="flex-1"
+            className="flex-1 order-2 sm:order-1"
             data-testid="button-cancel-donation-amount"
           >
             Cancel
           </Button>
           <Button 
             onClick={handleContinueToContact}
-            className="flex-1 bg-green-600 hover:bg-green-700 text-lg py-6"
+            className="flex-1 bg-green-600 hover:bg-green-700 text-base sm:text-lg py-3 sm:py-6 order-1 sm:order-2"
             disabled={!getFinalAmount()}
             data-testid="button-continue-contact"
           >
-            Continue to Contact Information
-            <ArrowRight className="ml-2 h-5 w-5" />
+            <span className="hidden sm:inline">Continue to Contact Information</span>
+            <span className="sm:hidden">Continue to Contact</span>
+            <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
         </div>
       </CardContent>
@@ -310,11 +311,11 @@ export default function DonationFlow() {
           </RadioGroup>
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
           <Button 
             variant="outline" 
             onClick={() => setLocation('/')}
-            className="flex-1"
+            className="flex-1 order-3 sm:order-1"
             data-testid="button-cancel-donation"
           >
             Cancel
@@ -322,19 +323,20 @@ export default function DonationFlow() {
           <Button 
             variant="outline" 
             onClick={() => setStep('amount')}
-            className="flex-1"
+            className="flex-1 order-2"
             data-testid="button-back-amount"
           >
             Back to Amount
           </Button>
           <Button 
             onClick={handleSubmitDonation}
-            className="flex-1 bg-green-600 hover:bg-green-700"
+            className="flex-1 bg-green-600 hover:bg-green-700 text-sm sm:text-base py-3 order-1 sm:order-3"
             disabled={!donorInfo.firstName || !donorInfo.lastName || !donorInfo.email}
             data-testid="button-proceed-payment"
           >
-            Proceed to Payment
-            <ArrowRight className="ml-2 h-5 w-5" />
+            <span className="hidden sm:inline">Proceed to Payment</span>
+            <span className="sm:hidden">Complete Donation</span>
+            <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
         </div>
       </CardContent>

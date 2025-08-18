@@ -210,8 +210,8 @@ export default function YourWhy() {
             <Card className="text-center border-purple-200">
               <CardContent className="p-6">
                 <MapPin className="h-12 w-12 text-purple-600 mx-auto mb-4" />
-                <h3 className="text-3xl font-bold text-gray-900 mb-2">Corpus Christi</h3>
-                <p className="text-gray-600">Middle schools where we focus our impact</p>
+                <h3 className="text-3xl font-bold text-gray-900 mb-2">Nationwide</h3>
+                <p className="text-gray-600">Student competitors receiving educational opportunities</p>
               </CardContent>
             </Card>
           </div>
