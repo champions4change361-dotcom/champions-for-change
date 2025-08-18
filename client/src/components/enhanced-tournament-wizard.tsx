@@ -8,6 +8,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -65,9 +66,120 @@ export default function EnhancedTournamentWizard({
   const [teams, setTeams] = useState<TeamData[]>([]);
   const [createdTournament, setCreatedTournament] = useState<any>(null);
 
+  // Cascading dropdown state
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string>('');
+
+  // Comprehensive sport categories system
+  const sportCategories = {
+    athletic: {
+      name: 'Athletic',
+      subcategories: {
+        team_sports: {
+          name: 'Team Sports',
+          sports: [
+            'Basketball (Boys)', 'Basketball (Girls)', 'Football', 'Soccer (Boys)', 'Soccer (Girls)',
+            'Volleyball (Boys)', 'Volleyball (Girls)', 'Baseball', 'Softball', 'Hockey',
+            'Rugby', 'Ultimate Frisbee', 'Water Polo', 'Field Hockey'
+          ]
+        },
+        individual_sports: {
+          name: 'Individual Sports',
+          sports: [
+            'Track & Field', 'Swimming & Diving', 'Cross Country', 'Tennis (Boys)',
+            'Tennis (Girls)', 'Golf (Boys)', 'Golf (Girls)', 'Wrestling', 'Gymnastics',
+            'Archery', 'Bowling', 'Martial Arts', 'Cycling', 'Fencing'
+          ]
+        },
+        winter_sports: {
+          name: 'Winter Sports',
+          sports: ['Skiing', 'Snowboarding', 'Ice Hockey', 'Figure Skating', 'Curling']
+        }
+      }
+    },
+    academic: {
+      name: 'Academic',
+      subcategories: {
+        uil_academic: {
+          name: 'UIL Academic Competitions',
+          sports: [
+            'Accounting', 'Calculator Applications', 'Computer Applications', 'Computer Science',
+            'Current Issues & Events', 'Economics', 'Literary Criticism', 'Mathematics',
+            'Number Sense', 'Science', 'Social Studies', 'Spelling & Vocabulary'
+          ]
+        },
+        speech_debate: {
+          name: 'Speech & Debate',
+          sports: [
+            'Cross Examination Debate', 'Lincoln-Douglas Debate', 'Informative Speaking',
+            'Persuasive Speaking', 'Poetry Interpretation', 'Prose Interpretation',
+            'Extemporaneous Speaking', 'Original Oratory'
+          ]
+        },
+        stem_competitions: {
+          name: 'STEM Competitions',
+          sports: [
+            'Science Olympiad', 'Math Olympiad', 'Robotics Competition', 'Engineering Challenge',
+            'Programming Competition', 'Quiz Bowl', 'Academic Decathlon', 'Destination Imagination'
+          ]
+        }
+      }
+    },
+    fine_arts: {
+      name: 'Fine Arts',
+      subcategories: {
+        music: {
+          name: 'Music',
+          sports: [
+            'Concert Band', 'Marching Band', 'Jazz Band', 'Orchestra', 'Choir',
+            'Solo & Ensemble', 'All-State Auditions', 'Piano Competition'
+          ]
+        },
+        visual_arts: {
+          name: 'Visual Arts',
+          sports: [
+            'Art Competition', 'Photography', 'Digital Art', 'Sculpture',
+            'Painting', 'Drawing', 'Ceramics', 'Graphic Design'
+          ]
+        },
+        performing_arts: {
+          name: 'Performing Arts',
+          sports: [
+            'One Act Play', 'Musical Theater', 'Dance Competition', 'Drama',
+            'Improvisation', 'Monologue Competition', 'Technical Theater'
+          ]
+        }
+      }
+    }
+  };
+
   const { data: sports = [] } = useQuery<any[]>({
     queryKey: ["/api/sports"],
   });
+
+  // Get available sports based on selected category and subcategory
+  const getAvailableSports = () => {
+    if (!selectedCategory || !selectedSubcategory) return [];
+    
+    const category = sportCategories[selectedCategory as keyof typeof sportCategories];
+    if (!category) return [];
+    
+    const subcategory = (category.subcategories as any)[selectedSubcategory];
+    return subcategory ? subcategory.sports : [];
+  };
+
+  // Reset selections when category changes
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
+    setSelectedSubcategory('');
+    form.setValue("sport", "");
+  };
+
+  // Reset sport when subcategory changes
+  const handleSubcategoryChange = (subcategory: string) => {
+    setSelectedSubcategory(subcategory);
+    form.setValue("sport", "");
+  };
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -243,24 +355,87 @@ export default function EnhancedTournamentWizard({
         <CardContent className="pt-6">
           {currentStep === 'sport' && (
             <div className="space-y-6">
+              {/* Step 1: Category Selection */}
               <div>
-                <Label htmlFor="sport" className="block text-sm font-medium text-gray-700 mb-2">
-                  Sport *
+                <Label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
+                  Competition Category *
                 </Label>
                 <select 
-                  onChange={(e) => form.setValue("sport", e.target.value)} 
-                  value={form.watch("sport") || ""}
-                  className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  data-testid="select-sport"
+                  value={selectedCategory}
+                  onChange={(e) => handleCategoryChange(e.target.value)}
+                  className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  data-testid="select-category"
                 >
-                  <option value="">Choose a sport</option>
-                  {sports.map((sport) => (
-                    <option key={sport.id} value={sport.sportName}>
-                      {sport.sportName} - {sport.competitionType === "leaderboard" ? "Leaderboard" : "Bracket"}
+                  <option value="">Select broader category</option>
+                  {Object.entries(sportCategories).map(([key, category]) => (
+                    <option key={key} value={key}>
+                      {category.name}
                     </option>
                   ))}
                 </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  Choose from Athletic, Academic, or Fine Arts competitions
+                </p>
               </div>
+
+              {/* Step 2: Subcategory Selection */}
+              {selectedCategory && (
+                <div>
+                  <Label htmlFor="subcategory" className="block text-sm font-medium text-gray-700 mb-2">
+                    Specific Area *
+                  </Label>
+                  <select 
+                    value={selectedSubcategory}
+                    onChange={(e) => handleSubcategoryChange(e.target.value)}
+                    className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    data-testid="select-subcategory"
+                  >
+                    <option value="">Select specific area</option>
+                    {Object.entries(sportCategories[selectedCategory as keyof typeof sportCategories].subcategories).map(([key, subcategory]) => (
+                      <option key={key} value={key}>
+                        {subcategory.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* Step 3: Sport Selection */}
+              {selectedCategory && selectedSubcategory && (
+                <div>
+                  <Label htmlFor="sport" className="block text-sm font-medium text-gray-700 mb-2">
+                    Specific Competition *
+                  </Label>
+                  <select 
+                    onChange={(e) => form.setValue("sport", e.target.value)} 
+                    value={form.watch("sport") || ""}
+                    className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    data-testid="select-sport"
+                  >
+                    <option value="">Choose specific competition</option>
+                    {getAvailableSports().map((sport: string, index: number) => (
+                      <option key={index} value={sport}>
+                        {sport}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* Help text showing selection path */}
+              {selectedCategory && selectedSubcategory && form.watch("sport") && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                  <div className="flex items-center text-sm text-green-700">
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    <span className="font-medium">Selection Complete:</span>
+                  </div>
+                  <p className="text-sm text-green-600 mt-1">
+                    {(sportCategories as any)[selectedCategory].name} → {" "}
+                    {(sportCategories as any)[selectedCategory].subcategories[selectedSubcategory].name} → {" "}
+                    {form.watch("sport")}
+                  </p>
+                </div>
+              )}
 
               <div>
                 <Label htmlFor="competitionFormat" className="block text-sm font-medium text-gray-700 mb-2">
