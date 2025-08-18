@@ -19,12 +19,18 @@ export default function CreateTournament() {
       const sport = urlParams.get('sport');
       const participants = urlParams.get('participants');
       const goals = urlParams.get('goals');
+      const budget = urlParams.get('budget');
+      const features = urlParams.get('features');
+      const complexity = urlParams.get('complexity');
       
       // Set AI recommendations based on URL parameters
       setAiRecommendations({
         sport,
         participantCount: participants,
         goals,
+        budget,
+        features: features ? JSON.parse(features) : null,
+        complexity,
         fromConsultant: true
       });
       

@@ -222,23 +222,21 @@ export function AIConsultant({ domain = 'education' }: AIConsultantProps) {
     };
   };
 
-  // Determine the best flow based on comprehensive analysis
+  // Always go to tournament creation, but with different feature sets
   const handleStartTournamentCreation = () => {
     const complexity = getCompetitionComplexity();
     
-    if (complexity.isSimple) {
-      // Direct to tournament creation with pre-filled data
-      const params = new URLSearchParams({
-        sport: consultation.sport,
-        participants: consultation.participantCount,
-        goals: consultation.goals,
-        fromConsultant: 'true'
-      });
-      window.location.href = `/create?${params.toString()}`;
-    } else {
-      // For complex needs, guide to appropriate registration
-      window.location.href = '/register';
-    }
+    // Always go to tournament creation with pre-filled data and complexity level
+    const params = new URLSearchParams({
+      sport: consultation.sport,
+      participants: consultation.participantCount,
+      goals: consultation.goals,
+      budget: consultation.budget,
+      features: JSON.stringify(consultation.features),
+      complexity: complexity.isSimple ? 'simple' : 'advanced',
+      fromConsultant: 'true'
+    });
+    window.location.href = `/create?${params.toString()}`;
   };
 
   const generateRecommendations = () => {
@@ -508,8 +506,8 @@ export function AIConsultant({ domain = 'education' }: AIConsultantProps) {
                           {complexity.isSimple
                             ? 'Go straight to building your tournament - no signup needed!'
                             : complexity.requiresComplexSetup
-                            ? 'Professional setup with compliance support'
-                            : 'Full setup with our team support'
+                            ? 'Advanced tournament creation with professional features'
+                            : 'Full tournament builder with enhanced options'
                           }
                         </div>
                       </div>
@@ -547,10 +545,7 @@ export function AIConsultant({ domain = 'education' }: AIConsultantProps) {
                   onClick={() => handleStartTournamentCreation()}
                   data-testid="button-start-setup"
                 >
-                  {getCompetitionComplexity().isSimple
-                    ? 'Create Tournament Now' 
-                    : 'Start Setup Process'
-                  }
+                  Create Tournament Now
                 </Button>
               </div>
             </div>
