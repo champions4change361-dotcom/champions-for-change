@@ -28,7 +28,11 @@ import {
   Stethoscope,
   Activity,
   ClipboardList,
-  Bell
+  Bell,
+  Brain,
+  Target,
+  TrendingUp,
+  Zap
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -37,6 +41,18 @@ export default function AthleticTrainerDashboard() {
   const [selectedAthlete, setSelectedAthlete] = useState(null);
   const [showAddAthlete, setShowAddAthlete] = useState(false);
   const [showMessageComposer, setShowMessageComposer] = useState(false);
+  const [showAIConsultant, setShowAIConsultant] = useState(false);
+  const [aiConsultation, setAiConsultation] = useState({
+    athleteName: '',
+    sport: '',
+    injuryLocation: '',
+    symptoms: '',
+    painLevel: '',
+    onset: '',
+    mechanism: '',
+    previousInjuries: '',
+    currentActivity: ''
+  });
 
   // Mock data for demonstration
   const athletes = [
@@ -116,6 +132,14 @@ export default function AthleticTrainerDashboard() {
             <p className="text-slate-600">Welcome back, {user?.firstName} {user?.lastName}</p>
           </div>
           <div className="flex space-x-3">
+            <Button 
+              onClick={() => setShowAIConsultant(true)}
+              className="bg-purple-600 hover:bg-purple-700"
+              data-testid="button-ai-consultant"
+            >
+              <Brain className="h-4 w-4 mr-2" />
+              AI Injury Consultant
+            </Button>
             <Button 
               onClick={() => setShowMessageComposer(true)}
               className="bg-blue-600 hover:bg-blue-700"
@@ -867,6 +891,361 @@ export default function AthleticTrainerDashboard() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* AI Injury Consultation Modal */}
+        {showAIConsultant && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6 border-b border-gray-200">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-purple-100 rounded-lg">
+                      <Brain className="h-6 w-6 text-purple-600" />
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-bold text-gray-900">AI Injury Assessment & Rehabilitation Consultant</h2>
+                      <p className="text-sm text-gray-600">Evidence-based recommendations for injury evaluation and recovery protocols</p>
+                    </div>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => setShowAIConsultant(false)}
+                    data-testid="button-close-ai-consultant"
+                  >
+                    ×
+                  </Button>
+                </div>
+              </div>
+
+              <div className="p-6 space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Athlete Information */}
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-lg text-gray-900">Athlete Information</h3>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Athlete Name</label>
+                      <Input
+                        value={aiConsultation.athleteName}
+                        onChange={(e) => setAiConsultation(prev => ({ ...prev, athleteName: e.target.value }))}
+                        placeholder="Enter athlete's name"
+                        data-testid="input-athlete-name"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Sport/Activity</label>
+                      <Select 
+                        value={aiConsultation.sport}
+                        onValueChange={(value) => setAiConsultation(prev => ({ ...prev, sport: value }))}
+                      >
+                        <SelectTrigger data-testid="select-sport-consultation">
+                          <SelectValue placeholder="Select sport" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="baseball">Baseball</SelectItem>
+                          <SelectItem value="softball">Softball</SelectItem>
+                          <SelectItem value="tennis">Tennis</SelectItem>
+                          <SelectItem value="volleyball">Volleyball</SelectItem>
+                          <SelectItem value="swimming">Swimming</SelectItem>
+                          <SelectItem value="track_throwing">Track & Field (Throwing)</SelectItem>
+                          <SelectItem value="football">Football (Quarterback)</SelectItem>
+                          <SelectItem value="basketball">Basketball</SelectItem>
+                          <SelectItem value="other">Other Throwing Sport</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Injury Location</label>
+                      <Select 
+                        value={aiConsultation.injuryLocation}
+                        onValueChange={(value) => setAiConsultation(prev => ({ ...prev, injuryLocation: value }))}
+                      >
+                        <SelectTrigger data-testid="select-injury-location">
+                          <SelectValue placeholder="Select area of concern" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="shoulder">Shoulder</SelectItem>
+                          <SelectItem value="elbow">Elbow</SelectItem>
+                          <SelectItem value="wrist">Wrist</SelectItem>
+                          <SelectItem value="lower_back">Lower Back</SelectItem>
+                          <SelectItem value="hip">Hip</SelectItem>
+                          <SelectItem value="knee">Knee</SelectItem>
+                          <SelectItem value="ankle">Ankle</SelectItem>
+                          <SelectItem value="neck">Neck</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Pain Level (1-10)</label>
+                      <Select 
+                        value={aiConsultation.painLevel}
+                        onValueChange={(value) => setAiConsultation(prev => ({ ...prev, painLevel: value }))}
+                      >
+                        <SelectTrigger data-testid="select-pain-level">
+                          <SelectValue placeholder="Select pain level" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="1-2">1-2 (Minimal)</SelectItem>
+                          <SelectItem value="3-4">3-4 (Mild)</SelectItem>
+                          <SelectItem value="5-6">5-6 (Moderate)</SelectItem>
+                          <SelectItem value="7-8">7-8 (Severe)</SelectItem>
+                          <SelectItem value="9-10">9-10 (Extreme)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {/* Injury Details */}
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-lg text-gray-900">Injury Assessment</h3>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Onset</label>
+                      <Select 
+                        value={aiConsultation.onset}
+                        onValueChange={(value) => setAiConsultation(prev => ({ ...prev, onset: value }))}
+                      >
+                        <SelectTrigger data-testid="select-onset">
+                          <SelectValue placeholder="When did symptoms start?" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="acute">Acute (sudden onset)</SelectItem>
+                          <SelectItem value="gradual">Gradual (developed over time)</SelectItem>
+                          <SelectItem value="recurrent">Recurrent (comes and goes)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Mechanism of Injury</label>
+                      <Select 
+                        value={aiConsultation.mechanism}
+                        onValueChange={(value) => setAiConsultation(prev => ({ ...prev, mechanism: value }))}
+                      >
+                        <SelectTrigger data-testid="select-mechanism">
+                          <SelectValue placeholder="How did the injury occur?" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="overuse">Overuse/Repetitive Motion</SelectItem>
+                          <SelectItem value="contact">Direct Contact/Collision</SelectItem>
+                          <SelectItem value="non_contact">Non-Contact (Plant/Cut)</SelectItem>
+                          <SelectItem value="fall">Fall</SelectItem>
+                          <SelectItem value="unknown">Unknown/Insidious</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Current Activity Level</label>
+                      <Select 
+                        value={aiConsultation.currentActivity}
+                        onValueChange={(value) => setAiConsultation(prev => ({ ...prev, currentActivity: value }))}
+                      >
+                        <SelectTrigger data-testid="select-activity-level">
+                          <SelectValue placeholder="Current participation status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="full">Full Participation</SelectItem>
+                          <SelectItem value="limited">Limited Participation</SelectItem>
+                          <SelectItem value="rest">Complete Rest</SelectItem>
+                          <SelectItem value="modified">Modified Activities Only</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Symptoms</label>
+                      <Textarea
+                        value={aiConsultation.symptoms}
+                        onChange={(e) => setAiConsultation(prev => ({ ...prev, symptoms: e.target.value }))}
+                        placeholder="Describe symptoms: pain during throwing, stiffness, weakness, swelling, etc."
+                        className="min-h-[80px]"
+                        data-testid="textarea-symptoms"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Previous Injuries</label>
+                      <Textarea
+                        value={aiConsultation.previousInjuries}
+                        onChange={(e) => setAiConsultation(prev => ({ ...prev, previousInjuries: e.target.value }))}
+                        placeholder="Any previous injuries to this area or related areas"
+                        className="min-h-[60px]"
+                        data-testid="textarea-previous-injuries"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* AI Recommendations */}
+                {aiConsultation.injuryLocation && aiConsultation.sport && (
+                  <div className="border-t pt-6">
+                    <h3 className="font-semibold text-lg text-gray-900 mb-4">AI-Powered Assessment & Recommendations</h3>
+                    
+                    {/* Throwing Shoulder/Elbow Specific Recommendations */}
+                    {(aiConsultation.injuryLocation === 'shoulder' || aiConsultation.injuryLocation === 'elbow') && 
+                     ['baseball', 'softball', 'tennis', 'volleyball', 'track_throwing', 'football'].includes(aiConsultation.sport) && (
+                      <div className="space-y-4">
+                        <div className="bg-purple-50 p-4 rounded-lg">
+                          <div className="flex items-start space-x-3">
+                            <Target className="h-5 w-5 text-purple-600 mt-1" />
+                            <div>
+                              <h4 className="font-medium text-purple-900">Throwing Athlete Assessment</h4>
+                              <p className="text-sm text-purple-700 mt-1">
+                                Based on current research for {aiConsultation.injuryLocation} injuries in {aiConsultation.sport} athletes.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <Card className="border-blue-200 bg-blue-50">
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-sm flex items-center">
+                                <Stethoscope className="h-4 w-4 mr-2 text-blue-600" />
+                                Immediate Assessment
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="pt-0 text-sm space-y-2">
+                              {aiConsultation.injuryLocation === 'shoulder' ? (
+                                <>
+                                  <p>• Perform Athletic Shoulder Test (AST)</p>
+                                  <p>• Check passive/active range of motion</p>
+                                  <p>• Assess rotator cuff strength</p>
+                                  <p>• Evaluate scapular stability</p>
+                                  <p>• Pain with overhead motion?</p>
+                                </>
+                              ) : (
+                                <>
+                                  <p>• Evaluate elbow valgus stress</p>
+                                  <p>• Check UCL integrity (moving valgus test)</p>
+                                  <p>• Assess flexor-pronator muscle group</p>
+                                  <p>• Range of motion: flexion/extension</p>
+                                  <p>• Medial vs lateral elbow pain location</p>
+                                </>
+                              )}
+                            </CardContent>
+                          </Card>
+
+                          <Card className="border-green-200 bg-green-50">
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-sm flex items-center">
+                                <TrendingUp className="h-4 w-4 mr-2 text-green-600" />
+                                Recovery Protocol
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="pt-0 text-sm space-y-2">
+                              {aiConsultation.injuryLocation === 'shoulder' ? (
+                                <>
+                                  <p>• Begin with pain-free range of motion</p>
+                                  <p>• Progress to rotator cuff strengthening</p>
+                                  <p>• Emphasize posterior capsule mobility</p>
+                                  <p>• Scapular stabilization exercises</p>
+                                  <p>• Gradual return to throwing program</p>
+                                </>
+                              ) : (
+                                <>
+                                  <p>• Rest from throwing activities initially</p>
+                                  <p>• Strengthen flexor-pronator muscles</p>
+                                  <p>• Address total arm strength deficits</p>
+                                  <p>• Improve throwing mechanics</p>
+                                  <p>• Interval throwing program when ready</p>
+                                </>
+                              )}
+                            </CardContent>
+                          </Card>
+                        </div>
+
+                        <Card className="border-orange-200 bg-orange-50">
+                          <CardHeader className="pb-3">
+                            <CardTitle className="text-sm flex items-center">
+                              <AlertTriangle className="h-4 w-4 mr-2 text-orange-600" />
+                              Red Flags - Refer to Physician
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="pt-0 text-sm space-y-1">
+                            <p>• Severe pain (7-10/10) with throwing</p>
+                            <p>• Significant strength loss or weakness</p>
+                            <p>• Numbness, tingling, or neurological symptoms</p>
+                            <p>• Inability to continue sport participation</p>
+                            <p>• No improvement after 1-2 weeks of conservative treatment</p>
+                          </CardContent>
+                        </Card>
+
+                        <Card className="border-purple-200 bg-purple-50">
+                          <CardHeader className="pb-3">
+                            <CardTitle className="text-sm flex items-center">
+                              <Zap className="h-4 w-4 mr-2 text-purple-600" />
+                              Prevention Strategies
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="pt-0 text-sm space-y-1">
+                            <p>• Monitor throwing volume and intensity</p>
+                            <p>• Maintain year-round conditioning</p>
+                            <p>• Address flexibility deficits (GIRD, posterior tightness)</p>
+                            <p>• Regular biomechanical assessment</p>
+                            <p>• Proper warm-up and cool-down protocols</p>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    )}
+
+                    {/* General Recommendations for Other Injuries */}
+                    {(!['shoulder', 'elbow'].includes(aiConsultation.injuryLocation) || 
+                      !['baseball', 'softball', 'tennis', 'volleyball', 'track_throwing', 'football'].includes(aiConsultation.sport)) && (
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <p className="text-sm text-gray-700">
+                          For {aiConsultation.injuryLocation} injuries in {aiConsultation.sport}, recommend:
+                          standard injury assessment protocols, appropriate rest and recovery,
+                          sport-specific rehabilitation, and physician consultation if symptoms persist
+                          or worsen. Monitor closely and document all interventions.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <div className="flex justify-between pt-4">
+                  <Button 
+                    variant="outline"
+                    onClick={() => setAiConsultation({
+                      athleteName: '',
+                      sport: '',
+                      injuryLocation: '',
+                      symptoms: '',
+                      painLevel: '',
+                      onset: '',
+                      mechanism: '',
+                      previousInjuries: '',
+                      currentActivity: ''
+                    })}
+                    data-testid="button-clear-consultation"
+                  >
+                    Clear Form
+                  </Button>
+                  
+                  <div className="space-x-3">
+                    <Button 
+                      variant="outline"
+                      data-testid="button-save-consultation"
+                    >
+                      Save Assessment
+                    </Button>
+                    <Button 
+                      className="bg-purple-600 hover:bg-purple-700"
+                      data-testid="button-create-care-plan"
+                    >
+                      Create Care Plan
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
