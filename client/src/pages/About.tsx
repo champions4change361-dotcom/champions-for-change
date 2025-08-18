@@ -186,8 +186,8 @@ export default function About() {
                 <p className="text-blue-700 dark:text-blue-300">Platform profits directed to student education funding</p>
               </div>
               <div>
-                <div className="text-2xl font-bold text-green-600 mb-2">5-15</div>
-                <p className="text-blue-700 dark:text-blue-300">Students we can fund annually with current growth</p>
+                <div className="text-2xl font-bold text-green-600 mb-2">5-∞</div>
+                <p className="text-blue-700 dark:text-blue-300">Students we can fund annually with unlimited potential</p>
               </div>
             </div>
           </div>

@@ -382,7 +382,7 @@ export default function Landing() {
                 <div className="text-emerald-100">Sports supported</div>
               </div>
               <div className="bg-emerald-700/30 rounded-xl p-6">
-                <div className="text-4xl font-bold mb-2 text-yellow-400">5-15</div>
+                <div className="text-4xl font-bold mb-2 text-yellow-400">5-∞</div>
                 <div className="text-emerald-100">Students funded annually</div>
               </div>
             </div>
