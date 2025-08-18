@@ -6,10 +6,11 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Heart, CreditCard, CheckCircle, ArrowLeft } from 'lucide-react';
 
-// Load Stripe with public key
-// Using the public key provided by user: pk_live_51Rv785CqHhAoAM06rXDP8bX80THS8sQIe6VjA0KizOlOHmHOUt5W1WlsHD3rkLIP2crTLwIAqXqcDNkqzfnxBl7p004XpujDZh
-const stripePublicKey = 'pk_live_51Rv785CqHhAoAM06rXDP8bX80THS8sQIe6VjA0KizOlOHmHOUt5W1WlsHD3rkLIP2crTLwIAqXqcDNkqzfnxBl7p004XpujDZh';
-const stripePromise = loadStripe(stripePublicKey);
+// Load Stripe with public key from environment
+if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
+  throw new Error('Missing required Stripe key: VITE_STRIPE_PUBLIC_KEY');
+}
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
 interface CheckoutFormProps {
   clientSecret: string;

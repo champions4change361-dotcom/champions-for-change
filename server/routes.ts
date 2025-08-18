@@ -3,9 +3,18 @@ import { createServer, type Server } from "http";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { getStorage } from "./storage";
 import { emailService } from "./emailService";
+import Stripe from "stripe";
 
 console.log('🏫 District athletics management platform initialized');
 console.log('💚 Champions for Change nonprofit mission active');
+
+// Initialize Stripe
+if (!process.env.STRIPE_SECRET_KEY) {
+  throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
+}
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: "2023-10-16",
+});
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // PRIORITY: Health check endpoints first for fastest response
@@ -370,6 +379,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error validating invitation code:", error);
       res.status(500).json({ error: "Failed to validate invitation code" });
+    }
+  });
+
+  // Stripe payment route for donations
+  app.post("/api/create-payment-intent", async (req, res) => {
+    try {
+      const { amount, description } = req.body;
+      
+      if (!amount || amount < 5) {
+        return res.status(400).json({ 
+          error: "Invalid amount. Minimum donation is $5." 
+        });
+      }
+      
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount * 100), // Convert to cents
+        currency: "usd",
+        description: description || "Donation to Champions for Change",
+        metadata: {
+          platform: "Champions for Change",
+          purpose: "Educational Trips",
+          amount_dollars: amount.toString()
+        }
+      });
+      
+      res.json({ 
+        clientSecret: paymentIntent.client_secret,
+        amount: amount,
+        paymentIntentId: paymentIntent.id
+      });
+    } catch (error: any) {
+      console.error("Stripe payment intent error:", error);
+      res.status(500).json({ 
+        error: "Error creating payment intent: " + error.message 
+      });
     }
   });
 

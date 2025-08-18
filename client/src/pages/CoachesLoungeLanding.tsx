@@ -37,6 +37,7 @@ export default function CoachesLoungeLanding() {
   const [showDonation, setShowDonation] = useState(false);
   const [customAmount, setCustomAmount] = useState('');
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
+  const [isProcessingDonation, setIsProcessingDonation] = useState(false);
   const [selectedLeagueType, setSelectedLeagueType] = useState<string | null>(null);
 
   // Join league mutation
@@ -80,6 +81,50 @@ export default function CoachesLoungeLanding() {
   const handleCreateLeague = (type: string) => {
     setSelectedLeagueType(type);
     createLeagueMutation.mutate(type);
+  };
+
+  const handleDonation = async () => {
+    const amount = selectedAmount || parseInt(customAmount);
+    if (!amount || amount < 5) {
+      toast({
+        title: "Invalid Amount",
+        description: "Please select an amount of $5 or more.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsProcessingDonation(true);
+    try {
+      // Create payment intent
+      const response = await fetch('/api/create-payment-intent', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          amount: amount,
+          description: `Donation to Champions for Change - Educational Trips`
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Payment setup failed');
+      }
+
+      const { clientSecret } = await response.json();
+      
+      // Redirect to checkout page with client secret
+      window.location.href = `/checkout?client_secret=${clientSecret}&amount=${amount}&type=donation`;
+      
+    } catch (error) {
+      toast({
+        title: "Payment Error",
+        description: "Unable to process donation. Please try again.",
+        variant: "destructive",
+      });
+      setIsProcessingDonation(false);
+    }
   };
 
   const leagueTypes = [
@@ -203,11 +248,15 @@ export default function CoachesLoungeLanding() {
                     <Button 
                       size="sm" 
                       className="w-full bg-green-600 hover:bg-green-700 text-white"
-                      disabled={!selectedAmount && (!customAmount || parseInt(customAmount) < 5)}
+                      disabled={(!selectedAmount && (!customAmount || parseInt(customAmount) < 5)) || isProcessingDonation}
+                      onClick={handleDonation}
                       data-testid="button-donate-now"
                     >
                       <Heart className="mr-2 h-3 w-3" />
-                      Donate ${selectedAmount || customAmount || '0'} to Champions for Change
+                      {isProcessingDonation 
+                        ? 'Processing...' 
+                        : `Donate $${selectedAmount || customAmount || '0'} to Champions for Change`
+                      }
                     </Button>
                     <p className="text-xs text-green-200 text-center">100% goes to student educational trips</p>
                   </div>

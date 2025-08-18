@@ -149,6 +149,10 @@ function AuthenticatedRoutes() {
           <Route path="/commissioner" component={CommissionerDashboard} />
         )}
         
+        {/* Payment and Donation Pages */}
+        <Route path="/checkout" component={Checkout} />
+        <Route path="/donation-success" component={DonationSuccess} />
+        
         {/* Legal Pages */}
         <Route path="/privacy" component={PrivacyPolicy} />
         <Route path="/refund-policy" component={RefundPolicy} />
