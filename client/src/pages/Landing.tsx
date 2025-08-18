@@ -85,7 +85,7 @@ export default function Landing() {
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center space-x-2 text-sm lg:text-sm text-xs sm:text-sm">
             <Heart className="h-4 w-4 flex-shrink-0" />
-            <span className="text-center leading-relaxed">Built by coaches to fund educational opportunities for underprivileged youth</span>
+            <span className="text-center leading-relaxed">Built by coaches to fund educational opportunities for underprivileged student athletes</span>
             <MapPin className="h-4 w-4 flex-shrink-0" />
           </div>
         </div>
@@ -238,7 +238,7 @@ export default function Landing() {
           <div className="text-center mb-8">
             <h3 className="text-3xl font-bold text-white mb-4">Our Impact Mission</h3>
             <p className="text-slate-300 text-lg max-w-3xl mx-auto">
-              Revenue from this platform directly funds educational trips and opportunities for underprivileged youth. 
+              Revenue from this platform directly funds educational trips and opportunities for underprivileged student athletes. 
               When you choose our tournament management solution, you're not just organizing competitions—you're championing change in young lives.
             </p>
           </div>

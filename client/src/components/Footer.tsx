@@ -13,7 +13,7 @@ export default function Footer() {
               Our Mission
             </h3>
             <p className="text-gray-300 text-sm leading-relaxed mb-4">
-              Champions for Change is dedicated to funding educational opportunities and student trips for underprivileged youth. Every tournament managed on our platform directly supports these vital educational experiences.
+              Champions for Change is dedicated to funding educational opportunities and student trips for underprivileged student athletes. Every tournament managed on our platform directly supports these vital educational experiences.
             </p>
             <div className="flex items-center text-sm text-green-400">
               <GraduationCap className="h-4 w-4 mr-2" />
