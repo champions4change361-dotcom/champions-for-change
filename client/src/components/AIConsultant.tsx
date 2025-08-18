@@ -68,6 +68,13 @@ export function AIConsultant({ domain = 'education' }: AIConsultantProps) {
             'Golf', 'Wrestling', 'Gymnastics', 'Powerlifting', 'Bowling'
           ]
         },
+        competitive_spirit: {
+          name: 'Competitive Spirit & Support',
+          sports: [
+            'Competitive Cheerleading', 'Sideline Cheerleading', 'Mascot Team', 
+            'Pep Squad', 'Spirit Squad', 'Student Section Leadership'
+          ]
+        },
         combat_sports: {
           name: 'Combat Sports',
           sports: [
@@ -131,6 +138,14 @@ export function AIConsultant({ domain = 'education' }: AIConsultantProps) {
           sports: [
             'One Act Play', 'Musical Theater', 'Dance Competition', 'Drama',
             'Improvisation', 'Monologue Competition', 'Technical Theater'
+          ]
+        },
+        dance_and_movement: {
+          name: 'Dance & Movement Arts',
+          sports: [
+            'Competitive Dance Team', 'Hip-Hop Dance', 'Contemporary Dance', 'Jazz Dance', 
+            'Pom Dance', 'Performance Cheerleading', 'Color Guard', 'Winter Guard',
+            'Drill Team', 'Dance Theatre'
           ]
         }
       }
