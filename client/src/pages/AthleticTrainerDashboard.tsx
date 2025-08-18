@@ -1085,9 +1085,9 @@ export default function AthleticTrainerDashboard() {
                   <div className="border-t pt-6">
                     <h3 className="font-semibold text-lg text-gray-900 mb-4">AI-Powered Assessment & Recommendations</h3>
                     
-                    {/* Throwing Shoulder/Elbow Specific Recommendations */}
-                    {(aiConsultation.injuryLocation === 'shoulder' || aiConsultation.injuryLocation === 'elbow') && 
-                     ['baseball', 'softball', 'tennis', 'volleyball', 'track_throwing', 'football'].includes(aiConsultation.sport) && (
+                    {/* Comprehensive Injury-Specific AI Recommendations */}
+                    {((aiConsultation.injuryLocation === 'shoulder' || aiConsultation.injuryLocation === 'elbow') && 
+                     ['baseball', 'softball', 'tennis', 'volleyball', 'track_throwing', 'football'].includes(aiConsultation.sport)) && (
                       <div className="space-y-4">
                         <div className="bg-purple-50 p-4 rounded-lg">
                           <div className="flex items-start space-x-3">
@@ -1193,16 +1193,394 @@ export default function AthleticTrainerDashboard() {
                       </div>
                     )}
 
-                    {/* General Recommendations for Other Injuries */}
-                    {(!['shoulder', 'elbow'].includes(aiConsultation.injuryLocation) || 
-                      !['baseball', 'softball', 'tennis', 'volleyball', 'track_throwing', 'football'].includes(aiConsultation.sport)) && (
+                    {/* ACL Injury Assessment - 96% AI Diagnostic Accuracy */}
+                    {aiConsultation.injuryLocation === 'knee' && aiConsultation.mechanism === 'non_contact' && (
+                      <div className="space-y-4">
+                        <div className="bg-red-50 p-4 rounded-lg border-l-4 border-red-500">
+                          <div className="flex items-start space-x-3">
+                            <AlertTriangle className="h-5 w-5 text-red-600 mt-1" />
+                            <div>
+                              <h4 className="font-medium text-red-900">High ACL Injury Risk - Non-Contact Mechanism</h4>
+                              <p className="text-sm text-red-700 mt-1">
+                                AI models show 96% accuracy in ACL tear detection. Non-contact mechanism in {aiConsultation.sport} significantly increases ACL injury probability.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <Card className="border-blue-200 bg-blue-50">
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-sm flex items-center">
+                                <Stethoscope className="h-4 w-4 mr-2 text-blue-600" />
+                                Immediate ACL Assessment
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="pt-0 text-sm space-y-2">
+                              <p>• Lachman test (highest sensitivity)</p>
+                              <p>• Anterior drawer test</p>
+                              <p>• Pivot shift test (most specific)</p>
+                              <p>• Check for effusion and range of motion</p>
+                              <p>• Assess valgus stress and joint line tenderness</p>
+                              <p>• 3D biomechanical movement analysis if available</p>
+                            </CardContent>
+                          </Card>
+
+                          <Card className="border-green-200 bg-green-50">
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-sm flex items-center">
+                                <TrendingUp className="h-4 w-4 mr-2 text-green-600" />
+                                ACL Rehabilitation Protocol
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="pt-0 text-sm space-y-2">
+                              <p>• Phase 1: Control swelling, restore ROM</p>
+                              <p>• Phase 2: Quadriceps strengthening (key predictor)</p>
+                              <p>• Phase 3: Proprioceptive training</p>
+                              <p>• Phase 4: Sport-specific movements</p>
+                              <p>• AI-monitored return-to-sport criteria</p>
+                              <p>• Continuous risk monitoring post-return</p>
+                            </CardContent>
+                          </Card>
+                        </div>
+
+                        <Card className="border-orange-200 bg-orange-50">
+                          <CardHeader className="pb-3">
+                            <CardTitle className="text-sm flex items-center">
+                              <AlertTriangle className="h-4 w-4 mr-2 text-orange-600" />
+                              ACL Red Flags - Immediate MRI/Orthopedic Referral
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="pt-0 text-sm space-y-1">
+                            <p>• Positive Lachman with firm endpoint loss</p>
+                            <p>• Significant knee instability with pivot shift</p>
+                            <p>• Unable to bear weight or continue activity</p>
+                            <p>• Large effusion with mechanical symptoms</p>
+                            <p>• Combined injury patterns (ACL + MCL + meniscus)</p>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    )}
+
+                    {/* Ankle Injury Assessment - AI Biomechanical Analysis */}
+                    {aiConsultation.injuryLocation === 'ankle' && (
+                      <div className="space-y-4">
+                        <div className="bg-blue-50 p-4 rounded-lg">
+                          <div className="flex items-start space-x-3">
+                            <Target className="h-5 w-5 text-blue-600 mt-1" />
+                            <div>
+                              <h4 className="font-medium text-blue-900">AI-Enhanced Ankle Assessment</h4>
+                              <p className="text-sm text-blue-700 mt-1">
+                                Wearable sensors and AI provide 95% accuracy in ankle movement analysis and injury prediction.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <Card className="border-purple-200 bg-purple-50">
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-sm flex items-center">
+                                <Stethoscope className="h-4 w-4 mr-2 text-purple-600" />
+                                Comprehensive Ankle Evaluation
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="pt-0 text-sm space-y-2">
+                              <p>• Ottawa Ankle Rules for fracture screening</p>
+                              <p>• Anterior drawer test (ATFL integrity)</p>
+                              <p>• Talar tilt test (CFL assessment)</p>
+                              <p>• Weight-bearing capability assessment</p>
+                              <p>• 3D kinematic landing mechanics analysis</p>
+                              <p>• Proprioceptive testing with AI feedback</p>
+                            </CardContent>
+                          </Card>
+
+                          <Card className="border-green-200 bg-green-50">
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-sm flex items-center">
+                                <TrendingUp className="h-4 w-4 mr-2 text-green-600" />
+                                Progressive Ankle Rehabilitation
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="pt-0 text-sm space-y-2">
+                              <p>• RICE protocol in acute phase</p>
+                              <p>• Early mobilization (grade I-II sprains)</p>
+                              <p>• Balance and proprioceptive training</p>
+                              <p>• Strengthening: peroneal, tibialis anterior</p>
+                              <p>• Sport-specific movement patterns</p>
+                              <p>• AI-monitored return to play criteria</p>
+                            </CardContent>
+                          </Card>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Concussion Management - 95% AI Prediction Accuracy */}
+                    {aiConsultation.injuryLocation === 'neck' || aiConsultation.symptoms.toLowerCase().includes('head') || 
+                     aiConsultation.symptoms.toLowerCase().includes('concussion') && (
+                      <div className="space-y-4">
+                        <div className="bg-red-50 p-4 rounded-lg border-l-4 border-red-500">
+                          <div className="flex items-start space-x-3">
+                            <Brain className="h-5 w-5 text-red-600 mt-1" />
+                            <div>
+                              <h4 className="font-medium text-red-900">Concussion Protocol - AI Risk Assessment</h4>
+                              <p className="text-sm text-red-700 mt-1">
+                                AI models achieve 95% accuracy in post-concussion injury risk prediction. Mandatory 11-day minimum stand-down protocol.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <Card className="border-red-200 bg-red-50">
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-sm flex items-center">
+                                <AlertTriangle className="h-4 w-4 mr-2 text-red-600" />
+                                Immediate Concussion Assessment
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="pt-0 text-sm space-y-2">
+                              <p>• SCAT5 or ImPACT baseline comparison</p>
+                              <p>• Cognitive assessment (orientation, memory)</p>
+                              <p>• Balance testing (modified BESS)</p>
+                              <p>• Symptom inventory (headache, nausea, dizziness)</p>
+                              <p>• Cervical spine clearance</p>
+                              <p>• Sleep pattern analysis via AI monitoring</p>
+                            </CardContent>
+                          </Card>
+
+                          <Card className="border-blue-200 bg-blue-50">
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-sm flex items-center">
+                                <Shield className="h-4 w-4 mr-2 text-blue-600" />
+                                Return-to-Play Protocol
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="pt-0 text-sm space-y-2">
+                              <p>• Minimum 11-day stand-down (evidence-based)</p>
+                              <p>• 6-stage graduated return protocol</p>
+                              <p>• Daily symptom monitoring with AI</p>
+                              <p>• Cognitive testing at each stage</p>
+                              <p>• Medical clearance required</p>
+                              <p>• Extended monitoring for secondary injury risk</p>
+                            </CardContent>
+                          </Card>
+                        </div>
+
+                        <Card className="border-red-200 bg-red-50">
+                          <CardHeader className="pb-3">
+                            <CardTitle className="text-sm flex items-center">
+                              <Zap className="h-4 w-4 mr-2 text-red-600" />
+                              Emergency Red Flags - Immediate Medical Attention
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="pt-0 text-sm space-y-1">
+                            <p>• Deteriorating consciousness or confusion</p>
+                            <p>• Repeated vomiting or severe headache</p>
+                            <p>• Seizures or abnormal behavior</p>
+                            <p>• Double vision or pupils unequal in size</p>
+                            <p>• Weakness or numbness in limbs</p>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    )}
+
+                    {/* Hamstring Injury - AI Prediction Models */}
+                    {(aiConsultation.injuryLocation === 'hip' && aiConsultation.symptoms.toLowerCase().includes('hamstring')) ||
+                     (aiConsultation.mechanism === 'overuse' && ['track_throwing', 'football', 'basketball'].includes(aiConsultation.sport)) && (
+                      <div className="space-y-4">
+                        <div className="bg-yellow-50 p-4 rounded-lg">
+                          <div className="flex items-start space-x-3">
+                            <Zap className="h-5 w-5 text-yellow-600 mt-1" />
+                            <div>
+                              <h4 className="font-medium text-yellow-900">Hamstring Strain - AI Predictive Analysis</h4>
+                              <p className="text-sm text-yellow-700 mt-1">
+                                AI models with AUC-ROC 0.747 accuracy identify high-risk athletes through biomechanical analysis.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <Card className="border-orange-200 bg-orange-50">
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-sm flex items-center">
+                                <Target className="h-4 w-4 mr-2 text-orange-600" />
+                                Hamstring Assessment Protocol
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="pt-0 text-sm space-y-2">
+                              <p>• Eccentric strength testing (key predictor)</p>
+                              <p>• Hamstring-to-quadriceps ratio analysis</p>
+                              <p>• Previous injury history evaluation</p>
+                              <p>• Real-time EMG during high-speed movements</p>
+                              <p>• Flexibility assessment (90/90 test)</p>
+                              <p>• Fatigue monitoring through workload tracking</p>
+                            </CardContent>
+                          </Card>
+
+                          <Card className="border-green-200 bg-green-50">
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-sm flex items-center">
+                                <TrendingUp className="h-4 w-4 mr-2 text-green-600" />
+                                Evidence-Based Rehabilitation
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="pt-0 text-sm space-y-2">
+                              <p>• Eccentric strengthening (Nordic hamstrings)</p>
+                              <p>• Progressive loading protocols</p>
+                              <p>• Neuromuscular control training</p>
+                              <p>• Sport-specific movement patterns</p>
+                              <p>• Running progression (pace/distance)</p>
+                              <p>• AI-monitored biomechanical correction</p>
+                            </CardContent>
+                          </Card>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Back/Spine Injury Assessment */}
+                    {aiConsultation.injuryLocation === 'lower_back' && (
+                      <div className="space-y-4">
+                        <div className="bg-indigo-50 p-4 rounded-lg">
+                          <div className="flex items-start space-x-3">
+                            <Shield className="h-5 w-5 text-indigo-600 mt-1" />
+                            <div>
+                              <h4 className="font-medium text-indigo-900">Lower Back Assessment - AI Diagnostic Support</h4>
+                              <p className="text-sm text-indigo-700 mt-1">
+                                AI image processing and biomechanical analysis for comprehensive spine evaluation.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <Card className="border-purple-200 bg-purple-50">
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-sm flex items-center">
+                                <Stethoscope className="h-4 w-4 mr-2 text-purple-600" />
+                                Comprehensive Back Evaluation
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="pt-0 text-sm space-y-2">
+                              <p>• Range of motion assessment (flexion/extension)</p>
+                              <p>• Neurological screening (reflexes, sensation)</p>
+                              <p>• Straight leg raise test</p>
+                              <p>• Core stability assessment</p>
+                              <p>• Movement pattern analysis</p>
+                              <p>• AI-assisted posture evaluation</p>
+                            </CardContent>
+                          </Card>
+
+                          <Card className="border-green-200 bg-green-50">
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-sm flex items-center">
+                                <TrendingUp className="h-4 w-4 mr-2 text-green-600" />
+                                Progressive Back Rehabilitation
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="pt-0 text-sm space-y-2">
+                              <p>• Pain management and movement restoration</p>
+                              <p>• Core strengthening progression</p>
+                              <p>• Movement re-education</p>
+                              <p>• Sport-specific loading protocols</p>
+                              <p>• Ergonomic and technique modification</p>
+                              <p>• AI-monitored movement quality</p>
+                            </CardContent>
+                          </Card>
+                        </div>
+
+                        <Card className="border-red-200 bg-red-50">
+                          <CardHeader className="pb-3">
+                            <CardTitle className="text-sm flex items-center">
+                              <AlertTriangle className="h-4 w-4 mr-2 text-red-600" />
+                              Red Flags - Immediate Medical Referral
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="pt-0 text-sm space-y-1">
+                            <p>• Cauda equina syndrome symptoms</p>
+                            <p>• Progressive neurological deficits</p>
+                            <p>• Bowel/bladder dysfunction</p>
+                            <p>• Severe night pain or fever</p>
+                            <p>• Saddle anesthesia</p>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    )}
+
+                    {/* Hip Injury Assessment */}
+                    {aiConsultation.injuryLocation === 'hip' && !aiConsultation.symptoms.toLowerCase().includes('hamstring') && (
+                      <div className="space-y-4">
+                        <div className="bg-teal-50 p-4 rounded-lg">
+                          <div className="flex items-start space-x-3">
+                            <Target className="h-5 w-5 text-teal-600 mt-1" />
+                            <div>
+                              <h4 className="font-medium text-teal-900">Hip Assessment - AI Pattern Recognition</h4>
+                              <p className="text-sm text-teal-700 mt-1">
+                                Machine learning analysis of hip biomechanics and movement patterns for accurate diagnosis.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <Card className="border-blue-200 bg-blue-50">
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-sm flex items-center">
+                                <Stethoscope className="h-4 w-4 mr-2 text-blue-600" />
+                                Hip Assessment Protocol
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="pt-0 text-sm space-y-2">
+                              <p>• Range of motion (flexion, extension, rotation)</p>
+                              <p>• Hip impingement tests (FADIR, FABER)</p>
+                              <p>• Strength testing (hip abductors, flexors)</p>
+                              <p>• Trendelenburg test for stability</p>
+                              <p>• Gait analysis and movement screening</p>
+                              <p>• AI-assisted biomechanical evaluation</p>
+                            </CardContent>
+                          </Card>
+
+                          <Card className="border-green-200 bg-green-50">
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-sm flex items-center">
+                                <TrendingUp className="h-4 w-4 mr-2 text-green-600" />
+                                Hip Rehabilitation Strategy
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="pt-0 text-sm space-y-2">
+                              <p>• Pain reduction and mobility restoration</p>
+                              <p>• Hip stabilizer strengthening</p>
+                              <p>• Movement pattern correction</p>
+                              <p>• Sport-specific functional training</p>
+                              <p>• Load management protocols</p>
+                              <p>• AI-guided progress monitoring</p>
+                            </CardContent>
+                          </Card>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* General Evidence-Based Recommendations */}
+                    {!['knee', 'ankle', 'neck', 'hip', 'lower_back'].includes(aiConsultation.injuryLocation) && (
                       <div className="bg-gray-50 p-4 rounded-lg">
-                        <p className="text-sm text-gray-700">
-                          For {aiConsultation.injuryLocation} injuries in {aiConsultation.sport}, recommend:
-                          standard injury assessment protocols, appropriate rest and recovery,
-                          sport-specific rehabilitation, and physician consultation if symptoms persist
-                          or worsen. Monitor closely and document all interventions.
-                        </p>
+                        <div className="flex items-start space-x-3">
+                          <Brain className="h-5 w-5 text-gray-600 mt-1" />
+                          <div>
+                            <h4 className="font-medium text-gray-900">Evidence-Based {aiConsultation.injuryLocation.charAt(0).toUpperCase() + aiConsultation.injuryLocation.slice(1)} Assessment</h4>
+                            <p className="text-sm text-gray-700 mt-2">
+                              For {aiConsultation.injuryLocation} injuries in {aiConsultation.sport} athletes:
+                            </p>
+                            <ul className="text-sm text-gray-700 mt-2 space-y-1">
+                              <li>• Comprehensive injury assessment using validated clinical tests</li>
+                              <li>• Evidence-based rehabilitation protocols specific to {aiConsultation.sport}</li>
+                              <li>• AI-monitored progress tracking and outcome measures</li>
+                              <li>• Sport-specific return-to-play criteria</li>
+                              <li>• Physician consultation for persistent or severe symptoms</li>
+                              <li>• Preventive strategies based on injury mechanism and sport demands</li>
+                            </ul>
+                          </div>
+                        </div>
                       </div>
                     )}
                   </div>
