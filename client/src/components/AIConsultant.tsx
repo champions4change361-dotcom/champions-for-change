@@ -14,6 +14,8 @@ interface AIConsultantProps {
 export function AIConsultant({ domain = 'education' }: AIConsultantProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState(1);
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedSubcategory, setSelectedSubcategory] = useState('');
   const [consultation, setConsultation] = useState({
     sport: '',
     participantCount: '',
@@ -45,6 +47,119 @@ export function AIConsultant({ domain = 'education' }: AIConsultantProps) {
   };
 
   const config = domainConfig[domain];
+
+  // Comprehensive sport categories with cascading structure
+  const sportCategories = {
+    athletic: {
+      name: 'Athletic',
+      subcategories: {
+        team_sports: {
+          name: 'Team Sports',
+          sports: [
+            'Basketball (Boys)', 'Basketball (Girls)', 'Football', 'Soccer (Boys)', 'Soccer (Girls)',
+            'Volleyball (Boys)', 'Volleyball (Girls)', 'Baseball', 'Softball', 'Hockey',
+            'Lacrosse (Boys)', 'Lacrosse (Girls)', 'Water Polo', 'Rugby', 'Team Tennis'
+          ]
+        },
+        individual_sports: {
+          name: 'Individual Sports',
+          sports: [
+            'Track & Field', 'Cross Country', 'Swimming', 'Diving', 'Tennis',
+            'Golf', 'Wrestling', 'Gymnastics', 'Powerlifting', 'Bowling'
+          ]
+        },
+        combat_sports: {
+          name: 'Combat Sports',
+          sports: [
+            'Boxing', 'Mixed Martial Arts', 'Karate', 'Taekwondo', 'Judo', 'Brazilian Jiu-Jitsu'
+          ]
+        }
+      }
+    },
+    academic: {
+      name: 'Academic',
+      subcategories: {
+        uil_academic: {
+          name: 'UIL Academic',
+          sports: [
+            'Accounting', 'Calculator Applications', 'Computer Applications', 'Computer Science',
+            'Current Issues & Events', 'Debate (Cross-Examination)', 'Debate (Lincoln-Douglas)',
+            'Editorial Writing', 'Feature Writing', 'Headline Writing', 'Informative Speaking',
+            'Literary Criticism', 'Mathematics', 'News Writing', 'Number Sense', 'Persuasive Speaking',
+            'Poetry Interpretation', 'Prose Interpretation', 'Ready Writing', 'Science',
+            'Social Studies', 'Spelling & Vocabulary'
+          ]
+        },
+        speech_debate: {
+          name: 'Speech & Debate',
+          sports: [
+            'Policy Debate', 'Lincoln-Douglas Debate', 'Public Forum Debate', 'Congressional Debate',
+            'Extemporaneous Speaking', 'Original Oratory', 'Dramatic Interpretation',
+            'Humorous Interpretation', 'Duo Interpretation', 'Poetry', 'Prose', 'Storytelling'
+          ]
+        },
+        stem_competitions: {
+          name: 'STEM Competitions',
+          sports: [
+            'Science Fair', 'Math Competition', 'Robotics', 'Engineering Design',
+            'Coding Competition', 'Cybersecurity Challenge', 'Physics Olympiad',
+            'Chemistry Olympiad', 'Biology Olympiad', 'Environmental Science'
+          ]
+        }
+      }
+    },
+    fine_arts: {
+      name: 'Fine Arts',
+      subcategories: {
+        music: {
+          name: 'Music',
+          sports: [
+            'Marching Band', 'Concert Band', 'Jazz Band', 'Orchestra', 'Choir',
+            'Solo & Ensemble', 'All-State Auditions', 'Piano Competition',
+            'Voice Competition', 'Instrumental Solo', 'Music Theory'
+          ]
+        },
+        visual_arts: {
+          name: 'Visual Arts',
+          sports: [
+            'Art Competition', 'Photography', 'Digital Art', 'Sculpture',
+            'Painting', 'Drawing', 'Ceramics', 'Graphic Design'
+          ]
+        },
+        performing_arts: {
+          name: 'Performing Arts',
+          sports: [
+            'One Act Play', 'Musical Theater', 'Dance Competition', 'Drama',
+            'Improvisation', 'Monologue Competition', 'Technical Theater'
+          ]
+        }
+      }
+    }
+  };
+
+  // Get available sports based on selected category and subcategory
+  const getAvailableSports = () => {
+    if (!selectedCategory || !selectedSubcategory) return [];
+    
+    const category = sportCategories[selectedCategory as keyof typeof sportCategories];
+    if (!category) return [];
+    
+    const subcategory = (category.subcategories as any)[selectedSubcategory];
+    return subcategory ? subcategory.sports : [];
+  };
+
+  // Reset selections when category changes
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
+    setSelectedSubcategory('');
+    setConsultation(prev => ({ ...prev, sport: '' }));
+  };
+
+  // Reset sport when subcategory changes
+  const handleSubcategoryChange = (subcategory: string) => {
+    setSelectedSubcategory(subcategory);
+    setConsultation(prev => ({ ...prev, sport: '' }));
+  };
 
   const handleFeatureToggle = (feature: string) => {
     setConsultation(prev => ({
@@ -129,21 +244,69 @@ export function AIConsultant({ domain = 'education' }: AIConsultantProps) {
             <div className="space-y-4">
               <h4 className="font-semibold">Tell me about your tournament needs:</h4>
               
-              <div>
-                <label className="text-sm font-medium">Sport/Activity</label>
-                <select 
-                  value={consultation.sport} 
-                  onChange={(e) => setConsultation(prev => ({ ...prev, sport: e.target.value }))}
-                  className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  data-testid="select-sport"
-                >
-                  <option value="">Select sport</option>
-                  <option value="basketball">Basketball</option>
-                  <option value="soccer">Soccer</option>
-                  <option value="baseball">Baseball</option>
-                  <option value="track">Track & Field</option>
-                  <option value="other">Other</option>
-                </select>
+              <div className="space-y-3">
+                <label className="text-sm font-medium">Competition Category & Sport</label>
+                
+                {/* Selection Path Display */}
+                {(selectedCategory || selectedSubcategory || consultation.sport) && (
+                  <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded border">
+                    Selection Path: {selectedCategory ? sportCategories[selectedCategory as keyof typeof sportCategories].name : 'Category'} 
+                    {selectedSubcategory && ` → ${(sportCategories[selectedCategory as keyof typeof sportCategories].subcategories as any)[selectedSubcategory]?.name}`}
+                    {consultation.sport && ` → ${consultation.sport}`}
+                  </div>
+                )}
+                
+                {/* Step 1: Category Selection */}
+                <div>
+                  <label className="text-xs text-gray-500">1. Main Category</label>
+                  <select 
+                    value={selectedCategory} 
+                    onChange={(e) => handleCategoryChange(e.target.value)}
+                    className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    data-testid="select-category"
+                  >
+                    <option value="">Select category...</option>
+                    <option value="athletic">Athletic</option>
+                    <option value="academic">Academic</option>
+                    <option value="fine_arts">Fine Arts</option>
+                  </select>
+                </div>
+
+                {/* Step 2: Subcategory Selection */}
+                {selectedCategory && (
+                  <div>
+                    <label className="text-xs text-gray-500">2. Specific Area</label>
+                    <select 
+                      value={selectedSubcategory} 
+                      onChange={(e) => handleSubcategoryChange(e.target.value)}
+                      className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      data-testid="select-subcategory"
+                    >
+                      <option value="">Select area...</option>
+                      {Object.entries(sportCategories[selectedCategory as keyof typeof sportCategories].subcategories).map(([key, subcategory]) => (
+                        <option key={key} value={key}>{subcategory.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {/* Step 3: Specific Sport Selection */}
+                {selectedSubcategory && (
+                  <div>
+                    <label className="text-xs text-gray-500">3. Specific Competition</label>
+                    <select 
+                      value={consultation.sport} 
+                      onChange={(e) => setConsultation(prev => ({ ...prev, sport: e.target.value }))}
+                      className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      data-testid="select-sport"
+                    >
+                      <option value="">Select competition...</option>
+                      {getAvailableSports().map((sport) => (
+                        <option key={sport} value={sport}>{sport}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
               </div>
 
               <div>
