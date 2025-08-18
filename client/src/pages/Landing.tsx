@@ -8,7 +8,7 @@ import championVideo from "@assets/Champions for Change Logo_1755291031903.mp4";
 import championLogoNew from "@assets/Untitled design_1755380695198.png";
 import { DonationSection } from "@/components/DonationSection";
 import { SignupSection } from "@/components/SignupSection";
-import { CrossPlatformPromotion, FantasyPromotion } from "@/components/CrossPlatformPromotion";
+
 import Footer from "@/components/Footer";
 import { AIConsultant } from "@/components/AIConsultant";
 
@@ -509,28 +509,11 @@ export default function Landing() {
             </div>
           </div>
 
-          <div className="text-center">
-            <div className="mb-6">
-              <Button 
-                size="lg" 
-                variant="outline"
-                className="border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/10 hover:border-yellow-400 px-8 py-4 text-lg"
-                onClick={() => setLocation("/fantasy-coaching")}
-                data-testid="button-fantasy-domain"
-              >
-                🎮 Fantasy Sports Features →
-              </Button>
-            </div>
-            <p className="text-slate-400 text-sm">
-              Looking for fantasy sports? Access our fantasy coaching features, professional leagues, and fantasy competitions right here.
-            </p>
-          </div>
+
         </div>
 
-        {/* Enhanced Cross-Platform Promotion */}
-        {/* Cross-platform promotions - conditionally rendered based on domain */}
-        <FantasyPromotion />
-        <CrossPlatformPromotion placement="banner" />
+        {/* Enhanced Cross-Platform Promotion - Only for appropriate domains */}
+        {/* Note: FantasyPromotion and CrossPlatformPromotion are domain-gated and only show on enterprise/fantasy domains */}
 
         {/* Professional Signup Section */}
         <SignupSection />
