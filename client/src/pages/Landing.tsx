@@ -232,23 +232,73 @@ export default function Landing() {
             {/* Enterprise/Nonprofit Access */}
             <div className="mt-8 p-6 bg-slate-700/50 border border-slate-600 rounded-xl">
               <p className="text-slate-300 text-center mb-4">
-                Not a school or district but need reduced price and ad-free tournament solutions 
-                for your nonprofit or company? Our donation-based revenue model keeps the fun going 
-                while giving you access to our 65+ competitions!
+                <Shield className="h-5 w-5 inline mr-2" />
+                Trusted by Educational Organizations
               </p>
-              <div className="text-center">
-                <Button 
-                  variant="outline"
-                  className="border-emerald-400 text-emerald-400 hover:bg-emerald-400/10 hover:border-emerald-300"
-                  onClick={() => setLocation("/business-pricing-test")}
-                  data-testid="button-enterprise-help"
-                >
-                  Click Here - We Can Help
-                </Button>
+              <div className="grid sm:grid-cols-3 gap-4 text-center">
+                <div className="text-orange-400 font-medium">Districts</div>
+                <div className="text-blue-400 font-medium">Schools</div>
+                <div className="text-green-400 font-medium">Youth Organizations</div>
               </div>
             </div>
           </div>
         </div>
+
+        {/* Donation Impact Section - Above the fold */}
+        <section className="bg-gradient-to-r from-green-600 via-green-500 to-emerald-600 text-white py-12 mb-16">
+          <div className="max-w-6xl mx-auto px-4 text-center">
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-3xl md:text-4xl font-bold mb-6">
+                Every Platform Subscription Funds Student Educational Opportunities
+              </h2>
+              <p className="text-xl text-green-100 mb-8 leading-relaxed">
+                Built by coaches who understand that sports and academics create life-changing opportunities. 
+                Your support directly funds educational trips and experiences for underprivileged student competitors.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
+                <Button 
+                  size="lg" 
+                  className="bg-white text-green-600 hover:bg-green-50 font-bold px-8 py-4 text-lg"
+                  onClick={() => setLocation("/donate")}
+                  data-testid="button-donate-impact"
+                >
+                  <Heart className="mr-2 h-5 w-5" />
+                  Make a Direct Donation
+                </Button>
+                <Button 
+                  size="lg" 
+                  variant="outline"
+                  className="border-white text-white hover:bg-white/10 hover:border-green-100 px-8 py-4 text-lg"
+                  onClick={() => setLocation("/your-why")}
+                  data-testid="button-impact-story"
+                >
+                  <GraduationCap className="mr-2 h-5 w-5" />
+                  See Our Impact
+                </Button>
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-6 text-center">
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                  <div className="text-2xl font-bold text-green-100">100%</div>
+                  <div className="text-sm text-green-200">Goes to Students</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                  <div className="text-2xl font-bold text-green-100">501(c)(3)</div>
+                  <div className="text-sm text-green-200">Tax Deductible</div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                  <div className="text-2xl font-bold text-green-100">Direct</div>
+                  <div className="text-sm text-green-200">Impact Tracking</div>
+                </div>
+              </div>
+              
+              <div className="mt-6 text-sm text-green-100">
+                <p>Champions for Change • EIN: 33-2548199 • 501(c)(3) Nonprofit Organization</p>
+              </div>
+            </div>
+          </div>
+        </section>
         
         {/* Impact Mission Command Center */}
         <div id="impact-mission" className="bg-slate-800 border border-emerald-500/30 rounded-2xl p-8 mb-12">

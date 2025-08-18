@@ -70,7 +70,8 @@ export default function Footer() {
               <p>Platform built by coaches who understand tournament management needs</p>
               <div className="mt-3 pt-3 border-t border-gray-700">
                 <p>Champions for Change is a 501(c)(3) nonprofit organization</p>
-                <p>Tax ID/EIN: [Please provide your EIN to replace this]</p>
+                <p>Tax ID/EIN: 33-2548199</p>
+                <p className="text-xs text-gray-400 mt-1">Donations are tax-deductible to the extent allowed by law</p>
               </div>
             </div>
           </div>
