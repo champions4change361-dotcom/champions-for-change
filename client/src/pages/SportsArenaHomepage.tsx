@@ -126,7 +126,7 @@ export default function SportsArenaHomepage() {
                 <p className="text-xl text-slate-300 mb-4">
                   {user?.subscriptionPlan === 'district_enterprise' 
                     ? 'Your Champions for Change platform is generating revenue for student education'
-                    : 'Every tournament creates opportunities for underprivileged youth'
+                    : 'Every tournament creates opportunities for underprivileged student competitors'
                   }
                 </p>
                 {!user && (

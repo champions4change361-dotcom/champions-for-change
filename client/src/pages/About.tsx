@@ -55,7 +55,7 @@ export default function About() {
         
         <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-4xl mx-auto">
           Founded by coaches who saw firsthand the challenges of tournament management and the funding needs 
-          of educational programs for underprivileged youth.
+          of educational programs for underprivileged student competitors.
         </p>
       </section>
 

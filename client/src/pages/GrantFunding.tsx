@@ -68,7 +68,7 @@ export default function GrantFunding() {
               <Alert className="bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800" data-testid="alert-grant-strategy">
                 <AlertCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
                 <AlertDescription className="text-green-800 dark:text-green-200">
-                  <strong>Grant Strategy:</strong> Position our platform as "student athlete safety technology" rather than just tournament management. 
+                  <strong>Grant Strategy:</strong> Position our platform as "student competitor safety technology" rather than just tournament management. 
                   Emphasize injury prevention, health monitoring, and educational outcomes.
                 </AlertDescription>
               </Alert>
@@ -261,7 +261,7 @@ export default function GrantFunding() {
               </CardHeader>
               <CardContent>
                 <p className="text-white/90">
-                  Emphasize injury prevention, liability reduction, and student athlete welfare rather than just tournament management.
+                  Emphasize injury prevention, liability reduction, and student competitor welfare rather than just tournament management.
                 </p>
               </CardContent>
             </Card>

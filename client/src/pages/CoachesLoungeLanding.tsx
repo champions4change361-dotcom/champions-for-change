@@ -138,21 +138,21 @@ export default function CoachesLoungeLanding() {
             </Alert>
 
             <div className="grid md:grid-cols-2 gap-6">
-              <div className="bg-white p-4 rounded-lg border border-green-200">
-                <h4 className="flex items-center gap-2 font-semibold text-green-900 mb-2">
+              <div className="bg-slate-800 p-4 rounded-lg border border-green-200">
+                <h4 className="flex items-center gap-2 font-semibold text-green-100 mb-2">
                   <GraduationCap className="h-4 w-4" />
                   Our Educational Mission
                 </h4>
-                <p className="text-green-800 text-sm mb-3">
+                <p className="text-green-200 text-sm mb-3">
                   Every platform supports Champions for Change - funding educational trips 
-                  for students in Corpus Christi, Texas. Donations are voluntary but greatly appreciated!
+                  for underprivileged student competitors. Donations are voluntary but greatly appreciated!
                 </p>
                 
                 {!showDonation ? (
                   <Button 
                     onClick={() => setShowDonation(true)}
                     variant="outline" 
-                    className="w-full border-green-300 text-green-700 hover:bg-green-50"
+                    className="w-full border-green-300 text-green-200 hover:bg-green-700/30"
                     data-testid="button-show-donation"
                   >
                     <Heart className="mr-2 h-4 w-4" />
