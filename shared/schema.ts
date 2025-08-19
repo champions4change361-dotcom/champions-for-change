@@ -33,15 +33,17 @@ export const users = pgTable("users", {
     enum: [
       // District Level
       "district_athletic_director", 
-      "district_head_athletic_trainer",
+      "district_athletic_coordinator",
+      "district_athletic_trainer",
+      "district_aquatic_coordinator",
       // School Level  
       "school_athletic_director",
+      "school_athletic_coordinator",
       "school_athletic_trainer", 
-      "school_principal",
-      // Team Level
+      "school_aquatic_coordinator",
+      // Coaching Level
       "head_coach",
       "assistant_coach", 
-      "athletic_training_student",
       // General Access
       "scorekeeper", 
       "athlete", 
@@ -118,11 +120,14 @@ export const users = pgTable("users", {
     enum: [
       // District Level
       "district_athletic_director", 
-      "district_head_athletic_trainer",
+      "district_athletic_coordinator",
+      "district_athletic_trainer",
+      "district_aquatic_coordinator",
       // School Level  
       "school_athletic_director",
+      "school_athletic_coordinator",
       "school_athletic_trainer", 
-      "school_principal",
+      "school_aquatic_coordinator",
       // Team Level
       "head_coach",
       "assistant_coach", 

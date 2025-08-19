@@ -57,8 +57,36 @@ export default function AdminRoleManagement() {
   const [selectedRole, setSelectedRole] = useState<string>("");
   const [showNewUser, setShowNewUser] = useState(false);
 
-  // Sample role definitions
+  // Standard District Athletics Hierarchy Role Definitions
   const roleDefinitions: RolePermission[] = [
+    {
+      id: "district-athletic-director",
+      name: "District Athletic Director",
+      description: "District-wide athletics administration and oversight",
+      category: "admin",
+      permissions: [
+        "admin.district_management",
+        "admin.all_schools",
+        "admin.budget_oversight",
+        "admin.policy_creation",
+        "tournament.district_wide",
+        "medical.oversight",
+        "scheduling.district_access"
+      ]
+    },
+    {
+      id: "district-athletic-coordinator",
+      name: "District Athletic Coordinator",
+      description: "Coordinates athletics programs and events across district",
+      category: "admin",
+      permissions: [
+        "admin.program_coordination",
+        "tournament.district_events",
+        "scheduling.district_coordination",
+        "admin.school_communication",
+        "medical.basic_oversight"
+      ]
+    },
     {
       id: "district-athletic-trainer",
       name: "District Athletic Trainer",
@@ -74,22 +102,47 @@ export default function AdminRoleManagement() {
       ]
     },
     {
-      id: "athletic-director",
-      name: "Athletic Director", 
+      id: "district-aquatic-coordinator",
+      name: "District Aquatic Coordinator",
+      description: "Oversees aquatic programs and safety across district",
+      category: "admin",
+      permissions: [
+        "admin.aquatic_programs",
+        "medical.water_safety",
+        "scheduling.aquatic_facilities",
+        "admin.lifeguard_management",
+        "tournament.aquatic_events"
+      ]
+    },
+    {
+      id: "school-athletic-director",
+      name: "School Athletic Director", 
       description: "School-level sports administration with medical oversight",
       category: "admin",
       permissions: [
         "admin.school_management",
         "admin.coach_assignment",
         "medical.oversight",
-        "tournament.management",
-        "scheduling.all_access",
-        "admin.role_assignment"
+        "tournament.school_events",
+        "scheduling.school_access",
+        "admin.school_role_assignment"
       ]
     },
     {
-      id: "athletic-trainer",
-      name: "Athletic Trainer",
+      id: "school-athletic-coordinator",
+      name: "School Athletic Coordinator",
+      description: "Coordinates school athletics programs and schedules",
+      category: "admin",
+      permissions: [
+        "admin.school_coordination",
+        "tournament.school_management",
+        "scheduling.school_coordination",
+        "admin.team_management"
+      ]
+    },
+    {
+      id: "school-athletic-trainer",
+      name: "School Athletic Trainer",
       description: "Medical professional with school-specific access",
       category: "medical", 
       permissions: [
@@ -98,6 +151,18 @@ export default function AdminRoleManagement() {
         "medical.injury_tracking",
         "scheduling.medical_appointments",
         "medical.emergency_response"
+      ]
+    },
+    {
+      id: "school-aquatic-coordinator",
+      name: "School Aquatic Coordinator",
+      description: "Manages aquatic programs and safety at school level",
+      category: "admin",
+      permissions: [
+        "admin.school_aquatic_programs",
+        "medical.water_safety_school",
+        "scheduling.school_aquatic",
+        "tournament.aquatic_school_events"
       ]
     },
     {

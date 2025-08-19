@@ -13,11 +13,11 @@ interface RoleInfo {
 }
 
 const roleHierarchy: RoleInfo[] = [
-  // District Level
+  // District Level - Standard Athletics Hierarchy
   {
     role: 'district_athletic_director',
     title: 'District Athletic Director',
-    description: 'Super Admin - Oversees all athletic operations across the district',
+    description: 'District Admin - Oversees all athletic operations across the district',
     level: 'district',
     permissions: [
       'All district operations',
@@ -31,8 +31,23 @@ const roleHierarchy: RoleInfo[] = [
     medicalAccess: true
   },
   {
-    role: 'district_head_athletic_trainer',
-    title: 'District Head Athletic Trainer',
+    role: 'district_athletic_coordinator',
+    title: 'District Athletic Coordinator',
+    description: 'Program Coordinator - Coordinates athletics programs and events district-wide',
+    level: 'district',
+    permissions: [
+      'Program coordination',
+      'Event scheduling',
+      'Inter-school communication',
+      'Tournament management',
+      'Basic medical oversight'
+    ],
+    icon: Users,
+    medicalAccess: false
+  },
+  {
+    role: 'district_athletic_trainer',
+    title: 'District Athletic Trainer',
     description: 'Health Admin - Manages medical programs district-wide',
     level: 'district',
     permissions: [
@@ -46,8 +61,23 @@ const roleHierarchy: RoleInfo[] = [
     icon: Heart,
     medicalAccess: true
   },
+  {
+    role: 'district_aquatic_coordinator',
+    title: 'District Aquatic Coordinator',
+    description: 'Aquatic Admin - Oversees aquatic programs and safety district-wide',
+    level: 'district',
+    permissions: [
+      'Aquatic program management',
+      'Water safety protocols',
+      'Pool facility coordination',
+      'Lifeguard oversight',
+      'Aquatic events'
+    ],
+    icon: Users,
+    medicalAccess: false
+  },
 
-  // School Level
+  // School Level - Standard Athletics Hierarchy
   {
     role: 'school_athletic_director',
     title: 'School Athletic Director',
@@ -63,6 +93,20 @@ const roleHierarchy: RoleInfo[] = [
     ],
     icon: GraduationCap,
     medicalAccess: true
+  },
+  {
+    role: 'school_athletic_coordinator',
+    title: 'School Athletic Coordinator',
+    description: 'School Coordinator - Coordinates school athletics programs and schedules',
+    level: 'school',
+    permissions: [
+      'School program coordination',
+      'Schedule management',
+      'Team organization',
+      'Event coordination'
+    ],
+    icon: Clipboard,
+    medicalAccess: false
   },
   {
     role: 'school_athletic_trainer',
