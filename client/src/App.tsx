@@ -61,6 +61,7 @@ import AthleteDashboard from './pages/AthleteDashboard';
 import CoachDashboard from './pages/CoachDashboard';
 import AthleticTrainerDashboard from './pages/AthleticTrainerDashboard';
 import ScorekeeperDashboard from './pages/ScorekeeperDashboard';
+import ScorekeeperScheduling from './pages/ScorekeeperScheduling';
 import ParentDashboard from './pages/ParentDashboard';
 import FamilyAccessManagement from './pages/FamilyAccessManagement';
 import Login from './pages/Login';
@@ -261,6 +262,10 @@ function AppRouter() {
       {/* Scorekeeper Dashboard - Public Demo Access */}
       <Route path="/scorekeeper" component={ScorekeeperDashboard} />
       <Route path="/scorekeeper-dashboard" component={ScorekeeperDashboard} />
+      
+      {/* Scorekeeper Scheduling - Public Demo Access */}
+      <Route path="/scorekeeper-scheduling" component={ScorekeeperScheduling} />
+      <Route path="/scheduling" component={ScorekeeperScheduling} />
       
       {/* Parent Dashboard - Public Demo Access */}
       <Route path="/parent" component={ParentDashboard} />
