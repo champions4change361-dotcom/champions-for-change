@@ -32,7 +32,8 @@ import {
   Brain,
   Target,
   TrendingUp,
-  Zap
+  Zap,
+  Info
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { CheerleadingInjuryAssessment } from "@/components/CheerleadingInjuryAssessment";
@@ -259,6 +260,15 @@ export default function AthleticTrainerDashboard() {
 
           {/* Athletes Tab */}
           <TabsContent value="athletes" className="space-y-4">
+            <div className="bg-blue-50 border-l-4 border-blue-400 p-3 rounded mb-4">
+              <div className="flex items-center">
+                <Info className="h-4 w-4 text-blue-600 mr-2" />
+                <p className="text-sm text-blue-800">
+                  <strong>Demo Platform:</strong> This showcases comprehensive athletic training capabilities. 
+                  The AI Consultant provides fully functional injury assessment - other features demonstrate interface design.
+                </p>
+              </div>
+            </div>
             <div className="flex flex-col sm:flex-row gap-2 sm:justify-between sm:items-center">
               <div className="flex flex-col sm:flex-row gap-2">
                 <div className="relative flex-1 sm:flex-initial">
@@ -269,20 +279,26 @@ export default function AthleticTrainerDashboard() {
                     data-testid="input-search-athletes"
                   />
                 </div>
-                <Select defaultValue="all">
-                  <SelectTrigger className="w-full sm:w-32" data-testid="filter-sport">
-                    <Filter className="h-4 w-4 mr-2" />
-                    <SelectValue placeholder="Sport" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Sports</SelectItem>
-                    <SelectItem value="football">Football</SelectItem>
-                    <SelectItem value="basketball">Basketball</SelectItem>
-                    <SelectItem value="track">Track & Field</SelectItem>
-                    <SelectItem value="soccer">Soccer</SelectItem>
-                    <SelectItem value="tennis">Tennis</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="relative">
+                  <Filter className="absolute left-3 top-3 h-4 w-4 text-slate-400 pointer-events-none" />
+                  <select 
+                    defaultValue="all"
+                    className="w-full sm:w-32 pl-10 pr-4 py-2 border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    data-testid="filter-sport"
+                  >
+                    <option value="all">All Sports</option>
+                    <option value="football">Football</option>
+                    <option value="basketball">Basketball</option>
+                    <option value="track">Track & Field</option>
+                    <option value="soccer">Soccer</option>
+                    <option value="tennis">Tennis</option>
+                    <option value="cheerleading">Cheerleading</option>
+                    <option value="volleyball">Volleyball</option>
+                    <option value="swimming">Swimming</option>
+                    <option value="baseball">Baseball</option>
+                    <option value="softball">Softball</option>
+                  </select>
+                </div>
               </div>
             </div>
 
