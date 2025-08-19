@@ -195,18 +195,21 @@ export default function AdminManagement() {
                   <Button
                     onClick={async () => {
                       try {
-                        const response = await fetch('/api/login-form', {
+                        const response = await fetch('/api/auth/login', {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' },
                           body: JSON.stringify({
-                            email: 'admin@example.com',
-                            password: 'admin123',
+                            email: 'champions4change361@gmail.com',
+                            password: 'master-admin-danielthornton',
                             userType: 'district'
                           }),
                         });
                         if (response.ok) {
-                          toast({ title: "Success", description: "Logged in successfully!" });
-                          window.location.reload();
+                          toast({ title: "Success", description: "Logged in as District Admin!" });
+                          // Redirect to district dashboard after successful login
+                          setTimeout(() => {
+                            navigate('/role-based-dashboards');
+                          }, 1000);
                         } else {
                           const error = await response.json();
                           toast({ title: "Error", description: error.message || "Login failed", variant: "destructive" });
