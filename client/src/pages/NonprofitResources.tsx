@@ -52,10 +52,10 @@ export default function NonprofitResources() {
               size="lg" 
               variant="outline" 
               className="border-2 border-white bg-white/10 text-white hover:bg-white hover:text-green-900 backdrop-blur-sm font-semibold" 
-              onClick={() => window.open('https://www.techsoup.org/', '_blank')}
-              data-testid="button-tech-resources"
+              onClick={() => window.open('https://www.nten.org/', '_blank')}
+              data-testid="button-nten-resources"
             >
-              TechSoup Resources
+              NTEN Community
             </Button>
           </div>
         </div>
