@@ -738,7 +738,7 @@ export default function RoleBasedDashboards() {
     switch (userRole) {
       case 'district_athletic_director':
         return <DistrictAthleticDirectorDashboard organizationId={organizationId} />;
-      case 'district_head_athletic_trainer':
+      case 'district_athletic_trainer':
         return <DistrictHeadAthleticTrainerDashboard organizationId={organizationId} />;
       case 'school_athletic_director':
         return <SchoolAthleticDirectorDashboard organizationId={organizationId} />;

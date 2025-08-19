@@ -110,17 +110,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Check for master admin credentials (case-insensitive email)
       if (email?.toLowerCase() === 'champions4change361@gmail.com' && password === 'master-admin-danielthornton') {
-        // Create master admin user session
+        // Create master admin user session with all required role properties
         const masterAdmin = {
           id: 'master-admin-danielthornton',
           email: email,
           firstName: 'Daniel',
           lastName: 'Thornton',
           role: 'district_athletic_director',
+          userRole: 'district_athletic_director', // Add this for the dashboard
+          complianceRole: 'district_athletic_director', // Add this for permissions
           subscriptionPlan: 'district_enterprise',
+          subscriptionStatus: 'active',
+          organizationId: 'champions-for-change',
           organizationName: 'Champions for Change',
           userType: userType || 'district',
-          isAdmin: true
+          isAdmin: true,
+          isWhitelabelClient: true,
+          whitelabelDomain: 'trantortournaments.org'
         };
 
         // Store in session and wait for it to be saved before responding
