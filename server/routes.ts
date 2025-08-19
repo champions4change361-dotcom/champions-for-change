@@ -14,7 +14,7 @@ if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
 }
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2023-10-16",
+  apiVersion: "2025-07-30.basil",
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -123,21 +123,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
           isAdmin: true
         };
 
-        // Store in session with callback to ensure it's saved
+        // Store in session and wait for it to be saved before responding
         (req as any).session.user = masterAdmin;
-        (req as any).session.save((err: any) => {
-          if (err) {
-            console.error('Session save error:', err);
-          } else {
-            console.log('Session saved successfully for master admin');
-          }
+        
+        // Wait for session to be saved before responding
+        await new Promise<void>((resolve, reject) => {
+          (req as any).session.save((err: any) => {
+            if (err) {
+              console.error('Session save error:', err);
+              reject(err);
+            } else {
+              console.log('Session saved successfully for master admin');
+              resolve();
+            }
+          });
         });
         
         console.log('Master admin session created successfully');
         res.json({ 
           success: true, 
           user: masterAdmin,
-          message: 'Login successful' 
+          message: 'Login successful',
+          redirectTo: '/role-based-dashboards'
         });
       } else {
         res.status(401).json({ message: 'Invalid credentials' });
@@ -151,13 +158,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Basic user authentication endpoint - modified to check session
   app.get("/api/auth/user", async (req: any, res) => {
     try {
+      console.log('Auth user check - Session ID:', req.sessionID);
+      console.log('Auth user check - Session user:', req.session?.user ? 'present' : 'missing');
+      console.log('Auth user check - OAuth user:', req.user ? 'present' : 'missing');
+      
       // Check session-based auth first
       if (req.session?.user) {
+        console.log('Returning session user:', req.session.user.email);
         return res.json(req.session.user);
       }
       
       // Then check OAuth auth
       if (req.user && req.user.claims) {
+        console.log('Returning OAuth user:', req.user.claims.email);
         res.json({
           id: req.user.claims.sub,
           email: req.user.claims.email,
@@ -166,6 +179,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           profileImageUrl: req.user.claims.profile_image_url,
         });
       } else {
+        console.log('No valid user found, returning 401');
         res.status(401).json({ message: "Unauthorized" });
       }
     } catch (error) {

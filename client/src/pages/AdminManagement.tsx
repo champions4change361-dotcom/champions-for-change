@@ -206,10 +206,8 @@ export default function AdminManagement() {
                         });
                         if (response.ok) {
                           toast({ title: "Success", description: "Logged in as District Admin!" });
-                          // Redirect to district dashboard after successful login
-                          setTimeout(() => {
-                            navigate('/role-based-dashboards');
-                          }, 1000);
+                          // Immediately redirect to district dashboard without delay
+                          navigate('/role-based-dashboards');
                         } else {
                           const error = await response.json();
                           toast({ title: "Error", description: error.message || "Login failed", variant: "destructive" });

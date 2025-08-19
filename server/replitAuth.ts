@@ -46,8 +46,9 @@ export function getSession() {
   return session({
     secret: process.env.SESSION_SECRET || 'champions-for-change-secret-key',
     store: sessionStore,
-    resave: false,
-    saveUninitialized: false,
+    resave: true, // Force session save on every request
+    saveUninitialized: true, // Save uninitialized sessions
+    rolling: true, // Reset cookie maxAge on every request
     cookie: {
       httpOnly: true,
       secure: false, // Allow HTTP for development
