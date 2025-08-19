@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { AlertCircle, Users, Building, GraduationCap, Heart, Trophy, FileText, Settings, GitBranch } from 'lucide-react';
+import { AlertCircle, Users, Building, GraduationCap, Heart, Trophy, FileText, Settings, GitBranch, ArrowLeft, LogIn, Shield } from 'lucide-react';
 import { OrgChartBuilder } from '@/components/OrgChartBuilder';
 
 interface DashboardProps {
@@ -693,7 +693,41 @@ export default function RoleBasedDashboards() {
   const { user } = useAuth();
   
   if (!user) {
-    return <div>Please log in to access your dashboard</div>;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-50 flex items-center justify-center p-4">
+        <Card className="max-w-md mx-auto">
+          <CardContent className="text-center p-8">
+            <Shield className="h-16 w-16 text-blue-600 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Authentication Required</h2>
+            <p className="text-gray-600 mb-6">
+              You need to log in to access the dashboard and organizational chart builder.
+            </p>
+            <div className="flex flex-col gap-3">
+              <Button
+                onClick={() => window.location.href = '/admin'}
+                className="bg-blue-600 hover:bg-blue-700 w-full"
+                data-testid="button-login"
+              >
+                <LogIn className="h-4 w-4 mr-2" />
+                Go to Admin Login
+              </Button>
+              <Button
+                onClick={() => window.location.href = '/'}
+                variant="outline"
+                className="w-full"
+                data-testid="button-back-home"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Home
+              </Button>
+            </div>
+            <div className="mt-4 text-sm text-gray-500">
+              <p>Need access? Contact the system administrator</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   const userRole = user.userRole || 'fan';
