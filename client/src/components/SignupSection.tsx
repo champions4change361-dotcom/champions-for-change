@@ -28,7 +28,7 @@ export function SignupSection() {
       tier: 'freemium',
       buttonColor: 'bg-blue-600 hover:bg-blue-700',
       popular: false,
-      badge: 'Free'
+      badge: null
     },
     {
       name: 'Annual Pro',
@@ -84,20 +84,22 @@ export function SignupSection() {
           {tiers.map((tier) => (
             <Card 
               key={tier.name} 
-              className={`relative ${tier.popular ? 'border-2 border-blue-500 shadow-xl' : 'border border-gray-200'}`}
+              className={`relative flex flex-col ${tier.popular ? 'border-2 border-blue-500 shadow-xl' : 'border border-gray-200'}`}
               data-testid={`tier-${tier.tier}`}
             >
-              {tier.popular && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-1 rounded-full text-sm font-semibold flex items-center gap-1">
-                  <Star className="h-3 w-3" />
-                  {tier.badge}
-                </div>
-              )}
-              
-              <CardHeader className="text-center pb-6">
-                <div className="flex justify-between items-start mb-2">
-                  <CardTitle className="text-2xl font-bold">{tier.name}</CardTitle>
-                  {tier.badge && !tier.popular && <Badge className="bg-blue-500 text-white">{tier.badge}</Badge>}
+              <CardHeader className="text-center pb-6 flex-1">
+                <div className="mb-2">
+                  <div className="flex items-start justify-between min-h-[2rem]">
+                    <CardTitle className="text-2xl font-bold">{tier.name}</CardTitle>
+                    {tier.badge && (
+                      <Badge className="bg-blue-500 text-white ml-2">{tier.badge}</Badge>
+                    )}
+                  </div>
+                  {tier.popular && (
+                    <div className="mt-3">
+                      <Badge className="bg-blue-500 text-white">Popular</Badge>
+                    </div>
+                  )}
                 </div>
                 <div className="mb-4">
                   <span className="text-4xl font-bold text-gray-900">{tier.price}</span>
@@ -106,8 +108,8 @@ export function SignupSection() {
                 <CardDescription className="text-base">{tier.description}</CardDescription>
               </CardHeader>
               
-              <CardContent>
-                <ul className="space-y-3 mb-8">
+              <CardContent className="flex flex-col">
+                <ul className="space-y-3 mb-8 flex-1">
                   {tier.features.map((feature, idx) => (
                     <li key={idx} className="flex items-start gap-2">
                       <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
@@ -118,7 +120,7 @@ export function SignupSection() {
                 
                 <Button 
                   onClick={() => startRegistration(tier.tier)}
-                  className={`w-full ${tier.buttonColor} text-white`}
+                  className={`w-full ${tier.buttonColor} text-white mt-auto`}
                   size="lg"
                   data-testid={`button-start-${tier.tier}`}
                 >
