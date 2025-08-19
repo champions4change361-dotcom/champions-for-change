@@ -402,17 +402,19 @@ export default function YourWhy() {
                   </div>
                 )}
                 
-                <div className="flex justify-center space-x-4">
-                  <Link href="/">
-                    <Button size="lg" className="bg-green-600 hover:bg-green-700 text-white px-8 py-3">
-                      {ctaContent.buttonText}
-                    </Button>
-                  </Link>
-                  <Link href="/pricing">
-                    <Button size="lg" variant="outline" className="border-green-600 text-green-600 hover:bg-green-50 px-8 py-3">
-                      {ctaContent.secondaryText}
-                    </Button>
-                  </Link>
+                <div className="flex justify-center">
+                  <Button 
+                    size="lg" 
+                    variant="outline" 
+                    className="border-green-600 text-green-600 hover:bg-green-50 px-8 py-3"
+                    onClick={() => {
+                      window.location.href = "/pricing";
+                      setTimeout(() => window.scrollTo(0, 0), 100);
+                    }}
+                    data-testid="button-see-all-options"
+                  >
+                    {ctaContent.secondaryText}
+                  </Button>
                 </div>
               </div>
               
