@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Heart, GraduationCap, Users, Trophy } from "lucide-react";
 
 // Load Stripe with your publishable key
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 const DonationForm = () => {
   const stripe = useStripe();
@@ -160,12 +160,12 @@ export default function NonprofitDonation() {
 
   const createPaymentIntent = async (amount: number) => {
     try {
-      const response = await apiRequest("POST", "/api/nonprofit/donation", {
+      const data = await apiRequest("POST", "/api/nonprofit/donation", {
         amount,
         donorEmail: "demo@example.com",
         cause: "general-mission",
       });
-      setClientSecret(response.clientSecret);
+      setClientSecret(data.clientSecret);
     } catch (error) {
       console.error("Failed to create payment intent:", error);
     }

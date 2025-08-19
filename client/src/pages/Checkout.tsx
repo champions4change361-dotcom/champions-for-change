@@ -7,10 +7,10 @@ import { useToast } from '@/hooks/use-toast';
 import { Heart, CreditCard, CheckCircle, ArrowLeft } from 'lucide-react';
 
 // Load Stripe with public key from environment
-if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
-  throw new Error('Missing required Stripe key: VITE_STRIPE_PUBLIC_KEY');
+if (!import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY) {
+  throw new Error('Missing required Stripe key: VITE_STRIPE_PUBLISHABLE_KEY');
 }
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 interface CheckoutFormProps {
   clientSecret: string;
