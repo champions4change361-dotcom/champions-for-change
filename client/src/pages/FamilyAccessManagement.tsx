@@ -500,13 +500,13 @@ export default function FamilyAccessManagement() {
                   <div className="grid md:grid-cols-2 gap-4">
                     <Input placeholder="Full Name" className="bg-slate-700 border-slate-600 text-white" />
                     <select className="bg-slate-700 border border-slate-600 text-white rounded-md px-3 py-2">
-                      <option value="">Select Relationship</option>
-                      <option value="parent">Parent</option>
-                      <option value="guardian">Legal Guardian</option>
-                      <option value="grandparent">Grandparent</option>
-                      <option value="aunt_uncle">Aunt/Uncle</option>
-                      <option value="sibling">Sibling (18+)</option>
-                      <option value="family_friend">Family Friend</option>
+                      <option value="" className="bg-slate-700 text-white">Select Relationship</option>
+                      <option value="parent" className="bg-slate-700 text-white">Parent</option>
+                      <option value="guardian" className="bg-slate-700 text-white">Legal Guardian</option>
+                      <option value="grandparent" className="bg-slate-700 text-white">Grandparent</option>
+                      <option value="aunt_uncle" className="bg-slate-700 text-white">Aunt/Uncle</option>
+                      <option value="sibling" className="bg-slate-700 text-white">Sibling (18+)</option>
+                      <option value="family_friend" className="bg-slate-700 text-white">Family Friend</option>
                     </select>
                   </div>
                   <div className="grid md:grid-cols-2 gap-4">
