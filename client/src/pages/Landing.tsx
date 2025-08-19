@@ -623,7 +623,11 @@ export default function Landing() {
           </p>
           <Button 
             className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 text-lg"
-            onClick={() => setLocation("/compliance")}
+            onClick={() => {
+              setLocation("/compliance");
+              // Small delay to ensure navigation happens first, then scroll
+              setTimeout(() => window.scrollTo(0, 0), 100);
+            }}
             data-testid="button-compliance-center"
           >
             View Compliance Center
