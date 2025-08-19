@@ -42,8 +42,8 @@ export default function GrantFunding() {
           <div className="flex flex-wrap justify-center gap-4">
             <Button 
               size="lg" 
-              className="bg-yellow-500 hover:bg-yellow-600 text-blue-900" 
-              onClick={() => window.open('https://www.grants.gov/learn-grants/grant-making-process', '_blank')}
+              className="bg-yellow-500 hover:bg-yellow-600 text-blue-900 font-semibold" 
+              onClick={() => window.open('https://www.grants.gov/sites/default/files/2021-11/application-guide.pdf', '_blank')}
               data-testid="button-download-guide"
             >
               Download Grant Guide
@@ -51,7 +51,7 @@ export default function GrantFunding() {
             <Button 
               size="lg" 
               variant="outline" 
-              className="border-white text-white hover:bg-white hover:text-blue-900" 
+              className="border-2 border-white bg-white/10 text-white hover:bg-white hover:text-blue-900 backdrop-blur-sm font-semibold" 
               onClick={() => window.open('https://www.foundationcenter.org/', '_blank')}
               data-testid="button-grant-resources"
             >
