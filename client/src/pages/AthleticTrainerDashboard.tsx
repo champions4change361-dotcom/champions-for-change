@@ -1271,74 +1271,68 @@ export default function AthleticTrainerDashboard() {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Sport/Activity</label>
-                      <Select 
-                        value={aiConsultation.sport}
-                        onValueChange={(value) => setAiConsultation(prev => ({ ...prev, sport: value }))}
+                      <select
+                        value={aiConsultation.sport || ''}
+                        onChange={(e) => setAiConsultation(prev => ({ ...prev, sport: e.target.value }))}
+                        className="w-full p-3 border-2 border-gray-300 rounded-md focus:border-blue-500 focus:outline-none bg-white"
+                        data-testid="select-sport-consultation"
                       >
-                        <SelectTrigger data-testid="select-sport-consultation" className="border-2 border-gray-300">
-                          <SelectValue placeholder="Select sport" />
-                        </SelectTrigger>
-                        <SelectContent className="z-[9999]">
-                          <SelectItem value="cheerleading">Cheerleading</SelectItem>
-                          <SelectItem value="dance_team">Dance Team</SelectItem>
-                          <SelectItem value="color_guard">Color Guard</SelectItem>
-                          <SelectItem value="baseball">Baseball</SelectItem>
-                          <SelectItem value="softball">Softball</SelectItem>
-                          <SelectItem value="tennis">Tennis</SelectItem>
-                          <SelectItem value="volleyball">Volleyball</SelectItem>
-                          <SelectItem value="swimming">Swimming</SelectItem>
-                          <SelectItem value="track_throwing">Track & Field (Throwing)</SelectItem>
-                          <SelectItem value="football">Football (Quarterback)</SelectItem>
-                          <SelectItem value="basketball">Basketball</SelectItem>
-                          <SelectItem value="marching_band">Marching Band</SelectItem>
-                          <SelectItem value="other">Other Sport/Activity</SelectItem>
-                        </SelectContent>
-                      </Select>
+                        <option value="">Select sport</option>
+                        <option value="cheerleading">Cheerleading</option>
+                        <option value="dance_team">Dance Team</option>
+                        <option value="color_guard">Color Guard</option>
+                        <option value="baseball">Baseball</option>
+                        <option value="softball">Softball</option>
+                        <option value="tennis">Tennis</option>
+                        <option value="volleyball">Volleyball</option>
+                        <option value="swimming">Swimming</option>
+                        <option value="track_throwing">Track & Field (Throwing)</option>
+                        <option value="football">Football (Quarterback)</option>
+                        <option value="basketball">Basketball</option>
+                        <option value="marching_band">Marching Band</option>
+                        <option value="other">Other Sport/Activity</option>
+                      </select>
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Injury Location</label>
-                      <Select 
+                      <select
                         value={aiConsultation.injuryLocation || ''}
-                        onValueChange={(value) => setAiConsultation(prev => ({ ...prev, injuryLocation: value }))}
+                        onChange={(e) => setAiConsultation(prev => ({ ...prev, injuryLocation: e.target.value }))}
+                        className="w-full p-3 border-2 border-gray-300 rounded-md focus:border-blue-500 focus:outline-none bg-white"
+                        data-testid="select-injury-location"
                       >
-                        <SelectTrigger data-testid="select-injury-location" className="border-2 border-gray-300">
-                          <SelectValue placeholder="Select area of concern" />
-                        </SelectTrigger>
-                        <SelectContent className="z-[9999]">
-                          <SelectItem value="shoulder">Shoulder</SelectItem>
-                          <SelectItem value="elbow">Elbow</SelectItem>
-                          <SelectItem value="wrist">Wrist</SelectItem>
-                          <SelectItem value="lower_back">Lower Back</SelectItem>
-                          <SelectItem value="hip">Hip</SelectItem>
-                          <SelectItem value="knee">Knee</SelectItem>
-                          <SelectItem value="ankle">Ankle</SelectItem>
-                          <SelectItem value="neck">Neck</SelectItem>
-                          <SelectItem value="head">Head/Concussion</SelectItem>
-                          <SelectItem value="chest">Chest</SelectItem>
-                          <SelectItem value="groin">Groin</SelectItem>
-                          <SelectItem value="foot">Foot</SelectItem>
-                        </SelectContent>
-                      </Select>
+                        <option value="">Select area of concern</option>
+                        <option value="shoulder">Shoulder</option>
+                        <option value="elbow">Elbow</option>
+                        <option value="wrist">Wrist</option>
+                        <option value="lower_back">Lower Back</option>
+                        <option value="hip">Hip</option>
+                        <option value="knee">Knee</option>
+                        <option value="ankle">Ankle</option>
+                        <option value="neck">Neck</option>
+                        <option value="head">Head/Concussion</option>
+                        <option value="chest">Chest</option>
+                        <option value="groin">Groin</option>
+                        <option value="foot">Foot</option>
+                      </select>
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Pain Level (1-10)</label>
-                      <Select 
-                        value={aiConsultation.painLevel}
-                        onValueChange={(value) => setAiConsultation(prev => ({ ...prev, painLevel: value }))}
+                      <select
+                        value={aiConsultation.painLevel || ''}
+                        onChange={(e) => setAiConsultation(prev => ({ ...prev, painLevel: e.target.value }))}
+                        className="w-full p-3 border-2 border-gray-300 rounded-md focus:border-blue-500 focus:outline-none bg-white"
+                        data-testid="select-pain-level"
                       >
-                        <SelectTrigger data-testid="select-pain-level" className="border-2 border-gray-300">
-                          <SelectValue placeholder="Select pain level" />
-                        </SelectTrigger>
-                        <SelectContent className="z-[9999]">
-                          <SelectItem value="1-2">1-2 (Minimal)</SelectItem>
-                          <SelectItem value="3-4">3-4 (Mild)</SelectItem>
-                          <SelectItem value="5-6">5-6 (Moderate)</SelectItem>
-                          <SelectItem value="7-8">7-8 (Severe)</SelectItem>
-                          <SelectItem value="9-10">9-10 (Extreme)</SelectItem>
-                        </SelectContent>
-                      </Select>
+                        <option value="">Select pain level</option>
+                        <option value="1-2">1-2 (Minimal)</option>
+                        <option value="3-4">3-4 (Mild)</option>
+                        <option value="5-6">5-6 (Moderate)</option>
+                        <option value="7-8">7-8 (Severe)</option>
+                        <option value="9-10">9-10 (Extreme)</option>
+                      </select>
                     </div>
                   </div>
 
@@ -1374,56 +1368,50 @@ export default function AthleticTrainerDashboard() {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Onset Pattern</label>
-                      <Select 
-                        value={aiConsultation.onset}
-                        onValueChange={(value) => setAiConsultation(prev => ({ ...prev, onset: value }))}
+                      <select
+                        value={aiConsultation.onset || ''}
+                        onChange={(e) => setAiConsultation(prev => ({ ...prev, onset: e.target.value }))}
+                        className="w-full p-3 border-2 border-gray-300 rounded-md focus:border-blue-500 focus:outline-none bg-white"
+                        data-testid="select-onset"
                       >
-                        <SelectTrigger data-testid="select-onset">
-                          <SelectValue placeholder="How did symptoms develop?" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="acute">Acute (sudden onset)</SelectItem>
-                          <SelectItem value="gradual">Gradual (developed over time)</SelectItem>
-                          <SelectItem value="recurrent">Recurrent (comes and goes)</SelectItem>
-                        </SelectContent>
-                      </Select>
+                        <option value="">How did symptoms develop?</option>
+                        <option value="acute">Acute (sudden onset)</option>
+                        <option value="gradual">Gradual (developed over time)</option>
+                        <option value="recurrent">Recurrent (comes and goes)</option>
+                      </select>
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Mechanism of Injury</label>
-                      <Select 
-                        value={aiConsultation.mechanism}
-                        onValueChange={(value) => setAiConsultation(prev => ({ ...prev, mechanism: value }))}
+                      <select
+                        value={aiConsultation.mechanism || ''}
+                        onChange={(e) => setAiConsultation(prev => ({ ...prev, mechanism: e.target.value }))}
+                        className="w-full p-3 border-2 border-gray-300 rounded-md focus:border-blue-500 focus:outline-none bg-white"
+                        data-testid="select-mechanism"
                       >
-                        <SelectTrigger data-testid="select-mechanism">
-                          <SelectValue placeholder="How did the injury occur?" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="overuse">Overuse/Repetitive Motion</SelectItem>
-                          <SelectItem value="contact">Direct Contact/Collision</SelectItem>
-                          <SelectItem value="non_contact">Non-Contact (Plant/Cut)</SelectItem>
-                          <SelectItem value="fall">Fall</SelectItem>
-                          <SelectItem value="unknown">Unknown/Insidious</SelectItem>
-                        </SelectContent>
-                      </Select>
+                        <option value="">How did the injury occur?</option>
+                        <option value="overuse">Overuse/Repetitive Motion</option>
+                        <option value="contact">Direct Contact/Collision</option>
+                        <option value="non_contact">Non-Contact (Plant/Cut)</option>
+                        <option value="fall">Fall</option>
+                        <option value="unknown">Unknown/Insidious</option>
+                      </select>
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Current Activity Level</label>
-                      <Select 
-                        value={aiConsultation.currentActivity}
-                        onValueChange={(value) => setAiConsultation(prev => ({ ...prev, currentActivity: value }))}
+                      <select
+                        value={aiConsultation.currentActivity || ''}
+                        onChange={(e) => setAiConsultation(prev => ({ ...prev, currentActivity: e.target.value }))}
+                        className="w-full p-3 border-2 border-gray-300 rounded-md focus:border-blue-500 focus:outline-none bg-white"
+                        data-testid="select-activity-level"
                       >
-                        <SelectTrigger data-testid="select-activity-level">
-                          <SelectValue placeholder="Current participation status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="full">Full Participation</SelectItem>
-                          <SelectItem value="limited">Limited Participation</SelectItem>
-                          <SelectItem value="rest">Complete Rest</SelectItem>
-                          <SelectItem value="modified">Modified Activities Only</SelectItem>
-                        </SelectContent>
-                      </Select>
+                        <option value="">Current participation status</option>
+                        <option value="full">Full Participation</option>
+                        <option value="limited">Limited Participation</option>
+                        <option value="rest">Complete Rest</option>
+                        <option value="modified">Modified Activities Only</option>
+                      </select>
                     </div>
 
                     <div>
