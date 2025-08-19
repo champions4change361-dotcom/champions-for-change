@@ -327,9 +327,9 @@ export default function NonprofitResources() {
               <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-full w-fit mx-auto mb-4">
                 <Code className="h-8 w-8 text-blue-600 dark:text-blue-400" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">API Integration</h3>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">Technology Guidance</h3>
               <p className="text-gray-600 dark:text-gray-300">
-                Ready to integrate with Candid and other nonprofit APIs for automated grant discovery.
+                We connect nonprofits with the best free and discounted technology resources to amplify their impact.
               </p>
             </div>
             
@@ -350,8 +350,8 @@ export default function NonprofitResources() {
                 Partner with Champions for Change
               </h3>
               <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">
-                Join our mission to provide educational opportunities for underprivileged youth while leveraging 
-                powerful nonprofit technology tools and APIs.
+                Join our mission to provide educational opportunities for underprivileged youth while accessing 
+                the best nonprofit technology resources and tools.
               </p>
               <div className="flex flex-wrap justify-center gap-4">
                 <Link href="/grant-funding">
