@@ -219,7 +219,8 @@ export default function Landing() {
                       data-testid="button-donate-hero"
                     >
                       <Heart className="mr-1 lg:mr-2 h-4 w-4 lg:h-5 lg:w-5" />
-                      <span className="hidden sm:inline">Fund Student Education</span>
+                      <span className="hidden lg:inline">Fund Student Education</span>
+                      <span className="hidden sm:inline lg:hidden">Fund Education</span>
                       <span className="sm:hidden">Donate</span>
                     </Button>
                     <Button 
