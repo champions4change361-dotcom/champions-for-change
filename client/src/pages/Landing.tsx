@@ -515,10 +515,11 @@ export default function Landing() {
                   </Button>
                   <Button 
                     variant="outline"
-                    className="w-full mt-2 border-blue-300 text-white hover:bg-blue-500/20 hover:text-white bg-blue-600"
+                    size="sm"
+                    className="w-full mt-2 border-blue-300 text-white hover:bg-blue-500/20 hover:text-white bg-blue-600 flex items-center justify-center py-2"
                     onClick={() => window.location.href = 'mailto:Champions4change361@gmail.com?subject=Tournament Organizer Pricing Inquiry&body=Hello, I am interested in learning more about Tournament Organizer pricing and would like to discuss options.'}
                   >
-                    <Mail className="h-4 w-4 mr-2" />
+                    <Mail className="h-3 w-3 mr-2" />
                     Contact Us
                   </Button>
                   <p className="text-blue-200 text-sm mt-2">Perfect for coaches & individual organizers</p>
@@ -541,10 +542,11 @@ export default function Landing() {
                   </Button>
                   <Button 
                     variant="outline"
-                    className="w-full mt-2 border-green-300 text-white hover:bg-green-500/20 hover:text-white bg-blue-600"
+                    size="sm"
+                    className="w-full mt-2 border-green-300 text-white hover:bg-green-500/20 hover:text-white bg-blue-600 flex items-center justify-center py-2"
                     onClick={() => window.location.href = 'mailto:Champions4change361@gmail.com?subject=Business Enterprise Pricing Inquiry&body=Hello, I am interested in learning more about Business Enterprise pricing and would like to discuss flexible solutions.'}
                   >
-                    <Mail className="h-4 w-4 mr-2" />
+                    <Mail className="h-3 w-3 mr-2" />
                     Contact Us
                   </Button>
                   <p className="text-green-200 text-sm mt-2">Flexible solutions for any organization</p>
@@ -567,10 +569,11 @@ export default function Landing() {
                   </Button>
                   <Button 
                     variant="outline"
-                    className="w-full mt-2 border-purple-300 text-white hover:bg-purple-500/20 hover:text-white bg-blue-600"
+                    size="sm"
+                    className="w-full mt-2 border-purple-300 text-white hover:bg-purple-500/20 hover:text-white bg-blue-600 flex items-center justify-center py-2"
                     onClick={() => window.location.href = 'mailto:Champions4change361@gmail.com?subject=District Enterprise Alternative Payment Methods&body=Hello, I am interested in alternative payment methods for District Enterprise pricing.'}
                   >
-                    <Mail className="h-4 w-4 mr-2" />
+                    <Mail className="h-3 w-3 mr-2" />
                     Contact Us
                   </Button>
                   <p className="text-purple-200 text-sm mt-2">Complete district-wide management</p>
