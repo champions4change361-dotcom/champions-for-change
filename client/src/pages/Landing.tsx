@@ -202,38 +202,39 @@ export default function Landing() {
                     </Button>
                   </div>
                   
-                  <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                    <Button 
-                      size="lg" 
-                      className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-6 py-3 text-base lg:px-8 lg:py-4 lg:text-lg w-full sm:w-auto"
-                      onClick={() => setLocation("/register")}
-                      data-testid="button-get-started"
-                    >
-                      <span className="hidden sm:inline">Start Supporting Students</span>
-                      <span className="sm:hidden">Get Started</span>
-                    </Button>
-                    <Button 
-                      size="lg" 
-                      className="bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-3 text-base lg:px-8 lg:py-4 lg:text-lg w-full sm:w-auto"
-                      onClick={() => setLocation("/donate")}
-                      data-testid="button-donate-hero"
-                    >
-                      <Heart className="mr-1 lg:mr-2 h-4 w-4 lg:h-5 lg:w-5" />
-                      <span className="hidden lg:inline">Fund Student Education</span>
-                      <span className="hidden sm:inline lg:hidden">Fund Education</span>
-                      <span className="sm:hidden">Donate</span>
-                    </Button>
+                  <div className="flex flex-col gap-3 w-full max-w-lg">
+                    <div className="flex gap-3">
+                      <Button 
+                        size="lg" 
+                        className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-4 py-3 text-base flex-1"
+                        onClick={() => setLocation("/register")}
+                        data-testid="button-get-started"
+                      >
+                        <span className="hidden md:inline">Start Supporting</span>
+                        <span className="md:hidden">Get Started</span>
+                      </Button>
+                      <Button 
+                        size="lg" 
+                        className="bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-3 text-base flex-1"
+                        onClick={() => setLocation("/donate")}
+                        data-testid="button-donate-hero"
+                      >
+                        <Heart className="mr-1 h-4 w-4" />
+                        <span className="hidden md:inline">Fund Students</span>
+                        <span className="md:hidden">Donate</span>
+                      </Button>
+                    </div>
                     <Button 
                       size="lg" 
                       variant="outline"
-                      className="border-red-500/50 text-red-400 hover:bg-red-500/10 hover:border-red-400 px-6 py-3 text-base lg:px-6 lg:py-4 lg:text-lg w-full sm:w-auto"
+                      className="border-red-500/50 text-red-400 hover:bg-red-500/10 hover:border-red-400 px-4 py-3 text-base w-full"
                       onClick={() => {
                         const impactSection = document.getElementById('impact-mission');
                         impactSection?.scrollIntoView({ behavior: 'smooth' });
                       }}
                       data-testid="button-learn-more"
                     >
-                      Learn More
+                      Learn More About Our Impact
                     </Button>
                   </div>
                 </div>
