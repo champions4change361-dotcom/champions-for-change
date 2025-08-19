@@ -60,6 +60,7 @@ import BulkRegistration from './pages/BulkRegistration';
 import AthleteDashboard from './pages/AthleteDashboard';
 import CoachDashboard from './pages/CoachDashboard';
 import AthleticTrainerDashboard from './pages/AthleticTrainerDashboard';
+import ScorekeeperDashboard from './pages/ScorekeeperDashboard';
 import Login from './pages/Login';
 import DistrictLogin from './pages/DistrictLogin';
 import TournamentOrganizerLogin from './pages/TournamentOrganizerLogin';
@@ -254,6 +255,10 @@ function AppRouter() {
       <Route path="/athletic-trainer" component={AthleticTrainerDashboard} />
       <Route path="/athletic-trainer-dashboard" component={AthleticTrainerDashboard} />
       <Route path="/athletic-trainer-demo" component={AthleticTrainerDemo} />
+      
+      {/* Scorekeeper Dashboard - Public Demo Access */}
+      <Route path="/scorekeeper" component={ScorekeeperDashboard} />
+      <Route path="/scorekeeper-dashboard" component={ScorekeeperDashboard} />
       {/* Miller White-Label Homepage */}
       <Route path="/miller-homepage" component={MillerHomepage} />
       {/* Show Coaches Lounge landing page */}
