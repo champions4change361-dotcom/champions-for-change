@@ -222,6 +222,16 @@ export default function AdminManagement() {
                     <User className="h-3 w-3 mr-1" />
                     Login as District Admin
                   </Button>
+                  
+                  <Button
+                    onClick={() => navigate('/athletic-trainer-dashboard')}
+                    size="sm"
+                    className="bg-blue-600 hover:bg-blue-700 text-xs"
+                    data-testid="button-org-chart"
+                  >
+                    <Building2 className="h-3 w-3 mr-1" />
+                    Organizational Chart
+                  </Button>
                 </div>
                 <p className="text-xs text-gray-600 mt-2">
                   Use this to authenticate and test user creation features
