@@ -24,6 +24,7 @@ Organization Expansion: Include charter schools, private schools, pony leagues, 
 **AI Video Analysis**: Built and ready for deployment when AI video technology advances (12-18 months projected)
 **Market Position**: Comprehensive athletics ecosystem vs. point solutions, with uncopyable nonprofit mission advantage
 **Safari Compatibility**: Platform optimized for macOS Safari with responsive button layouts and proper text sizing (August 2025)
+**Accessibility Compliance**: Enterprise-grade accessibility with proper text contrast, white text on dark backgrounds, and WCAG compliance (August 2025)
 
 ## System Architecture
 
@@ -92,6 +93,9 @@ Organization Expansion: Include charter schools, private schools, pony leagues, 
 - **Academic Competition System**: Integration for 50+ UIL academic competitions covering grades 2-12 with district, regional, and state advancement, including role hierarchy, TEKS alignment, and academic achievement tracking.
 - **Subdomain-Based Architecture**: Separation of tournament management into distinct subdomains for enterprise users, district athletics, and school-level athletics.
 - **Cascading Dropdown System**: Comprehensive 3-tier progressive disclosure system for competition selection.
+- **Scorekeeper Scheduling System**: Complete Google Sheets replacement with assignment signup, coach-to-coach swap requests, approval workflows, athletic coordinator publishing, and real-time availability management.
+- **Family Access Management**: Three-tier security system (Full/Events Only/Results Only) with parent authorization, extended family access controls, real-time location privacy protections, and comprehensive audit trails for student safety.
+- **Enterprise Accessibility**: WCAG-compliant interface with proper text contrast, white text on dark backgrounds, accessible tab navigation, and professional readability standards.
 
 ## External Dependencies
 - **Database**: Neon PostgreSQL.
