@@ -106,13 +106,14 @@ export function BusinessPricingSection() {
                 className={`relative ${tier.popular ? 'border-2 border-blue-500 shadow-xl scale-105' : 'border border-gray-200'}`}
                 data-testid={`card-business-${tier.name.toLowerCase()}`}
               >
-                {tier.popular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-semibold">
-                    Most Popular
-                  </div>
-                )}
+
                 
                 <CardHeader className="text-center pb-6">
+                  <div className="h-8 mb-4 flex items-center justify-center">
+                    {tier.popular && (
+                      <Badge className="bg-blue-100 text-blue-800 text-xs px-2 py-1">Most Popular</Badge>
+                    )}
+                  </div>
                   <div className="mx-auto mb-4 p-3 bg-blue-100 rounded-full w-fit">
                     <IconComponent className="h-6 w-6 text-blue-600" />
                   </div>
