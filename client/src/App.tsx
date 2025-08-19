@@ -29,6 +29,7 @@ import CommissionerDashboard from './pages/CommissionerDashboard';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import RefundPolicy from './pages/RefundPolicy';
 import TermsOfService from './pages/TermsOfService';
+import Compliance from './pages/Compliance';
 import Register from './pages/Register';
 import RegistrationForm from './pages/RegistrationForm';
 import TournamentDesign from './pages/TournamentDesign';
@@ -157,6 +158,7 @@ function AuthenticatedRoutes() {
         <Route path="/privacy" component={PrivacyPolicy} />
         <Route path="/refund-policy" component={RefundPolicy} />
         <Route path="/terms" component={TermsOfService} />
+        <Route path="/compliance" component={Compliance} />
         
         <Route>
           {/* 404 - redirect to home */}
