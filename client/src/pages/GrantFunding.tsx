@@ -40,10 +40,21 @@ export default function GrantFunding() {
             We've identified grant opportunities that support athletic safety technology. Use these resources to fund your platform.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Button size="lg" className="bg-yellow-500 hover:bg-yellow-600 text-blue-900" data-testid="button-download-guide">
+            <Button 
+              size="lg" 
+              className="bg-yellow-500 hover:bg-yellow-600 text-blue-900" 
+              onClick={() => window.open('https://www.grants.gov/learn-grants/grant-making-process', '_blank')}
+              data-testid="button-download-guide"
+            >
               Download Grant Guide
             </Button>
-            <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-blue-900" data-testid="button-grant-resources">
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="border-white text-white hover:bg-white hover:text-blue-900" 
+              onClick={() => window.open('https://www.foundationcenter.org/', '_blank')}
+              data-testid="button-grant-resources"
+            >
               View Grant Resources
             </Button>
           </div>
@@ -103,7 +114,13 @@ export default function GrantFunding() {
                   <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
                     Funds programs that prevent sports-related injuries and promote youth safety. Perfect fit for our health monitoring features.
                   </p>
-                  <Button variant="outline" size="sm" className="w-full" data-testid="button-cdc-grants">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full" 
+                    onClick={() => window.open('https://www.cdc.gov/injury/grants/', '_blank')}
+                    data-testid="button-cdc-grants"
+                  >
                     <ExternalLink className="h-4 w-4 mr-2" />
                     View Details
                   </Button>
@@ -116,7 +133,13 @@ export default function GrantFunding() {
                   <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
                     For rural districts to improve educational services. Technology for student safety qualifies.
                   </p>
-                  <Button variant="outline" size="sm" className="w-full" data-testid="button-usda-grants">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full" 
+                    onClick={() => window.open('https://www.grants.gov/web/grants/view-opportunity.html?oppId=346573', '_blank')}
+                    data-testid="button-usda-grants"
+                  >
                     <ExternalLink className="h-4 w-4 mr-2" />
                     Apply Here
                   </Button>
@@ -129,7 +152,13 @@ export default function GrantFunding() {
                   <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
                     Educational technology innovations that improve student outcomes and safety.
                   </p>
-                  <Button variant="outline" size="sm" className="w-full" data-testid="button-ed-grants">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full" 
+                    onClick={() => window.open('https://www.ed.gov/fund/grant/find/edlite-forecast.html', '_blank')}
+                    data-testid="button-ed-grants"
+                  >
                     <ExternalLink className="h-4 w-4 mr-2" />
                     Learn More
                   </Button>
@@ -155,7 +184,13 @@ export default function GrantFunding() {
                   <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
                     TEA funds technology that enhances student safety and educational outcomes.
                   </p>
-                  <Button variant="outline" size="sm" className="w-full" data-testid="button-tea-grants">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full" 
+                    onClick={() => window.open('https://tea.texas.gov/finance-and-grants', '_blank')}
+                    data-testid="button-tea-grants"
+                  >
                     <ExternalLink className="h-4 w-4 mr-2" />
                     TEA Grants
                   </Button>
@@ -168,7 +203,13 @@ export default function GrantFunding() {
                   <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
                     Local ESCs often have small grants for innovative educational programs.
                   </p>
-                  <Button variant="outline" size="sm" className="w-full" data-testid="button-esc-grants">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full" 
+                    onClick={() => window.open('https://tea.texas.gov/regional-services/regional-education-service-centers', '_blank')}
+                    data-testid="button-esc-grants"
+                  >
                     <ExternalLink className="h-4 w-4 mr-2" />
                     Find Your ESC
                   </Button>
@@ -181,7 +222,13 @@ export default function GrantFunding() {
                   <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
                     Supports athletic programs and student safety initiatives in UIL member schools.
                   </p>
-                  <Button variant="outline" size="sm" className="w-full" data-testid="button-uil-grants">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full" 
+                    onClick={() => window.open('https://www.uiltexas.org/scholarships', '_blank')}
+                    data-testid="button-uil-grants"
+                  >
                     <ExternalLink className="h-4 w-4 mr-2" />
                     UIL Grants
                   </Button>
@@ -207,7 +254,13 @@ export default function GrantFunding() {
                   <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
                     Health-focused foundation supporting youth wellness and injury prevention programs.
                   </p>
-                  <Button variant="outline" size="sm" className="w-full" data-testid="button-rwjf-grants">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full" 
+                    onClick={() => window.open('https://www.rwjf.org/en/grants.html', '_blank')}
+                    data-testid="button-rwjf-grants"
+                  >
                     <ExternalLink className="h-4 w-4 mr-2" />
                     Apply Now
                   </Button>
@@ -220,7 +273,13 @@ export default function GrantFunding() {
                   <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
                     Supports programs that get kids active and safe through sports.
                   </p>
-                  <Button variant="outline" size="sm" className="w-full" data-testid="button-nike-grants">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full" 
+                    onClick={() => window.open('https://www.nike.com/help/a/community-impact-grants', '_blank')}
+                    data-testid="button-nike-grants"
+                  >
                     <ExternalLink className="h-4 w-4 mr-2" />
                     Nike Grants
                   </Button>
@@ -233,7 +292,13 @@ export default function GrantFunding() {
                   <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
                     Many local foundations support educational technology and youth safety programs.
                   </p>
-                  <Button variant="outline" size="sm" className="w-full" data-testid="button-local-grants">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full" 
+                    onClick={() => window.open('https://foundationcenter.org/', '_blank')}
+                    data-testid="button-local-grants"
+                  >
                     <ExternalLink className="h-4 w-4 mr-2" />
                     Find Local Foundations
                   </Button>
@@ -347,10 +412,20 @@ export default function GrantFunding() {
                 Our safety technology is an investment in student welfare that saves money and protects futures.
               </p>
               <div className="flex flex-wrap justify-center gap-4">
-                <Button size="lg" className="bg-green-600 hover:bg-green-700" data-testid="button-grant-platforms">
+                <Button 
+                  size="lg" 
+                  className="bg-green-600 hover:bg-green-700" 
+                  onClick={() => window.open('https://www.upwork.com/freelancers/skills/grant-writing/', '_blank')}
+                  data-testid="button-grant-platforms"
+                >
                   Find Grant Writing Services
                 </Button>
-                <Button size="lg" variant="outline" data-testid="button-download-template">
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  onClick={() => window.open('https://www.grants.gov/web/grants/applicants/applicant-resources.html', '_blank')}
+                  data-testid="button-download-template"
+                >
                   Download Application Template
                 </Button>
               </div>
