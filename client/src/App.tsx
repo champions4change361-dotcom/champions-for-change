@@ -124,6 +124,7 @@ function AuthenticatedRoutes() {
         <Route path="/coach-dashboard" component={CoachDashboard} />
         <Route path="/athletic-trainer-dashboard" component={AthleticTrainerDashboard} />
         <Route path="/role-dashboard" component={RoleBasedDashboards} />
+        <Route path="/role-based-dashboards" component={RoleBasedDashboards} />
         <Route path="/bulk-registration" component={BulkRegistration} />
         <Route path="/staff-registration" component={StaffRegistration} />
         <Route path="/staff-onboarding" component={StaffOnboarding} />

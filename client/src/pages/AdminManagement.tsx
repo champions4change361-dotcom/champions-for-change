@@ -224,7 +224,7 @@ export default function AdminManagement() {
                   </Button>
                   
                   <Button
-                    onClick={() => navigate('/athletic-trainer-dashboard')}
+                    onClick={() => navigate('/role-based-dashboards')}
                     size="sm"
                     className="bg-blue-600 hover:bg-blue-700 text-xs"
                     data-testid="button-org-chart"
