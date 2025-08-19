@@ -491,49 +491,58 @@ export default function Landing() {
 
           {/* Pricing Cards */}
           <div className="grid md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl p-6 text-white">
-              <div className="text-center">
+            <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl p-6 text-white flex flex-col">
+              <div className="text-center flex-1">
+                <div className="h-8 mb-3"></div> {/* Spacer for badge alignment */}
                 <h4 className="text-2xl font-bold mb-2">Tournament Organizer</h4>
                 <div className="text-4xl font-bold mb-2">$39<span className="text-lg font-normal">/month</span></div>
-                <div className="text-blue-200 mb-4">or $399/year (save 2 months)</div>
-                <Button 
-                  className="w-full bg-white text-blue-600 hover:bg-blue-50 font-semibold"
-                  onClick={() => setLocation("/pricing?type=education")}
-                >
-                  Start Free Trial
-                </Button>
-                <p className="text-blue-200 text-sm mt-3">Perfect for coaches & individual organizers</p>
+                <div className="text-blue-200 mb-6">or $399/year (save 2 months)</div>
+                <div className="mt-auto">
+                  <Button 
+                    className="w-full bg-white text-blue-600 hover:bg-blue-50 font-semibold mb-3"
+                    onClick={() => setLocation("/pricing?type=education")}
+                  >
+                    Start Free Trial
+                  </Button>
+                  <p className="text-blue-200 text-sm">Perfect for coaches & individual organizers</p>
+                </div>
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-green-600 to-green-700 rounded-xl p-6 text-white border-2 border-yellow-400">
-              <div className="text-center">
+            <div className="bg-gradient-to-br from-green-600 to-green-700 rounded-xl p-6 text-white border-2 border-yellow-400 flex flex-col">
+              <div className="text-center flex-1">
                 <Badge className="bg-yellow-400 text-green-800 mb-3">Most Popular</Badge>
                 <h4 className="text-2xl font-bold mb-2">Business Enterprise</h4>
                 <div className="text-4xl font-bold mb-2">$149<span className="text-lg font-normal">/month</span></div>
-                <div className="text-green-200 mb-4">or $1,499/year (save 2 months)</div>
-                <Button 
-                  className="w-full bg-white text-green-600 hover:bg-green-50 font-semibold"
-                  onClick={() => setLocation("/pricing?type=business")}
-                >
-                  Start Enterprise
-                </Button>
-                <p className="text-green-200 text-sm mt-3">Flexible solutions for any organization</p>
+                <div className="text-green-200 mb-6">or $1,499/year (save 2 months)</div>
+                <div className="mt-auto">
+                  <Button 
+                    className="w-full bg-white text-green-600 hover:bg-green-50 font-semibold mb-3"
+                    onClick={() => setLocation("/pricing?type=business")}
+                  >
+                    Start Enterprise
+                  </Button>
+                  <p className="text-green-200 text-sm">Flexible solutions for any organization</p>
+                </div>
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl p-6 text-white">
-              <div className="text-center">
+            <div className="bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl p-6 text-white flex flex-col">
+              <div className="text-center flex-1">
+                <div className="h-8 mb-3"></div> {/* Spacer for badge alignment */}
                 <h4 className="text-2xl font-bold mb-2">District Enterprise</h4>
                 <div className="text-4xl font-bold mb-2">$4,500<span className="text-lg font-normal">/year</span></div>
-                <div className="text-purple-200 mb-4">Save $26,000+ annually vs alternatives</div>
-                <Button 
-                  className="w-full bg-white text-purple-600 hover:bg-purple-50 font-semibold"
-                  onClick={() => setLocation("/login/district")}
-                >
-                  Contact for District Access
-                </Button>
-                <p className="text-purple-200 text-sm mt-3">Complete district-wide management</p>
+                <div className="text-purple-200 mb-6">Save $26,000+ annually vs alternatives</div>
+                <div className="mt-auto">
+                  <Button 
+                    className="w-full bg-white text-purple-600 hover:bg-purple-50 font-semibold mb-3"
+                    onClick={() => setLocation("/login/district")}
+                  >
+                    Start District
+                  </Button>
+                  <p className="text-purple-200 text-sm">Complete district-wide management</p>
+                  <p className="text-purple-200 text-xs mt-1">Contact for alternative payment options</p>
+                </div>
               </div>
             </div>
           </div>
