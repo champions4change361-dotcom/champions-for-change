@@ -37,6 +37,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { CheerleadingInjuryAssessment } from "@/components/CheerleadingInjuryAssessment";
+import { OrgChartBuilder } from "@/components/OrgChartBuilder";
 
 export default function AthleticTrainerDashboard() {
   const { user } = useAuth();
@@ -45,6 +46,7 @@ export default function AthleticTrainerDashboard() {
   const [showMessageComposer, setShowMessageComposer] = useState(false);
   const [showAIConsultant, setShowAIConsultant] = useState(false);
   const [showCheerInjuryAssessment, setShowCheerInjuryAssessment] = useState(false);
+  const [showOrgChartBuilder, setShowOrgChartBuilder] = useState(false);
   const [aiConsultation, setAiConsultation] = useState({
     athleteName: '',
     sport: '',
@@ -261,12 +263,23 @@ export default function AthleticTrainerDashboard() {
           {/* Athletes Tab */}
           <TabsContent value="athletes" className="space-y-4">
             <div className="bg-blue-50 border-l-4 border-blue-400 p-3 rounded mb-4">
-              <div className="flex items-center">
-                <Info className="h-4 w-4 text-blue-600 mr-2" />
-                <p className="text-sm text-blue-800">
-                  <strong>Demo Platform:</strong> This showcases comprehensive athletic training capabilities. 
-                  The AI Consultant provides fully functional injury assessment - other features demonstrate interface design.
-                </p>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <Info className="h-4 w-4 text-blue-600 mr-2" />
+                  <p className="text-sm text-blue-800">
+                    <strong>Demo Platform:</strong> This showcases comprehensive athletic training capabilities. 
+                    The AI Consultant provides fully functional injury assessment - other features demonstrate interface design.
+                  </p>
+                </div>
+                <Button
+                  size="sm"
+                  onClick={() => setShowOrgChartBuilder(true)}
+                  className="bg-green-600 hover:bg-green-700 text-xs"
+                  data-testid="button-org-chart-builder"
+                >
+                  <Users className="h-3 w-3 mr-1" />
+                  Build Org Chart
+                </Button>
               </div>
             </div>
             <div className="flex flex-col sm:flex-row gap-2 sm:justify-between sm:items-center">
@@ -2261,6 +2274,16 @@ export default function AthleticTrainerDashboard() {
         <CheerleadingInjuryAssessment 
           isOpen={showCheerInjuryAssessment}
           onClose={() => setShowCheerInjuryAssessment(false)}
+        />
+
+        <OrgChartBuilder
+          isOpen={showOrgChartBuilder}
+          onClose={() => setShowOrgChartBuilder(false)}
+          onSave={(orgChart) => {
+            console.log('Org chart saved:', orgChart);
+            // In a real implementation, this would save to the database
+            // and update the user permission system accordingly
+          }}
         />
       </div>
     </div>
