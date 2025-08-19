@@ -279,7 +279,7 @@ export default function Landing() {
                 <Button 
                   size="lg" 
                   variant="outline"
-                  className="border-white text-white hover:bg-white/10 hover:border-green-100 px-8 py-4 text-lg"
+                  className="border-green-200 text-green-100 hover:bg-green-600 hover:text-white hover:border-green-500 px-8 py-4 text-lg"
                   onClick={() => setLocation("/your-why")}
                   data-testid="button-impact-story"
                 >
