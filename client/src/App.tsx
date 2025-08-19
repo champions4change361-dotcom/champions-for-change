@@ -123,8 +123,7 @@ function AuthenticatedRoutes() {
         <Route path="/athlete-dashboard" component={AthleteDashboard} />
         <Route path="/coach-dashboard" component={CoachDashboard} />
         <Route path="/athletic-trainer-dashboard" component={AthleticTrainerDashboard} />
-        <Route path="/role-dashboard" component={RoleBasedDashboards} />
-        <Route path="/role-based-dashboards" component={RoleBasedDashboards} />
+
         <Route path="/bulk-registration" component={BulkRegistration} />
         <Route path="/staff-registration" component={StaffRegistration} />
         <Route path="/staff-onboarding" component={StaffOnboarding} />
@@ -279,6 +278,10 @@ function AppRouter() {
       {/* Family Access Management - Public Demo Access */}
       <Route path="/family-access" component={FamilyAccessManagement} />
       <Route path="/family-access-management" component={FamilyAccessManagement} />
+      
+      {/* Role-Based Dashboards - Admin Access */}
+      <Route path="/role-based-dashboards" component={RoleBasedDashboards} />
+      <Route path="/role-dashboard" component={RoleBasedDashboards} />
       {/* Miller White-Label Homepage */}
       <Route path="/miller-homepage" component={MillerHomepage} />
       {/* Show Coaches Lounge landing page */}
