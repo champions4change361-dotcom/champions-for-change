@@ -34,12 +34,14 @@ import {
   TrendingUp,
   Zap,
   Info,
-  Video
+  Video,
+  Share2
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { CheerleadingInjuryAssessment } from "@/components/CheerleadingInjuryAssessment";
 import { OrgChartBuilder } from "@/components/OrgChartBuilder";
 import { AIVideoAnalysis } from "@/components/AIVideoAnalysis";
+import { SocialSharingHub } from "@/components/SocialSharingHub";
 
 export default function AthleticTrainerDashboard() {
   const { user } = useAuth();
@@ -50,6 +52,7 @@ export default function AthleticTrainerDashboard() {
   const [showCheerInjuryAssessment, setShowCheerInjuryAssessment] = useState(false);
   const [showOrgChartBuilder, setShowOrgChartBuilder] = useState(false);
   const [showVideoAnalysis, setShowVideoAnalysis] = useState(false);
+  const [showSocialHub, setShowSocialHub] = useState(false);
   const [aiConsultation, setAiConsultation] = useState({
     athleteName: '',
     sport: '',
@@ -292,6 +295,15 @@ export default function AthleticTrainerDashboard() {
                   >
                     <Video className="h-3 w-3 mr-1" />
                     AI Video Beta
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => setShowSocialHub(true)}
+                    className="bg-orange-600 hover:bg-orange-700 text-xs"
+                    data-testid="button-social-hub"
+                  >
+                    <Share2 className="h-3 w-3 mr-1" />
+                    Social Hub
                   </Button>
                 </div>
               </div>
@@ -2304,6 +2316,11 @@ export default function AthleticTrainerDashboard() {
           isOpen={showVideoAnalysis}
           onClose={() => setShowVideoAnalysis(false)}
           sport="Basketball" // Could be dynamic based on context
+        />
+
+        <SocialSharingHub
+          isOpen={showSocialHub}
+          onClose={() => setShowSocialHub(false)}
         />
       </div>
     </div>
