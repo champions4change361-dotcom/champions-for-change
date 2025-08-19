@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Check, GraduationCap, Building, Star } from 'lucide-react';
+import { Check, GraduationCap, Building, Star, Mail } from 'lucide-react';
 
 export function EducationPricingSection() {
   const educationTiers = [
@@ -46,7 +46,7 @@ export function EducationPricingSection() {
       note: 'Annual option: $399/year (save 2 months)',
       icon: Star,
       popular: true,
-      badge: 'Most Popular'
+      badge: 'Most Tournament Organizers Choose This'
     },
     {
       name: 'District Enterprise',
@@ -65,12 +65,13 @@ export function EducationPricingSection() {
         'Staff training & onboarding',
         'Save $26,000+ annually vs current solutions'
       ],
-      cta: 'Contact for District Pricing',
+      cta: 'Register',
       buttonColor: 'bg-purple-600 hover:bg-purple-700',
-      note: 'ROI: Fiscally irresponsible not to adopt. Price locked forever.',
+      note: 'Alternative payment methods available. Contact us for flexible options.',
       icon: Building,
       popular: false,
-      badge: 'Massive Savings'
+      badge: 'Massive Savings',
+      contactInfo: true
     }
   ];
 
@@ -103,7 +104,7 @@ export function EducationPricingSection() {
                 {tier.popular && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-2 rounded-full text-sm font-semibold flex items-center gap-2">
                     <Star className="h-4 w-4" />
-                    Most Districts Choose This
+                    {tier.badge}
                   </div>
                 )}
                 
@@ -136,6 +137,19 @@ export function EducationPricingSection() {
                   >
                     {tier.cta}
                   </Button>
+                  
+                  {tier.contactInfo && (
+                    <Button 
+                      variant="outline"
+                      className="w-full mt-3 border-purple-300 text-purple-600 hover:bg-purple-50"
+                      size="lg"
+                      onClick={() => window.location.href = 'mailto:Champions4change361@gmail.com?subject=District Enterprise Pricing Inquiry&body=Hello, I am interested in learning more about District Enterprise pricing and alternative payment methods for our district.'}
+                      data-testid={`button-contact-${tier.name.toLowerCase()}`}
+                    >
+                      <Mail className="h-4 w-4 mr-2" />
+                      Contact Us
+                    </Button>
+                  )}
                   
                   {tier.note && (
                     <p className="text-xs text-gray-600 text-center mt-4 italic">

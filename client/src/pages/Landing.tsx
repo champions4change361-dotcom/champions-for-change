@@ -491,9 +491,9 @@ export default function Landing() {
 
           {/* Pricing Cards */}
           <div className="grid md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl p-6 text-white flex flex-col">
+            <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl p-6 text-white flex flex-col border-2 border-yellow-400">
               <div className="text-center flex-1">
-                <div className="h-8 mb-3"></div> {/* Spacer for badge alignment */}
+                <Badge className="bg-yellow-400 text-blue-800 mb-3">Most Tournament Organizers Choose This</Badge>
                 <h4 className="text-2xl font-bold mb-2">Tournament Organizer</h4>
                 <div className="text-4xl font-bold mb-2">$39<span className="text-lg font-normal">/month</span></div>
                 <div className="text-blue-200 mb-6">or $399/year (save 2 months)</div>
@@ -509,9 +509,9 @@ export default function Landing() {
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-green-600 to-green-700 rounded-xl p-6 text-white border-2 border-yellow-400 flex flex-col">
+            <div className="bg-gradient-to-br from-green-600 to-green-700 rounded-xl p-6 text-white flex flex-col">
               <div className="text-center flex-1">
-                <Badge className="bg-yellow-400 text-green-800 mb-3">Most Popular</Badge>
+                <div className="h-8 mb-3"></div> {/* Spacer for badge alignment */}
                 <h4 className="text-2xl font-bold mb-2">Business Enterprise</h4>
                 <div className="text-4xl font-bold mb-2">$149<span className="text-lg font-normal">/month</span></div>
                 <div className="text-green-200 mb-6">or $1,499/year (save 2 months)</div>
@@ -538,10 +538,18 @@ export default function Landing() {
                     className="w-full bg-white text-purple-600 hover:bg-purple-50 font-semibold mb-3"
                     onClick={() => setLocation("/login/district")}
                   >
-                    Start District
+                    Register
                   </Button>
-                  <p className="text-purple-200 text-sm">Complete district-wide management</p>
-                  <p className="text-purple-200 text-xs mt-1">Contact for alternative payment options</p>
+                  <Button 
+                    variant="outline"
+                    className="w-full mt-2 border-purple-300 text-purple-100 hover:bg-purple-500/20 hover:text-white"
+                    onClick={() => window.location.href = 'mailto:Champions4change361@gmail.com?subject=District Enterprise Alternative Payment Methods&body=Hello, I am interested in alternative payment methods for District Enterprise pricing.'}
+                  >
+                    <Mail className="h-4 w-4 mr-2" />
+                    Contact Us
+                  </Button>
+                  <p className="text-purple-200 text-sm mt-2">Complete district-wide management</p>
+                  <p className="text-purple-200 text-xs mt-1">Alternative payment methods available</p>
                 </div>
               </div>
             </div>
