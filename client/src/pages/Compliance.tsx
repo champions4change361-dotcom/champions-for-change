@@ -24,22 +24,38 @@ export default function Compliance() {
 
         {/* Quick Navigation */}
         <div className="grid md:grid-cols-4 gap-4 mb-12">
-          <a href="#privacy" className="bg-slate-800 border border-slate-700 rounded-lg p-4 hover:border-green-500/50 transition-all">
+          <button 
+            onClick={() => document.getElementById('privacy')?.scrollIntoView({ behavior: 'smooth' })}
+            className="bg-slate-800 border border-slate-700 rounded-lg p-4 hover:border-green-500/50 transition-all text-left"
+            data-testid="nav-privacy"
+          >
             <Eye className="h-6 w-6 text-green-400 mb-2" />
             <h3 className="text-white font-semibold">Privacy Policy</h3>
-          </a>
-          <a href="#ferpa" className="bg-slate-800 border border-slate-700 rounded-lg p-4 hover:border-blue-500/50 transition-all">
+          </button>
+          <button 
+            onClick={() => document.getElementById('ferpa')?.scrollIntoView({ behavior: 'smooth' })}
+            className="bg-slate-800 border border-slate-700 rounded-lg p-4 hover:border-blue-500/50 transition-all text-left"
+            data-testid="nav-ferpa"
+          >
             <FileText className="h-6 w-6 text-blue-400 mb-2" />
             <h3 className="text-white font-semibold">FERPA Compliance</h3>
-          </a>
-          <a href="#hipaa" className="bg-slate-800 border border-slate-700 rounded-lg p-4 hover:border-purple-500/50 transition-all">
+          </button>
+          <button 
+            onClick={() => document.getElementById('hipaa')?.scrollIntoView({ behavior: 'smooth' })}
+            className="bg-slate-800 border border-slate-700 rounded-lg p-4 hover:border-purple-500/50 transition-all text-left"
+            data-testid="nav-hipaa"
+          >
             <Heart className="h-6 w-6 text-purple-400 mb-2" />
             <h3 className="text-white font-semibold">HIPAA Compliance</h3>
-          </a>
-          <a href="#safety" className="bg-slate-800 border border-slate-700 rounded-lg p-4 hover:border-orange-500/50 transition-all">
+          </button>
+          <button 
+            onClick={() => document.getElementById('safety')?.scrollIntoView({ behavior: 'smooth' })}
+            className="bg-slate-800 border border-slate-700 rounded-lg p-4 hover:border-orange-500/50 transition-all text-left"
+            data-testid="nav-safety"
+          >
             <Shield className="h-6 w-6 text-orange-400 mb-2" />
             <h3 className="text-white font-semibold">Safety Protocols</h3>
-          </a>
+          </button>
         </div>
 
         {/* Privacy Policy */}

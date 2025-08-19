@@ -610,6 +610,27 @@ export default function Landing() {
         <DonationSection />
       </main>
 
+      {/* Compliance Center Link */}
+      <div className="bg-slate-800 border border-slate-700 rounded-2xl p-8 mb-12">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Shield className="h-8 w-8 text-green-400" />
+          </div>
+          <h3 className="text-2xl font-bold text-white mb-3">Compliance & Privacy Center</h3>
+          <p className="text-slate-300 mb-6 max-w-2xl mx-auto">
+            Access our comprehensive compliance documentation including Privacy Policy, FERPA, HIPAA, 
+            and Safety Protocols. Essential for Facebook plugins and third-party integrations.
+          </p>
+          <Button 
+            className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 text-lg"
+            onClick={() => setLocation("/compliance")}
+            data-testid="button-compliance-center"
+          >
+            View Compliance Center
+          </Button>
+        </div>
+      </div>
+
       {/* AI Consultant */}
       <AIConsultant domain="education" />
       

@@ -154,11 +154,7 @@ function AuthenticatedRoutes() {
         <Route path="/checkout" component={Checkout} />
         <Route path="/donation-success" component={DonationSuccess} />
         
-        {/* Legal Pages */}
-        <Route path="/privacy" component={PrivacyPolicy} />
-        <Route path="/refund-policy" component={RefundPolicy} />
-        <Route path="/terms" component={TermsOfService} />
-        <Route path="/compliance" component={Compliance} />
+        {/* Note: Legal pages moved to public routes for better accessibility */}
         
         <Route>
           {/* 404 - redirect to home */}
@@ -229,6 +225,12 @@ function AppRouter() {
       <Route path="/register" component={RegistrationForm} />
       <Route path="/tournament/design" component={TournamentDesign} />
       <Route path="/register-old" component={Register} />
+      
+      {/* Legal and Compliance Pages - Public Access */}
+      <Route path="/privacy" component={PrivacyPolicy} />
+      <Route path="/refund-policy" component={RefundPolicy} />
+      <Route path="/terms" component={TermsOfService} />
+      <Route path="/compliance" component={Compliance} />
 
       <Route path="/health-benefits" component={HealthBenefits} />
       <Route path="/grant-funding" component={GrantFunding} />

@@ -84,6 +84,9 @@ export default function Footer() {
               <p>&copy; 2025 Champions for Change. Supporting education through sports management.</p>
             </div>
             <div className="flex items-center gap-6 text-sm">
+              <Link href="/compliance" className="text-gray-400 hover:text-white transition-colors">
+                Compliance Center
+              </Link>
               <Link href="/privacy" className="text-gray-400 hover:text-white transition-colors">
                 Privacy Policy
               </Link>
