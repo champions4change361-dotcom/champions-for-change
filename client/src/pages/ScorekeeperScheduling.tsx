@@ -314,7 +314,7 @@ export default function ScorekeeperScheduling() {
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-white">Available Scorekeeper Assignments</h2>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" className="border-slate-600 text-white hover:text-slate-900">
+                <Button variant="outline" size="sm" className="border-slate-600 text-white hover:bg-slate-700 hover:text-white bg-slate-800">
                   <Filter className="h-4 w-4 mr-2" />
                   Filter
                 </Button>
@@ -376,7 +376,7 @@ export default function ScorekeeperScheduling() {
                         </Button>
                         <Button 
                           variant="outline"
-                          className="border-slate-600 text-white hover:bg-slate-700 hover:text-white"
+                          className="border-slate-600 text-white hover:bg-slate-700 hover:text-white bg-slate-800"
                           data-testid={`button-details-${assignment.id}`}
                         >
                           <Eye className="h-4 w-4 mr-2" />
@@ -496,7 +496,7 @@ export default function ScorekeeperScheduling() {
                         {assignment.canSwap && (
                           <Button 
                             variant="outline"
-                            className="border-orange-500 text-orange-400 hover:bg-orange-500/10"
+                            className="border-orange-500 text-orange-300 hover:bg-orange-500/20 hover:text-white bg-slate-800"
                             onClick={() => {
                               setSelectedAssignment(assignment.id);
                               setShowSwapDialog(true);
@@ -509,7 +509,7 @@ export default function ScorekeeperScheduling() {
                         )}
                         <Button 
                           variant="outline"
-                          className="border-blue-500 text-blue-300 hover:bg-blue-500/20 hover:text-white"
+                          className="border-blue-500 text-blue-300 hover:bg-blue-500/20 hover:text-white bg-slate-800"
                           data-testid={`button-event-details-${assignment.id}`}
                         >
                           <Eye className="h-4 w-4 mr-2" />
