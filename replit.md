@@ -23,6 +23,7 @@ Organization Expansion: Include charter schools, private schools, pony leagues, 
 **Competitive Moat**: Mission-driven purpose funding student educational opportunities - cannot be replicated by pure tech companies
 **AI Video Analysis**: Built and ready for deployment when AI video technology advances (12-18 months projected)
 **Market Position**: Comprehensive athletics ecosystem vs. point solutions, with uncopyable nonprofit mission advantage
+**Safari Compatibility**: Platform optimized for macOS Safari with responsive button layouts and proper text sizing (August 2025)
 
 ## System Architecture
 
@@ -65,6 +66,7 @@ Organization Expansion: Include charter schools, private schools, pony leagues, 
 - **User Hierarchy**: A multi-tiered role-based access control system matching standard district athletics structure: District Level (Athletic Director, Athletic Coordinator, Athletic Trainer, Aquatic Coordinator), School Level (same positions at school level), and Coaching Level (Head Coach, Assistant Coach). This hierarchy enforces HIPAA compliance for medical/tournament data partitioning and aligns with standard district organizational charts like CCISD.
 - **HIPAA/FERPA Compliance**: Enterprise-grade route-level compliance middleware with automatic audit logging, role-based medical data access controls, and comprehensive violation tracking.
 - **Age Verification System**: Implemented for specific domains to ensure 21+ access for legal compliance.
+- **Stripe Payment Integration**: Secure payment processing with proper publishable/secret key separation for client-server architecture.
 
 ### Core Features & Design Patterns
 - **Shared Schema**: Common TypeScript types and Zod schemas shared between frontend and backend.
