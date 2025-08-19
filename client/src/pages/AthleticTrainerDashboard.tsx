@@ -53,7 +53,9 @@ export default function AthleticTrainerDashboard() {
     onset: '',
     mechanism: '',
     previousInjuries: '',
-    currentActivity: ''
+    currentActivity: '',
+    injuryDate: '',
+    injuryTime: ''
   });
 
   // Mock data for demonstration
@@ -1341,13 +1343,37 @@ export default function AthleticTrainerDashboard() {
                     <h3 className="font-semibold text-lg text-gray-900">Injury Assessment</h3>
                     
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Onset</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">When Did Injury Occur?</label>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div>
+                          <Input
+                            type="date"
+                            value={aiConsultation.injuryDate}
+                            onChange={(e) => setAiConsultation(prev => ({ ...prev, injuryDate: e.target.value }))}
+                            className="w-full"
+                            data-testid="input-injury-date"
+                          />
+                        </div>
+                        <div>
+                          <Input
+                            type="time"
+                            value={aiConsultation.injuryTime}
+                            onChange={(e) => setAiConsultation(prev => ({ ...prev, injuryTime: e.target.value }))}
+                            className="w-full"
+                            data-testid="input-injury-time"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Onset Pattern</label>
                       <Select 
                         value={aiConsultation.onset}
                         onValueChange={(value) => setAiConsultation(prev => ({ ...prev, onset: value }))}
                       >
                         <SelectTrigger data-testid="select-onset">
-                          <SelectValue placeholder="When did symptoms start?" />
+                          <SelectValue placeholder="How did symptoms develop?" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="acute">Acute (sudden onset)</SelectItem>
