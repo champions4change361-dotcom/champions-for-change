@@ -24,7 +24,8 @@ export function EducationPricingSection() {
       note: '$25 suggested donation per tournament to support Champions for Change student trips',
       icon: GraduationCap,
       popular: false,
-      badge: 'Free'
+      badge: 'Free',
+      contactInfo: true
     },
     {
       name: 'Tournament Organizer',
@@ -46,7 +47,8 @@ export function EducationPricingSection() {
       note: 'Annual option: $399/year (save 2 months)',
       icon: Star,
       popular: true,
-      badge: 'Most Tournament Organizers Choose This'
+      badge: 'Most Tournament Organizers Choose This',
+      contactInfo: true
     },
     {
       name: 'District Enterprise',
@@ -141,10 +143,22 @@ export function EducationPricingSection() {
                   {tier.contactInfo && (
                     <Button 
                       variant="outline"
-                      className="w-full mt-3 border-purple-300 text-purple-600 hover:bg-purple-50"
+                      className={`w-full mt-3 ${
+                        tier.name === 'District Enterprise' 
+                          ? 'border-blue-500 text-blue-700 hover:bg-blue-50 bg-blue-500 text-white hover:text-blue-700' 
+                          : 'border-blue-500 text-white hover:bg-blue-700 bg-blue-600'
+                      }`}
                       size="lg"
-                      onClick={() => window.location.href = 'mailto:Champions4change361@gmail.com?subject=District Enterprise Pricing Inquiry&body=Hello, I am interested in learning more about District Enterprise pricing and alternative payment methods for our district.'}
-                      data-testid={`button-contact-${tier.name.toLowerCase()}`}
+                      onClick={() => {
+                        const subject = tier.name === 'District Enterprise' 
+                          ? 'District Enterprise Pricing Inquiry'
+                          : `${tier.name} Pricing Inquiry`;
+                        const body = tier.name === 'District Enterprise'
+                          ? 'Hello, I am interested in learning more about District Enterprise pricing and alternative payment methods for our district.'
+                          : `Hello, I am interested in learning more about ${tier.name} and would like to discuss pricing options.`;
+                        window.location.href = `mailto:Champions4change361@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                      }}
+                      data-testid={`button-contact-${tier.name.toLowerCase().replace(/\s+/g, '-')}`}
                     >
                       <Mail className="h-4 w-4 mr-2" />
                       Contact Us

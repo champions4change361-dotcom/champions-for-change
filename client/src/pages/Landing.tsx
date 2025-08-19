@@ -83,6 +83,15 @@ export default function Landing() {
                     <span className="lg:hidden">Sign Up</span>
                     <span className="hidden lg:inline">Sign Up Free</span>
                   </Button>
+                  <Button 
+                    onClick={() => window.location.href = 'mailto:Champions4change361@gmail.com?subject=Champions for Change Platform Inquiry&body=Hello, I am interested in learning more about your tournament platform and would like to discuss how it can support our organization.'}
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base w-full lg:w-auto"
+                    data-testid="button-contact-header"
+                  >
+                    <Mail className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4" />
+                    <span className="lg:hidden">Contact</span>
+                    <span className="hidden lg:inline">Contact Us</span>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -504,7 +513,15 @@ export default function Landing() {
                   >
                     Start Free Trial
                   </Button>
-                  <p className="text-blue-200 text-sm">Perfect for coaches & individual organizers</p>
+                  <Button 
+                    variant="outline"
+                    className="w-full mt-2 border-blue-300 text-white hover:bg-blue-500/20 hover:text-white bg-blue-600"
+                    onClick={() => window.location.href = 'mailto:Champions4change361@gmail.com?subject=Tournament Organizer Pricing Inquiry&body=Hello, I am interested in learning more about Tournament Organizer pricing and would like to discuss options.'}
+                  >
+                    <Mail className="h-4 w-4 mr-2" />
+                    Contact Us
+                  </Button>
+                  <p className="text-blue-200 text-sm mt-2">Perfect for coaches & individual organizers</p>
                 </div>
               </div>
             </div>
@@ -522,7 +539,15 @@ export default function Landing() {
                   >
                     Start Enterprise
                   </Button>
-                  <p className="text-green-200 text-sm">Flexible solutions for any organization</p>
+                  <Button 
+                    variant="outline"
+                    className="w-full mt-2 border-green-300 text-white hover:bg-green-500/20 hover:text-white bg-blue-600"
+                    onClick={() => window.location.href = 'mailto:Champions4change361@gmail.com?subject=Business Enterprise Pricing Inquiry&body=Hello, I am interested in learning more about Business Enterprise pricing and would like to discuss flexible solutions.'}
+                  >
+                    <Mail className="h-4 w-4 mr-2" />
+                    Contact Us
+                  </Button>
+                  <p className="text-green-200 text-sm mt-2">Flexible solutions for any organization</p>
                 </div>
               </div>
             </div>
@@ -542,7 +567,7 @@ export default function Landing() {
                   </Button>
                   <Button 
                     variant="outline"
-                    className="w-full mt-2 border-purple-300 text-purple-100 hover:bg-purple-500/20 hover:text-white"
+                    className="w-full mt-2 border-purple-300 text-white hover:bg-purple-500/20 hover:text-white bg-blue-600"
                     onClick={() => window.location.href = 'mailto:Champions4change361@gmail.com?subject=District Enterprise Alternative Payment Methods&body=Hello, I am interested in alternative payment methods for District Enterprise pricing.'}
                   >
                     <Mail className="h-4 w-4 mr-2" />
