@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { AlertCircle, Users, Building, GraduationCap, Heart, Trophy, FileText, Settings, GitBranch, ArrowLeft, LogIn, Shield } from 'lucide-react';
+import { AlertCircle, Users, Building, GraduationCap, Heart, Trophy, FileText, Settings, GitBranch, ArrowLeft, LogIn, Shield, DollarSign, Calculator, Save, Download, Upload, Plus, Edit3, CheckCircle, AlertTriangle, School, UserCheck, BookOpen, ClipboardCheck } from 'lucide-react';
 import { OrgChartBuilder } from '@/components/OrgChartBuilder';
 
 interface DashboardProps {
@@ -141,6 +141,18 @@ function DistrictAthleticDirectorDashboard({ organizationId }: { organizationId:
               <p>District-wide athletic program management dashboard with cascading data access</p>
             </CardContent>
           </Card>
+        </TabsContent>
+        
+        <TabsContent value="budgets">
+          <BudgetAllocationTab organizationId={organizationId} />
+        </TabsContent>
+        
+        <TabsContent value="compliance">
+          <ComplianceManagementTab organizationId={organizationId} />
+        </TabsContent>
+        
+        <TabsContent value="schools">
+          <SchoolManagementTab organizationId={organizationId} />
         </TabsContent>
         
         <TabsContent value="org-structure">
@@ -786,5 +798,575 @@ export default function RoleBasedDashboards() {
         {renderDashboard()}
       </div>
     </div>
+  );
+}
+
+// BUDGET ALLOCATION TAB - Professional spreadsheet-style budget management
+function BudgetAllocationTab({ organizationId }: { organizationId: string }) {
+  const [budgetItems, setBudgetItems] = useState([
+    // CCISD-style budget structure based on your research
+    { category: 'PAYROLL COSTS', subcategory: 'Athletic Director Salary', budgeted: '', actual: '', variance: '', percentage: 'auto', notes: '' },
+    { category: 'PAYROLL COSTS', subcategory: 'Head Coaches Stipends', budgeted: '', actual: '', variance: '', percentage: 'auto', notes: '' },
+    { category: 'PAYROLL COSTS', subcategory: 'Assistant Coaches Stipends', budgeted: '', actual: '', variance: '', percentage: 'auto', notes: '' },
+    { category: 'PAYROLL COSTS', subcategory: 'Athletic Trainers', budgeted: '', actual: '', variance: '', percentage: 'auto', notes: '' },
+    { category: 'PAYROLL COSTS', subcategory: 'Support Staff', budgeted: '', actual: '', variance: '', percentage: 'auto', notes: '' },
+    
+    { category: 'PROFESSIONAL SERVICES', subcategory: 'Officials/Referees Fees', budgeted: '', actual: '', variance: '', percentage: 'auto', notes: '' },
+    { category: 'PROFESSIONAL SERVICES', subcategory: 'Medical Services', budgeted: '', actual: '', variance: '', percentage: 'auto', notes: '' },
+    { category: 'PROFESSIONAL SERVICES', subcategory: 'Event Security', budgeted: '', actual: '', variance: '', percentage: 'auto', notes: '' },
+    { category: 'PROFESSIONAL SERVICES', subcategory: 'Contracted Maintenance', budgeted: '', actual: '', variance: '', percentage: 'auto', notes: '' },
+    
+    { category: 'SUPPLIES & MATERIALS', subcategory: 'Uniforms & Equipment', budgeted: '', actual: '', variance: '', percentage: 'auto', notes: '' },
+    { category: 'SUPPLIES & MATERIALS', subcategory: 'Athletic Equipment', budgeted: '', actual: '', variance: '', percentage: 'auto', notes: '' },
+    { category: 'SUPPLIES & MATERIALS', subcategory: 'Office Supplies', budgeted: '', actual: '', variance: '', percentage: 'auto', notes: '' },
+    { category: 'SUPPLIES & MATERIALS', subcategory: 'First Aid Supplies', budgeted: '', actual: '', variance: '', percentage: 'auto', notes: '' },
+    
+    { category: 'OPERATING EXPENSES', subcategory: 'Transportation/Buses', budgeted: '', actual: '', variance: '', percentage: 'auto', notes: '' },
+    { category: 'OPERATING EXPENSES', subcategory: 'Tournament Entry Fees', budgeted: '', actual: '', variance: '', percentage: 'auto', notes: '' },
+    { category: 'OPERATING EXPENSES', subcategory: 'Travel/Meals/Lodging', budgeted: '', actual: '', variance: '', percentage: 'auto', notes: '' },
+    { category: 'OPERATING EXPENSES', subcategory: 'Awards & Banquets', budgeted: '', actual: '', variance: '', percentage: 'auto', notes: '' },
+    
+    { category: 'CAPITAL OUTLAY', subcategory: 'Equipment Purchases', budgeted: '', actual: '', variance: '', percentage: 'auto', notes: '' },
+    { category: 'CAPITAL OUTLAY', subcategory: 'Scoreboards/Technology', budgeted: '', actual: '', variance: '', percentage: 'auto', notes: '' },
+    { category: 'CAPITAL OUTLAY', subcategory: 'Vehicles', budgeted: '', actual: '', variance: '', percentage: 'auto', notes: '' },
+    
+    { category: 'FACILITIES & UTILITIES', subcategory: 'Field Maintenance', budgeted: '', actual: '', variance: '', percentage: 'auto', notes: '' },
+    { category: 'FACILITIES & UTILITIES', subcategory: 'Utilities for Events', budgeted: '', actual: '', variance: '', percentage: 'auto', notes: '' },
+    { category: 'FACILITIES & UTILITIES', subcategory: 'Insurance', budgeted: '', actual: '', variance: '', percentage: 'auto', notes: '' }
+  ]);
+  
+  const [totalBudget, setTotalBudget] = useState('');
+  
+  // Calculate totals and variances
+  const calculateTotals = () => {
+    const budgetedTotal = budgetItems.reduce((sum, item) => sum + (parseFloat(item.budgeted) || 0), 0);
+    const actualTotal = budgetItems.reduce((sum, item) => sum + (parseFloat(item.actual) || 0), 0);
+    const varianceTotal = actualTotal - budgetedTotal;
+    return { budgetedTotal, actualTotal, varianceTotal };
+  };
+  
+  const updateBudgetItem = (index: number, field: string, value: string) => {
+    const updated = [...budgetItems];
+    updated[index] = { ...updated[index], [field]: value };
+    
+    // Auto-calculate variance if both budgeted and actual are present
+    if (field === 'budgeted' || field === 'actual') {
+      const budgeted = parseFloat(updated[index].budgeted) || 0;
+      const actual = parseFloat(updated[index].actual) || 0;
+      updated[index].variance = (actual - budgeted).toFixed(2);
+    }
+    
+    setBudgetItems(updated);
+  };
+  
+  const addBudgetItem = () => {
+    setBudgetItems([...budgetItems, {
+      category: 'CUSTOM',
+      subcategory: 'New Line Item',
+      budgeted: '',
+      actual: '',
+      variance: '',
+      percentage: 'auto',
+      notes: ''
+    }]);
+  };
+  
+  const { budgetedTotal, actualTotal, varianceTotal } = calculateTotals();
+  
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <DollarSign className="h-5 w-5" />
+          District Athletic Budget Allocation
+        </CardTitle>
+        <CardDescription>
+          Professional budget management tool with CCISD-style categories and automatic calculations
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-6">
+          {/* Budget Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-green-50 rounded-lg border border-green-200">
+            <div>
+              <Label>Total Budget Allocation</Label>
+              <Input
+                type="number"
+                placeholder="8400000"
+                value={totalBudget}
+                onChange={(e) => setTotalBudget(e.target.value)}
+                className="text-lg font-semibold"
+              />
+              <p className="text-xs text-green-700 mt-1">CCISD Range: $8.4M - $15M</p>
+            </div>
+            <div className="space-y-1">
+              <Label className="text-sm">Budgeted Total</Label>
+              <p className="text-lg font-semibold text-blue-700">
+                ${budgetedTotal.toLocaleString()}
+              </p>
+            </div>
+            <div className="space-y-1">
+              <Label className="text-sm">Actual Spent</Label>
+              <p className="text-lg font-semibold text-orange-700">
+                ${actualTotal.toLocaleString()}
+              </p>
+            </div>
+            <div className="space-y-1">
+              <Label className="text-sm">Variance</Label>
+              <p className={`text-lg font-semibold ${varianceTotal >= 0 ? 'text-red-700' : 'text-green-700'}`}>
+                ${varianceTotal.toLocaleString()}
+              </p>
+            </div>
+          </div>
+          
+          {/* Action Buttons */}
+          <div className="flex gap-2">
+            <Button onClick={addBudgetItem} size="sm">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Line Item
+            </Button>
+            <Button variant="outline" size="sm">
+              <Download className="h-4 w-4 mr-2" />
+              Export to Excel
+            </Button>
+            <Button variant="outline" size="sm">
+              <Upload className="h-4 w-4 mr-2" />
+              Import Budget
+            </Button>
+            <Button variant="outline" size="sm">
+              <Save className="h-4 w-4 mr-2" />
+              Save Budget
+            </Button>
+          </div>
+          
+          {/* Budget Spreadsheet */}
+          <div className="border rounded-lg overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="border border-gray-200 p-2 text-left text-sm font-semibold">Category</th>
+                    <th className="border border-gray-200 p-2 text-left text-sm font-semibold">Line Item</th>
+                    <th className="border border-gray-200 p-2 text-left text-sm font-semibold">Budgeted ($)</th>
+                    <th className="border border-gray-200 p-2 text-left text-sm font-semibold">Actual ($)</th>
+                    <th className="border border-gray-200 p-2 text-left text-sm font-semibold">Variance ($)</th>
+                    <th className="border border-gray-200 p-2 text-left text-sm font-semibold">% of Total</th>
+                    <th className="border border-gray-200 p-2 text-left text-sm font-semibold">Notes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {budgetItems.map((item, index) => {
+                    const percentage = totalBudget && item.budgeted 
+                      ? ((parseFloat(item.budgeted) / parseFloat(totalBudget)) * 100).toFixed(1)
+                      : '0.0';
+                    const varianceColor = parseFloat(item.variance) >= 0 ? 'text-red-600' : 'text-green-600';
+                    
+                    return (
+                      <tr key={index} className="hover:bg-gray-50">
+                        <td className="border border-gray-200 p-2">
+                          <Input
+                            value={item.category}
+                            onChange={(e) => updateBudgetItem(index, 'category', e.target.value)}
+                            className="border-0 bg-transparent text-xs font-medium"
+                          />
+                        </td>
+                        <td className="border border-gray-200 p-2">
+                          <Input
+                            value={item.subcategory}
+                            onChange={(e) => updateBudgetItem(index, 'subcategory', e.target.value)}
+                            className="border-0 bg-transparent text-xs"
+                          />
+                        </td>
+                        <td className="border border-gray-200 p-2">
+                          <Input
+                            type="number"
+                            value={item.budgeted}
+                            onChange={(e) => updateBudgetItem(index, 'budgeted', e.target.value)}
+                            className="border-0 bg-transparent text-xs text-right"
+                            placeholder="0"
+                          />
+                        </td>
+                        <td className="border border-gray-200 p-2">
+                          <Input
+                            type="number"
+                            value={item.actual}
+                            onChange={(e) => updateBudgetItem(index, 'actual', e.target.value)}
+                            className="border-0 bg-transparent text-xs text-right"
+                            placeholder="0"
+                          />
+                        </td>
+                        <td className={`border border-gray-200 p-2 ${varianceColor}`}>
+                          <span className="text-xs font-medium">
+                            {item.variance ? `${parseFloat(item.variance) >= 0 ? '+' : ''}${item.variance}` : '0.00'}
+                          </span>
+                        </td>
+                        <td className="border border-gray-200 p-2">
+                          <span className="text-xs">{percentage}%</span>
+                        </td>
+                        <td className="border border-gray-200 p-2">
+                          <Input
+                            value={item.notes}
+                            onChange={(e) => updateBudgetItem(index, 'notes', e.target.value)}
+                            className="border-0 bg-transparent text-xs"
+                            placeholder="Add notes..."
+                          />
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+          {/* Budget Guidelines */}
+          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+            <h4 className="font-semibold text-blue-900 mb-2">CCISD Budget Guidelines</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-blue-800">
+              <div>
+                <p className="font-medium">Typical Allocation Ranges:</p>
+                <ul className="list-disc list-inside space-y-1 mt-1">
+                  <li>Payroll Costs: 50-70% ($4M-$10M)</li>
+                  <li>Operating Expenses: 15-25% ($1M-$4M)</li>
+                  <li>Supplies & Materials: 5-15% ($500K-$2M)</li>
+                  <li>Professional Services: 5-10% ($300K-$1.5M)</li>
+                </ul>
+              </div>
+              <div>
+                <p className="font-medium">Revenue Offsets:</p>
+                <ul className="list-disc list-inside space-y-1 mt-1">
+                  <li>Ticket Sales: $200K-$400K</li>
+                  <li>Concessions: $150K-$300K</li>
+                  <li>Playoff Games: $100K-$300K</li>
+                  <li>Sponsorships: $50K-$200K</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// COMPLIANCE MANAGEMENT TAB
+function ComplianceManagementTab({ organizationId }: { organizationId: string }) {
+  const [complianceItems, setComplianceItems] = useState([
+    { category: 'HIPAA Compliance', requirement: 'Staff Training Completed', status: 'pending', dueDate: '2024-12-01', responsible: 'Athletic Director', notes: '' },
+    { category: 'FERPA Compliance', requirement: 'Agreement Signed', status: 'completed', dueDate: '2024-09-01', responsible: 'District Office', notes: 'Annual renewal required' },
+    { category: 'Safety Protocols', requirement: 'Emergency Action Plans', status: 'in_progress', dueDate: '2024-11-15', responsible: 'Head Trainer', notes: '' },
+    { category: 'Insurance Coverage', requirement: 'Liability Insurance Active', status: 'completed', dueDate: '2025-08-01', responsible: 'Business Office', notes: 'Policy #12345' },
+    { category: 'UIL Compliance', requirement: 'Athletic Physical Forms', status: 'pending', dueDate: '2024-10-30', responsible: 'School Nurses', notes: '85% complete' },
+    { category: 'Background Checks', requirement: 'All Coaches Cleared', status: 'in_progress', dueDate: '2024-11-01', responsible: 'HR Department', notes: '3 pending renewals' }
+  ]);
+  
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'completed': return 'text-green-700 bg-green-100';
+      case 'in_progress': return 'text-yellow-700 bg-yellow-100';
+      case 'pending': return 'text-red-700 bg-red-100';
+      default: return 'text-gray-700 bg-gray-100';
+    }
+  };
+  
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'completed': return <CheckCircle className="h-4 w-4" />;
+      case 'in_progress': return <AlertTriangle className="h-4 w-4" />;
+      case 'pending': return <AlertCircle className="h-4 w-4" />;
+      default: return <FileText className="h-4 w-4" />;
+    }
+  };
+  
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Shield className="h-5 w-5" />
+          HIPAA/FERPA Compliance Management
+        </CardTitle>
+        <CardDescription>
+          Track regulatory compliance requirements and audit trails
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-6">
+          {/* Compliance Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card className="border-green-200 bg-green-50">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-5 w-5 text-green-600" />
+                  <div>
+                    <p className="text-sm font-medium">Completed</p>
+                    <p className="text-2xl font-bold text-green-700">
+                      {complianceItems.filter(item => item.status === 'completed').length}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="border-yellow-200 bg-yellow-50">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5 text-yellow-600" />
+                  <div>
+                    <p className="text-sm font-medium">In Progress</p>
+                    <p className="text-2xl font-bold text-yellow-700">
+                      {complianceItems.filter(item => item.status === 'in_progress').length}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="border-red-200 bg-red-50">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="h-5 w-5 text-red-600" />
+                  <div>
+                    <p className="text-sm font-medium">Pending</p>
+                    <p className="text-2xl font-bold text-red-700">
+                      {complianceItems.filter(item => item.status === 'pending').length}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          
+          {/* Compliance Tracking Table */}
+          <div className="border rounded-lg overflow-hidden">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="border border-gray-200 p-3 text-left text-sm font-semibold">Category</th>
+                  <th className="border border-gray-200 p-3 text-left text-sm font-semibold">Requirement</th>
+                  <th className="border border-gray-200 p-3 text-left text-sm font-semibold">Status</th>
+                  <th className="border border-gray-200 p-3 text-left text-sm font-semibold">Due Date</th>
+                  <th className="border border-gray-200 p-3 text-left text-sm font-semibold">Responsible Party</th>
+                  <th className="border border-gray-200 p-3 text-left text-sm font-semibold">Notes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {complianceItems.map((item, index) => (
+                  <tr key={index} className="hover:bg-gray-50">
+                    <td className="border border-gray-200 p-3 text-sm font-medium">{item.category}</td>
+                    <td className="border border-gray-200 p-3 text-sm">{item.requirement}</td>
+                    <td className="border border-gray-200 p-3">
+                      <Badge className={`${getStatusColor(item.status)} flex items-center gap-1 w-fit`}>
+                        {getStatusIcon(item.status)}
+                        {item.status.replace('_', ' ').toUpperCase()}
+                      </Badge>
+                    </td>
+                    <td className="border border-gray-200 p-3 text-sm">{item.dueDate}</td>
+                    <td className="border border-gray-200 p-3 text-sm">{item.responsible}</td>
+                    <td className="border border-gray-200 p-3 text-sm">{item.notes}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          
+          {/* Quick Actions */}
+          <div className="flex gap-2">
+            <Button size="sm">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Requirement
+            </Button>
+            <Button variant="outline" size="sm">
+              <Download className="h-4 w-4 mr-2" />
+              Export Report
+            </Button>
+            <Button variant="outline" size="sm">
+              <ClipboardCheck className="h-4 w-4 mr-2" />
+              Audit Trail
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// SCHOOL MANAGEMENT TAB
+function SchoolManagementTab({ organizationId }: { organizationId: string }) {
+  const [schools] = useState([
+    { 
+      name: 'Miller High School', 
+      students: 1247, 
+      athletes: 287, 
+      coaches: 18, 
+      sports: ['Football', 'Basketball', 'Baseball', 'Track', 'Soccer'], 
+      status: 'active',
+      lastUpdate: '2024-08-15'
+    },
+    { 
+      name: 'Driscoll Middle School', 
+      students: 892, 
+      athletes: 156, 
+      coaches: 12, 
+      sports: ['Basketball', 'Track', 'Soccer', 'Cross Country'], 
+      status: 'active',
+      lastUpdate: '2024-08-14'
+    },
+    { 
+      name: 'Martin Middle School', 
+      students: 734, 
+      athletes: 134, 
+      coaches: 10, 
+      sports: ['Basketball', 'Track', 'Volleyball'], 
+      status: 'active',
+      lastUpdate: '2024-08-13'
+    }
+  ]);
+  
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <School className="h-5 w-5" />
+          District School Management
+        </CardTitle>
+        <CardDescription>
+          Comprehensive oversight of all schools in the athletic district
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-6">
+          {/* District Summary */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card className="border-blue-200 bg-blue-50">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2">
+                  <Building className="h-5 w-5 text-blue-600" />
+                  <div>
+                    <p className="text-sm font-medium">Total Schools</p>
+                    <p className="text-2xl font-bold text-blue-700">{schools.length}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="border-green-200 bg-green-50">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2">
+                  <Users className="h-5 w-5 text-green-600" />
+                  <div>
+                    <p className="text-sm font-medium">Total Athletes</p>
+                    <p className="text-2xl font-bold text-green-700">
+                      {schools.reduce((sum, school) => sum + school.athletes, 0)}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="border-orange-200 bg-orange-50">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2">
+                  <UserCheck className="h-5 w-5 text-orange-600" />
+                  <div>
+                    <p className="text-sm font-medium">Total Coaches</p>
+                    <p className="text-2xl font-bold text-orange-700">
+                      {schools.reduce((sum, school) => sum + school.coaches, 0)}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="border-purple-200 bg-purple-50">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2">
+                  <GraduationCap className="h-5 w-5 text-purple-600" />
+                  <div>
+                    <p className="text-sm font-medium">Total Students</p>
+                    <p className="text-2xl font-bold text-purple-700">
+                      {schools.reduce((sum, school) => sum + school.students, 0).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          
+          {/* School Details Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {schools.map((school, index) => (
+              <Card key={index} className="border-gray-200">
+                <CardHeader>
+                  <CardTitle className="text-lg">{school.name}</CardTitle>
+                  <CardDescription>
+                    Last updated: {school.lastUpdate}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <Label className="text-xs text-gray-600">Total Students</Label>
+                        <p className="font-semibold">{school.students.toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <Label className="text-xs text-gray-600">Athletes</Label>
+                        <p className="font-semibold">{school.athletes}</p>
+                      </div>
+                      <div>
+                        <Label className="text-xs text-gray-600">Coaches</Label>
+                        <p className="font-semibold">{school.coaches}</p>
+                      </div>
+                      <div>
+                        <Label className="text-xs text-gray-600">Participation %</Label>
+                        <p className="font-semibold">{((school.athletes / school.students) * 100).toFixed(1)}%</p>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <Label className="text-xs text-gray-600">Sports Programs</Label>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {school.sports.map((sport, sportIndex) => (
+                          <Badge key={sportIndex} variant="outline" className="text-xs">
+                            {sport}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-2 pt-2">
+                      <Button size="sm" variant="outline" className="text-xs">
+                        <Edit3 className="h-3 w-3 mr-1" />
+                        Manage
+                      </Button>
+                      <Button size="sm" variant="outline" className="text-xs">
+                        <FileText className="h-3 w-3 mr-1" />
+                        Reports
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          
+          {/* Management Actions */}
+          <div className="flex gap-2">
+            <Button size="sm">
+              <Plus className="h-4 w-4 mr-2" />
+              Add School
+            </Button>
+            <Button variant="outline" size="sm">
+              <Download className="h-4 w-4 mr-2" />
+              Export Data
+            </Button>
+            <Button variant="outline" size="sm">
+              <BookOpen className="h-4 w-4 mr-2" />
+              District Report
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
