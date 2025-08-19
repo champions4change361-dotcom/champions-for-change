@@ -124,34 +124,38 @@ export default function AthleticTrainerDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-slate-50 p-3 sm:p-6">
+      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         
         {/* Header */}
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col lg:flex-row gap-4 lg:justify-between lg:items-center">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Athletic Training Center</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Athletic Training Center</h1>
             <p className="text-slate-600">Welcome back, {user?.firstName} {user?.lastName}</p>
           </div>
-          <div className="flex space-x-3">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
             <Button 
               onClick={() => setShowAIConsultant(true)}
-              className="bg-purple-600 hover:bg-purple-700"
+              className="bg-purple-600 hover:bg-purple-700 text-sm"
+              size="sm"
               data-testid="button-ai-consultant"
             >
               <Brain className="h-4 w-4 mr-2" />
-              AI Injury Consultant
+              AI Consultant
             </Button>
             <Button 
               onClick={() => setShowMessageComposer(true)}
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-blue-600 hover:bg-blue-700 text-sm"
+              size="sm"
               data-testid="button-compose-message"
             >
               <MessageSquare className="h-4 w-4 mr-2" />
-              Send Message
+              Message
             </Button>
             <Button 
               onClick={() => setShowAddAthlete(true)}
+              className="text-sm"
+              size="sm"
               data-testid="button-add-athlete"
             >
               <Plus className="h-4 w-4 mr-2" />
@@ -211,53 +215,60 @@ export default function AthleticTrainerDashboard() {
           </Card>
         </div>
 
-        {/* Main Dashboard Tabs */}
+        {/* Main Dashboard Tabs - Mobile Responsive */}
         <Tabs defaultValue="athletes" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-7">
-            <TabsTrigger value="athletes" data-testid="tab-athletes">
-              <Users className="h-4 w-4 mr-2" />
-              Athletes
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 h-auto p-1">
+            <TabsTrigger value="athletes" data-testid="tab-athletes" className="text-xs p-1 sm:p-2 flex-col sm:flex-row gap-1">
+              <Users className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Athletes</span>
+              <span className="sm:hidden">Ath</span>
             </TabsTrigger>
-            <TabsTrigger value="cheerleading" data-testid="tab-cheerleading">
-              <Zap className="h-4 w-4 mr-2" />
-              Support Teams
+            <TabsTrigger value="cheerleading" data-testid="tab-cheerleading" className="text-xs p-1 sm:p-2 flex-col sm:flex-row gap-1">
+              <Zap className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Support</span>
+              <span className="sm:hidden">Sup</span>
             </TabsTrigger>
-            <TabsTrigger value="communications" data-testid="tab-communications">
-              <MessageSquare className="h-4 w-4 mr-2" />
-              Communications
+            <TabsTrigger value="communications" data-testid="tab-communications" className="text-xs p-1 sm:p-2 flex-col sm:flex-row gap-1">
+              <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Comm</span>
+              <span className="sm:hidden">Msg</span>
             </TabsTrigger>
-            <TabsTrigger value="documents" data-testid="tab-documents">
-              <FileText className="h-4 w-4 mr-2" />
-              Medical Docs
+            <TabsTrigger value="documents" data-testid="tab-documents" className="text-xs p-1 sm:p-2 flex-col sm:flex-row gap-1">
+              <FileText className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Docs</span>
+              <span className="sm:hidden">Doc</span>
             </TabsTrigger>
-            <TabsTrigger value="care-plans" data-testid="tab-care-plans">
-              <Heart className="h-4 w-4 mr-2" />
-              Care Plans
+            <TabsTrigger value="care-plans" data-testid="tab-care-plans" className="text-xs p-1 sm:p-2 flex-col sm:flex-row gap-1">
+              <Heart className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Care</span>
+              <span className="sm:hidden">Care</span>
             </TabsTrigger>
-            <TabsTrigger value="supplies" data-testid="tab-supplies">
-              <Package className="h-4 w-4 mr-2" />
-              Supplies
+            <TabsTrigger value="supplies" data-testid="tab-supplies" className="text-xs p-1 sm:p-2 flex-col sm:flex-row gap-1">
+              <Package className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Supply</span>
+              <span className="sm:hidden">Sup</span>
             </TabsTrigger>
-            <TabsTrigger value="equipment" data-testid="tab-equipment">
-              <Shield className="h-4 w-4 mr-2" />
-              Equipment
+            <TabsTrigger value="equipment" data-testid="tab-equipment" className="text-xs p-1 sm:p-2 flex-col sm:flex-row gap-1">
+              <Shield className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Equipment</span>
+              <span className="sm:hidden">Eqp</span>
             </TabsTrigger>
           </TabsList>
 
           {/* Athletes Tab */}
           <TabsContent value="athletes" className="space-y-4">
-            <div className="flex justify-between items-center">
-              <div className="flex space-x-2">
-                <div className="relative">
+            <div className="flex flex-col sm:flex-row gap-2 sm:justify-between sm:items-center">
+              <div className="flex flex-col sm:flex-row gap-2">
+                <div className="relative flex-1 sm:flex-initial">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
                   <Input 
                     placeholder="Search athletes..."
-                    className="pl-10 w-64"
+                    className="pl-10 w-full sm:w-64"
                     data-testid="input-search-athletes"
                   />
                 </div>
-                <Select>
-                  <SelectTrigger className="w-32" data-testid="filter-sport">
+                <Select defaultValue="all">
+                  <SelectTrigger className="w-full sm:w-32" data-testid="filter-sport">
                     <Filter className="h-4 w-4 mr-2" />
                     <SelectValue placeholder="Sport" />
                   </SelectTrigger>
@@ -266,6 +277,8 @@ export default function AthleticTrainerDashboard() {
                     <SelectItem value="football">Football</SelectItem>
                     <SelectItem value="basketball">Basketball</SelectItem>
                     <SelectItem value="track">Track & Field</SelectItem>
+                    <SelectItem value="soccer">Soccer</SelectItem>
+                    <SelectItem value="tennis">Tennis</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -307,10 +320,11 @@ export default function AthleticTrainerDashboard() {
                       )}
                     </div>
 
-                    <div className="flex space-x-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <Button 
                         size="sm" 
                         variant="outline"
+                        className="flex-1 sm:flex-initial"
                         data-testid={`button-view-athlete-${athlete.id}`}
                       >
                         <FileText className="h-4 w-4 mr-1" />
@@ -319,6 +333,7 @@ export default function AthleticTrainerDashboard() {
                       <Button 
                         size="sm" 
                         variant="outline"
+                        className="flex-1 sm:flex-initial"
                         data-testid={`button-message-athlete-${athlete.id}`}
                       >
                         <MessageSquare className="h-4 w-4 mr-1" />
