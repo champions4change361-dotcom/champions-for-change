@@ -1230,7 +1230,7 @@ export default function AthleticTrainerDashboard() {
 
         {/* AI Injury Consultation Modal */}
         {showAIConsultant && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[9998]">
             <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
               <div className="p-6 border-b border-gray-200">
                 <div className="flex items-center justify-between">
@@ -1275,10 +1275,10 @@ export default function AthleticTrainerDashboard() {
                         value={aiConsultation.sport}
                         onValueChange={(value) => setAiConsultation(prev => ({ ...prev, sport: value }))}
                       >
-                        <SelectTrigger data-testid="select-sport-consultation">
+                        <SelectTrigger data-testid="select-sport-consultation" className="border-2 border-gray-300">
                           <SelectValue placeholder="Select sport" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="z-[9999]">
                           <SelectItem value="cheerleading">Cheerleading</SelectItem>
                           <SelectItem value="dance_team">Dance Team</SelectItem>
                           <SelectItem value="color_guard">Color Guard</SelectItem>
@@ -1299,13 +1299,13 @@ export default function AthleticTrainerDashboard() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Injury Location</label>
                       <Select 
-                        value={aiConsultation.injuryLocation}
+                        value={aiConsultation.injuryLocation || ''}
                         onValueChange={(value) => setAiConsultation(prev => ({ ...prev, injuryLocation: value }))}
                       >
-                        <SelectTrigger data-testid="select-injury-location">
+                        <SelectTrigger data-testid="select-injury-location" className="border-2 border-gray-300">
                           <SelectValue placeholder="Select area of concern" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="z-[9999]">
                           <SelectItem value="shoulder">Shoulder</SelectItem>
                           <SelectItem value="elbow">Elbow</SelectItem>
                           <SelectItem value="wrist">Wrist</SelectItem>
@@ -1314,6 +1314,10 @@ export default function AthleticTrainerDashboard() {
                           <SelectItem value="knee">Knee</SelectItem>
                           <SelectItem value="ankle">Ankle</SelectItem>
                           <SelectItem value="neck">Neck</SelectItem>
+                          <SelectItem value="head">Head/Concussion</SelectItem>
+                          <SelectItem value="chest">Chest</SelectItem>
+                          <SelectItem value="groin">Groin</SelectItem>
+                          <SelectItem value="foot">Foot</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -1324,10 +1328,10 @@ export default function AthleticTrainerDashboard() {
                         value={aiConsultation.painLevel}
                         onValueChange={(value) => setAiConsultation(prev => ({ ...prev, painLevel: value }))}
                       >
-                        <SelectTrigger data-testid="select-pain-level">
+                        <SelectTrigger data-testid="select-pain-level" className="border-2 border-gray-300">
                           <SelectValue placeholder="Select pain level" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="z-[9999]">
                           <SelectItem value="1-2">1-2 (Minimal)</SelectItem>
                           <SelectItem value="3-4">3-4 (Mild)</SelectItem>
                           <SelectItem value="5-6">5-6 (Moderate)</SelectItem>
@@ -1346,20 +1350,22 @@ export default function AthleticTrainerDashboard() {
                       <label className="block text-sm font-medium text-gray-700 mb-1">When Did Injury Occur?</label>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         <div>
+                          <label className="block text-xs text-gray-600 mb-1">Date</label>
                           <Input
                             type="date"
-                            value={aiConsultation.injuryDate}
+                            value={aiConsultation.injuryDate || ''}
                             onChange={(e) => setAiConsultation(prev => ({ ...prev, injuryDate: e.target.value }))}
-                            className="w-full"
+                            className="w-full border-2 border-gray-300 focus:border-blue-500"
                             data-testid="input-injury-date"
                           />
                         </div>
                         <div>
+                          <label className="block text-xs text-gray-600 mb-1">Time</label>
                           <Input
                             type="time"
-                            value={aiConsultation.injuryTime}
+                            value={aiConsultation.injuryTime || ''}
                             onChange={(e) => setAiConsultation(prev => ({ ...prev, injuryTime: e.target.value }))}
-                            className="w-full"
+                            className="w-full border-2 border-gray-300 focus:border-blue-500"
                             data-testid="input-injury-time"
                           />
                         </div>
