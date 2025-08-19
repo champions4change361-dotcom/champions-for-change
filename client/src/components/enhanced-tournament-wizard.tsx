@@ -475,49 +475,43 @@ export default function EnhancedTournamentWizard({
                   <Label htmlFor="ageGroup" className="block text-sm font-medium text-gray-700 mb-2">
                     Age Group
                   </Label>
-                  <Select
+                  <select
                     value={form.watch("ageGroup") || ""}
-                    onValueChange={(value) => {
-                      console.log("Age group selected:", value);
-                      form.setValue("ageGroup", value);
+                    onChange={(e) => {
+                      console.log("Age group selected:", e.target.value);
+                      form.setValue("ageGroup", e.target.value);
                     }}
+                    className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     data-testid="select-age-group"
                   >
-                    <SelectTrigger className="w-full" data-testid="trigger-age-group">
-                      <SelectValue placeholder="Select age group" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Elementary" data-testid="option-elementary">Elementary (K-5)</SelectItem>
-                      <SelectItem value="Middle School" data-testid="option-middle">Middle School (6-8)</SelectItem>
-                      <SelectItem value="High School" data-testid="option-high">High School (9-12)</SelectItem>
-                      <SelectItem value="Adult" data-testid="option-adult">Adult (18+)</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    <option value="">Select age group</option>
+                    <option value="Elementary">Elementary (K-5)</option>
+                    <option value="Middle School">Middle School (6-8)</option>
+                    <option value="High School">High School (9-12)</option>
+                    <option value="Adult">Adult (18+)</option>
+                  </select>
                 </div>
 
                 <div>
                   <Label htmlFor="genderDivision" className="block text-sm font-medium text-gray-700 mb-2">
                     Gender Division
                   </Label>
-                  <Select
+                  <select
                     value={form.watch("genderDivision") || ""}
-                    onValueChange={(value) => {
-                      console.log("Gender division selected:", value);
-                      form.setValue("genderDivision", value);
+                    onChange={(e) => {
+                      console.log("Gender division selected:", e.target.value);
+                      form.setValue("genderDivision", e.target.value);
                     }}
+                    className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     data-testid="select-gender-division"
                   >
-                    <SelectTrigger className="w-full" data-testid="trigger-gender-division">
-                      <SelectValue placeholder="Select division" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Men" data-testid="option-men">Men's</SelectItem>
-                      <SelectItem value="Women" data-testid="option-women">Women's</SelectItem>
-                      <SelectItem value="Boys" data-testid="option-boys">Boys'</SelectItem>
-                      <SelectItem value="Girls" data-testid="option-girls">Girls'</SelectItem>
-                      <SelectItem value="Mixed" data-testid="option-mixed">Mixed/Open</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    <option value="">Select division</option>
+                    <option value="Men">Men's</option>
+                    <option value="Women">Women's</option>
+                    <option value="Boys">Boys'</option>
+                    <option value="Girls">Girls'</option>
+                    <option value="Mixed">Mixed/Open</option>
+                  </select>
                 </div>
               </div>
             </div>
