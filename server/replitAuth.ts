@@ -54,7 +54,9 @@ export function getSession() {
       secure: false, // Allow HTTP for development
       maxAge: sessionTtl,
       sameSite: 'lax', // More compatible for same-site requests
+      path: '/', // Ensure cookie is available site-wide
     },
+    name: 'connect.sid', // Use standard session name
   });
 }
 

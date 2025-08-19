@@ -12,14 +12,14 @@ export default function QuickLogin() {
   const quickLogin = async (userType: 'district' | 'organizer' | 'business' = 'district') => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/login-form', {
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email: 'admin@example.com',
-          password: 'admin123',
+          email: 'champions4change361@gmail.com',
+          password: 'master-admin-danielthornton',
           userType
         }),
       });
@@ -30,8 +30,8 @@ export default function QuickLogin() {
           description: "Logged in successfully!",
         });
         
-        // Refresh the page to update auth state
-        window.location.reload();
+        // Redirect to dashboard instead of reload
+        window.location.href = '/role-based-dashboards';
       } else {
         const error = await response.json();
         toast({
