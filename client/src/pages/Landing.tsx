@@ -557,27 +557,27 @@ export default function Landing() {
             <div className="bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl p-6 text-white flex flex-col">
               <div className="text-center flex-1">
                 <div className="h-8 mb-3"></div> {/* Spacer for badge alignment */}
-                <h4 className="text-2xl font-bold mb-2">District Enterprise</h4>
-                <div className="text-4xl font-bold mb-2">$4,500<span className="text-lg font-normal">/year</span></div>
-                <div className="text-purple-200 mb-6">Save $26,000+ annually vs alternatives</div>
+                <h4 className="text-2xl font-bold mb-2">Champions District</h4>
+                <div className="text-4xl font-bold mb-2">$2,490<span className="text-lg font-normal">/year</span></div>
+                <div className="text-purple-200 mb-6">Full enterprise features - mission pricing (up to 15 schools)</div>
                 <div className="mt-auto">
                   <Button 
                     className="w-full bg-white text-purple-600 hover:bg-purple-50 font-semibold mb-3"
                     onClick={() => setLocation("/login/district")}
                   >
-                    Register
+                    Register District
                   </Button>
                   <Button 
                     variant="outline"
                     size="sm"
                     className="w-full mt-2 border-purple-300 text-white hover:bg-purple-500/20 hover:text-white bg-blue-600 flex items-center justify-center py-2"
-                    onClick={() => window.location.href = 'mailto:Champions4change361@gmail.com?subject=District Enterprise Alternative Payment Methods&body=Hello, I am interested in alternative payment methods for District Enterprise pricing.'}
+                    onClick={() => window.location.href = 'mailto:Champions4change361@gmail.com?subject=Champions District Enterprise Features&body=Hello, I am interested in learning more about Champions District enterprise capabilities and alternative payment methods.'}
                   >
                     <Mail className="h-3 w-3 mr-2" />
                     Contact Us
                   </Button>
-                  <p className="text-purple-200 text-sm mt-2">Complete district-wide management</p>
-                  <p className="text-purple-200 text-xs mt-1">Alternative payment methods available</p>
+                  <p className="text-purple-200 text-sm mt-2">Same enterprise capabilities as large districts</p>
+                  <p className="text-purple-200 text-xs mt-1">HIPAA/FERPA compliance • White-label branding • Medical data management</p>
                 </div>
               </div>
             </div>

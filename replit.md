@@ -10,9 +10,12 @@ Branding: Green and blue color scheme from Champions for Change logo, emphasis o
 Domain Strategy: Primary domain will be championsforchange.net hosted on Replit. All existing business cards and QR codes should redirect seamlessly to the new Replit-hosted tournament platform.
 Transparency Policy: Absolute commitment to honest marketing - no fake reviews, testimonials, or misleading claims. Platform will earn authentic reviews through real user experiences.
 Competitive Strategy: Mission-driven advantage - "Let them copy, they'll always be behind and can't replicate the authentic educational mission."
-District Value Proposition: At $4,500-5,000/year, districts save $26,000+ annually compared to current solutions while supporting educational mission. ROI still massive and fiscally irresponsible not to adopt. Districts handle student fees through existing systems - no payment processing burden on platform.
-Tournament Organizer Pricing: $39/month ($468/year) or $399/year (2 months free) - competitive with Jersey Watch + Challonge combined. Includes unlimited tournaments, 5-step AI wizard, 65+ sports, team management, CSV import/export, advanced analytics, and priority support.
-Business Enterprise Pricing: $149/month or $1,499/year (2 months free) for flexible enterprise solutions.
+Enterprise Equality Philosophy: All organizations receive the same enterprise-level capabilities regardless of size or budget. Pricing differentiated by volume limits and support level, never by feature quality. Small districts get identical enterprise features as large districts. Small businesses get identical enterprise features as large corporations.
+Champions District: $2,490/year (up to 15 schools) - Full enterprise district capabilities including HIPAA/FERPA compliance, athletic trainer medical data management, white-label branding, role hierarchy, emergency notifications, and cross-school coordination. Same features as District Enterprise.
+District Enterprise: $4,500/year (15+ schools, 25,000+ students) - Identical features to Champions District but with unlimited capacity, enhanced integrations, and dedicated account manager.
+Tournament Organizer: $39/month ($468/year) or $399/year (2 months free) - Complete tournament management with unlimited events, AI assistance, and professional features.
+Business Enterprise: $149/month or $1,499/year - Complete enterprise features for small to mid-size businesses (up to 50 tournaments/year). Same capabilities as large corporations.
+Annual Pro: $990/month - High-volume tournament companies (50+ tournaments/year) with unlimited capacity and enhanced support.
 Guaranteed Pricing Model: "The price you pay at the time is the price you always pay" - creates permanent cost advantage for early adopters and eliminates budget uncertainty.
 White Label Strategy: Remove from initial offering to simplify market entry. Add later with 50-100% price increase. Focus on "Professional Platform" with logo, colors, custom domain.
 Organization Expansion: Include charter schools, private schools, pony leagues, pop warner, and youth organizations with dedicated registration path alongside districts.

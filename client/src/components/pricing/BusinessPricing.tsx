@@ -30,49 +30,49 @@ export function BusinessPricingSection() {
       name: 'Business Enterprise',
       price: '$149',
       period: '/month',
-      description: 'Flexible enterprise solutions for any organization',
+      description: 'Complete enterprise features for small to mid-size businesses (up to 50 tournaments/year)',
       features: [
-        'Unlimited tournaments',
-        'AI tournament assistance',
-        'Advanced analytics & insights',
-        'Custom branding options',
-        'Priority email support',
-        'Team management tools',
-        'CSV bulk import/export',
-        'Multi-location support',
-        'API access available'
+        'Unlimited tournaments per month',
+        'Full enterprise AI tournament assistance',
+        'Complete analytics & reporting suite',
+        'White-label branding & custom domain',
+        'Priority email & phone support',
+        'Advanced team management tools',
+        'CSV bulk import/export & API access',
+        'Multi-location coordination',
+        'Same enterprise capabilities as large corporations'
       ],
       cta: 'Start Enterprise',
       buttonColor: 'bg-green-600 hover:bg-green-700',
       icon: Star,
       popular: true,
-      bestFor: 'Regular events, growing companies',
-      badge: 'Most Popular',
+      bestFor: 'Small to mid-size businesses',
+      badge: 'Enterprise Features',
       note: 'Annual option: $1,499/year (save 2 months)'
     },
     {
-      name: 'Enterprise',
-      price: '$199',
+      name: 'Annual Pro',
+      price: '$990',
       period: '/month',
-      description: 'Large corporations, enterprise-wide tournaments',
+      description: 'High-volume tournament companies (50+ tournaments/year, unlimited capacity)',
       features: [
-        'Everything in Professional',
-        'White-label branding',
-        'Custom subdomain (yourcompany.tournaments.pro)',
-        'API access for integrations',
-        'Dedicated account manager',
-        'SSO integration',
-        'Priority phone support',
-        'Advanced user management',
-        'Custom reporting dashboard'
+        'Everything in Business Enterprise',
+        'Unlimited tournament capacity & frequency',
+        'Enhanced integration capabilities',
+        'Dedicated account manager & priority support',
+        'Advanced enterprise reporting & analytics',
+        'Custom compliance workflows',
+        'Premium implementation support',
+        'Advanced user management & SSO',
+        'Custom feature development options'
       ],
-      cta: 'Get Enterprise Access',
+      cta: 'Get Pro Access',
       buttonColor: 'bg-purple-600 hover:bg-purple-700',
       icon: Building,
       popular: false,
-      bestFor: 'Large corporations, enterprise needs',
-      badge: 'Enterprise',
-      note: 'Annual option: $1,990/year (save $398). Setup included!'
+      bestFor: 'High-volume tournament management companies',
+      badge: 'High Volume',
+      note: 'For companies whose primary business is tournament management'
     }
   ];
 
@@ -88,8 +88,8 @@ export function BusinessPricingSection() {
             Professional Tournament Management
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-6">
-            Start with 5 free tournaments, then scale to unlimited corporate events. 
-            Grow with plans that match your business needs.
+            Start with 5 free tournaments, then scale with full enterprise features at every tier. 
+            Small businesses get the same capabilities as large corporations - differentiated by volume, not features.
           </p>
           <div className="inline-flex items-center gap-2 bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-semibold">
             <Check className="h-4 w-4" />
