@@ -477,16 +477,20 @@ export default function EnhancedTournamentWizard({
                   </Label>
                   <Select
                     value={form.watch("ageGroup") || ""}
-                    onValueChange={(value) => form.setValue("ageGroup", value)}
+                    onValueChange={(value) => {
+                      console.log("Age group selected:", value);
+                      form.setValue("ageGroup", value);
+                    }}
+                    data-testid="select-age-group"
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="w-full" data-testid="trigger-age-group">
                       <SelectValue placeholder="Select age group" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Elementary">Elementary (K-5)</SelectItem>
-                      <SelectItem value="Middle School">Middle School (6-8)</SelectItem>
-                      <SelectItem value="High School">High School (9-12)</SelectItem>
-                      <SelectItem value="Adult">Adult (18+)</SelectItem>
+                      <SelectItem value="Elementary" data-testid="option-elementary">Elementary (K-5)</SelectItem>
+                      <SelectItem value="Middle School" data-testid="option-middle">Middle School (6-8)</SelectItem>
+                      <SelectItem value="High School" data-testid="option-high">High School (9-12)</SelectItem>
+                      <SelectItem value="Adult" data-testid="option-adult">Adult (18+)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -497,17 +501,21 @@ export default function EnhancedTournamentWizard({
                   </Label>
                   <Select
                     value={form.watch("genderDivision") || ""}
-                    onValueChange={(value) => form.setValue("genderDivision", value)}
+                    onValueChange={(value) => {
+                      console.log("Gender division selected:", value);
+                      form.setValue("genderDivision", value);
+                    }}
+                    data-testid="select-gender-division"
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="w-full" data-testid="trigger-gender-division">
                       <SelectValue placeholder="Select division" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Men">Men's</SelectItem>
-                      <SelectItem value="Women">Women's</SelectItem>
-                      <SelectItem value="Boys">Boys'</SelectItem>
-                      <SelectItem value="Girls">Girls'</SelectItem>
-                      <SelectItem value="Mixed">Mixed/Open</SelectItem>
+                      <SelectItem value="Men" data-testid="option-men">Men's</SelectItem>
+                      <SelectItem value="Women" data-testid="option-women">Women's</SelectItem>
+                      <SelectItem value="Boys" data-testid="option-boys">Boys'</SelectItem>
+                      <SelectItem value="Girls" data-testid="option-girls">Girls'</SelectItem>
+                      <SelectItem value="Mixed" data-testid="option-mixed">Mixed/Open</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
