@@ -176,7 +176,7 @@ export default function Compliance() {
               </div>
               <div className="bg-purple-500/20 border-l-4 border-l-purple-500 p-3 rounded">
                 <h4 className="text-purple-300 font-semibold">Events Only (Extended Family)</h4>
-                <p className="text-purple-100 text-sm">Event schedules and final results, NO real-time location access - perfect for aunts, uncles, grandparents</p>
+                <p className="text-purple-100 text-sm">Event schedules and final results, NO real-time location access - perfect for aunts, uncles, grandparents, and extended family members</p>
               </div>
               <div className="bg-green-500/20 border-l-4 border-l-green-500 p-3 rounded">
                 <h4 className="text-green-300 font-semibold">Results Only (Family Friends)</h4>
@@ -229,7 +229,7 @@ export default function Compliance() {
               <h4 className="text-yellow-300 font-semibold mb-2">Our Commitment</h4>
               <p className="text-yellow-200 text-sm">
                 We believe that families should be able to celebrate their student-athletes' achievements together, while maintaining the highest standards 
-                of student safety and privacy. Our system enables tías, tíos, and grandparents to follow their loved ones' athletic journeys without 
+                of student safety and privacy. Our system enables aunts, uncles, grandparents, and extended family members to follow their loved ones' athletic journeys without 
                 compromising security or creating safety risks.
               </p>
             </div>
