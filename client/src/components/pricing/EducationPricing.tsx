@@ -23,8 +23,6 @@ export function EducationPricingSection() {
       buttonColor: 'bg-blue-600 hover:bg-blue-700',
       note: '$25 suggested donation per tournament to support Champions for Change student trips',
       icon: GraduationCap,
-      popular: false,
-      badge: 'Free',
       contactInfo: true
     },
     {
@@ -46,8 +44,6 @@ export function EducationPricingSection() {
       buttonColor: 'bg-green-600 hover:bg-green-700',
       note: 'Annual option: $399/year (save 2 months)',
       icon: Star,
-      popular: true,
-      badge: 'Most Tournament Organizers Choose This',
       contactInfo: true
     },
     {
@@ -71,8 +67,6 @@ export function EducationPricingSection() {
       buttonColor: 'bg-blue-600 hover:bg-blue-700',
       note: 'Full enterprise capabilities for smaller districts. Alternative payment methods available.',
       icon: GraduationCap,
-      popular: false,
-      badge: 'Enterprise Features',
       contactInfo: true
     },
     {
@@ -96,8 +90,6 @@ export function EducationPricingSection() {
       buttonColor: 'bg-purple-600 hover:bg-purple-700',
       note: 'For large districts. Alternative payment methods available.',
       icon: Building,
-      popular: false,
-      badge: 'Large Districts',
       contactInfo: true
     }
   ];
@@ -119,7 +111,7 @@ export function EducationPricingSection() {
           </p>
         </div>
         
-        <div className="grid lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div className="grid lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
           {educationTiers.map((tier) => {
             const IconComponent = tier.icon;
             return (
