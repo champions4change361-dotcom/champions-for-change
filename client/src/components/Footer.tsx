@@ -1,4 +1,4 @@
-import { Heart, GraduationCap, MapPin, Mail, Phone, Award } from "lucide-react";
+import { Heart, GraduationCap, BookOpen, Mail, Phone, Award } from "lucide-react";
 import { Link } from "wouter";
 
 export default function Footer() {

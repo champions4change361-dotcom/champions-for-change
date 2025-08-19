@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Heart, Plane, MapPin, Users } from 'lucide-react';
+import { Heart, Plane, BookOpen, Users } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface DonationSectionProps {
@@ -142,7 +142,7 @@ export function DonationSection({ variant = 'full', className = '' }: DonationSe
             <p className="text-sm text-gray-600">$2,600+ per student for educational tours</p>
           </div>
           <div className="flex flex-col items-center space-y-2">
-            <MapPin className="h-8 w-8 text-green-600" />
+            <BookOpen className="h-8 w-8 text-green-600" />
             <h4 className="font-semibold">Educational Focus</h4>
             <p className="text-sm text-gray-600">Supporting underprivileged student competitor education</p>
           </div>

@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Users, Zap, Globe, CreditCard, Star, Heart, GraduationCap, MapPin, Award, Mail, Phone, Timer, UserCheck, Shield, Target, Building, Check } from "lucide-react";
+import { Trophy, Users, Zap, Globe, CreditCard, Star, Heart, GraduationCap, BookOpen, Award, Mail, Phone, Timer, UserCheck, Shield, Target, Building, Check } from "lucide-react";
 import { useLocation } from "wouter";
 import championLogo from "@assets/IMG_1442_1754896656003.jpeg";
 import championVideo from "@assets/Champions for Change Logo_1755291031903.mp4";
@@ -108,7 +108,7 @@ export default function Landing() {
               <span className="hidden sm:inline">Built by coaches to fund educational opportunities for underprivileged student competitors</span>
               <span className="sm:hidden">Funding student educational opportunities</span>
             </span>
-            <MapPin className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+            <BookOpen className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
           </div>
         </div>
         {/* Add breathing room below tagline - reduced for mobile */}
