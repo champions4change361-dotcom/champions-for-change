@@ -45,8 +45,8 @@ export function SignupSection() {
       ],
       tier: 'annual',
       buttonColor: 'bg-green-600 hover:bg-green-700',
-      popular: true,
-      badge: 'Best Value'
+      popular: false,
+      badge: null
     },
     {
       name: 'Champions District',
@@ -63,7 +63,7 @@ export function SignupSection() {
       tier: 'champions',
       buttonColor: 'bg-blue-600 hover:bg-blue-700',
       popular: false,
-      badge: 'Popular'
+      badge: null
     }
   ];
 
@@ -84,22 +84,12 @@ export function SignupSection() {
           {tiers.map((tier) => (
             <Card 
               key={tier.name} 
-              className={`relative flex flex-col ${tier.popular ? 'border-2 border-blue-500 shadow-xl' : 'border border-gray-200'}`}
+              className="relative flex flex-col border border-gray-200"
               data-testid={`tier-${tier.tier}`}
             >
               <CardHeader className="text-center pb-6 flex-1">
                 <div className="mb-2">
-                  <div className="flex items-start justify-between min-h-[2rem]">
-                    <CardTitle className="text-2xl font-bold">{tier.name}</CardTitle>
-                    {tier.badge && (
-                      <Badge className="bg-blue-500 text-white ml-2">{tier.badge}</Badge>
-                    )}
-                  </div>
-                  {tier.popular && (
-                    <div className="mt-3">
-                      <Badge className="bg-blue-500 text-white">Popular</Badge>
-                    </div>
-                  )}
+                  <CardTitle className="text-2xl font-bold">{tier.name}</CardTitle>
                 </div>
                 <div className="mb-4">
                   <span className="text-4xl font-bold text-gray-900">{tier.price}</span>

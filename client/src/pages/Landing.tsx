@@ -502,7 +502,9 @@ export default function Landing() {
           <div className="grid md:grid-cols-3 gap-6 mb-8">
             <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl p-6 text-white flex flex-col">
               <div className="text-center flex-1">
-                <div className="h-8 mb-3"></div>
+                <div className="h-8 mb-3 flex items-center justify-center">
+                  <Badge className="bg-yellow-400 text-blue-800 text-xs px-2 py-1">Most Popular</Badge>
+                </div>
                 <h4 className="text-2xl font-bold mb-2">Tournament Organizer</h4>
                 <div className="text-4xl font-bold mb-2">$39<span className="text-lg font-normal">/month</span></div>
                 <div className="text-blue-200 mb-6">or $399/year (save 2 months)</div>
@@ -529,7 +531,9 @@ export default function Landing() {
 
             <div className="bg-gradient-to-br from-green-600 to-green-700 rounded-xl p-6 text-white flex flex-col">
               <div className="text-center flex-1">
-                <div className="h-8 mb-3"></div>
+                <div className="h-8 mb-3 flex items-center justify-center">
+                  <Badge className="bg-green-200 text-green-800 text-xs px-2 py-1 opacity-80">Enterprise Features</Badge>
+                </div>
                 <h4 className="text-2xl font-bold mb-2">Business Enterprise</h4>
                 <div className="text-4xl font-bold mb-2">$149<span className="text-lg font-normal">/month</span></div>
                 <div className="text-green-200 mb-6">or $1,499/year (save 2 months)</div>
@@ -556,7 +560,9 @@ export default function Landing() {
 
             <div className="bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl p-6 text-white flex flex-col">
               <div className="text-center flex-1">
-                <div className="h-8 mb-3"></div>
+                <div className="h-8 mb-3 flex items-center justify-center">
+                  <Badge className="bg-purple-200 text-purple-800 text-xs px-2 py-1 opacity-80">Mission Pricing</Badge>
+                </div>
                 <h4 className="text-2xl font-bold mb-2">Champions District</h4>
                 <div className="text-4xl font-bold mb-2">$2,490<span className="text-lg font-normal">/year</span></div>
                 <div className="text-purple-200 mb-6">Full enterprise features - mission pricing (up to 15 schools)</div>
