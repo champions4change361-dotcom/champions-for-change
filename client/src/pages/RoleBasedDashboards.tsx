@@ -9,7 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { AlertCircle, Users, Building, GraduationCap, Heart, Trophy, FileText, Settings } from 'lucide-react';
+import { AlertCircle, Users, Building, GraduationCap, Heart, Trophy, FileText, Settings, GitBranch } from 'lucide-react';
+import { OrgChartBuilder } from '@/components/OrgChartBuilder';
 
 interface DashboardProps {
   userRole: string;
@@ -22,6 +23,7 @@ function DistrictAthleticDirectorDashboard({ organizationId }: { organizationId:
   const [selectedSchools, setSelectedSchools] = useState<string[]>([]);
   const [selectedSports, setSelectedSports] = useState<string[]>([]);
   const [timeRange, setTimeRange] = useState('current_year');
+  const [showOrgChartBuilder, setShowOrgChartBuilder] = useState(false);
   
   return (
     <div className="space-y-6">
@@ -124,6 +126,7 @@ function DistrictAthleticDirectorDashboard({ organizationId }: { organizationId:
         <TabsList>
           <TabsTrigger value="overview">District Overview</TabsTrigger>
           <TabsTrigger value="schools">School Management</TabsTrigger>
+          <TabsTrigger value="org-structure">Organization Structure</TabsTrigger>
           <TabsTrigger value="compliance">Compliance</TabsTrigger>
           <TabsTrigger value="budgets">Budget Allocation</TabsTrigger>
         </TabsList>
@@ -139,7 +142,65 @@ function DistrictAthleticDirectorDashboard({ organizationId }: { organizationId:
             </CardContent>
           </Card>
         </TabsContent>
+        
+        <TabsContent value="org-structure">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <GitBranch className="h-5 w-5" />
+                Organization Structure Builder
+              </CardTitle>
+              <CardDescription>
+                Build and manage your district's organizational hierarchy - just like a tournament bracket but for your staff structure
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <h4 className="font-semibold text-blue-900 mb-2">How It Works</h4>
+                  <p className="text-blue-800 text-sm mb-3">
+                    The organizational chart builder works exactly like creating a tournament bracket, but instead of teams advancing, 
+                    you're building reporting relationships and role hierarchies.
+                  </p>
+                  <ul className="text-blue-800 text-sm space-y-1">
+                    <li>• Start with your top position (like Superintendent)</li>
+                    <li>• Add direct reports (like Athletic Directors)</li>
+                    <li>• Build down the hierarchy (Coaches, Trainers, etc.)</li>
+                    <li>• Set permissions and access levels for each role</li>
+                  </ul>
+                </div>
+                
+                <div className="flex gap-4">
+                  <Button 
+                    onClick={() => setShowOrgChartBuilder(true)}
+                    className="bg-blue-600 hover:bg-blue-700"
+                    data-testid="button-org-chart-builder"
+                  >
+                    <GitBranch className="h-4 w-4 mr-2" />
+                    Build Organization Chart
+                  </Button>
+                  <Button variant="outline">
+                    <FileText className="h-4 w-4 mr-2" />
+                    View Current Structure
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
+      
+      {/* Organization Chart Builder Modal */}
+      <OrgChartBuilder
+        isOpen={showOrgChartBuilder}
+        onClose={() => setShowOrgChartBuilder(false)}
+        onSave={(orgChart) => {
+          console.log('Saving organizational chart:', orgChart);
+          // Here you would typically save to your backend
+          setShowOrgChartBuilder(false);
+          // Show success message
+        }}
+      />
     </div>
   );
 }
