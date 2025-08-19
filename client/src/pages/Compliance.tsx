@@ -28,7 +28,7 @@ export default function Compliance() {
         </div>
 
         {/* Quick Navigation */}
-        <div className="grid md:grid-cols-4 gap-4 mb-12">
+        <div className="grid md:grid-cols-5 gap-4 mb-12">
           <button 
             onClick={() => document.getElementById('privacy')?.scrollIntoView({ behavior: 'smooth' })}
             className="bg-slate-800 border border-slate-700 rounded-lg p-4 hover:border-green-500/50 transition-all text-left"
@@ -52,6 +52,14 @@ export default function Compliance() {
           >
             <Heart className="h-6 w-6 text-purple-400 mb-2" />
             <h3 className="text-white font-semibold">HIPAA Compliance</h3>
+          </button>
+          <button 
+            onClick={() => document.getElementById('student-safety')?.scrollIntoView({ behavior: 'smooth' })}
+            className="bg-slate-800 border border-slate-700 rounded-lg p-4 hover:border-red-500/50 transition-all text-left"
+            data-testid="nav-student-safety"
+          >
+            <Users className="h-6 w-6 text-red-400 mb-2" />
+            <h3 className="text-white font-semibold">Student Safety</h3>
           </button>
           <button 
             onClick={() => document.getElementById('safety')?.scrollIntoView({ behavior: 'smooth' })}
@@ -112,6 +120,119 @@ export default function Compliance() {
               <li>Opt out of non-essential communications</li>
               <li>Request data portability</li>
             </ul>
+          </CardContent>
+        </Card>
+
+        {/* Student Safety & Privacy Protection */}
+        <Card id="student-safety" className="mb-8 bg-slate-800/50 border-slate-700 border-l-4 border-l-red-500">
+          <CardHeader>
+            <CardTitle className="flex items-center text-red-400">
+              <Users className="h-6 w-6 mr-3" />
+              Student Safety & Privacy Protection
+            </CardTitle>
+            <CardDescription className="text-slate-300">
+              Comprehensive protections for student location data and family access controls
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="text-slate-300 space-y-4">
+            <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 mb-6">
+              <h4 className="text-red-300 font-semibold mb-2 flex items-center">
+                <Shield className="h-4 w-4 mr-2" />
+                Critical Security Notice
+              </h4>
+              <p className="text-red-200 text-sm">
+                We recognize that student safety is paramount in today's world. Not everyone can be trusted with real-time student location information. 
+                Our platform implements strict controls to ensure only verified family members receive appropriate access to student athletic information.
+              </p>
+            </div>
+
+            <h3 className="text-lg font-semibold text-white">Family Access Authorization</h3>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <h4 className="text-white font-semibold mb-2">Who Can Grant Access:</h4>
+                <ul className="space-y-1 ml-4 list-disc text-sm">
+                  <li><strong className="text-red-300">Parents/Legal Guardians:</strong> Full authority to grant family member access</li>
+                  <li><strong className="text-blue-300">Athletic Director:</strong> Emergency verification and override authority</li>
+                  <li><strong className="text-purple-300">Principal:</strong> Administrative override for special situations</li>
+                  <li><strong className="text-green-300">School Nurse:</strong> Medical emergency access authorization</li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="text-white font-semibold mb-2">Verification Requirements:</h4>
+                <ul className="space-y-1 ml-4 list-disc text-sm">
+                  <li>Identity verification through official documents</li>
+                  <li>Relationship proof (birth certificates, custody documents)</li>
+                  <li>Parent/guardian explicit approval</li>
+                  <li>School record cross-reference when applicable</li>
+                </ul>
+              </div>
+            </div>
+
+            <h3 className="text-lg font-semibold text-white">Three-Tier Access Control System</h3>
+            <div className="space-y-3">
+              <div className="bg-blue-500/20 border-l-4 border-l-blue-500 p-3 rounded">
+                <h4 className="text-blue-300 font-semibold">Full Access (Parents/Guardians Only)</h4>
+                <p className="text-blue-100 text-sm">Real-time location tracking, live event updates, schedule management, emergency notifications</p>
+              </div>
+              <div className="bg-purple-500/20 border-l-4 border-l-purple-500 p-3 rounded">
+                <h4 className="text-purple-300 font-semibold">Events Only (Extended Family)</h4>
+                <p className="text-purple-100 text-sm">Event schedules and final results, NO real-time location access - perfect for aunts, uncles, grandparents</p>
+              </div>
+              <div className="bg-green-500/20 border-l-4 border-l-green-500 p-3 rounded">
+                <h4 className="text-green-300 font-semibold">Results Only (Family Friends)</h4>
+                <p className="text-green-100 text-sm">Final competition results published after event completion, no scheduling or location information</p>
+              </div>
+            </div>
+
+            <h3 className="text-lg font-semibold text-white">Location Privacy Safeguards</h3>
+            <ul className="space-y-2 ml-4 list-disc">
+              <li><strong>Real-time location access requires explicit parent approval</strong> - We understand scores are public knowledge, but student locations before events are not</li>
+              <li><strong>Geofencing controls</strong> - Location data only available at approved athletic venues</li>
+              <li><strong>Time-based restrictions</strong> - Location access automatically expires after events</li>
+              <li><strong>Complete audit trails</strong> - Every location access is logged with timestamp and user identification</li>
+              <li><strong>IP address monitoring</strong> - Unusual access patterns trigger automatic security reviews</li>
+              <li><strong>Device fingerprinting</strong> - Trusted device verification for enhanced security</li>
+            </ul>
+
+            <h3 className="text-lg font-semibold text-white">Family Member Categories</h3>
+            <div className="grid md:grid-cols-3 gap-4">
+              <div className="bg-slate-700/30 rounded-lg p-3">
+                <h4 className="text-white font-semibold mb-2">Immediate Family</h4>
+                <ul className="text-sm space-y-1">
+                  <li>• Parents</li>
+                  <li>• Legal Guardians</li>
+                  <li>• Adult Siblings (18+)</li>
+                </ul>
+                <Badge className="mt-2 bg-blue-500/20 text-blue-400 text-xs">Full Access Available</Badge>
+              </div>
+              <div className="bg-slate-700/30 rounded-lg p-3">
+                <h4 className="text-white font-semibold mb-2">Extended Family</h4>
+                <ul className="text-sm space-y-1">
+                  <li>• Grandparents</li>
+                  <li>• Aunts & Uncles</li>
+                  <li>• Close Family Friends</li>
+                </ul>
+                <Badge className="mt-2 bg-purple-500/20 text-purple-400 text-xs">Events Access Only</Badge>
+              </div>
+              <div className="bg-slate-700/30 rounded-lg p-3">
+                <h4 className="text-white font-semibold mb-2">Emergency Contacts</h4>
+                <ul className="text-sm space-y-1">
+                  <li>• School-verified contacts</li>
+                  <li>• Medical emergency access</li>
+                  <li>• Athletic trainer coordination</li>
+                </ul>
+                <Badge className="mt-2 bg-orange-500/20 text-orange-400 text-xs">Medical Access Only</Badge>
+              </div>
+            </div>
+
+            <div className="bg-yellow-500/20 border border-yellow-500/50 rounded-lg p-4">
+              <h4 className="text-yellow-300 font-semibold mb-2">Our Commitment</h4>
+              <p className="text-yellow-200 text-sm">
+                We believe that families should be able to celebrate their student-athletes' achievements together, while maintaining the highest standards 
+                of student safety and privacy. Our system enables tías, tíos, and grandparents to follow their loved ones' athletic journeys without 
+                compromising security or creating safety risks.
+              </p>
+            </div>
           </CardContent>
         </Card>
 
