@@ -33,11 +33,13 @@ import {
   Target,
   TrendingUp,
   Zap,
-  Info
+  Info,
+  Video
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { CheerleadingInjuryAssessment } from "@/components/CheerleadingInjuryAssessment";
 import { OrgChartBuilder } from "@/components/OrgChartBuilder";
+import { AIVideoAnalysis } from "@/components/AIVideoAnalysis";
 
 export default function AthleticTrainerDashboard() {
   const { user } = useAuth();
@@ -47,6 +49,7 @@ export default function AthleticTrainerDashboard() {
   const [showAIConsultant, setShowAIConsultant] = useState(false);
   const [showCheerInjuryAssessment, setShowCheerInjuryAssessment] = useState(false);
   const [showOrgChartBuilder, setShowOrgChartBuilder] = useState(false);
+  const [showVideoAnalysis, setShowVideoAnalysis] = useState(false);
   const [aiConsultation, setAiConsultation] = useState({
     athleteName: '',
     sport: '',
@@ -271,15 +274,26 @@ export default function AthleticTrainerDashboard() {
                     The AI Consultant provides fully functional injury assessment - other features demonstrate interface design.
                   </p>
                 </div>
-                <Button
-                  size="sm"
-                  onClick={() => setShowOrgChartBuilder(true)}
-                  className="bg-green-600 hover:bg-green-700 text-xs"
-                  data-testid="button-org-chart-builder"
-                >
-                  <Users className="h-3 w-3 mr-1" />
-                  Build Org Chart
-                </Button>
+                <div className="flex space-x-2">
+                  <Button
+                    size="sm"
+                    onClick={() => setShowOrgChartBuilder(true)}
+                    className="bg-green-600 hover:bg-green-700 text-xs"
+                    data-testid="button-org-chart-builder"
+                  >
+                    <Users className="h-3 w-3 mr-1" />
+                    Build Org Chart
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => setShowVideoAnalysis(true)}
+                    className="bg-purple-600 hover:bg-purple-700 text-xs"
+                    data-testid="button-video-analysis"
+                  >
+                    <Video className="h-3 w-3 mr-1" />
+                    AI Video Beta
+                  </Button>
+                </div>
               </div>
             </div>
             <div className="flex flex-col sm:flex-row gap-2 sm:justify-between sm:items-center">
@@ -2284,6 +2298,12 @@ export default function AthleticTrainerDashboard() {
             // In a real implementation, this would save to the database
             // and update the user permission system accordingly
           }}
+        />
+
+        <AIVideoAnalysis
+          isOpen={showVideoAnalysis}
+          onClose={() => setShowVideoAnalysis(false)}
+          sport="Basketball" // Could be dynamic based on context
         />
       </div>
     </div>
