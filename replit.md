@@ -28,6 +28,7 @@ Organization Expansion: Include charter schools, private schools, pony leagues, 
 **Market Position**: Comprehensive athletics ecosystem vs. point solutions, with uncopyable nonprofit mission advantage
 **Safari Compatibility**: Platform optimized for macOS Safari with responsive button layouts and proper text sizing (August 2025)
 **Accessibility Compliance**: Enterprise-grade accessibility with proper text contrast, white text on dark backgrounds, and WCAG compliance (August 2025)
+**Clean Pricing UI**: Uniform pricing card headers with aligned pricing display, removed promotional badges from "Start Your Journey" section for professional appearance while maintaining contextual badges in "Choose Your Platform" section (August 2025)
 
 ## System Architecture
 
