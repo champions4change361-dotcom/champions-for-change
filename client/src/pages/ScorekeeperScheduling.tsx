@@ -295,16 +295,16 @@ export default function ScorekeeperScheduling() {
 
         <Tabs defaultValue="available" className="space-y-6">
           <TabsList className="grid w-full grid-cols-4 bg-slate-800 border border-slate-700">
-            <TabsTrigger value="available" className="data-[state=active]:bg-green-600">
+            <TabsTrigger value="available" className="data-[state=active]:bg-green-600 data-[state=active]:text-white text-white hover:text-white">
               Available Events ({availableAssignments.length})
             </TabsTrigger>
-            <TabsTrigger value="my-assignments" className="data-[state=active]:bg-blue-600">
+            <TabsTrigger value="my-assignments" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-white hover:text-white">
               My Assignments ({myAssignments.length})
             </TabsTrigger>
-            <TabsTrigger value="swap-requests" className="data-[state=active]:bg-orange-600">
+            <TabsTrigger value="swap-requests" className="data-[state=active]:bg-orange-600 data-[state=active]:text-white text-white hover:text-white">
               Swap Requests ({pendingSwapRequests.length})
             </TabsTrigger>
-            <TabsTrigger value="calendar" className="data-[state=active]:bg-purple-600">
+            <TabsTrigger value="calendar" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white text-white hover:text-white">
               Calendar View
             </TabsTrigger>
           </TabsList>

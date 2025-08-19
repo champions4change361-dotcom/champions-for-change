@@ -238,16 +238,16 @@ export default function FamilyAccessManagement() {
 
         <Tabs defaultValue="current-access" className="space-y-6">
           <TabsList className="grid w-full grid-cols-4 bg-slate-800 border border-slate-700">
-            <TabsTrigger value="current-access" className="data-[state=active]:bg-blue-600">
+            <TabsTrigger value="current-access" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-white hover:text-white">
               Current Access ({currentStudent?.familyMembers.filter(m => m.verificationStatus === 'verified').length || 0})
             </TabsTrigger>
-            <TabsTrigger value="pending" className="data-[state=active]:bg-yellow-600">
+            <TabsTrigger value="pending" className="data-[state=active]:bg-yellow-600 data-[state=active]:text-white text-white hover:text-white">
               Pending Requests ({currentStudent?.familyMembers.filter(m => m.verificationStatus === 'pending').length || 0})
             </TabsTrigger>
-            <TabsTrigger value="add-member" className="data-[state=active]:bg-green-600">
+            <TabsTrigger value="add-member" className="data-[state=active]:bg-green-600 data-[state=active]:text-white text-white hover:text-white">
               Add Family Member
             </TabsTrigger>
-            <TabsTrigger value="audit-log" className="data-[state=active]:bg-purple-600">
+            <TabsTrigger value="audit-log" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white text-white hover:text-white">
               Audit Log
             </TabsTrigger>
           </TabsList>
