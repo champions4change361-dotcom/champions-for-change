@@ -52,10 +52,10 @@ export default function GrantFunding() {
               size="lg" 
               variant="outline" 
               className="border-2 border-white bg-white/10 text-white hover:bg-white hover:text-blue-900 backdrop-blur-sm font-semibold" 
-              onClick={() => window.open('https://www.foundationcenter.org/', '_blank')}
-              data-testid="button-grant-resources"
+              onClick={() => window.open('https://candid.org/', '_blank')}
+              data-testid="button-foundation-partners"
             >
-              View Grant Resources
+              Find Foundation Partners
             </Button>
           </div>
         </div>
@@ -427,6 +427,15 @@ export default function GrantFunding() {
                   data-testid="button-download-template"
                 >
                   Download Application Template
+                </Button>
+                <Button 
+                  size="lg" 
+                  variant="outline"
+                  className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white"
+                  onClick={() => window.location.href = '/nonprofit-resources'}
+                  data-testid="button-nonprofit-resources"
+                >
+                  Nonprofit Tech Resources
                 </Button>
               </div>
             </CardContent>
