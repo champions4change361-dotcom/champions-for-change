@@ -28,7 +28,8 @@ import {
   Unlock,
   Camera,
   MessageSquare,
-  Bell
+  Bell,
+  Trophy
 } from 'lucide-react';
 
 interface FamilyMember {

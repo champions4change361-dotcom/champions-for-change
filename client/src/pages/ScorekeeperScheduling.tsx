@@ -342,25 +342,25 @@ export default function ScorekeeperScheduling() {
                   <CardContent>
                     <div className="space-y-4">
                       <div className="grid md:grid-cols-3 gap-4">
-                        <div className="flex items-center text-slate-300">
+                        <div className="flex items-center text-white">
                           <Calendar className="h-4 w-4 mr-2 text-blue-400" />
                           <div>
-                            <p className="font-semibold">{new Date(assignment.date).toLocaleDateString()}</p>
-                            <p className="text-sm text-slate-400">{assignment.time}</p>
+                            <p className="font-semibold text-white">{new Date(assignment.date).toLocaleDateString()}</p>
+                            <p className="text-sm text-slate-300">{assignment.time}</p>
                           </div>
                         </div>
-                        <div className="flex items-center text-slate-300">
+                        <div className="flex items-center text-white">
                           <MapPin className="h-4 w-4 mr-2 text-red-400" />
                           <div>
-                            <p className="font-semibold">{assignment.location}</p>
-                            <p className="text-sm text-slate-400">{assignment.eventType.replace('_', ' ')}</p>
+                            <p className="font-semibold text-white">{assignment.location}</p>
+                            <p className="text-sm text-slate-300">{assignment.eventType.replace('_', ' ')}</p>
                           </div>
                         </div>
-                        <div className="flex items-center text-slate-300">
+                        <div className="flex items-center text-white">
                           <Users className="h-4 w-4 mr-2 text-purple-400" />
                           <div>
-                            <p className="font-semibold">{assignment.athleticCoordinator}</p>
-                            <p className="text-sm text-slate-400">Athletic Coordinator</p>
+                            <p className="font-semibold text-white">{assignment.athleticCoordinator}</p>
+                            <p className="text-sm text-slate-300">Athletic Coordinator</p>
                           </div>
                         </div>
                       </div>
@@ -426,25 +426,25 @@ export default function ScorekeeperScheduling() {
                   <CardContent>
                     <div className="space-y-4">
                       <div className="grid md:grid-cols-3 gap-4">
-                        <div className="flex items-center text-slate-300">
+                        <div className="flex items-center text-white">
                           <Calendar className="h-4 w-4 mr-2 text-blue-400" />
                           <div>
-                            <p className="font-semibold">{new Date(assignment.date).toLocaleDateString()}</p>
-                            <p className="text-sm text-slate-400">{assignment.time}</p>
+                            <p className="font-semibold text-white">{new Date(assignment.date).toLocaleDateString()}</p>
+                            <p className="text-sm text-slate-300">{assignment.time}</p>
                           </div>
                         </div>
-                        <div className="flex items-center text-slate-300">
+                        <div className="flex items-center text-white">
                           <MapPin className="h-4 w-4 mr-2 text-red-400" />
                           <div>
-                            <p className="font-semibold">{assignment.location}</p>
-                            <p className="text-sm text-slate-400">{assignment.eventType.replace('_', ' ')}</p>
+                            <p className="font-semibold text-white">{assignment.location}</p>
+                            <p className="text-sm text-slate-300">{assignment.eventType.replace('_', ' ')}</p>
                           </div>
                         </div>
-                        <div className="flex items-center text-slate-300">
+                        <div className="flex items-center text-white">
                           <Target className="h-4 w-4 mr-2 text-green-400" />
                           <div>
-                            <p className="font-semibold">{assignment.division === 'girls' ? 'Girls' : assignment.division === 'boys' ? 'Boys' : 'Mixed'}</p>
-                            <p className="text-sm text-slate-400">{assignment.level.replace('_', ' ')}</p>
+                            <p className="font-semibold text-white">{assignment.division === 'girls' ? 'Girls' : assignment.division === 'boys' ? 'Boys' : 'Mixed'}</p>
+                            <p className="text-sm text-slate-300">{assignment.level.replace('_', ' ')}</p>
                           </div>
                         </div>
                       </div>
@@ -541,7 +541,7 @@ export default function ScorekeeperScheduling() {
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
                       <h4 className="text-white font-semibold mb-2">Requesting a Swap:</h4>
-                      <ul className="text-slate-300 text-sm space-y-1">
+                      <ul className="text-white text-sm space-y-1">
                         <li>• Find the assignment you want to swap with</li>
                         <li>• Send a swap request with your reason</li>
                         <li>• The other coach can approve or decline</li>
@@ -550,7 +550,7 @@ export default function ScorekeeperScheduling() {
                     </div>
                     <div>
                       <h4 className="text-white font-semibold mb-2">Swap Guidelines:</h4>
-                      <ul className="text-slate-300 text-sm space-y-1">
+                      <ul className="text-white text-sm space-y-1">
                         <li>• Swaps must be approved 48 hours before event</li>
                         <li>• Both coaches must be qualified for the event type</li>
                         <li>• Emergency swaps require coordinator approval</li>
@@ -570,13 +570,13 @@ export default function ScorekeeperScheduling() {
                           <h3 className="text-white font-semibold">Swap Request</h3>
                           <Badge className="bg-orange-500/20 text-orange-400">Pending</Badge>
                         </div>
-                        <p className="text-slate-300">
+                        <p className="text-white">
                           <strong>{swap.requestedByName}</strong> from {swap.requestedBySchool} wants to swap assignments
                         </p>
                         <div className="bg-slate-700/30 rounded-lg p-3">
-                          <p className="text-slate-300 text-sm mb-2"><strong>Their Assignment:</strong> {swap.targetAssignmentName}</p>
-                          <p className="text-slate-300 text-sm mb-2"><strong>Your Assignment:</strong> Discus Throw - Girls (April 17, 5:30 PM)</p>
-                          <p className="text-slate-300 text-sm"><strong>Reason:</strong> {swap.reason}</p>
+                          <p className="text-white text-sm mb-2"><strong>Their Assignment:</strong> {swap.targetAssignmentName}</p>
+                          <p className="text-white text-sm mb-2"><strong>Your Assignment:</strong> Discus Throw - Girls (April 17, 5:30 PM)</p>
+                          <p className="text-white text-sm"><strong>Reason:</strong> {swap.reason}</p>
                         </div>
                         <div className="flex gap-2">
                           <Button 
@@ -670,15 +670,15 @@ export default function ScorekeeperScheduling() {
                 <div className="flex gap-4 text-sm">
                   <div className="flex items-center">
                     <div className="w-4 h-4 bg-blue-500/20 border border-blue-500 rounded mr-2"></div>
-                    <span className="text-slate-300">My Assignments</span>
+                    <span className="text-white">My Assignments</span>
                   </div>
                   <div className="flex items-center">
                     <div className="w-4 h-4 bg-green-500/20 border border-green-500 rounded mr-2"></div>
-                    <span className="text-slate-300">Available</span>
+                    <span className="text-white">Available</span>
                   </div>
                   <div className="flex items-center">
                     <div className="w-4 h-4 bg-orange-500/20 border border-orange-500 rounded mr-2"></div>
-                    <span className="text-slate-300">Swap Requests</span>
+                    <span className="text-white">Swap Requests</span>
                   </div>
                 </div>
               </CardContent>
@@ -697,14 +697,14 @@ export default function ScorekeeperScheduling() {
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-semibold text-slate-300 mb-2 block">Select assignment to swap with:</label>
+                <label className="text-sm font-semibold text-white mb-2 block">Select assignment to swap with:</label>
                 <select className="w-full bg-slate-700 border border-slate-600 text-white rounded-md px-3 py-2">
                   <option value="" className="bg-slate-700 text-white">Choose an assignment...</option>
                   <option value="assign-2" className="bg-slate-700 text-white">Coach Lopez - Boys Track Meet (April 18, 5:30 PM)</option>
                 </select>
               </div>
               <div>
-                <label className="text-sm font-semibold text-slate-300 mb-2 block">Reason for swap:</label>
+                <label className="text-sm font-semibold text-white mb-2 block">Reason for swap:</label>
                 <textarea 
                   className="w-full bg-slate-700 border border-slate-600 text-white rounded-md px-3 py-2 h-20"
                   placeholder="Explain why you need to swap assignments..."
