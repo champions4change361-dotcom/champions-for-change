@@ -37,10 +37,18 @@ const avatarStyles = [
   {
     id: 'sports_mascot',
     name: 'Sports Mascot',
-    description: 'Fun and energetic for gaming communities',
+    description: 'Fun and energetic for tournament communities',
     icon: Trophy,
     preview: '🏆',
     domain: 'Community'
+  },
+  {
+    id: 'keystone_coach',
+    name: 'Keystone Coach',
+    description: 'Mission-focused AI coach for Champions for Change',
+    icon: Trophy,
+    preview: '🔑',
+    domain: 'Champions'
   },
   {
     id: 'minimalist_icon',
@@ -234,6 +242,8 @@ export function AIAvatarSettings() {
                     "Hi there! I'm Keystone AI, your tournament assistant. Ready to create something amazing together?"}
                   {currentPrefs.avatarStyle === 'sports_mascot' && 
                     "Hey coach! Let's fire up some epic tournaments and get this competition rolling! What's the game plan?"}
+                  {(currentPrefs?.avatarStyle as string) === 'keystone_coach' && 
+                    "Ready to create opportunities for students! I'm Keystone AI, here to help Champions for Change build amazing tournaments that fund educational dreams."}
                   {currentPrefs.avatarStyle === 'minimalist_icon' && 
                     "Tournament assistance available. How can I help?"}
                 </div>

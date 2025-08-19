@@ -83,7 +83,7 @@ export const users = pgTable("users", {
     
     // AVATAR PREFERENCES
     avatarEnabled: boolean;
-    avatarStyle: 'professional_coach' | 'friendly_advisor' | 'minimalist_icon' | 'sports_mascot';
+    avatarStyle: 'professional_coach' | 'friendly_advisor' | 'minimalist_icon' | 'sports_mascot' | 'keystone_coach';
     
     // USAGE REMINDER PREFERENCES
     usageRemindersEnabled: boolean;
