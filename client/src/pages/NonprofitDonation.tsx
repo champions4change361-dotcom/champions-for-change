@@ -165,8 +165,8 @@ export default function NonprofitDonation() {
         donorEmail: "demo@example.com",
         cause: "general-mission",
       });
-      if (data && data.clientSecret) {
-        setClientSecret(data.clientSecret);
+      if (data && typeof data === 'object' && 'clientSecret' in data) {
+        setClientSecret(data.clientSecret as string);
       } else {
         console.error("No client secret returned from payment intent creation");
       }
