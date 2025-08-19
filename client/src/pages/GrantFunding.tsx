@@ -43,10 +43,10 @@ export default function GrantFunding() {
             <Button 
               size="lg" 
               className="bg-yellow-500 hover:bg-yellow-600 text-blue-900 font-semibold" 
-              onClick={() => window.open('https://www.grants.gov/sites/default/files/2021-11/application-guide.pdf', '_blank')}
-              data-testid="button-download-guide"
+              onClick={() => window.open('https://www.grants.gov/learn-grants/grant-making-process', '_blank')}
+              data-testid="button-grants-gov"
             >
-              Download Grant Guide
+              Visit Grants.gov
             </Button>
             <Button 
               size="lg" 
