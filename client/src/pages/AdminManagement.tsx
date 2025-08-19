@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { Settings, Users, Trophy, Building2, Plus, Eye } from "lucide-react";
+import { Settings, Users, Trophy, Building2, Plus, Eye, Shield, User } from "lucide-react";
 import { useLocation } from "wouter";
 
 interface FakeUser {
@@ -156,32 +156,79 @@ export default function AdminManagement() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-3 md:p-6">
+      <div className="max-w-7xl mx-auto space-y-4 md:space-y-8">
         {/* Header */}
-        <div className="text-center space-y-4">
-          <div className="flex items-center justify-center space-x-3">
-            <Settings className="h-10 w-10 text-blue-600" />
+        <div className="text-center space-y-2 md:space-y-4">
+          <div className="flex items-center justify-center space-x-2 md:space-x-3">
+            <Settings className="h-6 w-6 md:h-10 md:w-10 text-blue-600" />
             <div>
-              <h1 className="text-4xl font-bold text-slate-900">Master Admin Portal</h1>
-              <p className="text-lg text-slate-600">Manage and test all platform features</p>
+              <h1 className="text-2xl md:text-4xl font-bold text-slate-900">Master Admin Portal</h1>
+              <p className="text-sm md:text-lg text-slate-600">Manage and test all platform features</p>
             </div>
           </div>
-          <Badge variant="secondary" className="text-lg px-4 py-2">
+          <Badge variant="secondary" className="text-sm md:text-lg px-3 py-1 md:px-4 md:py-2">
             Full Access Across All Platforms
           </Badge>
         </div>
 
-        <Tabs defaultValue="create-users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="create-users">Create Test Users</TabsTrigger>
-            <TabsTrigger value="view-users">View Users</TabsTrigger>
-            <TabsTrigger value="platform-access">Platform Access</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+        <Tabs defaultValue="create-users" className="space-y-4 md:space-y-6">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 gap-1 h-auto p-1">
+            <TabsTrigger value="create-users" className="text-xs md:text-sm p-1 md:p-2 h-8 md:h-10">Create Users</TabsTrigger>
+            <TabsTrigger value="view-users" className="text-xs md:text-sm p-1 md:p-2 h-8 md:h-10">View Users</TabsTrigger>
+            <TabsTrigger value="platform-access" className="text-xs md:text-sm p-1 md:p-2 h-8 md:h-10">Platform</TabsTrigger>
+            <TabsTrigger value="analytics" className="text-xs md:text-sm p-1 md:p-2 h-8 md:h-10">Analytics</TabsTrigger>
           </TabsList>
 
           {/* Create Test Users Tab */}
           <TabsContent value="create-users">
+            {/* Quick Login Component */}
+            <Card className="mb-4 border-orange-200 bg-orange-50">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-sm">
+                  <Shield className="h-4 w-4" />
+                  Quick Admin Login (Testing)
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <Button
+                    onClick={async () => {
+                      try {
+                        const response = await fetch('/api/login-form', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            email: 'admin@example.com',
+                            password: 'admin123',
+                            userType: 'district'
+                          }),
+                        });
+                        if (response.ok) {
+                          toast({ title: "Success", description: "Logged in successfully!" });
+                          window.location.reload();
+                        } else {
+                          const error = await response.json();
+                          toast({ title: "Error", description: error.message || "Login failed", variant: "destructive" });
+                        }
+                      } catch (error) {
+                        toast({ title: "Error", description: "Network error during login", variant: "destructive" });
+                      }
+                    }}
+                    size="sm"
+                    className="bg-green-600 hover:bg-green-700 text-xs"
+                    data-testid="button-quick-login-district"
+                  >
+                    <User className="h-3 w-3 mr-1" />
+                    Login as District Admin
+                  </Button>
+                </div>
+                <p className="text-xs text-gray-600 mt-2">
+                  Use this to authenticate and test user creation features
+                </p>
+              </CardContent>
+            </Card>
+            
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
@@ -193,54 +240,58 @@ export default function AdminManagement() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Basic Info */}
+                <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
+                  <div className="grid grid-cols-1 gap-4 md:gap-6">
+                    {/* Basic Info - Full width on mobile */}
                     <div className="space-y-4">
-                      <h3 className="font-semibold text-slate-900">Basic Information</h3>
+                      <h3 className="font-semibold text-slate-900 text-sm md:text-base">Basic Information</h3>
                       
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                         <div>
-                          <Label htmlFor="firstName">First Name</Label>
+                          <Label htmlFor="firstName" className="text-sm">First Name</Label>
                           <Input
                             id="firstName"
                             value={newUser.firstName}
                             onChange={(e) => setNewUser({ ...newUser, firstName: e.target.value })}
                             placeholder="John"
+                            className="text-sm"
                             data-testid="input-firstname"
                           />
                         </div>
                         <div>
-                          <Label htmlFor="lastName">Last Name</Label>
+                          <Label htmlFor="lastName" className="text-sm">Last Name</Label>
                           <Input
                             id="lastName"
                             value={newUser.lastName}
                             onChange={(e) => setNewUser({ ...newUser, lastName: e.target.value })}
                             placeholder="Smith"
+                            className="text-sm"
                             data-testid="input-lastname"
                           />
                         </div>
                       </div>
 
                       <div>
-                        <Label htmlFor="email">Email</Label>
+                        <Label htmlFor="email" className="text-sm">Email</Label>
                         <Input
                           id="email"
                           type="email"
                           value={newUser.email}
                           onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
                           placeholder="john.smith@example.com"
+                          className="text-sm"
                           data-testid="input-email"
                         />
                       </div>
 
                       <div>
-                        <Label htmlFor="organizationName">Organization</Label>
+                        <Label htmlFor="organizationName" className="text-sm">Organization</Label>
                         <Input
                           id="organizationName"
                           value={newUser.organizationName}
                           onChange={(e) => setNewUser({ ...newUser, organizationName: e.target.value })}
                           placeholder="Example School District"
+                          className="text-sm"
                           data-testid="input-organization"
                         />
                       </div>
@@ -248,10 +299,10 @@ export default function AdminManagement() {
 
                     {/* Platform & Role */}
                     <div className="space-y-4">
-                      <h3 className="font-semibold text-slate-900">Platform & Access</h3>
+                      <h3 className="font-semibold text-slate-900 text-sm md:text-base">Platform & Access</h3>
                       
                       <div>
-                        <Label htmlFor="userType">Platform Type</Label>
+                        <Label htmlFor="userType" className="text-sm">Platform Type</Label>
                         <select
                           id="userType"
                           value={newUser.userType}
@@ -266,7 +317,7 @@ export default function AdminManagement() {
                               subscriptionPlan: subscriptionOptions[0]?.value || '' 
                             });
                           }}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
                           data-testid="select-usertype"
                         >
                           <option value="district">District Platform</option>

@@ -280,7 +280,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         firstName: "Jolynn",
         lastName: "Millette",
         profileImageUrl: null,
-        subscriptionPlan: "district",
+        subscriptionPlan: "district_enterprise",
         subscriptionStatus: "active",
         complianceRole: "school_athletic_trainer",
         organizationId: "ccisd-carroll-high",
@@ -314,7 +314,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(response);
     } catch (error) {
       console.error("❌ Error creating Jolynn's real account:", error);
-      res.status(500).json({ error: "Failed to create Jolynn's account", details: error.message });
+      res.status(500).json({ error: "Failed to create Jolynn's account", details: (error as Error).message });
     }
   });
 

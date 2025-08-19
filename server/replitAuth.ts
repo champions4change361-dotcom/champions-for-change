@@ -235,7 +235,14 @@ export async function setupAuth(app: Express) {
           });
           
           // Redirect based on user type to appropriate dashboard
-          const redirectPath = userType === 'district' ? '/admin' : '/';
+          let redirectPath = '/';
+          if (userType === 'district') {
+            redirectPath = '/admin'; // District users get admin access
+          } else if (userType === 'organizer') {
+            redirectPath = '/create'; // Tournament organizers go to tournament creation
+          } else if (userType === 'business') {
+            redirectPath = '/'; // Business users go to main page
+          }
           return res.redirect(redirectPath);
         });
       });
@@ -266,7 +273,7 @@ export async function setupAuth(app: Express) {
     }
     
     passport.authenticate(strategyName, {
-      successReturnToOrRedirect: "/admin",
+      successReturnToOrRedirect: "/",
       failureRedirect: "/api/login",
     })(req, res, next);
   });
