@@ -75,7 +75,7 @@ export default function Landing() {
                     <span className="hidden lg:inline">Login to Arena</span>
                   </Button>
                   <Button 
-                    onClick={() => setLocation('/register')}
+                    onClick={() => setLocation('/pricing')}
                     variant="outline"
                     className="border-orange-500 text-orange-400 hover:bg-orange-500/10 hover:border-orange-400 px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base font-semibold w-full lg:w-auto"
                     data-testid="button-signup"
@@ -207,7 +207,7 @@ export default function Landing() {
                       <Button 
                         size="lg" 
                         className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-4 py-3 text-base flex-1"
-                        onClick={() => setLocation("/register")}
+                        onClick={() => setLocation("/pricing")}
                         data-testid="button-get-started"
                       >
                         <span className="hidden md:inline">Start Supporting</span>
@@ -500,7 +500,7 @@ export default function Landing() {
                 <div className="mt-auto">
                   <Button 
                     className="w-full bg-white text-blue-600 hover:bg-blue-50 font-semibold mb-3"
-                    onClick={() => setLocation("/pricing?type=education")}
+                    onClick={() => setLocation("/pricing?type=education#tournament-organizer")}
                   >
                     Start Free Trial
                   </Button>
@@ -518,7 +518,7 @@ export default function Landing() {
                 <div className="mt-auto">
                   <Button 
                     className="w-full bg-white text-green-600 hover:bg-green-50 font-semibold mb-3"
-                    onClick={() => setLocation("/pricing?type=business")}
+                    onClick={() => setLocation("/pricing?type=business#business-enterprise")}
                   >
                     Start Enterprise
                   </Button>

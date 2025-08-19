@@ -91,6 +91,19 @@ export default function Pricing() {
     return "min-h-screen bg-gradient-to-br from-slate-50 to-slate-100";
   };
 
+  // Handle anchor scrolling for pricing cards
+  React.useEffect(() => {
+    const hash = window.location.hash.substring(1);
+    if (hash) {
+      setTimeout(() => {
+        const element = document.getElementById(hash);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    }
+  }, []);
+
   return (
     <div className={getBrandClass()}>
       {/* Header with back navigation */}
