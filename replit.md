@@ -24,7 +24,7 @@ Organization Expansion: Include charter schools, private schools, pony leagues, 
 - **Routing**: Wouter.
 - **State Management**: TanStack Query (React Query) for server state and caching.
 - **UI Framework**: Shadcn/ui components built on Radix UI primitives with Tailwind CSS.
-- **Custom Design System**: Extensive use of CSS variables for consistent theming and dark mode support. Integrated custom Tailwind extensions (colors, animations, spacing). Preference for custom React components with variants (CustomCard, CustomButton, AnimatedText, FloatingElement). Design patterns include glass morphism, gradients, floating animations, and glow effects. Tournament-themed color system in HSL format. CSS-based animations with custom keyframes. Mobile-first responsive design.
+- **Custom Design System**: Extensive use of CSS variables for consistent theming and dark mode support. Integrated custom Tailwind extensions (colors, animations, spacing). Preference for custom React components with variants (CustomCard, CustomButton, AnimatedText, FloatingElement). Design patterns include glass morphism, gradients, floating animations, and glow effects. Tournament-themed color system in HSL format. CSS-based animations with custom keyframes. Mobile-first responsive design with improved navigation system for CCISD VLC schools access and proper content spacing.
 - **Form Management**: React Hook Form with Zod validation.
 - **Component Structure**: Modular design for UI, pages, and business logic.
 

@@ -84,8 +84,8 @@ function AuthenticatedRoutes() {
   return (
     <div className={brandClass}>
       <DomainNavigation />
-      {/* Add padding-top to account for fixed header */}
-      <div className="pt-12">
+      {/* Add padding-top to account for fixed header - increased for mobile */}
+      <div className="pt-16 md:pt-12">
         <Switch>
         <Route path="/" component={() => <Home />} />
         <Route path="/create" component={CreateTournament} />

@@ -23,24 +23,24 @@ export default function DomainNavigation() {
 
   return (
     <nav 
-      className="fixed top-0 left-0 right-0 z-50 w-full py-2 px-4 shadow-lg"
+      className="fixed top-0 left-0 right-0 z-40 w-full py-2 px-3 md:px-4 shadow-lg"
       style={{ backgroundColor: config.primaryColor }}
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Brand Section */}
-        <div className="flex items-center space-x-3">
-          <div className="h-8 w-8 bg-white/20 rounded-lg flex items-center justify-center text-white text-lg">
+        <div className="flex items-center space-x-2 md:space-x-3 flex-shrink-0">
+          <div className="h-6 w-6 md:h-8 md:w-8 bg-white/20 rounded-lg flex items-center justify-center text-white text-sm md:text-lg">
             {config.brand === 'CHAMPIONS_FOR_CHANGE' ? '🏆' : 
              config.brand === 'COACHES_LOUNGE' ? '🎮' : '⚡'}
           </div>
-          <div>
-            <h1 className="text-lg font-bold text-white">{config.brand.replace(/_/g, ' ')}</h1>
-            <p className="text-xs text-white/70">District Athletics Management</p>
+          <div className="min-w-0">
+            <h1 className="text-sm md:text-lg font-bold text-white truncate">{config.brand.replace(/_/g, ' ')}</h1>
+            <p className="text-xs text-white/70 hidden sm:block">District Athletics Management</p>
           </div>
         </div>
 
-        {/* Navigation Links */}
-        <div className="flex items-center space-x-6">
+        {/* Navigation Links - Responsive */}
+        <div className="hidden md:flex items-center space-x-6">
           <Link href="/">
             <a className={getNavItemClass("/")}>Home</a>
           </Link>
@@ -52,11 +52,27 @@ export default function DomainNavigation() {
             </Link>
           )}
 
-          {/* Miller VLC Demo - CCISD Showcase */}
+          {/* All CCISD VLC Schools - District Athletic Director Access */}
           {config.brand !== 'COACHES_LOUNGE' && (
-            <Link href="/miller-vlc-demo">
-              <a className={getNavItemClass("/miller-vlc-demo")}>Miller VLC</a>
-            </Link>
+            <div className="relative group">
+              <button className="px-3 py-1 rounded-md transition-colors text-sm text-white/80 hover:text-white hover:bg-white/10">
+                CCISD VLC Schools
+              </button>
+              <div className="absolute right-0 mt-1 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <Link href="/miller-vlc-demo">
+                  <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-t-md">Miller High School VLC</a>
+                </Link>
+                <Link href="/carroll-vlc-demo">
+                  <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Carroll High School VLC</a>
+                </Link>
+                <Link href="/veterans-vlc-demo">
+                  <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Veterans Memorial VLC</a>
+                </Link>
+                <Link href="/ray-vlc-demo">
+                  <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-b-md">Ray High School VLC</a>
+                </Link>
+              </div>
+            </div>
           )}
 
           {/* Schools - District Management */}
@@ -72,7 +88,54 @@ export default function DomainNavigation() {
               <a className={getNavItemClass("/role-hierarchy")}>Roles</a>
             </Link>
           )}
+        </div>
 
+        {/* Mobile Navigation Menu */}
+        <div className="md:hidden">
+          <details className="relative">
+            <summary className="list-none cursor-pointer">
+              <div className="w-6 h-6 flex flex-col justify-center items-center text-white">
+                <div className="w-4 h-0.5 bg-white mb-1"></div>
+                <div className="w-4 h-0.5 bg-white mb-1"></div>
+                <div className="w-4 h-0.5 bg-white"></div>
+              </div>
+            </summary>
+            <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg z-50">
+              <Link href="/">
+                <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-t-md">Home</a>
+              </Link>
+              {config.brand !== 'COACHES_LOUNGE' && (
+                <>
+                  <Link href="/tournament-empire">
+                    <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Tournaments</a>
+                  </Link>
+                  <div className="px-4 py-2 text-xs font-medium text-gray-500 bg-gray-50">CCISD VLC Schools</div>
+                  <Link href="/miller-vlc-demo">
+                    <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 ml-2">Miller High School</a>
+                  </Link>
+                  <Link href="/carroll-vlc-demo">
+                    <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 ml-2">Carroll High School</a>
+                  </Link>
+                  <Link href="/veterans-vlc-demo">
+                    <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 ml-2">Veterans Memorial</a>
+                  </Link>
+                  <Link href="/ray-vlc-demo">
+                    <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 ml-2">Ray High School</a>
+                  </Link>
+                  <Link href="/schools">
+                    <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Schools</a>
+                  </Link>
+                  <Link href="/role-hierarchy">
+                    <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-b-md">Roles</a>
+                  </Link>
+                </>
+              )}
+            </div>
+          </details>
+        </div>
+        
+        {/* Desktop Additional Navigation */}
+        <div className="hidden md:flex items-center space-x-4">
           {/* Show Fantasy only for fantasy and pro domains */}
           {isFeatureEnabled('fantasyLeagues') && (
             <Link href="/fantasy-tournaments">
