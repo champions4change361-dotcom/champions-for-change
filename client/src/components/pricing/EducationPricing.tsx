@@ -125,16 +125,9 @@ export function EducationPricingSection() {
             return (
               <Card 
                 key={tier.name} 
-                className={`relative ${tier.popular ? 'border-2 border-green-500 shadow-xl' : 'border border-gray-200'}`}
+                className="relative border border-gray-200"
                 data-testid={`card-education-${tier.name.toLowerCase()}`}
               >
-                {tier.popular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-2 rounded-full text-sm font-semibold flex items-center gap-2">
-                    <Star className="h-4 w-4" />
-                    {tier.badge}
-                  </div>
-                )}
-                
                 <CardHeader className="text-center pb-6">
                   <div className="mx-auto mb-4 p-3 bg-green-100 rounded-full w-fit">
                     <IconComponent className="h-8 w-8 text-green-600" />

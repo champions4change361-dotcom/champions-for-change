@@ -107,24 +107,13 @@ export function CoachesLoungePricingSection() {
             return (
               <Card 
                 key={tier.name} 
-                className={`relative bg-white/10 backdrop-blur-sm border-white/20 ${
-                  tier.popular ? 'border-2 border-purple-400 shadow-2xl scale-105' : ''
-                }`}
+                className="relative bg-white/10 backdrop-blur-sm border-white/20"
                 data-testid={`card-coaches-${tier.name.toLowerCase().replace(' ', '-')}`}
               >
-                {tier.popular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-purple-500 text-white px-4 py-1 rounded-full text-sm font-semibold">
-                    {tier.badge}
-                  </div>
-                )}
-                
                 <CardHeader className="text-center pb-6">
                   <div className="mx-auto mb-4 p-3 bg-purple-500/20 rounded-full w-fit">
                     <IconComponent className="h-6 w-6 text-purple-300" />
                   </div>
-                  <Badge variant="outline" className="mb-2 text-xs border-purple-300 text-purple-200">
-                    {tier.badge}
-                  </Badge>
                   <CardTitle className="text-xl font-bold mb-2 text-white">{tier.name}</CardTitle>
                   <div className="mb-4">
                     <span className="text-3xl font-bold text-white">{tier.price}</span>
