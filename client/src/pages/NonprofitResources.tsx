@@ -43,10 +43,10 @@ export default function NonprofitResources() {
             <Button 
               size="lg" 
               className="bg-yellow-500 hover:bg-yellow-600 text-green-900 font-semibold" 
-              onClick={() => window.open('https://candid.org/about/candid-apis', '_blank')}
-              data-testid="button-api-docs"
+              onClick={() => window.open('https://www.techsoup.org/', '_blank')}
+              data-testid="button-tech-resources"
             >
-              Explore APIs
+              Get Free Tech Tools
             </Button>
             <Button 
               size="lg" 
@@ -65,86 +65,92 @@ export default function NonprofitResources() {
       <section className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12" data-testid="text-api-title">
-            Essential APIs for Nonprofits
+            Professional Grant Research Resources
           </h2>
           
           <div className="grid lg:grid-cols-2 gap-8 mb-12">
-            {/* Candid APIs */}
-            <Card className="border-t-4 border-green-500" data-testid="card-candid-api">
+            {/* Candid Foundation Directory */}
+            <Card className="border-t-4 border-green-500" data-testid="card-candid-directory">
               <CardHeader>
                 <div className="flex items-center gap-3 mb-4">
                   <div className="bg-green-100 dark:bg-green-900 p-2 rounded-full">
                     <Database className="h-6 w-6 text-green-600 dark:text-green-400" />
                   </div>
-                  <CardTitle className="text-green-900 dark:text-green-100">Candid Foundation API</CardTitle>
+                  <CardTitle className="text-green-900 dark:text-green-100">Candid Foundation Directory</CardTitle>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-gray-600 dark:text-gray-300">
-                  Access the world's largest database of foundations and grants. Perfect for automated grant discovery.
+                  The world's largest database of foundations and grants. Essential for professional grant research.
                 </p>
                 <div className="bg-gray-50 dark:bg-slate-700 p-4 rounded-lg">
-                  <div className="font-semibold text-gray-900 dark:text-white mb-2">Key Features:</div>
+                  <div className="font-semibold text-gray-900 dark:text-white mb-2">What You Get:</div>
                   <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
                     <li>• Foundation profiles and giving patterns</li>
                     <li>• Grant opportunities by category</li>
                     <li>• Application deadlines and requirements</li>
                     <li>• Funder contact information</li>
                   </ul>
+                  <div className="mt-3 p-2 bg-yellow-100 dark:bg-yellow-900/20 rounded text-xs text-yellow-800 dark:text-yellow-200">
+                    <strong>Note:</strong> Professional subscriptions start around $149/month
+                  </div>
                 </div>
                 <Button 
                   variant="outline" 
                   className="w-full" 
-                  onClick={() => window.open('https://candid.org/about/candid-apis', '_blank')}
-                  data-testid="button-candid-api"
+                  onClick={() => window.open('https://candid.org/find-funding', '_blank')}
+                  data-testid="button-candid-directory"
                 >
                   <ExternalLink className="h-4 w-4 mr-2" />
-                  Candid API Documentation
+                  Explore Candid Directory
                 </Button>
               </CardContent>
             </Card>
 
-            {/* GuideStar API */}
-            <Card className="border-t-4 border-blue-500" data-testid="card-guidestar-api">
+            {/* Free Alternatives */}
+            <Card className="border-t-4 border-blue-500" data-testid="card-free-resources">
               <CardHeader>
                 <div className="flex items-center gap-3 mb-4">
                   <div className="bg-blue-100 dark:bg-blue-900 p-2 rounded-full">
                     <Search className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                   </div>
-                  <CardTitle className="text-blue-900 dark:text-blue-100">GuideStar API</CardTitle>
+                  <CardTitle className="text-blue-900 dark:text-blue-100">Free Grant Research</CardTitle>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-gray-600 dark:text-gray-300">
-                  Nonprofit organization data and financial information for due diligence and research.
+                  Start your grant search with these free government resources and databases.
                 </p>
                 <div className="bg-gray-50 dark:bg-slate-700 p-4 rounded-lg">
-                  <div className="font-semibold text-gray-900 dark:text-white mb-2">Key Features:</div>
+                  <div className="font-semibold text-gray-900 dark:text-white mb-2">Free Options:</div>
                   <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
-                    <li>• Nonprofit financial data</li>
-                    <li>• Organization profiles</li>
-                    <li>• Board and leadership info</li>
-                    <li>• Performance metrics</li>
+                    <li>• Grants.gov - All federal opportunities</li>
+                    <li>• State education department grants</li>
+                    <li>• Foundation websites directly</li>
+                    <li>• Local community foundation directories</li>
                   </ul>
+                  <div className="mt-3 p-2 bg-green-100 dark:bg-green-900/20 rounded text-xs text-green-800 dark:text-green-200">
+                    <strong>Best for:</strong> Getting started and finding federal grants
+                  </div>
                 </div>
                 <Button 
                   variant="outline" 
                   className="w-full" 
-                  onClick={() => window.open('https://www.guidestar.org/profile/shared/partners/api', '_blank')}
-                  data-testid="button-guidestar-api"
+                  onClick={() => window.open('https://www.grants.gov/', '_blank')}
+                  data-testid="button-free-grants"
                 >
                   <ExternalLink className="h-4 w-4 mr-2" />
-                  GuideStar API Info
+                  Start with Grants.gov
                 </Button>
               </CardContent>
             </Card>
           </div>
 
-          <Alert className="bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800 mb-8" data-testid="alert-integration">
-            <Code className="h-4 w-4 text-green-600 dark:text-green-400" />
-            <AlertDescription className="text-green-800 dark:text-green-200">
-              <strong>Platform Integration:</strong> These APIs can be integrated into our tournament platform to help 
-              school districts and nonprofits automatically discover relevant funding opportunities based on their programs.
+          <Alert className="bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800 mb-8" data-testid="alert-realistic">
+            <AlertCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            <AlertDescription className="text-blue-800 dark:text-blue-200">
+              <strong>Honest Guidance:</strong> Professional grant databases cost $5,000-9,000 annually. We recommend starting with 
+              free resources and TechSoup's discounted software, then investing in professional tools as your grant program grows.
             </AlertDescription>
           </Alert>
         </div>
