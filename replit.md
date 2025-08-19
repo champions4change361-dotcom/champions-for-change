@@ -11,7 +11,7 @@ Domain Strategy: Primary domain will be championsforchange.net hosted on Replit.
 Transparency Policy: Absolute commitment to honest marketing - no fake reviews, testimonials, or misleading claims. Platform will earn authentic reviews through real user experiences.
 Competitive Strategy: Mission-driven advantage - "Let them copy, they'll always be behind and can't replicate the authentic educational mission."
 District Value Proposition: At $4,500-5,000/year, districts save $26,000+ annually compared to current solutions while supporting educational mission. ROI still massive and fiscally irresponsible not to adopt. Districts handle student fees through existing systems - no payment processing burden on platform.
-Tournament Organizer Pricing: $39/month ($468/year) or $399/year (2 months free) - competitive with Jersey Watch + Challonge combined.
+Tournament Organizer Pricing: $39/month ($468/year) or $399/year (2 months free) - competitive with Jersey Watch + Challonge combined. Includes unlimited tournaments, 5-step AI wizard, 65+ sports, team management, CSV import/export, advanced analytics, and priority support.
 Business Enterprise Pricing: $149/month or $1,499/year (2 months free) for flexible enterprise solutions.
 Guaranteed Pricing Model: "The price you pay at the time is the price you always pay" - creates permanent cost advantage for early adopters and eliminates budget uncertainty.
 White Label Strategy: Remove from initial offering to simplify market entry. Add later with 50-100% price increase. Focus on "Professional Platform" with logo, colors, custom domain.
