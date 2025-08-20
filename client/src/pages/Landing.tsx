@@ -44,7 +44,7 @@ export default function Landing() {
                   </div>
                   <div>
                     <h1 className="text-xl font-bold text-white">Champions for Change</h1>
-                    <p className="text-xs text-orange-400">Tournament Management Platform</p>
+                    <p className="text-xs text-orange-400">Athletic & Academic Management Platform</p>
                   </div>
                 </div>
 
@@ -166,12 +166,12 @@ export default function Landing() {
                 </Badge>
                 
                 <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-4 lg:mb-6 leading-tight">
-                  Tournament Platform That <span className="text-orange-400">Champions Change</span>
+                  Complete Athletic & Academic <span className="text-orange-400">Management Platform</span>
                 </h1>
             
                 <p className="text-base sm:text-lg lg:text-xl text-slate-300 mb-6 lg:mb-8 max-w-4xl leading-relaxed">
-                  Professional tournament management platform built by coaches who identified needs in the tournament world. 
-                  Every subscription helps fund student trips and educational opportunities for underprivileged youth.
+                  Comprehensive platform for school districts and organizations managing athletic programs, academic competitions, 
+                  budgets, health monitoring, and organizational oversight. Every subscription helps fund student trips and educational opportunities for underprivileged youth.
                 </p>
 
                 <div className="flex flex-col gap-4 justify-center lg:justify-start items-center lg:items-start">
