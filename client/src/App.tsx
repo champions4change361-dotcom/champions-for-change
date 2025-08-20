@@ -102,7 +102,7 @@ function AuthenticatedRoutes() {
       <div className="pt-16 md:pt-12">
         <Switch>
         <Route path="/" component={() => <Home />} />
-        <Route path="/create" component={CreateTournament} />
+        {/* CreateTournament moved to public routes with conditional access */}
         <Route path="/tournament/:id" component={Tournament} />
         <Route path="/contacts" component={Contacts} />
         <Route path="/ai-consultation" component={AIConsultation} />
@@ -245,6 +245,23 @@ function AppRouter() {
       <Route path="/signup" component={SignupSelector} />
       <Route path="/tournament/design" component={TournamentDesign} />
       <Route path="/register-old" component={Register} />
+      
+      {/* AI Tournament Creation - Guest Access When Coming from AI Consultant */}
+      <Route path="/create">
+        {(() => {
+          const urlParams = new URLSearchParams(window.location.search);
+          const fromAI = urlParams.get('fromAI');
+          const consultationComplete = urlParams.get('consultationComplete');
+          
+          // Allow guest access if coming from AI consultation
+          if (fromAI === 'true' && consultationComplete === 'true') {
+            return <CreateTournament />;
+          }
+          
+          // Otherwise redirect to login for regular tournament creation
+          return <Login />;
+        })()}
+      </Route>
       
       {/* Legal and Compliance Pages - Public Access */}
       <Route path="/privacy" component={PrivacyPolicy} />

@@ -249,6 +249,7 @@ export default function EnhancedTournamentWizard({
         ...data,
         teams: data.teams,
         scoringMethod: selectedSport?.scoringMethod || "wins",
+        isGuestCreated: !user, // Mark as guest-created for tournaments created without login
       });
       return response.json();
     },
