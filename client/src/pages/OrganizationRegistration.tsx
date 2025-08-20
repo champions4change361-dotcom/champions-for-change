@@ -6,53 +6,41 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
-const organizationFormSchema = z.object({
-  organizationType: z.string().min(1, "Please select your organization type"),
-  organizationName: z.string().min(2, "Organization name must be at least 2 characters"),
-  contactName: z.string().min(2, "Contact name must be at least 2 characters"),
-  contactEmail: z.string().email("Please enter a valid email address"),
-  contactPhone: z.string().min(10, "Please enter a valid phone number"),
-  city: z.string().min(2, "City is required"),
-  state: z.string().min(2, "State is required"),
-  approximateParticipants: z.string().min(1, "Please select participant range"),
-  primarySports: z.string().min(5, "Please describe the sports/activities"),
-  additionalInfo: z.string().optional(),
-});
-
-type OrganizationFormData = z.infer<typeof organizationFormSchema>;
-
 export default function OrganizationRegistration() {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
   const { toast } = useToast();
 
-  const form = useForm<OrganizationFormData>({
-    resolver: zodResolver(organizationFormSchema),
-    defaultValues: {
-      organizationType: "",
-      organizationName: "",
-      contactName: "",
-      contactEmail: "",
-      contactPhone: "",
-      city: "",
-      state: "",
-      approximateParticipants: "",
-      primarySports: "",
-      additionalInfo: "",
-    },
-  });
+  const handleActivityChange = (activity: string, checked: boolean) => {
+    if (checked) {
+      setSelectedActivities(prev => [...prev, activity]);
+    } else {
+      setSelectedActivities(prev => prev.filter(a => a !== activity));
+    }
+  };
 
-  const onSubmit = async (data: OrganizationFormData) => {
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     setIsSubmitting(true);
+    
+    const formData = new FormData(e.currentTarget);
+    const data = {
+      organizationType: formData.get('organizationType'),
+      organizationName: formData.get('organizationName'),
+      contactName: formData.get('contactName'),
+      contactEmail: formData.get('contactEmail'),
+      contactPhone: formData.get('contactPhone'),
+      city: formData.get('city'),
+      state: formData.get('state'),
+      approximateParticipants: formData.get('approximateParticipants'),
+      primaryActivities: selectedActivities,
+      additionalInfo: formData.get('additionalInfo'),
+    };
+
     try {
-      // Here you would typically send to your backend
       console.log("Organization registration data:", data);
       
       toast({
@@ -61,7 +49,8 @@ export default function OrganizationRegistration() {
       });
       
       // Reset form
-      form.reset();
+      e.currentTarget.reset();
+      setSelectedActivities([]);
     } catch (error) {
       toast({
         title: "Registration Failed",
@@ -173,294 +162,338 @@ export default function OrganizationRegistration() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6" data-testid="form-organization-registration">
-                  
-                  {/* Organization Type */}
-                  <FormField
-                    control={form.control}
+              <form onSubmit={onSubmit} className="space-y-6" data-testid="form-organization-registration">
+                
+                {/* Organization Type */}
+                <div>
+                  <Label htmlFor="organizationType">Organization Type *</Label>
+                  <select 
+                    id="organizationType"
                     name="organizationType"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Organization Type *</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger data-testid="select-organization-type">
-                              <SelectValue placeholder="Select your organization type" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="charter-school">Charter School</SelectItem>
-                            <SelectItem value="private-school">Private School</SelectItem>
-                            <SelectItem value="pony-league">Pony League</SelectItem>
-                            <SelectItem value="pop-warner">Pop Warner</SelectItem>
-                            <SelectItem value="youth-sports">Youth Sports Organization</SelectItem>
-                            <SelectItem value="club-sports">Club Sports</SelectItem>
-                            <SelectItem value="recreation-center">Recreation Center</SelectItem>
-                            <SelectItem value="other">Other</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    required
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    data-testid="select-organization-type"
+                  >
+                    <option value="">Select your organization type</option>
+                    <option value="school-district">School District</option>
+                    <option value="charter-school">Charter School</option>
+                    <option value="private-school">Private School</option>
+                    <option value="church">Church/Religious Organization</option>
+                    <option value="ymca-ywca">YMCA/YWCA</option>
+                    <option value="boys-girls-club">Boys & Girls Club</option>
+                    <option value="pony-league">Pony League</option>
+                    <option value="pop-warner">Pop Warner</option>
+                    <option value="youth-sports">Youth Sports Organization</option>
+                    <option value="club-sports">Club Sports</option>
+                    <option value="recreation-center">Recreation Center</option>
+                    <option value="business-enterprise">Business Enterprise</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
 
-                  <div className="grid md:grid-cols-2 gap-6">
-                    {/* Organization Name */}
-                    <FormField
-                      control={form.control}
+                <div className="grid md:grid-cols-2 gap-6">
+                  {/* Organization Name */}
+                  <div>
+                    <Label htmlFor="organizationName">Organization Name *</Label>
+                    <Input 
+                      id="organizationName"
                       name="organizationName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Organization Name *</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Your organization name" {...field} data-testid="input-organization-name" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                      placeholder="Your organization name" 
+                      required 
+                      data-testid="input-organization-name" 
                     />
+                  </div>
 
-                    {/* Contact Name */}
-                    <FormField
-                      control={form.control}
+                  {/* Contact Name */}
+                  <div>
+                    <Label htmlFor="contactName">Contact Name *</Label>
+                    <Input 
+                      id="contactName"
                       name="contactName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Contact Name *</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Your full name" {...field} data-testid="input-contact-name" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                      placeholder="Your full name" 
+                      required 
+                      data-testid="input-contact-name" 
                     />
                   </div>
+                </div>
 
-                  <div className="grid md:grid-cols-2 gap-6">
-                    {/* Contact Email */}
-                    <FormField
-                      control={form.control}
+                <div className="grid md:grid-cols-2 gap-6">
+                  {/* Contact Email */}
+                  <div>
+                    <Label htmlFor="contactEmail">Email Address *</Label>
+                    <Input 
+                      id="contactEmail"
                       name="contactEmail"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email Address *</FormLabel>
-                          <FormControl>
-                            <Input type="email" placeholder="your.email@organization.com" {...field} data-testid="input-contact-email" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                      type="email" 
+                      placeholder="your.email@organization.com" 
+                      required 
+                      data-testid="input-contact-email" 
                     />
+                  </div>
 
-                    {/* Contact Phone */}
-                    <FormField
-                      control={form.control}
+                  {/* Contact Phone */}
+                  <div>
+                    <Label htmlFor="contactPhone">Phone Number *</Label>
+                    <Input 
+                      id="contactPhone"
                       name="contactPhone"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Phone Number *</FormLabel>
-                          <FormControl>
-                            <Input type="tel" placeholder="(555) 123-4567" {...field} data-testid="input-contact-phone" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                      type="tel" 
+                      placeholder="(555) 123-4567" 
+                      required 
+                      data-testid="input-contact-phone" 
                     />
                   </div>
+                </div>
 
-                  <div className="grid md:grid-cols-2 gap-6">
-                    {/* City */}
-                    <FormField
-                      control={form.control}
+                <div className="grid md:grid-cols-2 gap-6">
+                  {/* City */}
+                  <div>
+                    <Label htmlFor="city">City *</Label>
+                    <Input 
+                      id="city"
                       name="city"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>City *</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Your city" {...field} data-testid="input-city" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                      placeholder="Your city" 
+                      required 
+                      data-testid="input-city" 
                     />
+                  </div>
 
-                    {/* State */}
-                    <FormField
-                      control={form.control}
+                  {/* State */}
+                  <div>
+                    <Label htmlFor="state">State *</Label>
+                    <select 
+                      id="state"
                       name="state"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>State *</FormLabel>
-                          <FormControl>
-                            <Input placeholder="TX" {...field} data-testid="input-state" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  {/* Participant Count */}
-                  <FormField
-                    control={form.control}
-                    name="approximateParticipants"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Approximate Number of Participants *</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger data-testid="select-participants">
-                              <SelectValue placeholder="Select participant range" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="10-25">10-25 participants</SelectItem>
-                            <SelectItem value="26-50">26-50 participants</SelectItem>
-                            <SelectItem value="51-100">51-100 participants</SelectItem>
-                            <SelectItem value="101-200">101-200 participants</SelectItem>
-                            <SelectItem value="201-500">201-500 participants</SelectItem>
-                            <SelectItem value="500+">500+ participants</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Primary Sports */}
-                  <FormField
-                    control={form.control}
-                    name="primarySports"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Primary Sports/Activities *</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            placeholder="List the main sports or activities your organization manages (e.g., football, baseball, basketball, soccer, etc.)"
-                            {...field}
-                            data-testid="textarea-primary-sports"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Additional Info */}
-                  <FormField
-                    control={form.control}
-                    name="additionalInfo"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Additional Information (Optional)</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            placeholder="Tell us about any specific needs, current challenges, or questions you have about our platform"
-                            {...field}
-                            data-testid="textarea-additional-info"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <div className="text-center pt-6">
-                    <Button 
-                      type="submit" 
-                      size="lg"
-                      className="bg-green-600 hover:bg-green-700 text-white px-8 py-4"
-                      disabled={isSubmitting}
-                      data-testid="button-submit-registration"
+                      required
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      data-testid="select-state"
                     >
-                      {isSubmitting ? "Submitting..." : "Submit Registration"}
-                    </Button>
+                      <option value="">Select your state</option>
+                      <option value="AL">Alabama</option>
+                      <option value="AK">Alaska</option>
+                      <option value="AZ">Arizona</option>
+                      <option value="AR">Arkansas</option>
+                      <option value="CA">California</option>
+                      <option value="CO">Colorado</option>
+                      <option value="CT">Connecticut</option>
+                      <option value="DE">Delaware</option>
+                      <option value="FL">Florida</option>
+                      <option value="GA">Georgia</option>
+                      <option value="HI">Hawaii</option>
+                      <option value="ID">Idaho</option>
+                      <option value="IL">Illinois</option>
+                      <option value="IN">Indiana</option>
+                      <option value="IA">Iowa</option>
+                      <option value="KS">Kansas</option>
+                      <option value="KY">Kentucky</option>
+                      <option value="LA">Louisiana</option>
+                      <option value="ME">Maine</option>
+                      <option value="MD">Maryland</option>
+                      <option value="MA">Massachusetts</option>
+                      <option value="MI">Michigan</option>
+                      <option value="MN">Minnesota</option>
+                      <option value="MS">Mississippi</option>
+                      <option value="MO">Missouri</option>
+                      <option value="MT">Montana</option>
+                      <option value="NE">Nebraska</option>
+                      <option value="NV">Nevada</option>
+                      <option value="NH">New Hampshire</option>
+                      <option value="NJ">New Jersey</option>
+                      <option value="NM">New Mexico</option>
+                      <option value="NY">New York</option>
+                      <option value="NC">North Carolina</option>
+                      <option value="ND">North Dakota</option>
+                      <option value="OH">Ohio</option>
+                      <option value="OK">Oklahoma</option>
+                      <option value="OR">Oregon</option>
+                      <option value="PA">Pennsylvania</option>
+                      <option value="RI">Rhode Island</option>
+                      <option value="SC">South Carolina</option>
+                      <option value="SD">South Dakota</option>
+                      <option value="TN">Tennessee</option>
+                      <option value="TX">Texas</option>
+                      <option value="UT">Utah</option>
+                      <option value="VT">Vermont</option>
+                      <option value="VA">Virginia</option>
+                      <option value="WA">Washington</option>
+                      <option value="WV">West Virginia</option>
+                      <option value="WI">Wisconsin</option>
+                      <option value="WY">Wyoming</option>
+                    </select>
                   </div>
-                </form>
-              </Form>
+                </div>
+
+                {/* Participant Count */}
+                <div>
+                  <Label htmlFor="approximateParticipants">Approximate Number of Participants *</Label>
+                  <select 
+                    id="approximateParticipants"
+                    name="approximateParticipants"
+                    required
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    data-testid="select-participants"
+                  >
+                    <option value="">Select participant range</option>
+                    <option value="10-25">10-25 participants</option>
+                    <option value="26-50">26-50 participants</option>
+                    <option value="51-100">51-100 participants</option>
+                    <option value="101-200">101-200 participants</option>
+                    <option value="201-500">201-500 participants</option>
+                    <option value="500+">500+ participants</option>
+                  </select>
+                </div>
+
+                {/* Primary Activities - Multi-select checkboxes */}
+                <div>
+                  <Label>Primary Activities/Categories * (Select all that apply)</Label>
+                  <div className="grid md:grid-cols-2 gap-4 mt-2 p-4 border rounded-md" data-testid="checkbox-group-activities">
+                    {[
+                      { id: 'academic', label: 'Academic Competitions (UIL, Debate, Math, Science)' },
+                      { id: 'athletic', label: 'Athletic Sports (Football, Basketball, Baseball, etc.)' },
+                      { id: 'stem', label: 'STEM Competitions (Robotics, Engineering, Tech)' },
+                      { id: 'fine-arts', label: 'Fine Arts (Band, Choir, Theater, Art)' },
+                      { id: 'community', label: 'Community Events & Tournaments' },
+                      { id: 'health-wellness', label: 'Health & Wellness Programs' },
+                    ].map((activity) => (
+                      <div key={activity.id} className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id={activity.id}
+                          checked={selectedActivities.includes(activity.id)}
+                          onChange={(e) => handleActivityChange(activity.id, e.target.checked)}
+                          className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                          data-testid={`checkbox-${activity.id}`}
+                        />
+                        <Label htmlFor={activity.id} className="text-sm font-normal cursor-pointer">
+                          {activity.label}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                  {selectedActivities.length === 0 && (
+                    <p className="text-red-500 text-sm mt-1">Please select at least one activity category</p>
+                  )}
+                </div>
+
+                {/* Additional Info */}
+                <div>
+                  <Label htmlFor="additionalInfo">Additional Information (Optional)</Label>
+                  <Textarea 
+                    id="additionalInfo"
+                    name="additionalInfo"
+                    placeholder="Tell us about any specific needs, current challenges, or questions you have about our platform"
+                    data-testid="textarea-additional-info"
+                  />
+                </div>
+
+                <div className="text-center pt-6">
+                  <Button 
+                    type="submit" 
+                    size="lg"
+                    className="bg-green-600 hover:bg-green-700 text-white px-8 py-4"
+                    disabled={isSubmitting || selectedActivities.length === 0}
+                    data-testid="button-submit-registration"
+                  >
+                    {isSubmitting ? "Submitting..." : "Submit Registration"}
+                  </Button>
+                </div>
+
+                <div className="text-center text-sm text-gray-600 dark:text-gray-400">
+                  <p>By submitting this form, you agree to our terms of service and privacy policy.</p>
+                  <p className="mt-2">We'll contact you within 24 hours to schedule your demo and discuss pricing options.</p>
+                </div>
+              </form>
             </CardContent>
           </Card>
         </div>
       </section>
 
-      {/* Features Preview */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8">
+      {/* Pricing Preview */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-slate-50 dark:bg-slate-900">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12" data-testid="text-features-title">
-            What You'll Get with Your Organization Account
+          <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
+            Transparent Pricing for Every Organization
           </h2>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="flex items-start space-x-3" data-testid="feature-tournament-management">
-              <CheckCircle className="h-6 w-6 text-green-500 mt-1 flex-shrink-0" />
-              <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Tournament Management</h3>
-                <p className="text-gray-600 dark:text-gray-300 text-sm">Create and manage tournaments with custom brackets and scoring</p>
-              </div>
-            </div>
-            
-            <div className="flex items-start space-x-3" data-testid="feature-team-registration">
-              <CheckCircle className="h-6 w-6 text-green-500 mt-1 flex-shrink-0" />
-              <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Team Registration</h3>
-                <p className="text-gray-600 dark:text-gray-300 text-sm">Easy team signup and roster management for coaches</p>
-              </div>
-            </div>
-            
-            <div className="flex items-start space-x-3" data-testid="feature-scheduling">
-              <CheckCircle className="h-6 w-6 text-green-500 mt-1 flex-shrink-0" />
-              <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Smart Scheduling</h3>
-                <p className="text-gray-600 dark:text-gray-300 text-sm">Automated scheduling with conflict detection</p>
-              </div>
-            </div>
-            
-            <div className="flex items-start space-x-3" data-testid="feature-health-monitoring">
-              <CheckCircle className="h-6 w-6 text-green-500 mt-1 flex-shrink-0" />
-              <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Health Monitoring</h3>
-                <p className="text-gray-600 dark:text-gray-300 text-sm">Track participant safety and health metrics</p>
-              </div>
-            </div>
-            
-            <div className="flex items-start space-x-3" data-testid="feature-communication">
-              <CheckCircle className="h-6 w-6 text-green-500 mt-1 flex-shrink-0" />
-              <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Communication Tools</h3>
-                <p className="text-gray-600 dark:text-gray-300 text-sm">Keep parents and participants informed</p>
-              </div>
-            </div>
-            
-            <div className="flex items-start space-x-3" data-testid="feature-reporting">
-              <CheckCircle className="h-6 w-6 text-green-500 mt-1 flex-shrink-0" />
-              <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Reporting & Analytics</h3>
-                <p className="text-gray-600 dark:text-gray-300 text-sm">Detailed reports on participation and performance</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+          <div className="grid md:grid-cols-3 gap-8">
+            <Card className="relative">
+              <CardHeader>
+                <Badge className="w-fit bg-green-100 text-green-800">Community Nonprofits</Badge>
+                <CardTitle className="text-2xl">$39/month</CardTitle>
+                <CardDescription>Perfect for churches, youth organizations, and small leagues</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-sm">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    Tournament management
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    Basic health tracking
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    Communication tools
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
 
-      {/* CTA Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-green-600 to-blue-600 text-white">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-6" data-testid="text-cta-title">
-            Ready to Transform Your Organization?
-          </h2>
-          <p className="text-xl mb-8" data-testid="text-cta-description">
-            Join hundreds of organizations already using our platform to create better experiences for their participants while supporting educational opportunities.
-          </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Button size="lg" className="bg-yellow-500 hover:bg-yellow-600 text-gray-900" data-testid="button-contact-sales">
-              Contact Our Team
-            </Button>
-            <Link href="/">
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-gray-900" data-testid="button-return-home">
-                Return to Home
-              </Button>
-            </Link>
+            <Card className="relative border-green-500 border-2">
+              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                <Badge className="bg-green-600 text-white">Most Popular</Badge>
+              </div>
+              <CardHeader>
+                <Badge className="w-fit bg-blue-100 text-blue-800">School Districts</Badge>
+                <CardTitle className="text-2xl">$2,490/year</CardTitle>
+                <CardDescription>Champions District pricing with full enterprise features</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-sm">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    HIPAA/FERPA compliant
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    Athletic trainer dashboards
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    AI injury prediction
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    White-label branding
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            <Card className="relative">
+              <CardHeader>
+                <Badge className="w-fit bg-purple-100 text-purple-800">Business Enterprise</Badge>
+                <CardTitle className="text-2xl">$149/month</CardTitle>
+                <CardDescription>Full platform for tournament businesses</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-sm">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    Complete white-label platform
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    Advanced analytics
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    Priority support
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
