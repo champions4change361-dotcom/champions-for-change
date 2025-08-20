@@ -31,19 +31,78 @@ export function AIConsultant({ domain = 'education' }: AIConsultantProps) {
       title: "AI Tournament Consultant",
       subtitle: "Get professional tournament recommendations",
       primaryColor: "green",
-      features: ["FERPA Compliance", "Student Safety Protocols", "Educational Trip Integration", "Parent Communication"]
+      features: [
+        // Core Educational Features
+        "FERPA Compliance", "HIPAA Compliance", "Student Safety Protocols", 
+        "Educational Trip Integration", "Parent Communication", "Emergency Notifications",
+        
+        // Athletic Management
+        "Athletic Trainer Dashboard", "Injury Prediction AI (95% Accuracy)", "Health Monitoring",
+        "Medical Data Management", "Concussion Protocols", "Equipment Tracking",
+        
+        // Academic Competitions  
+        "UIL Academic Events (50+)", "Speech & Debate Management", "STEM Competitions",
+        "Academic Bowl Integration", "District-to-State Advancement", "TEKS Alignment",
+        
+        // Budget & Administration
+        "Excel-Style Budget Management", "Financial Allocation Tracking", "Compliance Management",
+        "Organizational Chart Builder", "Role-Based Access Control", "Audit Trails",
+        
+        // Enhanced Capabilities
+        "AI Assistant on All Forms", "Multi-School Coordination", "Family Access Portal",
+        "Achievement Tracking", "Live Score Updates", "Championship Series Management"
+      ]
     },
     business: {
       title: "AI Tournament Builder",  
       subtitle: "Custom tournament solutions for your business",
       primaryColor: "blue",
-      features: ["Custom Branding", "Sponsorship Integration", "Revenue Analytics", "Professional Reporting"]
+      features: [
+        // White Label & Branding
+        "White Label Platform", "Custom Branding", "Domain Integration", "Logo Customization",
+        
+        // Revenue & Analytics
+        "Revenue Analytics", "Sponsorship Integration", "Payment Processing", "Financial Reporting",
+        "Registration Fee Management", "Multi-Tier Pricing", "Corporate Partnerships",
+        
+        // Professional Features
+        "Professional Tournament Management", "Broadcasting Integration", "Media Management",
+        "Professional Reporting", "Advanced Analytics", "Performance Tracking",
+        
+        // Business Operations
+        "API Integration", "CRM Integration", "Marketing Automation", "Lead Generation",
+        "Customer Support Tools", "Multi-Location Management", "Franchise Support",
+        
+        // Advanced Capabilities
+        "AI Consultation Services", "Custom Development", "Enterprise Support",
+        "Dedicated Account Manager", "24/7 Technical Support", "SLA Guarantees"
+      ]
     },
     coaches: {
       title: "AI Fantasy Coach",
       subtitle: "Smart tournament and league management",
       primaryColor: "purple", 
-      features: ["League Management", "Player Analytics", "Community Building", "Live Updates"]
+      features: [
+        // League Management
+        "Fantasy League Creation", "Draft Management", "Player Analytics", "Live Updates",
+        "Season-Long Competitions", "Playoff Brackets", "Championship Management",
+        
+        // Community & Social
+        "Community Building", "Social Features", "Team Communication", "Fan Engagement",
+        "Leaderboards", "Achievement Systems", "Rivalry Tracking",
+        
+        // Advanced Analytics
+        "Performance Predictions", "Player Valuation", "Trade Analysis", "Injury Impact",
+        "Season Projections", "Draft Strategy", "Optimal Lineups",
+        
+        // Pro Features
+        "Professional Player Integration", "Real-Time Stats", "ESPN API Integration",
+        "Advanced Scoring Systems", "Custom Rules Engine", "Commissioner Tools",
+        
+        // Monetization
+        "Entry Fees", "Prize Pools", "Sponsorship Opportunities", "Revenue Sharing",
+        "Premium Subscriptions", "VIP Features", "Exclusive Content"
+      ]
     }
   };
 
@@ -186,6 +245,7 @@ export function AIConsultant({ domain = 'education' }: AIConsultantProps) {
     setConsultation(prev => ({ ...prev, sport: '' }));
   };
 
+  // Handle feature toggle
   const handleFeatureToggle = (feature: string) => {
     setConsultation(prev => ({
       ...prev,
@@ -193,6 +253,79 @@ export function AIConsultant({ domain = 'education' }: AIConsultantProps) {
         ? prev.features.filter(f => f !== feature)
         : [...prev.features, feature]
     }));
+  };
+
+  const getFeatureCategories = () => {
+    if (domain === 'education') {
+      return [
+        {
+          name: "Core Educational",
+          features: ["FERPA Compliance", "HIPAA Compliance", "Student Safety Protocols", "Educational Trip Integration", "Parent Communication", "Emergency Notifications"]
+        },
+        {
+          name: "Athletic Management", 
+          features: ["Athletic Trainer Dashboard", "Injury Prediction AI (95% Accuracy)", "Health Monitoring", "Medical Data Management", "Concussion Protocols", "Equipment Tracking"]
+        },
+        {
+          name: "Academic Competitions",
+          features: ["UIL Academic Events (50+)", "Speech & Debate Management", "STEM Competitions", "Academic Bowl Integration", "District-to-State Advancement", "TEKS Alignment"]
+        },
+        {
+          name: "Budget & Administration",
+          features: ["Excel-Style Budget Management", "Financial Allocation Tracking", "Compliance Management", "Organizational Chart Builder", "Role-Based Access Control", "Audit Trails"]
+        },
+        {
+          name: "Enhanced Capabilities",
+          features: ["AI Assistant on All Forms", "Multi-School Coordination", "Family Access Portal", "Achievement Tracking", "Live Score Updates", "Championship Series Management"]
+        }
+      ];
+    } else if (domain === 'business') {
+      return [
+        {
+          name: "White Label & Branding",
+          features: ["White Label Platform", "Custom Branding", "Domain Integration", "Logo Customization"]
+        },
+        {
+          name: "Revenue & Analytics",
+          features: ["Revenue Analytics", "Sponsorship Integration", "Payment Processing", "Financial Reporting", "Registration Fee Management", "Multi-Tier Pricing", "Corporate Partnerships"]
+        },
+        {
+          name: "Professional Features",
+          features: ["Professional Tournament Management", "Broadcasting Integration", "Media Management", "Professional Reporting", "Advanced Analytics", "Performance Tracking"]
+        },
+        {
+          name: "Business Operations",
+          features: ["API Integration", "CRM Integration", "Marketing Automation", "Lead Generation", "Customer Support Tools", "Multi-Location Management", "Franchise Support"]
+        },
+        {
+          name: "Enterprise Support",
+          features: ["AI Consultation Services", "Custom Development", "Enterprise Support", "Dedicated Account Manager", "24/7 Technical Support", "SLA Guarantees"]
+        }
+      ];
+    } else { // coaches/fantasy
+      return [
+        {
+          name: "League Management",
+          features: ["Fantasy League Creation", "Draft Management", "Player Analytics", "Live Updates", "Season-Long Competitions", "Playoff Brackets", "Championship Management"]
+        },
+        {
+          name: "Community & Social",
+          features: ["Community Building", "Social Features", "Team Communication", "Fan Engagement", "Leaderboards", "Achievement Systems", "Rivalry Tracking"]
+        },
+        {
+          name: "Advanced Analytics",
+          features: ["Performance Predictions", "Player Valuation", "Trade Analysis", "Injury Impact", "Season Projections", "Draft Strategy", "Optimal Lineups"]
+        },
+        {
+          name: "Pro Features",
+          features: ["Professional Player Integration", "Real-Time Stats", "ESPN API Integration", "Advanced Scoring Systems", "Custom Rules Engine", "Commissioner Tools"]
+        },
+        {
+          name: "Monetization",
+          features: ["Entry Fees", "Prize Pools", "Sponsorship Opportunities", "Revenue Sharing", "Premium Subscriptions", "VIP Features", "Exclusive Content"]
+        }
+      ];
+    }
   };
 
   // Determine complexity based on multiple factors
@@ -424,24 +557,34 @@ export function AIConsultant({ domain = 'education' }: AIConsultantProps) {
           {step === 2 && (
             <div className="space-y-4">
               <h4 className="font-semibold">What features do you need?</h4>
+              <p className="text-xs text-gray-600">
+                Select the capabilities most important to your organization. You'll get all features in your chosen plan.
+              </p>
               
-              <div className="grid grid-cols-1 gap-2">
-                {config.features.map((feature) => (
-                  <div 
-                    key={feature}
-                    onClick={() => handleFeatureToggle(feature)}
-                    className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                      consultation.features.includes(feature)
-                        ? `border-${config.primaryColor}-500 bg-${config.primaryColor}-50`
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                    data-testid={`feature-${feature.toLowerCase().replace(/\s+/g, '-')}`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">{feature}</span>
-                      {consultation.features.includes(feature) && (
-                        <CheckCircle className={`h-4 w-4 text-${config.primaryColor}-600`} />
-                      )}
+              <div className="max-h-48 overflow-y-auto space-y-2">
+                {getFeatureCategories().map((category) => (
+                  <div key={category.name} className="space-y-1">
+                    <h5 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">{category.name}</h5>
+                    <div className="grid grid-cols-1 gap-1">
+                      {category.features.map((feature) => (
+                        <div 
+                          key={feature}
+                          onClick={() => handleFeatureToggle(feature)}
+                          className={`p-2 border rounded cursor-pointer transition-colors text-xs ${
+                            consultation.features.includes(feature)
+                              ? `border-${config.primaryColor}-500 bg-${config.primaryColor}-50`
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                          data-testid={`feature-${feature.toLowerCase().replace(/\s+/g, '-')}`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="font-medium">{feature}</span>
+                            {consultation.features.includes(feature) && (
+                              <CheckCircle className={`h-3 w-3 text-${config.primaryColor}-600`} />
+                            )}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 ))}
