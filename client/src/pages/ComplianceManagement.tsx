@@ -507,14 +507,14 @@ export default function ComplianceManagement() {
                     🚨 TX-RAMP Certification In Progress - State Mandate
                   </h3>
                   <p className="text-red-800 dark:text-red-200 mb-3">
-                    Platform TX-RAMP certification currently in progress. Texas educational institutions require TX-RAMP 
-                    certification for cloud services processing student/district data. Champions for Change platform 
-                    pursuing Level 2 certification for comprehensive compliance.
+                    Platform lacks required third-party security certifications for TX-RAMP Fast Track eligibility. 
+                    SOC II Type 2, ISO 27001, and other assessments needed within 24 months for Texas district compliance. 
+                    Security certification roadmap in development.
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    <Badge className="bg-yellow-600 text-white">Certification Pending</Badge>
-                    <Badge className="bg-orange-600 text-white">FERPA/HIPAA Ready</Badge>
-                    <Badge className="bg-blue-600 text-white">Assessment Planned</Badge>
+                    <Badge className="bg-red-600 text-white">SOC II Required</Badge>
+                    <Badge className="bg-red-600 text-white">ISO 27001 Required</Badge>
+                    <Badge className="bg-yellow-600 text-white">Security Assessment Needed</Badge>
                   </div>
                   <div className="mt-3">
                     <Button size="sm" className="bg-yellow-600 hover:bg-yellow-700 text-white">
