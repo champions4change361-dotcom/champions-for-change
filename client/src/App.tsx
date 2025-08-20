@@ -64,6 +64,7 @@ import AthleteDashboard from './pages/AthleteDashboard';
 import AthleteManagement from './pages/AthleteManagement';
 import HealthCommunication from './pages/HealthCommunication';
 import EquipmentManagement from './pages/EquipmentManagement';
+import SmartScheduler from './pages/SmartScheduler';
 import CoachDashboard from './pages/CoachDashboard';
 import AthleticTrainerDashboard from './pages/AthleticTrainerDashboard';
 import ScorekeeperDashboard from './pages/ScorekeeperDashboard';
@@ -130,6 +131,7 @@ function AuthenticatedRoutes() {
         <Route path="/athlete-management" component={AthleteManagement} />
         <Route path="/health-communication" component={HealthCommunication} />
         <Route path="/equipment-management" component={EquipmentManagement} />
+        <Route path="/smart-scheduler" component={SmartScheduler} />
         <Route path="/coach-dashboard" component={CoachDashboard} />
         <Route path="/athletic-trainer-dashboard" component={AthleticTrainerDashboard} />
 
