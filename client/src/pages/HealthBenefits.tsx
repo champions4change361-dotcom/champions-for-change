@@ -142,33 +142,33 @@ export default function HealthBenefits() {
                   <TrendingUp className="h-8 w-8 text-purple-600 dark:text-purple-400" />
                 </div>
                 <CardTitle className="text-purple-900 dark:text-purple-100">Business Enterprise</CardTitle>
-                <CardDescription>$149/month or $1,499/year - Employee wellness</CardDescription>
+                <CardDescription>$149/month or $1,499/year - White-label tournament platform</CardDescription>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3 text-sm">
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>Employee wellness competitions</span>
+                    <span>White-label tournament management platform</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>Corporate health analytics dashboard</span>
+                    <span>Custom branded website with your domain</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>Team fitness tracking and goals</span>
+                    <span>Complete tournament analytics & reporting</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>Workplace injury prevention</span>
+                    <span>Participant registration & payment processing</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>Employee engagement metrics</span>
+                    <span>Unlimited tournaments and events</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>ROI reporting for wellness programs</span>
+                    <span>Enterprise support and account management</span>
                   </li>
                 </ul>
               </CardContent>
