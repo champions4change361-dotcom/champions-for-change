@@ -72,6 +72,25 @@ export function DonationSection({ variant = 'full', className = '' }: DonationSe
     } catch (error: any) {
       console.error('Donation error:', error);
       
+      // Handle specific Stripe errors with helpful messages
+      if (error.message.includes('Expired API Key') || error.message.includes('api_key_expired')) {
+        toast({
+          title: "Payment System Maintenance",
+          description: "Our payment system is temporarily being updated. Please try again in a few minutes or contact support.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      if (error.message.includes('Invalid API Key') || error.message.includes('authentication')) {
+        toast({
+          title: "Payment Configuration Issue",
+          description: "There's a temporary issue with our payment system. Please contact support for assistance.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       // Handle Stripe activation delay
       const isActivationIssue = error.message?.includes('Expired API Key') || 
                                 error.message?.includes('activate') ||
