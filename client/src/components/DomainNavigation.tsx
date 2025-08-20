@@ -1,6 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { useDomain } from "@/hooks/useDomain";
 import { Button } from "@/components/ui/button";
+import { Brain } from "lucide-react";
 
 export default function DomainNavigation() {
   const [location] = useLocation();
@@ -142,6 +143,14 @@ export default function DomainNavigation() {
               <a className={getNavItemClass("/fantasy-tournaments")}>Fantasy</a>
             </Link>
           )}
+
+          {/* AI Chat - Available for all users */}
+          <Link href="/ai-chat">
+            <a className={`${getNavItemClass("/ai-chat")} flex items-center space-x-1`}>
+              <Brain className="w-4 h-4" />
+              <span>AI Assistant</span>
+            </a>
+          </Link>
 
           {/* Additional navigation for Champions for Change */}
           {config.brand === 'CHAMPIONS_FOR_CHANGE' && (

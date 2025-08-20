@@ -1,0 +1,286 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+// import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+import { sessionManager, type AIMessage } from '@/lib/sessionManager';
+import { 
+  Brain, 
+  MessageSquare, 
+  Send, 
+  Bot, 
+  User, 
+  Sparkles,
+  Trophy,
+  Users,
+  Calendar,
+  DollarSign,
+  Heart,
+  Target
+} from "lucide-react";
+
+interface ConversationalMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+  suggestions?: string[];
+}
+
+interface ConversationalAIProps {
+  domain?: 'education' | 'business' | 'coaches';
+  className?: string;
+}
+
+export function ConversationalAI({ domain = 'education', className = '' }: ConversationalAIProps) {
+  const [messages, setMessages] = useState<ConversationalMessage[]>([
+    {
+      id: '1',
+      role: 'assistant',
+      content: `Hi! I'm your AI assistant for Champions for Change. I can help you with:\n\n• Tournament creation and management\n• Budget planning and allocation\n• Health monitoring and injury prevention\n• Academic competition setup\n• District-wide coordination\n• Compliance requirements (HIPAA/FERPA)\n\nWhat would you like to work on today? Just ask me naturally - like "Help me plan a track meet for 200 students" or "How do I set up injury monitoring?"`,
+      timestamp: new Date(),
+      suggestions: [
+        "Help me create a tournament",
+        "Set up budget tracking",
+        "Configure health monitoring",
+        "Plan academic competitions",
+        "Manage district compliance"
+      ]
+    }
+  ]);
+  
+  const [inputMessage, setInputMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const handleSendMessage = async (messageText?: string) => {
+    const text = messageText || inputMessage.trim();
+    if (!text || isLoading) return;
+
+    // Add user message
+    const userMessage: ConversationalMessage = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: text,
+      timestamp: new Date()
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setInputMessage('');
+    setIsLoading(true);
+
+    // Update session with conversation context
+    sessionManager.addAIMessage({
+      role: 'user',
+      content: text,
+      timestamp: Date.now(),
+      metadata: { intent: 'conversational', extractedData: { domain } }
+    });
+
+    try {
+      // Call our AI consultation endpoint with conversational context
+      const response = await fetch('/api/ai-conversation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: text,
+          conversation_history: messages,
+          domain: domain,
+          user_context: sessionManager.getSession(),
+          consultation_type: 'conversational'
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      // Add AI response
+      const aiMessage: ConversationalMessage = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: data.response || "I'm here to help! Could you tell me more about what you're trying to accomplish?",
+        timestamp: new Date(),
+        suggestions: data.suggestions || []
+      };
+
+      setMessages(prev => [...prev, aiMessage]);
+      
+      // Update session with AI response
+      sessionManager.addAIMessage({
+        role: 'assistant',
+        content: aiMessage.content,
+        timestamp: Date.now(),
+        metadata: { intent: data.intent, extractedData: data.extracted_context, routingSuggestion: data.suggestions?.[0] }
+      });
+
+      // Extract any context from the conversation
+      if (data.extracted_context) {
+        sessionManager.updateUserContext(data.extracted_context);
+      }
+
+    } catch (error) {
+      console.error('AI conversation error:', error);
+      
+      // Add fallback response
+      const errorMessage: ConversationalMessage = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: "I'm having trouble connecting right now, but I'm still here to help! While we get that sorted, I can guide you through our platform features. What specific area would you like to explore?",
+        timestamp: new Date(),
+        suggestions: [
+          "Show me tournament creation",
+          "Help with budget planning",
+          "Explain health monitoring",
+          "Academic competition setup"
+        ]
+      };
+      
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
+  const MessageBubble = ({ message }: { message: ConversationalMessage }) => (
+    <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} mb-4`}>
+      <div className={`flex items-start space-x-2 max-w-[80%] ${message.role === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
+        <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+          message.role === 'user' 
+            ? 'bg-blue-600' 
+            : 'bg-gradient-to-br from-green-500 to-emerald-600'
+        }`}>
+          {message.role === 'user' ? (
+            <User className="w-4 h-4 text-white" />
+          ) : (
+            <Brain className="w-4 h-4 text-white" />
+          )}
+        </div>
+        
+        <div className={`rounded-2xl px-4 py-3 ${
+          message.role === 'user'
+            ? 'bg-blue-600 text-white'
+            : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
+        }`}>
+          <div className="whitespace-pre-wrap text-sm leading-relaxed">
+            {message.content}
+          </div>
+          
+          {message.suggestions && message.suggestions.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-3">
+              {message.suggestions.map((suggestion, idx) => (
+                <Badge
+                  key={idx}
+                  variant="secondary"
+                  className="cursor-pointer hover:bg-green-500 hover:text-white transition-colors text-xs"
+                  onClick={() => handleSendMessage(suggestion)}
+                >
+                  {suggestion}
+                </Badge>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <Card className={`h-[600px] flex flex-col ${className}`}>
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center space-x-2 text-lg">
+          <div className="bg-gradient-to-br from-green-500 to-emerald-600 p-2 rounded-lg">
+            <MessageSquare className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <span className="text-green-700 dark:text-green-400">AI Assistant</span>
+            <div className="flex items-center space-x-1 mt-1">
+              <Sparkles className="w-3 h-3 text-yellow-500" />
+              <span className="text-xs text-gray-500">Champions for Change Platform</span>
+            </div>
+          </div>
+        </CardTitle>
+      </CardHeader>
+      
+      <CardContent className="flex flex-col flex-1 p-0">
+        <div className="flex-1 px-4 overflow-y-auto">
+          <div className="space-y-4 pb-4">
+            {messages.map((message) => (
+              <MessageBubble key={message.id} message={message} />
+            ))}
+            
+            {isLoading && (
+              <div className="flex justify-start mb-4">
+                <div className="flex items-center space-x-2">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
+                    <Brain className="w-4 h-4 text-white animate-pulse" />
+                  </div>
+                  <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl px-4 py-3">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+        </div>
+        
+        <div className="border-t p-4">
+          <div className="flex space-x-2">
+            <Input
+              ref={inputRef}
+              value={inputMessage}
+              onChange={(e) => setInputMessage(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Ask me anything about tournaments, budgets, health monitoring, or district management..."
+              className="flex-1 focus:ring-green-500 focus:border-green-500"
+              disabled={isLoading}
+              data-testid="input-ai-message"
+            />
+            <Button 
+              onClick={() => handleSendMessage()}
+              disabled={!inputMessage.trim() || isLoading}
+              className="bg-green-600 hover:bg-green-700 text-white px-4"
+              data-testid="button-send-message"
+            >
+              <Send className="w-4 h-4" />
+            </Button>
+          </div>
+          
+          <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
+            <span>Press Enter to send • Shift+Enter for new line</span>
+            <div className="flex items-center space-x-1">
+              <Heart className="w-3 h-3 text-red-500" />
+              <span>Powered by Champions for Change</span>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export default ConversationalAI;

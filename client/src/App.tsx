@@ -16,6 +16,7 @@ import CreateTournament from './pages/CreateTournament';
 import Tournament from './pages/tournament';
 import Contacts from './pages/Contacts';
 import AIConsultation from './pages/AIConsultation';
+import AIChat from './pages/AIChat';
 import AIDemo from './pages/AIDemo';
 import Settings from './pages/Settings';
 import LiveMatches from './pages/LiveMatches';
@@ -100,6 +101,7 @@ function AuthenticatedRoutes() {
         <Route path="/tournament/:id" component={Tournament} />
         <Route path="/contacts" component={Contacts} />
         <Route path="/ai-consultation" component={AIConsultation} />
+        <Route path="/ai-chat" component={AIChat} />
         <Route path="/ai-demo" component={AIDemo} />
         <Route path="/settings" component={Settings} />
         <Route path="/live-matches" component={LiveMatches} />

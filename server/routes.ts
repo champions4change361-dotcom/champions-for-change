@@ -433,6 +433,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // AI conversation route
+  const { handleAIConversation } = await import('./ai-conversation');
+  app.post('/api/ai-conversation', handleAIConversation);
+
   // Session management routes
   const { registerSessionRoutes } = await import('./sessionRoutes');
   registerSessionRoutes(app);
