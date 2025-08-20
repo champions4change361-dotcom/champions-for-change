@@ -344,7 +344,7 @@ export default function HealthBenefits() {
               Get Started Now
             </Button>
             <Link href="/">
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-gray-900" data-testid="button-back-home-footer">
+              <Button size="lg" variant="outline" className="border-white text-white bg-transparent hover:bg-white hover:text-gray-900" data-testid="button-back-home-footer">
                 Return to Home
               </Button>
             </Link>
