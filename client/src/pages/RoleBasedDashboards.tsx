@@ -763,6 +763,12 @@ export default function RoleBasedDashboards() {
         return <ScorekeeperDashboard organizationId={organizationId} />;
       case 'athlete':
         return <AthleteDashboard organizationId={organizationId} />;
+      case 'tournament_organizer':
+      case 'community_nonprofit':
+        return <CommunityNonprofitDashboard organizationId={organizationId} />;
+      case 'business_enterprise':
+      case 'tournament_company':
+        return <BusinessEnterpriseDashboard organizationId={organizationId} />;
       default:
         return (
           <Card>
@@ -797,6 +803,278 @@ export default function RoleBasedDashboards() {
         
         {renderDashboard()}
       </div>
+    </div>
+  );
+}
+
+// COMMUNITY NONPROFIT DASHBOARD
+function CommunityNonprofitDashboard({ organizationId }: { organizationId: string }) {
+  const [activeTab, setActiveTab] = useState('events');
+  
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Trophy className="h-5 w-5" />
+              Active Events
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span className="text-sm">Youth Basketball League</span>
+                <Badge variant="default">8 teams</Badge>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm">Spring Fundraiser Tournament</span>
+                <Badge variant="secondary">32 participants</Badge>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm">Summer Camp Registration</span>
+                <Badge variant="outline">Open</Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Heart className="h-5 w-5" />
+              Health & Safety
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span className="text-sm">Medical Forms</span>
+                <Badge variant="default">45/50</Badge>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm">Recent Incidents</span>
+                <Badge variant="destructive">2</Badge>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm">Safety Checks</span>
+                <Badge variant="default">Complete</Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <DollarSign className="h-5 w-5" />
+              Event Budget
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span className="text-sm">Total Budget</span>
+                <Badge variant="default">$12,500</Badge>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm">Spent</span>
+                <Badge variant="secondary">$8,200</Badge>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm">Remaining</span>
+                <Badge variant="outline">$4,300</Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Participants
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span className="text-sm">Total Registered</span>
+                <Badge variant="default">127</Badge>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm">Volunteers</span>
+                <Badge variant="secondary">18</Badge>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm">Staff</span>
+                <Badge variant="outline">6</Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList>
+          <TabsTrigger value="events">Event Management</TabsTrigger>
+          <TabsTrigger value="health">Health Tracking</TabsTrigger>
+          <TabsTrigger value="budget">Budget Management</TabsTrigger>
+          <TabsTrigger value="volunteers">Volunteer Coordination</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="events">
+          <CommunityEventManagementTab organizationId={organizationId} />
+        </TabsContent>
+        
+        <TabsContent value="health">
+          <CommunityHealthTrackingTab organizationId={organizationId} />
+        </TabsContent>
+        
+        <TabsContent value="budget">
+          <CommunityBudgetManagementTab organizationId={organizationId} />
+        </TabsContent>
+        
+        <TabsContent value="volunteers">
+          <CommunityVolunteerTab organizationId={organizationId} />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
+
+// BUSINESS ENTERPRISE DASHBOARD
+function BusinessEnterpriseDashboard({ organizationId }: { organizationId: string }) {
+  const [activeTab, setActiveTab] = useState('tournaments');
+  
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Building className="h-5 w-5" />
+              Active Tournaments
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span className="text-sm">Corporate League Championship</span>
+                <Badge variant="default">16 teams</Badge>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm">Employee Wellness Challenge</span>
+                <Badge variant="secondary">84 participants</Badge>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm">Client Appreciation Tournament</span>
+                <Badge variant="outline">Planning</Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Heart className="h-5 w-5" />
+              Wellness Tracking
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span className="text-sm">Active Participants</span>
+                <Badge variant="default">156</Badge>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm">Incident Reports</span>
+                <Badge variant="destructive">1</Badge>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm">Safety Score</span>
+                <Badge variant="default">98%</Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <DollarSign className="h-5 w-5" />
+              Program Budget
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span className="text-sm">Annual Budget</span>
+                <Badge variant="default">$85,000</Badge>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm">Q1 Spent</span>
+                <Badge variant="secondary">$18,400</Badge>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm">ROI</span>
+                <Badge variant="outline">+24%</Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5" />
+              Analytics
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span className="text-sm">Employee Engagement</span>
+                <Badge variant="default">87%</Badge>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm">Retention Rate</span>
+                <Badge variant="secondary">94%</Badge>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm">Satisfaction Score</span>
+                <Badge variant="outline">4.7/5</Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList>
+          <TabsTrigger value="tournaments">Tournament Management</TabsTrigger>
+          <TabsTrigger value="wellness">Employee Wellness</TabsTrigger>
+          <TabsTrigger value="budget">Budget Management</TabsTrigger>
+          <TabsTrigger value="analytics">Analytics & ROI</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="tournaments">
+          <BusinessTournamentManagementTab organizationId={organizationId} />
+        </TabsContent>
+        
+        <TabsContent value="wellness">
+          <BusinessWellnessTrackingTab organizationId={organizationId} />
+        </TabsContent>
+        
+        <TabsContent value="budget">
+          <BusinessBudgetManagementTab organizationId={organizationId} />
+        </TabsContent>
+        
+        <TabsContent value="analytics">
+          <BusinessAnalyticsTab organizationId={organizationId} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

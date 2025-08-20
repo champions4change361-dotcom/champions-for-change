@@ -36,7 +36,7 @@ export default function HealthBenefits() {
             Health & Wellness Benefits
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-8" data-testid="text-hero-subtitle">
-            Comprehensive health monitoring and wellness solutions for athletes, students, and communities across all user segments
+            AI-powered athlete health management and injury tracking for all organization types - from HIPAA-compliant district systems to simple community injury documentation
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Button size="lg" className="bg-green-600 hover:bg-green-700" data-testid="button-get-started">
@@ -148,27 +148,27 @@ export default function HealthBenefits() {
                 <ul className="space-y-3 text-sm">
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>White-label tournament management platform</span>
+                    <span>Employee wellness competition tracking</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>Custom branded website with your domain</span>
+                    <span>Workplace injury documentation system</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>Complete tournament analytics & reporting</span>
+                    <span>Corporate health analytics dashboard</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>Participant registration & payment processing</span>
+                    <span>Budget management for wellness programs</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>Unlimited tournaments and events</span>
+                    <span>White-label platform with health features</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>Enterprise support and account management</span>
+                    <span>ROI reporting for wellness initiatives</span>
                   </li>
                 </ul>
               </CardContent>
@@ -187,27 +187,27 @@ export default function HealthBenefits() {
                 <ul className="space-y-3 text-sm">
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>Tournament management for community events</span>
+                    <span>Basic injury documentation and tracking</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>Fundraising event organization tools</span>
+                    <span>Youth league health and safety monitoring</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>Youth league and camp management</span>
+                    <span>Tournament medical incident reporting</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>Volunteer coordination and scheduling</span>
+                    <span>Event budget management tools</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>Registration and payment processing</span>
+                    <span>Volunteer safety awareness tracking</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>Community engagement tracking</span>
+                    <span>AI-powered health trend insights</span>
                   </li>
                 </ul>
               </CardContent>
