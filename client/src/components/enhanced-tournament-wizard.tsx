@@ -196,7 +196,7 @@ export default function EnhancedTournamentWizard({
   // Apply AI recommendations when component mounts
   useEffect(() => {
     if (aiRecommendations && sports.length > 0) {
-      const { sport, format, age_group, gender_division, teamSize } = aiRecommendations;
+      const { name, sport, format, age_group, gender_division, teamSize } = aiRecommendations;
       
       if (sport) {
         const matchingSport = sports.find(s => 
@@ -225,12 +225,16 @@ export default function EnhancedTournamentWizard({
         form.setValue("teamSize", closestSize);
       }
       
-      // Auto-generate tournament name
-      const sportName = sport || "Championship";
-      const agePart = age_group && age_group !== "All Ages" ? `${age_group} ` : "";
-      const genderPart = gender_division && gender_division !== "Mixed" ? `${gender_division} ` : "";
-      const autoName = `${agePart}${genderPart}${sportName} Tournament`;
-      form.setValue("name", autoName);
+      // Use provided name or auto-generate tournament name
+      if (name) {
+        form.setValue("name", name);
+      } else {
+        const sportName = sport || "Championship";
+        const agePart = age_group && age_group !== "All Ages" ? `${age_group} ` : "";
+        const genderPart = gender_division && gender_division !== "Mixed" ? `${gender_division} ` : "";
+        const autoName = `${agePart}${genderPart}${sportName} Tournament`;
+        form.setValue("name", autoName);
+      }
     }
   }, [aiRecommendations, sports, form]);
 

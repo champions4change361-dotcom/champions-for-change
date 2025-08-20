@@ -22,6 +22,7 @@ export function AIConsultant({ domain = 'education' }: AIConsultantProps) {
     budget: '',
     goals: '',
     timeline: '',
+    tournamentName: '',
     features: [] as string[]
   });
 
@@ -224,10 +225,15 @@ export function AIConsultant({ domain = 'education' }: AIConsultantProps) {
 
   // Always go to tournament creation, but with different feature sets
   const handleStartTournamentCreation = () => {
+    if (!consultation.tournamentName) {
+      return; // Don't proceed without tournament name
+    }
+
     const complexity = getCompetitionComplexity();
     
     // Always go to tournament creation with pre-filled data and complexity level
     const params = new URLSearchParams({
+      name: consultation.tournamentName,
       sport: consultation.sport,
       participants: consultation.participantCount,
       goals: consultation.goals,
@@ -523,6 +529,17 @@ export function AIConsultant({ domain = 'education' }: AIConsultantProps) {
                 })()}
 
                 <div className="p-3 bg-gray-50 rounded-lg">
+                  <div className="text-sm font-medium text-gray-900">Tournament Name</div>
+                  <Input
+                    placeholder="Enter your tournament name"
+                    value={consultation.tournamentName}
+                    onChange={(e) => setConsultation(prev => ({ ...prev, tournamentName: e.target.value }))}
+                    className="mt-2"
+                    data-testid="input-tournament-name"
+                  />
+                </div>
+
+                <div className="p-3 bg-gray-50 rounded-lg">
                   <div className="text-sm font-medium text-gray-900">Included Features</div>
                   <div className="flex flex-wrap gap-1 mt-1">
                     {consultation.features.map(feature => (
@@ -543,9 +560,10 @@ export function AIConsultant({ domain = 'education' }: AIConsultantProps) {
                     'bg-purple-600 hover:bg-purple-700'
                   }`}
                   onClick={() => handleStartTournamentCreation()}
-                  data-testid="button-start-setup"
+                  disabled={!consultation.tournamentName}
+                  data-testid="button-create-tournament"
                 >
-                  Create Tournament Now
+                  Create Tournament <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
               </div>
             </div>

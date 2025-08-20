@@ -16,6 +16,7 @@ export default function CreateTournament() {
     const fromConsultant = urlParams.get('fromConsultant');
     
     if (fromConsultant === 'true') {
+      const name = urlParams.get('name');
       const sport = urlParams.get('sport');
       const participants = urlParams.get('participants');
       const goals = urlParams.get('goals');
@@ -25,6 +26,7 @@ export default function CreateTournament() {
       
       // Set AI recommendations based on URL parameters
       setAiRecommendations({
+        name,
         sport,
         participantCount: participants,
         goals,
