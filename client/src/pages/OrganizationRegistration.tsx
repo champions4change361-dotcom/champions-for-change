@@ -408,92 +408,282 @@ export default function OrganizationRegistration() {
         </div>
       </section>
 
-      {/* Pricing Preview */}
+      {/* Comprehensive Pricing Preview */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-slate-50 dark:bg-slate-900">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
-            Transparent Pricing for Every Organization
+          <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-4">
+            Complete Pricing Options for Every Organization
           </h2>
+          <p className="text-center text-gray-600 dark:text-gray-400 mb-12 max-w-3xl mx-auto">
+            Enterprise equality philosophy: Small organizations get identical features as large corporations. 
+            Pricing differs by capacity and support level, never by feature quality.
+          </p>
           
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid lg:grid-cols-5 md:grid-cols-2 gap-6">
+            
+            {/* Freemium */}
             <Card className="relative">
               <CardHeader>
-                <Badge className="w-fit bg-green-100 text-green-800">Community Nonprofits</Badge>
-                <CardTitle className="text-2xl">$39/month</CardTitle>
-                <CardDescription>Perfect for churches, youth organizations, and small leagues</CardDescription>
+                <Badge className="w-fit bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200">Free Trial</Badge>
+                <CardTitle className="text-xl">Free</CardTitle>
+                <CardDescription>30-day trial with full features</CardDescription>
               </CardHeader>
               <CardContent>
-                <ul className="space-y-2 text-sm">
+                <ul className="space-y-2 text-xs">
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    Tournament management
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    All platform features
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    Basic health tracking
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    Up to 2 tournaments
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    Communication tools
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    50 participants max
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    Email support
                   </li>
                 </ul>
               </CardContent>
             </Card>
 
+            {/* Tournament Organizer */}
+            <Card className="relative">
+              <CardHeader>
+                <Badge className="w-fit bg-green-100 text-green-800">Community Nonprofits</Badge>
+                <CardTitle className="text-xl">$39/month</CardTitle>
+                <CardDescription>Churches, youth organizations, small leagues</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-xs">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    Unlimited tournaments
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    AI tournament creation
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    Basic health tracking
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    Communication tools
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    Custom branding
+                  </li>
+                </ul>
+                <div className="mt-4 text-xs text-gray-600 dark:text-gray-400">
+                  Annual: $399/year (2 months free)
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Champions District */}
             <Card className="relative border-green-500 border-2">
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                 <Badge className="bg-green-600 text-white">Most Popular</Badge>
               </div>
               <CardHeader>
                 <Badge className="w-fit bg-blue-100 text-blue-800">School Districts</Badge>
-                <CardTitle className="text-2xl">$2,490/year</CardTitle>
-                <CardDescription>Champions District pricing with full enterprise features</CardDescription>
+                <CardTitle className="text-xl">$2,490/year</CardTitle>
+                <CardDescription>Champions District - up to 15 schools</CardDescription>
               </CardHeader>
               <CardContent>
-                <ul className="space-y-2 text-sm">
+                <ul className="space-y-2 text-xs">
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <CheckCircle className="h-3 w-3 text-green-600" />
                     HIPAA/FERPA compliant
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <CheckCircle className="h-3 w-3 text-green-600" />
                     Athletic trainer dashboards
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    AI injury prediction
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    AI injury prediction (95% accuracy)
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    White-label branding
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    Role-based access
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    Emergency notifications
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    White-label platform
                   </li>
                 </ul>
               </CardContent>
             </Card>
 
+            {/* Business Enterprise */}
             <Card className="relative">
               <CardHeader>
                 <Badge className="w-fit bg-purple-100 text-purple-800">Business Enterprise</Badge>
-                <CardTitle className="text-2xl">$149/month</CardTitle>
-                <CardDescription>Full platform for tournament businesses</CardDescription>
+                <CardTitle className="text-xl">$149/month</CardTitle>
+                <CardDescription>For-profit tournament businesses</CardDescription>
               </CardHeader>
               <CardContent>
-                <ul className="space-y-2 text-sm">
+                <ul className="space-y-2 text-xs">
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <CheckCircle className="h-3 w-3 text-green-600" />
                     Complete white-label platform
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <CheckCircle className="h-3 w-3 text-green-600" />
                     Advanced analytics
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    Multi-tenant architecture
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    API access
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-3 w-3 text-green-600" />
                     Priority support
+                  </li>
+                </ul>
+                <div className="mt-4 text-xs text-gray-600 dark:text-gray-400">
+                  Annual: $1,499/year (2 months free)
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* District Enterprise */}
+            <Card className="relative border-blue-500 border-2">
+              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                <Badge className="bg-blue-600 text-white">Enterprise</Badge>
+              </div>
+              <CardHeader>
+                <Badge className="w-fit bg-orange-100 text-orange-800">Large Districts</Badge>
+                <CardTitle className="text-xl">$4,500/year</CardTitle>
+                <CardDescription>15+ schools, 25,000+ students</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-xs">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    Unlimited capacity
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    All Champions District features
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    Enhanced integrations
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    Dedicated account manager
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    Custom development
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    24/7 phone support
                   </li>
                 </ul>
               </CardContent>
             </Card>
+          </div>
+
+          {/* Enterprise Plus */}
+          <div className="mt-8">
+            <Card className="max-w-4xl mx-auto bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 border-2 border-purple-200 dark:border-purple-700">
+              <CardHeader className="text-center">
+                <Badge className="w-fit mx-auto bg-purple-600 text-white mb-2">Annual Pro</Badge>
+                <CardTitle className="text-2xl">$990/month</CardTitle>
+                <CardDescription className="text-lg">
+                  High-volume tournament companies (50+ tournaments/year)
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-3 gap-6">
+                  <div>
+                    <h4 className="font-semibold mb-2 text-purple-900 dark:text-purple-100">Unlimited Everything</h4>
+                    <ul className="space-y-1 text-sm">
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        Unlimited tournaments
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        Unlimited participants
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        Unlimited domains
+                      </li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold mb-2 text-purple-900 dark:text-purple-100">Enterprise Features</h4>
+                    <ul className="space-y-1 text-sm">
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        White-label platform
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        Advanced AI analytics
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        Custom integrations
+                      </li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold mb-2 text-purple-900 dark:text-purple-100">Premium Support</h4>
+                    <ul className="space-y-1 text-sm">
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        Dedicated success team
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        24/7 priority support
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        Custom training
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Pricing Guarantee */}
+          <div className="mt-12 text-center">
+            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6 max-w-3xl mx-auto">
+              <div className="flex items-center justify-center gap-2 mb-3">
+                <Star className="h-5 w-5 text-yellow-600" />
+                <h3 className="text-lg font-semibold text-yellow-900 dark:text-yellow-100">Pricing Guarantee</h3>
+                <Star className="h-5 w-5 text-yellow-600" />
+              </div>
+              <p className="text-yellow-800 dark:text-yellow-200">
+                <strong>"The price you pay at the time is the price you always pay"</strong> - Early adopters get permanent cost advantage with no surprise increases. 
+                All organizations receive identical enterprise features regardless of size.
+              </p>
+            </div>
           </div>
         </div>
       </section>
