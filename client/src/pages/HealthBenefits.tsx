@@ -142,7 +142,7 @@ export default function HealthBenefits() {
                   <TrendingUp className="h-8 w-8 text-purple-600 dark:text-purple-400" />
                 </div>
                 <CardTitle className="text-purple-900 dark:text-purple-100">Business Enterprise</CardTitle>
-                <CardDescription>$99-$999/month - Employee wellness</CardDescription>
+                <CardDescription>$149/month or $1,499/year - Employee wellness</CardDescription>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3 text-sm">
@@ -181,7 +181,7 @@ export default function HealthBenefits() {
                   <Users className="h-8 w-8 text-orange-600 dark:text-orange-400" />
                 </div>
                 <CardTitle className="text-orange-900 dark:text-orange-100">Nonprofit Organizations</CardTitle>
-                <CardDescription>$99-$999 (Tax-Exempt) - Community health</CardDescription>
+                <CardDescription>$2,490/year (Champions District) or $4,500/year (District Enterprise) - Community health</CardDescription>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3 text-sm">
