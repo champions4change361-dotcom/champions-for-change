@@ -496,31 +496,31 @@ export default function ComplianceManagement() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Grant Funding Opportunity Alert */}
+        {/* Private School Advantage Alert */}
         <div className="mb-6">
           <Card className="border-green-200 bg-green-50 dark:bg-green-900/20">
             <CardContent className="p-6">
               <div className="flex items-start space-x-4">
-                <Shield className="h-8 w-8 text-green-600 flex-shrink-0" />
+                <CheckCircle className="h-8 w-8 text-green-600 flex-shrink-0" />
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-green-900 dark:text-green-100 mb-2">
-                    💰 Grant Funding Available - Educational Nonprofit Advantage
+                    ✅ Private School Ready - No Certification Required
                   </h3>
                   <p className="text-green-800 dark:text-green-200 mb-3">
-                    Champions for Change 501(c)(3) status and SAM registration enable access to federal grants, 
-                    foundation funding, and corporate philanthropy for security certification costs ($150K target). 
-                    Educational nonprofits have significant advantages in technology infrastructure funding.
+                    Private schools are generally NOT subject to FERPA and have significant exceptions to formal 
+                    security certification requirements. Champions for Change can serve private schools immediately 
+                    with enterprise-grade security practices and transparent reporting.
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    <Badge className="bg-green-600 text-white">Federal Grants Available</Badge>
-                    <Badge className="bg-blue-600 text-white">Foundation Funding</Badge>
-                    <Badge className="bg-purple-600 text-white">SAM Registered</Badge>
-                    <Badge className="bg-orange-600 text-white">501(c)(3) Advantage</Badge>
+                    <Badge className="bg-green-600 text-white">Private School Ready</Badge>
+                    <Badge className="bg-blue-600 text-white">No FERPA Requirements</Badge>
+                    <Badge className="bg-purple-600 text-white">Flexible Security Standards</Badge>
+                    <Badge className="bg-orange-600 text-white">Mission-Driven Pricing</Badge>
                   </div>
                   <div className="mt-3">
                     <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">
-                      <Shield className="w-4 h-4 mr-2" />
-                      Explore Grant Opportunities
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      View Private School Solutions
                     </Button>
                   </div>
                 </div>
@@ -529,29 +529,28 @@ export default function ComplianceManagement() {
           </Card>
         </div>
 
-        {/* Security Requirements Alert */}
+        {/* Future Public School Readiness */}
         <div className="mb-6">
-          <Card className="border-red-200 bg-red-50 dark:bg-red-900/20">
+          <Card className="border-blue-200 bg-blue-50 dark:bg-blue-900/20">
             <CardContent className="p-6">
               <div className="flex items-start space-x-4">
-                <AlertTriangle className="h-8 w-8 text-red-600 flex-shrink-0" />
+                <Clock className="h-8 w-8 text-blue-600 flex-shrink-0" />
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-red-900 dark:text-red-100 mb-2">
-                    🚨 Security Certifications Required - Multi-State Mandate
+                  <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-2">
+                    🎯 Public School Readiness - Certification in Progress
                   </h3>
-                  <p className="text-red-800 dark:text-red-200 mb-3">
-                    Platform lacks industry-standard security certifications required by educational institutions nationwide. 
-                    SOC II Type 2 and ISO 27001 are baseline requirements for EdTech platforms serving districts in any state. 
-                    Comprehensive security certification program needed for competitive positioning.
+                  <p className="text-blue-800 dark:text-blue-200 mb-3">
+                    Security certifications (SOC II Type 2, ISO 27001) in development for future public school 
+                    and charter school market expansion. Grant funding strategy in place to achieve certifications 
+                    while maintaining current private school focus.
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    <Badge className="bg-red-600 text-white">SOC II Required (Universal)</Badge>
-                    <Badge className="bg-red-600 text-white">ISO 27001 Required (Enterprise)</Badge>
-                    <Badge className="bg-orange-600 text-white">Industry Standard Gap</Badge>
-                    <Badge className="bg-yellow-600 text-white">Certification Roadmap Needed</Badge>
+                    <Badge className="bg-blue-600 text-white">Future Public School Market</Badge>
+                    <Badge className="bg-purple-600 text-white">Grant Funding Strategy</Badge>
+                    <Badge className="bg-green-600 text-white">Private School Focus Now</Badge>
                   </div>
                   <div className="mt-3 flex flex-wrap gap-2">
-                    <Button size="sm" className="bg-yellow-600 hover:bg-yellow-700 text-white">
+                    <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
                       <Clock className="w-4 h-4 mr-2" />
                       Track Certification Progress
                     </Button>
