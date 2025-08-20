@@ -1389,10 +1389,13 @@ export function analyzeTournamentQuery(text: string): KeystoneConsultationResult
   else if (textLower.includes('music')) { sport = 'Music Competition'; confidence += 30; }
   else if (textLower.includes('photography')) { sport = 'Photography Contest'; confidence += 30; }
   
-  // Culinary
+  // Culinary (Educational-appropriate)
   else if (textLower.includes('cooking') || textLower.includes('culinary')) { sport = 'Cooking Competition'; confidence += 30; }
   else if (textLower.includes('baking')) { sport = 'Baking Contest'; confidence += 30; }
   else if (textLower.includes('bbq') || textLower.includes('barbecue')) { sport = 'BBQ Competition'; confidence += 30; }
+  
+  // Adult/Business Only Competitions (filtered by organization type)
+  // Note: These should only appear for Business Enterprise or Community Nonprofit organizations, NOT school districts
   else if (textLower.includes('mixology') || textLower.includes('cocktail')) { sport = 'Mixology Contest'; confidence += 30; }
 
   // Enhanced format detection
