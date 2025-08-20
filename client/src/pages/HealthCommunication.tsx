@@ -298,11 +298,11 @@ export default function HealthCommunication() {
             <div className="flex items-center space-x-2">
               <Button className="bg-red-600 hover:bg-red-700">
                 <Phone className="w-4 h-4 mr-2" />
-                Emergency
+                Emergency Protocol
               </Button>
-              <Button className="bg-blue-600 hover:bg-blue-700">
-                <Video className="w-4 h-4 mr-2" />
-                Video Call
+              <Button className="bg-green-600 hover:bg-green-700">
+                <Activity className="w-4 h-4 mr-2" />
+                AI Health Analysis
               </Button>
             </div>
           </div>
