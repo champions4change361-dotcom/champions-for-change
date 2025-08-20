@@ -64,7 +64,7 @@ export default function HealthBenefits() {
                   <Shield className="h-8 w-8 text-blue-600 dark:text-blue-400" />
                 </div>
                 <CardTitle className="text-blue-900 dark:text-blue-100">School Districts</CardTitle>
-                <CardDescription>$2,490/year - Complete protection</CardDescription>
+                <CardDescription>$2,490/year (Champions District) or $4,500/year (District Enterprise)</CardDescription>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3 text-sm">
@@ -180,34 +180,34 @@ export default function HealthBenefits() {
                 <div className="bg-orange-100 dark:bg-orange-900 p-3 rounded-full w-fit mx-auto mb-4">
                   <Users className="h-8 w-8 text-orange-600 dark:text-orange-400" />
                 </div>
-                <CardTitle className="text-orange-900 dark:text-orange-100">Nonprofit Organizations</CardTitle>
-                <CardDescription>$2,490/year (Champions District) or $4,500/year (District Enterprise) - Community health</CardDescription>
+                <CardTitle className="text-orange-900 dark:text-orange-100">Community Nonprofits</CardTitle>
+                <CardDescription>$39/month (Tournament Organizer) - Churches, Boys & Girls Clubs, etc.</CardDescription>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3 text-sm">
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>Community health impact tracking</span>
+                    <span>Tournament management for community events</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>Grant-friendly health outcome reporting</span>
+                    <span>Fundraising event organization tools</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>Youth development health metrics</span>
+                    <span>Youth league and camp management</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>Educational health programming</span>
+                    <span>Volunteer coordination and scheduling</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>Volunteer health and safety tracking</span>
+                    <span>Registration and payment processing</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>Social impact health documentation</span>
+                    <span>Community engagement tracking</span>
                   </li>
                 </ul>
               </CardContent>
