@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-
 import { Badge } from "@/components/ui/badge";
+import { sessionManager, type AIMessage } from '@/lib/sessionManager';
 import { Brain, MessageSquare, Trophy, Users, Calendar, DollarSign, Globe, ArrowRight, CheckCircle } from "lucide-react";
 
 interface AIConsultantProps {
@@ -27,6 +27,34 @@ export function AIConsultant({ domain = 'education' }: AIConsultantProps) {
     tournamentName: '',
     features: [] as string[]
   });
+
+  // Load existing session data on mount
+  useEffect(() => {
+    const session = sessionManager.getSession();
+    if (session.buildSelections) {
+      setConsultation(prev => ({
+        ...prev,
+        sport: session.buildSelections.sportType || '',
+        participantCount: session.buildSelections.participantCount || '',
+        goals: session.buildSelections.goals || '',
+        budget: session.buildSelections.budget || '',
+        features: session.buildSelections.features || [],
+        tournamentName: session.buildSelections.venue || ''
+      }));
+    }
+  }, []);
+
+  // Update session manager when consultation changes
+  useEffect(() => {
+    sessionManager.updateBuildSelections({
+      sportType: consultation.sport,
+      participantCount: consultation.participantCount,
+      goals: consultation.goals,
+      budget: consultation.budget,
+      features: consultation.features,
+      venue: consultation.tournamentName
+    });
+  }, [consultation]);
 
   const domainConfig = {
     education: {

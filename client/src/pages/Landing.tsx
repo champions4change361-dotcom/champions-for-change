@@ -11,6 +11,7 @@ import { SignupSection } from "@/components/SignupSection";
 
 import Footer from "@/components/Footer";
 import { AIConsultant } from "@/components/AIConsultant";
+import { SmartRoutingAssistant } from "@/components/ai/SmartRoutingAssistant";
 
 export default function Landing() {
   const [, setLocation] = useLocation();
@@ -787,7 +788,10 @@ export default function Landing() {
       </div>
 
       {/* AI Consultant */}
-      <AIConsultant domain="education" />
+      <div className="space-y-6">
+        <SmartRoutingAssistant />
+        <AIConsultant domain="education" />
+      </div>
       
       {/* Footer */}
       <Footer />

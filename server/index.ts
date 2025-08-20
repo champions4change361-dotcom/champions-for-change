@@ -47,19 +47,15 @@ app.use((req, res, next) => {
   // Create server early to start listening immediately
   const server = await registerRoutes(app);
 
-  // Start listening immediately for health checks - improved deployment compatibility
-  server.listen(port, "0.0.0.0", () => {
-    console.log(`🚀 Server listening on port ${port}`);
-    console.log(`✅ Health check endpoints available:`);
-    console.log(`   - http://0.0.0.0:${port}/`);
-    console.log(`   - http://0.0.0.0:${port}/health`);
-    console.log(`   - http://0.0.0.0:${port}/healthz`);
-    console.log(`   - http://0.0.0.0:${port}/api/health`);
-    console.log(`🎯 DEPLOYMENT READY: All health checks configured for Replit`);
-    log(`serving on port ${port}`);
-  });
+  // Setup Vite before starting server
+  if (process.env.NODE_ENV === 'development') {
+    await setupVite(app, server);
+  } else {
+    // In production, serve static files from the build directory
+    serveStatic(app);
+  }
 
-  // Setup error handling after server is listening - improved for deployment stability
+  // Setup error handling before starting server
   app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
@@ -81,13 +77,17 @@ app.use((req, res, next) => {
     }
   });
 
-  // Setup Vite only in development mode to avoid production deployment issues
-  if (process.env.NODE_ENV === 'development') {
-    await setupVite(app, server);
-  } else {
-    // In production, serve static files from the build directory
-    serveStatic(app);
-  }
+  // Start listening after Vite setup
+  server.listen(port, "0.0.0.0", () => {
+    console.log(`🚀 Server listening on port ${port}`);
+    console.log(`✅ Health check endpoints available:`);
+    console.log(`   - http://0.0.0.0:${port}/`);
+    console.log(`   - http://0.0.0.0:${port}/health`);
+    console.log(`   - http://0.0.0.0:${port}/healthz`);
+    console.log(`   - http://0.0.0.0:${port}/api/health`);
+    console.log(`🎯 DEPLOYMENT READY: All health checks configured for Replit`);
+    log(`serving on port ${port}`);
+  });
   
   server.on('error', (err: any) => {
     console.error('❌ Server error:', err);

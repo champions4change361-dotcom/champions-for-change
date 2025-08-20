@@ -441,6 +441,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Session management routes
+  const { registerSessionRoutes } = await import('./sessionRoutes');
+  registerSessionRoutes(app);
+
   // Create and return server
   const server = createServer(app);
   return server;
