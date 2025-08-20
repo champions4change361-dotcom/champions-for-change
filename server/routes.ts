@@ -4,18 +4,10 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { getStorage } from "./storage";
 import { emailService } from "./emailService";
 import supportTeamRoutes from "./supportTeamRoutes";
-import Stripe from "stripe";
+import { stripe } from "./nonprofitStripeConfig";
 
 console.log('🏫 District athletics management platform initialized');
 console.log('💚 Champions for Change nonprofit mission active');
-
-// Initialize Stripe
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
-}
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2025-07-30.basil",
-});
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // PRIORITY: Health check endpoints first for fastest response
