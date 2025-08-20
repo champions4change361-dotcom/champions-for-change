@@ -641,76 +641,34 @@ export default function Landing() {
             <div className="bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl p-6 text-white flex flex-col">
               <div className="text-center flex-1">
                 <div className="h-8 mb-3 flex items-center justify-center">
-                  <Badge className="bg-purple-200 text-purple-800 text-xs px-2 py-1 opacity-80">Mission Pricing</Badge>
+                  <Badge className="bg-purple-200 text-purple-800 text-xs px-2 py-1 opacity-80">Educational Mission</Badge>
                 </div>
-                <h4 className="text-2xl font-bold mb-2">Champions District</h4>
-                <div className="text-4xl font-bold mb-2">$2,490<span className="text-lg font-normal">/year</span></div>
-                <div className="text-purple-200 mb-6">Full enterprise features - mission pricing (up to 15 schools)</div>
+                <h4 className="text-2xl font-bold mb-2">Champions Level</h4>
+                <div className="text-4xl font-bold mb-2">$399<span className="text-lg font-normal">/month</span></div>
+                <div className="text-purple-200 mb-6">Complete enterprise platform for larger educational institutions</div>
                 <div className="mt-auto">
                   <Button 
                     className="w-full bg-white text-purple-600 hover:bg-purple-50 font-semibold mb-3"
-                    onClick={() => setLocation("/login/district")}
+                    onClick={() => setLocation("/register?plan=champions")}
                   >
-                    Register District
+                    Start Champions Level
                   </Button>
                   <Button 
                     variant="outline"
                     size="sm"
-                    className="w-full mt-2 border-purple-300 text-white hover:bg-purple-500/20 hover:text-white bg-blue-600 flex items-center justify-center py-2"
-                    onClick={() => window.location.href = 'mailto:Champions4change361@gmail.com?subject=Champions District Enterprise Features&body=Hello, I am interested in learning more about Champions District enterprise capabilities and alternative payment methods.'}
+                    className="w-full mt-2 border-purple-300 text-white hover:bg-purple-500/20 hover:text-white bg-purple-600 flex items-center justify-center py-2"
+                    onClick={() => window.location.href = 'mailto:Champions4change361@gmail.com?subject=Champions Level Pricing Inquiry&body=Hello, I am interested in learning more about Champions Level for our educational institution and would like to discuss our specific needs.'}
                   >
                     <Mail className="h-3 w-3 mr-2" />
                     Contact Us
                   </Button>
-                  <p className="text-purple-200 text-sm mt-2">Same enterprise capabilities as large districts</p>
-                  <p className="text-purple-200 text-xs mt-1">HIPAA/FERPA compliance • White-label branding • Medical data management</p>
+                  <p className="text-purple-200 text-sm mt-2">Perfect for large private schools & charter networks</p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* District Enterprise Option */}
-          <div className="bg-gradient-to-br from-slate-700 to-slate-800 rounded-xl p-6 border border-orange-500/30 mb-8">
-            <div className="text-center">
-              <div className="inline-flex items-center gap-2 bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-semibold mb-4">
-                <Building className="h-4 w-4" />
-                Large Districts (15+ Schools)
-              </div>
-              <h4 className="text-2xl font-bold text-white mb-2">District Enterprise</h4>
-              <div className="text-3xl font-bold text-white mb-2">$4,500<span className="text-lg font-normal text-slate-300">/year</span></div>
-              <div className="text-slate-300 mb-6">Everything in Champions District + unlimited capacity & enhanced support</div>
-              
-              <div className="grid md:grid-cols-2 gap-4 text-left text-sm text-slate-200 mb-6">
-                <div className="space-y-2">
-                  <div className="flex items-center"><Check className="h-4 w-4 mr-2 text-green-400" />Unlimited schools & student capacity</div>
-                  <div className="flex items-center"><Check className="h-4 w-4 mr-2 text-green-400" />Enhanced integration capabilities</div>
-                  <div className="flex items-center"><Check className="h-4 w-4 mr-2 text-green-400" />Dedicated account manager</div>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center"><Check className="h-4 w-4 mr-2 text-green-400" />Advanced enterprise reporting</div>
-                  <div className="flex items-center"><Check className="h-4 w-4 mr-2 text-green-400" />Priority phone support</div>
-                  <div className="flex items-center"><Check className="h-4 w-4 mr-2 text-green-400" />Save $26,000+ annually vs alternatives</div>
-                </div>
-              </div>
 
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Button 
-                  className="bg-orange-600 hover:bg-orange-700 text-white font-semibold px-6 py-2"
-                  onClick={() => setLocation("/login/district")}
-                >
-                  Register Large District
-                </Button>
-                <Button 
-                  variant="outline"
-                  className="border-orange-500 text-orange-400 hover:bg-orange-500/10 hover:text-orange-300 bg-blue-600 text-white hover:bg-blue-700 flex items-center justify-center"
-                  onClick={() => window.location.href = 'mailto:Champions4change361@gmail.com?subject=District Enterprise Large District Inquiry&body=Hello, I am interested in learning more about District Enterprise for large districts (15+ schools) and would like to discuss enterprise capabilities and alternative payment methods.'}
-                >
-                  <Mail className="h-4 w-4 mr-2" />
-                  Contact Us
-                </Button>
-              </div>
-            </div>
-          </div>
           
           {/* Registration Workflows */}
           <div className="text-center mb-6">
