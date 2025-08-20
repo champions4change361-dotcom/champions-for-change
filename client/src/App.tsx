@@ -49,6 +49,7 @@ import AdminRoleManagement from './pages/AdminRoleManagement';
 import GamePracticeScheduler from './pages/GamePracticeScheduler';
 import NonprofitBilling from './pages/NonprofitBilling';
 import HealthBenefits from './pages/HealthBenefits';
+import HealthDemo from './pages/HealthDemo';
 import GrantFunding from './pages/GrantFunding';
 import NonprofitResources from './pages/NonprofitResources';
 import OrganizationRegistration from './pages/OrganizationRegistration';
@@ -240,6 +241,7 @@ function AppRouter() {
       <Route path="/compliance" component={Compliance} />
 
       <Route path="/health-benefits" component={HealthBenefits} />
+      <Route path="/demo/health" component={HealthDemo} />
       <Route path="/grant-funding" component={GrantFunding} />
       <Route path="/nonprofit-resources" component={NonprofitResources} />
       <Route path="/register-organization" component={OrganizationRegistration} />

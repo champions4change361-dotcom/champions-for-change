@@ -319,12 +319,16 @@ export default function HealthBenefits() {
               With AI-powered analytics, real-time alerts, and comprehensive health tracking, we help you protect your most valuable assets: your people.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
-              <Button size="lg" className="bg-green-600 hover:bg-green-700" data-testid="button-start-prevention">
-                Start Preventing Injuries Today
-              </Button>
-              <Button size="lg" variant="outline" data-testid="button-schedule-demo">
-                Schedule a Health Demo
-              </Button>
+              <Link href="/login/district">
+                <Button size="lg" className="bg-green-600 hover:bg-green-700" data-testid="button-start-prevention">
+                  Start Preventing Injuries Today
+                </Button>
+              </Link>
+              <Link href="/demo/health">
+                <Button size="lg" variant="outline" data-testid="button-schedule-demo">
+                  Schedule a Health Demo
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
@@ -340,9 +344,11 @@ export default function HealthBenefits() {
             Join thousands of organizations using our platform to protect athletes and promote wellness across their communities.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Button size="lg" className="bg-green-600 hover:bg-green-700" data-testid="button-get-started-footer">
-              Get Started Now
-            </Button>
+            <Link href="/login/district">
+              <Button size="lg" className="bg-green-600 hover:bg-green-700" data-testid="button-get-started-footer">
+                Get Started Now
+              </Button>
+            </Link>
             <Link href="/">
               <Button size="lg" variant="outline" className="border-white text-white bg-transparent hover:bg-white hover:text-gray-900" data-testid="button-back-home-footer">
                 Return to Home
