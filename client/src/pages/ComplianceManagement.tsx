@@ -15,14 +15,16 @@ interface ComplianceTraining {
   id: string;
   name: string;
   type: 'annual' | 'lifetime' | 'seasonal' | 'one_time';
-  category: 'safety' | 'education' | 'sport_specific' | 'administrative' | 'medical';
+  category: 'safety' | 'education' | 'sport_specific' | 'administrative' | 'medical' | 'data_security';
   description: string;
   requiredFor: string[];
   provider: string;
   durationHours?: number;
   validityPeriod?: number; // years
   uilRequired: boolean;
+  txRampRequired: boolean;
   priority: 'required' | 'recommended' | 'optional';
+  stateMandate?: 'TX-RAMP' | 'UIL' | 'FERPA' | 'HIPAA';
 }
 
 interface CoachCompliance {
@@ -78,6 +80,7 @@ export default function ComplianceManagement() {
         durationHours: 2,
         validityPeriod: 1,
         uilRequired: true,
+        txRampRequired: false,
         priority: 'required'
       },
       {
@@ -91,6 +94,7 @@ export default function ComplianceManagement() {
         durationHours: 1,
         validityPeriod: 1,
         uilRequired: true,
+        txRampRequired: false,
         priority: 'required'
       },
       {
@@ -104,6 +108,7 @@ export default function ComplianceManagement() {
         durationHours: 8,
         validityPeriod: 30, // Until 2055 as shown in image
         uilRequired: true,
+        txRampRequired: false,
         priority: 'required'
       },
       {
@@ -117,6 +122,7 @@ export default function ComplianceManagement() {
         durationHours: 1,
         validityPeriod: 1,
         uilRequired: true,
+        txRampRequired: false,
         priority: 'required'
       },
       {
@@ -130,6 +136,7 @@ export default function ComplianceManagement() {
         durationHours: 2,
         validityPeriod: 1,
         uilRequired: true,
+        txRampRequired: false,
         priority: 'required'
       },
       {
@@ -143,6 +150,7 @@ export default function ComplianceManagement() {
         durationHours: 1,
         validityPeriod: 1,
         uilRequired: true,
+        txRampRequired: false,
         priority: 'required'
       },
       {
@@ -156,6 +164,7 @@ export default function ComplianceManagement() {
         durationHours: 1,
         validityPeriod: 1,
         uilRequired: true,
+        txRampRequired: false,
         priority: 'required'
       },
       {
@@ -169,6 +178,7 @@ export default function ComplianceManagement() {
         durationHours: 2,
         validityPeriod: 1,
         uilRequired: true,
+        txRampRequired: false,
         priority: 'required'
       },
       {
@@ -182,6 +192,7 @@ export default function ComplianceManagement() {
         durationHours: 1,
         validityPeriod: 1,
         uilRequired: true,
+        txRampRequired: false,
         priority: 'required'
       },
       {
@@ -195,7 +206,68 @@ export default function ComplianceManagement() {
         durationHours: 3,
         validityPeriod: 1,
         uilRequired: true,
+        txRampRequired: false,
         priority: 'required'
+      },
+      {
+        id: '11',
+        name: 'TX-RAMP Level 1 Certification',
+        type: 'one_time',
+        category: 'data_security',
+        description: 'Texas Risk and Authorization Management Program Level 1 - Non-confidential data and low-impact information resources',
+        requiredFor: ['District Administration', 'Technology Staff', 'Data Managers'],
+        provider: 'Texas DIR',
+        durationHours: 8,
+        validityPeriod: 3,
+        uilRequired: false,
+        txRampRequired: true,
+        priority: 'required',
+        stateMandate: 'TX-RAMP'
+      },
+      {
+        id: '12',
+        name: 'TX-RAMP Level 2 Certification',
+        type: 'one_time',
+        category: 'data_security',
+        description: 'Texas Risk and Authorization Management Program Level 2 - Confidential information and moderate/high-impact information resources',
+        requiredFor: ['District Administration', 'Technology Staff', 'Student Information Systems'],
+        provider: 'Texas DIR',
+        durationHours: 16,
+        validityPeriod: 3,
+        uilRequired: false,
+        txRampRequired: true,
+        priority: 'required',
+        stateMandate: 'TX-RAMP'
+      },
+      {
+        id: '13',
+        name: 'FERPA Compliance Training',
+        type: 'annual',
+        category: 'data_security',
+        description: 'Family Educational Rights and Privacy Act compliance for student data protection',
+        requiredFor: ['All Staff', 'Coaches', 'Administrators'],
+        provider: 'US Department of Education',
+        durationHours: 2,
+        validityPeriod: 1,
+        uilRequired: false,
+        txRampRequired: false,
+        priority: 'required',
+        stateMandate: 'FERPA'
+      },
+      {
+        id: '14',
+        name: 'HIPAA Privacy Training',
+        type: 'annual',
+        category: 'data_security',
+        description: 'Health Insurance Portability and Accountability Act training for medical data protection',
+        requiredFor: ['Athletic Trainers', 'Nurses', 'Medical Staff'],
+        provider: 'HHS',
+        durationHours: 3,
+        validityPeriod: 1,
+        uilRequired: false,
+        txRampRequired: false,
+        priority: 'required',
+        stateMandate: 'HIPAA'
       }
     ];
 
@@ -424,6 +496,37 @@ export default function ComplianceManagement() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* TX-RAMP Critical Alert */}
+        <div className="mb-6">
+          <Card className="border-red-200 bg-red-50 dark:bg-red-900/20">
+            <CardContent className="p-6">
+              <div className="flex items-start space-x-4">
+                <AlertTriangle className="h-8 w-8 text-red-600 flex-shrink-0" />
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-red-900 dark:text-red-100 mb-2">
+                    🚨 TX-RAMP Compliance Required - State Mandate
+                  </h3>
+                  <p className="text-red-800 dark:text-red-200 mb-3">
+                    Texas educational institutions must have TX-RAMP certification for cloud services processing student/district data. 
+                    Deadlines passed: Level 2 (Jan 2022), Level 1 (Jan 2024).
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge className="bg-red-600 text-white">Level 2 Required</Badge>
+                    <Badge className="bg-orange-600 text-white">FERPA/HIPAA Data</Badge>
+                    <Badge className="bg-yellow-600 text-white">State Audit Risk</Badge>
+                  </div>
+                  <div className="mt-3">
+                    <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white">
+                      <Shield className="w-4 h-4 mr-2" />
+                      Review TX-RAMP Requirements
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card>
