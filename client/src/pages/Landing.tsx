@@ -403,14 +403,80 @@ export default function Landing() {
           </div>
         </div>
 
+        {/* Parent & Athlete Benefits */}
+        <div className="mb-12">
+          <div className="bg-gradient-to-r from-purple-600 via-purple-500 to-purple-600 rounded-2xl text-white py-12">
+            <div className="text-center px-8 mb-8">
+              <h2 className="text-4xl font-bold mb-4">For Parents & Athletes - Always Free</h2>
+              <p className="text-xl text-purple-100 max-w-4xl mx-auto mb-8">
+                When your school or organization uses our platform, you get access to powerful tools at no cost. 
+                Here's what you gain as a parent or athlete:
+              </p>
+            </div>
+            
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 px-8">
+              <div className="bg-purple-700/30 rounded-xl p-6 text-center">
+                <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <Shield className="h-6 w-6 text-purple-200" />
+                </div>
+                <h3 className="text-lg font-bold mb-3">Health Monitoring</h3>
+                <p className="text-purple-200 text-sm">
+                  Real-time injury tracking and AI-powered health insights to keep your athlete safe
+                </p>
+              </div>
+              
+              <div className="bg-purple-700/30 rounded-xl p-6 text-center">
+                <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <Timer className="h-6 w-6 text-purple-200" />
+                </div>
+                <h3 className="text-lg font-bold mb-3">Live Updates</h3>
+                <p className="text-purple-200 text-sm">
+                  Get instant notifications about games, practice changes, and tournament results
+                </p>
+              </div>
+              
+              <div className="bg-purple-700/30 rounded-xl p-6 text-center">
+                <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <Trophy className="h-6 w-6 text-purple-200" />
+                </div>
+                <h3 className="text-lg font-bold mb-3">Achievement Tracking</h3>
+                <p className="text-purple-200 text-sm">
+                  Complete academic and athletic records, stats, and performance analytics
+                </p>
+              </div>
+              
+              <div className="bg-purple-700/30 rounded-xl p-6 text-center">
+                <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <UserCheck className="h-6 w-6 text-purple-200" />
+                </div>
+                <h3 className="text-lg font-bold mb-3">Family Communication</h3>
+                <p className="text-purple-200 text-sm">
+                  Direct communication with coaches, trainers, and school staff through secure channels
+                </p>
+              </div>
+            </div>
+            
+            <div className="text-center mt-8 px-8">
+              <div className="bg-purple-800/40 rounded-xl p-6 max-w-4xl mx-auto">
+                <h3 className="text-xl font-bold mb-3 text-yellow-300">Why It's Free for Families</h3>
+                <p className="text-purple-100">
+                  Your school or organization subscribes to our platform, which gives your entire family access to these powerful tools. 
+                  Plus, every subscription helps fund educational trips for underprivileged student athletes - 
+                  so you're part of something bigger while getting premium features at no cost.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Features Arena */}
         <div className="mb-12">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-white mb-4">
-              Professional Tournament Management
+              Complete Athletic & Academic Management
             </h2>
             <p className="text-xl text-slate-300 max-w-3xl mx-auto">
-              Built by coaches who understand the tournament world. Every feature designed to streamline your competitions while supporting student education.
+              Built by coaches who understand the needs of schools and districts. Every feature designed to streamline operations while supporting student education.
             </p>
           </div>
           
