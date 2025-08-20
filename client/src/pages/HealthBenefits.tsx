@@ -39,12 +39,16 @@ export default function HealthBenefits() {
             AI-powered athlete health management and injury tracking for all organization types - from HIPAA-compliant district systems to simple community injury documentation
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Button size="lg" className="bg-green-600 hover:bg-green-700" data-testid="button-get-started">
-              Get Started Today
-            </Button>
-            <Button size="lg" variant="outline" data-testid="button-learn-more">
-              Learn More
-            </Button>
+            <Link href="/register-organization">
+              <Button size="lg" className="bg-green-600 hover:bg-green-700" data-testid="button-get-started">
+                Get Started Today
+              </Button>
+            </Link>
+            <Link href="/demo/health">
+              <Button size="lg" variant="outline" data-testid="button-learn-more">
+                Schedule Demo
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
@@ -319,7 +323,7 @@ export default function HealthBenefits() {
               With AI-powered analytics, real-time alerts, and comprehensive health tracking, we help you protect your most valuable assets: your people.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
-              <Link href="/login/district">
+              <Link href="/register-organization">
                 <Button size="lg" className="bg-green-600 hover:bg-green-700" data-testid="button-start-prevention">
                   Start Preventing Injuries Today
                 </Button>
@@ -344,7 +348,7 @@ export default function HealthBenefits() {
             Join thousands of organizations using our platform to protect athletes and promote wellness across their communities.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Link href="/login/district">
+            <Link href="/register-organization">
               <Button size="lg" className="bg-green-600 hover:bg-green-700" data-testid="button-get-started-footer">
                 Get Started Now
               </Button>
