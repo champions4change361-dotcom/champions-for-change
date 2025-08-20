@@ -62,6 +62,7 @@ import RoleDashboard from './pages/RoleDashboard';
 import BulkRegistration from './pages/BulkRegistration';
 import AthleteDashboard from './pages/AthleteDashboard';
 import AthleteManagement from './pages/AthleteManagement';
+import HealthCommunication from './pages/HealthCommunication';
 import CoachDashboard from './pages/CoachDashboard';
 import AthleticTrainerDashboard from './pages/AthleticTrainerDashboard';
 import ScorekeeperDashboard from './pages/ScorekeeperDashboard';
@@ -126,6 +127,7 @@ function AuthenticatedRoutes() {
         <Route path="/dashboard" component={RoleDashboard} />
         <Route path="/athlete-dashboard" component={AthleteDashboard} />
         <Route path="/athlete-management" component={AthleteManagement} />
+        <Route path="/health-communication" component={HealthCommunication} />
         <Route path="/coach-dashboard" component={CoachDashboard} />
         <Route path="/athletic-trainer-dashboard" component={AthleticTrainerDashboard} />
 
