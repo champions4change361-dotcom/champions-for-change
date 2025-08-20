@@ -7,91 +7,72 @@ import { Check, GraduationCap, Building, Star, Mail } from 'lucide-react';
 export function EducationPricingSection() {
   const educationTiers = [
     {
-      name: 'Foundation',
-      price: 'Free',
-      description: 'Perfect for single schools, small nonprofits, testing the waters',
-      features: [
-        'Up to 3 tournaments per year',
-        'Basic bracket management',
-        'Score tracking & live updates',
-        'Email notifications',
-        'Tournament donation pages (you keep 100%)',
-        'Mobile-friendly interface',
-        'Community support'
-      ],
-      cta: 'Get Started Free',
-      buttonColor: 'bg-blue-600 hover:bg-blue-700',
-      note: '$25 suggested donation per tournament to support Champions for Change student trips',
-      icon: GraduationCap,
-      contactInfo: true
-    },
-    {
-      name: 'Tournament Organizer',
-      price: '$39',
+      name: 'Educational Partnership',
+      price: '$99',
       period: '/month',
-      description: 'Perfect for individual tournament organizers and coaches',
+      description: 'Essential features for smaller private schools (under 200 students)',
       features: [
-        'Unlimited tournaments',
-        'AI tournament assistance',
-        'Advanced analytics & reporting',
-        'Custom branding options',
-        'Priority email support',
-        'Team management tools',
-        'CSV bulk import/export',
-        '5-step tournament wizard'
+        'Athletic program management',
+        'Basic injury tracking & forms',
+        'Equipment inventory system',
+        'Practice & game scheduling',
+        'Parent communication portal',
+        'Basic tournament management',
+        'Community support forum',
+        'Mobile-friendly interface'
       ],
-      cta: 'Start Tournament Organizer',
-      buttonColor: 'bg-green-600 hover:bg-green-700',
-      note: 'Annual option: $399/year (save 2 months)',
+      cta: 'Start Partnership',
+      buttonColor: 'bg-blue-600 hover:bg-blue-700',
+      note: 'Perfect for smaller private schools and religious institutions',
       icon: Star,
       contactInfo: true
     },
     {
-      name: 'Champions District',
-      price: '$2,490',
-      period: '/year',
-      description: 'Complete enterprise district platform - same capabilities, mission pricing',
+      name: 'Independent School Pro',
+      price: '$199',
+      period: '/month',
+      description: 'Complete athletic management for mid-size private schools (up to 500 students)',
+      features: [
+        'Unlimited tournaments & events',
+        'AI injury prediction (95% accuracy)',
+        'Health communication system',
+        'Equipment management & tracking',
+        'Smart scheduling with conflict detection',
+        'UIL compliance tracking',
+        'Parent/athlete communication portal',
+        'Budget allocation tools',
+        'Multi-sport coordination'
+      ],
+      cta: 'Start Independent Pro',
+      buttonColor: 'bg-green-600 hover:bg-green-700',
+      note: 'Perfect for mid-size private schools and religious institutions',
+      icon: GraduationCap,
+      contactInfo: true
+    },
+    {
+      name: 'Champions Level',
+      price: '$399',
+      period: '/month',
+      description: 'Enterprise platform for large private schools (500-1,500 students)',
       features: [
         'Everything in Tournament Organizer',
-        'Full enterprise district management (up to 15 schools)',
+        'Multi-school management capabilities',
         'HIPAA/FERPA compliant data management',
         'Complete role hierarchy (Athletic Director → Student)',
         'Athletic trainer medical data management', 
         'Comprehensive audit trails & compliance',
         'White-label branding & custom domain',
         'Emergency notification system',
-        'Cross-school coordination & analytics',
-        'Same enterprise features as large districts'
+        'Advanced analytics & reporting',
+        'Priority support & training'
       ],
-      cta: 'Register District',
-      buttonColor: 'bg-blue-600 hover:bg-blue-700',
-      note: 'Full enterprise capabilities for smaller districts. Alternative payment methods available.',
-      icon: GraduationCap,
-      contactInfo: true
-    },
-    {
-      name: 'District Enterprise',
-      price: '$4,500',
-      period: '/year',
-      description: 'Enterprise platform for large districts (15+ schools, 25,000+ students)',
-      features: [
-        'Everything in Champions District',
-        'Unlimited schools & student capacity',
-        'Enhanced integration capabilities',
-        'Dedicated account manager & priority support',
-        'Advanced enterprise reporting',
-        'Custom compliance workflows',
-        'Multi-district coordination options',
-        'Premium implementation support',
-        'Staff training & onboarding programs',
-        'Save $26,000+ annually vs current solutions'
-      ],
-      cta: 'Register',
+      cta: 'Start Enterprise',
       buttonColor: 'bg-purple-600 hover:bg-purple-700',
-      note: 'For large districts. Alternative payment methods available.',
+      note: 'Perfect for large private schools and charter organizations.',
       icon: Building,
       contactInfo: true
-    }
+    },
+
   ];
 
   return (
@@ -103,15 +84,15 @@ export function EducationPricingSection() {
             Champions for Change Educational Platform
           </div>
           <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            Choose Your Educational Plan
+            Private School Athletic Management Plans
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Start free with 3 tournaments, then grow with unlimited options. Every subscription helps fund 
-            student educational trips in Corpus Christi.
+            Comprehensive athletic management tailored for private schools and charter organizations. 
+            Every subscription helps fund student educational trips in Corpus Christi.
           </p>
         </div>
         
-        <div className="grid lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+        <div className="grid lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
           {educationTiers.map((tier) => {
             const IconComponent = tier.icon;
             return (
@@ -153,19 +134,11 @@ export function EducationPricingSection() {
                   {tier.contactInfo && (
                     <Button 
                       variant="outline"
-                      className={`w-full mt-3 ${
-                        tier.name === 'District Enterprise' 
-                          ? 'border-blue-500 text-blue-700 hover:bg-blue-50 bg-blue-500 text-white hover:text-blue-700' 
-                          : 'border-blue-500 text-white hover:bg-blue-700 bg-blue-600'
-                      }`}
+                      className="w-full mt-3 border-blue-500 text-white hover:bg-blue-700 bg-blue-600"
                       size="lg"
                       onClick={() => {
-                        const subject = tier.name === 'District Enterprise' 
-                          ? 'District Enterprise Pricing Inquiry'
-                          : `${tier.name} Pricing Inquiry`;
-                        const body = tier.name === 'District Enterprise'
-                          ? 'Hello, I am interested in learning more about District Enterprise pricing and alternative payment methods for our district.'
-                          : `Hello, I am interested in learning more about ${tier.name} and would like to discuss pricing options.`;
+                        const subject = `${tier.name} Pricing Inquiry`;
+                        const body = `Hello, I am interested in learning more about ${tier.name} and would like to discuss pricing options for our private school.`;
                         window.location.href = `mailto:Champions4change361@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
                       }}
                       data-testid={`button-contact-${tier.name.toLowerCase().replace(/\s+/g, '-')}`}
