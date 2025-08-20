@@ -57,6 +57,7 @@ import OrganizationRegistration from './pages/OrganizationRegistration';
 import RoleHierarchy from './pages/RoleHierarchy';
 import CustomDesignDemo from './pages/CustomDesignDemo';
 import Schools from './pages/Schools';
+import Capabilities from './pages/Capabilities';
 import MillerHomepage from './pages/MillerHomepage';
 import RoleDashboard from './pages/RoleDashboard';
 import BulkRegistration from './pages/BulkRegistration';
@@ -240,6 +241,7 @@ function AppRouter() {
       <Route path="/nonprofit/analytics" component={NonprofitAnalytics} />
       <Route path="/pricing" component={Pricing} />
       <Route path="/business-pricing-test" component={BusinessPricingTest} />
+      <Route path="/capabilities" component={Capabilities} />
       <Route path="/your-why" component={YourWhy} />
       <Route path="/register" component={RegistrationForm} />
       <Route path="/signup" component={SignupSelector} />

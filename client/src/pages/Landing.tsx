@@ -193,6 +193,17 @@ export default function Landing() {
                     <Button 
                       size="sm"
                       variant="outline"
+                      className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10 hover:border-blue-400 px-3 py-2 text-sm lg:px-4 lg:py-3 lg:text-base"
+                      onClick={() => setLocation("/capabilities")}
+                      data-testid="button-capabilities"
+                    >
+                      <Trophy className="h-3 w-3 lg:h-4 lg:w-4 mr-1 lg:mr-2" />
+                      <span className="hidden sm:inline">Platform Capabilities</span>
+                      <span className="sm:hidden">Capabilities</span>
+                    </Button>
+                    <Button 
+                      size="sm"
+                      variant="outline"
                       className="border-orange-500/50 text-orange-400 hover:bg-orange-500/10 hover:border-orange-400 px-3 py-2 text-sm lg:px-4 lg:py-3 lg:text-base"
                       onClick={() => setLocation("/grant-funding")}
                       data-testid="button-grant-funding"
