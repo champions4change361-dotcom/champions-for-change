@@ -504,21 +504,22 @@ export default function ComplianceManagement() {
                 <AlertTriangle className="h-8 w-8 text-red-600 flex-shrink-0" />
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-red-900 dark:text-red-100 mb-2">
-                    🚨 TX-RAMP Compliance Required - State Mandate
+                    🚨 TX-RAMP Certification In Progress - State Mandate
                   </h3>
                   <p className="text-red-800 dark:text-red-200 mb-3">
-                    Texas educational institutions must have TX-RAMP certification for cloud services processing student/district data. 
-                    Deadlines passed: Level 2 (Jan 2022), Level 1 (Jan 2024).
+                    Platform TX-RAMP certification currently in progress. Texas educational institutions require TX-RAMP 
+                    certification for cloud services processing student/district data. Champions for Change platform 
+                    pursuing Level 2 certification for comprehensive compliance.
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    <Badge className="bg-red-600 text-white">Level 2 Required</Badge>
-                    <Badge className="bg-orange-600 text-white">FERPA/HIPAA Data</Badge>
-                    <Badge className="bg-yellow-600 text-white">State Audit Risk</Badge>
+                    <Badge className="bg-yellow-600 text-white">Certification Pending</Badge>
+                    <Badge className="bg-orange-600 text-white">FERPA/HIPAA Ready</Badge>
+                    <Badge className="bg-blue-600 text-white">Assessment Planned</Badge>
                   </div>
                   <div className="mt-3">
-                    <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white">
-                      <Shield className="w-4 h-4 mr-2" />
-                      Review TX-RAMP Requirements
+                    <Button size="sm" className="bg-yellow-600 hover:bg-yellow-700 text-white">
+                      <Clock className="w-4 h-4 mr-2" />
+                      Track Certification Progress
                     </Button>
                   </div>
                 </div>
