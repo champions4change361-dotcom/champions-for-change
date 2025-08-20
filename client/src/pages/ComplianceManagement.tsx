@@ -496,7 +496,40 @@ export default function ComplianceManagement() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* TX-RAMP Critical Alert */}
+        {/* Grant Funding Opportunity Alert */}
+        <div className="mb-6">
+          <Card className="border-green-200 bg-green-50 dark:bg-green-900/20">
+            <CardContent className="p-6">
+              <div className="flex items-start space-x-4">
+                <Shield className="h-8 w-8 text-green-600 flex-shrink-0" />
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-green-900 dark:text-green-100 mb-2">
+                    💰 Grant Funding Available - Educational Nonprofit Advantage
+                  </h3>
+                  <p className="text-green-800 dark:text-green-200 mb-3">
+                    Champions for Change 501(c)(3) status and SAM registration enable access to federal grants, 
+                    foundation funding, and corporate philanthropy for security certification costs ($150K target). 
+                    Educational nonprofits have significant advantages in technology infrastructure funding.
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge className="bg-green-600 text-white">Federal Grants Available</Badge>
+                    <Badge className="bg-blue-600 text-white">Foundation Funding</Badge>
+                    <Badge className="bg-purple-600 text-white">SAM Registered</Badge>
+                    <Badge className="bg-orange-600 text-white">501(c)(3) Advantage</Badge>
+                  </div>
+                  <div className="mt-3">
+                    <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">
+                      <Shield className="w-4 h-4 mr-2" />
+                      Explore Grant Opportunities
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Security Requirements Alert */}
         <div className="mb-6">
           <Card className="border-red-200 bg-red-50 dark:bg-red-900/20">
             <CardContent className="p-6">
@@ -517,10 +550,14 @@ export default function ComplianceManagement() {
                     <Badge className="bg-orange-600 text-white">Industry Standard Gap</Badge>
                     <Badge className="bg-yellow-600 text-white">Certification Roadmap Needed</Badge>
                   </div>
-                  <div className="mt-3">
+                  <div className="mt-3 flex flex-wrap gap-2">
                     <Button size="sm" className="bg-yellow-600 hover:bg-yellow-700 text-white">
                       <Clock className="w-4 h-4 mr-2" />
                       Track Certification Progress
+                    </Button>
+                    <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">
+                      <Shield className="w-4 h-4 mr-2" />
+                      View Grant Opportunities
                     </Button>
                   </div>
                 </div>
