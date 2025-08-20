@@ -504,17 +504,18 @@ export default function ComplianceManagement() {
                 <AlertTriangle className="h-8 w-8 text-red-600 flex-shrink-0" />
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-red-900 dark:text-red-100 mb-2">
-                    🚨 TX-RAMP Certification In Progress - State Mandate
+                    🚨 Security Certifications Required - Multi-State Mandate
                   </h3>
                   <p className="text-red-800 dark:text-red-200 mb-3">
-                    Platform lacks required third-party security certifications for TX-RAMP Fast Track eligibility. 
-                    SOC II Type 2, ISO 27001, and other assessments needed within 24 months for Texas district compliance. 
-                    Security certification roadmap in development.
+                    Platform lacks industry-standard security certifications required by educational institutions nationwide. 
+                    SOC II Type 2 and ISO 27001 are baseline requirements for EdTech platforms serving districts in any state. 
+                    Comprehensive security certification program needed for competitive positioning.
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    <Badge className="bg-red-600 text-white">SOC II Required</Badge>
-                    <Badge className="bg-red-600 text-white">ISO 27001 Required</Badge>
-                    <Badge className="bg-yellow-600 text-white">Security Assessment Needed</Badge>
+                    <Badge className="bg-red-600 text-white">SOC II Required (Universal)</Badge>
+                    <Badge className="bg-red-600 text-white">ISO 27001 Required (Enterprise)</Badge>
+                    <Badge className="bg-orange-600 text-white">Industry Standard Gap</Badge>
+                    <Badge className="bg-yellow-600 text-white">Certification Roadmap Needed</Badge>
                   </div>
                   <div className="mt-3">
                     <Button size="sm" className="bg-yellow-600 hover:bg-yellow-700 text-white">
