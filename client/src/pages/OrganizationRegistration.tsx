@@ -426,25 +426,33 @@ export default function OrganizationRegistration() {
               <CardHeader>
                 <Badge className="w-fit bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200">Free Trial</Badge>
                 <CardTitle className="text-xl">Free</CardTitle>
-                <CardDescription>30-day trial with full features</CardDescription>
+                <CardDescription>30-day trial with full platform access</CardDescription>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-xs">
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-3 w-3 text-green-600" />
-                    All platform features
+                    AI tournament builder with smart recommendations
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-3 w-3 text-green-600" />
-                    Up to 2 tournaments
+                    Budget management spreadsheets
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-3 w-3 text-green-600" />
-                    50 participants max
+                    Basic organizational charts
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-3 w-3 text-green-600" />
-                    Email support
+                    Health tracking dashboards
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    AI assistant on all data entry pages
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Target className="h-3 w-3 text-orange-600" />
+                    Limited: 2 tournaments, 50 participants
                   </li>
                 </ul>
               </CardContent>
@@ -461,23 +469,31 @@ export default function OrganizationRegistration() {
                 <ul className="space-y-2 text-xs">
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-3 w-3 text-green-600" />
-                    Unlimited tournaments
+                    Unlimited AI-powered tournament creation
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-3 w-3 text-green-600" />
-                    AI tournament creation
+                    Excel-style budget management system
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-3 w-3 text-green-600" />
-                    Basic health tracking
+                    Interactive organizational charts
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-3 w-3 text-green-600" />
-                    Communication tools
+                    Basic health tracking & injury documentation
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-3 w-3 text-green-600" />
-                    Custom branding
+                    AI assistant for all forms & data entry
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    Custom branding & communication tools
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    Scheduling & scoring systems
                   </li>
                 </ul>
                 <div className="mt-4 text-xs text-gray-600 dark:text-gray-400">
@@ -500,27 +516,39 @@ export default function OrganizationRegistration() {
                 <ul className="space-y-2 text-xs">
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-3 w-3 text-green-600" />
-                    HIPAA/FERPA compliant
+                    Complete district budget allocation system
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-3 w-3 text-green-600" />
-                    Athletic trainer dashboards
+                    Multi-school organizational chart builder
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-3 w-3 text-green-600" />
-                    AI injury prediction (95% accuracy)
+                    HIPAA/FERPA compliant data management
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-3 w-3 text-green-600" />
-                    Role-based access
+                    Athletic trainer dashboards with AI assistance
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-3 w-3 text-green-600" />
-                    Emergency notifications
+                    95% accuracy AI injury prediction system
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-3 w-3 text-green-600" />
-                    White-label platform
+                    50+ UIL academic competition management
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    Emergency notification & communication
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    Role-based access & audit trails
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    White-label platform with custom domain
                   </li>
                 </ul>
               </CardContent>
@@ -537,23 +565,35 @@ export default function OrganizationRegistration() {
                 <ul className="space-y-2 text-xs">
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-3 w-3 text-green-600" />
-                    Complete white-label platform
+                    Complete white-label tournament platform
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-3 w-3 text-green-600" />
-                    Advanced analytics
+                    Advanced budget & financial analytics
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-3 w-3 text-green-600" />
-                    Multi-tenant architecture
+                    Multi-client organizational management
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-3 w-3 text-green-600" />
-                    API access
+                    AI-powered tournament optimization
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-3 w-3 text-green-600" />
-                    Priority support
+                    Custom integrations & API access
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    Multi-tenant architecture support
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    Revenue tracking & client billing
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    Priority support & dedicated success manager
                   </li>
                 </ul>
                 <div className="mt-4 text-xs text-gray-600 dark:text-gray-400">
@@ -576,27 +616,39 @@ export default function OrganizationRegistration() {
                 <ul className="space-y-2 text-xs">
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-3 w-3 text-green-600" />
-                    Unlimited capacity
+                    Unlimited schools & student capacity
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-3 w-3 text-green-600" />
-                    All Champions District features
+                    Enterprise budget management across all schools
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-3 w-3 text-green-600" />
-                    Enhanced integrations
+                    Advanced organizational chart system
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-3 w-3 text-green-600" />
-                    Dedicated account manager
+                    All Champions District features included
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-3 w-3 text-green-600" />
-                    Custom development
+                    Enhanced AI capabilities & analytics
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-3 w-3 text-green-600" />
-                    24/7 phone support
+                    Custom integrations with existing systems
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    Dedicated account manager & training
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    Custom development & feature requests
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    24/7 phone support & priority response
                   </li>
                 </ul>
               </CardContent>
@@ -620,49 +672,61 @@ export default function OrganizationRegistration() {
                     <ul className="space-y-1 text-sm">
                       <li className="flex items-center gap-2">
                         <CheckCircle className="h-4 w-4 text-green-600" />
-                        Unlimited tournaments
+                        Unlimited tournaments & participants
                       </li>
                       <li className="flex items-center gap-2">
                         <CheckCircle className="h-4 w-4 text-green-600" />
-                        Unlimited participants
+                        Unlimited custom domains
                       </li>
                       <li className="flex items-center gap-2">
                         <CheckCircle className="h-4 w-4 text-green-600" />
-                        Unlimited domains
-                      </li>
-                    </ul>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-2 text-purple-900 dark:text-purple-100">Enterprise Features</h4>
-                    <ul className="space-y-1 text-sm">
-                      <li className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-green-600" />
-                        White-label platform
+                        Unlimited budget management systems
                       </li>
                       <li className="flex items-center gap-2">
                         <CheckCircle className="h-4 w-4 text-green-600" />
-                        Advanced AI analytics
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-green-600" />
-                        Custom integrations
+                        Unlimited organizational charts
                       </li>
                     </ul>
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-2 text-purple-900 dark:text-purple-100">Premium Support</h4>
+                    <h4 className="font-semibold mb-2 text-purple-900 dark:text-purple-100">Advanced AI Platform</h4>
                     <ul className="space-y-1 text-sm">
                       <li className="flex items-center gap-2">
                         <CheckCircle className="h-4 w-4 text-green-600" />
-                        Dedicated success team
+                        AI assistants on every data entry page
                       </li>
                       <li className="flex items-center gap-2">
                         <CheckCircle className="h-4 w-4 text-green-600" />
-                        24/7 priority support
+                        Advanced tournament optimization AI
                       </li>
                       <li className="flex items-center gap-2">
                         <CheckCircle className="h-4 w-4 text-green-600" />
-                        Custom training
+                        Predictive analytics & reporting
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        Custom AI model training
+                      </li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold mb-2 text-purple-900 dark:text-purple-100">Enterprise Support</h4>
+                    <ul className="space-y-1 text-sm">
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        Dedicated success team & account manager
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        24/7 priority support & custom training
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        Custom development & integrations
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        White-label platform with full customization
                       </li>
                     </ul>
                   </div>
@@ -671,8 +735,39 @@ export default function OrganizationRegistration() {
             </Card>
           </div>
 
+          {/* AI Assistant Feature Highlight */}
+          <div className="mt-12">
+            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6 max-w-4xl mx-auto">
+              <div className="flex items-center justify-center gap-2 mb-3">
+                <Target className="h-5 w-5 text-blue-600" />
+                <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100">AI-Powered Platform Intelligence</h3>
+                <Target className="h-5 w-5 text-blue-600" />
+              </div>
+              <div className="grid md:grid-cols-3 gap-6 text-sm">
+                <div className="text-center">
+                  <h4 className="font-semibold mb-2 text-blue-900 dark:text-blue-100">Smart Data Entry</h4>
+                  <p className="text-blue-800 dark:text-blue-200">
+                    AI assistants on budget pages, tournament builders, and all forms provide intelligent suggestions and error prevention.
+                  </p>
+                </div>
+                <div className="text-center">
+                  <h4 className="font-semibold mb-2 text-blue-900 dark:text-blue-100">Platform Understanding</h4>
+                  <p className="text-blue-800 dark:text-blue-200">
+                    Our AI understands all platform capabilities - from budget allocation to organizational charts to health monitoring.
+                  </p>
+                </div>
+                <div className="text-center">
+                  <h4 className="font-semibold mb-2 text-blue-900 dark:text-blue-100">Contextual Help</h4>
+                  <p className="text-blue-800 dark:text-blue-200">
+                    Get specific guidance based on your organization type, whether you're managing districts, nonprofits, or tournaments.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Pricing Guarantee */}
-          <div className="mt-12 text-center">
+          <div className="mt-8 text-center">
             <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6 max-w-3xl mx-auto">
               <div className="flex items-center justify-center gap-2 mb-3">
                 <Star className="h-5 w-5 text-yellow-600" />
