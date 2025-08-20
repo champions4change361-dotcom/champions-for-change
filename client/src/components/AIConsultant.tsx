@@ -28,19 +28,30 @@ export function AIConsultant({ domain = 'education' }: AIConsultantProps) {
     features: [] as string[]
   });
 
-  // Load existing session data on mount
+  // Load existing session data on mount and determine step
   useEffect(() => {
     const session = sessionManager.getSession();
     if (session.buildSelections) {
+      const selections = session.buildSelections;
       setConsultation(prev => ({
         ...prev,
-        sport: session.buildSelections.sportType || '',
-        participantCount: session.buildSelections.participantCount || '',
-        goals: session.buildSelections.goals || '',
-        budget: session.buildSelections.budget || '',
-        features: session.buildSelections.features || [],
-        tournamentName: session.buildSelections.venue || ''
+        sport: selections.sportType || '',
+        participantCount: selections.participantCount || '',
+        goals: selections.goals || '',
+        budget: selections.budget || '',
+        features: selections.features || [],
+        tournamentName: selections.venue || ''
       }));
+      
+      // Determine which step to resume at
+      if (selections.sportType && selections.participantCount) {
+        if (selections.features && selections.features.length > 0) {
+          setStep(3); // Go to final recommendations
+        } else {
+          setStep(2); // Go to features selection
+        }
+      }
+      // Otherwise stay at step 1
     }
   }, []);
 
@@ -394,20 +405,38 @@ export function AIConsultant({ domain = 'education' }: AIConsultantProps) {
 
     const complexity = getCompetitionComplexity();
     
-    // Always go to tournament creation with pre-filled data and complexity level
-    const params = new URLSearchParams({
+    // Create structured recommendation object for the tournament wizard
+    const recommendations = {
       name: consultation.tournamentName,
       sport: consultation.sport,
-      participants: consultation.participantCount,
+      participantCount: consultation.participantCount,
       goals: consultation.goals,
       budget: consultation.budget,
-      features: JSON.stringify(consultation.features),
+      features: consultation.features,
       complexity: complexity.isSimple ? 'simple' : 'advanced',
-      fromConsultant: 'true'
+      fromConsultant: true,
+      // Add format suggestions based on sport and participant count
+      format: complexity.isIndividualCompetition ? 'leaderboard' : 'bracket',
+      tournamentType: complexity.requiresComplexSetup ? 'round-robin' : 'single',
+      teamSize: parseInt(consultation.participantCount || '16'),
+      age_group: consultation.features.includes('Youth Competitions') ? 'Youth' : 'All Ages',
+      gender_division: 'Mixed'
+    };
+    
+    // Store recommendations in sessionStorage for the wizard to pick up
+    sessionStorage.setItem('aiRecommendations', JSON.stringify(recommendations));
+    
+    // Navigate to tournament creation with a flag indicating AI consultation
+    const params = new URLSearchParams({
+      fromAI: 'true',
+      consultationComplete: 'true'
     });
     
-    // Use router navigation to stay in same window/tab
-    setLocation(`/create?${params.toString()}`);
+    // Close the consultant and navigate
+    setIsOpen(false);
+    
+    // Use window.location for more reliable navigation
+    window.location.href = `/create?${params.toString()}`;
   };
 
   const generateRecommendations = () => {
@@ -426,6 +455,15 @@ export function AIConsultant({ domain = 'education' }: AIConsultantProps) {
     };
   };
 
+  // Check if there's existing session data to resume
+  const hasExistingSession = () => {
+    const session = sessionManager.getSession();
+    return session.buildSelections && 
+           (session.buildSelections.sportType || 
+            session.buildSelections.participantCount || 
+            session.buildSelections.goals);
+  };
+
   if (!isOpen) {
     return (
       <div className="fixed bottom-6 right-6 z-50">
@@ -440,8 +478,17 @@ export function AIConsultant({ domain = 'education' }: AIConsultantProps) {
         >
           <Brain className="h-6 w-6 mr-2" />
           <div className="text-left">
-            <div className="font-semibold">Need Help?</div>
-            <div className="text-xs opacity-90">AI Tournament Consultant</div>
+            <div className="font-semibold">
+              {hasExistingSession() ? 'Continue AI Chat' : 'Need Help?'}
+            </div>
+            <div className="text-xs opacity-90">
+              {hasExistingSession() ? 'Resume your consultation' : 'AI Tournament Consultant'}
+            </div>
+            {hasExistingSession() && (
+              <div className="text-xs mt-1 bg-white/20 rounded px-2 py-1">
+                Session Progress: {sessionManager.getSession().buildSelections?.sportType ? 'Sport selected' : 'In progress'}
+              </div>
+            )}
           </div>
         </Button>
       </div>

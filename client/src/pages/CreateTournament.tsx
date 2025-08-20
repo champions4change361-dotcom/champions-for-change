@@ -13,8 +13,24 @@ export default function CreateTournament() {
   // Check for URL parameters from AI consultant
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const fromConsultant = urlParams.get('fromConsultant');
+    const fromAI = urlParams.get('fromAI');
+    const consultationComplete = urlParams.get('consultationComplete');
     
+    // New flow: Check if coming from AI consultation with sessionStorage
+    if (fromAI === 'true' && consultationComplete === 'true') {
+      const storedRecommendations = sessionStorage.getItem('aiRecommendations');
+      if (storedRecommendations) {
+        const recommendations = JSON.parse(storedRecommendations);
+        setAiRecommendations(recommendations);
+        setCreationMode('wizard');
+        // Clear the stored recommendations
+        sessionStorage.removeItem('aiRecommendations');
+        return;
+      }
+    }
+    
+    // Legacy flow: URL parameters from AI consultant
+    const fromConsultant = urlParams.get('fromConsultant');
     if (fromConsultant === 'true') {
       const name = urlParams.get('name');
       const sport = urlParams.get('sport');
