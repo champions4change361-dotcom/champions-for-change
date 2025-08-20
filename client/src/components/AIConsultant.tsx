@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLocation } from 'wouter';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,6 +13,7 @@ interface AIConsultantProps {
 }
 
 export function AIConsultant({ domain = 'education' }: AIConsultantProps) {
+  const [location, setLocation] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -375,7 +377,9 @@ export function AIConsultant({ domain = 'education' }: AIConsultantProps) {
       complexity: complexity.isSimple ? 'simple' : 'advanced',
       fromConsultant: 'true'
     });
-    window.location.href = `/create?${params.toString()}`;
+    
+    // Use router navigation to stay in same window/tab
+    setLocation(`/create?${params.toString()}`);
   };
 
   const generateRecommendations = () => {
