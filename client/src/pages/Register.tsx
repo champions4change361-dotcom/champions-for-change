@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,7 +17,7 @@ import { apiRequest } from '@/lib/queryClient';
 import { useDomain } from '@/hooks/useDomain';
 
 const registrationSchema = z.object({
-  requestType: z.enum(['district_admin', 'school_admin', 'coach', 'scorekeeper']),
+  requestType: z.enum(['district_admin', 'school_admin', 'coach', 'scorekeeper', 'tournament_manager']),
   firstName: z.string().min(2, 'First name must be at least 2 characters'),
   lastName: z.string().min(2, 'Last name must be at least 2 characters'),
   email: z.string().email('Please enter a valid email address'),
@@ -40,16 +41,54 @@ export default function Register() {
   const [selectedSports, setSelectedSports] = useState<string[]>([]);
   const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'check'>('stripe');
   const [selectedPlan, setSelectedPlan] = useState<string>('freemium');
-  const { isSchoolSafe } = useDomain();
+  const [organizationType, setOrganizationType] = useState<string>('');
+  const [shouldShowRoleSelection, setShouldShowRoleSelection] = useState(false);
+  const { isSchoolSafe, isProDomain } = useDomain();
 
   const form = useForm<RegistrationForm>({
     resolver: zodResolver(registrationSchema),
     defaultValues: {
       sportsInvolved: [],
       paymentMethod: 'stripe',
-      subscriptionPlan: 'freemium'
+      subscriptionPlan: 'freemium',
+      requestType: 'tournament_manager' // Default to tournament manager role
     }
   });
+
+  // Determine if user should see role selection based on organization type and domain
+  const checkRoleSelectionNeeded = (orgType: string, plan: string) => {
+    // Private schools and private charter schools should see role selection
+    const needsRoleSelection = orgType === 'private_school' || orgType === 'charter_school';
+    
+    // For freemium and business enterprise users, skip role selection and assign tournament manager
+    const isFreemiumOrBusiness = plan === 'freemium' || orgType === 'business' || isProDomain();
+    
+    if (isFreemiumOrBusiness && !needsRoleSelection) {
+      // Automatically assign tournament manager role for freemium and business users
+      form.setValue('requestType', 'tournament_manager');
+      setShouldShowRoleSelection(false);
+    } else if (needsRoleSelection) {
+      setShouldShowRoleSelection(true);
+    } else {
+      // Default behavior for other organization types
+      setShouldShowRoleSelection(false);
+      form.setValue('requestType', 'tournament_manager');
+    }
+  };
+
+  // Handle organization type changes
+  const handleOrganizationTypeChange = (orgType: string) => {
+    setOrganizationType(orgType);
+    form.setValue('organizationType', orgType as any);
+    checkRoleSelectionNeeded(orgType, selectedPlan);
+  };
+
+  // Handle plan changes
+  const handlePlanChange = (plan: string) => {
+    setSelectedPlan(plan);
+    form.setValue('subscriptionPlan', plan as any);
+    checkRoleSelectionNeeded(organizationType, plan);
+  };
 
   const submitMutation = useMutation({
     mutationFn: (data: RegistrationForm) => 
@@ -76,6 +115,12 @@ export default function Register() {
   };
 
   const roleDescriptions = {
+    tournament_manager: {
+      title: 'Tournament Manager',
+      description: 'Organize and manage tournaments for your organization. Perfect for freemium and business users who run tournaments.',
+      requirements: ['Tournament organizing experience', 'Event management skills', 'Team coordination'],
+      recommendedPlan: 'freemium'
+    },
     district_admin: {
       title: 'District Athletic Director',
       description: 'Oversee all athletic programs across multiple schools in your district. Create district-wide tournaments and assign schools to events.',
@@ -223,14 +268,14 @@ export default function Register() {
         {/* Step Progress */}
         <div className="flex justify-center mb-8">
           <div className="flex items-center space-x-4">
-            {[1, 2, 3].map((stepNum) => (
+            {[1, 2, 3, 4].map((stepNum) => (
               <div key={stepNum} className="flex items-center">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
                   step >= stepNum ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
                 }`}>
                   {stepNum}
                 </div>
-                {stepNum < 3 && <div className={`w-12 h-1 ${step > stepNum ? 'bg-blue-600' : 'bg-gray-200'}`} />}
+                {stepNum < 4 && <div className={`w-12 h-1 ${step > stepNum ? 'bg-blue-600' : 'bg-gray-200'}`} />}
               </div>
             ))}
           </div>
@@ -242,7 +287,59 @@ export default function Register() {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Users className="h-6 w-6 mr-2 text-blue-600" />
-                  Step 1: Choose Your Role
+                  Step 1: Organization Type
+                </CardTitle>
+                <CardDescription>Tell us about your organization to customize your experience</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="organizationType">Organization Type *</Label>
+                    <Select onValueChange={handleOrganizationTypeChange} value={organizationType}>
+                      <SelectTrigger data-testid="select-organizationType">
+                        <SelectValue placeholder="Select your organization type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="private_school">Private School</SelectItem>
+                        <SelectItem value="charter_school">Charter School</SelectItem>
+                        <SelectItem value="business">Business Enterprise</SelectItem>
+                        <SelectItem value="nonprofit">Nonprofit Organization</SelectItem>
+                        <SelectItem value="club">Sports Club</SelectItem>
+                        <SelectItem value="school_district">School District</SelectItem>
+                        <SelectItem value="school">Public School</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="organizationName">Organization Name *</Label>
+                    <Input 
+                      {...form.register('organizationName')} 
+                      placeholder="e.g., ABC Private School, Sports Club"
+                      data-testid="input-organizationName"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end">
+                  <Button 
+                    type="button" 
+                    onClick={() => setStep(shouldShowRoleSelection ? 2 : 3)}
+                    disabled={!organizationType}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    Continue
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {step === 2 && shouldShowRoleSelection && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Users className="h-6 w-6 mr-2 text-blue-600" />
+                  Step 2: Choose Your Role
                 </CardTitle>
                 <CardDescription>Select the role that best describes your position and responsibilities</CardDescription>
               </CardHeader>
@@ -282,10 +379,17 @@ export default function Register() {
                   <p className="text-red-500 text-sm">{form.formState.errors.requestType.message}</p>
                 )}
                 
-                <div className="flex justify-end">
+                <div className="flex justify-between">
                   <Button 
                     type="button" 
-                    onClick={() => setStep(2)}
+                    variant="outline"
+                    onClick={() => setStep(1)}
+                  >
+                    Back
+                  </Button>
+                  <Button 
+                    type="button" 
+                    onClick={() => setStep(3)}
                     disabled={!form.watch('requestType')}
                     className="bg-blue-600 hover:bg-blue-700"
                   >
@@ -296,14 +400,14 @@ export default function Register() {
             </Card>
           )}
 
-          {step === 2 && (
+          {step === 3 && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <GraduationCap className="h-6 w-6 mr-2 text-blue-600" />
-                  Step 2: Organization & Experience
+                  Step 3: Personal Information
                 </CardTitle>
-                <CardDescription>Tell us about yourself and your organization</CardDescription>
+                <CardDescription>Tell us about yourself</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -339,39 +443,17 @@ export default function Register() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="organizationType">Organization Type *</Label>
-                    <select 
-                      {...form.register('organizationType')}
-                      className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      data-testid="select-organizationType"
-                    >
-                      <option value="">Select type</option>
-                      <option value="school_district">School District</option>
-                      <option value="school">School</option>
-                      <option value="club">Club/Organization</option>
-                      <option value="nonprofit">Nonprofit</option>
-                    </select>
-                    {form.formState.errors.organizationType && (
-                      <p className="text-red-500 text-sm mt-1">{form.formState.errors.organizationType.message}</p>
-                    )}
-                  </div>
-                  <div>
-                    <Label htmlFor="organizationName">Organization Name *</Label>
-                    <Input {...form.register('organizationName')} placeholder="e.g., Robert Driscoll Middle School" data-testid="input-organizationName" />
-                    {form.formState.errors.organizationName && (
-                      <p className="text-red-500 text-sm mt-1">{form.formState.errors.organizationName.message}</p>
-                    )}
-                  </div>
+                <div>
+                  <Label htmlFor="position">Position/Title *</Label>
+                  <Input 
+                    {...form.register('position')} 
+                    placeholder="e.g., Athletic Director, Coach, Tournament Organizer"
+                    data-testid="input-position"
+                  />
+                  {form.formState.errors.position && (
+                    <p className="text-red-500 text-sm mt-1">{form.formState.errors.position.message}</p>
+                  )}
                 </div>
-
-                {form.watch('organizationType') === 'school' && (
-                  <div>
-                    <Label htmlFor="parentOrganization">School District</Label>
-                    <Input {...form.register('parentOrganization')} placeholder="e.g., Corpus Christi ISD" data-testid="input-parentOrganization" />
-                  </div>
-                )}
 
                 <div>
                   <Label>Sports Involved *</Label>
@@ -414,10 +496,10 @@ export default function Register() {
                 </div>
 
                 <div className="flex justify-between">
-                  <Button type="button" variant="outline" onClick={() => setStep(1)} data-testid="button-back">
+                  <Button type="button" variant="outline" onClick={() => setStep(shouldShowRoleSelection ? 2 : 1)} data-testid="button-back">
                     Back
                   </Button>
-                  <Button type="button" onClick={() => setStep(3)} className="bg-blue-600 hover:bg-blue-700" data-testid="button-continue">
+                  <Button type="button" onClick={() => setStep(4)} className="bg-blue-600 hover:bg-blue-700" data-testid="button-continue">
                     Continue
                   </Button>
                 </div>
@@ -425,12 +507,12 @@ export default function Register() {
             </Card>
           )}
 
-          {step === 3 && (
+          {step === 4 && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <CreditCard className="h-6 w-6 mr-2 text-blue-600" />
-                  Step 3: Choose Plan & Payment
+                  Step 4: Choose Plan & Payment
                 </CardTitle>
                 <CardDescription>Select your subscription plan and payment method</CardDescription>
               </CardHeader>
@@ -452,7 +534,7 @@ export default function Register() {
                               ? 'border-green-500 bg-green-50 ring-2 ring-green-200' 
                               : 'border-gray-200 hover:border-gray-300'
                           } ${planKey === 'annual' ? 'border-green-400 border-2' : ''}`}
-                          onClick={() => setSelectedPlan(planKey)}
+                          onClick={() => handlePlanChange(planKey)}
                           data-testid={`plan-${planKey}`}
                         >
                           <div className="flex justify-between items-start mb-2">
@@ -495,7 +577,7 @@ export default function Register() {
                               ? `${planKey === 'champions' ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200' : 'border-purple-500 bg-purple-50 ring-2 ring-purple-200'}` 
                               : 'border-gray-200 hover:border-gray-300'
                           } ${planKey === 'champions' ? 'border-blue-400 border-2' : 'border-purple-400 border-2'}`}
-                          onClick={() => setSelectedPlan(planKey)}
+                          onClick={() => handlePlanChange(planKey)}
                           data-testid={`plan-${planKey}`}
                         >
                           <div className="flex justify-between items-start mb-2">
@@ -566,7 +648,7 @@ export default function Register() {
                 )}
 
                 <div className="flex justify-between">
-                  <Button type="button" variant="outline" onClick={() => setStep(2)} data-testid="button-back-step3">
+                  <Button type="button" variant="outline" onClick={() => setStep(3)} data-testid="button-back-step4">
                     Back
                   </Button>
                   <Button 

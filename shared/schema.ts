@@ -44,6 +44,9 @@ export const users = pgTable("users", {
       // Coaching Level
       "head_coach",
       "assistant_coach", 
+      // Tournament Management
+      "tournament_manager",
+      "assistant_tournament_manager",
       // General Access
       "scorekeeper", 
       "athlete", 
