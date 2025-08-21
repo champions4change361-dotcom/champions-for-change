@@ -170,15 +170,15 @@ export function BusinessPricingSection() {
                     size="lg"
                     onClick={() => {
                       console.log(`${tier.name} button clicked - ${tier.cta}`);
-                      // Route based on tier type
+                      // Route to dedicated business registration page
                       if (tier.name === 'Starter') {
-                        window.location.href = '/register?plan=free&type=business';
+                        window.location.href = '/business-register?plan=free';
                       } else if (tier.name === 'Tournament Organizer') {
-                        window.location.href = '/register?plan=tournament-organizer&price=39&type=business';
+                        window.location.href = '/business-register?plan=tournament-organizer&price=39';
                       } else if (tier.name === 'Business Enterprise') {
-                        window.location.href = '/register?plan=business-enterprise&price=149&type=business';
+                        window.location.href = '/business-register?plan=business-enterprise&price=149';
                       } else if (tier.name === 'Annual Pro') {
-                        window.location.href = '/register?plan=annual-pro&price=990&type=business';
+                        window.location.href = '/business-register?plan=annual-pro&price=990';
                       }
                     }}
                     data-testid={`button-business-${tier.name.toLowerCase()}`}

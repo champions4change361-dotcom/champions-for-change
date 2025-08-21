@@ -330,6 +330,91 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Business Registration endpoint
+  app.post("/api/registration/business", async (req, res) => {
+    try {
+      console.log('Business registration request:', req.body);
+      
+      const {
+        firstName,
+        lastName,
+        email,
+        phone,
+        organizationName,
+        organizationType,
+        description,
+        sportsInvolved,
+        paymentMethod,
+        plan,
+        price,
+        requestType = 'tournament_manager',
+        subscriptionPlan
+      } = req.body;
+
+      // Validate required fields
+      if (!firstName || !lastName || !email || !organizationName) {
+        return res.status(400).json({
+          error: "Missing required fields: firstName, lastName, email, organizationName"
+        });
+      }
+
+      const storage = await getStorage();
+      
+      // Create user record for business registration
+      const userId = `business-user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      
+      const businessUser = await storage.upsertUser({
+        id: userId,
+        email: email,
+        firstName: firstName,
+        lastName: lastName,
+        profileImageUrl: null,
+        subscriptionPlan: plan || 'tournament-organizer',
+        subscriptionStatus: paymentMethod === 'stripe' ? 'pending' : 'pending_check',
+        complianceRole: 'tournament_manager',
+        organizationId: `business-${organizationName.toLowerCase().replace(/\s+/g, '-')}`,
+        organizationName: organizationName,
+        isWhitelabelClient: false,
+        whitelabelDomain: null,
+        phone: phone,
+        organizationType: organizationType || 'business',
+        sportsInvolved: sportsInvolved || [],
+        description: description,
+        requestType: requestType
+      });
+
+      console.log('✅ Business user created:', businessUser);
+
+      // Send welcome email for business registration
+      try {
+        const emailResult = await emailService.sendWelcomeEmail(
+          email,
+          firstName,
+          'tournament_manager',
+          organizationName
+        );
+        console.log('📧 Business welcome email sent:', emailResult);
+      } catch (emailError) {
+        console.error('⚠️ Failed to send welcome email:', emailError);
+        // Don't fail the registration if email fails
+      }
+
+      res.json({
+        success: true,
+        user: businessUser,
+        plan: plan,
+        message: "Business registration successful! Check your email for next steps."
+      });
+
+    } catch (error) {
+      console.error('❌ Business registration error:', error);
+      res.status(500).json({
+        error: "Registration failed",
+        details: (error as Error).message
+      });
+    }
+  });
+
   // Athletic Director Onboarding Link Generation
   app.post("/api/generate-staff-invitation", isAuthenticated, async (req: any, res) => {
     try {

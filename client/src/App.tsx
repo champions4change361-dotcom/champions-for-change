@@ -32,6 +32,7 @@ import RefundPolicy from './pages/RefundPolicy';
 import TermsOfService from './pages/TermsOfService';
 import Compliance from './pages/Compliance';
 import Register from './pages/Register';
+import BusinessRegister from './pages/BusinessRegister';
 import RegistrationForm from './pages/RegistrationForm';
 import TournamentDesign from './pages/TournamentDesign';
 import Pricing from './pages/Pricing';
@@ -244,6 +245,7 @@ function AppRouter() {
       <Route path="/capabilities" component={Capabilities} />
       <Route path="/your-why" component={YourWhy} />
       <Route path="/register" component={RegistrationForm} />
+      <Route path="/business-register" component={BusinessRegister} />
       <Route path="/signup" component={SignupSelector} />
       <Route path="/tournament/design" component={TournamentDesign} />
       <Route path="/register-old" component={Register} />
