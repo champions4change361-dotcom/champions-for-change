@@ -398,6 +398,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Donation endpoint for processing donations
+  app.post("/api/create-donation", async (req, res) => {
+    try {
+      const {
+        amount,
+        firstName,
+        lastName,
+        email,
+        phone,
+        postDonationChoice,
+        source
+      } = req.body;
+
+      // Validate required fields
+      if (!amount || !firstName || !lastName || !email) {
+        return res.status(400).json({
+          error: "Missing required fields: amount, firstName, lastName, email"
+        });
+      }
+
+      // Validate amount
+      const numericAmount = parseFloat(amount);
+      if (isNaN(numericAmount) || numericAmount < 1) {
+        return res.status(400).json({
+          error: "Invalid donation amount. Minimum $1 required."
+        });
+      }
+
+      // Validate postDonationChoice
+      const validChoices = ['test_platform', 'just_donate', 'learn_more'];
+      if (postDonationChoice && !validChoices.includes(postDonationChoice)) {
+        return res.status(400).json({
+          error: "Invalid post-donation choice"
+        });
+      }
+
+      // Create donor record (simplified for now)
+      const donorId = `donor-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      
+      // Create donation record
+      const donation = {
+        id: `donation-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        donorId,
+        amount: numericAmount,
+        firstName,
+        lastName,
+        email,
+        phone: phone || null,
+        postDonationChoice: postDonationChoice || 'just_donate',
+        source: source || 'website',
+        status: 'pending',
+        createdAt: new Date()
+      };
+
+      console.log('💚 Donation created:', donation);
+
+      // For now, just return success with the donation data
+      // In production, this would be saved to database
+      res.json({
+        success: true,
+        donorId: donation.donorId,
+        donationId: donation.id,
+        amount: donation.amount,
+        message: 'Donation created successfully'
+      });
+
+    } catch (error) {
+      console.error('Donation creation error:', error);
+      res.status(500).json({
+        error: "Failed to create donation"
+      });
+    }
+  });
+
   // Registration endpoint for new users
   app.post("/api/registration/request", async (req, res) => {
     try {
