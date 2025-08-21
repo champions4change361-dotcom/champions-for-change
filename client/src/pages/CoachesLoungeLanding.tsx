@@ -316,12 +316,14 @@ export default function CoachesLoungeLanding() {
                 <CheckCircle className="h-4 w-4 text-green-600" />
                 <span>Educational tool - Professional sports data only (Texas compliant)</span>
               </div>
-              <Link href="/fantasy-coaching">
-                <Button className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white">
-                  <Brain className="h-4 w-4 mr-2" />
-                  Access Fantasy Coaching AI
-                </Button>
-              </Link>
+              <Button 
+                onClick={() => window.location.href = '/fantasy-coaching'}
+                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
+                data-testid="access-fantasy-coaching-button"
+              >
+                <Brain className="h-4 w-4 mr-2" />
+                Access Fantasy Coaching AI
+              </Button>
             </div>
           </CardContent>
         </Card>

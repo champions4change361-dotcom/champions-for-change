@@ -162,10 +162,8 @@ function AuthenticatedRoutes() {
           <Route path="/coaches-lounge" component={CoachesLoungeLanding} />
         )}
         
-        {/* Fantasy Coaching AI for fantasy domains */}
-        {isFeatureEnabled('fantasyLeagues') && (
-          <Route path="/fantasy-coaching" component={FantasyCoaching} />
-        )}
+        {/* Fantasy Coaching AI - Available on all domains */}
+        <Route path="/fantasy-coaching" component={FantasyCoaching} />
         
         {/* Commissioner Dashboard for fantasy domains */}
         {isFeatureEnabled('fantasyLeagues') && (
