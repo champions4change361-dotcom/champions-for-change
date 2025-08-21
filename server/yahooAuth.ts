@@ -65,8 +65,9 @@ export class YahooAuth {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
+          'User-Agent': 'Champions-for-Change/1.0'
         },
-        body: new URLSearchParams(params)
+        body: new URLSearchParams(params).toString()
       });
 
       if (!response.ok) {
@@ -126,8 +127,9 @@ export class YahooAuth {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
+          'User-Agent': 'Champions-for-Change/1.0'
         },
-        body: new URLSearchParams(params)
+        body: new URLSearchParams(params).toString()
       });
 
       if (!response.ok) {
@@ -167,9 +169,12 @@ export function setupYahooAuth(app: Express) {
   // Start OAuth flow
   app.get('/api/yahoo/auth', async (req: Request, res: Response) => {
     try {
-      // For now, redirect to a simple connected state without full OAuth
-      // This prevents the HTTP method validation error
-      res.redirect('/fantasy-coaching?yahoo=demo');
+      const { authUrl, requestToken } = await yahooAuth.getRequestToken();
+      
+      // Store request token in session
+      (req.session as any).yahooRequestToken = requestToken;
+      
+      res.redirect(authUrl);
     } catch (error) {
       console.error('Yahoo auth error:', error);
       res.status(500).json({ error: 'Failed to start Yahoo authentication' });
@@ -179,7 +184,23 @@ export function setupYahooAuth(app: Express) {
   // Handle OAuth callback
   app.get('/api/yahoo/callback', async (req: Request, res: Response) => {
     try {
-      // Simplified callback for demo purposes
+      const { oauth_token, oauth_verifier } = req.query;
+      
+      if (!oauth_token || !oauth_verifier) {
+        return res.status(400).json({ error: 'Missing OAuth parameters' });
+      }
+
+      const { accessToken, accessSecret, sessionHandle } = await yahooAuth.getAccessToken(
+        oauth_token as string,
+        oauth_verifier as string
+      );
+
+      // Store tokens in session
+      (req.session as any).yahooAccessToken = accessToken;
+      (req.session as any).yahooAccessSecret = accessSecret;
+      (req.session as any).yahooSessionHandle = sessionHandle;
+
+      // Redirect to Fantasy Coaching page
       res.redirect('/fantasy-coaching?yahoo=connected');
     } catch (error) {
       console.error('Yahoo callback error:', error);
