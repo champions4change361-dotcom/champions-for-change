@@ -26,16 +26,16 @@ export default function PlatformOptions() {
 
   const platformOptions = [
     {
-      id: "district",
-      title: "School Districts",
-      description: "Complete athletic & academic management for public school districts",
+      id: "charter-schools",
+      title: "Charter Schools",
+      description: "Comprehensive athletic & academic management for charter school networks",
       icon: Building,
       color: "blue",
-      features: ["Athletic Program Management", "Academic Competition Tracking", "Budget Allocation", "Health Monitoring", "HIPAA/FERPA Compliance"],
-      action: "District Registration",
+      features: ["Multi-Campus Coordination", "Academic Competition Tracking", "Budget Allocation", "Health Monitoring", "HIPAA/FERPA Compliance"],
+      action: "Charter Registration",
       route: "/register",
       price: "Enterprise pricing",
-      badge: "Most Popular"
+      badge: "Network Ready"
     },
     {
       id: "private-school",
@@ -47,7 +47,7 @@ export default function PlatformOptions() {
       action: "Private School Setup",
       route: "/login/district", // Can reuse district login for private schools
       price: "From $199/month",
-      badge: "Flexible Security"
+      badge: "Independent Schools"
     },
     {
       id: "tournament-organizer",
@@ -169,14 +169,14 @@ export default function PlatformOptions() {
           </h1>
           
           <p className="text-xl text-slate-300 mb-8 max-w-4xl mx-auto leading-relaxed">
-            Every organization gets the same enterprise-grade features. We differentiate by volume limits and support level, 
-            never by feature quality. Find the solution that fits your needs perfectly.
+            Professional tournament and athletic management solutions for every organization type. 
+            Built by coaches to support educational opportunities for student competitors.
           </p>
 
           <div className="flex flex-wrap gap-4 justify-center mb-12">
             <div className="flex items-center space-x-2 text-emerald-400">
               <Award className="h-5 w-5" />
-              <span className="font-semibold">Enterprise Features for All</span>
+              <span className="font-semibold">Professional Features</span>
             </div>
             <div className="flex items-center space-x-2 text-blue-400">
               <Globe className="h-5 w-5" />
