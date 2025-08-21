@@ -74,6 +74,10 @@ export default function Register() {
       setOrganizationType('business');
       form.setValue('organizationType', 'club' as any); // Map business to club/nonprofit in schema
       
+      // Skip to step 3 (personal information) for business users
+      setStep(3);
+      console.log('Skipping to step 3 for business user');
+      
       // Set plan based on URL parameter
       if (plan === 'free') {
         setSelectedPlan('freemium');
