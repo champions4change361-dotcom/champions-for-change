@@ -27,6 +27,33 @@ export function BusinessPricingSection() {
       badge: 'Free'
     },
     {
+      name: 'Tournament Organizer',
+      price: '$39',
+      period: '/month',
+      description: 'Perfect for individual tournament organizers who want professional features with payment processing',
+      features: [
+        'Unlimited tournament events',
+        'Team & athlete registration',
+        'Payment processing & fee collection', 
+        'Custom donation page setup',
+        'Professional branding & logos',
+        'Score tracking & brackets',
+        'Email notifications & communication',
+        'Mobile-responsive interface',
+        'Basic analytics & reporting',
+        'Community support',
+        'White-label tournament experience'
+      ],
+      cta: 'Start Organizing',
+      buttonColor: 'bg-orange-600 hover:bg-orange-700',
+      icon: Star,
+      popular: true,
+      bestFor: 'Individual tournament organizers, coaches, community leaders',
+      badge: 'Most Popular',
+      note: 'Annual option: $399/year (save 2 months)',
+      annualPrice: '$399'
+    },
+    {
       name: 'Business Enterprise',
       price: '$149',
       period: '/month',
@@ -44,8 +71,8 @@ export function BusinessPricingSection() {
       ],
       cta: 'Start Enterprise',
       buttonColor: 'bg-green-600 hover:bg-green-700',
-      icon: Star,
-      popular: true,
+      icon: Building,
+      popular: false,
       bestFor: 'Small to mid-size businesses',
       badge: 'Enterprise Features',
       note: 'Annual option: $1,499/year (save 2 months)'
