@@ -30,7 +30,7 @@ export function LeagueJoinForm() {
         registrationCode: code 
       });
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       setJoinedLeague(data.league);
       toast({
         title: "Successfully Joined League!",

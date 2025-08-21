@@ -798,6 +798,114 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ========================================
+  // COACHES LOUNGE LEAGUE ENDPOINTS
+  // ========================================
+
+  // Join a league using registration code
+  app.post("/api/leagues/join", async (req, res) => {
+    try {
+      const { code } = req.body;
+      console.log('League join request with code:', code);
+
+      if (!code) {
+        return res.status(400).json({ error: "Registration code is required" });
+      }
+
+      // Mock league join response - in real implementation, would query database
+      const mockLeague = {
+        id: `league-${Date.now()}`,
+        name: "Champions Fantasy League",
+        leagueType: "ppr_league",
+        registrationCode: code,
+        status: "active",
+        currentParticipants: 8,
+        maxParticipants: 12
+      };
+
+      res.json({
+        success: true,
+        league: mockLeague,
+        leagueName: mockLeague.name,
+        message: "Successfully joined league!"
+      });
+
+    } catch (error) {
+      console.error('League join error:', error);
+      res.status(500).json({ error: "Failed to join league" });
+    }
+  });
+
+  // Create a new league
+  app.post("/api/leagues/create", async (req, res) => {
+    try {
+      const { type } = req.body;
+      console.log('League creation request for type:', type);
+
+      if (!type) {
+        return res.status(400).json({ error: "League type is required" });
+      }
+
+      // Generate registration code
+      const registrationCode = `COACH${new Date().getFullYear()}-${Math.random().toString(36).substr(2, 8).toUpperCase()}`;
+
+      // Mock league creation response
+      const newLeague = {
+        id: `league-${Date.now()}`,
+        name: `${type.replace('_', ' ').toUpperCase()} League`,
+        leagueType: type,
+        registrationCode: registrationCode,
+        status: "draft",
+        currentParticipants: 1,
+        maxParticipants: 12
+      };
+
+      res.json({
+        success: true,
+        league: newLeague,
+        registrationCode: registrationCode,
+        message: "League created successfully!"
+      });
+
+    } catch (error) {
+      console.error('League creation error:', error);
+      res.status(500).json({ error: "Failed to create league" });
+    }
+  });
+
+  // Join league via commissioner endpoint (alternative endpoint)
+  app.post("/api/commissioner/join-league", async (req, res) => {
+    try {
+      const { registrationCode } = req.body;
+      console.log('Commissioner league join request with code:', registrationCode);
+
+      if (!registrationCode) {
+        return res.status(400).json({ error: "Registration code is required" });
+      }
+
+      // Mock league data
+      const mockLeague = {
+        id: `league-${Date.now()}`,
+        name: "Premier Coaching League",
+        leagueType: "coaching_league",
+        registrationCode: registrationCode,
+        status: "active",
+        currentParticipants: 6,
+        maxParticipants: 10
+      };
+
+      res.json({
+        success: true,
+        league: mockLeague,
+        message: "Successfully joined the league!"
+      });
+
+    } catch (error) {
+      console.error('Commissioner league join error:', error);
+      res.status(500).json({ error: "Failed to join league", message: "Invalid registration code or league not found" });
+    }
+  });
+
   // AI conversation route
   const { handleAIConversation } = await import('./ai-conversation');
   app.post('/api/ai-conversation', handleAIConversation);

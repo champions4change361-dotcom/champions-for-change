@@ -81,19 +81,19 @@ export function useDomain() {
         }
       };
     } else {
-      // Default to main Champions for Change brand for development/unknown domains
+      // Default for development - enable all features for testing
       config = {
         type: 'school',
         brand: 'CHAMPIONS_FOR_CHANGE',
         theme: 'educational',
-        allowFantasyPromo: false,
-        allowProPromo: false,
-        allowSchoolPromo: false,
+        allowFantasyPromo: true,
+        allowProPromo: true,
+        allowSchoolPromo: true,
         primaryColor: 'green',
         features: {
-          fantasyLeagues: false,
+          fantasyLeagues: true,  // Enable for development testing
           ageVerification: false,
-          crossSelling: false,
+          crossSelling: true,
           guestAccess: true,
           registration: true
         }
