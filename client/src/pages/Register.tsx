@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -31,7 +31,7 @@ const registrationSchema = z.object({
   certifications: z.string().optional(),
   requestReason: z.string().min(10, 'Please explain why you need access (minimum 10 characters)'),
   paymentMethod: z.enum(['stripe', 'check']),
-  subscriptionPlan: z.enum(['freemium', 'credits', 'monthly', 'annual', 'champions', 'enterprise'])
+  subscriptionPlan: z.enum(['freemium', 'credits', 'tournament-organizer', 'monthly', 'annual', 'champions', 'enterprise'])
 });
 
 type RegistrationForm = z.infer<typeof registrationSchema>;
@@ -54,6 +54,42 @@ export default function Register() {
       requestType: 'tournament_manager' // Default to tournament manager role
     }
   });
+
+  // Process URL parameters on component mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const plan = urlParams.get('plan');
+    const type = urlParams.get('type');
+    const price = urlParams.get('price');
+
+    console.log('Registration URL params:', { plan, type, price });
+
+    // Handle business/tournament organizer flows - automatically assign tournament manager role
+    if (type === 'business') {
+      console.log('Business user detected - auto-assigning tournament manager role');
+      form.setValue('requestType', 'tournament_manager');
+      setShouldShowRoleSelection(false);
+      
+      // Set appropriate organization type for business users
+      setOrganizationType('business');
+      form.setValue('organizationType', 'club' as any); // Map business to club/nonprofit in schema
+      
+      // Set plan based on URL parameter
+      if (plan === 'free') {
+        setSelectedPlan('freemium');
+        form.setValue('subscriptionPlan', 'freemium');
+      } else if (plan === 'tournament-organizer') {
+        setSelectedPlan('tournament-organizer'); // Map to correct $39/month plan
+        form.setValue('subscriptionPlan', 'tournament-organizer' as any);
+      } else if (plan === 'business-enterprise') {
+        setSelectedPlan('enterprise');
+        form.setValue('subscriptionPlan', 'enterprise');
+      } else if (plan === 'annual-pro') {
+        setSelectedPlan('annual');
+        form.setValue('subscriptionPlan', 'annual');
+      }
+    }
+  }, [form]);
 
   // Determine if user should see role selection based on organization type and domain
   const checkRoleSelectionNeeded = (orgType: string, plan: string) => {
@@ -161,6 +197,13 @@ export default function Register() {
       description: 'Pay-per-tournament for occasional organizers',
       features: ['Full tournament features per credit', 'No monthly commitment', 'Advanced bracket management', 'Email support'],
       note: 'Perfect for seasonal organizers'
+    },
+    'tournament-organizer': {
+      name: 'Tournament Organizer',
+      price: '$39/month',
+      description: 'Perfect for individual tournament organizers who want professional features',
+      features: ['Unlimited tournament events', 'Team & athlete registration', 'Payment processing & fee collection', 'Custom donation page setup', 'Professional branding & logos', 'White-label tournament experience'],
+      note: 'Annual option: $399/year (save 2 months)'
     },
     monthly: {
       name: 'Monthly Pro',
