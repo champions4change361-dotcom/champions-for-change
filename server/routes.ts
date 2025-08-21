@@ -401,20 +401,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Donation endpoint for processing donations
   app.post("/api/create-donation", async (req, res) => {
     try {
+      console.log('Donation request body:', JSON.stringify(req.body, null, 2));
+      
       const {
         amount,
-        firstName,
-        lastName,
-        email,
-        phone,
+        donorInfo,
         postDonationChoice,
-        source
+        source,
+        description
       } = req.body;
+
+      // Extract donor info from nested structure
+      const firstName = donorInfo?.firstName;
+      const lastName = donorInfo?.lastName;
+      const email = donorInfo?.email;
+      const phone = donorInfo?.phone;
+
+      console.log('Extracted fields:', { amount, firstName, lastName, email });
 
       // Validate required fields
       if (!amount || !firstName || !lastName || !email) {
         return res.status(400).json({
-          error: "Missing required fields: amount, firstName, lastName, email"
+          error: `Missing required fields. Got: amount=${amount}, firstName=${firstName}, lastName=${lastName}, email=${email}`
         });
       }
 
