@@ -148,7 +148,7 @@ export default function Landing() {
                     
                     // After spin completes, redirect to onboarding
                     setTimeout(() => {
-                      window.location.href = '/register';
+                      window.location.href = '/platform-options';
                     }, 1800); // Wait for coin flip animation to complete
                   }}
                   data-testid="hero-logo-coin"
@@ -162,7 +162,7 @@ export default function Landing() {
                   </div>
                   {/* Hover indication */}
                   <div className="absolute inset-0 bg-gradient-to-br from-orange-400/20 to-emerald-400/20 opacity-0 hover:opacity-100 transition-all duration-300 flex items-center justify-center rounded-full">
-                    <span className="text-white font-semibold bg-black/60 px-4 py-2 rounded-full text-sm shadow-lg">Click for Onboarding</span>
+                    <span className="text-white font-semibold bg-black/60 px-4 py-2 rounded-full text-sm shadow-lg">Choose Your Platform</span>
                   </div>
                 </div>
               </div>

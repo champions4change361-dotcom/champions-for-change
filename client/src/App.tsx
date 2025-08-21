@@ -26,6 +26,7 @@ import TournamentEmpire from './pages/TournamentEmpire';
 import FantasyTournaments from './pages/FantasyTournaments';
 import CoachesLoungeLanding from './pages/CoachesLoungeLanding';
 import FantasyCoaching from './pages/FantasyCoaching';
+import PlatformOptions from './pages/PlatformOptions';
 import CommissionerDashboard from './pages/CommissionerDashboard';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import RefundPolicy from './pages/RefundPolicy';
@@ -234,6 +235,9 @@ function AppRouter() {
     <Switch>
       {/* Fantasy Coaching AI - High Priority Route */}
       <Route path="/fantasy-coaching" component={FantasyCoaching} />
+      
+      {/* Platform Selection Page */}
+      <Route path="/platform-options" component={PlatformOptions} />
       
       <Route path="/donate" component={DonationFlow} />
       <Route path="/payment-methods" component={PaymentMethods} />
