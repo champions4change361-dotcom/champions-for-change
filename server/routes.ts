@@ -398,6 +398,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Registration endpoint for new users
+  app.post("/api/registration/request", async (req, res) => {
+    try {
+      console.log('Registration request received:', req.body);
+      
+      const {
+        requestType,
+        firstName,
+        lastName,
+        email,
+        phone,
+        position,
+        organizationName,
+        organizationType,
+        parentOrganization,
+        yearsExperience,
+        sportsInvolved,
+        certifications,
+        requestReason,
+        paymentMethod,
+        subscriptionPlan,
+        references
+      } = req.body;
+
+      // Basic validation
+      if (!firstName || !lastName || !email || !requestType || !organizationName) {
+        return res.status(400).json({ 
+          error: "Missing required fields" 
+        });
+      }
+
+      // Create registration request object
+      const registrationRequest = {
+        id: `reg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        requestType,
+        firstName,
+        lastName,
+        email,
+        phone: phone || null,
+        position: position || null,
+        organizationName,
+        organizationType: organizationType || 'other',
+        parentOrganization: parentOrganization || null,
+        yearsExperience: yearsExperience || 0,
+        sportsInvolved: Array.isArray(sportsInvolved) ? sportsInvolved : [],
+        certifications: certifications || null,
+        requestReason: requestReason || '',
+        paymentMethod: paymentMethod || 'stripe',
+        subscriptionPlan: subscriptionPlan || 'freemium',
+        references: Array.isArray(references) ? references : [],
+        status: 'pending',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+
+      // For now, just log the registration and return success
+      // In production, this would be saved to database
+      console.log('📝 Registration request created:', registrationRequest);
+
+      // Send success response
+      res.json({ 
+        success: true, 
+        message: 'Registration submitted successfully',
+        registrationId: registrationRequest.id,
+        nextStep: paymentMethod === 'stripe' ? 'payment' : 'confirmation'
+      });
+
+    } catch (error) {
+      console.error('Registration error:', error);
+      res.status(500).json({ 
+        error: "Failed to process registration request" 
+      });
+    }
+  });
+
   // Stripe payment route for donations
   app.post("/api/create-payment-intent", async (req, res) => {
     try {
