@@ -176,18 +176,24 @@ export function setupYahooAuth(app: Express) {
   // Start OAuth flow
   app.get('/api/yahoo/auth', async (req: Request, res: Response) => {
     try {
-      console.log('Starting Yahoo OAuth flow...');
+      console.log('🎯 Starting Yahoo OAuth flow...');
+      console.log('- Consumer Key:', process.env.YAHOO_CONSUMER_KEY?.substring(0, 8) + '...');
+      console.log('- Consumer Secret present:', !!process.env.YAHOO_CONSUMER_SECRET);
+      console.log('- Redirect URI:', yahooAuth.config?.redirectUri || 'Not configured');
+      
       const { authUrl, requestToken } = await yahooAuth.getRequestToken();
       
       // Store request token in session
       (req.session as any).yahooRequestToken = requestToken;
-      console.log('Yahoo OAuth redirect URL:', authUrl);
+      console.log('✅ Yahoo OAuth redirect URL generated:', authUrl);
       
       res.redirect(authUrl);
     } catch (error) {
-      console.error('Yahoo auth error:', error);
-      // Fallback to demo mode if OAuth fails
-      res.redirect('/fantasy-coaching?yahoo=demo&error=oauth_failed');
+      console.error('❌ Yahoo auth error details:', error);
+      // Provide more specific error info
+      const errorMsg = error instanceof Error ? error.message : 'Unknown OAuth error';
+      console.log('🔄 Falling back to demo mode due to:', errorMsg);
+      res.redirect(`/fantasy-coaching?yahoo=demo&error=${encodeURIComponent(errorMsg)}`);
     }
   });
 
@@ -218,23 +224,35 @@ export function setupYahooAuth(app: Express) {
     }
   });
 
-  // Check Yahoo connection status
+  // Check Yahoo connection status  
   app.get('/api/yahoo/status', (req: Request, res: Response) => {
     try {
       const session = req.session as any;
       const isConnected = !!(session?.yahooAccessToken && session?.yahooAccessSecret);
       const hasCredentials = !!(process.env.YAHOO_CONSUMER_KEY && process.env.YAHOO_CONSUMER_SECRET);
       
+      // Debug logging for credential verification
+      console.log('Yahoo API Status Check:');
+      console.log('- Consumer Key present:', !!process.env.YAHOO_CONSUMER_KEY);
+      console.log('- Consumer Secret present:', !!process.env.YAHOO_CONSUMER_SECRET);
+      console.log('- Consumer Key prefix:', process.env.YAHOO_CONSUMER_KEY?.substring(0, 8) + '...');
+      console.log('- Access tokens in session:', isConnected);
+      
       res.json({
         connected: isConnected,
-        hasCredentials
+        hasCredentials,
+        debug: {
+          consumerKeyPresent: !!process.env.YAHOO_CONSUMER_KEY,
+          consumerSecretPresent: !!process.env.YAHOO_CONSUMER_SECRET,
+          keyPrefix: process.env.YAHOO_CONSUMER_KEY?.substring(0, 8) + '...'
+        }
       });
     } catch (error) {
       console.error('Yahoo status check error:', error);
       res.json({
         connected: false,
         hasCredentials: false,
-        error: error.message
+        error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   });
