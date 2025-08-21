@@ -166,8 +166,8 @@ export default function FantasyCoaching() {
 
       {/* Yahoo Connection Status */}
       <div className="max-w-7xl mx-auto px-4 pt-6">
-        {yahooStatus?.hasCredentials ? (
-          yahooStatus?.connected ? (
+        {(yahooStatus as any)?.hasCredentials ? (
+          (yahooStatus as any)?.connected ? (
             <Alert className="border-green-200 bg-green-50 mb-4" data-testid="yahoo-connected">
               <CheckCircle className="h-4 w-4 text-green-600" />
               <AlertDescription className="text-green-900">
@@ -370,26 +370,26 @@ export default function FantasyCoaching() {
                         <Brain className="h-4 w-4" />
                         AI Analysis
                         <Badge className="ml-auto bg-purple-600">
-                          {askQuestionMutation.data.confidence}% Confidence
+                          {(askQuestionMutation.data as any).confidence}% Confidence
                         </Badge>
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div>
                         <h4 className="font-semibold text-purple-900 mb-2">Answer:</h4>
-                        <p className="text-purple-800">{askQuestionMutation.data.answer}</p>
+                        <p className="text-purple-800">{(askQuestionMutation.data as any).answer}</p>
                       </div>
                       
                       <div>
                         <h4 className="font-semibold text-purple-900 mb-2">Analysis:</h4>
-                        <p className="text-purple-700">{askQuestionMutation.data.analysis}</p>
+                        <p className="text-purple-700">{(askQuestionMutation.data as any).analysis}</p>
                       </div>
 
-                      {askQuestionMutation.data.supportingData && askQuestionMutation.data.supportingData.length > 0 && (
+                      {(askQuestionMutation.data as any).supportingData && (askQuestionMutation.data as any).supportingData.length > 0 && (
                         <div>
                           <h4 className="font-semibold text-purple-900 mb-2">Supporting Data:</h4>
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                            {askQuestionMutation.data.supportingData.map((data: any, index: number) => (
+                            {(askQuestionMutation.data as any).supportingData.map((data: any, index: number) => (
                               <div key={index} className="bg-white/60 p-3 rounded-lg text-center">
                                 <div className="text-sm text-purple-600 font-medium">
                                   {data.metric || data.player}
@@ -441,7 +441,7 @@ export default function FantasyCoaching() {
                     <Activity className="w-6 h-6 animate-spin mr-2" />
                     Analyzing slate data...
                   </div>
-                ) : slateAnalysis?.analysis ? (
+                ) : (slateAnalysis as any)?.analysis ? (
                   <div className="space-y-6">
                     {/* Top Plays */}
                     <div>
@@ -450,7 +450,7 @@ export default function FantasyCoaching() {
                         Top Carry Projections
                       </h3>
                       <div className="grid gap-3">
-                        {slateAnalysis.analysis.topPlays.slice(0, 3).map((player: any, index: number) => (
+                        {(slateAnalysis as any).analysis.topPlays.slice(0, 3).map((player: any, index: number) => (
                           <div key={index} className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg border">
                             <div className="flex items-center justify-between mb-2">
                               <div className="flex items-center gap-3">
@@ -496,13 +496,13 @@ export default function FantasyCoaching() {
                     </div>
 
                     {/* Stack Recommendations */}
-                    {slateAnalysis.analysis.stackRecommendations && (
+                    {(slateAnalysis as any).analysis.stackRecommendations && (
                       <div>
                         <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
                           <Users className="h-5 w-5 text-purple-600" />
                           Stack Recommendations
                         </h3>
-                        {slateAnalysis.analysis.stackRecommendations.map((stack: any, index: number) => (
+                        {(slateAnalysis as any).analysis.stackRecommendations.map((stack: any, index: number) => (
                           <div key={index} className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-lg border">
                             <div className="flex items-center justify-between mb-2">
                               <div className="font-semibold">{stack.qb} + {stack.receivers.join(' + ')}</div>
@@ -536,9 +536,9 @@ export default function FantasyCoaching() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {injuryReports?.injuries ? (
+                {(injuryReports as any)?.injuries ? (
                   <div className="space-y-3">
-                    {injuryReports.injuries.map((injury: any, index: number) => (
+                    {(injuryReports as any).injuries.map((injury: any, index: number) => (
                       <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                         <div className="flex items-center gap-3">
                           <div className={`w-3 h-3 rounded-full ${

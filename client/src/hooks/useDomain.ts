@@ -68,14 +68,14 @@ export function useDomain() {
         type: 'school',
         brand: 'CHAMPIONS_FOR_CHANGE',
         theme: 'educational',
-        allowFantasyPromo: false, // NEVER show fantasy to schools
-        allowProPromo: false,     // NEVER show pro to schools
+        allowFantasyPromo: true,  // Allow fantasy features for Champions for Change 
+        allowProPromo: true,      // Allow pro features for Champions for Change
         allowSchoolPromo: false,  // Already on main domain
         primaryColor: 'green',
         features: {
-          fantasyLeagues: false,
+          fantasyLeagues: true,   // Enable fantasy for comprehensive platform
           ageVerification: false,
-          crossSelling: false,    // NO cross-selling on main domain
+          crossSelling: true,     // Enable cross-selling features
           guestAccess: true,
           registration: true
         }
