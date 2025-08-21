@@ -91,7 +91,8 @@ export function BusinessPricingSection() {
         'Custom compliance workflows',
         'Premium implementation support',
         'Advanced user management & SSO',
-        'Custom feature development options'
+        'Custom feature development options',
+        'Check payment option available'
       ],
       cta: 'Get Pro Access',
       buttonColor: 'bg-purple-600 hover:bg-purple-700',

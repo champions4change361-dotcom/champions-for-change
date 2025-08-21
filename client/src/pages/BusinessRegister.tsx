@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -41,6 +41,13 @@ export default function BusinessRegister() {
   const urlParams = new URLSearchParams(window.location.search);
   const plan = urlParams.get('plan') || 'tournament-organizer';
   const price = urlParams.get('price') || '39';
+
+  // Auto-reset payment method for non-annual plans
+  useEffect(() => {
+    if (plan !== 'annual-pro' && paymentMethod === 'check') {
+      setPaymentMethod('stripe');
+    }
+  }, [plan, paymentMethod]);
 
   const planDetails = {
     'free': {
@@ -376,17 +383,25 @@ export default function BusinessRegister() {
                       <CreditCard className="h-4 w-4" />
                       <span>Credit Card (Stripe)</span>
                     </label>
-                    <label className="flex items-center space-x-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        value="check"
-                        checked={paymentMethod === 'check'}
-                        onChange={(e) => setPaymentMethod(e.target.value as any)}
-                        data-testid="radio-payment-check"
-                      />
-                      <span>Check Payment</span>
-                    </label>
+                    {plan === 'annual-pro' && (
+                      <label className="flex items-center space-x-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          value="check"
+                          checked={paymentMethod === 'check'}
+                          onChange={(e) => setPaymentMethod(e.target.value as any)}
+                          data-testid="radio-payment-check"
+                        />
+                        <span>Check Payment (Annual Only)</span>
+                      </label>
+                    )}
                   </div>
+                  
+                  {plan !== 'annual-pro' && (
+                    <p className="text-sm text-gray-600 mt-2">
+                      💳 Monthly plans require credit/debit card payment. Check payments are only available for annual subscriptions.
+                    </p>
+                  )}
                   
                   {/* Check Payment Instructions */}
                   {paymentMethod === 'check' && plan !== 'free' && (
