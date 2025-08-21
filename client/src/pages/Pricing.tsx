@@ -52,14 +52,20 @@ export default function Pricing() {
               <div className="flex flex-wrap gap-4 justify-center">
                 <Button 
                   className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3"
-                  onClick={() => navigate('/pricing?type=business')}
+                  onClick={() => {
+                    console.log('Bottom Tournament Organizer button clicked - navigating to /pricing?type=business');
+                    window.location.href = '/pricing?type=business';
+                  }}
                   data-testid="button-tournament-organizer-pricing"
                 >
                   View Tournament Organizer Plans ($39/month)
                 </Button>
                 <Button 
                   variant="outline"
-                  onClick={() => navigate('/pricing?type=coaches')}
+                  onClick={() => {
+                    console.log('Bottom Coaches button clicked - navigating to /pricing?type=coaches');
+                    window.location.href = '/pricing?type=coaches';
+                  }}
                   data-testid="button-coaches-pricing"
                 >
                   Coaches Lounge Pricing
@@ -131,14 +137,20 @@ export default function Pricing() {
           <div className="flex flex-wrap justify-center gap-3">
             <Button 
               variant={pricingType === 'education' || (!pricingType && isSchoolDomain()) ? 'default' : 'outline'}
-              onClick={() => navigate('/pricing?type=education')}
+              onClick={() => {
+                console.log('Education button clicked - navigating to /pricing?type=education');
+                window.location.href = '/pricing?type=education';
+              }}
               data-testid="nav-education-pricing"
               className="px-6 py-3"
             >
               Education & Schools
             </Button>
             <Button 
-              onClick={() => navigate('/pricing?type=business')}
+              onClick={() => {
+                console.log('Business button clicked - navigating to /pricing?type=business');
+                window.location.href = '/pricing?type=business';
+              }}
               data-testid="nav-business-pricing"
               className={`px-6 py-3 ${pricingType === 'business' 
                 ? 'bg-orange-600 hover:bg-orange-700 text-white border-orange-600' 
@@ -148,7 +160,10 @@ export default function Pricing() {
             </Button>
             <Button 
               variant={pricingType === 'coaches' ? 'default' : 'outline'}
-              onClick={() => navigate('/pricing?type=coaches')}
+              onClick={() => {
+                console.log('Coaches button clicked - navigating to /pricing?type=coaches');
+                window.location.href = '/pricing?type=coaches';
+              }}
               data-testid="nav-coaches-pricing"
               className="px-6 py-3"
             >
