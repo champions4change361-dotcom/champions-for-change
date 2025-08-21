@@ -38,32 +38,28 @@ export default function Pricing() {
     
     // Default domain-based routing
     if (isSchoolDomain()) {
-      return <EducationPricingSection />;
-    } else if (isProDomain()) {
-      return <BusinessPricingSection />;
-    } else if (isFantasyDomain()) {
-      return <CoachesLoungePricingSection />;
-    } else {
-      // Default to education pricing with note about other options
       return (
         <>
           <EducationPricingSection />
-          <div className="bg-gray-100 py-8">
+          <div className="bg-gradient-to-r from-orange-50 to-green-50 py-8 border-t border-orange-200">
             <div className="max-w-4xl mx-auto px-4 text-center">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Looking for different pricing options?
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                Looking for Tournament Organizer Pricing?
               </h3>
+              <p className="text-gray-600 mb-6">
+                Individual tournament organizers, coaches, and community leaders can access our specialized pricing tiers.
+              </p>
               <div className="flex flex-wrap gap-4 justify-center">
                 <Button 
-                  variant="outline"
-                  onClick={() => window.open('https://pro.trantortournaments.org/pricing', '_blank')}
-                  data-testid="button-business-pricing"
+                  className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3"
+                  onClick={() => navigate('/pricing?type=business')}
+                  data-testid="button-tournament-organizer-pricing"
                 >
-                  Business Pricing
+                  View Tournament Organizer Plans ($39/month)
                 </Button>
                 <Button 
                   variant="outline"
-                  onClick={() => window.open('https://coaches.trantortournaments.org/pricing', '_blank')}
+                  onClick={() => navigate('/pricing?type=coaches')}
                   data-testid="button-coaches-pricing"
                 >
                   Coaches Lounge Pricing
@@ -73,6 +69,13 @@ export default function Pricing() {
           </div>
         </>
       );
+    } else if (isProDomain()) {
+      return <BusinessPricingSection />;
+    } else if (isFantasyDomain()) {
+      return <CoachesLoungePricingSection />;
+    } else {
+      // Default to business pricing for general users
+      return <BusinessPricingSection />;
     }
   };
 
@@ -118,6 +121,39 @@ export default function Pricing() {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Platform
           </Button>
+        </div>
+      </div>
+
+      {/* Pricing Type Navigation */}
+      <div className="bg-white border-b border-gray-200 py-6">
+        <div className="max-w-6xl mx-auto px-4">
+          <h1 className="text-3xl font-bold text-center text-gray-900 mb-6">Choose Your Platform</h1>
+          <div className="flex flex-wrap justify-center gap-3">
+            <Button 
+              variant={pricingType === 'education' || (!pricingType && isSchoolDomain()) ? 'default' : 'outline'}
+              onClick={() => navigate('/pricing?type=education')}
+              data-testid="nav-education-pricing"
+              className="px-6 py-3"
+            >
+              Education & Schools
+            </Button>
+            <Button 
+              variant={pricingType === 'business' ? 'default' : 'outline'}
+              onClick={() => navigate('/pricing?type=business')}
+              data-testid="nav-business-pricing"
+              className={`px-6 py-3 ${pricingType === 'business' ? 'bg-orange-600 hover:bg-orange-700 text-white' : 'border-orange-600 text-orange-600 hover:bg-orange-50'}`}
+            >
+              Tournament Organizers ($39/month)
+            </Button>
+            <Button 
+              variant={pricingType === 'coaches' ? 'default' : 'outline'}
+              onClick={() => navigate('/pricing?type=coaches')}
+              data-testid="nav-coaches-pricing"
+              className="px-6 py-3"
+            >
+              Coaches Lounge
+            </Button>
+          </div>
         </div>
       </div>
 
