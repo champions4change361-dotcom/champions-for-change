@@ -370,7 +370,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lastName: lastName,
         profileImageUrl: null,
         subscriptionPlan: plan || 'tournament-organizer',
-        subscriptionStatus: paymentMethod === 'stripe' ? 'pending' : 'pending_check',
+        subscriptionStatus: paymentMethod === 'stripe' ? 'pending' : 'pending_approval',
         complianceRole: 'tournament_manager',
         organizationId: `business-${organizationName.toLowerCase().replace(/\s+/g, '-')}`,
         organizationName: organizationName,
@@ -380,7 +380,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         organizationType: organizationType || 'business',
         sportsInvolved: sportsInvolved || [],
         description: description,
-        requestType: requestType
+        requestType: requestType,
+        paymentMethod: paymentMethod,
+        pendingCheckAmount: paymentMethod === 'check' ? price : null,
+        accountStatus: paymentMethod === 'check' ? 'pending_check_payment' : 'active'
       });
 
       console.log('✅ Business user created:', businessUser);
@@ -410,6 +413,95 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('❌ Business registration error:', error);
       res.status(500).json({
         error: "Registration failed",
+        details: (error as Error).message
+      });
+    }
+  });
+
+  // Admin: Get pending users for approval
+  app.get("/api/admin/pending-users", async (req, res) => {
+    try {
+      const storage = await getStorage();
+      
+      // For now, return mock data since we need to set up proper admin authentication
+      const mockPendingUsers = [
+        {
+          id: "pending-user-1",
+          firstName: "John",
+          lastName: "Tournament Organizer",
+          email: "john@example.com",
+          phone: "555-123-4567",
+          organizationName: "Local Sports Club",
+          organizationType: "sports_club",
+          subscriptionPlan: "tournament-organizer",
+          paymentMethod: "check",
+          pendingCheckAmount: "39",
+          accountStatus: "pending_check_payment",
+          description: "We organize youth basketball tournaments in our community and need professional features.",
+          sportsInvolved: ["Basketball", "Soccer"],
+          createdAt: new Date().toISOString()
+        }
+      ];
+
+      res.json({
+        success: true,
+        users: mockPendingUsers
+      });
+
+    } catch (error) {
+      console.error('❌ Error fetching pending users:', error);
+      res.status(500).json({
+        error: "Failed to fetch pending users",
+        details: (error as Error).message
+      });
+    }
+  });
+
+  // Admin: Approve a pending user
+  app.post("/api/admin/approve-user/:userId", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const storage = await getStorage();
+      
+      console.log(`✅ Admin approving user: ${userId}`);
+      
+      // For demo purposes, just return success
+      // In production, this would update the user's account status
+      
+      res.json({
+        success: true,
+        message: "User account activated successfully"
+      });
+
+    } catch (error) {
+      console.error('❌ Error approving user:', error);
+      res.status(500).json({
+        error: "Failed to approve user",
+        details: (error as Error).message
+      });
+    }
+  });
+
+  // Admin: Reject a pending user
+  app.post("/api/admin/reject-user/:userId", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const storage = await getStorage();
+      
+      console.log(`❌ Admin rejecting user: ${userId}`);
+      
+      // For demo purposes, just return success
+      // In production, this would update the user's account status and send notification
+      
+      res.json({
+        success: true,
+        message: "User account rejected and notified"
+      });
+
+    } catch (error) {
+      console.error('❌ Error rejecting user:', error);
+      res.status(500).json({
+        error: "Failed to reject user",
         details: (error as Error).message
       });
     }

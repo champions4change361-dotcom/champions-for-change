@@ -24,10 +24,10 @@ export const users = pgTable("users", {
   stripeCustomerId: varchar("stripe_customer_id"),
   stripeSubscriptionId: varchar("stripe_subscription_id"),
   subscriptionStatus: text("subscription_status", { 
-    enum: ["active", "inactive", "trialing", "past_due", "canceled", "unpaid"] 
+    enum: ["active", "inactive", "trialing", "past_due", "canceled", "unpaid", "pending", "pending_approval"] 
   }).default("inactive"),
   subscriptionPlan: text("subscription_plan", { 
-    enum: ["free", "foundation", "starter", "professional", "champion", "enterprise", "district_enterprise"] 
+    enum: ["free", "foundation", "starter", "professional", "champion", "enterprise", "district_enterprise", "tournament-organizer", "business-enterprise", "annual-pro"] 
   }).default("foundation"),
   userRole: text("user_role", {
     enum: [
@@ -135,12 +135,31 @@ export const users = pgTable("users", {
       "head_coach",
       "assistant_coach", 
       "athletic_training_student",
+      // Tournament Management
+      "tournament_manager",
+      "assistant_tournament_manager",
       // General Access
       "scorekeeper"
     ]
   }),
   medicalDataAccess: boolean("medical_data_access").default(false),
   lastComplianceAudit: timestamp("last_compliance_audit"),
+  
+  // BUSINESS REGISTRATION FIELDS
+  phone: varchar("phone"),
+  organizationType: text("organization_type", {
+    enum: ["business", "nonprofit", "sports_club", "individual", "district", "school", "club"]
+  }),
+  description: text("description"),
+  sportsInvolved: jsonb("sports_involved").$type<string[]>(),
+  requestType: varchar("request_type"),
+  paymentMethod: text("payment_method", {
+    enum: ["stripe", "check", "paypal", "bank_transfer"]
+  }),
+  pendingCheckAmount: varchar("pending_check_amount"),
+  accountStatus: text("account_status", {
+    enum: ["active", "pending_check_payment", "suspended", "under_review"]
+  }).default("active"),
   
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

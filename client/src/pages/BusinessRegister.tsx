@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { CheckCircle, CreditCard, Trophy, Star, Building, Zap } from 'lucide-react';
+import { CheckCircle, CreditCard, Trophy, Star, Building, Zap, AlertTriangle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
@@ -131,22 +131,45 @@ export default function BusinessRegister() {
             <Alert>
               <Trophy className="h-4 w-4" />
               <AlertDescription>
-                <strong>Your {selectedPlanDetails.name} account is ready!</strong>
+                <strong>Your {selectedPlanDetails.name} account is {paymentMethod === 'check' ? 'pending approval' : 'ready'}!</strong>
                 <ul className="list-disc list-inside mt-2 space-y-1">
                   <li>Check your email for login instructions</li>
-                  <li>Access your tournament dashboard</li>
-                  <li>Start organizing professional tournaments</li>
-                  <li>Support Champions for Change educational mission</li>
+                  {paymentMethod === 'check' ? (
+                    <>
+                      <li>Account status: Pending payment verification</li>
+                      <li>Mail your check to the address provided</li>
+                      <li>Full access will be granted upon payment processing (7-10 business days)</li>
+                    </>
+                  ) : (
+                    <>
+                      <li>Access your tournament dashboard</li>
+                      <li>Start organizing professional tournaments</li>
+                      <li>Support Champions for Change educational mission</li>
+                    </>
+                  )}
                 </ul>
               </AlertDescription>
             </Alert>
             
-            <div className="bg-green-50 p-4 rounded-lg">
-              <h4 className="font-semibold text-green-900 mb-2">Next Steps</h4>
-              <p className="text-green-800">
-                🚀 <strong>Get Started:</strong> Create your first tournament<br />
-                💡 <strong>Support:</strong> Contact us at champions4change361@gmail.com<br />
-                📞 <strong>Phone:</strong> 361-300-1552
+            <div className={`p-4 rounded-lg ${paymentMethod === 'check' ? 'bg-amber-50' : 'bg-green-50'}`}>
+              <h4 className={`font-semibold mb-2 ${paymentMethod === 'check' ? 'text-amber-900' : 'text-green-900'}`}>
+                {paymentMethod === 'check' ? 'Payment Instructions' : 'Next Steps'}
+              </h4>
+              <p className={paymentMethod === 'check' ? 'text-amber-800' : 'text-green-800'}>
+                {paymentMethod === 'check' ? (
+                  <>
+                    📮 <strong>Mail Check To:</strong> Champions for Change, 15210 Cruiser St. Corpus Christi TX 78418<br />
+                    ⏱️ <strong>Processing Time:</strong> 7-10 business days for account activation<br />
+                    💡 <strong>Support:</strong> Contact us at champions4change361@gmail.com<br />
+                    📞 <strong>Phone:</strong> 361-300-1552
+                  </>
+                ) : (
+                  <>
+                    🚀 <strong>Get Started:</strong> Create your first tournament<br />
+                    💡 <strong>Support:</strong> Contact us at champions4change361@gmail.com<br />
+                    📞 <strong>Phone:</strong> 361-300-1552
+                  </>
+                )}
               </p>
             </div>
           </CardContent>
@@ -364,6 +387,29 @@ export default function BusinessRegister() {
                       <span>Check Payment</span>
                     </label>
                   </div>
+                  
+                  {/* Check Payment Instructions */}
+                  {paymentMethod === 'check' && plan !== 'free' && (
+                    <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                      <div className="flex items-start gap-2">
+                        <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5" />
+                        <div className="text-sm text-amber-800">
+                          <p className="font-semibold mb-2">Check Payment Instructions:</p>
+                          <p className="mb-2">Please make checks payable to:</p>
+                          <div className="font-medium bg-white p-2 rounded border">
+                            <strong>Champions for Change</strong><br />
+                            15210 Cruiser St.<br />
+                            Corpus Christi, TX 78418
+                          </div>
+                          <p className="mt-2 text-xs">
+                            <strong>Note:</strong> Your account will be in pending approval status until your check is processed. 
+                            This may take up to 7-10 business days before your account is fully activated. 
+                            You'll have access to platform features but your account will show "Pending Payment" status.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
