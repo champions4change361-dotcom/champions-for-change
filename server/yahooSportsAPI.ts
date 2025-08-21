@@ -62,9 +62,15 @@ export class YahooSportsAPI {
   private accessToken?: string;
   private accessSecret?: string;
 
-  constructor(consumerKey: string, consumerSecret: string) {
-    this.consumerKey = consumerKey;
-    this.consumerSecret = consumerSecret;
+  constructor(consumerKey?: string, consumerSecret?: string) {
+    this.consumerKey = consumerKey || process.env.YAHOO_CONSUMER_KEY || '';
+    this.consumerSecret = consumerSecret || process.env.YAHOO_CONSUMER_SECRET || '';
+    
+    if (!this.consumerKey || !this.consumerSecret) {
+      console.warn('Yahoo API credentials not found. Using mock data.');
+    } else {
+      console.log('Yahoo API credentials loaded successfully');
+    }
   }
 
   // OAuth signature generation

@@ -68,11 +68,24 @@ export default function FantasyCoaching() {
     }
   });
 
+  // Yahoo Connection Status
+  const { data: yahooStatus } = useQuery({
+    queryKey: ['/api/yahoo/status'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/yahoo/status');
+      return response;
+    }
+  });
+
   const handleAskQuestion = async () => {
     if (!question.trim()) return;
     
     askQuestionMutation.mutate(question);
     setQuestion('');
+  };
+
+  const connectToYahoo = () => {
+    window.location.href = '/api/yahoo/auth';
   };
 
   // Sample data for demonstration
@@ -151,8 +164,45 @@ export default function FantasyCoaching() {
         </div>
       </div>
 
-      {/* AI Disclaimer */}
+      {/* Yahoo Connection Status */}
       <div className="max-w-7xl mx-auto px-4 pt-6">
+        {yahooStatus?.hasCredentials ? (
+          yahooStatus?.connected ? (
+            <Alert className="border-green-200 bg-green-50 mb-4" data-testid="yahoo-connected">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <AlertDescription className="text-green-900">
+                <strong>Real Data Active:</strong> Connected to Yahoo Fantasy Sports API. 
+                Getting live injury reports, usage rates, and authentic matchup data.
+              </AlertDescription>
+            </Alert>
+          ) : (
+            <Alert className="border-blue-200 bg-blue-50 mb-4" data-testid="yahoo-disconnected">
+              <Activity className="h-4 w-4 text-blue-600" />
+              <AlertDescription className="text-blue-900 flex items-center justify-between">
+                <span>
+                  <strong>Connect to Yahoo:</strong> Enable real sports data for authentic fantasy intelligence.
+                </span>
+                <Button 
+                  onClick={connectToYahoo}
+                  size="sm"
+                  className="ml-4"
+                  data-testid="connect-yahoo-button"
+                >
+                  Connect Yahoo
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )
+        ) : (
+          <Alert className="border-yellow-200 bg-yellow-50 mb-4" data-testid="yahoo-no-credentials">
+            <AlertTriangle className="h-4 w-4 text-yellow-600" />
+            <AlertDescription className="text-yellow-900">
+              <strong>Demo Mode:</strong> Using realistic mock data. Add Yahoo API credentials for live sports intelligence.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* AI Disclaimer */}
         <Alert className="border-amber-200 bg-amber-50" data-testid="ai-disclaimer">
           <Brain className="h-4 w-4 text-amber-600" />
           <AlertDescription className="text-amber-900">

@@ -906,14 +906,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Yahoo Sports API Authentication
+  const { setupYahooAuth } = await import('./yahooAuth');
+  setupYahooAuth(app);
+
   // Fantasy Coaching AI endpoints
   app.post("/api/fantasy/analyze-slate", async (req, res) => {
     try {
       const { slate = 'all-day' } = req.body;
       
-      // For now, use mock Yahoo API (in production, would use real credentials)
+      // Use real Yahoo API credentials
       const { YahooSportsAPI } = await import('./yahooSportsAPI');
-      const yahooAPI = new YahooSportsAPI('mock_key', 'mock_secret');
+      const yahooAPI = new YahooSportsAPI();
       
       const analysis = await yahooAPI.analyzeSundaySlate(slate);
       
@@ -939,7 +943,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('Fantasy AI Question:', question);
       
       const { YahooSportsAPI } = await import('./yahooSportsAPI');
-      const yahooAPI = new YahooSportsAPI('mock_key', 'mock_secret');
+      const yahooAPI = new YahooSportsAPI();
       
       const response = await yahooAPI.answerFantasyQuestion(question);
       
@@ -958,7 +962,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/fantasy/injury-reports", async (req, res) => {
     try {
       const { YahooSportsAPI } = await import('./yahooSportsAPI');
-      const yahooAPI = new YahooSportsAPI('mock_key', 'mock_secret');
+      const yahooAPI = new YahooSportsAPI();
       
       const injuries = await yahooAPI.getInjuryReports();
       
@@ -983,7 +987,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const { YahooSportsAPI } = await import('./yahooSportsAPI');
-      const yahooAPI = new YahooSportsAPI('mock_key', 'mock_secret');
+      const yahooAPI = new YahooSportsAPI();
       
       const projections = await yahooAPI.getPlayerProjections(
         position.toUpperCase() as 'RB' | 'WR' | 'QB' | 'TE',
