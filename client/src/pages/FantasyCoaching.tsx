@@ -68,8 +68,20 @@ export default function FantasyCoaching() {
     }
   });
 
-  // Yahoo Connection Status - Temporarily disabled to prevent runtime errors
-  const yahooStatus = { hasCredentials: true, connected: false };
+  // Yahoo Connection Status
+  const { data: yahooStatus } = useQuery({
+    queryKey: ['/api/yahoo/status'],
+    queryFn: async () => {
+      try {
+        const response = await apiRequest('GET', '/api/yahoo/status');
+        return response;
+      } catch (error) {
+        console.error('Yahoo status error:', error);
+        return { hasCredentials: false, connected: false, error: true };
+      }
+    },
+    retry: false
+  });
 
   const handleAskQuestion = async () => {
     if (!question.trim()) return;

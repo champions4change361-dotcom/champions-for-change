@@ -22,6 +22,13 @@ export class YahooAuth {
     params: Record<string, string>,
     tokenSecret: string = ''
   ): string {
+    // Validate method is a proper HTTP method
+    const validMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
+    const normalizedMethod = method.toUpperCase();
+    if (!validMethods.includes(normalizedMethod)) {
+      throw new Error(`Invalid HTTP method: ${method}`);
+    }
+
     // Sort parameters
     const sortedParams = Object.keys(params)
       .sort()
@@ -30,7 +37,7 @@ export class YahooAuth {
 
     // Create base string
     const baseString = [
-      method.toUpperCase(),
+      normalizedMethod,
       encodeURIComponent(url),
       encodeURIComponent(sortedParams)
     ].join('&');
@@ -166,14 +173,21 @@ export function setupYahooAuth(app: Express) {
     redirectUri: `${process.env.REPLIT_DOMAIN || 'http://localhost:5000'}/api/yahoo/callback`
   });
 
-  // Start OAuth flow - Temporarily disabled to prevent runtime errors
+  // Start OAuth flow
   app.get('/api/yahoo/auth', async (req: Request, res: Response) => {
     try {
-      // Temporarily redirect to fantasy coaching with demo status
-      res.redirect('/fantasy-coaching?yahoo=demo');
+      console.log('Starting Yahoo OAuth flow...');
+      const { authUrl, requestToken } = await yahooAuth.getRequestToken();
+      
+      // Store request token in session
+      (req.session as any).yahooRequestToken = requestToken;
+      console.log('Yahoo OAuth redirect URL:', authUrl);
+      
+      res.redirect(authUrl);
     } catch (error) {
       console.error('Yahoo auth error:', error);
-      res.status(500).json({ error: 'Failed to start Yahoo authentication' });
+      // Fallback to demo mode if OAuth fails
+      res.redirect('/fantasy-coaching?yahoo=demo&error=oauth_failed');
     }
   });
 
@@ -204,12 +218,25 @@ export function setupYahooAuth(app: Express) {
     }
   });
 
-  // Check Yahoo connection status - Simplified to prevent runtime errors
+  // Check Yahoo connection status
   app.get('/api/yahoo/status', (req: Request, res: Response) => {
-    res.json({
-      connected: false,
-      hasCredentials: true
-    });
+    try {
+      const session = req.session as any;
+      const isConnected = !!(session?.yahooAccessToken && session?.yahooAccessSecret);
+      const hasCredentials = !!(process.env.YAHOO_CONSUMER_KEY && process.env.YAHOO_CONSUMER_SECRET);
+      
+      res.json({
+        connected: isConnected,
+        hasCredentials
+      });
+    } catch (error) {
+      console.error('Yahoo status check error:', error);
+      res.json({
+        connected: false,
+        hasCredentials: false,
+        error: error.message
+      });
+    }
   });
 
   // Disconnect Yahoo
