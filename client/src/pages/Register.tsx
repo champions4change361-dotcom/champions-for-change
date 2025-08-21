@@ -298,6 +298,11 @@ export default function Register() {
     );
   }
 
+  console.log('Register component render - Current step:', step);
+  console.log('Register component render - shouldShowRoleSelection:', shouldShowRoleSelection);
+  console.log('Register component render - organizationType:', organizationType);
+  console.log('Register component render - selectedPlan:', selectedPlan);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-50 py-8">
       <div className="max-w-4xl mx-auto p-6">
