@@ -168,6 +168,19 @@ export function BusinessPricingSection() {
                   <Button 
                     className={`w-full ${tier.buttonColor} text-white`} 
                     size="lg"
+                    onClick={() => {
+                      console.log(`${tier.name} button clicked - ${tier.cta}`);
+                      // Route based on tier type
+                      if (tier.name === 'Starter') {
+                        window.location.href = '/register?plan=free&type=business';
+                      } else if (tier.name === 'Tournament Organizer') {
+                        window.location.href = '/register?plan=tournament-organizer&price=39&type=business';
+                      } else if (tier.name === 'Business Enterprise') {
+                        window.location.href = '/register?plan=business-enterprise&price=149&type=business';
+                      } else if (tier.name === 'Annual Pro') {
+                        window.location.href = '/register?plan=annual-pro&price=990&type=business';
+                      }
+                    }}
                     data-testid={`button-business-${tier.name.toLowerCase()}`}
                   >
                     {tier.cta}
