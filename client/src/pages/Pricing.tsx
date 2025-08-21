@@ -138,10 +138,11 @@ export default function Pricing() {
               Education & Schools
             </Button>
             <Button 
-              variant={pricingType === 'business' ? 'default' : 'outline'}
               onClick={() => navigate('/pricing?type=business')}
               data-testid="nav-business-pricing"
-              className={`px-6 py-3 ${pricingType === 'business' ? 'bg-orange-600 hover:bg-orange-700 text-white' : 'border-orange-600 text-orange-600 hover:bg-orange-50'}`}
+              className={`px-6 py-3 ${pricingType === 'business' 
+                ? 'bg-orange-600 hover:bg-orange-700 text-white border-orange-600' 
+                : 'bg-white border-2 border-orange-600 text-orange-600 hover:bg-orange-50'}`}
             >
               Tournament Organizers ($39/month)
             </Button>
