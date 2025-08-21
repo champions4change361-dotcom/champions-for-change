@@ -27,12 +27,13 @@ import { useAuth } from '@/hooks/useAuth';
 import { useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import { LeagueJoinForm } from '@/components/LeagueJoinForm';
 
 export default function CoachesLoungeLanding() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [loginCode, setLoginCode] = useState('');
   const [showDonation, setShowDonation] = useState(false);
   const [customAmount, setCustomAmount] = useState('');
@@ -317,7 +318,10 @@ export default function CoachesLoungeLanding() {
                 <span>Educational tool - Professional sports data only (Texas compliant)</span>
               </div>
               <Button 
-                onClick={() => window.location.href = '/fantasy-coaching'}
+                onClick={() => {
+                  console.log('Navigating to Fantasy Coaching AI...');
+                  setLocation('/fantasy-coaching');
+                }}
                 className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
                 data-testid="access-fantasy-coaching-button"
               >

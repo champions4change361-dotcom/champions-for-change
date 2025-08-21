@@ -162,8 +162,7 @@ function AuthenticatedRoutes() {
           <Route path="/coaches-lounge" component={CoachesLoungeLanding} />
         )}
         
-        {/* Fantasy Coaching AI - Available on all domains */}
-        <Route path="/fantasy-coaching" component={FantasyCoaching} />
+        {/* Fantasy Coaching AI route moved to top of switch */}
         
         {/* Commissioner Dashboard for fantasy domains */}
         {isFeatureEnabled('fantasyLeagues') && (
@@ -233,6 +232,9 @@ function AppRouter() {
 
   return (
     <Switch>
+      {/* Fantasy Coaching AI - High Priority Route */}
+      <Route path="/fantasy-coaching" component={FantasyCoaching} />
+      
       <Route path="/donate" component={DonationFlow} />
       <Route path="/payment-methods" component={PaymentMethods} />
       <Route path="/checkout" component={Checkout} />
