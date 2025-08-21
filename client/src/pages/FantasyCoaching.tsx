@@ -74,7 +74,7 @@ export default function FantasyCoaching() {
     queryFn: async () => {
       try {
         const response = await apiRequest('GET', '/api/yahoo/status');
-        return response;
+        return response as { hasCredentials: boolean; connected: boolean; error?: boolean };
       } catch (error) {
         console.error('Yahoo status error:', error);
         return { hasCredentials: false, connected: false, error: true };
