@@ -120,8 +120,8 @@ export default function DonationFlow() {
         throw new Error('Payment setup incomplete');
       }
       
-      // Redirect to payment method selection instead of direct checkout
-      window.location.href = `/payment-methods?amount=${numericAmount}&donor_id=${donorId}&choice=${postDonationChoice}`;
+      // Redirect to payment method selection with client secret
+      window.location.href = `/payment-methods?amount=${numericAmount}&donor_id=${donorId}&choice=${postDonationChoice}&client_secret=${encodeURIComponent(clientSecret)}`;
       
     } catch (error: any) {
       console.error('Donation error:', error);

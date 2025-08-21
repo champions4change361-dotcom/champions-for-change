@@ -34,21 +34,33 @@ export default function PaymentMethods() {
     if (!paymentData) return;
     
     try {
-      // Create Stripe payment intent
-      const response = await fetch('/api/create-donation', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          amount: parseInt(paymentData.amount),
-          paymentMethod: 'stripe'
-        }),
-      });
+      // Use existing payment intent - get clientSecret from URL params or create new one
+      const urlParams = new URLSearchParams(window.location.search);
+      let clientSecret = urlParams.get('client_secret');
+      
+      if (!clientSecret) {
+        // If no client secret in URL, create a new payment intent
+        const response = await fetch('/api/create-payment-intent', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            amount: parseInt(paymentData.amount),
+            description: `$${paymentData.amount} donation to Champions for Change educational programs`
+          }),
+        });
 
-      const { clientSecret } = await response.json();
-      window.location.href = `/checkout?client_secret=${encodeURIComponent(clientSecret)}&amount=${paymentData.amount}&donor_id=${paymentData.donorId}&choice=${paymentData.postDonationChoice}`;
+        const data = await response.json();
+        clientSecret = data.clientSecret;
+      }
+
+      if (clientSecret) {
+        window.location.href = `/checkout?client_secret=${encodeURIComponent(clientSecret)}&amount=${paymentData.amount}&donor_id=${paymentData.donorId}&choice=${paymentData.postDonationChoice}`;
+      } else {
+        throw new Error('Failed to create payment intent');
+      }
     } catch (error) {
       console.error('Payment setup error:', error);
     }
