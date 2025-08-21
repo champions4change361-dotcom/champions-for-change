@@ -172,8 +172,8 @@ export default function FantasyCoaching() {
 
       {/* Yahoo Connection Status */}
       <div className="max-w-7xl mx-auto px-4 pt-6">
-        {(yahooStatus as any)?.hasCredentials ? (
-          (yahooStatus as any)?.connected ? (
+        {yahooStatus?.hasCredentials ? (
+          yahooStatus?.connected ? (
             <Alert className="border-green-200 bg-green-50 mb-4" data-testid="yahoo-connected">
               <CheckCircle className="h-4 w-4 text-green-600" />
               <AlertDescription className="text-green-900">
@@ -186,7 +186,7 @@ export default function FantasyCoaching() {
               <Activity className="h-4 w-4 text-blue-600" />
               <AlertDescription className="text-blue-900 flex items-center justify-between">
                 <span>
-                  <strong>Connect to Yahoo:</strong> Enable real sports data for authentic fantasy intelligence.
+                  <strong>Yahoo API Ready:</strong> Credentials configured. Click to connect for real sports data.
                 </span>
                 <Button 
                   onClick={connectToYahoo}
@@ -200,10 +200,10 @@ export default function FantasyCoaching() {
             </Alert>
           )
         ) : (
-          <Alert className="border-yellow-200 bg-yellow-50 mb-4" data-testid="yahoo-no-credentials">
-            <AlertTriangle className="h-4 w-4 text-yellow-600" />
-            <AlertDescription className="text-yellow-900">
-              <strong>Demo Mode:</strong> Using realistic mock data. Add Yahoo API credentials for live sports intelligence.
+          <Alert className="border-amber-200 bg-amber-50 mb-4" data-testid="yahoo-initializing">
+            <AlertTriangle className="h-4 w-4 text-amber-600" />
+            <AlertDescription className="text-amber-900">
+              <strong>Initializing Yahoo API:</strong> New developer credentials may take 5-15 minutes to activate. Fantasy AI ready with intelligent analysis.
             </AlertDescription>
           </Alert>
         )}

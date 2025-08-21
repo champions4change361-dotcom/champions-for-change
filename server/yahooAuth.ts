@@ -179,7 +179,7 @@ export function setupYahooAuth(app: Express) {
       console.log('🎯 Starting Yahoo OAuth flow...');
       console.log('- Consumer Key:', process.env.YAHOO_CONSUMER_KEY?.substring(0, 8) + '...');
       console.log('- Consumer Secret present:', !!process.env.YAHOO_CONSUMER_SECRET);
-      console.log('- Redirect URI:', yahooAuth.config?.redirectUri || 'Not configured');
+      console.log('- Redirect URI:', `${process.env.REPLIT_DOMAIN || 'http://localhost:5000'}/api/yahoo/callback`);
       
       const { authUrl, requestToken } = await yahooAuth.getRequestToken();
       
