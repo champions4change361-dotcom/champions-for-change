@@ -462,15 +462,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log('💚 Donation created:', donation);
 
-      // For now, just return success with the donation data
-      // In production, this would be saved to database
-      res.json({
-        success: true,
-        donorId: donation.donorId,
-        donationId: donation.id,
-        amount: donation.amount,
-        message: 'Donation created successfully'
-      });
+      // Create Stripe payment intent for the donation
+      console.log('Creating Stripe payment intent for amount:', numericAmount);
+      try {
+        const paymentIntent = await stripe.paymentIntents.create({
+          amount: Math.round(numericAmount * 100), // Convert to cents
+          currency: "usd",
+          description: `$${numericAmount} donation to Champions for Change educational programs`,
+          metadata: {
+            platform: "Champions for Change",
+            purpose: "Educational Trips",
+            donorId: donation.donorId,
+            donationId: donation.id,
+            amount_dollars: numericAmount.toString()
+          }
+        });
+
+        console.log('✅ Stripe payment intent created:', paymentIntent.id);
+
+        // Return success with donation data and payment client secret
+        res.json({
+          success: true,
+          donorId: donation.donorId,
+          donationId: donation.id,
+          amount: donation.amount,
+          clientSecret: paymentIntent.client_secret,
+          message: 'Donation created successfully'
+        });
+      } catch (stripeError) {
+        console.error('❌ Stripe payment intent creation failed:', stripeError);
+        
+        // Return success for donation but indicate payment setup issue
+        res.json({
+          success: true,
+          donorId: donation.donorId,
+          donationId: donation.id,
+          amount: donation.amount,
+          error: 'Payment setup failed',
+          message: 'Donation recorded but payment setup incomplete'
+        });
+      }
 
     } catch (error) {
       console.error('Donation creation error:', error);
