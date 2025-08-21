@@ -906,6 +906,103 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Fantasy Coaching AI endpoints
+  app.post("/api/fantasy/analyze-slate", async (req, res) => {
+    try {
+      const { slate = 'all-day' } = req.body;
+      
+      // For now, use mock Yahoo API (in production, would use real credentials)
+      const { YahooSportsAPI } = await import('./yahooSportsAPI');
+      const yahooAPI = new YahooSportsAPI('mock_key', 'mock_secret');
+      
+      const analysis = await yahooAPI.analyzeSundaySlate(slate);
+      
+      res.json({
+        success: true,
+        analysis,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Fantasy slate analysis error:', error);
+      res.status(500).json({ error: "Failed to analyze slate" });
+    }
+  });
+
+  app.post("/api/fantasy/ask-question", async (req, res) => {
+    try {
+      const { question } = req.body;
+      
+      if (!question) {
+        return res.status(400).json({ error: "Question is required" });
+      }
+
+      console.log('Fantasy AI Question:', question);
+      
+      const { YahooSportsAPI } = await import('./yahooSportsAPI');
+      const yahooAPI = new YahooSportsAPI('mock_key', 'mock_secret');
+      
+      const response = await yahooAPI.answerFantasyQuestion(question);
+      
+      res.json({
+        success: true,
+        question,
+        ...response,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Fantasy question error:', error);
+      res.status(500).json({ error: "Failed to answer question" });
+    }
+  });
+
+  app.get("/api/fantasy/injury-reports", async (req, res) => {
+    try {
+      const { YahooSportsAPI } = await import('./yahooSportsAPI');
+      const yahooAPI = new YahooSportsAPI('mock_key', 'mock_secret');
+      
+      const injuries = await yahooAPI.getInjuryReports();
+      
+      res.json({
+        success: true,
+        injuries,
+        lastUpdated: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Injury reports error:', error);
+      res.status(500).json({ error: "Failed to get injury reports" });
+    }
+  });
+
+  app.get("/api/fantasy/projections/:position", async (req, res) => {
+    try {
+      const { position } = req.params;
+      const { week = 1 } = req.query;
+      
+      if (!['RB', 'WR', 'QB', 'TE'].includes(position.toUpperCase())) {
+        return res.status(400).json({ error: "Invalid position" });
+      }
+
+      const { YahooSportsAPI } = await import('./yahooSportsAPI');
+      const yahooAPI = new YahooSportsAPI('mock_key', 'mock_secret');
+      
+      const projections = await yahooAPI.getPlayerProjections(
+        position.toUpperCase() as 'RB' | 'WR' | 'QB' | 'TE',
+        parseInt(week as string)
+      );
+      
+      res.json({
+        success: true,
+        position,
+        week,
+        projections,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Player projections error:', error);
+      res.status(500).json({ error: "Failed to get projections" });
+    }
+  });
+
   // AI conversation route
   const { handleAIConversation } = await import('./ai-conversation');
   app.post('/api/ai-conversation', handleAIConversation);

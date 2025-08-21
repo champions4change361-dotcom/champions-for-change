@@ -7,18 +7,73 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Brain, Trophy, TrendingUp, Users, Zap, Target, BarChart3 } from 'lucide-react';
+import { Brain, Trophy, TrendingUp, Users, Zap, Target, BarChart3, MessageSquare, Activity, AlertTriangle, CheckCircle } from 'lucide-react';
 import { KeystoneAvatar } from '@/components/KeystoneAvatar';
 import { FantasyLineupCoach } from '@/components/FantasyLineupCoach';
 import { LiveScoring } from '@/components/LiveScoring';
 import { useAuth } from '@/hooks/useAuth';
 import { FantasyAgeGate } from '@/components/FantasyAgeGate';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
 
 export default function FantasyCoaching() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [selectedWeek, setSelectedWeek] = useState<number>(1);
   const [selectedPlayer, setSelectedPlayer] = useState<string>('');
-  const [activeTab, setActiveTab] = useState('lineup');
+  const [activeTab, setActiveTab] = useState('ai-coach');
+  const [question, setQuestion] = useState('');
+  const [selectedSlate, setSelectedSlate] = useState<'morning' | 'afternoon' | 'all-day'>('all-day');
+
+  // Fantasy AI Question Mutation
+  const askQuestionMutation = useMutation({
+    mutationFn: async (question: string) => {
+      const response = await apiRequest('POST', '/api/fantasy/ask-question', { question });
+      return response;
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to get AI response. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Slate Analysis Query
+  const { data: slateAnalysis, isLoading: slateLoading } = useQuery({
+    queryKey: ['/api/fantasy/analyze-slate', selectedSlate],
+    queryFn: async () => {
+      const response = await apiRequest('POST', '/api/fantasy/analyze-slate', { slate: selectedSlate });
+      return response;
+    }
+  });
+
+  // Injury Reports Query
+  const { data: injuryReports } = useQuery({
+    queryKey: ['/api/fantasy/injury-reports'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/fantasy/injury-reports');
+      return response;
+    }
+  });
+
+  // Player Projections Query
+  const { data: rbProjections } = useQuery({
+    queryKey: ['/api/fantasy/projections/RB', selectedWeek],
+    queryFn: async () => {
+      const response = await apiRequest('GET', `/api/fantasy/projections/RB?week=${selectedWeek}`);
+      return response;
+    }
+  });
+
+  const handleAskQuestion = async () => {
+    if (!question.trim()) return;
+    
+    askQuestionMutation.mutate(question);
+    setQuestion('');
+  };
 
   // Sample data for demonstration
   const weeklyTrends = {
@@ -156,12 +211,318 @@ export default function FantasyCoaching() {
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} data-testid="coaching-tabs">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="lineup" data-testid="tab-lineup">Lineup Coach</TabsTrigger>
-            <TabsTrigger value="trends" data-testid="tab-trends">Weekly Trends</TabsTrigger>
-            <TabsTrigger value="live" data-testid="tab-live">Live Scoring</TabsTrigger>
-            <TabsTrigger value="insights" data-testid="tab-insights">Game Insights</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="ai-coach" data-testid="tab-ai-coach">
+              <Brain className="w-4 h-4 mr-2" />
+              AI Coach
+            </TabsTrigger>
+            <TabsTrigger value="slate-analysis" data-testid="tab-slate-analysis">
+              <BarChart3 className="w-4 h-4 mr-2" />
+              Slate Analysis
+            </TabsTrigger>
+            <TabsTrigger value="injury-reports" data-testid="tab-injury-reports">
+              <AlertTriangle className="w-4 h-4 mr-2" />
+              Injuries
+            </TabsTrigger>
+            <TabsTrigger value="lineup" data-testid="tab-lineup">
+              <Target className="w-4 h-4 mr-2" />
+              Lineup Coach
+            </TabsTrigger>
+            <TabsTrigger value="live" data-testid="tab-live">
+              <Zap className="w-4 h-4 mr-2" />
+              Live Scoring
+            </TabsTrigger>
           </TabsList>
+
+          {/* AI Coach Tab - Real Sports Intelligence */}
+          <TabsContent value="ai-coach" className="space-y-6" data-testid="ai-coach-content">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Brain className="h-5 w-5 text-purple-600" />
+                  Fantasy Coaching AI - Real Sports Intelligence
+                </CardTitle>
+                <CardDescription>
+                  Ask questions about player usage, injury reports, matchups, and Sunday slate optimization. 
+                  Powered by live Yahoo Sports data and advanced analytics.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Ask: 'Which RB will get the most carries on Sunday's slate?' or 'Analyze injury reports for this week'"
+                    value={question}
+                    onChange={(e) => setQuestion(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleAskQuestion()}
+                    data-testid="ai-question-input"
+                    className="flex-1"
+                  />
+                  <Button 
+                    onClick={handleAskQuestion}
+                    disabled={askQuestionMutation.isPending || !question.trim()}
+                    data-testid="ask-ai-button"
+                  >
+                    {askQuestionMutation.isPending ? (
+                      <>
+                        <Activity className="w-4 h-4 mr-2 animate-spin" />
+                        Analyzing...
+                      </>
+                    ) : (
+                      <>
+                        <MessageSquare className="w-4 h-4 mr-2" />
+                        Ask AI
+                      </>
+                    )}
+                  </Button>
+                </div>
+
+                {/* Sample Questions */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setQuestion("Which running back will get the most carries on Sunday's morning slate?")}
+                    data-testid="sample-question-carries"
+                  >
+                    RB Carry Analysis
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setQuestion("What are the key injury reports affecting this week's slate?")}
+                    data-testid="sample-question-injuries"
+                  >
+                    Injury Impact Analysis
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setQuestion("Which WR has the best matchup in the all-day slate?")}
+                    data-testid="sample-question-matchups"
+                  >
+                    WR Matchup Analysis
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setQuestion("Analyze usage rates for top RBs this week")}
+                    data-testid="sample-question-usage"
+                  >
+                    Usage Rate Analysis
+                  </Button>
+                </div>
+
+                {/* AI Response */}
+                {askQuestionMutation.data && (
+                  <Card className="bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200" data-testid="ai-response">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-purple-800">
+                        <Brain className="h-4 w-4" />
+                        AI Analysis
+                        <Badge className="ml-auto bg-purple-600">
+                          {askQuestionMutation.data.confidence}% Confidence
+                        </Badge>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <h4 className="font-semibold text-purple-900 mb-2">Answer:</h4>
+                        <p className="text-purple-800">{askQuestionMutation.data.answer}</p>
+                      </div>
+                      
+                      <div>
+                        <h4 className="font-semibold text-purple-900 mb-2">Analysis:</h4>
+                        <p className="text-purple-700">{askQuestionMutation.data.analysis}</p>
+                      </div>
+
+                      {askQuestionMutation.data.supportingData && askQuestionMutation.data.supportingData.length > 0 && (
+                        <div>
+                          <h4 className="font-semibold text-purple-900 mb-2">Supporting Data:</h4>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            {askQuestionMutation.data.supportingData.map((data: any, index: number) => (
+                              <div key={index} className="bg-white/60 p-3 rounded-lg text-center">
+                                <div className="text-sm text-purple-600 font-medium">
+                                  {data.metric || data.player}
+                                </div>
+                                <div className="text-lg font-bold text-purple-900">
+                                  {data.value || data.status}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Slate Analysis Tab */}
+          <TabsContent value="slate-analysis" className="space-y-6" data-testid="slate-analysis-content">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5 text-blue-600" />
+                  Sunday Slate Analysis
+                </CardTitle>
+                <CardDescription>
+                  Comprehensive analysis of Sunday's games with carry projections and matchup data
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="mb-4">
+                  <Label>Select Slate</Label>
+                  <Select value={selectedSlate} onValueChange={(value: any) => setSelectedSlate(value)}>
+                    <SelectTrigger data-testid="slate-selector">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="morning">Morning Slate (1:00 PM ET)</SelectItem>
+                      <SelectItem value="afternoon">Afternoon Slate (4:00 PM ET)</SelectItem>
+                      <SelectItem value="all-day">All-Day Slate</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {slateLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Activity className="w-6 h-6 animate-spin mr-2" />
+                    Analyzing slate data...
+                  </div>
+                ) : slateAnalysis?.analysis ? (
+                  <div className="space-y-6">
+                    {/* Top Plays */}
+                    <div>
+                      <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                        <Trophy className="h-5 w-5 text-yellow-600" />
+                        Top Carry Projections
+                      </h3>
+                      <div className="grid gap-3">
+                        {slateAnalysis.analysis.topPlays.slice(0, 3).map((player: any, index: number) => (
+                          <div key={index} className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg border">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center font-bold">
+                                  {index + 1}
+                                </div>
+                                <div>
+                                  <div className="font-semibold">{player.playerName}</div>
+                                  <div className="text-sm text-gray-600">{player.team} {player.position} {player.opponent}</div>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-lg font-bold text-green-700">{player.projectedPoints} pts</div>
+                                <div className="text-sm text-gray-600">{player.confidence}% confidence</div>
+                              </div>
+                            </div>
+                            <p className="text-sm text-gray-700 mb-2">{player.analysis}</p>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                              <div className="bg-white/60 p-2 rounded text-center">
+                                <div className="font-medium">Carry Share</div>
+                                <div className="text-blue-600 font-bold">
+                                  {((player.usage?.carryShare || 0) * 100).toFixed(0)}%
+                                </div>
+                              </div>
+                              <div className="bg-white/60 p-2 rounded text-center">
+                                <div className="font-medium">Matchup</div>
+                                <div className={`font-bold ${player.matchup?.difficulty === 'Easy' ? 'text-green-600' : 'text-yellow-600'}`}>
+                                  {player.matchup?.difficulty}
+                                </div>
+                              </div>
+                              <div className="bg-white/60 p-2 rounded text-center">
+                                <div className="font-medium">Def Rank</div>
+                                <div className="text-red-600 font-bold">#{player.matchup?.defensiveRank}</div>
+                              </div>
+                              <div className="bg-white/60 p-2 rounded text-center">
+                                <div className="font-medium">Snap %</div>
+                                <div className="text-purple-600 font-bold">{player.usage?.snapCount}%</div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Stack Recommendations */}
+                    {slateAnalysis.analysis.stackRecommendations && (
+                      <div>
+                        <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                          <Users className="h-5 w-5 text-purple-600" />
+                          Stack Recommendations
+                        </h3>
+                        {slateAnalysis.analysis.stackRecommendations.map((stack: any, index: number) => (
+                          <div key={index} className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-lg border">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="font-semibold">{stack.qb} + {stack.receivers.join(' + ')}</div>
+                              <Badge className="bg-purple-600">{stack.confidence}% Confidence</Badge>
+                            </div>
+                            <p className="text-sm text-gray-700">{stack.reasoning}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    Select a slate to view analysis
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Injury Reports Tab */}
+          <TabsContent value="injury-reports" className="space-y-6" data-testid="injury-reports-content">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5 text-red-600" />
+                  Live Injury Reports
+                </CardTitle>
+                <CardDescription>
+                  Real-time injury updates affecting fantasy relevance
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {injuryReports?.injuries ? (
+                  <div className="space-y-3">
+                    {injuryReports.injuries.map((injury: any, index: number) => (
+                      <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-3 h-3 rounded-full ${
+                            injury.status === 'Healthy' ? 'bg-green-500' :
+                            injury.status === 'Questionable' ? 'bg-yellow-500' :
+                            injury.status === 'Doubtful' ? 'bg-orange-500' :
+                            'bg-red-500'
+                          }`} />
+                          <div>
+                            <div className="font-medium">{injury.playerName}</div>
+                            <div className="text-sm text-gray-600">{injury.team} - {injury.injury}</div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <Badge variant={
+                            injury.status === 'Healthy' ? 'default' :
+                            injury.status === 'Questionable' ? 'secondary' :
+                            'destructive'
+                          }>
+                            {injury.status}
+                          </Badge>
+                          <div className="text-xs text-gray-500 mt-1">{injury.impact}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    Loading injury reports...
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           <TabsContent value="lineup" className="space-y-6" data-testid="lineup-content">
             <Card>
