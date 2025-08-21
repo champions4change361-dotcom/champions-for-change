@@ -37,12 +37,26 @@ const registrationSchema = z.object({
 type RegistrationForm = z.infer<typeof registrationSchema>;
 
 export default function Register() {
-  const [step, setStep] = useState(1);
+  // Check URL parameters immediately to determine initial state
+  const urlParams = new URLSearchParams(window.location.search);
+  const plan = urlParams.get('plan');
+  const type = urlParams.get('type');
+  const price = urlParams.get('price');
+  
+  // Determine if this is a business user flow
+  const isBusinessUser = type === 'business';
+  
+  const [step, setStep] = useState(isBusinessUser ? 3 : 1); // Start at step 3 for business users
   const [selectedSports, setSelectedSports] = useState<string[]>([]);
   const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'check'>('stripe');
-  const [selectedPlan, setSelectedPlan] = useState<string>('freemium');
-  const [organizationType, setOrganizationType] = useState<string>('');
-  const [shouldShowRoleSelection, setShouldShowRoleSelection] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<string>(
+    isBusinessUser && plan === 'tournament-organizer' ? 'tournament-organizer' :
+    isBusinessUser && plan === 'business-enterprise' ? 'enterprise' :
+    isBusinessUser && plan === 'annual-pro' ? 'annual' :
+    isBusinessUser && plan === 'free' ? 'freemium' : 'freemium'
+  );
+  const [organizationType, setOrganizationType] = useState<string>(isBusinessUser ? 'business' : '');
+  const [shouldShowRoleSelection, setShouldShowRoleSelection] = useState(!isBusinessUser);
   const { isSchoolSafe, isProDomain } = useDomain();
 
   const form = useForm<RegistrationForm>({
@@ -50,50 +64,14 @@ export default function Register() {
     defaultValues: {
       sportsInvolved: [],
       paymentMethod: 'stripe',
-      subscriptionPlan: 'freemium',
-      requestType: 'tournament_manager' // Default to tournament manager role
+      subscriptionPlan: selectedPlan as any,
+      requestType: 'tournament_manager', // Default to tournament manager role
+      organizationType: isBusinessUser ? 'club' : undefined // Map business to club in schema
     }
   });
 
-  // Process URL parameters on component mount
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const plan = urlParams.get('plan');
-    const type = urlParams.get('type');
-    const price = urlParams.get('price');
-
-    console.log('Registration URL params:', { plan, type, price });
-
-    // Handle business/tournament organizer flows - automatically assign tournament manager role
-    if (type === 'business') {
-      console.log('Business user detected - auto-assigning tournament manager role');
-      form.setValue('requestType', 'tournament_manager');
-      setShouldShowRoleSelection(false);
-      
-      // Set appropriate organization type for business users
-      setOrganizationType('business');
-      form.setValue('organizationType', 'club' as any); // Map business to club/nonprofit in schema
-      
-      // Skip to step 3 (personal information) for business users
-      setStep(3);
-      console.log('Skipping to step 3 for business user');
-      
-      // Set plan based on URL parameter
-      if (plan === 'free') {
-        setSelectedPlan('freemium');
-        form.setValue('subscriptionPlan', 'freemium');
-      } else if (plan === 'tournament-organizer') {
-        setSelectedPlan('tournament-organizer'); // Map to correct $39/month plan
-        form.setValue('subscriptionPlan', 'tournament-organizer' as any);
-      } else if (plan === 'business-enterprise') {
-        setSelectedPlan('enterprise');
-        form.setValue('subscriptionPlan', 'enterprise');
-      } else if (plan === 'annual-pro') {
-        setSelectedPlan('annual');
-        form.setValue('subscriptionPlan', 'annual');
-      }
-    }
-  }, [form]);
+  console.log('Registration URL params:', { plan, type, price });
+  console.log('Business user detected:', isBusinessUser);
 
   // Determine if user should see role selection based on organization type and domain
   const checkRoleSelectionNeeded = (orgType: string, plan: string) => {
