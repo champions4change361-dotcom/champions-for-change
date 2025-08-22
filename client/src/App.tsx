@@ -54,6 +54,7 @@ import GamePracticeScheduler from './pages/GamePracticeScheduler';
 import NonprofitBilling from './pages/NonprofitBilling';
 import HealthBenefits from './pages/HealthBenefits';
 import HealthDemo from './pages/HealthDemo';
+import DomainManager from './pages/DomainManager';
 import GrantFunding from './pages/GrantFunding';
 import NonprofitResources from './pages/NonprofitResources';
 import OrganizationRegistration from './pages/OrganizationRegistration';
@@ -140,6 +141,7 @@ function AuthenticatedRoutes() {
         <Route path="/compliance-management" component={ComplianceManagement} />
         <Route path="/coach-dashboard" component={CoachDashboard} />
         <Route path="/athletic-trainer-dashboard" component={AthleticTrainerDashboard} />
+        <Route path="/domains" component={DomainManager} />
 
         <Route path="/bulk-registration" component={BulkRegistration} />
         <Route path="/staff-registration" component={StaffRegistration} />

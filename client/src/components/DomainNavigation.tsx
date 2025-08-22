@@ -53,6 +53,13 @@ export default function DomainNavigation() {
             </Link>
           )}
 
+          {/* Domain Management for Champions for Change */}
+          {config.brand === 'CHAMPIONS_FOR_CHANGE' && (
+            <Link href="/domains">
+              <a className={getNavItemClass("/domains")}>Domains</a>
+            </Link>
+          )}
+
           {/* All CCISD VLC Schools - District Athletic Director Access */}
           {config.brand !== 'COACHES_LOUNGE' && (
             <div className="relative group">
