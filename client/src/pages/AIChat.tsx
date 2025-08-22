@@ -3,6 +3,7 @@ import { Link } from 'wouter';
 import { ArrowLeft, MessageSquare, Bot, Sparkles } from 'lucide-react';
 import { useAuth } from "@/hooks/useAuth";
 import ConversationalAI from '@/components/ConversationalAI';
+import UserMenu from "@/components/UserMenu";
 
 export default function AIChat() {
   const { user } = useAuth();
@@ -30,16 +31,7 @@ export default function AIChat() {
               </div>
             </div>
             
-            {user && (
-              <div className="flex items-center space-x-3">
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  {user.firstName || user.email}
-                </span>
-                <a href="/api/logout" className="text-sm text-red-600 hover:text-red-700">
-                  Logout
-                </a>
-              </div>
-            )}
+            {user && <UserMenu variant="compact" showUserInfo={false} />}
           </div>
         </div>
       </header>

@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { Heart, AlertTriangle, Users, FileText, Activity, MessageSquare } from "lucide-react";
+import AuthenticatedLayout from "@/components/AuthenticatedLayout";
 
 export default function CoachDashboard() {
   const { user } = useAuth();
@@ -44,23 +45,14 @@ export default function CoachDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-50">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-800">Coach Dashboard</h1>
-            <p className="text-slate-600">Welcome, {user?.firstName} {user?.lastName}</p>
-            <p className="text-sm text-slate-500">{user?.organizationName}</p>
-          </div>
-          <Button 
-            variant="outline" 
-            onClick={() => window.location.href = '/api/logout'}
-            data-testid="button-logout"
-          >
-            Logout
-          </Button>
-        </div>
+    <AuthenticatedLayout
+      title="Coach Dashboard"
+      subtitle={`${user?.organizationName || 'Champions for Change'}`}
+      variant="default"
+    >
+      <div className="mb-8">
+        <p className="text-slate-600">Welcome, {user?.firstName} {user?.lastName}</p>
+      </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Overview Stats */}
@@ -293,7 +285,6 @@ export default function CoachDashboard() {
             </div>
           </Button>
         </div>
-      </div>
-    </div>
+    </AuthenticatedLayout>
   );
 }

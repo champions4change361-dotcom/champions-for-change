@@ -5,38 +5,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useAuth } from "@/hooks/useAuth";
 import { AccountLinking } from "@/components/AccountLinking";
 import { CrossPlatformPromotion } from "@/components/CrossPlatformPromotion";
+import AuthenticatedLayout from "@/components/AuthenticatedLayout";
 
 export default function Settings() {
   const { user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
-      {/* Header */}
-      <header className="relative border-b border-yellow-500/20 bg-slate-900/80 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-3">
-              <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
-                <div className="bg-gradient-to-br from-yellow-400 to-yellow-600 p-2 rounded-lg shadow-lg">
-                  <Trophy className="h-6 w-6 text-slate-900" />
-                </div>
-                <div>
-                  <h1 className="text-xl font-bold text-white">Champions Arena</h1>
-                  <p className="text-xs text-yellow-400">Tournament Central</p>
-                </div>
-              </Link>
-            </div>
-            
-            <Link href="/" className="flex items-center text-slate-300 hover:text-yellow-400 transition-colors">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <AuthenticatedLayout
+      title="Settings"
+      subtitle="Champions for Change"
+      variant="default"
+      className="bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900"
+    >
         <div className="text-center mb-8">
           <div className="inline-flex items-center space-x-2 bg-blue-500/10 text-blue-400 px-4 py-2 rounded-full text-sm font-medium mb-4">
             <SettingsIcon className="h-4 w-4" />
@@ -258,7 +238,6 @@ export default function Settings() {
         <div className="mt-8">
           <CrossPlatformPromotion placement="sidebar" />
         </div>
-      </main>
-    </div>
+    </AuthenticatedLayout>
   );
 }

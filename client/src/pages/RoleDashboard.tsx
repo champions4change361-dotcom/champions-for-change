@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
+import AuthenticatedLayout from "@/components/AuthenticatedLayout";
 
 export default function RoleDashboard() {
   const { user, isLoading, isAuthenticated } = useAuth();
@@ -203,35 +204,22 @@ export default function RoleDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-50">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-800">Athletics Dashboard</h1>
-            <p className="text-slate-600">Welcome, {user.firstName} {user.lastName}</p>
-          </div>
-          <div className="text-right">
-            <Badge className={`${roleInfo.color} text-white mb-2`}>
-              {roleInfo.label}
-            </Badge>
-            <div className="text-sm text-slate-600">
-              {user.organizationName}
-            </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => window.location.href = '/api/logout'}
-              data-testid="button-logout"
-            >
-              Logout
-            </Button>
-          </div>
+    <AuthenticatedLayout
+      title="Athletics Dashboard"
+      subtitle={user.organizationName || 'Champions for Change'}
+      variant="default"
+    >
+      <div className="mb-8">
+        <div className="flex justify-between items-center">
+          <p className="text-slate-600">Welcome, {user.firstName} {user.lastName}</p>
+          <Badge className={`${roleInfo.color} text-white`}>
+            {roleInfo.label}
+          </Badge>
         </div>
-
-        {/* Dashboard Content */}
-        {getDashboardContent()}
       </div>
-    </div>
+
+      {/* Dashboard Content */}
+      {getDashboardContent()}
+    </AuthenticatedLayout>
   );
 }

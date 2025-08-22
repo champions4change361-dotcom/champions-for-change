@@ -42,6 +42,7 @@ import { CheerleadingInjuryAssessment } from "@/components/CheerleadingInjuryAss
 import { OrgChartBuilder } from "@/components/OrgChartBuilder";
 import { AIVideoAnalysis } from "@/components/AIVideoAnalysis";
 import { SocialSharingHub } from "@/components/SocialSharingHub";
+import AuthenticatedLayout from "@/components/AuthenticatedLayout";
 
 export default function AthleticTrainerDashboard() {
   const { user } = useAuth();
@@ -135,13 +136,16 @@ export default function AthleticTrainerDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 p-3 sm:p-6">
-      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
+    <AuthenticatedLayout
+      title="Athletic Training Center"
+      subtitle="Champions for Change"
+      variant="default"
+    >
+      <div className="space-y-4 sm:space-y-6">
         
-        {/* Header */}
+        {/* Welcome Header */}
         <div className="flex flex-col lg:flex-row gap-4 lg:justify-between lg:items-center">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Athletic Training Center</h1>
             <p className="text-slate-600">Welcome back, {user?.firstName} {user?.lastName}</p>
           </div>
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
@@ -2269,7 +2273,9 @@ export default function AthleticTrainerDashboard() {
                       onset: '',
                       mechanism: '',
                       previousInjuries: '',
-                      currentActivity: ''
+                      currentActivity: '',
+                      injuryDate: '',
+                      injuryTime: ''
                     })}
                     data-testid="button-clear-consultation"
                   >
@@ -2323,6 +2329,6 @@ export default function AthleticTrainerDashboard() {
           onClose={() => setShowSocialHub(false)}
         />
       </div>
-    </div>
+    </AuthenticatedLayout>
   );
 }

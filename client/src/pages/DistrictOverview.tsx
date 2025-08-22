@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { BarChart3, Trophy, Users, School, Calendar, MapPin, TrendingUp, AlertCircle, CheckCircle } from "lucide-react";
 import { useLocation } from "wouter";
+import AuthenticatedLayout from "@/components/AuthenticatedLayout";
 
 export default function DistrictOverview() {
   const { toast } = useToast();
@@ -64,20 +65,12 @@ export default function DistrictOverview() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <Button 
-            variant="outline" 
-            onClick={() => navigate('/dashboard')}
-            className="mb-4"
-          >
-            ← Back to Dashboard
-          </Button>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">District Athletics Overview</h1>
-          <p className="text-slate-600">Comprehensive view of district athletic programs and performance</p>
-        </div>
+    <AuthenticatedLayout
+      title="District Athletics Overview"
+      subtitle="Comprehensive view of district athletic programs and performance"
+      backButtonHref="/dashboard"
+      variant="default"
+    >
 
         {/* Key Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -280,7 +273,6 @@ export default function DistrictOverview() {
             </div>
           </TabsContent>
         </Tabs>
-      </div>
-    </div>
+    </AuthenticatedLayout>
   );
 }
