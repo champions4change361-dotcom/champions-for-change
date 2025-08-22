@@ -45,9 +45,10 @@ Mobile-first development approach validated - platform built 95% on mobile devic
 
 ### Data Storage
 - **Primary Database**: PostgreSQL with Drizzle ORM.
-- **Database Provider**: Neon Database for serverless PostgreSQL.
+- **Database Provider**: Neon Database for serverless PostgreSQL (ACTIVE: ep-dark-lake-aeblribj.c-2.us-east-2.aws.neon.tech).
 - **Schema Management**: Drizzle Kit for migrations.
 - **Data Validation**: Zod schemas for runtime type validation.
+- **Database Status**: ✅ Connected and operational (all Supabase references removed 8/22/2025).
 
 ### Authentication and Authorization
 - **Dual Authentication System**: Replit OAuth and form-based authentication with session management.
