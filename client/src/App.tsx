@@ -73,6 +73,8 @@ import SmartScheduler from './pages/SmartScheduler';
 import ComplianceManagement from './pages/ComplianceManagement';
 import CoachDashboard from './pages/CoachDashboard';
 import AthleticTrainerDashboard from './pages/AthleticTrainerDashboard';
+import TournamentsPage from './pages/tournaments';
+import TournamentDetailPage from './pages/tournament-detail';
 import ScorekeeperDashboard from './pages/ScorekeeperDashboard';
 import ScorekeeperScheduling from './pages/ScorekeeperScheduling';
 import ParentDashboard from './pages/ParentDashboard';
@@ -107,6 +109,8 @@ function AuthenticatedRoutes() {
       <div className="pt-16 md:pt-12">
         <Switch>
         <Route path="/" component={() => <Home />} />
+        <Route path="/tournaments" component={TournamentsPage} />
+        <Route path="/tournaments/:id" component={TournamentDetailPage} />
         <Route path="/create" component={CreateTournament} />
         <Route path="/tournament/:id" component={Tournament} />
         <Route path="/contacts" component={Contacts} />

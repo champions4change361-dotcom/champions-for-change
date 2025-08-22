@@ -46,10 +46,17 @@ export default function DomainNavigation() {
             <a className={getNavItemClass("/")}>Home</a>
           </Link>
 
+          {/* Show Tournament Management for school-safe and pro domains */}
+          {config.brand !== 'COACHES_LOUNGE' && (
+            <Link href="/tournaments">
+              <a className={getNavItemClass("/tournaments")}>Tournaments</a>
+            </Link>
+          )}
+          
           {/* Show Tournament Empire for school-safe and pro domains */}
           {config.brand !== 'COACHES_LOUNGE' && (
             <Link href="/tournament-empire">
-              <a className={getNavItemClass("/tournament-empire")}>Tournaments</a>
+              <a className={getNavItemClass("/tournament-empire")}>Tournament Empire</a>
             </Link>
           )}
 

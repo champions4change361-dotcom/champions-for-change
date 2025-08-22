@@ -1,193 +1,228 @@
-import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { X } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
-import { type Match } from "@shared/schema";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import React, { useState, useEffect } from 'react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Trophy, Clock, Target } from 'lucide-react';
+
+interface Match {
+  id: string;
+  tournamentId: string;
+  round: number;
+  position: number;
+  team1?: string;
+  team2?: string;
+  team1Score: number;
+  team2Score: number;
+  winner?: string;
+  status: 'upcoming' | 'in-progress' | 'completed';
+  bracket?: 'winners' | 'losers' | 'championship';
+  poolId?: string;
+}
 
 interface MatchUpdateModalProps {
   match: Match;
   isOpen: boolean;
   onClose: () => void;
+  onUpdate: (data: { matchId: string; team1Score: number; team2Score: number; winner: string; status: string }) => void;
+  isLoading: boolean;
 }
 
-const updateMatchSchema = z.object({
-  team1Score: z.number().min(0),
-  team2Score: z.number().min(0),
-  status: z.enum(["upcoming", "in-progress", "completed"]),
-});
+export default function MatchUpdateModal({ 
+  match, 
+  isOpen, 
+  onClose, 
+  onUpdate, 
+  isLoading 
+}: MatchUpdateModalProps) {
+  const [team1Score, setTeam1Score] = useState(match.team1Score.toString());
+  const [team2Score, setTeam2Score] = useState(match.team2Score.toString());
+  const [status, setStatus] = useState(match.status);
+  const [winner, setWinner] = useState(match.winner || '');
 
-type UpdateMatchData = z.infer<typeof updateMatchSchema>;
+  useEffect(() => {
+    setTeam1Score(match.team1Score.toString());
+    setTeam2Score(match.team2Score.toString());
+    setStatus(match.status);
+    setWinner(match.winner || '');
+  }, [match]);
 
-export default function MatchUpdateModal({ match, isOpen, onClose }: MatchUpdateModalProps) {
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
+  // Auto-determine winner based on scores
+  useEffect(() => {
+    const score1 = parseInt(team1Score) || 0;
+    const score2 = parseInt(team2Score) || 0;
+    
+    if (score1 > score2 && match.team1) {
+      setWinner(match.team1);
+    } else if (score2 > score1 && match.team2) {
+      setWinner(match.team2);
+    } else if (score1 === score2) {
+      setWinner('');
+    }
+  }, [team1Score, team2Score, match.team1, match.team2]);
 
-  const form = useForm<UpdateMatchData>({
-    resolver: zodResolver(updateMatchSchema),
-    defaultValues: {
-      team1Score: match.team1Score || 0,
-      team2Score: match.team2Score || 0,
-      status: match.status,
-    },
-  });
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const score1 = parseInt(team1Score) || 0;
+    const score2 = parseInt(team2Score) || 0;
+    
+    let finalStatus = status;
+    let finalWinner = winner;
+    
+    // Auto-set status and winner if scores are entered
+    if (score1 > 0 || score2 > 0) {
+      if (score1 !== score2) {
+        finalStatus = 'completed';
+        finalWinner = score1 > score2 ? (match.team1 || '') : (match.team2 || '');
+      } else if (score1 === score2 && score1 > 0) {
+        finalStatus = 'completed';
+        // For ties, let user manually select winner or handle differently
+      }
+    }
 
-  const updateMatchMutation = useMutation({
-    mutationFn: async (data: UpdateMatchData) => {
-      const response = await apiRequest("PATCH", `/api/matches/${match.id}`, data);
-      return response.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: "Match Updated",
-        description: "Match result has been saved successfully!",
-      });
-      onClose();
-      queryClient.invalidateQueries({ queryKey: ["/api/tournaments", match.tournamentId] });
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update match",
-        variant: "destructive",
-      });
-    },
-  });
+    onUpdate({
+      matchId: match.id,
+      team1Score: score1,
+      team2Score: score2,
+      winner: finalWinner,
+      status: finalStatus
+    });
+  };
 
-  const onSubmit = (data: UpdateMatchData) => {
-    updateMatchMutation.mutate(data);
+  const getBracketBadge = () => {
+    if (match.bracket === 'winners') return <Badge className="bg-yellow-500">Winners</Badge>;
+    if (match.bracket === 'losers') return <Badge className="bg-orange-500">Losers</Badge>;
+    if (match.bracket === 'championship') return <Badge className="bg-purple-500">Championship</Badge>;
+    if (match.poolId) return <Badge variant="secondary">Pool Play</Badge>;
+    return null;
+  };
+
+  const getRoundDisplay = () => {
+    if (match.bracket === 'championship') return 'Championship Final';
+    if (match.poolId) return `Pool ${match.poolId.split('-')[1]?.toUpperCase() || ''}`;
+    return `Round ${match.round}`;
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md" data-testid="modal-match-update">
+      <DialogContent className="sm:max-w-md" data-testid="match-update-modal">
         <DialogHeader>
-          <DialogTitle className="flex items-center justify-between">
+          <DialogTitle className="flex items-center gap-2">
+            <Trophy className="h-5 w-5" />
             Update Match Result
           </DialogTitle>
+          <DialogDescription>
+            {getRoundDisplay()} - Position {match.position}
+          </DialogDescription>
         </DialogHeader>
-        
-        <div className="space-y-4">
-          <div className="bg-gray-50 rounded-lg p-3 mb-4">
-            <div className="text-sm font-medium text-gray-700 mb-2">Match Details:</div>
-            <div className="flex justify-between items-center">
-              <span className="text-neutral font-medium" data-testid="text-match-team1">{match.team1}</span>
-              <span className="text-gray-400 mx-2">vs</span>
-              <span className="text-neutral font-medium" data-testid="text-match-team2">{match.team2}</span>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Match Info */}
+          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4 text-gray-500" />
+              <span className="text-sm font-medium">Match Status</span>
             </div>
+            {getBracketBadge()}
           </div>
 
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" data-testid="form-update-match">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="team1Score" className="block text-sm font-medium text-gray-700 mb-2">
-                  {match.team1} Score
-                </Label>
-                <Input
-                  id="team1Score"
-                  type="number"
-                  min="0"
-                  placeholder="0"
-                  {...form.register("team1Score", { valueAsNumber: true })}
-                  data-testid="input-team1-score"
-                />
-                {form.formState.errors.team1Score && (
-                  <p className="text-sm text-red-600 mt-1" data-testid="error-team1-score">
-                    {form.formState.errors.team1Score.message}
-                  </p>
-                )}
-              </div>
-              <div>
-                <Label htmlFor="team2Score" className="block text-sm font-medium text-gray-700 mb-2">
-                  {match.team2} Score
-                </Label>
-                <Input
-                  id="team2Score"
-                  type="number"
-                  min="0"
-                  placeholder="0"
-                  {...form.register("team2Score", { valueAsNumber: true })}
-                  data-testid="input-team2-score"
-                />
-                {form.formState.errors.team2Score && (
-                  <p className="text-sm text-red-600 mt-1" data-testid="error-team2-score">
-                    {form.formState.errors.team2Score.message}
-                  </p>
-                )}
-              </div>
+          {/* Team 1 Score */}
+          <div className="space-y-2">
+            <Label htmlFor="team1-score">
+              {match.team1 || 'Team 1'} Score
+            </Label>
+            <Input
+              id="team1-score"
+              type="number"
+              min="0"
+              value={team1Score}
+              onChange={(e) => setTeam1Score(e.target.value)}
+              placeholder="0"
+              data-testid="input-team1-score"
+            />
+          </div>
+
+          {/* Team 2 Score */}
+          <div className="space-y-2">
+            <Label htmlFor="team2-score">
+              {match.team2 || 'Team 2'} Score
+            </Label>
+            <Input
+              id="team2-score"
+              type="number"
+              min="0"
+              value={team2Score}
+              onChange={(e) => setTeam2Score(e.target.value)}
+              placeholder="0"
+              data-testid="input-team2-score"
+            />
+          </div>
+
+          {/* Status Selection */}
+          <div className="space-y-2">
+            <Label htmlFor="status">Match Status</Label>
+            <Select value={status} onValueChange={setStatus}>
+              <SelectTrigger data-testid="select-status">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="upcoming">Upcoming</SelectItem>
+                <SelectItem value="in-progress">In Progress</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Winner Selection (if needed) */}
+          {status === 'completed' && parseInt(team1Score) === parseInt(team2Score) && parseInt(team1Score) > 0 && (
+            <div className="space-y-2">
+              <Label htmlFor="winner">Winner (Tie Game)</Label>
+              <Select value={winner} onValueChange={setWinner}>
+                <SelectTrigger data-testid="select-winner">
+                  <SelectValue placeholder="Select winner" />
+                </SelectTrigger>
+                <SelectContent>
+                  {match.team1 && <SelectItem value={match.team1}>{match.team1}</SelectItem>}
+                  {match.team2 && <SelectItem value={match.team2}>{match.team2}</SelectItem>}
+                </SelectContent>
+              </Select>
             </div>
-            
-            <div className="bg-gray-50 rounded-lg p-3">
-              <p className="text-sm text-gray-600 mb-2">Match Status:</p>
-              <div className="flex space-x-3">
-                <label className="flex items-center">
-                  <input 
-                    type="radio" 
-                    value="upcoming" 
-                    {...form.register("status")}
-                    className="text-tournament-primary focus:ring-tournament-primary"
-                    data-testid="radio-status-upcoming"
-                  />
-                  <span className="ml-2 text-sm">Upcoming</span>
-                </label>
-                <label className="flex items-center">
-                  <input 
-                    type="radio" 
-                    value="in-progress" 
-                    {...form.register("status")}
-                    className="text-tournament-primary focus:ring-tournament-primary"
-                    data-testid="radio-status-in-progress"
-                  />
-                  <span className="ml-2 text-sm">In Progress</span>
-                </label>
-                <label className="flex items-center">
-                  <input 
-                    type="radio" 
-                    value="completed" 
-                    {...form.register("status")}
-                    className="text-tournament-primary focus:ring-tournament-primary"
-                    data-testid="radio-status-completed"
-                  />
-                  <span className="ml-2 text-sm">Completed</span>
-                </label>
+          )}
+
+          {/* Winner Display */}
+          {winner && status === 'completed' && (
+            <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+              <div className="flex items-center gap-2">
+                <Target className="h-4 w-4 text-green-600" />
+                <span className="text-sm font-medium text-green-800">
+                  Winner: {winner}
+                </span>
               </div>
             </div>
-            
-            <div className="flex space-x-3 mt-6">
-              <Button 
-                type="button"
-                variant="outline"
-                className="flex-1"
-                onClick={onClose}
-                data-testid="button-cancel-match-update"
-              >
-                Cancel
-              </Button>
-              <Button 
-                type="submit"
-                className="flex-1 bg-tournament-primary hover:bg-blue-700"
-                disabled={updateMatchMutation.isPending}
-                data-testid="button-save-match-result"
-              >
-                {updateMatchMutation.isPending ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Saving...
-                  </>
-                ) : (
-                  'Save Result'
-                )}
-              </Button>
-            </div>
-          </form>
-        </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex justify-end gap-2 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              data-testid="button-cancel"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={isLoading}
+              data-testid="button-save"
+            >
+              {isLoading ? 'Saving...' : 'Save Result'}
+            </Button>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
   );

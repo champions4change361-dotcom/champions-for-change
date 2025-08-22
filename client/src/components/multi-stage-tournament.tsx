@@ -1,267 +1,283 @@
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Progress } from "@/components/ui/progress";
-import BracketVisualization from "@/components/bracket-visualization";
-import LeaderboardView from "@/components/leaderboard-view";
-import { Trophy, Users, ArrowRight, Play, CheckCircle, Clock } from "lucide-react";
-import { type Tournament } from "@shared/schema";
-import { type Pool, type StageConfiguration } from "@shared/multi-stage-schema";
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Crown, Target, Trophy, ArrowRight, CheckCircle, Clock } from 'lucide-react';
+import PoolPlayBracket from './pool-play-bracket';
+import DoubleEliminationBracket from './double-elimination-bracket';
+import BracketVisualization from './bracket-visualization';
+
+interface Tournament {
+  id: string;
+  name: string;
+  sport: string;
+  teamSize: number;
+  tournamentType: string;
+  competitionFormat: string;
+  status: 'upcoming' | 'stage-1' | 'stage-2' | 'stage-3' | 'completed';
+  currentStage?: number;
+  totalStages?: number;
+  teams: { teamName: string }[];
+}
 
 interface MultiStageTournamentProps {
   tournament: Tournament;
-  pools?: Pool[];
 }
 
-export default function MultiStageTournament({ tournament, pools = [] }: MultiStageTournamentProps) {
-  const [activeTab, setActiveTab] = useState("current-stage");
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
+export default function MultiStageTournament({ tournament }: MultiStageTournamentProps) {
+  const [activeTab, setActiveTab] = useState('overview');
 
-  const stageConfig = tournament.stageConfiguration as StageConfiguration;
-  const currentStage = tournament.currentStage || 1;
-  const totalStages = tournament.totalStages || 1;
-  const currentStageInfo = stageConfig?.stages?.[currentStage - 1];
+  const stages = [
+    {
+      id: 1,
+      name: 'Pool Play',
+      description: 'Round robin within groups',
+      type: 'pool-play',
+      status: tournament.status === 'upcoming' ? 'pending' : 
+              tournament.currentStage === 1 ? 'active' :
+              (tournament.currentStage || 0) > 1 ? 'completed' : 'pending'
+    },
+    {
+      id: 2,
+      name: 'Elimination Bracket',
+      description: 'Single elimination from pool winners',
+      type: 'single-elimination',
+      status: tournament.status === 'upcoming' || (tournament.currentStage || 0) < 2 ? 'pending' :
+              tournament.currentStage === 2 ? 'active' :
+              (tournament.currentStage || 0) > 2 ? 'completed' : 'pending'
+    },
+    {
+      id: 3,
+      name: 'Championship',
+      description: 'Final match for tournament winner',
+      type: 'championship',
+      status: tournament.status === 'upcoming' || (tournament.currentStage || 0) < 3 ? 'pending' :
+              tournament.currentStage === 3 ? 'active' :
+              tournament.status === 'completed' ? 'completed' : 'pending'
+    }
+  ];
 
-  const advanceToNextStageMutation = useMutation({
-    mutationFn: async () => {
-      const response = await apiRequest("POST", `/api/tournaments/${tournament.id}/advance-stage`);
-      return response.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: "Stage Advanced",
-        description: `Tournament has advanced to the next stage`,
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/tournaments", tournament.id] });
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to advance tournament stage",
-        variant: "destructive",
-      });
-    },
-  });
+  const currentStageIndex = (tournament.currentStage || 1) - 1;
+  const progressPercentage = ((tournament.currentStage || 1) / 3) * 100;
 
-  const getStageIcon = (stageNumber: number) => {
-    if (stageNumber < currentStage) return <CheckCircle className="h-4 w-4 text-green-500" />;
-    if (stageNumber === currentStage) return <Play className="h-4 w-4 text-blue-500" />;
-    return <Clock className="h-4 w-4 text-gray-400" />;
+  const getStageIcon = (stage: any) => {
+    switch (stage.status) {
+      case 'completed': return <CheckCircle className="h-5 w-5 text-green-500" />;
+      case 'active': return <Clock className="h-5 w-5 text-blue-500" />;
+      default: return <div className="h-5 w-5 rounded-full border-2 border-gray-300" />;
+    }
   };
 
-  const getStageStatus = (stageNumber: number) => {
-    if (stageNumber < currentStage) return "completed";
-    if (stageNumber === currentStage) return "active";
-    return "upcoming";
+  const getStageColor = (stage: any) => {
+    switch (stage.status) {
+      case 'completed': return 'bg-green-100 border-green-300';
+      case 'active': return 'bg-blue-100 border-blue-300';
+      default: return 'bg-gray-50 border-gray-200';
+    }
   };
 
-  const renderPoolStandings = (pool: Pool) => (
-    <Card key={pool.poolId}>
-      <CardHeader>
-        <CardTitle className="text-sm">{pool.poolName}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-8">#</TableHead>
-              <TableHead>Team</TableHead>
-              <TableHead className="text-center">W</TableHead>
-              <TableHead className="text-center">L</TableHead>
-              <TableHead className="text-center">Pts</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {pool.standings
-              .sort((a, b) => b.wins - a.wins || b.points - a.points || b.pointDifferential - a.pointDifferential)
-              .map((standing, index) => (
-                <TableRow key={standing.team}>
-                  <TableCell className="font-medium">{index + 1}</TableCell>
-                  <TableCell>{standing.team}</TableCell>
-                  <TableCell className="text-center">{standing.wins}</TableCell>
-                  <TableCell className="text-center">{standing.losses}</TableCell>
-                  <TableCell className="text-center">{standing.points}</TableCell>
-                </TableRow>
-              ))}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
-  );
+  const renderStageContent = () => {
+    const currentStage = stages[currentStageIndex];
+    
+    if (!currentStage || tournament.status === 'upcoming') {
+      return (
+        <Card>
+          <CardContent className="text-center py-12">
+            <Trophy className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="font-semibold text-lg mb-2">Tournament Not Started</h3>
+            <p className="text-gray-600">
+              The tournament is scheduled to begin with pool play
+            </p>
+          </CardContent>
+        </Card>
+      );
+    }
 
-  const renderCurrentStage = () => {
-    if (!currentStageInfo) return <div>No stage configuration available</div>;
-
-    switch (currentStageInfo.stageType) {
-      case "pool-play":
-      case "round-robin":
-        return (
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {pools.map(renderPoolStandings)}
-            </div>
-            {pools.length === 0 && (
-              <div className="text-center py-8">
-                <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Pool Play Setup</h3>
-                <p className="text-gray-600">Pools will be generated when the tournament starts</p>
-              </div>
-            )}
-          </div>
-        );
-      
-      case "single-elimination":
-      case "double-elimination":
-        return <BracketVisualization tournament={tournament} />;
-      
-      case "leaderboard":
-        return <LeaderboardView tournament={tournament} />;
-      
-      case "swiss-system":
-        return (
-          <div className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Swiss System Rounds</CardTitle>
-                <CardDescription>
-                  Pairings based on current standings and previous opponents
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <Trophy className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Swiss Rounds</h3>
-                  <p className="text-gray-600">Round pairings will be generated automatically</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        );
-      
+    switch (currentStage.type) {
+      case 'pool-play':
+        return <PoolPlayBracket tournament={tournament} />;
+      case 'single-elimination':
+        return <BracketVisualization tournament={tournament} matches={[]} />;
+      case 'championship':
+        return <DoubleEliminationBracket tournament={tournament} />;
       default:
-        return <div>Unknown stage type: {currentStageInfo.stageType}</div>;
+        return <BracketVisualization tournament={tournament} matches={[]} />;
     }
   };
 
   return (
     <div className="space-y-6" data-testid="multi-stage-tournament">
-      {/* Stage Progress */}
+      {/* Tournament Progress */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Trophy className="h-5 w-5" />
-            Tournament Progress
+            <Crown className="h-5 w-5 text-purple-500" />
+            Multi-Stage Tournament Progress
           </CardTitle>
-          <CardDescription>
-            Multi-stage tournament: {stageConfig?.overallFormat || "Custom Format"}
-          </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <Progress value={(currentStage / totalStages) * 100} className="w-full" />
-            
-            {/* Stage Timeline */}
-            <div className="flex items-center justify-between">
-              {stageConfig?.stages?.map((stage, index) => (
-                <div key={index} className="flex flex-col items-center space-y-2">
-                  <div className="flex items-center space-x-2">
-                    {getStageIcon(index + 1)}
-                    <Badge variant={getStageStatus(index + 1) === "active" ? "default" : "secondary"}>
-                      Stage {index + 1}
+        <CardContent className="space-y-6">
+          {/* Progress Bar */}
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span>Tournament Progress</span>
+              <span>{Math.round(progressPercentage)}% Complete</span>
+            </div>
+            <Progress value={progressPercentage} className="h-3" />
+          </div>
+
+          {/* Stage Timeline */}
+          <div className="grid gap-4 md:grid-cols-3">
+            {stages.map((stage, index) => (
+              <div
+                key={stage.id}
+                className={`p-4 rounded-lg border-2 ${getStageColor(stage)} transition-all`}
+              >
+                <div className="flex items-start gap-3">
+                  {getStageIcon(stage)}
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-lg">{stage.name}</h3>
+                    <p className="text-sm text-gray-600 mb-2">{stage.description}</p>
+                    
+                    <Badge variant={
+                      stage.status === 'completed' ? 'default' :
+                      stage.status === 'active' ? 'secondary' : 'outline'
+                    }>
+                      {stage.status === 'pending' ? 'Upcoming' :
+                       stage.status === 'active' ? 'In Progress' : 'Completed'}
                     </Badge>
                   </div>
-                  <div className="text-center">
-                    <div className="font-medium text-sm">{stage.stageName}</div>
-                    <div className="text-xs text-gray-500">{stage.stageType}</div>
-                  </div>
-                  {index < stageConfig.stages.length - 1 && (
-                    <ArrowRight className="h-4 w-4 text-gray-400 absolute right-[-20px]" />
-                  )}
                 </div>
-              ))}
-            </div>
+                
+                {index < stages.length - 1 && (
+                  <div className="flex justify-center mt-4">
+                    <ArrowRight className="h-4 w-4 text-gray-400" />
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>
 
-      {/* Current Stage Content */}
+      {/* Stage Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="current-stage">
-            Current Stage: {currentStageInfo?.stageName}
-          </TabsTrigger>
-          <TabsTrigger value="overall-standings">Overall Standings</TabsTrigger>
-          <TabsTrigger value="advancement">Advancement Rules</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="current">Current Stage</TabsTrigger>
+          <TabsTrigger value="standings">Standings</TabsTrigger>
+          <TabsTrigger value="schedule">Schedule</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="current-stage">
-          {renderCurrentStage()}
-          
-          {currentStage < totalStages && (
-            <div className="mt-6 flex justify-center">
-              <Button 
-                onClick={() => advanceToNextStageMutation.mutate()}
-                disabled={advanceToNextStageMutation.isPending}
-                size="lg"
-                data-testid="button-advance-stage"
-              >
-                Advance to Next Stage
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="overall-standings">
+        <TabsContent value="overview" className="mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>Tournament Standings</CardTitle>
-              <CardDescription>
-                Current overall tournament standings across all stages
-              </CardDescription>
+              <CardTitle>Tournament Overview</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8">
-                <Trophy className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Overall Standings</h3>
-                <p className="text-gray-600">Will be calculated based on stage performance</p>
+              <div className="grid gap-6 md:grid-cols-2">
+                <div className="space-y-4">
+                  <h4 className="font-semibold">Tournament Details</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span>Total Teams:</span>
+                      <span className="font-medium">{tournament.teams?.length || tournament.teamSize}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Sport:</span>
+                      <span className="font-medium">{tournament.sport}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Format:</span>
+                      <span className="font-medium">Multi-Stage</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Current Stage:</span>
+                      <span className="font-medium">
+                        {stages[currentStageIndex]?.name || 'Not Started'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h4 className="font-semibold">Stage Breakdown</h4>
+                  <div className="space-y-3">
+                    {stages.map((stage) => (
+                      <div key={stage.id} className="flex items-center gap-3 text-sm">
+                        {getStageIcon(stage)}
+                        <span className="flex-1">{stage.name}</span>
+                        <Badge variant="outline" className="text-xs">
+                          {stage.type}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="advancement">
+        <TabsContent value="current" className="mt-6">
+          <div className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Target className="h-5 w-5" />
+                  Current Stage: {stages[currentStageIndex]?.name || 'Not Started'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 mb-4">
+                  {stages[currentStageIndex]?.description || 'Tournament has not begun yet'}
+                </p>
+              </CardContent>
+            </Card>
+            
+            {renderStageContent()}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="standings" className="mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>Advancement Rules</CardTitle>
-              <CardDescription>
-                How teams advance between tournament stages
-              </CardDescription>
+              <CardTitle>Overall Standings</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-center text-gray-500 py-8">
+                Standings will be calculated based on performance across all stages
+              </p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="schedule" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Tournament Schedule</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {stageConfig?.stages?.map((stage, index) => (
-                  <div key={index} className="border rounded-lg p-4">
-                    <div className="flex justify-between items-center mb-2">
-                      <h4 className="font-medium">{stage.stageName}</h4>
-                      <Badge variant="outline">{stage.stageType}</Badge>
-                    </div>
-                    <div className="text-sm text-gray-600 space-y-1">
-                      <p>Teams Advancing: {stage.advancementRules.teamsAdvancing}</p>
-                      <p>Criteria: {stage.advancementRules.advancementCriteria}</p>
-                      {stage.advancementRules.minimumScore && (
-                        <p>Minimum Score: {stage.advancementRules.minimumScore}</p>
-                      )}
-                      {stage.tiebreakers && (
-                        <p>Tiebreakers: {stage.tiebreakers.join(", ")}</p>
-                      )}
+                {stages.map((stage) => (
+                  <div 
+                    key={stage.id} 
+                    className={`p-4 rounded-lg border ${getStageColor(stage)}`}
+                  >
+                    <div className="flex items-center gap-3">
+                      {getStageIcon(stage)}
+                      <div className="flex-1">
+                        <h4 className="font-semibold">{stage.name}</h4>
+                        <p className="text-sm text-gray-600">{stage.description}</p>
+                      </div>
+                      <Badge variant={
+                        stage.status === 'completed' ? 'default' :
+                        stage.status === 'active' ? 'secondary' : 'outline'
+                      }>
+                        {stage.status === 'pending' ? 'Scheduled' :
+                         stage.status === 'active' ? 'Now Playing' : 'Completed'}
+                      </Badge>
                     </div>
                   </div>
                 ))}

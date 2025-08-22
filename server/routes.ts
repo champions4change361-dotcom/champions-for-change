@@ -6,6 +6,7 @@ import { emailService } from "./emailService";
 import supportTeamRoutes from "./supportTeamRoutes";
 import { stripe } from "./nonprofitStripeConfig";
 import { registerDomainRoutes } from "./domainRoutes";
+import { registerTournamentRoutes } from "./routes/tournamentRoutes";
 
 console.log('🏫 District athletics management platform initialized');
 console.log('💚 Champions for Change nonprofit mission active');
@@ -1018,6 +1019,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Domain management routes
   registerDomainRoutes(app);
+
+  // Tournament management routes
+  registerTournamentRoutes(app);
 
   // Create and return server
   const server = createServer(app);
