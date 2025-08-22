@@ -7,8 +7,13 @@ import { z } from "zod";
 export function registerTournamentRoutes(app: Express) {
   
   // Get all tournaments for the current user
-  app.get("/api/tournaments", async (req, res) => {
+  app.get("/api/tournaments", async (req: any, res) => {
     try {
+      // Check authentication
+      if (!req.isAuthenticated || !req.isAuthenticated()) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
       const tournaments = await storage.getAllTournaments();
       res.json(tournaments);
     } catch (error) {
@@ -35,8 +40,60 @@ export function registerTournamentRoutes(app: Express) {
   });
 
   // Create a new tournament
-  app.post("/api/tournaments", async (req, res) => {
+  app.post("/api/tournaments", async (req: any, res) => {
     try {
+      // Check authentication
+      if (!req.isAuthenticated || !req.isAuthenticated()) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      // Get user details for access control
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User ID required" });
+      }
+
+      // Get user from storage to check subscription and limits
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(401).json({ message: "User not found" });
+      }
+
+      // Check tournament creation limits based on subscription
+      const existingTournaments = await storage.getAllTournaments();
+      const userTournaments = existingTournaments.filter(t => t.createdBy === userId);
+      
+      const getTournamentLimit = (plan: string, status: string) => {
+        if (status !== 'active') return 1; // Inactive accounts get 1 tournament
+        
+        switch (plan) {
+          case 'foundation':
+          case 'free':
+            return 3;
+          case 'tournament-organizer':
+            return 25;
+          case 'business-enterprise':
+            return 100;
+          case 'district_enterprise':
+          case 'enterprise':
+          case 'annual-pro':
+            return -1; // Unlimited
+          default:
+            return 2;
+        }
+      };
+
+      const limit = getTournamentLimit(user.subscriptionPlan || 'foundation', user.subscriptionStatus || 'inactive');
+      
+      if (limit !== -1 && userTournaments.length >= limit) {
+        return res.status(403).json({ 
+          message: "Tournament limit reached for your subscription plan",
+          currentCount: userTournaments.length,
+          limit: limit,
+          plan: user.subscriptionPlan
+        });
+      }
+
       const validatedData = insertTournamentSchema.parse(req.body);
       
       // Generate bracket structure based on tournament type
@@ -50,11 +107,12 @@ export function registerTournamentRoutes(app: Express) {
         validatedData.sport
       );
 
-      // Create tournament with generated bracket
+      // Create tournament with generated bracket and user association
       const tournamentData = {
         ...validatedData,
         bracket: bracketStructure,
-        status: 'upcoming' as const
+        status: 'upcoming' as const,
+        createdBy: userId
       };
 
       const tournament = await storage.createTournament(tournamentData);

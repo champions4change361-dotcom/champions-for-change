@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   Trophy, 
   Plus, 
@@ -17,10 +18,17 @@ import {
   CheckCircle,
   Clock,
   Target,
-  Crown
+  Crown,
+  Lock,
+  Star,
+  Zap
 } from 'lucide-react';
 import { Link } from 'wouter';
+import { useAuth } from '@/hooks/useAuth';
+import { useTournamentAccess } from '@/hooks/useTournamentAccess';
 import EnhancedTournamentWizard from '@/components/enhanced-tournament-wizard';
+import { TournamentAccessGate, FeatureLimitGate } from '@/components/tournament-access-gate';
+import PricingComparison from '@/components/pricing-comparison';
 
 interface Tournament {
   id: string;
@@ -42,9 +50,21 @@ export default function TournamentsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [formatFilter, setFormatFilter] = useState('all');
+  
+  const { user, isAuthenticated } = useAuth();
+  const { 
+    limits, 
+    canCreateTournament, 
+    getUpgradeMessage, 
+    userPlan, 
+    userStatus, 
+    isDistrictUser,
+    isTournamentManager 
+  } = useTournamentAccess();
 
   const { data: tournaments = [], isLoading } = useQuery<Tournament[]>({
     queryKey: ["/api/tournaments"],
+    enabled: isAuthenticated, // Only fetch if authenticated
   });
 
   const filteredTournaments = tournaments.filter(tournament => {
@@ -119,40 +139,138 @@ export default function TournamentsPage() {
             ← Back to Tournaments
           </Button>
         </div>
-        <EnhancedTournamentWizard 
-          onClose={() => setShowCreateWizard(false)}
-          onTournamentCreated={() => {
-            setShowCreateWizard(false);
-            // Refresh tournaments list
-            window.location.reload();
-          }}
-        />
+        
+        <FeatureLimitGate
+          feature="tournaments"
+          currentCount={tournaments.length}
+          checkLimit={canCreateTournament}
+        >
+          <EnhancedTournamentWizard 
+            onClose={() => setShowCreateWizard(false)}
+            onTournamentCreated={() => {
+              setShowCreateWizard(false);
+              // Refresh tournaments list
+              window.location.reload();
+            }}
+          />
+        </FeatureLimitGate>
+      </div>
+    );
+  }
+
+  // Authentication check
+  if (!isAuthenticated) {
+    return (
+      <div className="container mx-auto p-6 space-y-6" data-testid="tournaments-page-guest">
+        <Card>
+          <CardContent className="text-center py-12">
+            <Lock className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold mb-4">Tournament Management</h2>
+            <p className="text-gray-600 mb-6">
+              Sign in to create and manage professional tournaments with comprehensive bracket systems
+            </p>
+            <div className="grid gap-4 md:grid-cols-3 mb-8">
+              <div className="p-4 bg-blue-50 rounded-lg">
+                <Trophy className="h-8 w-8 text-blue-500 mx-auto mb-2" />
+                <h3 className="font-semibold">Professional Brackets</h3>
+                <p className="text-sm text-gray-600">Single & double elimination tournaments</p>
+              </div>
+              <div className="p-4 bg-green-50 rounded-lg">
+                <Users className="h-8 w-8 text-green-500 mx-auto mb-2" />
+                <h3 className="font-semibold">Team Management</h3>
+                <p className="text-sm text-gray-600">Organize teams and track progress</p>
+              </div>
+              <div className="p-4 bg-purple-50 rounded-lg">
+                <Star className="h-8 w-8 text-purple-500 mx-auto mb-2" />
+                <h3 className="font-semibold">Live Updates</h3>
+                <p className="text-sm text-gray-600">Real-time scoring and results</p>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <Link href="/api/login">
+                <Button className="w-full">Sign In to Get Started</Button>
+              </Link>
+              <p className="text-sm text-gray-500">
+                Free account includes 1 tournament with up to 8 teams
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
     <div className="container mx-auto p-6 space-y-6" data-testid="tournaments-page">
+      {/* Account Status Alert */}
+      {userStatus !== 'active' && (
+        <Alert>
+          <Zap className="h-4 w-4" />
+          <AlertDescription>
+            <div className="flex items-center justify-between">
+              <span>
+                Limited access with {userPlan} plan. {getUpgradeMessage('unlimited tournaments')}
+              </span>
+              <Link href="/pricing">
+                <Button variant="outline" size="sm">Upgrade</Button>
+              </Link>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-3">
             <Trophy className="h-8 w-8 text-primary" />
             Tournament Management
+            {isDistrictUser && <Badge className="bg-blue-500">District</Badge>}
+            {isTournamentManager && <Badge className="bg-green-500">Pro</Badge>}
           </h1>
           <p className="text-gray-600 mt-2">
             Create and manage tournaments with comprehensive bracket systems
           </p>
+          <div className="flex items-center gap-4 mt-2 text-sm">
+            <span className="text-gray-500">
+              Plan: <strong className="capitalize">{userPlan.replace('-', ' ')}</strong>
+            </span>
+            <span className="text-gray-500">
+              Tournaments: <strong>{tournaments.length}</strong>
+              {limits.maxTournaments !== -1 && ` / ${limits.maxTournaments}`}
+            </span>
+            <span className="text-gray-500">
+              Max Teams: <strong>{limits.maxTeamsPerTournament === -1 ? 'Unlimited' : limits.maxTeamsPerTournament}</strong>
+            </span>
+          </div>
         </div>
         
-        <Button 
-          onClick={() => setShowCreateWizard(true)}
-          className="flex items-center gap-2"
-          data-testid="button-create-tournament"
-        >
-          <Plus className="h-4 w-4" />
-          Create Tournament
-        </Button>
+        <div className="flex items-center gap-3">
+          {!canCreateTournament(tournaments.length) ? (
+            <div className="text-right">
+              <Button 
+                disabled
+                className="flex items-center gap-2"
+                data-testid="button-create-tournament-disabled"
+              >
+                <Lock className="h-4 w-4" />
+                Limit Reached
+              </Button>
+              <p className="text-xs text-gray-500 mt-1">
+                {getUpgradeMessage('more tournaments')}
+              </p>
+            </div>
+          ) : (
+            <Button 
+              onClick={() => setShowCreateWizard(true)}
+              className="flex items-center gap-2"
+              data-testid="button-create-tournament"
+            >
+              <Plus className="h-4 w-4" />
+              Create Tournament
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Filters */}
@@ -335,45 +453,126 @@ export default function TournamentsPage() {
         </div>
       )}
 
-      {/* Quick Stats */}
-      {tournaments.length > 0 && (
+      {/* Quick Stats & Account Info */}
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Tournament Stats */}
+        {tournaments.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Tournament Overview</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 grid-cols-2">
+                <div className="text-center p-4 bg-blue-50 rounded-lg">
+                  <div className="text-2xl font-bold text-blue-600">
+                    {tournaments.length}
+                  </div>
+                  <div className="text-sm text-blue-700">Total Tournaments</div>
+                </div>
+                
+                <div className="text-center p-4 bg-yellow-50 rounded-lg">
+                  <div className="text-2xl font-bold text-yellow-600">
+                    {tournaments.filter(t => ['stage-1', 'stage-2', 'stage-3'].includes(t.status)).length}
+                  </div>
+                  <div className="text-sm text-yellow-700">Active</div>
+                </div>
+                
+                <div className="text-center p-4 bg-green-50 rounded-lg">
+                  <div className="text-2xl font-bold text-green-600">
+                    {tournaments.filter(t => t.status === 'completed').length}
+                  </div>
+                  <div className="text-sm text-green-700">Completed</div>
+                </div>
+                
+                <div className="text-center p-4 bg-gray-50 rounded-lg">
+                  <div className="text-2xl font-bold text-gray-600">
+                    {tournaments.reduce((sum, t) => sum + getParticipantCount(t), 0)}
+                  </div>
+                  <div className="text-sm text-gray-700">Total Participants</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Account Features */}
         <Card>
           <CardHeader>
-            <CardTitle>Tournament Overview</CardTitle>
+            <CardTitle>Your Account Features</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 md:grid-cols-4">
-              <div className="text-center p-4 bg-blue-50 rounded-lg">
-                <div className="text-2xl font-bold text-blue-600">
-                  {tournaments.length}
-                </div>
-                <div className="text-sm text-blue-700">Total Tournaments</div>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Advanced Formats</span>
+                {limits.allowAdvancedFormats ? (
+                  <Badge className="bg-green-500">✓ Enabled</Badge>
+                ) : (
+                  <Badge variant="outline">
+                    <Lock className="h-3 w-3 mr-1" />
+                    Upgrade Required
+                  </Badge>
+                )}
               </div>
               
-              <div className="text-center p-4 bg-yellow-50 rounded-lg">
-                <div className="text-2xl font-bold text-yellow-600">
-                  {tournaments.filter(t => ['stage-1', 'stage-2', 'stage-3'].includes(t.status)).length}
-                </div>
-                <div className="text-sm text-yellow-700">Active</div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Custom Branding</span>
+                {limits.allowCustomBranding ? (
+                  <Badge className="bg-green-500">✓ Enabled</Badge>
+                ) : (
+                  <Badge variant="outline">
+                    <Lock className="h-3 w-3 mr-1" />
+                    Upgrade Required
+                  </Badge>
+                )}
               </div>
               
-              <div className="text-center p-4 bg-green-50 rounded-lg">
-                <div className="text-2xl font-bold text-green-600">
-                  {tournaments.filter(t => t.status === 'completed').length}
-                </div>
-                <div className="text-sm text-green-700">Completed</div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Multi-Stage Tournaments</span>
+                {limits.allowMultiStage ? (
+                  <Badge className="bg-green-500">✓ Enabled</Badge>
+                ) : (
+                  <Badge variant="outline">
+                    <Lock className="h-3 w-3 mr-1" />
+                    Upgrade Required
+                  </Badge>
+                )}
               </div>
               
-              <div className="text-center p-4 bg-gray-50 rounded-lg">
-                <div className="text-2xl font-bold text-gray-600">
-                  {tournaments.reduce((sum, t) => sum + getParticipantCount(t), 0)}
-                </div>
-                <div className="text-sm text-gray-700">Total Participants</div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Data Export</span>
+                {limits.allowDataExport ? (
+                  <Badge className="bg-green-500">✓ Enabled</Badge>
+                ) : (
+                  <Badge variant="outline">
+                    <Lock className="h-3 w-3 mr-1" />
+                    Upgrade Required
+                  </Badge>
+                )}
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <span className="text-sm">API Access</span>
+                {limits.allowAPIAccess ? (
+                  <Badge className="bg-green-500">✓ Enabled</Badge>
+                ) : (
+                  <Badge variant="outline">
+                    <Lock className="h-3 w-3 mr-1" />
+                    Upgrade Required
+                  </Badge>
+                )}
+              </div>
+              
+              <div className="pt-3 border-t">
+                <Link href="/pricing">
+                  <Button variant="outline" className="w-full">
+                    View Upgrade Options
+                  </Button>
+                </Link>
               </div>
             </div>
           </CardContent>
         </Card>
-      )}
+      </div>
     </div>
   );
 }
