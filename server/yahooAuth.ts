@@ -156,6 +156,7 @@ export function setupYahooAuth(app: Express) {
       
       const authUrl = yahooAuth.getAuthorizationUrl(state);
       console.log('✅ Yahoo OAuth 2.0 authorization URL generated');
+      console.log('🔗 Redirecting to:', authUrl);
       
       res.redirect(authUrl);
     } catch (error) {
