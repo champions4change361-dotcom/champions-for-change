@@ -944,69 +944,98 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log('Fantasy AI Question:', question);
       
-      // Use the advanced Keystone Fantasy Coaching AI
-      const { KeystoneFantasyCoachingAI } = await import('./fantasy-coaching-ai');
-      const storage = await getStorage(); // Get storage for player data
+      // Use Yahoo Sports API to get real data for AI analysis
+      const { YahooSportsAPI } = await import('./yahooSportsAPI');
+      const yahooAPI = new YahooSportsAPI();
       
-      // Analyze the question to provide contextual insights
+      // Get the user's session to check for Yahoo authentication
+      const session = req.session as any;
+      const hasYahooToken = !!session?.yahooAccessToken;
+      
       let response;
-      const lowerQuestion = question.toLowerCase();
       
-      if (lowerQuestion.includes('running back') || lowerQuestion.includes('rb') || lowerQuestion.includes('carries')) {
-        // Generate RB analysis with specific player insights
-        const insight = await KeystoneFantasyCoachingAI.generatePlayerInsight('gibbs_2024', 1, storage);
-        response = {
-          answer: `🔥 **${insight.recommendation}**: ${insight.insight}`,
-          analysis: `**Risk Level**: ${insight.riskLevel} | **Confidence**: ${insight.confidence}%\n\n**Upside**: ${insight.upside}\n**Downside**: ${insight.downside}`,
-          supportingData: Object.entries(insight.supportingData).map(([key, value]) => ({
-            metric: key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1'),
-            value: value
-          })),
-          confidence: insight.confidence
-        };
-      } else if (lowerQuestion.includes('wide receiver') || lowerQuestion.includes('wr') || lowerQuestion.includes('matchup')) {
-        // WR matchup analysis  
-        response = {
-          answer: `🎯 **RED ZONE TARGET KING**: Puka Nacua commands 28% of red zone targets and faces a defense allowing 12.4 slot receptions per game (worst in NFL). This matchup screams touchdown upside!`,
-          analysis: `**Confidence**: 83% | **Risk Level**: Medium\n\n**Upside**: 8+ catches, 100+ yards, multiple TD potential\n**Downside**: TD-dependent for ceiling performance`,
-          supportingData: [
-            { metric: 'Red Zone Target Share', value: '28%' },
-            { metric: 'Opponent Slot Receptions Allowed', value: '12.4 per game' },
-            { metric: 'Defense Rank vs Slot', value: '32nd (worst)' },
-            { metric: 'Touchdown Probability', value: 'Above average' }
-          ],
-          confidence: 83
-        };
-      } else if (lowerQuestion.includes('quarterback') || lowerQuestion.includes('qb') || lowerQuestion.includes('passing')) {
-        // QB analysis with pressure insights
-        response = {
-          answer: `⚡ **CLEAN POCKET ADVANTAGE**: Josh Allen faces a defense generating pressure on only 18% of dropbacks (bottom 5 in NFL). Expect 300+ yards and multiple TDs with exceptional protection!`,
-          analysis: `**Confidence**: 82% | **Risk Level**: Low\n\n**Upside**: 300+ passing yards, 3+ total TDs in clean pocket\n**Downside**: Still solid floor with protection advantage`,
-          supportingData: [
-            { metric: 'Opponent Pressure Rate', value: '18% (bottom 5)' },
-            { metric: 'League Average Pressure', value: '24%' },
-            { metric: 'Allen vs Light Pressure', value: '8.2 YPA, 72% completion' },
-            { metric: 'Projected Pass Attempts', value: '32-38' }
-          ],
-          confidence: 82
-        };
-      } else if (lowerQuestion.includes('injury') || lowerQuestion.includes('questionable')) {
-        // Use Yahoo API for injury data
-        const { YahooSportsAPI } = await import('./yahooSportsAPI');
-        const yahooAPI = new YahooSportsAPI();
-        response = await yahooAPI.answerFantasyQuestion(question);
-      } else {
-        // Enhanced general analysis
-        response = {
-          answer: `AI analysis completed - see detailed insights below.`,
-          analysis: `Comprehensive analysis based on current NFL data, usage trends, and matchup information.`,
-          supportingData: [
-            { metric: 'Data Sources', value: 'Live Yahoo Sports API + Advanced Analytics' },
-            { metric: 'Analysis Confidence', value: '85%' },
-            { metric: 'Fantasy Factors', value: 'Usage, Matchups, Trends, Game Script' }
-          ],
-          confidence: 85
-        };
+      // Use Yahoo API to generate intelligent responses based on real data
+      try {
+        if (hasYahooToken) {
+          // Authenticated user - can access personalized Yahoo Fantasy data
+          response = await yahooAPI.generateIntelligentResponse(question, session);
+        } else {
+          // Use public Yahoo Sports data for analysis
+          response = await yahooAPI.answerFantasyQuestion(question);
+        }
+      } catch (apiError) {
+        console.error('Yahoo API error, falling back to enhanced analysis:', apiError);
+        
+        // Fallback to enhanced generic analysis when API fails
+        const lowerQuestion = question.toLowerCase();
+        
+        if (lowerQuestion.includes('running back') || lowerQuestion.includes('rb') || lowerQuestion.includes('carries')) {
+          response = {
+            answer: `🏈 **RB ANALYSIS REQUEST**: I need live Yahoo Sports data to provide specific player insights. Connect your Yahoo account for personalized recommendations based on your league data.`,
+            analysis: `Without Yahoo authentication, I can't access current player usage rates, matchup data, or injury reports. Connect to unlock detailed RB analysis.`,
+            supportingData: [
+              { metric: 'Data Needed', value: 'Yahoo Fantasy Sports API' },
+              { metric: 'Analysis Type', value: 'Usage rates, carry share, matchups' },
+              { metric: 'Recommendation', value: 'Connect Yahoo account above' }
+            ],
+            confidence: 60
+          };
+        } else if (lowerQuestion.includes('wide receiver') || lowerQuestion.includes('wr') || lowerQuestion.includes('matchup')) {
+          response = {
+            answer: `🎯 **WR MATCHUP ANALYSIS**: Real-time target share data and defensive rankings require Yahoo Sports API access. Connect your account for detailed WR insights.`,
+            analysis: `WR analysis needs current target trends, red zone usage, and opponent defensive stats from Yahoo's live data feeds.`,
+            supportingData: [
+              { metric: 'Data Source', value: 'Yahoo Sports API Required' },
+              { metric: 'Analysis Focus', value: 'Target share, red zone usage, matchups' },
+              { metric: 'Sports Covered', value: 'NFL, NBA, MLB, NHL' }
+            ],
+            confidence: 65
+          };
+        } else if (lowerQuestion.includes('basketball') || lowerQuestion.includes('nba') || lowerQuestion.includes('points') || lowerQuestion.includes('rebounds')) {
+          response = {
+            answer: `🏀 **NBA FANTASY ANALYSIS**: Basketball insights require live Yahoo NBA data including usage rates, pace factors, and injury reports.`,
+            analysis: `NBA analysis covers player efficiency, pace-adjusted stats, matchup advantages, and real-time injury impacts across all teams.`,
+            supportingData: [
+              { metric: 'Sport', value: 'NBA Basketball' },
+              { metric: 'Key Metrics', value: 'Usage %, Pace, Efficiency' },
+              { metric: 'Data Source', value: 'Yahoo Sports NBA API' }
+            ],
+            confidence: 70
+          };
+        } else if (lowerQuestion.includes('baseball') || lowerQuestion.includes('mlb') || lowerQuestion.includes('pitcher') || lowerQuestion.includes('hitter')) {
+          response = {
+            answer: `⚾ **MLB FANTASY INSIGHTS**: Baseball analysis requires Yahoo's pitcher vs. hitter matchup data, weather conditions, and ballpark factors.`,
+            analysis: `MLB insights include platoon splits, ballpark effects, weather impacts, and detailed pitcher-hitter historical matchups.`,
+            supportingData: [
+              { metric: 'Sport', value: 'MLB Baseball' },
+              { metric: 'Analysis Type', value: 'Matchups, Weather, Ballparks' },
+              { metric: 'Data Requirements', value: 'Yahoo MLB API Access' }
+            ],
+            confidence: 75
+          };
+        } else if (lowerQuestion.includes('hockey') || lowerQuestion.includes('nhl') || lowerQuestion.includes('goals') || lowerQuestion.includes('assists')) {
+          response = {
+            answer: `🏒 **NHL FANTASY ANALYSIS**: Hockey insights need Yahoo's line combination data, power play units, and goalie matchup information.`,
+            analysis: `NHL analysis covers line combinations, power play opportunities, goalie starts, and team pace factors for comprehensive insights.`,
+            supportingData: [
+              { metric: 'Sport', value: 'NHL Hockey' },
+              { metric: 'Key Factors', value: 'Lines, PP units, Goalies' },
+              { metric: 'Data Source', value: 'Yahoo NHL API' }
+            ],
+            confidence: 72
+          };
+        } else {
+          response = {
+            answer: `🤖 **MULTI-SPORT AI READY**: I can analyze NFL, NBA, MLB, and NHL fantasy questions using live Yahoo Sports data once connected.`,
+            analysis: `The AI supports comprehensive analysis across all major sports with real-time data integration when Yahoo authentication is available.`,
+            supportingData: [
+              { metric: 'Sports Supported', value: 'NFL, NBA, MLB, NHL' },
+              { metric: 'Data Source', value: 'Yahoo Sports API (all leagues)' },
+              { metric: 'Analysis Types', value: 'Players, Matchups, Trends, Injuries' }
+            ],
+            confidence: 80
+          };
+        }
       }
       
       res.json({
