@@ -14,6 +14,14 @@ export function registerDomainRoutes(app: Express) {
         return res.status(400).json({ error: "Search term is required" });
       }
 
+      // Check if API credentials are configured
+      if (!process.env.OPENPROVIDER_USERNAME || !process.env.OPENPROVIDER_PASSWORD) {
+        return res.status(503).json({ 
+          error: "Domain search service is not configured. Please add Openprovider API credentials.",
+          requiresSetup: true
+        });
+      }
+
       const results = await openproviderService.searchDomains(
         searchTerm, 
         tlds || ['.com', '.org', '.net', '.info', '.biz']

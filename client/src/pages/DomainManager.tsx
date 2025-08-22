@@ -35,9 +35,14 @@ export default function DomainManager() {
       setSearchResults(data.results);
     },
     onError: (error: any) => {
+      const errorMessage = error.message || "Unable to search domains";
+      const isSetupRequired = errorMessage.includes("not configured");
+      
       toast({
-        title: "Search Failed",
-        description: error.message || "Unable to search domains",
+        title: isSetupRequired ? "Setup Required" : "Search Failed",
+        description: isSetupRequired 
+          ? "Domain search needs Openprovider API credentials to be configured"
+          : errorMessage,
         variant: "destructive",
       });
     },

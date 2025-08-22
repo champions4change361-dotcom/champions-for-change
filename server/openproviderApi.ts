@@ -53,8 +53,12 @@ class OpenproviderService {
       apiUrl: process.env.OPENPROVIDER_API_URL || 'https://api.openprovider.eu',
       username: process.env.OPENPROVIDER_USERNAME || '',
       password: process.env.OPENPROVIDER_PASSWORD || '',
-      environment: (process.env.OPENPROVIDER_ENV as 'test' | 'live') || 'test',
+      environment: (process.env.OPENPROVIDER_ENV as 'test' | 'live') || 'live',
     };
+
+    if (!this.config.username || !this.config.password) {
+      console.warn('⚠️ Openprovider credentials not configured. Domain search will be unavailable.');
+    }
 
     this.api = axios.create({
       baseURL: this.config.apiUrl,
