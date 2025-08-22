@@ -67,6 +67,11 @@ export class YahooAuth {
     const signature = this.generateSignature('POST', url, params);
     params.oauth_signature = signature;
 
+    console.log('🔑 Yahoo OAuth Request Details:');
+    console.log('- URL:', url);
+    console.log('- Params:', params);
+    console.log('- Body:', new URLSearchParams(params).toString());
+
     try {
       const response = await fetch(url, {
         method: 'POST',
@@ -77,8 +82,14 @@ export class YahooAuth {
         body: new URLSearchParams(params).toString()
       });
 
+      console.log('📡 Yahoo API Response:');
+      console.log('- Status:', response.status);
+      console.log('- Headers:', Object.fromEntries(response.headers.entries()));
+
       if (!response.ok) {
-        throw new Error(`Yahoo API error: ${response.status}`);
+        const errorText = await response.text();
+        console.log('❌ Yahoo API Error Response:', errorText);
+        throw new Error(`Yahoo API error: ${response.status} - ${errorText}`);
       }
 
       const data = await response.text();
@@ -167,10 +178,16 @@ export class YahooAuth {
 
 // Express route handlers
 export function setupYahooAuth(app: Express) {
+  // Get the primary domain from REPLIT_DOMAINS
+  const primaryDomain = process.env.REPLIT_DOMAINS?.split(',')[0];
+  const redirectUri = primaryDomain 
+    ? `https://${primaryDomain}/api/yahoo/callback`
+    : 'http://localhost:5000/api/yahoo/callback';
+
   const yahooAuth = new YahooAuth({
     consumerKey: process.env.YAHOO_CONSUMER_KEY!,
     consumerSecret: process.env.YAHOO_CONSUMER_SECRET!,
-    redirectUri: `${process.env.REPLIT_DOMAIN || 'http://localhost:5000'}/api/yahoo/callback`
+    redirectUri
   });
 
   // Start OAuth flow
@@ -179,7 +196,7 @@ export function setupYahooAuth(app: Express) {
       console.log('🎯 Starting Yahoo OAuth flow...');
       console.log('- Consumer Key:', process.env.YAHOO_CONSUMER_KEY?.substring(0, 8) + '...');
       console.log('- Consumer Secret present:', !!process.env.YAHOO_CONSUMER_SECRET);
-      console.log('- Redirect URI:', `${process.env.REPLIT_DOMAIN || 'http://localhost:5000'}/api/yahoo/callback`);
+      console.log('- Redirect URI:', yahooAuth['config'].redirectUri);
       
       const { authUrl, requestToken } = await yahooAuth.getRequestToken();
       
