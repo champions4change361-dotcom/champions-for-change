@@ -6,7 +6,7 @@ Full-stack tournament bracket management application built with React/TypeScript
 ## Current Technology Stack
 - **Frontend**: React 18 + TypeScript, Wouter routing, TanStack Query, Shadcn/UI components, Tailwind CSS
 - **Backend**: Node.js + Express, TypeScript, RESTful API design
-- **Database**: PostgreSQL with Drizzle ORM (Supabase/Neon support), graceful fallback to in-memory storage
+- **Database**: PostgreSQL with Drizzle ORM (Neon Database), graceful fallback to in-memory storage
 - **Integration**: Bubble database import system for existing sports/tournament data
 
 ## Implemented Features
@@ -118,7 +118,7 @@ TournamentStructure {
 
 ## Deployment Status
 - **Development**: Fully functional with in-memory storage
-- **Production Ready**: Database schema and API endpoints ready for Supabase/Neon deployment
+- **Production Ready**: Database schema and API endpoints ready for Neon deployment
 - **Scalability**: Architecture supports horizontal scaling with external database
 
 This system provides a complete foundation for tournament management with extensive customization options and integration capabilities for additional features and data sources.
