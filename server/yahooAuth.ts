@@ -210,7 +210,14 @@ export function setupYahooAuth(app: Express) {
       // Provide more specific error info
       const errorMsg = error instanceof Error ? error.message : 'Unknown OAuth error';
       console.log('🔄 Falling back to demo mode due to:', errorMsg);
-      res.redirect(`/fantasy-coaching?yahoo=demo&error=${encodeURIComponent(errorMsg)}`);
+      
+      // Enhanced error feedback for troubleshooting
+      if (errorMsg.includes('404')) {
+        console.log('💡 Troubleshooting tip: Yahoo app may need activation or API permissions verification');
+        res.redirect(`/fantasy-coaching?yahoo=demo&error=Yahoo+app+not+found+-+check+developer+console+status`);
+      } else {
+        res.redirect(`/fantasy-coaching?yahoo=demo&error=${encodeURIComponent(errorMsg)}`);
+      }
     }
   });
 
@@ -282,5 +289,21 @@ export function setupYahooAuth(app: Express) {
     delete session.yahooSessionHandle;
     
     res.json({ success: true });
+  });
+
+  // Test Yahoo credentials (debugging endpoint)
+  app.get('/api/yahoo/test', (req: Request, res: Response) => {
+    const hasKeys = !!(process.env.YAHOO_CONSUMER_KEY && process.env.YAHOO_CONSUMER_SECRET);
+    const keyPrefix = process.env.YAHOO_CONSUMER_KEY?.substring(0, 12) + '...';
+    
+    res.json({
+      hasCredentials: hasKeys,
+      keyPrefix,
+      redirectUri: yahooAuth['config'].redirectUri,
+      status: hasKeys ? 'Credentials present - 404 error suggests Yahoo app not activated' : 'Missing credentials',
+      nextSteps: hasKeys ? 
+        'Check Yahoo Developer Console: App status should be "Active", not "Pending"' :
+        'Add YAHOO_CONSUMER_KEY and YAHOO_CONSUMER_SECRET to environment'
+    });
   });
 }
