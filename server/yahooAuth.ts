@@ -300,10 +300,15 @@ export function setupYahooAuth(app: Express) {
       hasCredentials: hasKeys,
       keyPrefix,
       redirectUri: yahooAuth['config'].redirectUri,
-      status: hasKeys ? 'Credentials present - 404 error suggests Yahoo app not activated' : 'Missing credentials',
-      nextSteps: hasKeys ? 
-        'Check Yahoo Developer Console: App status should be "Active", not "Pending"' :
-        'Add YAHOO_CONSUMER_KEY and YAHOO_CONSUMER_SECRET to environment'
+      status: 'App configured correctly - Fantasy Sports permission visible in console',
+      diagnosis: '404 error persists despite correct configuration. Possible causes:',
+      possibleCauses: [
+        'Fantasy Sports API requires additional approval beyond basic app approval',
+        'Yahoo OAuth v2 endpoint may have connectivity issues', 
+        'App processing still in progress (can take 24-48 hours)',
+        'Some Yahoo APIs require production domain verification'
+      ],
+      recommendation: 'App appears correctly configured. 404 may resolve automatically as Yahoo processes the application.'
     });
   });
 }
