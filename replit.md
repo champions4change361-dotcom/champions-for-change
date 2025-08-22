@@ -3,6 +3,8 @@
 ## Overview
 This platform is a comprehensive Enterprise Resource Planning (ERP) system designed for educational athletic and academic programs. As a white-label SaaS solution for the Champions for Change nonprofit, it generates funding for educational opportunities for underprivileged youth. **PRODUCTION-READY DONATION SYSTEM**: Complete Stripe integration fully verified with real financial transactions. Successfully processed $25 test donation with bank account verification, confirming end-to-end payment processing for Champions for Change educational programs.
 
+**DOMAIN RESELLER INTEGRATION**: Complete Openprovider integration (Account ID: 309533) enables white-label domain services at transparent nonprofit pricing (registry cost + $3 processing fee). Live API connectivity confirmed with credentials (champions4change361@gmail.com). Domain search available at `/domains` provides real-time availability and competitive pricing vs $15.99 retail rates.
+
 **CHECK PAYMENT SYSTEM**: Implemented pending approval workflow for annual subscribers who pay by check. Check payments restricted to Annual Pro subscribers only ($990/month plans). Monthly subscribers must use credit/debit cards. Check payment address: Champions for Change, 15210 Cruiser St. Corpus Christi TX 78418. Processing time: 7-10 business days with admin approval system at `/admin/approvals`. It serves as a complete district management system covering athletic programs, academic competitions (50+ UIL events), budget allocation, organizational oversight, and health monitoring. Key capabilities include HIPAA/FERPA compliant data management, Excel-style budget systems, interactive organizational charts, AI-powered injury prediction (95% accuracy), athletic trainer dashboards, role-based access controls, comprehensive audit trails, AI assistants on all data entry pages, tournament management, and multi-tenant architecture with full district-to-student hierarchy. The platform aims to manage educational programs, student health data, financial allocation, and organizational structure, emphasizing a mission-driven approach alongside enterprise-grade compliance for educational institutions.
 
 ## User Preferences
@@ -82,6 +84,7 @@ Mobile-first development approach validated - platform built 95% on mobile devic
 - **Validation**: Zod.
 - **Date Handling**: date-fns.
 - **Payment Integration**: Stripe.
+- **Domain Registration**: Openprovider (Account ID: 309533).
 - **API Integration**: ESPN API.
 - **AI**: AI-powered tournament consultation and AI coaching messages.
 - **Email**: SendGrid.
