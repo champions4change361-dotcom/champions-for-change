@@ -69,14 +69,17 @@ export default function FantasyCoaching() {
   });
 
   // Yahoo Connection Status
-  const { data: yahooStatus } = useQuery({
+  const { data: yahooStatus, error: yahooError, isLoading: yahooLoading } = useQuery({
     queryKey: ['/api/yahoo/status'],
     queryFn: async () => {
       try {
+        console.log('🔍 Fetching Yahoo status...');
         const response = await apiRequest('/api/yahoo/status', 'GET');
-        return await response.json() as { hasCredentials: boolean; connected: boolean; error?: boolean };
+        const data = await response.json();
+        console.log('📊 Yahoo status received:', data);
+        return data as { hasCredentials: boolean; connected: boolean; error?: boolean };
       } catch (error) {
-        console.error('Yahoo status error:', error);
+        console.error('❌ Yahoo status error:', error);
         return { hasCredentials: false, connected: false, error: true };
       }
     },
@@ -169,7 +172,14 @@ export default function FantasyCoaching() {
 
       {/* Yahoo Connection Status */}
       <div className="max-w-7xl mx-auto px-4 pt-6">
-        {yahooStatus?.hasCredentials ? (
+        {yahooLoading ? (
+          <Alert className="border-gray-200 bg-gray-50 mb-4" data-testid="yahoo-loading">
+            <Activity className="h-4 w-4 text-gray-600 animate-spin" />
+            <AlertDescription className="text-gray-900">
+              <strong>Checking Yahoo API Status...</strong> Please wait.
+            </AlertDescription>
+          </Alert>
+        ) : yahooStatus?.hasCredentials ? (
           yahooStatus?.connected ? (
             <Alert className="border-green-200 bg-green-50 mb-4" data-testid="yahoo-connected">
               <CheckCircle className="h-4 w-4 text-green-600" />
