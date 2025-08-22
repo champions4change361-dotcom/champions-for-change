@@ -21,8 +21,6 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
-  stripeCustomerId: varchar("stripe_customer_id"),
-  stripeSubscriptionId: varchar("stripe_subscription_id"),
   subscriptionStatus: text("subscription_status", { 
     enum: ["active", "inactive", "trialing", "past_due", "canceled", "unpaid", "pending", "pending_approval"] 
   }).default("inactive"),
@@ -145,6 +143,10 @@ export const users = pgTable("users", {
   medicalDataAccess: boolean("medical_data_access").default(false),
   lastComplianceAudit: timestamp("last_compliance_audit"),
   
+  // STRIPE INTEGRATION (OPTIONAL)
+  stripeCustomerId: varchar("stripe_customer_id"),
+  stripeSubscriptionId: varchar("stripe_subscription_id"),
+
   // BUSINESS REGISTRATION FIELDS
   phone: varchar("phone"),
   organizationType: text("organization_type", {

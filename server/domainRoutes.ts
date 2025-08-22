@@ -5,6 +5,43 @@ import { z } from "zod";
 
 export function registerDomainRoutes(app: Express) {
   
+  // Test endpoint to verify Openprovider configuration
+  app.get("/api/domains/test", async (req, res) => {
+    try {
+      const hasCredentials = !!(process.env.OPENPROVIDER_USERNAME && process.env.OPENPROVIDER_PASSWORD);
+      
+      if (!hasCredentials) {
+        return res.json({
+          status: "Configuration needed",
+          message: "Openprovider credentials not found in environment",
+          hasUsername: !!process.env.OPENPROVIDER_USERNAME,
+          hasPassword: !!process.env.OPENPROVIDER_PASSWORD
+        });
+      }
+
+      // Try a simple domain search to verify API connection
+      const results = await openproviderService.searchDomains('test', ['.com']);
+      
+      res.json({
+        status: "API connected",
+        message: "Openprovider API is working",
+        testResults: results.length,
+        samplePricing: results[0] ? {
+          domain: results[0].name,
+          registryPrice: results[0].price,
+          championsCost: results[0].price + 3.00,
+          savings: `$${(15.99 - (results[0].price + 3.00)).toFixed(2)} vs retail`
+        } : null
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        status: "API error",
+        message: error.message,
+        details: "Check Openprovider credentials or API connectivity"
+      });
+    }
+  });
+  
   // Search for available domains
   app.post("/api/domains/search", isAuthenticated, async (req, res) => {
     try {
