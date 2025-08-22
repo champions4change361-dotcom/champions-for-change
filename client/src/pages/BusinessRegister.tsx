@@ -22,7 +22,7 @@ const businessRegistrationSchema = z.object({
   phone: z.string().optional(),
   organizationName: z.string().min(2, 'Organization name is required'),
   organizationType: z.enum(['business', 'nonprofit', 'sports_club', 'individual']),
-  description: z.string().min(10, 'Please describe your tournament organizing needs (minimum 10 characters)'),
+  description: z.string().optional(),
   sportsInvolved: z.array(z.string()).min(1, 'Please select at least one sport'),
   paymentMethod: z.enum(['stripe', 'check']),
   plan: z.string(),
@@ -98,7 +98,10 @@ export default function BusinessRegister() {
         sportsInvolved: selectedSports
       }),
     onSuccess: () => {
-      if (paymentMethod === 'stripe' && plan !== 'free') {
+      if (plan === 'free') {
+        // Redirect to tournament dashboard for free accounts
+        window.location.href = '/tournaments';
+      } else if (paymentMethod === 'stripe') {
         setStep(3); // Go to Stripe checkout
       } else {
         setStep(2); // Success step
@@ -311,23 +314,23 @@ export default function BusinessRegister() {
                 </div>
                 <div>
                   <Label htmlFor="organizationType">Organization Type *</Label>
-                  <Select onValueChange={(value) => form.setValue('organizationType', value as any)}>
-                    <SelectTrigger data-testid="select-organizationType">
-                      <SelectValue placeholder="Select organization type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="business">Business</SelectItem>
-                      <SelectItem value="nonprofit">Nonprofit Organization</SelectItem>
-                      <SelectItem value="sports_club">Sports Club</SelectItem>
-                      <SelectItem value="individual">Individual Organizer</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select 
+                    {...form.register('organizationType')}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    data-testid="select-organizationType"
+                  >
+                    <option value="">Select organization type</option>
+                    <option value="business">Business</option>
+                    <option value="nonprofit">Nonprofit Organization</option>
+                    <option value="sports_club">Sports Club</option>
+                    <option value="individual">Individual Organizer</option>
+                  </select>
                 </div>
               </div>
 
               {/* Tournament Description */}
               <div>
-                <Label htmlFor="description">Tournament Organizing Experience *</Label>
+                <Label htmlFor="description">Tournament Organizing Experience (Filling this out will give you the best experience)</Label>
                 <Textarea 
                   {...form.register('description')} 
                   placeholder="Tell us about your tournament organizing experience and what types of events you plan to run..."
