@@ -29,7 +29,7 @@ export default function FantasyCoaching() {
   // Fantasy AI Question Mutation
   const askQuestionMutation = useMutation({
     mutationFn: async (question: string) => {
-      const response = await apiRequest('POST', '/api/fantasy/ask-question', { question });
+      const response = await apiRequest('/api/fantasy/ask-question', 'POST', { question });
       return response;
     },
     onError: (error) => {
@@ -45,7 +45,7 @@ export default function FantasyCoaching() {
   const { data: slateAnalysis, isLoading: slateLoading } = useQuery({
     queryKey: ['/api/fantasy/analyze-slate', selectedSlate],
     queryFn: async () => {
-      const response = await apiRequest('POST', '/api/fantasy/analyze-slate', { slate: selectedSlate });
+      const response = await apiRequest('/api/fantasy/analyze-slate', 'POST', { slate: selectedSlate });
       return response;
     }
   });
@@ -54,7 +54,7 @@ export default function FantasyCoaching() {
   const { data: injuryReports } = useQuery({
     queryKey: ['/api/fantasy/injury-reports'],
     queryFn: async () => {
-      const response = await apiRequest('GET', '/api/fantasy/injury-reports');
+      const response = await apiRequest('/api/fantasy/injury-reports', 'GET');
       return response;
     }
   });
@@ -63,7 +63,7 @@ export default function FantasyCoaching() {
   const { data: rbProjections } = useQuery({
     queryKey: ['/api/fantasy/projections/RB', selectedWeek],
     queryFn: async () => {
-      const response = await apiRequest('GET', `/api/fantasy/projections/RB?week=${selectedWeek}`);
+      const response = await apiRequest(`/api/fantasy/projections/RB?week=${selectedWeek}`, 'GET');
       return response;
     }
   });
@@ -73,8 +73,8 @@ export default function FantasyCoaching() {
     queryKey: ['/api/yahoo/status'],
     queryFn: async () => {
       try {
-        const response = await apiRequest('GET', '/api/yahoo/status');
-        return response as { hasCredentials: boolean; connected: boolean; error?: boolean };
+        const response = await apiRequest('/api/yahoo/status', 'GET');
+        return await response.json() as { hasCredentials: boolean; connected: boolean; error?: boolean };
       } catch (error) {
         console.error('Yahoo status error:', error);
         return { hasCredentials: false, connected: false, error: true };
