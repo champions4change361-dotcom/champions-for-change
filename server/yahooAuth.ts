@@ -201,6 +201,15 @@ export function setupYahooAuth(app: Express) {
       // Clear OAuth state
       delete (req.session as any).yahooOAuthState;
 
+      // Force session save to ensure token persistence
+      req.session.save((err) => {
+        if (err) {
+          console.error('❌ Session save error:', err);
+        } else {
+          console.log('💾 Yahoo token saved to session successfully');
+        }
+      });
+
       console.log('✅ Yahoo OAuth 2.0 authentication successful');
       res.redirect('/fantasy-coaching?yahoo=connected');
     } catch (error) {
