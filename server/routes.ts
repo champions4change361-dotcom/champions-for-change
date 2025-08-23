@@ -1584,8 +1584,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { sport, position, player, team } = req.body;
       console.log(`🔬 PROFESSIONAL ANALYSIS: ${sport} ${position} ${player} (${team})`);
 
-      // Generate professional-grade analysis with floor/ceiling projections
-      const professionalAnalysis = await generateProfessionalAnalysis(sport, position, player, team);
+      // Generate SPORT-SPECIFIC professional analysis with proper context
+      const professionalAnalysis = await generateSportSpecificAnalysis(sport, position, player, team);
       
       res.json(professionalAnalysis);
 
@@ -1678,7 +1678,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return scripts[Math.floor(Math.random() * scripts.length)];
   }
 
-  // 🏆 PROFESSIONAL-GRADE ANALYSIS ENGINE
+  // 🏆 SPORT-SPECIFIC PROFESSIONAL ANALYSIS ENGINE  
+  async function generateSportSpecificAnalysis(sport: string, position: string, player: string, team: string) {
+    // Import the AI analysis functions
+    const { KeystoneFantasyCoachingAI } = await import('./fantasy-coaching-ai.js');
+    
+    // Generate sport-specific analysis
+    let sportAnalysis;
+    switch (sport.toLowerCase()) {
+      case 'mlb':
+        sportAnalysis = KeystoneFantasyCoachingAI.generateBaseballAnalysis(player, position, team);
+        break;
+      case 'nfl':
+        sportAnalysis = KeystoneFantasyCoachingAI.generateFootballAnalysis(player, position, team);
+        break;
+      case 'nba':
+        sportAnalysis = KeystoneFantasyCoachingAI.generateBasketballAnalysis(player, position, team);
+        break;
+      case 'nhl':
+        sportAnalysis = KeystoneFantasyCoachingAI.generateHockeyAnalysis(player, position, team);
+        break;
+      default:
+        sportAnalysis = {
+          insight: `📊 ANALYSIS: ${player} (${team}) - Solid option with good upside potential`,
+          confidence: 75,
+          recommendation: "MONITOR CLOSELY",
+          riskLevel: "medium",
+          upside: "Good ceiling in favorable matchups",
+          downside: "Standard variance expected"
+        };
+    }
+
+    const baseProjection = getRealisticProjection(sport, position);
+    const floorProjection = Math.max(1, baseProjection - (baseProjection * 0.35));
+    const ceilingProjection = baseProjection + (baseProjection * 0.45);
+
+    return {
+      success: true,
+      player: player,
+      sport: sport.toUpperCase(),
+      position: position,
+      team: team,
+      projectedPoints: baseProjection,
+      confidence: sportAnalysis.confidence,
+      matchupRating: 7, // Out of 10
+      recommendation: sportAnalysis.recommendation,
+      keyFactor: sportAnalysis.insight,
+      injuryRisk: "⬤", // Low risk
+      ownership: "●●○", // Medium ownership
+      gameScript: "Positive game environment expected",
+      floorProjection: Math.round(floorProjection * 10) / 10,
+      ceilingProjection: Math.round(ceilingProjection * 10) / 10,
+      riskLevel: sportAnalysis.riskLevel,
+      upside: sportAnalysis.upside,
+      downside: sportAnalysis.downside || "Standard variance expected",
+      weatherConcerns: sport.toLowerCase() === 'nfl' ? "No weather concerns" : null,
+      venue: "Home dome advantage" // Simplified
+    };
+  }
+
+  // 🏆 LEGACY ANALYSIS ENGINE (KEEPING FOR COMPATIBILITY)
   async function generateProfessionalAnalysis(sport: string, position: string, player: string, team: string) {
     const baseProjection = getRealisticProjection(sport, position);
     
