@@ -272,26 +272,31 @@ export default function FantasyCoaching() {
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} data-testid="coaching-tabs">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="ai-coach" data-testid="tab-ai-coach">
-              <Brain className="w-4 h-4 mr-2" />
-              AI Coach
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1">
+            <TabsTrigger value="ai-coach" data-testid="tab-ai-coach" className="flex items-center justify-center text-xs sm:text-sm">
+              <Brain className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">AI Coach</span>
+              <span className="sm:hidden">AI</span>
             </TabsTrigger>
-            <TabsTrigger value="slate-analysis" data-testid="tab-slate-analysis">
-              <BarChart3 className="w-4 h-4 mr-2" />
-              Slate Analysis
+            <TabsTrigger value="slate-analysis" data-testid="tab-slate-analysis" className="flex items-center justify-center text-xs sm:text-sm">
+              <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Slate Analysis</span>
+              <span className="sm:hidden">Slate</span>
             </TabsTrigger>
-            <TabsTrigger value="injury-reports" data-testid="tab-injury-reports">
-              <AlertTriangle className="w-4 h-4 mr-2" />
-              Injuries
+            <TabsTrigger value="injury-reports" data-testid="tab-injury-reports" className="flex items-center justify-center text-xs sm:text-sm">
+              <AlertTriangle className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Injuries</span>
+              <span className="sm:hidden">Injury</span>
             </TabsTrigger>
-            <TabsTrigger value="lineup" data-testid="tab-lineup">
-              <Target className="w-4 h-4 mr-2" />
-              Lineup Coach
+            <TabsTrigger value="lineup" data-testid="tab-lineup" className="flex items-center justify-center text-xs sm:text-sm">
+              <Target className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Lineup Coach</span>
+              <span className="sm:hidden">Lineup</span>
             </TabsTrigger>
-            <TabsTrigger value="live" data-testid="tab-live">
-              <Zap className="w-4 h-4 mr-2" />
-              Live Scoring
+            <TabsTrigger value="live" data-testid="tab-live" className="flex items-center justify-center text-xs sm:text-sm">
+              <Zap className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Live Scoring</span>
+              <span className="sm:hidden">Live</span>
             </TabsTrigger>
           </TabsList>
 
