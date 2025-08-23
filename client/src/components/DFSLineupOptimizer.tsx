@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Trophy, Target, DollarSign, TrendingUp, Star, Zap } from 'lucide-react';
@@ -83,32 +82,34 @@ export default function DFSLineupOptimizer() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div>
               <label className="text-sm font-medium mb-2 block">DFS Site</label>
-              <Select value={selectedSite} onValueChange={setSelectedSite}>
-                <SelectTrigger data-testid="select-dfs-site">
-                  <SelectValue placeholder="Select DFS site" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="draftkings">DraftKings</SelectItem>
-                  <SelectItem value="fanduel">FanDuel</SelectItem>
-                  <SelectItem value="yahoo">Yahoo</SelectItem>
-                  <SelectItem value="fantasydraft">FantasyDraft</SelectItem>
-                </SelectContent>
-              </Select>
+              <select 
+                value={selectedSite} 
+                onChange={(e) => setSelectedSite(e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                data-testid="select-dfs-site"
+              >
+                <option value="">Select DFS site</option>
+                <option value="draftkings">DraftKings</option>
+                <option value="fanduel">FanDuel</option>
+                <option value="yahoo">Yahoo</option>
+                <option value="fantasydraft">FantasyDraft</option>
+              </select>
             </div>
             
             <div>
               <label className="text-sm font-medium mb-2 block">Sport</label>
-              <Select value={selectedSport} onValueChange={setSelectedSport}>
-                <SelectTrigger data-testid="select-sport">
-                  <SelectValue placeholder="Select sport" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="nfl">NFL Football</SelectItem>
-                  <SelectItem value="nba">NBA Basketball</SelectItem>
-                  <SelectItem value="mlb">MLB Baseball</SelectItem>
-                  <SelectItem value="nhl">NHL Hockey</SelectItem>
-                </SelectContent>
-              </Select>
+              <select 
+                value={selectedSport} 
+                onChange={(e) => setSelectedSport(e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                data-testid="select-sport"
+              >
+                <option value="">Select sport</option>
+                <option value="nfl">NFL Football</option>
+                <option value="nba">NBA Basketball</option>
+                <option value="mlb">MLB Baseball</option>
+                <option value="nhl">NHL Hockey</option>
+              </select>
             </div>
             
             <div className="flex items-end">
@@ -145,11 +146,11 @@ export default function DFSLineupOptimizer() {
                 </div>
               </div>
 
-              <div className="grid gap-6">
+              <div className="space-y-6">
                 {optimizerResult.lineups.map((lineup) => (
-                  <Card key={lineup.lineup_number} className="border-l-4 border-l-blue-500">
+                  <Card key={lineup.lineup_number} className="border-l-4 border-l-blue-500 w-full overflow-hidden">
                     <CardHeader className="pb-3">
-                      <div className="flex items-center justify-between">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                         <CardTitle className="flex items-center gap-2 text-lg">
                           <Star className="h-5 w-5 text-yellow-500" />
                           Lineup #{lineup.lineup_number}
@@ -172,24 +173,24 @@ export default function DFSLineupOptimizer() {
                         </div>
                       </div>
                     </CardHeader>
-                    <CardContent>
-                      <div className="grid gap-3">
+                    <CardContent className="px-3 sm:px-6">
+                      <div className="space-y-3">
                         {lineup.players.map((player, index) => (
-                          <div key={player.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                          <div key={player.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg min-w-0 w-full">
+                            <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-xs sm:text-sm flex-shrink-0">
                                 {index + 1}
                               </div>
-                              <div>
-                                <div className="font-semibold">{player.name}</div>
-                                <div className="text-sm text-muted-foreground">{player.team}</div>
+                              <div className="min-w-0 flex-1">
+                                <div className="font-semibold text-sm sm:text-base truncate">{player.name}</div>
+                                <div className="text-xs sm:text-sm text-muted-foreground">{player.team}</div>
                               </div>
-                              <Badge className={getPositionColor(player.position)}>
+                              <Badge className={`${getPositionColor(player.position)} text-xs flex-shrink-0`}>
                                 {player.position}
                               </Badge>
                             </div>
                             
-                            <div className="flex items-center gap-4 text-sm">
+                            <div className="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm flex-shrink-0">
                               <div className="text-right">
                                 <div className="font-semibold">{player.projected_points}</div>
                                 <div className="text-muted-foreground">pts</div>
