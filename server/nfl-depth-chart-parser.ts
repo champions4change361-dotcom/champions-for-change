@@ -230,7 +230,145 @@ export class NFLDepthChartParser {
           { id: 'johnson_diontae', name: 'Diontae Johnson', team: 'PIT', status: 'starter', depth: 2 },
           { id: 'washington_calvin', name: 'Calvin Austin III', team: 'PIT', status: 'backup', depth: 3 },
           { id: 'robinson_allen', name: 'Allen Robinson II', team: 'PIT', status: 'backup', depth: 4 },
-          { id: 'sims_scotty', name: 'Scotty Miller', team: 'PIT', status: 'backup', depth: 5 }
+          { id: 'sims_scotty', name: 'Scotty Miller', team: 'PIT', status: 'backup', depth: 5 },
+          
+          // AFC South WRs - Complete depth charts
+          { id: 'pittman_michael', name: 'Michael Pittman Jr.', team: 'IND', status: 'starter', depth: 1 },
+          { id: 'pierce_alec', name: 'Alec Pierce', team: 'IND', status: 'starter', depth: 2 },
+          { id: 'downs_adonai', name: 'Adonai Mitchell', team: 'IND', status: 'backup', depth: 3 },
+          { id: 'patmon_ashton', name: 'Ashton Dulin', team: 'IND', status: 'backup', depth: 4 },
+          { id: 'coutee_keke', name: 'Keke Coutee', team: 'IND', status: 'backup', depth: 5 },
+          
+          { id: 'collins_nico', name: 'Nico Collins', team: 'HOU', status: 'starter', depth: 1 },
+          { id: 'dell_tank', name: 'Tank Dell', team: 'HOU', status: 'starter', depth: 2 },
+          { id: 'diggs_stefon_hou', name: 'Stefon Diggs', team: 'HOU', status: 'backup', depth: 3 },
+          { id: 'metchie_john', name: 'John Metchie III', team: 'HOU', status: 'backup', depth: 4 },
+          { id: 'woods_robert', name: 'Robert Woods', team: 'HOU', status: 'backup', depth: 5 },
+          
+          { id: 'thomas_calvin', name: 'Calvin Ridley', team: 'TEN', status: 'starter', depth: 1 },
+          { id: 'hopkins_deandre_ten', name: 'DeAndre Hopkins', team: 'TEN', status: 'starter', depth: 2 },
+          { id: 'boyd_tyler_ten', name: 'Tyler Boyd', team: 'TEN', status: 'backup', depth: 3 },
+          { id: 'westbrook_colton', name: 'Colton Dowell', team: 'TEN', status: 'backup', depth: 4 },
+          { id: 'philips_kyle', name: 'Kyle Philips', team: 'TEN', status: 'backup', depth: 5 },
+          
+          { id: 'kirk_christian', name: 'Christian Kirk', team: 'JAX', status: 'starter', depth: 1 },
+          { id: 'ridley_calvin', name: 'Calvin Ridley', team: 'JAX', status: 'starter', depth: 2 },
+          { id: 'jones_zay_jax', name: 'Zay Jones', team: 'JAX', status: 'backup', depth: 3 },
+          { id: 'agnew_jamal', name: 'Jamal Agnew', team: 'JAX', status: 'backup', depth: 4 },
+          { id: 'shenault_laviska', name: 'Laviska Shenault Jr.', team: 'JAX', status: 'backup', depth: 5 },
+          
+          // AFC West WRs - Complete depth charts
+          { id: 'kelce_travis_wr', name: 'Travis Kelce', team: 'KC', status: 'starter', depth: 1 },
+          { id: 'rice_rashee', name: 'Rashee Rice', team: 'KC', status: 'starter', depth: 2 },
+          { id: 'worthy_xavier', name: 'Xavier Worthy', team: 'KC', status: 'backup', depth: 3 },
+          { id: 'watson_justin', name: 'Justin Watson', team: 'KC', status: 'backup', depth: 4 },
+          { id: 'moore_skyy', name: 'Skyy Moore', team: 'KC', status: 'backup', depth: 5 },
+          
+          { id: 'adams_davante_lv', name: 'Davante Adams', team: 'LV', status: 'starter', depth: 1 },
+          { id: 'meyers_jakobi_lv', name: 'Jakobi Meyers', team: 'LV', status: 'starter', depth: 2 },
+          { id: 'robinson_tre', name: 'Tre Tucker', team: 'LV', status: 'backup', depth: 3 },
+          { id: 'valdes-scantling', name: 'Marquez Valdes-Scantling', team: 'LV', status: 'backup', depth: 4 },
+          { id: 'turner_dj', name: 'DJ Turner', team: 'LV', status: 'backup', depth: 5 },
+          
+          { id: 'sutton_courtland', name: 'Courtland Sutton', team: 'DEN', status: 'starter', depth: 1 },
+          { id: 'jeudy_jerry', name: 'Jerry Jeudy', team: 'DEN', status: 'starter', depth: 2 },
+          { id: 'franklin_marvin', name: 'Marvin Mims Jr.', team: 'DEN', status: 'backup', depth: 3 },
+          { id: 'washington_lil', name: "Lil'Jordan Humphrey", team: 'DEN', status: 'backup', depth: 4 },
+          { id: 'reynolds_josh', name: 'Josh Reynolds', team: 'DEN', status: 'backup', depth: 5 },
+          
+          { id: 'allen_keenan_lac', name: 'Keenan Allen', team: 'LAC', status: 'starter', depth: 1 },
+          { id: 'palmer_josh', name: 'Joshua Palmer', team: 'LAC', status: 'starter', depth: 2 },
+          { id: 'mcconkey_ladd', name: 'Ladd McConkey', team: 'LAC', status: 'backup', depth: 3 },
+          { id: 'johnston_quentin', name: 'Quentin Johnston', team: 'LAC', status: 'backup', depth: 4 },
+          { id: 'carter_deandre', name: 'DeAndre Carter', team: 'LAC', status: 'backup', depth: 5 },
+          
+          // NFC East WRs - Complete depth charts
+          { id: 'brown_aj', name: 'A.J. Brown', team: 'PHI', status: 'starter', depth: 1 },
+          { id: 'smith_devonta', name: 'DeVonta Smith', team: 'PHI', status: 'starter', depth: 2 },
+          { id: 'barkley_jahan', name: 'Jahan Dotson', team: 'PHI', status: 'backup', depth: 3 },
+          { id: 'wilson_parris', name: 'Parris Campbell', team: 'PHI', status: 'backup', depth: 4 },
+          { id: 'ross_john', name: 'John Ross III', team: 'PHI', status: 'backup', depth: 5 },
+          
+          { id: 'nabers_malik', name: 'Malik Nabers', team: 'NYG', status: 'starter', depth: 1 },
+          { id: 'robinson_wan', name: 'Wan\'Dale Robinson', team: 'NYG', status: 'starter', depth: 2 },
+          { id: 'hyatt_jalin', name: 'Jalin Hyatt', team: 'NYG', status: 'backup', depth: 3 },
+          { id: 'slayton_darius', name: 'Darius Slayton', team: 'NYG', status: 'backup', depth: 4 },
+          { id: 'shepard_sterling', name: 'Sterling Shepard', team: 'NYG', status: 'backup', depth: 5 },
+          
+          { id: 'mclaurin_terry', name: 'Terry McLaurin', team: 'WAS', status: 'starter', depth: 1 },
+          { id: 'brown_noah', name: 'Noah Brown', team: 'WAS', status: 'starter', depth: 2 },
+          { id: 'dotson_jahan', name: 'Jahan Dotson', team: 'WAS', status: 'backup', depth: 3 },
+          { id: 'samuel_curtis_was', name: 'Curtis Samuel', team: 'WAS', status: 'backup', depth: 4 },
+          { id: 'crowder_jamison', name: 'Jamison Crowder', team: 'WAS', status: 'backup', depth: 5 },
+          
+          { id: 'lamb_ceedee', name: 'CeeDee Lamb', team: 'DAL', status: 'starter', depth: 1 },
+          { id: 'cooks_brandin', name: 'Brandin Cooks', team: 'DAL', status: 'starter', depth: 2 },
+          { id: 'tolbert_jalen', name: 'Jalen Tolbert', team: 'DAL', status: 'backup', depth: 3 },
+          { id: 'mingo_jonathan', name: 'Jonathan Mingo', team: 'DAL', status: 'backup', depth: 4 },
+          { id: 'brooks_kavonte', name: 'KaVontae Turpin', team: 'DAL', status: 'backup', depth: 5 },
+          
+          // NFC North WRs - Complete depth charts
+          { id: 'st_brown_amon', name: 'Amon-Ra St. Brown', team: 'DET', status: 'starter', depth: 1 },
+          { id: 'williams_jameson', name: 'Jameson Williams', team: 'DET', status: 'starter', depth: 2 },
+          { id: 'reynolds_josh_det', name: 'Josh Reynolds', team: 'DET', status: 'backup', depth: 3 },
+          { id: 'raymond_kalif', name: 'Kalif Raymond', team: 'DET', status: 'backup', depth: 4 },
+          { id: 'cephus_quintez', name: 'Quintez Cephus', team: 'DET', status: 'backup', depth: 5 },
+          
+          { id: 'jefferson_justin', name: 'Justin Jefferson', team: 'MIN', status: 'starter', depth: 1 },
+          { id: 'addison_jordan', name: 'Jordan Addison', team: 'MIN', status: 'starter', depth: 2 },
+          { id: 'nailor_jalen', name: 'Jalen Nailor', team: 'MIN', status: 'backup', depth: 3 },
+          { id: 'powell_brandon', name: 'Brandon Powell', team: 'MIN', status: 'backup', depth: 4 },
+          { id: 'jefferson_jordan', name: 'Jordan Jefferson', team: 'MIN', status: 'backup', depth: 5 },
+          
+          { id: 'moore_dj', name: 'DJ Moore', team: 'CHI', status: 'starter', depth: 1 },
+          { id: 'allen_keenan_chi', name: 'Keenan Allen', team: 'CHI', status: 'starter', depth: 2 },
+          { id: 'odunze_rome', name: 'Rome Odunze', team: 'CHI', status: 'backup', depth: 3 },
+          { id: 'scott_tyler', name: 'Tyler Scott', team: 'CHI', status: 'backup', depth: 4 },
+          { id: 'jones_velus', name: 'Velus Jones Jr.', team: 'CHI', status: 'backup', depth: 5 },
+          
+          { id: 'reed_jaylen', name: 'Jaylen Reed', team: 'GB', status: 'starter', depth: 1 },
+          { id: 'watson_christian', name: 'Christian Watson', team: 'GB', status: 'starter', depth: 2 },
+          { id: 'doubs_romeo', name: 'Romeo Doubs', team: 'GB', status: 'backup', depth: 3 },
+          { id: 'wicks_dontayvion', name: 'Dontayvion Wicks', team: 'GB', status: 'backup', depth: 4 },
+          { id: 'melton_bo', name: 'Bo Melton', team: 'GB', status: 'backup', depth: 5 },
+          
+          // NFC South WRs - Complete depth charts
+          { id: 'evans_mike', name: 'Mike Evans', team: 'TB', status: 'starter', depth: 1 },
+          { id: 'godwin_chris', name: 'Chris Godwin', team: 'TB', status: 'starter', depth: 2 },
+          { id: 'palmer_jalen', name: 'Jalen McMillan', team: 'TB', status: 'backup', depth: 3 },
+          { id: 'miller_scotty', name: 'Scotty Miller', team: 'TB', status: 'backup', depth: 4 },
+          { id: 'shepard_sterling_tb', name: 'Sterling Shepard', team: 'TB', status: 'backup', depth: 5 },
+          
+          { id: 'thielen_adam', name: 'Adam Thielen', team: 'CAR', status: 'starter', depth: 1 },
+          { id: 'legette_xavier', name: 'Xavier Legette', team: 'CAR', status: 'starter', depth: 2 },
+          { id: 'mingo_jonathan_car', name: 'Jonathan Mingo', team: 'CAR', status: 'backup', depth: 3 },
+          { id: 'coker_diontae', name: 'Diontae Johnson', team: 'CAR', status: 'backup', depth: 4 },
+          { id: 'sanders_miles', name: 'Miles Sanders', team: 'CAR', status: 'backup', depth: 5 },
+          
+          { id: 'thomas_michael', name: 'Michael Thomas', team: 'NO', status: 'starter', depth: 1 },
+          { id: 'shaheed_rashid', name: 'Rashid Shaheed', team: 'NO', status: 'starter', depth: 2 },
+          { id: 'olave_chris', name: 'Chris Olave', team: 'NO', status: 'backup', depth: 3 },
+          { id: 'wilson_cedrick_no', name: 'Cedrick Wilson Jr.', team: 'NO', status: 'backup', depth: 4 },
+          { id: 'miller_marquez', name: 'Marquez Callaway', team: 'NO', status: 'backup', depth: 5 },
+          
+          // NFC West WRs - Complete depth charts (ARI already included above)
+          { id: 'deebo_samuel', name: 'Deebo Samuel', team: 'SF', status: 'starter', depth: 1 },
+          { id: 'aiyuk_brandon', name: 'Brandon Aiyuk', team: 'SF', status: 'starter', depth: 2 },
+          { id: 'jennings_jauan', name: 'Jauan Jennings', team: 'SF', status: 'backup', depth: 3 },
+          { id: 'bell_ricky', name: 'Ricky Pearsall', team: 'SF', status: 'backup', depth: 4 },
+          { id: 'cowing_jacob', name: 'Jacob Cowing', team: 'SF', status: 'backup', depth: 5 },
+          
+          { id: 'metcalf_dk', name: 'DK Metcalf', team: 'SEA', status: 'starter', depth: 1 },
+          { id: 'lockett_tyler', name: 'Tyler Lockett', team: 'SEA', status: 'starter', depth: 2 },
+          { id: 'smith-njigba_jaxon', name: 'Jaxon Smith-Njigba', team: 'SEA', status: 'backup', depth: 3 },
+          { id: 'odunze_rome_sea', name: 'Rome Odunze', team: 'SEA', status: 'backup', depth: 4 },
+          { id: 'eskridge_dee', name: 'Dee Eskridge', team: 'SEA', status: 'backup', depth: 5 },
+          
+          { id: 'kupp_cooper_wr', name: 'Cooper Kupp', team: 'LAR', status: 'starter', depth: 1 },
+          { id: 'nacua_puka', name: 'Puka Nacua', team: 'LAR', status: 'starter', depth: 2 },
+          { id: 'robinson_demarcus', name: 'Demarcus Robinson', team: 'LAR', status: 'backup', depth: 3 },
+          { id: 'jefferson_van', name: 'Van Jefferson', team: 'LAR', status: 'backup', depth: 4 },
+          { id: 'atwell_tutu', name: 'Tutu Atwell', team: 'LAR', status: 'backup', depth: 5 }
         );
       }
 
