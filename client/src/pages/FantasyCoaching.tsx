@@ -420,7 +420,7 @@ export default function FantasyCoaching() {
                 <div className="space-y-2">
                   <div className="text-sm text-muted-foreground">Projected Points</div>
                   <div className="text-2xl font-bold text-green-600">
-                    {playerAnalysis.analysis.projectedPoints}
+                    {playerAnalysis?.analysis?.projectedPoints || playerAnalysis?.projectedPoints || 'N/A'}
                   </div>
                 </div>
                 <div className="space-y-2">

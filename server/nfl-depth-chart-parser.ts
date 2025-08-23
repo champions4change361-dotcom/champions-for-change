@@ -101,17 +101,39 @@ export class NFLDepthChartParser {
       // Add more comprehensive data for missing teams
       if (position === 'QB') {
         consolidatedRosters[position].push(
-          // AFC East
+          // AFC East - Starters AND Backups
           { id: 'allen_josh', name: 'Josh Allen', team: 'BUF', status: 'starter', depth: 1 },
-          { id: 'rodgers_aaron', name: 'Aaron Rodgers', team: 'NYJ', status: 'starter', depth: 1 },
-          { id: 'tagovailoa_tua', name: 'Tua Tagovailoa', team: 'MIA', status: 'starter', depth: 1 },
-          { id: 'maye_drake', name: 'Drake Maye', team: 'NE', status: 'starter', depth: 1 },
+          { id: 'trubisky_mitchell', name: 'Mitchell Trubisky', team: 'BUF', status: 'backup', depth: 2 },
+          { id: 'cook_james', name: 'James Cook', team: 'BUF', status: 'backup', depth: 3 },
           
-          // AFC North
+          { id: 'rodgers_aaron', name: 'Aaron Rodgers', team: 'NYJ', status: 'starter', depth: 1 },
+          { id: 'wilson_zach', name: 'Zach Wilson', team: 'NYJ', status: 'backup', depth: 2 },
+          { id: 'white_mike', name: 'Mike White', team: 'NYJ', status: 'backup', depth: 3 },
+          
+          { id: 'tagovailoa_tua', name: 'Tua Tagovailoa', team: 'MIA', status: 'starter', depth: 1 },
+          { id: 'bridgewater_teddy', name: 'Teddy Bridgewater', team: 'MIA', status: 'backup', depth: 2 },
+          { id: 'thompson_skylar', name: 'Skylar Thompson', team: 'MIA', status: 'backup', depth: 3 },
+          
+          { id: 'maye_drake', name: 'Drake Maye', team: 'NE', status: 'starter', depth: 1 },
+          { id: 'brissett_jacoby', name: 'Jacoby Brissett', team: 'NE', status: 'backup', depth: 2 },
+          { id: 'zappe_bailey', name: 'Bailey Zappe', team: 'NE', status: 'backup', depth: 3 },
+          
+          // AFC North - Starters AND Backups
           { id: 'jackson_lamar', name: 'Lamar Jackson', team: 'BAL', status: 'starter', depth: 1 },
+          { id: 'huntley_tyler', name: 'Tyler Huntley', team: 'BAL', status: 'backup', depth: 2 },
+          { id: 'streveler_chris', name: 'Chris Streveler', team: 'BAL', status: 'backup', depth: 3 },
+          
           { id: 'burrow_joe', name: 'Joe Burrow', team: 'CIN', status: 'starter', depth: 1 },
+          { id: 'browning_jake', name: 'Jake Browning', team: 'CIN', status: 'backup', depth: 2 },
+          { id: 'woodside_logan', name: 'Logan Woodside', team: 'CIN', status: 'backup', depth: 3 },
+          
           { id: 'watson_deshaun', name: 'Deshaun Watson', team: 'CLE', status: 'starter', depth: 1 },
+          { id: 'flacco_joe', name: 'Joe Flacco', team: 'CLE', status: 'backup', depth: 2 },
+          { id: 'dobbs_joshua', name: 'Joshua Dobbs', team: 'CLE', status: 'backup', depth: 3 },
+          
           { id: 'fields_justin', name: 'Justin Fields', team: 'PIT', status: 'starter', depth: 1 },
+          { id: 'wilson_russell', name: 'Russell Wilson', team: 'PIT', status: 'backup', depth: 2 },
+          { id: 'pickett_kenny', name: 'Kenny Pickett', team: 'PIT', status: 'backup', depth: 3 },
           
           // AFC South
           { id: 'richardson_anthony', name: 'Anthony Richardson', team: 'IND', status: 'starter', depth: 1 },
@@ -144,8 +166,119 @@ export class NFLDepthChartParser {
           
           // NFC West (Arizona already included above)
           { id: 'purdy_brock', name: 'Brock Purdy', team: 'SF', status: 'starter', depth: 1 },
+          { id: 'darnold_sam_sf', name: 'Sam Darnold', team: 'SF', status: 'backup', depth: 2 },
+          { id: 'dobbs_joshua_sf', name: 'Joshua Dobbs', team: 'SF', status: 'backup', depth: 3 },
+          
           { id: 'geno_smith', name: 'Geno Smith', team: 'SEA', status: 'starter', depth: 1 },
-          { id: 'stafford_matthew', name: 'Matthew Stafford', team: 'LAR', status: 'starter', depth: 1 }
+          { id: 'howell_sam', name: 'Sam Howell', team: 'SEA', status: 'backup', depth: 2 },
+          { id: 'lock_drew', name: 'Drew Lock', team: 'SEA', status: 'backup', depth: 3 },
+          
+          { id: 'stafford_matthew', name: 'Matthew Stafford', team: 'LAR', status: 'starter', depth: 1 },
+          { id: 'bennett_stetson', name: 'Stetson Bennett', team: 'LAR', status: 'backup', depth: 2 },
+          { id: 'rypien_john', name: 'John Wolford', team: 'LAR', status: 'backup', depth: 3 }
+        );
+      }
+
+      // Add comprehensive WR data for all teams with starters AND backups
+      if (position === 'WR') {
+        consolidatedRosters[position].push(
+          // AFC East WRs - Complete depth charts
+          { id: 'diggs_stefon', name: 'Stefon Diggs', team: 'BUF', status: 'starter', depth: 1 },
+          { id: 'cooper_amari', name: 'Amari Cooper', team: 'BUF', status: 'starter', depth: 2 },
+          { id: 'samuel_curtis', name: 'Curtis Samuel', team: 'BUF', status: 'backup', depth: 3 },
+          { id: 'davis_gabe', name: 'Gabe Davis', team: 'BUF', status: 'backup', depth: 4 },
+          { id: 'coleman_keon', name: 'Keon Coleman', team: 'BUF', status: 'backup', depth: 5 },
+          
+          { id: 'adams_davante', name: 'Davante Adams', team: 'NYJ', status: 'starter', depth: 1 },
+          { id: 'wilson_garrett', name: 'Garrett Wilson', team: 'NYJ', status: 'starter', depth: 2 },
+          { id: 'cobb_randall', name: 'Randall Cobb', team: 'NYJ', status: 'backup', depth: 3 },
+          { id: 'hardman_mecole', name: 'Mecole Hardman', team: 'NYJ', status: 'backup', depth: 4 },
+          { id: 'lazard_allen', name: 'Allen Lazard', team: 'NYJ', status: 'backup', depth: 5 },
+          
+          { id: 'hill_tyreek', name: 'Tyreek Hill', team: 'MIA', status: 'starter', depth: 1 },
+          { id: 'waddle_jaylen', name: 'Jaylen Waddle', team: 'MIA', status: 'starter', depth: 2 },
+          { id: 'wilson_cedrick', name: 'Cedrick Wilson Jr.', team: 'MIA', status: 'backup', depth: 3 },
+          { id: 'berrios_braxton', name: 'Braxton Berrios', team: 'MIA', status: 'backup', depth: 4 },
+          { id: 'washington_river', name: 'River Cracraft', team: 'MIA', status: 'backup', depth: 5 },
+          
+          { id: 'bourne_kendrick', name: 'Kendrick Bourne', team: 'NE', status: 'starter', depth: 1 },
+          { id: 'douglas_demario', name: 'DeMario Douglas', team: 'NE', status: 'starter', depth: 2 },
+          { id: 'thornton_tyquan', name: 'Tyquan Thornton', team: 'NE', status: 'backup', depth: 3 },
+          { id: 'parker_devante', name: 'DeVante Parker', team: 'NE', status: 'backup', depth: 4 },
+          { id: 'polk_javon', name: 'Javon Baker', team: 'NE', status: 'backup', depth: 5 },
+          
+          // AFC North WRs - Complete depth charts
+          { id: 'bateman_rashod', name: 'Rashod Bateman', team: 'BAL', status: 'starter', depth: 1 },
+          { id: 'flowers_zay_bal', name: 'Zay Flowers', team: 'BAL', status: 'starter', depth: 2 },
+          { id: 'agholor_nelson', name: 'Nelson Agholor', team: 'BAL', status: 'backup', depth: 3 },
+          { id: 'wallace_mike', name: 'Mike Wallace', team: 'BAL', status: 'backup', depth: 4 },
+          { id: 'proche_james', name: 'James Proche', team: 'BAL', status: 'backup', depth: 5 },
+          
+          { id: 'chase_jamarr', name: "Ja'Marr Chase", team: 'CIN', status: 'starter', depth: 1 },
+          { id: 'higgins_tee', name: 'Tee Higgins', team: 'CIN', status: 'starter', depth: 2 },
+          { id: 'boyd_tyler', name: 'Tyler Boyd', team: 'CIN', status: 'backup', depth: 3 },
+          { id: 'iosivas_andrei', name: 'Andrei Iosivas', team: 'CIN', status: 'backup', depth: 4 },
+          { id: 'jones_charlie', name: 'Charlie Jones', team: 'CIN', status: 'backup', depth: 5 },
+          
+          { id: 'cooper_amari_cle', name: 'Amari Cooper', team: 'CLE', status: 'starter', depth: 1 },
+          { id: 'peoples-jones_donovan', name: 'Donovan Peoples-Jones', team: 'CLE', status: 'starter', depth: 2 },
+          { id: 'bell_david', name: 'David Bell', team: 'CLE', status: 'backup', depth: 3 },
+          { id: 'schwartz_anthony', name: 'Anthony Schwartz', team: 'CLE', status: 'backup', depth: 4 },
+          { id: 'tillman_cedric', name: 'Cedric Tillman', team: 'CLE', status: 'backup', depth: 5 },
+          
+          { id: 'pickens_george', name: 'George Pickens', team: 'PIT', status: 'starter', depth: 1 },
+          { id: 'johnson_diontae', name: 'Diontae Johnson', team: 'PIT', status: 'starter', depth: 2 },
+          { id: 'washington_calvin', name: 'Calvin Austin III', team: 'PIT', status: 'backup', depth: 3 },
+          { id: 'robinson_allen', name: 'Allen Robinson II', team: 'PIT', status: 'backup', depth: 4 },
+          { id: 'sims_scotty', name: 'Scotty Miller', team: 'PIT', status: 'backup', depth: 5 }
+        );
+      }
+
+      // Add comprehensive RB data for all teams with starters AND backups
+      if (position === 'RB') {
+        consolidatedRosters[position].push(
+          // AFC East RBs - Complete depth charts
+          { id: 'cook_james_buf', name: 'James Cook', team: 'BUF', status: 'starter', depth: 1 },
+          { id: 'davis_ray', name: 'Ray Davis', team: 'BUF', status: 'backup', depth: 2 },
+          { id: 'johnson_ty', name: 'Ty Johnson', team: 'BUF', status: 'backup', depth: 3 },
+          { id: 'moss_zack', name: 'Zack Moss', team: 'BUF', status: 'backup', depth: 4 },
+          
+          { id: 'hall_breece', name: 'Breece Hall', team: 'NYJ', status: 'starter', depth: 1 },
+          { id: 'cook_dalvin', name: 'Dalvin Cook', team: 'NYJ', status: 'backup', depth: 2 },
+          { id: 'carter_michael_nyj', name: 'Michael Carter', team: 'NYJ', status: 'backup', depth: 3 },
+          { id: 'johnson_israel', name: 'Israel Abanikanda', team: 'NYJ', status: 'backup', depth: 4 },
+          
+          { id: 'mostert_raheem', name: 'Raheem Mostert', team: 'MIA', status: 'starter', depth: 1 },
+          { id: 'achane_devon', name: 'Devon Achane', team: 'MIA', status: 'backup', depth: 2 },
+          { id: 'edmonds_chase', name: 'Chase Edmonds', team: 'MIA', status: 'backup', depth: 3 },
+          { id: 'gaskin_myles', name: 'Myles Gaskin', team: 'MIA', status: 'backup', depth: 4 },
+          
+          { id: 'harris_damien', name: 'Damien Harris', team: 'NE', status: 'starter', depth: 1 },
+          { id: 'stevenson_rhamondre', name: 'Rhamondre Stevenson', team: 'NE', status: 'backup', depth: 2 },
+          { id: 'strong_pierre', name: 'Pierre Strong Jr.', team: 'NE', status: 'backup', depth: 3 },
+          { id: 'gibson_antonio', name: 'Antonio Gibson', team: 'NE', status: 'backup', depth: 4 }
+        );
+      }
+
+      // Add comprehensive TE data for all teams with starters AND backups  
+      if (position === 'TE') {
+        consolidatedRosters[position].push(
+          // AFC East TEs - Complete depth charts
+          { id: 'kincaid_dalton_buf', name: 'Dalton Kincaid', team: 'BUF', status: 'starter', depth: 1 },
+          { id: 'knox_dawson_buf', name: 'Dawson Knox', team: 'BUF', status: 'backup', depth: 2 },
+          { id: 'morris_quintin', name: 'Quintin Morris', team: 'BUF', status: 'backup', depth: 3 },
+          
+          { id: 'ruckert_jeremy', name: 'Jeremy Ruckert', team: 'NYJ', status: 'starter', depth: 1 },
+          { id: 'conklin_tyler', name: 'Tyler Conklin', team: 'NYJ', status: 'backup', depth: 2 },
+          { id: 'uzomah_cj', name: 'C.J. Uzomah', team: 'NYJ', status: 'backup', depth: 3 },
+          
+          { id: 'hill_jonnu', name: 'Jonnu Smith', team: 'MIA', status: 'starter', depth: 1 },
+          { id: 'gesicki_mike', name: 'Mike Gesicki', team: 'MIA', status: 'backup', depth: 2 },
+          { id: 'long_hunter', name: 'Hunter Long', team: 'MIA', status: 'backup', depth: 3 },
+          
+          { id: 'henry_hunter', name: 'Hunter Henry', team: 'NE', status: 'starter', depth: 1 },
+          { id: 'hooper_austin', name: 'Austin Hooper', team: 'NE', status: 'backup', depth: 2 },
+          { id: 'schipper_mitchell', name: 'Mitchell Wilcox', team: 'NE', status: 'backup', depth: 3 }
         );
       }
 
