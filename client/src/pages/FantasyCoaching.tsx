@@ -54,7 +54,7 @@ export default function FantasyCoaching() {
   });
 
   // Injury Reports Query
-  const { data: injuryReports } = useQuery({
+  const { data: injuryReports, isLoading: injuryLoading } = useQuery({
     queryKey: ['/api/fantasy/injury-reports'],
     queryFn: async () => {
       const response = await apiRequest('/api/fantasy/injury-reports', 'GET');
