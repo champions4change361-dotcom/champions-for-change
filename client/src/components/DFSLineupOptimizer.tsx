@@ -40,14 +40,24 @@ interface OptimizerResult {
 export default function DFSLineupOptimizer() {
   const [selectedSite, setSelectedSite] = useState<string>('draftkings');
   const [selectedSport, setSelectedSport] = useState<string>('nfl');
+  const [isOptimizing, setIsOptimizing] = useState(false);
 
   const { data: optimizerResult, isLoading, refetch } = useQuery<OptimizerResult>({
     queryKey: ['/api/dfs/optimize', selectedSite, selectedSport],
-    enabled: !!selectedSite && !!selectedSport,
+    enabled: false, // Don't auto-run, only run when button is clicked
   });
 
-  const handleOptimize = () => {
-    refetch();
+  const handleOptimize = async () => {
+    if (!selectedSite || !selectedSport) return;
+    
+    setIsOptimizing(true);
+    try {
+      await refetch();
+    } catch (error) {
+      console.error('Error optimizing lineups:', error);
+    } finally {
+      setIsOptimizing(false);
+    }
   };
 
   const formatSalary = (salary: number) => {
@@ -115,11 +125,11 @@ export default function DFSLineupOptimizer() {
             <div className="flex items-end">
               <Button 
                 onClick={handleOptimize} 
-                disabled={isLoading || !selectedSite || !selectedSport}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                disabled={(isLoading || isOptimizing) || !selectedSite || !selectedSport}
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 data-testid="button-optimize-lineups"
               >
-                {isLoading ? (
+                {(isLoading || isOptimizing) ? (
                   <div className="flex items-center gap-2">
                     <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
                     Optimizing...
@@ -222,7 +232,7 @@ export default function DFSLineupOptimizer() {
             </Alert>
           )}
 
-          {!optimizerResult && !isLoading && selectedSite && selectedSport && (
+          {!optimizerResult && !isLoading && !isOptimizing && selectedSite && selectedSport && (
             <Alert className="border-blue-200 bg-blue-50">
               <AlertDescription className="text-blue-800">
                 Click "Generate Optimal Lineups" to create mathematically optimized lineups for {selectedSite.toUpperCase()} {selectedSport.toUpperCase()}
