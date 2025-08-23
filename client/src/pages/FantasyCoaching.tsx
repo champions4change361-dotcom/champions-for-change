@@ -61,14 +61,18 @@ export default function FantasyCoaching() {
   });
 
   // Roster Data Query - loads players/teams for selected sport and position
-  const { data: rosterData } = useQuery({
+  const { data: rosterData, isLoading: rosterLoading } = useQuery({
     queryKey: ['/api/fantasy/roster', selectedSport, selectedPosition],
     queryFn: async () => {
       if (!selectedSport || !selectedPosition) return null;
+      console.log(`Loading roster: ${selectedSport}/${selectedPosition}`);
       const response = await apiRequest(`/api/fantasy/roster/${selectedSport}/${selectedPosition}`, 'GET');
-      return response;
+      const data = await response.json();
+      console.log('Roster data:', data);
+      return data;
     },
-    enabled: !!(selectedSport && selectedPosition)
+    enabled: !!(selectedSport && selectedPosition),
+    staleTime: 60000 // Cache for 1 minute
   });
 
   // Yahoo Connection Status
@@ -327,7 +331,9 @@ export default function FantasyCoaching() {
                 </select>
               </div>
               <div>
-                <Label htmlFor="player-select">Choose Player/Team</Label>
+                <Label htmlFor="player-select">
+                  Choose {selectedPosition === 'DEF' ? 'Team' : 'Player'}
+                </Label>
                 <select 
                   id="player-select"
                   value={selectedPlayer} 
@@ -336,12 +342,22 @@ export default function FantasyCoaching() {
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   data-testid="player-selector"
                 >
-                  <option value="">Select Player/Team</option>
-                  {rosterData?.success && rosterData.roster?.map((item: any) => (
-                    <option key={item.id || item.name} value={item.id || item.name}>
-                      {item.name} {item.team ? `(${item.team})` : ''}
-                    </option>
-                  ))}
+                  <option value="">
+                    Select {selectedPosition === 'DEF' ? 'Team' : 'Player'}
+                  </option>
+                  {rosterLoading && (
+                    <option disabled>Loading {selectedPosition === 'DEF' ? 'teams' : 'players'}...</option>
+                  )}
+                  {rosterData?.success && rosterData.roster?.length > 0 ? 
+                    rosterData.roster.map((item: any) => (
+                      <option key={item.id || item.name} value={item.id || item.name}>
+                        {item.name} {item.team ? `(${item.team})` : ''}
+                      </option>
+                    )) : 
+                    (!rosterLoading && selectedPosition && (
+                      <option disabled>No {selectedPosition === 'DEF' ? 'teams' : 'players'} found</option>
+                    ))
+                  }
                 </select>
               </div>
               <div className="flex items-end">
