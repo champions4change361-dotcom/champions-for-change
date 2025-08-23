@@ -808,7 +808,19 @@ export default function FantasyCoaching() {
                     {/* Filtered Injuries - DraftKings Style */}
                     <div className="space-y-3">
                       {(() => {
-                        const filteredInjuries = (injuryReports as any).injuries.filter((injury: any) => {
+                        console.log('Injury Reports Data:', injuryReports);
+                        console.log('Selected Sport:', selectedInjurySport);
+                        
+                        if (!injuryReports || !injuryReports.injuries || !Array.isArray(injuryReports.injuries)) {
+                          console.log('No valid injury data structure');
+                          return (
+                            <div className="text-center py-8 text-gray-500">
+                              Data structure issue - injuries not found
+                            </div>
+                          );
+                        }
+
+                        const filteredInjuries = injuryReports.injuries.filter((injury: any) => {
                           // For NFL, show all NFL injuries since our data is all NFL
                           if (selectedInjurySport === 'NFL') {
                             return true; // Show all for now since all our current data is NFL
@@ -821,6 +833,9 @@ export default function FantasyCoaching() {
                           }
                           return true;
                         });
+
+                        console.log('Filtered injuries count:', filteredInjuries.length);
+                        console.log('Filtered injuries:', filteredInjuries);
 
                         return filteredInjuries.length > 0 ? filteredInjuries.map((injury: any, index: number) => (
                           <div key={index} className="flex items-center gap-3 p-4 border rounded-lg bg-white hover:bg-gray-50 transition-colors">
