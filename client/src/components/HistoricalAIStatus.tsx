@@ -40,7 +40,7 @@ export default function HistoricalAIStatus() {
   const fetchAIStatus = async () => {
     try {
       setLoading(true);
-      const response = await apiRequest('GET', '/api/fantasy/ai-status');
+      const response = await apiRequest('/api/fantasy/ai-status', 'GET');
       const data = await response.json();
       
       if (data.success) {
