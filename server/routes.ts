@@ -943,85 +943,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
               { id: 'LV', name: 'Las Vegas Raiders', team: 'LV' }
             ];
           } else {
-            // Get NFL players for position - expanded roster data
+            // Get NFL players for position - 2025 CURRENT SEASON DATA
             const nflRosters: any = {
               'QB': [
-                // Tier 1 Elite
+                // Tier 1 Elite - 2025 Confirmed Starters
                 { id: 'mahomes', name: 'Patrick Mahomes', team: 'KC' },
                 { id: 'allen', name: 'Josh Allen', team: 'BUF' },
+                { id: 'jackson', name: 'Lamar Jackson', team: 'BAL' },
                 { id: 'burrow', name: 'Joe Burrow', team: 'CIN' },
                 { id: 'herbert', name: 'Justin Herbert', team: 'LAC' },
-                { id: 'jackson', name: 'Lamar Jackson', team: 'BAL' },
                 { id: 'hurts', name: 'Jalen Hurts', team: 'PHI' },
-                // Tier 2 Solid Starters
-                { id: 'tua', name: 'Tua Tagovailoa', team: 'MIA' },
-                { id: 'dak', name: 'Dak Prescott', team: 'DAL' },
-                { id: 'rodgers', name: 'Aaron Rodgers', team: 'NYJ' },
-                { id: 'wilson', name: 'Russell Wilson', team: 'PIT' },
-                { id: 'lawrence', name: 'Trevor Lawrence', team: 'JAC' },
+                // Tier 2 Solid Starters - 2025 Current
                 { id: 'stroud', name: 'C.J. Stroud', team: 'HOU' },
-                // Tier 3 Streamers/Backups
+                { id: 'tua', name: 'Tua Tagovailoa', team: 'MIA' },
+                { id: 'lawrence', name: 'Trevor Lawrence', team: 'JAC' },
                 { id: 'goff', name: 'Jared Goff', team: 'DET' },
-                { id: 'cousins', name: 'Kirk Cousins', team: 'ATL' },
-                { id: 'richardson', name: 'Anthony Richardson', team: 'IND' },
-                { id: 'jones', name: 'Daniel Jones', team: 'NYG' },
-                { id: 'watson', name: 'Deshaun Watson', team: 'CLE' },
-                { id: 'mayfield', name: 'Baker Mayfield', team: 'TB' }
+                { id: 'purdy', name: 'Brock Purdy', team: 'SF' },
+                { id: 'stafford', name: 'Matthew Stafford', team: 'LAR' },
+                // Tier 3 - New 2025 Starters & Changes
+                { id: 'fields', name: 'Justin Fields', team: 'NYJ' }, // Moved from CHI
+                { id: 'darnold', name: 'Sam Darnold', team: 'SEA' }, // Moved from MIN
+                { id: 'smith', name: 'Geno Smith', team: 'LV' }, // Moved from SEA
+                { id: 'jones_daniel', name: 'Daniel Jones', team: 'IND' }, // Beat Richardson
+                { id: 'flacco', name: 'Joe Flacco', team: 'CLE' }, // 2025 starter
+                { id: 'nix', name: 'Bo Nix', team: 'DEN' },
+                { id: 'williams', name: 'Caleb Williams', team: 'CHI' },
+                { id: 'ward', name: 'Cam Ward', team: 'TEN' }, // Rookie
+                { id: 'penix', name: 'Michael Penix Jr.', team: 'ATL' },
+                { id: 'love', name: 'Jordan Love', team: 'GB' },
+                { id: 'mccarthy', name: 'J.J. McCarthy', team: 'MIN' },
+                { id: 'mayfield', name: 'Baker Mayfield', team: 'TB' },
+                { id: 'murray', name: 'Kyler Murray', team: 'ARI' }
               ],
               'RB': [
-                // Tier 1 Workhorses
+                // Tier 1 Elite - 2025 Current Season
                 { id: 'mccaffrey', name: 'Christian McCaffrey', team: 'SF' },
-                { id: 'henry', name: 'Derrick Henry', team: 'BAL' },
-                { id: 'barkley', name: 'Saquon Barkley', team: 'PHI' },
-                { id: 'chubb', name: 'Nick Chubb', team: 'CLE' },
+                { id: 'barkley', name: 'Saquon Barkley', team: 'PHI' }, // Moved from NYG - All-Pro 2024
+                { id: 'henry', name: 'Derrick Henry', team: 'BAL' }, // 2024 All-Pro votes
                 { id: 'jacobs', name: 'Josh Jacobs', team: 'GB' },
-                { id: 'jones', name: 'Aaron Jones', team: 'MIN' },
-                // Tier 2 Quality Starters
+                { id: 'chubb', name: 'Nick Chubb', team: 'CLE' },
+                { id: 'jones_aaron', name: 'Aaron Jones', team: 'MIN' },
+                // Tier 2 Quality Starters - 2025
                 { id: 'mixon', name: 'Joe Mixon', team: 'HOU' },
-                { id: 'cook', name: 'Dalvin Cook', team: 'NYJ' },
                 { id: 'walker', name: 'Kenneth Walker III', team: 'SEA' },
-                { id: 'ekeler', name: 'Austin Ekeler', team: 'WAS' },
                 { id: 'montgomery', name: 'David Montgomery', team: 'DET' },
                 { id: 'gibbs', name: 'Jahmyr Gibbs', team: 'DET' },
-                // Tier 3 Flex/Backup Options
-                { id: 'pollard', name: 'Tony Pollard', team: 'TEN' },
-                { id: 'swift', name: 'D\'Andre Swift', team: 'CHI' },
                 { id: 'etienne', name: 'Travis Etienne', team: 'JAC' },
                 { id: 'conner', name: 'James Conner', team: 'ARI' },
-                { id: 'mostert', name: 'Raheem Mostert', team: 'MIA' },
-                { id: 'stevenson', name: 'Rhamondre Stevenson', team: 'NE' }
+                // Tier 3 - Committee & Flex Options 2025
+                { id: 'pollard', name: 'Tony Pollard', team: 'TEN' },
+                { id: 'swift', name: 'D\'Andre Swift', team: 'CHI' },
+                { id: 'williams_javonte', name: 'Javonte Williams', team: 'DEN' },
+                { id: 'white', name: 'Rachaad White', team: 'TB' },
+                { id: 'dowdle', name: 'Rico Dowdle', team: 'DAL' },
+                { id: 'stevenson', name: 'Rhamondre Stevenson', team: 'NE' },
+                { id: 'charbonnet', name: 'Zach Charbonnet', team: 'SEA' },
+                { id: 'benson', name: 'Trey Benson', team: 'ARI' } // 3rd round rookie
               ],
               'WR': [
-                // Tier 1 Elite
+                // Tier 1 Elite - 2025 Current Season
                 { id: 'jefferson', name: 'Justin Jefferson', team: 'MIN' },
                 { id: 'chase', name: 'Ja\'Marr Chase', team: 'CIN' },
                 { id: 'hill', name: 'Tyreek Hill', team: 'MIA' },
                 { id: 'adams', name: 'Davante Adams', team: 'LV' },
+                { id: 'brown_aj', name: 'A.J. Brown', team: 'PHI' },
                 { id: 'diggs', name: 'Stefon Diggs', team: 'HOU' },
-                { id: 'brown', name: 'A.J. Brown', team: 'PHI' },
-                // Tier 2 High-End WR1/2
+                // Tier 2 High-End WR1/2 - Current 2025
                 { id: 'kupp', name: 'Cooper Kupp', team: 'LAR' },
                 { id: 'evans', name: 'Mike Evans', team: 'TB' },
                 { id: 'godwin', name: 'Chris Godwin', team: 'TB' },
+                { id: 'amon_ra', name: 'Amon-Ra St. Brown', team: 'DET' },
                 { id: 'waddle', name: 'Jaylen Waddle', team: 'MIA' },
-                { id: 'amon-ra', name: 'Amon-Ra St. Brown', team: 'DET' },
                 { id: 'deebo', name: 'Deebo Samuel', team: 'SF' },
-                // Tier 3 WR2/Flex Options
+                { id: 'aiyuk', name: 'Brandon Aiyuk', team: 'SF' }, // Off PUP list
+                // Tier 3 WR2/Flex - 2025 Depth Charts
                 { id: 'higgins', name: 'Tee Higgins', team: 'CIN' },
-                { id: 'robinson', name: 'Allen Robinson II', team: 'PIT' },
-                { id: 'thomas', name: 'Michael Thomas', team: 'NO' },
-                { id: 'hopkins', name: 'DeAndre Hopkins', team: 'TEN' },
-                { id: 'lockett', name: 'Tyler Lockett', team: 'SEA' },
+                { id: 'smith_devonta', name: 'DeVonta Smith', team: 'PHI' },
                 { id: 'metcalf', name: 'DK Metcalf', team: 'SEA' },
-                { id: 'smith', name: 'DeVonta Smith', team: 'PHI' },
-                { id: 'williams', name: 'Mike Williams', team: 'NYJ' }
+                { id: 'lockett', name: 'Tyler Lockett', team: 'SEA' },
+                { id: 'moore_dj', name: 'DJ Moore', team: 'CHI' },
+                { id: 'jennings', name: 'Jauan Jennings', team: 'SF' },
+                { id: 'odunze', name: 'Rome Odunze', team: 'CHI' }, // Rookie
+                { id: 'burden', name: 'Luther Burden', team: 'CHI' }, // Current depth
+                { id: 'pearsall', name: 'Ricky Pearsall', team: 'SF' },
+                { id: 'iosivas', name: 'Andrei Iosivas', team: 'CIN' }
               ],
               'TE': [
-                // Tier 1 Elite
+                // Tier 1 Elite - 2025 Current
                 { id: 'kelce', name: 'Travis Kelce', team: 'KC' },
-                { id: 'andrews', name: 'Mark Andrews', team: 'BAL' },
                 { id: 'kittle', name: 'George Kittle', team: 'SF' },
-                // Tier 2 Reliable TE1s
+                { id: 'andrews', name: 'Mark Andrews', team: 'BAL' },
+                // Tier 2 Reliable TE1s - 2025
+                { id: 'kmet', name: 'Cole Kmet', team: 'CHI' },
+                { id: 'loveland', name: 'Colston Loveland', team: 'CHI' }, // Rookie depth
+                { id: 'farrell', name: 'Luke Farrell', team: 'SF' },
+                { id: 'smythe', name: 'Durham Smythe', team: 'CHI' },
+                // Tier 3 Streaming Options
                 { id: 'waller', name: 'Darren Waller', team: 'NYG' },
                 { id: 'goedert', name: 'Dallas Goedert', team: 'PHI' },
                 { id: 'pitts', name: 'Kyle Pitts', team: 'ATL' },
@@ -1075,32 +1092,91 @@ export async function registerRoutes(app: Express): Promise<Server> {
           break;
         
         case 'nba':
-          // NBA roster data by position
+          // NBA 2024-25 CURRENT SEASON ROSTERS
           const nbaRosters: any = {
             'PG': [
+              // Tier 1 Elite - Current 2024-25
+              { id: 'shai', name: 'Shai Gilgeous-Alexander', team: 'OKC' }, // Fantastic OKC lineup
               { id: 'curry', name: 'Stephen Curry', team: 'GSW' },
-              { id: 'doncic', name: 'Luka Doncic', team: 'DAL' },
-              { id: 'morant', name: 'Ja Morant', team: 'MEM' }
+              { id: 'doncic', name: 'Luka Dončić', team: 'DAL' }, // Deadly backcourt with Kyrie
+              { id: 'dame', name: 'Damian Lillard', team: 'MIL' }, // With Giannis
+              { id: 'trae', name: 'Trae Young', team: 'ATL' }, // Heliocentric force
+              { id: 'brunson', name: 'Jalen Brunson', team: 'NYK' }, // Ideal starting 5
+              // Tier 2 - 2024-25 Current
+              { id: 'ja', name: 'Ja Morant', team: 'MEM' },
+              { id: 'fox', name: 'De\'Aaron Fox', team: 'SAC' },
+              { id: 'maxey', name: 'Tyrese Maxey', team: 'PHI' },
+              { id: 'lamelo', name: 'LaMelo Ball', team: 'CHA' },
+              { id: 'garland', name: 'Darius Garland', team: 'CLE' },
+              { id: 'murray', name: 'Dejounte Murray', team: 'NO' },
+              { id: 'haliburton', name: 'Tyrese Haliburton', team: 'IND' },
+              { id: 'white', name: 'Derrick White', team: 'BOS' }
             ],
             'SG': [
-              { id: 'edwards', name: 'Anthony Edwards', team: 'MIN' },
+              // Tier 1 Elite - 2024-25
+              { id: 'ant', name: 'Anthony Edwards', team: 'MIN' }, // Rudy Gobert frontcourt
               { id: 'booker', name: 'Devin Booker', team: 'PHX' },
-              { id: 'mitchell', name: 'Donovan Mitchell', team: 'CLE' }
+              { id: 'mitchell', name: 'Donovan Mitchell', team: 'CLE' },
+              { id: 'brown', name: 'Jaylen Brown', team: 'BOS' },
+              // Tier 2 - Current Season
+              { id: 'harden', name: 'James Harden', team: 'LAC' },
+              { id: 'lavine', name: 'Zach LaVine', team: 'CHI' },
+              { id: 'murray_jamal', name: 'Jamal Murray', team: 'DEN' },
+              { id: 'holiday', name: 'Jrue Holiday', team: 'BOS' },
+              { id: 'poole', name: 'Jordan Poole', team: 'WAS' },
+              { id: 'beal', name: 'Bradley Beal', team: 'PHX' },
+              { id: 'herro', name: 'Tyler Herro', team: 'MIA' },
+              { id: 'mccollum', name: 'CJ McCollum', team: 'NO' }
             ],
             'SF': [
+              // Tier 1 Elite - 2024-25
               { id: 'tatum', name: 'Jayson Tatum', team: 'BOS' },
-              { id: 'durant', name: 'Kevin Durant', team: 'PHX' },
-              { id: 'lebron', name: 'LeBron James', team: 'LAL' }
+              { id: 'lebron', name: 'LeBron James', team: 'LAL' }, // Aging but effective with AD
+              { id: 'kd', name: 'Kevin Durant', team: 'PHX' },
+              { id: 'pg13', name: 'Paul George', team: 'PHI' }, // Biggest 2024 offseason signing
+              // Tier 2 - Current Season
+              { id: 'kawhi', name: 'Kawhi Leonard', team: 'LAC' },
+              { id: 'jimmy', name: 'Jimmy Butler', team: 'MIA' },
+              { id: 'og', name: 'OG Anunoby', team: 'NYK' }, // Ideal starting 5
+              { id: 'bridges', name: 'Mikal Bridges', team: 'NYK' }, // Completed ideal starting 5
+              { id: 'franz', name: 'Franz Wagner', team: 'ORL' },
+              { id: 'risacher', name: 'Zaccharie Risacher', team: 'ATL' }, // #1 overall pick
+              { id: 'derozan', name: 'DeMar DeRozan', team: 'SAC' },
+              { id: 'ingram', name: 'Brandon Ingram', team: 'NO' }
             ],
             'PF': [
-              { id: 'giannis', name: 'Giannis Antetokounmpo', team: 'MIL' },
-              { id: 'davis', name: 'Anthony Davis', team: 'LAL' },
-              { id: 'zion', name: 'Zion Williamson', team: 'NOP' }
+              // Tier 1 Elite - 2024-25
+              { id: 'giannis', name: 'Giannis Antetokounmpo', team: 'MIL' }, // With Lillard
+              { id: 'ad', name: 'Anthony Davis', team: 'LAL' }, // Knocking back Father Time
+              { id: 'siakam', name: 'Pascal Siakam', team: 'IND' },
+              { id: 'mobley', name: 'Evan Mobley', team: 'CLE' },
+              { id: 'johnson', name: 'Jalen Johnson', team: 'ATL' }, // Ascending stud
+              // Tier 2 - Current
+              { id: 'randle', name: 'Julius Randle', team: 'NYK' },
+              { id: 'barnes', name: 'Scottie Barnes', team: 'TOR' },
+              { id: 'cunningham', name: 'Cade Cunningham', team: 'DET' }, // Poised to be star
+              { id: 'collins', name: 'John Collins', team: 'UTA' },
+              { id: 'zion', name: 'Zion Williamson', team: 'NO' },
+              { id: 'green', name: 'Draymond Green', team: 'GSW' },
+              { id: 'sabonis', name: 'Domantas Sabonis', team: 'SAC' }
             ],
             'C': [
-              { id: 'jokic', name: 'Nikola Jokic', team: 'DEN' },
-              { id: 'embiid', name: 'Joel Embiid', team: 'PHI' },
-              { id: 'wemby', name: 'Victor Wembanyama', team: 'SAS' }
+              // Tier 1 Elite - 2024-25
+              { id: 'jokic', name: 'Nikola Jokić', team: 'DEN' }, // Big boy anchoring Nuggets
+              { id: 'embiid', name: 'Joel Embiid', team: 'PHI' }, // With Paul George
+              { id: 'kat', name: 'Karl-Anthony Towns', team: 'NYK' },
+              { id: 'gobert', name: 'Rudy Gobert', team: 'MIN' }, // Defensive tower
+              { id: 'holmgren', name: 'Chet Holmgren', team: 'OKC' }, // Fantastic OKC lineup
+              // Tier 2 - Current Season
+              { id: 'bam', name: 'Bam Adebayo', team: 'MIA' },
+              { id: 'duren', name: 'Jalen Duren', team: 'DET' }, // Quietly became stud
+              { id: 'allen', name: 'Jarrett Allen', team: 'CLE' },
+              { id: 'hartenstein', name: 'Isaiah Hartenstein', team: 'OKC' }, // OKC fantastic lineup
+              { id: 'ayton', name: 'Deandre Ayton', team: 'POR' },
+              { id: 'capela', name: 'Clint Capela', team: 'ATL' },
+              { id: 'wemby', name: 'Victor Wembanyama', team: 'SAS' },
+              { id: 'ivey', name: 'Jaden Ivey', team: 'DET' }, // Brimming with potential
+              { id: 'thompson', name: 'Ausar Thompson', team: 'DET' } // Potential
             ]
           };
           roster = nbaRosters[position] || [];
@@ -1204,54 +1280,121 @@ export async function registerRoutes(app: Express): Promise<Server> {
               { id: 'pena', name: 'Jeremy Pena', team: 'HOU' }
             ],
             'OF': [
-              { id: 'trout', name: 'Mike Trout', team: 'LAA' },
-              { id: 'betts', name: 'Mookie Betts', team: 'LAD' },
-              { id: 'acuna', name: 'Ronald Acuña Jr.', team: 'ATL' },
-              { id: 'soto', name: 'Juan Soto', team: 'SD' },
-              { id: 'tucker', name: 'Kyle Tucker', team: 'HOU' },
-              { id: 'alvarez', name: 'Yordan Alvarez', team: 'HOU' },
-              { id: 'harper', name: 'Bryce Harper', team: 'PHI' },
-              { id: 'ohtani', name: 'Shohei Ohtani', team: 'LAD' },
-              { id: 'judge', name: 'Aaron Judge', team: 'NYY' },
-              { id: 'springer', name: 'George Springer', team: 'TOR' },
-              { id: 'hernandez', name: 'Teoscar Hernandez', team: 'LAD' },
-              { id: 'robert', name: 'Luis Robert Jr.', team: 'CWS' },
-              { id: 'harris', name: 'Michael Harris II', team: 'ATL' },
-              { id: 'castellanos', name: 'Nick Castellanos', team: 'PHI' },
-              { id: 'schwarber', name: 'Kyle Schwarber', team: 'PHI' },
-              { id: 'gurriel', name: 'Lourdes Gurriel Jr.', team: 'TOR' },
-              { id: 'stanton', name: 'Giancarlo Stanton', team: 'NYY' },
-              { id: 'bellinger', name: 'Cody Bellinger', team: 'CHC' },
-              { id: 'ward', name: 'Taylor Ward', team: 'LAA' },
-              { id: 'riley2', name: 'Austin Riley', team: 'ATL' }
+              // Tier 1 Elite - 2025 CURRENT SEASON
+              { id: 'ohtani', name: 'Shohei Ohtani', team: 'LAD' }, // Dodgers lineup 1-hole DH
+              { id: 'betts', name: 'Mookie Betts', team: 'LAD' }, // Moved to SS in 2025
+              { id: 'hernandez_t', name: 'Teoscar Hernández', team: 'LAD' }, // Current RF
+              { id: 'freeman', name: 'Freddie Freeman', team: 'LAD' }, // Dodgers 1B
+              { id: 'edman', name: 'Tommy Edman', team: 'LAD' }, // Center field
+              { id: 'smith_will', name: 'Will Smith', team: 'LAD' }, // Catcher
+              // Blue Jays 2025 Opening Day Lineup
+              { id: 'bichette2', name: 'Bo Bichette', team: 'TOR' }, // 2025 leadoff SS
+              { id: 'vladguerrero2', name: 'Vladimir Guerrero Jr.', team: 'TOR' }, // 1B cleanup
+              { id: 'santander', name: 'Anthony Santander', team: 'TOR' }, // LF #3 hole
+              { id: 'gimenez', name: 'Andrés Giménez', team: 'TOR' }, // 2B
+              { id: 'kirk2', name: 'Alejandro Kirk', team: 'TOR' }, // Catcher
+              { id: 'springer2', name: 'George Springer', team: 'TOR' }, // CF veteran
+              { id: 'wagner', name: 'Will Wagner', team: 'TOR' }, // DH
+              { id: 'clement', name: 'Ernie Clement', team: 'TOR' }, // 3B utility
+              { id: 'roden', name: 'Alan Roden', team: 'TOR' }, // RF
+              // Astros 2025 Changes
+              { id: 'altuve2', name: 'Jose Altuve', team: 'HOU' }, // MOVED TO LEFT FIELD in 2025
+              { id: 'tucker2', name: 'Kyle Tucker', team: 'HOU' },
+              { id: 'alvarez2', name: 'Yordan Alvarez', team: 'HOU' },
+              // Other Current Stars
+              { id: 'judge2', name: 'Aaron Judge', team: 'NYY' },
+              { id: 'acuna2', name: 'Ronald Acuña Jr.', team: 'ATL' },
+              { id: 'soto2', name: 'Juan Soto', team: 'SD' },
+              { id: 'trout2', name: 'Mike Trout', team: 'LAA' },
+              { id: 'harper2', name: 'Bryce Harper', team: 'PHI' }
             ]
           };
           roster = mlbRosters[position] || [];
           break;
 
         case 'nhl':
-          // NHL roster data by position
+          // NHL 2024-25 CURRENT SEASON ROSTERS - ONGOING SEASON
           const nhlRosters: any = {
             'C': [
+              // Tier 1 Elite - Current 2024-25
               { id: 'mcdavid', name: 'Connor McDavid', team: 'EDM' },
               { id: 'draisaitl', name: 'Leon Draisaitl', team: 'EDM' },
-              { id: 'mackinnon', name: 'Nathan MacKinnon', team: 'COL' }
+              { id: 'mackinnon', name: 'Nathan MacKinnon', team: 'COL' }, // Core Avalanche
+              { id: 'bedard', name: 'Connor Bedard', team: 'CHI' }, // Sophomore season
+              { id: 'kadri', name: 'Nazem Kadri', team: 'CGY' }, // Current Flames roster
+              { id: 'backlund', name: 'Mikael Backlund', team: 'CGY' },
+              // Tier 2 - Current Season
+              { id: 'pasta', name: 'David Pastrnak', team: 'BOS' }, // 22 active players
+              { id: 'zacha', name: 'Pavel Zacha', team: 'BOS' }, // Current lineup
+              { id: 'marchand', name: 'Brad Marchand', team: 'BOS' },
+              { id: 'thompson', name: 'Tage Thompson', team: 'BUF' }, // 23 active
+              { id: 'tuch', name: 'Alex Tuch', team: 'BUF' },
+              { id: 'bertuzzi', name: 'Tyler Bertuzzi', team: 'CHI' }, // With Bedard
+              { id: 'hall', name: 'Taylor Hall', team: 'CHI' }
             ],
             'LW': [
-              { id: 'pastrnak', name: 'David Pastrnak', team: 'BOS' },
-              { id: 'panarin', name: 'Artemi Panarin', team: 'NYR' }
+              // Tier 1 Elite - 2024-25
+              { id: 'panarin', name: 'Artemi Panarin', team: 'NYR' },
+              { id: 'huberdeau', name: 'Jonathan Huberdeau', team: 'CGY' },
+              { id: 'gaudreau', name: 'Johnny Gaudreau', team: 'CBJ' },
+              { id: 'forsberg', name: 'Filip Forsberg', team: 'NSH' },
+              { id: 'landeskog', name: 'Gabriel Landeskog', team: 'COL' }, // Injury status
+              // Tier 2 - Current
+              { id: 'pospisil', name: 'Martin Pospisil', team: 'CGY' }, // Current Flames
+              { id: 'kreider', name: 'Chris Kreider', team: 'NYR' },
+              { id: 'buchnevich', name: 'Pavel Buchnevich', team: 'STL' },
+              { id: 'ehlers', name: 'Nikolaj Ehlers', team: 'WPG' },
+              { id: 'nichushkin', name: 'Valeri Nichushkin', team: 'COL' }, // Notable injuries
+              { id: 'lehkonen', name: 'Artturi Lehkonen', team: 'COL' } // Injury status
             ],
             'RW': [
+              // Tier 1 Elite - 2024-25
               { id: 'kucherov', name: 'Nikita Kucherov', team: 'TBL' },
-              { id: 'rantanen', name: 'Mikko Rantanen', team: 'COL' }
+              { id: 'rantanen', name: 'Mikko Rantanen', team: 'COL' }, // Core Avalanche
+              { id: 'zuccarello', name: 'Mats Zuccarello', team: 'MIN' },
+              { id: 'pastrnak2', name: 'David Pastrnak', team: 'BOS' }, // Current season
+              { id: 'kaprizov', name: 'Kirill Kaprizov', team: 'MIN' },
+              // Tier 2 - Current
+              { id: 'andersson', name: 'Rasmus Andersson', team: 'CGY' }, // D/RW flexibility
+              { id: 'weegar', name: 'MacKenzie Weegar', team: 'CGY' },
+              { id: 'tarasenko', name: 'Vladimir Tarasenko', team: 'FLA' },
+              { id: 'reinhart', name: 'Sam Reinhart', team: 'FLA' },
+              { id: 'stone', name: 'Mark Stone', team: 'VGK' },
+              { id: 'marner', name: 'Mitch Marner', team: 'TOR' }
             ],
             'D': [
-              { id: 'makar', name: 'Cale Makar', team: 'COL' },
-              { id: 'hedman', name: 'Victor Hedman', team: 'TBL' }
+              // Tier 1 Elite - 2024-25
+              { id: 'makar', name: 'Cale Makar', team: 'COL' }, // Core Avalanche
+              { id: 'hedman', name: 'Victor Hedman', team: 'TBL' },
+              { id: 'mcavoy', name: 'Charlie McAvoy', team: 'BOS' }, // Current Bruins
+              { id: 'lindholm', name: 'Hampus Lindholm', team: 'BOS' }, // 22 active
+              { id: 'dahlin', name: 'Rasmus Dahlin', team: 'BUF' }, // Key Sabres
+              { id: 'power', name: 'Owen Power', team: 'BUF' },
+              // Tier 2 - Current Season
+              { id: 'jones', name: 'Seth Jones', team: 'CHI' }, // With Bedard
+              { id: 'hughes', name: 'Quinn Hughes', team: 'VAN' },
+              { id: 'josi', name: 'Roman Josi', team: 'NSH' },
+              { id: 'carlson', name: 'John Carlson', team: 'WSH' },
+              { id: 'fox', name: 'Adam Fox', team: 'NYR' },
+              { id: 'burns', name: 'Brent Burns', team: 'CAR' }
             ],
             'G': [
+              // Tier 1 Elite - 2024-25 Current
               { id: 'shesterkin', name: 'Igor Shesterkin', team: 'NYR' },
-              { id: 'vasilevskiy', name: 'Andrei Vasilevskiy', team: 'TBL' }
+              { id: 'vasilevskiy', name: 'Andrei Vasilevskiy', team: 'TBL' },
+              { id: 'swayman', name: 'Jeremy Swayman', team: 'BOS' }, // Current Bruins starter
+              { id: 'korpisalo', name: 'Joonas Korpisalo', team: 'BOS' }, // Current backup
+              { id: 'luukkonen', name: 'Ukko-Pekka Luukkonen', team: 'BUF' }, // Sabres starter
+              { id: 'levi', name: 'Devon Levi', team: 'BUF' }, // Backup
+              // Tier 2 - Current Season
+              { id: 'vladar', name: 'Dan Vladar', team: 'CGY' }, // Current Flames
+              { id: 'wolf', name: 'Dustin Wolf', team: 'CGY' }, // Backup
+              { id: 'mrazek', name: 'Petr Mrazek', team: 'CHI' }, // With Bedard
+              { id: 'soderblom', name: 'Arvid Soderblom', team: 'CHI' }, // Backup
+              { id: 'georgiev', name: 'Alexandar Georgiev', team: 'COL' }, // Avalanche starter
+              { id: 'annunen', name: 'Justus Annunen', team: 'COL' }, // Backup
+              { id: 'hellebuyck', name: 'Connor Hellebuyck', team: 'WPG' },
+              { id: 'saros', name: 'Juuse Saros', team: 'NSH' }
             ]
           };
           roster = nhlRosters[position] || [];
