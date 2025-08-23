@@ -133,12 +133,12 @@ export default function FantasyCoaching() {
   // Player Analysis Mutation
   const analyzePlayerMutation = useMutation({
     mutationFn: async () => {
-      const selectedPlayerName = rosterData?.roster?.find((p: any) => p.id === selectedPlayer)?.name || selectedPlayer;
+      const selectedPlayerName = rosterData?.players?.find((p: any) => p.id === selectedPlayer)?.name || selectedPlayer;
       const analysisData = {
         sport: selectedSport,
         position: selectedPosition,
         player: selectedPlayerName,
-        team: rosterData?.roster?.find((p: any) => p.id === selectedPlayer)?.team
+        team: rosterData?.players?.find((p: any) => p.id === selectedPlayer)?.team
       };
       
       const response = await apiRequest('/api/fantasy/analyze-player', 'POST', analysisData);
@@ -149,7 +149,7 @@ export default function FantasyCoaching() {
       setPlayerAnalysis(data);
       toast({
         title: "Analysis Complete",
-        description: `Generated analysis for ${rosterData?.roster?.find((p: any) => p.id === selectedPlayer)?.name}`,
+        description: `Generated analysis for ${rosterData?.players?.find((p: any) => p.id === selectedPlayer)?.name}`,
       });
     },
     onError: (error) => {
@@ -379,8 +379,8 @@ export default function FantasyCoaching() {
                   {rosterLoading && (
                     <option disabled>Loading {selectedPosition === 'DEF' ? 'teams' : 'players'}...</option>
                   )}
-                  {rosterData?.success && rosterData.roster?.length > 0 ? 
-                    rosterData.roster.map((item: any) => (
+                  {rosterData?.success && rosterData.players?.length > 0 ? 
+                    rosterData.players.map((item: any) => (
                       <option key={item.id || item.name} value={item.id || item.name}>
                         {item.name} {item.team ? `(${item.team})` : ''}
                       </option>
