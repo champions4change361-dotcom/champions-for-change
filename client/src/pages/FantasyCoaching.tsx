@@ -805,11 +805,11 @@ export default function FantasyCoaching() {
 
                     {/* Filtered Injuries - DraftKings Style */}
                     <div className="space-y-3">
-                      {(injuryReports as any).injuries
-                        .filter((injury: any) => {
-                          // Filter by selected sport based on team abbreviations
+                      {(() => {
+                        const filteredInjuries = (injuryReports as any).injuries.filter((injury: any) => {
+                          // For NFL, show all NFL injuries since our data is all NFL
                           if (selectedInjurySport === 'NFL') {
-                            return ['NYJ', 'SF', 'LAR', 'BAL', 'MIA', 'CHI', 'LAC', 'TB', 'ATL', 'CLE', 'IND', 'KC', 'BUF', 'CIN', 'HOU', 'PHI', 'DET', 'JAC', 'NE', 'LV', 'DEN', 'WAS', 'GB', 'MIN', 'DAL', 'NYG', 'CAR', 'NO', 'ARI', 'SEA', 'TEN', 'PIT'].includes(injury.team);
+                            return true; // Show all for now since all our current data is NFL
                           } else if (selectedInjurySport === 'NBA') {
                             return ['LAL', 'GSW', 'BOS', 'MIA', 'NYK', 'BRK', 'CHI', 'MIL', 'PHI', 'TOR', 'IND', 'CLE', 'ATL', 'ORL', 'WAS', 'CHA', 'DET', 'SAC', 'LAC', 'PHX', 'POR', 'UTA', 'OKC', 'MIN', 'NOP', 'SAS', 'HOU', 'DAL', 'MEM', 'DEN'].includes(injury.team);
                           } else if (selectedInjurySport === 'MLB') {
@@ -818,47 +818,53 @@ export default function FantasyCoaching() {
                             return ['BOS', 'NYR', 'TOR', 'MTL', 'VGK', 'LAK', 'TB', 'FLA', 'CAR', 'NJD', 'NYI', 'WSH', 'PIT', 'PHI', 'CBJ', 'BUF', 'DET', 'OTT', 'COL', 'DAL', 'MIN', 'WPG', 'STL', 'NSH', 'CHI', 'ARI', 'CGY', 'EDM', 'VAN', 'SEA', 'SJS', 'ANA'].includes(injury.team);
                           }
                           return true;
-                        })
-                        .map((injury: any, index: number) => (
-                        <div key={index} className="flex items-center gap-3 p-4 border rounded-lg bg-white hover:bg-gray-50 transition-colors">
-                          {/* Player Avatar - DraftKings Style */}
-                          <div className="w-12 h-12 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full flex items-center justify-center text-xs font-bold text-gray-600 shadow-sm">
-                            {injury.playerName.split(' ').map((n: string) => n[0]).join('')}
-                          </div>
-                          
-                          {/* Player Info */}
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-semibold text-gray-900">{injury.playerName}</span>
-                              <span className="text-sm font-medium text-gray-600">{injury.position}</span>
-                              {/* Injury Status Badge - Clean DraftKings Style */}
-                              {injury.status !== 'Healthy' && (
-                                <div className={`w-5 h-5 rounded flex items-center justify-center text-white text-xs font-bold ${
-                                  injury.status === 'Questionable' ? 'bg-yellow-500' :
-                                  injury.status === 'Doubtful' ? 'bg-orange-500' :
-                                  'bg-red-500'
-                                }`}>
-                                  {injury.status === 'Questionable' ? 'Q' :
-                                   injury.status === 'Doubtful' ? 'D' : 'O'}
-                                </div>
-                              )}
+                        });
+
+                        return filteredInjuries.length > 0 ? filteredInjuries.map((injury: any, index: number) => (
+                          <div key={index} className="flex items-center gap-3 p-4 border rounded-lg bg-white hover:bg-gray-50 transition-colors">
+                            {/* Player Avatar - DraftKings Style */}
+                            <div className="w-12 h-12 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full flex items-center justify-center text-xs font-bold text-gray-600 shadow-sm">
+                              {injury.playerName.split(' ').map((n: string) => n[0]).join('')}
                             </div>
-                            <div className="text-sm text-gray-600 mb-1">{injury.team} • {injury.injury}</div>
-                            <div className="text-xs text-gray-500">{injury.impact}</div>
+                            
+                            {/* Player Info */}
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-semibold text-gray-900">{injury.playerName}</span>
+                                <span className="text-sm font-medium text-gray-600">{injury.position}</span>
+                                {/* Injury Status Badge - Clean DraftKings Style */}
+                                {injury.status !== 'Healthy' && (
+                                  <div className={`w-5 h-5 rounded flex items-center justify-center text-white text-xs font-bold ${
+                                    injury.status === 'Questionable' ? 'bg-yellow-500' :
+                                    injury.status === 'Doubtful' ? 'bg-orange-500' :
+                                    'bg-red-500'
+                                  }`}>
+                                    {injury.status === 'Questionable' ? 'Q' :
+                                     injury.status === 'Doubtful' ? 'D' : 'O'}
+                                  </div>
+                                )}
+                              </div>
+                              <div className="text-sm text-gray-600 mb-1">{injury.team} • {injury.injury}</div>
+                              <div className="text-xs text-gray-500">{injury.impact}</div>
+                            </div>
+                            
+                            {/* Right Side Info - Timeline */}
+                            <div className="text-right">
+                              <div className="text-sm font-medium text-gray-900">{injury.timeline}</div>
+                              <div className="text-xs text-gray-500">{injury.lastUpdated}</div>
+                            </div>
                           </div>
-                          
-                          {/* Right Side Info - Timeline */}
-                          <div className="text-right">
-                            <div className="text-sm font-medium text-gray-900">{injury.timeline}</div>
-                            <div className="text-xs text-gray-500">{injury.lastUpdated}</div>
+                        )) : (
+                          <div className="text-center py-8 text-gray-500">
+                            No {selectedInjurySport} injury reports available right now.
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })()}
                     </div>
                   </>
                 ) : (
                   <div className="text-center py-8 text-gray-500">
-                    {injuryLoading ? 'Loading injury reports...' : 'No injury reports available for this sport.'}
+                    {injuryLoading ? 'Loading injury reports...' : 'No injury data available.'}
                   </div>
                 )}
               </CardContent>
