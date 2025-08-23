@@ -651,8 +651,9 @@ export default function FantasyCoaching() {
                   R Analytics - Professional Projections
                 </CardTitle>
                 <CardDescription>
-                  Advanced statistical analysis powered by R. NFL uses ffanalytics integration, 
-                  MLB uses baseball-public inspired analytics. Professional-grade projections with confidence ratings.
+                  Advanced statistical analysis powered by R. NFL uses enhanced ffanalytics + nflverse integration, 
+                  MLB uses baseball-public inspired analytics. Professional-grade projections with confidence ratings, 
+                  injury risk, and Vegas data.
                 </CardDescription>
               </CardHeader>
               <CardContent>

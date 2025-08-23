@@ -50,9 +50,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const { sport, position } = req.params;
     console.log(`🔬 Calling R analytics for ${sport.toUpperCase()} ${position} projections`);
     
-    // Choose the appropriate R script based on sport
-    const scriptFile = sport === 'nfl' ? 'test-api.R' : 'baseball-api.R';
-    const functionName = sport === 'nfl' ? 'get_projections' : 'get_baseball_projections';
+    // Choose the appropriate R script based on sport (enhanced for NFL)
+    let scriptFile, functionName;
+    if (sport === 'nfl') {
+      // Use enhanced nflverse integration for NFL
+      scriptFile = 'nflverse-enhanced-api.R';
+      functionName = 'get_enhanced_nfl_projections';
+    } else if (sport === 'mlb') {
+      scriptFile = 'baseball-api.R';
+      functionName = 'get_baseball_projections';
+    } else {
+      // Fallback to original ffanalytics
+      scriptFile = 'test-api.R';
+      functionName = 'get_projections';
+    }
     
     const command = `cd r-analytics && R --slave --no-restore -e ".libPaths(c('R-libs', .libPaths())); library(jsonlite); source('${scriptFile}'); cat(toJSON(${functionName}('${position}'), auto_unbox=TRUE))"`;
     
@@ -73,7 +84,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         if (jsonLine) {
           const result = JSON.parse(jsonLine);
-          console.log(`✅ R analytics returned ${result.projections?.length || 0} ${sport.toUpperCase()} ${position} projections`);
+          console.log(`✅ Enhanced R analytics returned ${result.projections?.length || 0} ${sport.toUpperCase()} ${position} projections`);
           res.json(result);
         } else {
           res.status(500).json({ 
