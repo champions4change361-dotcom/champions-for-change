@@ -2720,17 +2720,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
           designation: 'D'
         },
         { 
-          playerName: 'Ezekiel Elliott', 
+          playerName: 'Dak Prescott', 
           team: 'DAL', 
+          position: 'QB',
+          injury: 'Hamstring', 
+          status: 'Questionable', 
+          starterStatus: 'starter',
+          coachDecision: false,
+          impact: 'Game-time decision for Week 1',
+          riskLevel: 'medium',
+          timeline: 'Day-to-day',
+          lastUpdated: '2 hours ago',
+          designation: 'Q'
+        },
+        { 
+          playerName: 'Ezekiel Elliott', 
+          team: 'PHI', 
           position: 'RB',
           injury: 'Healthy', 
           status: 'Healthy', 
           starterStatus: 'bench',
-          coachDecision: true,
-          impact: 'Tony Pollard lead back - limited touches',
+          coachDecision: false,
+          impact: 'Backup to Kenneth Gainwell - limited touches',
           riskLevel: 'low',
-          timeline: 'Backup role',
-          lastUpdated: '8 hours ago',
+          timeline: 'Rotational role',
+          lastUpdated: '1 day ago',
           designation: '✓'
         }
       ];

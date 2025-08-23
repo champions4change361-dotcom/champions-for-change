@@ -59,7 +59,9 @@ export default function FantasyCoaching() {
     queryFn: async () => {
       const response = await apiRequest('/api/fantasy/injury-reports', 'GET');
       return response;
-    }
+    },
+    refetchInterval: 30000, // Refresh every 30 seconds
+    staleTime: 0 // Always consider data stale to force fresh fetches
   });
 
   // Roster Data Query - loads players/teams for selected sport and position
@@ -772,7 +774,7 @@ export default function FantasyCoaching() {
                   </div>
                 </div>
 
-                {!injuryLoading && (injuryReports as any)?.injuries ? (
+                {!injuryLoading && (injuryReports as any)?.injuries && (injuryReports as any).injuries.length > 0 ? (
                   <>
                     {/* Games for Selected Sport - DraftKings Style */}
                     <div className="mb-4">
