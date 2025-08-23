@@ -288,7 +288,7 @@ export default function FantasyCoaching() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 space-y-2 sm:space-y-0">
               <div>
                 <Label htmlFor="sport-select">Choose Sport</Label>
                 <select 
@@ -362,12 +362,12 @@ export default function FantasyCoaching() {
               </div>
               <div className="flex items-end">
                 <Button 
-                  className="w-full" 
+                  className="w-full h-12 text-base font-semibold" 
                   disabled={!selectedSport || !selectedPosition || !selectedPlayer || analyzePlayerMutation.isPending}
                   onClick={handleAnalyzePlayer}
                   data-testid="analyze-button"
                 >
-                  <Brain className="h-4 w-4 mr-2" />
+                  <Brain className="h-5 w-5 mr-2" />
                   {analyzePlayerMutation.isPending ? 'Analyzing...' : 'Analyze'}
                 </Button>
               </div>
@@ -385,7 +385,7 @@ export default function FantasyCoaching() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="space-y-2">
                   <div className="text-sm text-muted-foreground">Projected Points</div>
                   <div className="text-2xl font-bold text-green-600">
@@ -393,13 +393,19 @@ export default function FantasyCoaching() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <div className="text-sm text-muted-foreground">Confidence</div>
+                  <div className="text-sm text-muted-foreground">
+                    Confidence
+                    <span className="block text-xs opacity-70">AI prediction accuracy</span>
+                  </div>
                   <div className="text-2xl font-bold text-blue-600">
                     {playerAnalysis.analysis.confidence}%
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <div className="text-sm text-muted-foreground">Matchup Rating</div>
+                  <div className="text-sm text-muted-foreground">
+                    Matchup Rating
+                    <span className="block text-xs opacity-70">Opponent strength (10 = easiest)</span>
+                  </div>
                   <div className="text-2xl font-bold text-orange-600">
                     {playerAnalysis.analysis.matchupRating}/10
                   </div>

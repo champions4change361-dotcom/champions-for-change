@@ -1020,7 +1020,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 // Tier 3 WR2/Flex - 2025 Depth Charts
                 { id: 'higgins', name: 'Tee Higgins', team: 'CIN' },
                 { id: 'smith_devonta', name: 'DeVonta Smith', team: 'PHI' },
-                { id: 'metcalf', name: 'DK Metcalf', team: 'SEA' },
+                { id: 'metcalf', name: 'DK Metcalf', team: 'PIT' }, // Traded to Steelers July 2024
                 { id: 'lockett', name: 'Tyler Lockett', team: 'SEA' },
                 { id: 'moore_dj', name: 'DJ Moore', team: 'CHI' },
                 { id: 'jennings', name: 'Jauan Jennings', team: 'SF' },
