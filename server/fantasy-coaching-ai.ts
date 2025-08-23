@@ -2,10 +2,26 @@
 // The smartest fantasy coaching system ever built
 
 import { PlayerAnalytics, DefensiveAnalytics, AiCoachingInsights } from "@shared/fantasy-coaching-schema";
+import { HistoricalDataService } from './historical-data-service';
+import { AITrainingService } from './ai-training-service';
 
 export class KeystoneFantasyCoachingAI {
+  private static historicalService = HistoricalDataService.getInstance();
+  private static aiTrainingService = AITrainingService.getInstance();
+  private static isInitialized = false;
+
+  // Initialize historical AI training
+  static async initializeAI(): Promise<void> {
+    if (this.isInitialized) return;
+    
+    console.log('🧠 Initializing Enhanced Fantasy AI with Historical Data...');
+    await this.historicalService.initializeHistoricalData();
+    await this.aiTrainingService.initializeTraining();
+    this.isInitialized = true;
+    console.log('✅ Enhanced Fantasy AI fully loaded with 2020-2024 training data');
+  }
   
-  // Generate Jahmyr Gibbs style insights
+  // Generate Jahmyr Gibbs style insights with historical enhancement
   static async generatePlayerInsight(playerId: string, week: number, storage: any): Promise<{
     insight: string;
     confidence: number;
@@ -14,31 +30,73 @@ export class KeystoneFantasyCoachingAI {
     riskLevel: "low" | "medium" | "high";
     upside: string;
     downside: string;
+    historicalAnalysis?: any;
+    mlEnhancement?: any;
   }> {
+    
+    // Initialize AI if not already done
+    await this.initializeAI();
     
     const playerStats = await storage.getPlayerAnalytics(playerId);
     const opponent = await storage.getUpcomingOpponent(playerId, week);
     const defenseStats = await storage.getDefensiveAnalytics(opponent);
     
+    // Get enhanced historical insights
+    const historicalInsights = this.historicalService.getPlayerInsights(playerId);
+    const historicalPattern = this.historicalService.getPlayerPattern(playerId);
+    
     if (!playerStats || !defenseStats) {
-      return this.generateGenericInsight(playerId, "Limited data available");
+      const genericInsight = this.generateGenericInsight(playerId, "Limited data available");
+      
+      // Enhance with historical data if available
+      if (historicalInsights) {
+        return {
+          ...genericInsight,
+          insight: `📊 HISTORICAL PATTERN: ${historicalInsights.consistency} performer with ${historicalInsights.ceiling}. ${genericInsight.insight}`,
+          confidence: Math.min(95, genericInsight.confidence + 10),
+          historicalAnalysis: historicalInsights
+        };
+      }
+      
+      return genericInsight;
     }
 
-    // EXAMPLE: Gibbs left-side running insight
+    // ENHANCED: Gibbs left-side running insight with historical analysis
     if (playerStats.leftSideRushingPercentage && playerStats.leftSideRushingPercentage > 70 && 
         defenseStats.leftSideRushingYardsAllowed && defenseStats.leftSideRushingYardsAllowed > 120) {
+      
+      // Get ML enhancement for this matchup
+      const mlEnhancement = await this.aiTrainingService.enhanceProjection(
+        playerId, 
+        playerStats.position, 
+        18.5, // Base projection
+        {
+          opponent,
+          week,
+          isHome: true, // Would come from game data
+          gameScript: 'positive'
+        }
+      );
+      
       return {
-        insight: `🔥 TRENDING: ${playerStats.playerName} runs to the left side ${playerStats.leftSideRushingPercentage}% of the time, and ${opponent}'s defense allows ${defenseStats.leftSideRushingYardsAllowed} yards per game on left-side runs (67% above league average). This matchup screams breakout performance!`,
-        confidence: 85,
+        insight: `🔥 TRENDING: ${playerStats.playerName} runs to the left side ${playerStats.leftSideRushingPercentage}% of the time, and ${opponent}'s defense allows ${defenseStats.leftSideRushingYardsAllowed} yards per game on left-side runs (67% above league average). ${historicalInsights ? `Historical data shows ${historicalInsights.consistency} performance with ${historicalInsights.ceiling}.` : ''} This matchup screams breakout performance!`,
+        confidence: Math.min(95, 85 + (mlEnhancement.confidence - 75) * 0.1),
         recommendation: "START WITH HIGH CONFIDENCE",
         riskLevel: "low",
-        upside: "20+ fantasy points with multiple touchdown potential",
-        downside: "Still solid floor due to high usage rate",
+        upside: `${Math.round(mlEnhancement.enhancedProjection * 1.3)}+ fantasy points with ${mlEnhancement.boomProbability}% boom probability`,
+        downside: `Still solid floor due to high usage rate (Floor: ${Math.round(mlEnhancement.enhancedProjection * 0.7)})`,
         supportingData: {
           playerTendency: `${playerStats.leftSideRushingPercentage}% left-side carries`,
           defenseWeakness: `${defenseStats.leftSideRushingYardsAllowed} yards allowed left side`,
           leagueAverage: "72 yards allowed left side",
           advantage: "67% above average vulnerability"
+        },
+        historicalAnalysis: historicalInsights,
+        mlEnhancement: {
+          enhancedProjection: mlEnhancement.enhancedProjection,
+          boomProbability: mlEnhancement.boomProbability,
+          confidence: mlEnhancement.confidence,
+          explanation: mlEnhancement.explanation
         }
       };
     }

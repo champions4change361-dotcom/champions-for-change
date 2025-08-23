@@ -13,6 +13,7 @@ import DFSLineupOptimizer from '@/components/DFSLineupOptimizer';
 import { LiveScoring } from '@/components/LiveScoring';
 import { useAuth } from '@/hooks/useAuth';
 import { FantasyAgeGate } from '@/components/FantasyAgeGate';
+import HistoricalAIStatus from '@/components/HistoricalAIStatus';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -496,6 +497,10 @@ export default function FantasyCoaching() {
               <Brain className="w-4 h-4 mb-1" />
               <span>AI</span>
             </TabsTrigger>
+            <TabsTrigger value="historical-ai" data-testid="tab-historical-ai" className="flex flex-col items-center justify-center text-xs px-1 py-2 min-h-[3rem] bg-gradient-to-r from-purple-100 to-blue-100 border-2 border-purple-300">
+              <span className="text-xs font-bold text-purple-600 mb-1">📊</span>
+              <span className="font-bold text-purple-800">2020-24</span>
+            </TabsTrigger>
             <TabsTrigger value="r-analytics" data-testid="tab-r-analytics" className="flex flex-col items-center justify-center text-xs px-1 py-2 min-h-[3rem]">
               <BarChart3 className="w-4 h-4 mb-1" />
               <span>R Pro</span>
@@ -650,6 +655,11 @@ export default function FantasyCoaching() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Historical AI Training Tab */}
+          <TabsContent value="historical-ai" className="space-y-4" data-testid="historical-ai-content">
+            <HistoricalAIStatus />
           </TabsContent>
 
           {/* R Analytics Tab - Professional Grade Fantasy Intelligence */}

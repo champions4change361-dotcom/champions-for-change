@@ -2706,6 +2706,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Enhanced Historical AI Status
+  app.get('/api/fantasy/ai-status', async (req, res) => {
+    try {
+      const { HistoricalDataService } = await import('./historical-data-service');
+      const { AITrainingService } = await import('./ai-training-service');
+      
+      const historicalService = HistoricalDataService.getInstance();
+      const aiTrainingService = AITrainingService.getInstance();
+      
+      const dataInsights = historicalService.getDataInsights();
+      const trainingStatus = aiTrainingService.getTrainingStatus();
+      
+      res.json({
+        success: true,
+        status: 'enhanced',
+        message: 'Historical AI Training System (2020-2024)',
+        historicalData: {
+          totalPlayers: dataInsights.totalPlayers,
+          totalGames: dataInsights.totalGames,
+          avgConsistency: Math.round(dataInsights.avgConsistency),
+          topPerformers: dataInsights.topPerformers,
+          sleepers: dataInsights.sleepers
+        },
+        mlModels: {
+          modelsCount: trainingStatus.modelsCount,
+          avgAccuracy: trainingStatus.avgAccuracy,
+          lastTraining: trainingStatus.lastTrainingDate,
+          positionModels: trainingStatus.positionModels
+        },
+        features: [
+          'Historical Pattern Recognition (2020-2024)',
+          'Machine Learning Enhanced Projections',
+          'Seasonal Trend Analysis',
+          'Matchup History Integration',
+          'Injury Recovery Patterns',
+          'Consistency Scoring',
+          'Boom/Bust Probability'
+        ]
+      });
+    } catch (error) {
+      console.error('❌ Error getting AI status:', error);
+      res.status(500).json({ success: false, error: 'Failed to get AI status' });
+    }
+  });
+
   app.post("/api/fantasy/ask-question", async (req, res) => {
     try {
       const { question } = req.body;
