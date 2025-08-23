@@ -95,18 +95,18 @@ export default function FantasyCoaching() {
     retry: false
   });
 
-  // R Analytics Projections - Professional Grade Fantasy Intelligence
+  // R Analytics Projections - Professional Grade Fantasy Intelligence (NFL Only)
   const { data: rAnalyticsProjections, isLoading: rAnalyticsLoading } = useQuery({
-    queryKey: ['/api/r-analytics/projections', selectedPosition],
+    queryKey: ['/api/r-analytics/projections', selectedPosition, selectedSport],
     queryFn: async () => {
-      if (!selectedPosition || !['QB', 'RB', 'WR', 'TE'].includes(selectedPosition)) return null;
-      console.log(`🔬 Loading R analytics for ${selectedPosition}`);
+      if (!selectedPosition || !['QB', 'RB', 'WR', 'TE'].includes(selectedPosition) || selectedSport !== 'nfl') return null;
+      console.log(`🔬 Loading R analytics for NFL ${selectedPosition}`);
       const response = await fetch(`/api/r-analytics/projections/${selectedPosition}`);
       const data = await response.json();
       console.log('R Analytics data:', data);
       return data;
     },
-    enabled: !!(selectedPosition && ['QB', 'RB', 'WR', 'TE'].includes(selectedPosition)),
+    enabled: !!(selectedPosition && ['QB', 'RB', 'WR', 'TE'].includes(selectedPosition) && selectedSport === 'nfl'),
     staleTime: 300000 // Cache for 5 minutes
   });
 
@@ -644,11 +644,19 @@ export default function FantasyCoaching() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {!selectedPosition || !['QB', 'RB', 'WR', 'TE'].includes(selectedPosition) ? (
+                {selectedSport !== 'nfl' ? (
+                  <Alert className="border-amber-200 bg-amber-50">
+                    <BarChart3 className="h-4 w-4 text-amber-600" />
+                    <AlertDescription className="text-amber-900">
+                      <strong>NFL Only:</strong> R Analytics with ffanalytics integration is currently available for NFL football only. 
+                      For {selectedSport?.toUpperCase()} projections, use the main AI Coach tab which provides analysis across all sports.
+                    </AlertDescription>
+                  </Alert>
+                ) : !selectedPosition || !['QB', 'RB', 'WR', 'TE'].includes(selectedPosition) ? (
                   <Alert>
                     <BarChart3 className="h-4 w-4" />
                     <AlertDescription>
-                      Select a position (QB, RB, WR, or TE) above to view R Analytics projections.
+                      Select an NFL position (QB, RB, WR, or TE) above to view R Analytics projections powered by ffanalytics.
                     </AlertDescription>
                   </Alert>
                 ) : rAnalyticsLoading ? (
