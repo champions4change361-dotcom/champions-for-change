@@ -160,11 +160,92 @@ export class NFLDepthChartParser {
           { id: 'love_jordan', name: 'Jordan Love', team: 'GB', status: 'starter', depth: 1 },
           
           // NFC South (Atlanta already included above)
-          { id: 'young_bryce', name: 'Bryce Young', team: 'CAR', status: 'starter', depth: 1 },
-          { id: 'mayfield_baker', name: 'Baker Mayfield', team: 'TB', status: 'starter', depth: 1 },
-          { id: 'rattler_spencer', name: 'Spencer Rattler', team: 'NO', status: 'starter', depth: 1 },
+          { id: 'young_bryce_simple', name: 'Bryce Young', team: 'CAR', status: 'starter', depth: 1 },
+          { id: 'mayfield_baker_simple', name: 'Baker Mayfield', team: 'TB', status: 'starter', depth: 1 },
+          { id: 'rattler_spencer_simple', name: 'Spencer Rattler', team: 'NO', status: 'starter', depth: 1 },
           
-          // NFC West (Arizona already included above)
+          // AFC South - Complete QB depth charts  
+          { id: 'richardson_anthony', name: 'Anthony Richardson', team: 'IND', status: 'starter', depth: 1 },
+          { id: 'flacco_joe_ind', name: 'Joe Flacco', team: 'IND', status: 'backup', depth: 2 },
+          { id: 'ehlinger_sam', name: 'Sam Ehlinger', team: 'IND', status: 'backup', depth: 3 },
+          
+          { id: 'stroud_cj', name: 'C.J. Stroud', team: 'HOU', status: 'starter', depth: 1 },
+          { id: 'mills_davis', name: 'Davis Mills', team: 'HOU', status: 'backup', depth: 2 },
+          { id: 'keenum_case', name: 'Case Keenum', team: 'HOU', status: 'backup', depth: 3 },
+          
+          { id: 'levis_will', name: 'Will Levis', team: 'TEN', status: 'starter', depth: 1 },
+          { id: 'rudolph_mason', name: 'Mason Rudolph', team: 'TEN', status: 'backup', depth: 2 },
+          { id: 'malik_willis', name: 'Malik Willis', team: 'TEN', status: 'backup', depth: 3 },
+          
+          { id: 'lawrence_trevor', name: 'Trevor Lawrence', team: 'JAX', status: 'starter', depth: 1 },
+          { id: 'richardson_gardner', name: 'Gardner Minshew', team: 'JAX', status: 'backup', depth: 2 },
+          { id: 'beathard_cj', name: 'C.J. Beathard', team: 'JAX', status: 'backup', depth: 3 },
+          
+          // AFC West - Complete QB depth charts
+          { id: 'mahomes_patrick', name: 'Patrick Mahomes', team: 'KC', status: 'starter', depth: 1 },
+          { id: 'wentz_carson', name: 'Carson Wentz', team: 'KC', status: 'backup', depth: 2 },
+          { id: 'buechele_shane', name: 'Shane Buechele', team: 'KC', status: 'backup', depth: 3 },
+          
+          { id: 'oconnell_aidan', name: 'Aidan O\'Connell', team: 'LV', status: 'starter', depth: 1 },
+          { id: 'minshew_gardner', name: 'Gardner Minshew', team: 'LV', status: 'backup', depth: 2 },
+          { id: 'stidham_jarrett', name: 'Jarrett Stidham', team: 'LV', status: 'backup', depth: 3 },
+          
+          { id: 'nix_bo', name: 'Bo Nix', team: 'DEN', status: 'starter', depth: 1 },
+          { id: 'stidham_jarrett_den', name: 'Jarrett Stidham', team: 'DEN', status: 'backup', depth: 2 },
+          { id: 'rypien_brett', name: 'Brett Rypien', team: 'DEN', status: 'backup', depth: 3 },
+          
+          { id: 'herbert_justin', name: 'Justin Herbert', team: 'LAC', status: 'starter', depth: 1 },
+          { id: 'stick_easton', name: 'Easton Stick', team: 'LAC', status: 'backup', depth: 2 },
+          { id: 'heinicke_taylor', name: 'Taylor Heinicke', team: 'LAC', status: 'backup', depth: 3 },
+          
+          // NFC East - Complete QB depth charts
+          { id: 'hurts_jalen', name: 'Jalen Hurts', team: 'PHI', status: 'starter', depth: 1 },
+          { id: 'pickett_kenny_phi', name: 'Kenny Pickett', team: 'PHI', status: 'backup', depth: 2 },
+          { id: 'mckee_tanner', name: 'Tanner McKee', team: 'PHI', status: 'backup', depth: 3 },
+          
+          { id: 'jones_daniel', name: 'Daniel Jones', team: 'NYG', status: 'starter', depth: 1 },
+          { id: 'taylor_tyrod', name: 'Tyrod Taylor', team: 'NYG', status: 'backup', depth: 2 },
+          { id: 'devito_tommy', name: 'Tommy DeVito', team: 'NYG', status: 'backup', depth: 3 },
+          
+          { id: 'daniels_jayden', name: 'Jayden Daniels', team: 'WAS', status: 'starter', depth: 1 },
+          { id: 'mariota_marcus', name: 'Marcus Mariota', team: 'WAS', status: 'backup', depth: 2 },
+          { id: 'brissett_jacoby_was', name: 'Jacoby Brissett', team: 'WAS', status: 'backup', depth: 3 },
+          
+          { id: 'prescott_dak', name: 'Dak Prescott', team: 'DAL', status: 'starter', depth: 1 },
+          { id: 'rush_cooper_dal', name: 'Cooper Rush', team: 'DAL', status: 'backup', depth: 2 },
+          { id: 'lance_trey', name: 'Trey Lance', team: 'DAL', status: 'backup', depth: 3 },
+          
+          // NFC North - Complete QB depth charts
+          { id: 'goff_jared', name: 'Jared Goff', team: 'DET', status: 'starter', depth: 1 },
+          { id: 'hooker_hendon', name: 'Hendon Hooker', team: 'DET', status: 'backup', depth: 2 },
+          { id: 'boyle_tim', name: 'Tim Boyle', team: 'DET', status: 'backup', depth: 3 },
+          
+          { id: 'darnold_sam', name: 'Sam Darnold', team: 'MIN', status: 'starter', depth: 1 },
+          { id: 'mccarthy_jj', name: 'J.J. McCarthy', team: 'MIN', status: 'backup', depth: 2 },
+          { id: 'hall_nick', name: 'Nick Mullens', team: 'MIN', status: 'backup', depth: 3 },
+          
+          { id: 'williams_caleb', name: 'Caleb Williams', team: 'CHI', status: 'starter', depth: 1 },
+          { id: 'bagent_tyson', name: 'Tyson Bagent', team: 'CHI', status: 'backup', depth: 2 },
+          { id: 'peterman_nathan', name: 'Nathan Peterman', team: 'CHI', status: 'backup', depth: 3 },
+          
+          { id: 'love_jordan', name: 'Jordan Love', team: 'GB', status: 'starter', depth: 1 },
+          { id: 'clifford_sean', name: 'Sean Clifford', team: 'GB', status: 'backup', depth: 2 },
+          { id: 'pratt_michael', name: 'Michael Pratt', team: 'GB', status: 'backup', depth: 3 },
+          
+          // NFC South - Complete QB depth charts  
+          { id: 'mayfield_baker_tb', name: 'Baker Mayfield', team: 'TB', status: 'starter', depth: 1 },
+          { id: 'trask_kyle', name: 'Kyle Trask', team: 'TB', status: 'backup', depth: 2 },
+          { id: 'wolford_john', name: 'John Wolford', team: 'TB', status: 'backup', depth: 3 },
+          
+          { id: 'young_bryce_car', name: 'Bryce Young', team: 'CAR', status: 'starter', depth: 1 },
+          { id: 'dalton_andy', name: 'Andy Dalton', team: 'CAR', status: 'backup', depth: 2 },
+          { id: 'corral_matt', name: 'Matt Corral', team: 'CAR', status: 'backup', depth: 3 },
+          
+          { id: 'rattler_spencer_no', name: 'Spencer Rattler', team: 'NO', status: 'starter', depth: 1 },
+          { id: 'carr_derek', name: 'Derek Carr', team: 'NO', status: 'backup', depth: 2 },
+          { id: 'winston_jameis', name: 'Jameis Winston', team: 'NO', status: 'backup', depth: 3 },
+          
+          // NFC West - Complete QB depth charts (Arizona already included above)
           { id: 'purdy_brock', name: 'Brock Purdy', team: 'SF', status: 'starter', depth: 1 },
           { id: 'darnold_sam_sf', name: 'Sam Darnold', team: 'SF', status: 'backup', depth: 2 },
           { id: 'dobbs_joshua_sf', name: 'Joshua Dobbs', team: 'SF', status: 'backup', depth: 3 },

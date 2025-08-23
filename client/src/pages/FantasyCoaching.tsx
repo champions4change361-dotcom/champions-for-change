@@ -429,7 +429,7 @@ export default function FantasyCoaching() {
                     <span className="block text-xs opacity-70">AI prediction accuracy</span>
                   </div>
                   <div className="text-2xl font-bold text-blue-600">
-                    {playerAnalysis.analysis.confidence}%
+                    {playerAnalysis?.analysis?.confidence || playerAnalysis?.confidence || 'N/A'}%
                   </div>
                 </div>
                 <div className="space-y-2">
