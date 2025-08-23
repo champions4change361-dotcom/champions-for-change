@@ -1625,7 +1625,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         historicalContext: historicalContext,
         
         // Professional Key Factors
-        professionalFactors: generateProfessionalFactors(sport, position, vegasData, usageMetrics),
+        keyFactors: generateProfessionalFactors(sport, position, vegasData, usageMetrics),
         
         // Professional Recommendation
         recommendation: generateProfessionalRecommendation(position, marketData, matchupAnalysis),
