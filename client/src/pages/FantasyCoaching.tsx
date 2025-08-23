@@ -772,7 +772,7 @@ export default function FantasyCoaching() {
                   </div>
                 </div>
 
-                {(injuryReports as any)?.injuries ? (
+                {!injuryLoading && (injuryReports as any)?.injuries ? (
                   <>
                     {/* Games for Selected Sport - DraftKings Style */}
                     <div className="mb-4">
@@ -858,7 +858,7 @@ export default function FantasyCoaching() {
                   </>
                 ) : (
                   <div className="text-center py-8 text-gray-500">
-                    Loading injury reports...
+                    {injuryLoading ? 'Loading injury reports...' : 'No injury reports available for this sport.'}
                   </div>
                 )}
               </CardContent>
