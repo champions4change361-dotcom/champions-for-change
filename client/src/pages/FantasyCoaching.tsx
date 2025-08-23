@@ -26,6 +26,7 @@ export default function FantasyCoaching() {
   const [activeTab, setActiveTab] = useState('ai-coach');
   const [question, setQuestion] = useState('');
   const [selectedSlate, setSelectedSlate] = useState<'morning' | 'afternoon' | 'all-day'>('all-day');
+  const [playerAnalysis, setPlayerAnalysis] = useState<any>(null);
 
   // Fantasy AI Question Mutation
   const askQuestionMutation = useMutation({
@@ -96,6 +97,42 @@ export default function FantasyCoaching() {
     
     askQuestionMutation.mutate(question);
     setQuestion('');
+  };
+
+  // Player Analysis Mutation
+  const analyzePlayerMutation = useMutation({
+    mutationFn: async () => {
+      const selectedPlayerName = rosterData?.roster?.find((p: any) => p.id === selectedPlayer)?.name || selectedPlayer;
+      const analysisData = {
+        sport: selectedSport,
+        position: selectedPosition,
+        player: selectedPlayerName,
+        team: rosterData?.roster?.find((p: any) => p.id === selectedPlayer)?.team
+      };
+      
+      const response = await apiRequest('/api/fantasy/analyze-player', 'POST', analysisData);
+      const data = await response.json();
+      return data;
+    },
+    onSuccess: (data) => {
+      setPlayerAnalysis(data);
+      toast({
+        title: "Analysis Complete",
+        description: `Generated analysis for ${rosterData?.roster?.find((p: any) => p.id === selectedPlayer)?.name}`,
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Analysis Failed",
+        description: "Failed to analyze player. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const handleAnalyzePlayer = () => {
+    if (!selectedSport || !selectedPosition || !selectedPlayer) return;
+    analyzePlayerMutation.mutate();
   };
 
   const connectToYahoo = () => {
@@ -363,16 +400,90 @@ export default function FantasyCoaching() {
               <div className="flex items-end">
                 <Button 
                   className="w-full" 
-                  disabled={!selectedSport || !selectedPosition}
+                  disabled={!selectedSport || !selectedPosition || !selectedPlayer || analyzePlayerMutation.isPending}
+                  onClick={handleAnalyzePlayer}
                   data-testid="analyze-button"
                 >
                   <Brain className="h-4 w-4 mr-2" />
-                  Analyze
+                  {analyzePlayerMutation.isPending ? 'Analyzing...' : 'Analyze'}
                 </Button>
               </div>
             </div>
           </CardContent>
         </Card>
+
+        {/* Player Analysis Results */}
+        {playerAnalysis && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Brain className="h-5 w-5 text-purple-600" />
+                Analysis: {playerAnalysis.player} ({playerAnalysis.team})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <div className="text-sm text-muted-foreground">Projected Points</div>
+                  <div className="text-2xl font-bold text-green-600">
+                    {playerAnalysis.analysis.projectedPoints}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="text-sm text-muted-foreground">Confidence</div>
+                  <div className="text-2xl font-bold text-blue-600">
+                    {playerAnalysis.analysis.confidence}%
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="text-sm text-muted-foreground">Matchup Rating</div>
+                  <div className="text-2xl font-bold text-orange-600">
+                    {playerAnalysis.analysis.matchupRating}/10
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-4">
+                <div className="text-sm font-semibold mb-2">Recommendation</div>
+                <div className="text-sm text-muted-foreground">
+                  {playerAnalysis.analysis.recommendation}
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                <div>
+                  <div className="text-xs text-muted-foreground">Injury Risk</div>
+                  <Badge variant={playerAnalysis.analysis.injuryRisk === 'Low' ? 'default' : 'destructive'}>
+                    {playerAnalysis.analysis.injuryRisk}
+                  </Badge>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">Ownership</div>
+                  <div className="text-sm">{playerAnalysis.analysis.ownership}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">Game Script</div>
+                  <div className="text-sm">{playerAnalysis.analysis.gameScript}</div>
+                </div>
+                {playerAnalysis.analysis.weather && (
+                  <div>
+                    <div className="text-xs text-muted-foreground">Weather</div>
+                    <div className="text-sm">{playerAnalysis.analysis.weather}</div>
+                  </div>
+                )}
+              </div>
+              
+              <div className="mt-4">
+                <div className="text-sm font-semibold mb-2">Key Factors</div>
+                <div className="flex flex-wrap gap-2">
+                  {playerAnalysis.analysis.keyFactors.map((factor: string, index: number) => (
+                    <Badge key={index} variant="outline">{factor}</Badge>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} data-testid="coaching-tabs">
