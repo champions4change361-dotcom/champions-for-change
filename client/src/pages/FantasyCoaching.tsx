@@ -811,7 +811,7 @@ export default function FantasyCoaching() {
                         console.log('Injury Reports Data:', injuryReports);
                         console.log('Selected Sport:', selectedInjurySport);
                         
-                        if (!injuryReports || !injuryReports.injuries || !Array.isArray(injuryReports.injuries)) {
+                        if (!injuryReports || !(injuryReports as any).injuries || !Array.isArray((injuryReports as any).injuries)) {
                           console.log('No valid injury data structure');
                           return (
                             <div className="text-center py-8 text-gray-500">
@@ -820,7 +820,7 @@ export default function FantasyCoaching() {
                           );
                         }
 
-                        const filteredInjuries = injuryReports.injuries.filter((injury: any) => {
+                        const filteredInjuries = (injuryReports as any).injuries.filter((injury: any) => {
                           // For NFL, show all NFL injuries since our data is all NFL
                           if (selectedInjurySport === 'NFL') {
                             return true; // Show all for now since all our current data is NFL
