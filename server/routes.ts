@@ -946,44 +946,94 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // Get NFL players for position - expanded roster data
             const nflRosters: any = {
               'QB': [
+                // Tier 1 Elite
                 { id: 'mahomes', name: 'Patrick Mahomes', team: 'KC' },
                 { id: 'allen', name: 'Josh Allen', team: 'BUF' },
                 { id: 'burrow', name: 'Joe Burrow', team: 'CIN' },
                 { id: 'herbert', name: 'Justin Herbert', team: 'LAC' },
                 { id: 'jackson', name: 'Lamar Jackson', team: 'BAL' },
                 { id: 'hurts', name: 'Jalen Hurts', team: 'PHI' },
+                // Tier 2 Solid Starters
                 { id: 'tua', name: 'Tua Tagovailoa', team: 'MIA' },
-                { id: 'dak', name: 'Dak Prescott', team: 'DAL' }
+                { id: 'dak', name: 'Dak Prescott', team: 'DAL' },
+                { id: 'rodgers', name: 'Aaron Rodgers', team: 'NYJ' },
+                { id: 'wilson', name: 'Russell Wilson', team: 'PIT' },
+                { id: 'lawrence', name: 'Trevor Lawrence', team: 'JAC' },
+                { id: 'stroud', name: 'C.J. Stroud', team: 'HOU' },
+                // Tier 3 Streamers/Backups
+                { id: 'goff', name: 'Jared Goff', team: 'DET' },
+                { id: 'cousins', name: 'Kirk Cousins', team: 'ATL' },
+                { id: 'richardson', name: 'Anthony Richardson', team: 'IND' },
+                { id: 'jones', name: 'Daniel Jones', team: 'NYG' },
+                { id: 'watson', name: 'Deshaun Watson', team: 'CLE' },
+                { id: 'mayfield', name: 'Baker Mayfield', team: 'TB' }
               ],
               'RB': [
+                // Tier 1 Workhorses
                 { id: 'mccaffrey', name: 'Christian McCaffrey', team: 'SF' },
                 { id: 'henry', name: 'Derrick Henry', team: 'BAL' },
                 { id: 'barkley', name: 'Saquon Barkley', team: 'PHI' },
-                { id: 'cook', name: 'Dalvin Cook', team: 'NYJ' },
                 { id: 'chubb', name: 'Nick Chubb', team: 'CLE' },
                 { id: 'jacobs', name: 'Josh Jacobs', team: 'GB' },
                 { id: 'jones', name: 'Aaron Jones', team: 'MIN' },
-                { id: 'mixon', name: 'Joe Mixon', team: 'HOU' }
+                // Tier 2 Quality Starters
+                { id: 'mixon', name: 'Joe Mixon', team: 'HOU' },
+                { id: 'cook', name: 'Dalvin Cook', team: 'NYJ' },
+                { id: 'walker', name: 'Kenneth Walker III', team: 'SEA' },
+                { id: 'ekeler', name: 'Austin Ekeler', team: 'WAS' },
+                { id: 'montgomery', name: 'David Montgomery', team: 'DET' },
+                { id: 'gibbs', name: 'Jahmyr Gibbs', team: 'DET' },
+                // Tier 3 Flex/Backup Options
+                { id: 'pollard', name: 'Tony Pollard', team: 'TEN' },
+                { id: 'swift', name: 'D\'Andre Swift', team: 'CHI' },
+                { id: 'etienne', name: 'Travis Etienne', team: 'JAC' },
+                { id: 'conner', name: 'James Conner', team: 'ARI' },
+                { id: 'mostert', name: 'Raheem Mostert', team: 'MIA' },
+                { id: 'stevenson', name: 'Rhamondre Stevenson', team: 'NE' }
               ],
               'WR': [
+                // Tier 1 Elite
                 { id: 'jefferson', name: 'Justin Jefferson', team: 'MIN' },
                 { id: 'chase', name: 'Ja\'Marr Chase', team: 'CIN' },
                 { id: 'hill', name: 'Tyreek Hill', team: 'MIA' },
                 { id: 'adams', name: 'Davante Adams', team: 'LV' },
                 { id: 'diggs', name: 'Stefon Diggs', team: 'HOU' },
                 { id: 'brown', name: 'A.J. Brown', team: 'PHI' },
+                // Tier 2 High-End WR1/2
                 { id: 'kupp', name: 'Cooper Kupp', team: 'LAR' },
-                { id: 'evans', name: 'Mike Evans', team: 'TB' }
+                { id: 'evans', name: 'Mike Evans', team: 'TB' },
+                { id: 'godwin', name: 'Chris Godwin', team: 'TB' },
+                { id: 'waddle', name: 'Jaylen Waddle', team: 'MIA' },
+                { id: 'amon-ra', name: 'Amon-Ra St. Brown', team: 'DET' },
+                { id: 'deebo', name: 'Deebo Samuel', team: 'SF' },
+                // Tier 3 WR2/Flex Options
+                { id: 'higgins', name: 'Tee Higgins', team: 'CIN' },
+                { id: 'robinson', name: 'Allen Robinson II', team: 'PIT' },
+                { id: 'thomas', name: 'Michael Thomas', team: 'NO' },
+                { id: 'hopkins', name: 'DeAndre Hopkins', team: 'TEN' },
+                { id: 'lockett', name: 'Tyler Lockett', team: 'SEA' },
+                { id: 'metcalf', name: 'DK Metcalf', team: 'SEA' },
+                { id: 'smith', name: 'DeVonta Smith', team: 'PHI' },
+                { id: 'williams', name: 'Mike Williams', team: 'NYJ' }
               ],
               'TE': [
+                // Tier 1 Elite
                 { id: 'kelce', name: 'Travis Kelce', team: 'KC' },
                 { id: 'andrews', name: 'Mark Andrews', team: 'BAL' },
                 { id: 'kittle', name: 'George Kittle', team: 'SF' },
+                // Tier 2 Reliable TE1s
                 { id: 'waller', name: 'Darren Waller', team: 'NYG' },
                 { id: 'goedert', name: 'Dallas Goedert', team: 'PHI' },
                 { id: 'pitts', name: 'Kyle Pitts', team: 'ATL' },
                 { id: 'hockenson', name: 'T.J. Hockenson', team: 'MIN' },
-                { id: 'ertz', name: 'Zach Ertz', team: 'WAS' }
+                { id: 'ertz', name: 'Zach Ertz', team: 'WAS' },
+                // Tier 3 Streamers/Backups
+                { id: 'njoku', name: 'David Njoku', team: 'CLE' },
+                { id: 'schultz', name: 'Dalton Schultz', team: 'HOU' },
+                { id: 'engram', name: 'Evan Engram', team: 'JAC' },
+                { id: 'kmet', name: 'Cole Kmet', team: 'CHI' },
+                { id: 'ferguson', name: 'Jake Ferguson', team: 'DAL' },
+                { id: 'freiermuth', name: 'Pat Freiermuth', team: 'PIT' }
               ],
               'K': [
                 { id: 'tucker', name: 'Justin Tucker', team: 'BAL' },
@@ -991,7 +1041,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 { id: 'mcpherson', name: 'Evan McPherson', team: 'CIN' },
                 { id: 'butker', name: 'Harrison Butker', team: 'KC' },
                 { id: 'carlson', name: 'Daniel Carlson', team: 'LV' },
-                { id: 'folk', name: 'Nick Folk', team: 'TEN' }
+                { id: 'folk', name: 'Nick Folk', team: 'TEN' },
+                { id: 'lutz', name: 'Wil Lutz', team: 'DEN' },
+                { id: 'elliott', name: 'Jake Elliott', team: 'PHI' },
+                { id: 'succop', name: 'Ryan Succop', team: 'TB' },
+                { id: 'myers', name: 'Jason Myers', team: 'SEA' },
+                { id: 'hopkins2', name: 'Dustin Hopkins', team: 'CLE' },
+                { id: 'sanders', name: 'Jason Sanders', team: 'MIA' }
               ]
             };
             roster = nflRosters[position] || [];
@@ -1051,24 +1107,123 @@ export async function registerRoutes(app: Express): Promise<Server> {
           break;
 
         case 'mlb':
-          // MLB roster data by position
+          // Comprehensive MLB rosters with backups - DraftKings style
           const mlbRosters: any = {
+            'P': [
+              // Top Starters
+              { id: 'degrom', name: 'Jacob deGrom', team: 'TEX' },
+              { id: 'cole', name: 'Gerrit Cole', team: 'NYY' },
+              { id: 'scherzer', name: 'Max Scherzer', team: 'NYM' },
+              { id: 'burnes', name: 'Corbin Burnes', team: 'BAL' },
+              { id: 'wheeler', name: 'Zack Wheeler', team: 'PHI' },
+              { id: 'alcantara', name: 'Sandy Alcantara', team: 'MIA' },
+              { id: 'verlander', name: 'Justin Verlander', team: 'HOU' },
+              { id: 'cease', name: 'Dylan Cease', team: 'SD' },
+              { id: 'nola', name: 'Aaron Nola', team: 'PHI' },
+              { id: 'bassitt', name: 'Chris Bassitt', team: 'TOR' },
+              { id: 'manoah', name: 'Alek Manoah', team: 'TOR' },
+              { id: 'valdez', name: 'Framber Valdez', team: 'HOU' },
+              // Relief Pitchers
+              { id: 'hader', name: 'Josh Hader', team: 'HOU' },
+              { id: 'diaz', name: 'Edwin Diaz', team: 'NYM' },
+              { id: 'clase', name: 'Emmanuel Clase', team: 'CLE' },
+              { id: 'hendriks', name: 'Liam Hendriks', team: 'CWS' },
+              { id: 'romano', name: 'Jordan Romano', team: 'TOR' },
+              { id: 'pressly', name: 'Ryan Pressly', team: 'HOU' },
+              { id: 'kimbrel', name: 'Craig Kimbrel', team: 'PHI' },
+              { id: 'iglesias', name: 'Raisel Iglesias', team: 'ATL' }
+            ],
             'C': [
+              { id: 'smith', name: 'Will Smith', team: 'LAD' },
+              { id: 'realmuto', name: 'J.T. Realmuto', team: 'PHI' },
               { id: 'salvador', name: 'Salvador Perez', team: 'KC' },
-              { id: 'smith', name: 'Will Smith', team: 'LAD' }
+              { id: 'contreras', name: 'Willson Contreras', team: 'STL' },
+              { id: 'murphy', name: 'Sean Murphy', team: 'ATL' },
+              { id: 'kirk', name: 'Alejandro Kirk', team: 'TOR' },
+              { id: 'varsho', name: 'Daulton Varsho', team: 'TOR' },
+              { id: 'adley', name: 'Adley Rutschman', team: 'BAL' },
+              { id: 'keibert', name: 'Keibert Ruiz', team: 'WAS' },
+              { id: 'grandal', name: 'Yasmani Grandal', team: 'CWS' },
+              { id: 'stephenson', name: 'Tyler Stephenson', team: 'CIN' },
+              { id: 'nola2', name: 'Austin Nola', team: 'SD' }
+            ],
+            '1B': [
+              { id: 'freeman', name: 'Freddie Freeman', team: 'LAD' },
+              { id: 'goldschmidt', name: 'Paul Goldschmidt', team: 'STL' },
+              { id: 'olson', name: 'Matt Olson', team: 'ATL' },
+              { id: 'alonso', name: 'Pete Alonso', team: 'NYM' },
+              { id: 'vladguerrero', name: 'Vladimir Guerrero Jr.', team: 'TOR' },
+              { id: 'rizzo', name: 'Anthony Rizzo', team: 'NYY' },
+              { id: 'bell', name: 'Josh Bell', team: 'WAS' },
+              { id: 'abreu', name: 'Jose Abreu', team: 'HOU' },
+              { id: 'santana', name: 'Carlos Santana', team: 'MIL' },
+              { id: 'hosmer', name: 'Eric Hosmer', team: 'SD' },
+              { id: 'walsh', name: 'Jared Walsh', team: 'LAA' },
+              { id: 'voit', name: 'Luke Voit', team: 'WAS' }
+            ],
+            '2B': [
+              { id: 'altuve', name: 'Jose Altuve', team: 'HOU' },
+              { id: 'muncy', name: 'Max Muncy', team: 'LAD' },
+              { id: 'lemahieu', name: 'DJ LeMahieu', team: 'NYY' },
+              { id: 'mcneil', name: 'Jeff McNeil', team: 'NYM' },
+              { id: 'arraez', name: 'Luis Arraez', team: 'MIA' },
+              { id: 'semien', name: 'Marcus Semien', team: 'TEX' },
+              { id: 'biggio', name: 'Cavan Biggio', team: 'TOR' },
+              { id: 'india', name: 'Jonathan India', team: 'CIN' },
+              { id: 'lux', name: 'Gavin Lux', team: 'LAD' },
+              { id: 'gleyber', name: 'Gleyber Torres', team: 'NYY' },
+              { id: 'albies', name: 'Ozzie Albies', team: 'ATL' },
+              { id: 'merrifield', name: 'Whit Merrifield', team: 'TOR' }
+            ],
+            '3B': [
+              { id: 'arenado', name: 'Nolan Arenado', team: 'STL' },
+              { id: 'devers', name: 'Rafael Devers', team: 'BOS' },
+              { id: 'machado', name: 'Manny Machado', team: 'SD' },
+              { id: 'bregman', name: 'Alex Bregman', team: 'HOU' },
+              { id: 'turner', name: 'Justin Turner', team: 'BOS' },
+              { id: 'chapman', name: 'Matt Chapman', team: 'TOR' },
+              { id: 'ramirez', name: 'Jose Ramirez', team: 'CLE' },
+              { id: 'riley', name: 'Austin Riley', team: 'ATL' },
+              { id: 'rendon', name: 'Anthony Rendon', team: 'LAA' },
+              { id: 'suarez', name: 'Eugenio Suarez', team: 'SEA' },
+              { id: 'hayes', name: 'Ke\'Bryan Hayes', team: 'PIT' },
+              { id: 'bohm', name: 'Alec Bohm', team: 'PHI' }
+            ],
+            'SS': [
+              { id: 'tatis', name: 'Fernando Tatis Jr.', team: 'SD' },
+              { id: 'turner2', name: 'Trea Turner', team: 'PHI' },
+              { id: 'bogaerts', name: 'Xander Bogaerts', team: 'SD' },
+              { id: 'lindor', name: 'Francisco Lindor', team: 'NYM' },
+              { id: 'story', name: 'Trevor Story', team: 'BOS' },
+              { id: 'correa', name: 'Carlos Correa', team: 'MIN' },
+              { id: 'swanson', name: 'Dansby Swanson', team: 'CHC' },
+              { id: 'bichette', name: 'Bo Bichette', team: 'TOR' },
+              { id: 'seager', name: 'Corey Seager', team: 'TEX' },
+              { id: 'anderson', name: 'Tim Anderson', team: 'CWS' },
+              { id: 'franco', name: 'Wander Franco', team: 'TB' },
+              { id: 'pena', name: 'Jeremy Pena', team: 'HOU' }
             ],
             'OF': [
-              { id: 'judge', name: 'Aaron Judge', team: 'NYY' },
+              { id: 'trout', name: 'Mike Trout', team: 'LAA' },
+              { id: 'betts', name: 'Mookie Betts', team: 'LAD' },
+              { id: 'acuna', name: 'Ronald Acuña Jr.', team: 'ATL' },
+              { id: 'soto', name: 'Juan Soto', team: 'SD' },
+              { id: 'tucker', name: 'Kyle Tucker', team: 'HOU' },
+              { id: 'alvarez', name: 'Yordan Alvarez', team: 'HOU' },
+              { id: 'harper', name: 'Bryce Harper', team: 'PHI' },
               { id: 'ohtani', name: 'Shohei Ohtani', team: 'LAD' },
-              { id: 'acuna', name: 'Ronald Acuna Jr.', team: 'ATL' }
-            ],
-            'SP': [
-              { id: 'cole', name: 'Gerrit Cole', team: 'NYY' },
-              { id: 'alcantara', name: 'Sandy Alcantara', team: 'MIA' }
-            ],
-            'RP': [
-              { id: 'clase', name: 'Emmanuel Clase', team: 'CLE' },
-              { id: 'diaz', name: 'Edwin Diaz', team: 'NYM' }
+              { id: 'judge', name: 'Aaron Judge', team: 'NYY' },
+              { id: 'springer', name: 'George Springer', team: 'TOR' },
+              { id: 'hernandez', name: 'Teoscar Hernandez', team: 'LAD' },
+              { id: 'robert', name: 'Luis Robert Jr.', team: 'CWS' },
+              { id: 'harris', name: 'Michael Harris II', team: 'ATL' },
+              { id: 'castellanos', name: 'Nick Castellanos', team: 'PHI' },
+              { id: 'schwarber', name: 'Kyle Schwarber', team: 'PHI' },
+              { id: 'gurriel', name: 'Lourdes Gurriel Jr.', team: 'TOR' },
+              { id: 'stanton', name: 'Giancarlo Stanton', team: 'NYY' },
+              { id: 'bellinger', name: 'Cody Bellinger', team: 'CHC' },
+              { id: 'ward', name: 'Taylor Ward', team: 'LAA' },
+              { id: 'riley2', name: 'Austin Riley', team: 'ATL' }
             ]
           };
           roster = mlbRosters[position] || [];
@@ -1127,7 +1282,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { sport, position, player, team } = req.body;
       console.log(`Player analysis request: ${sport} ${position} ${player} (${team})`);
 
-      // Generate AI-powered player analysis
+      // Generate realistic fantasy projections by sport/position
+      const projectedPoints = getRealisticProjection(sport, position);
+      
       const analysis = {
         success: true,
         player: player,
@@ -1135,7 +1292,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         position: position,
         team: team,
         analysis: {
-          projectedPoints: Math.floor(Math.random() * 25) + 10, // 10-35 points
+          projectedPoints: projectedPoints,
           confidence: Math.floor(Math.random() * 30) + 70, // 70-100% confidence
           matchupRating: Math.floor(Math.random() * 5) + 6, // 6-10 rating
           recommendation: getPlayerRecommendation(position),
@@ -1154,6 +1311,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ success: false, message: 'Failed to analyze player' });
     }
   });
+
+  function getRealisticProjection(sport: string, position: string) {
+    const sportProjections: any = {
+      'nfl': {
+        'QB': () => Math.floor(Math.random() * 11) + 15, // 15-25 points
+        'RB': () => Math.floor(Math.random() * 15) + 8,  // 8-22 points  
+        'WR': () => Math.floor(Math.random() * 15) + 6,  // 6-20 points
+        'TE': () => Math.floor(Math.random() * 15) + 4,  // 4-18 points
+        'K': () => Math.floor(Math.random() * 10) + 6,   // 6-15 points
+        'DEF': () => Math.floor(Math.random() * 17) + 2, // 2-18 points (realistic!)
+      },
+      'nba': {
+        'PG': () => Math.floor(Math.random() * 25) + 30, // 30-55 points
+        'SG': () => Math.floor(Math.random() * 25) + 25, // 25-50 points
+        'SF': () => Math.floor(Math.random() * 25) + 25, // 25-50 points
+        'PF': () => Math.floor(Math.random() * 20) + 25, // 25-45 points
+        'C': () => Math.floor(Math.random() * 20) + 25,  // 25-45 points
+      },
+      'mlb': {
+        'P': () => Math.floor(Math.random() * 30) + 10,  // 10-40 points
+        'C': () => Math.floor(Math.random() * 20) + 8,   // 8-28 points
+        '1B': () => Math.floor(Math.random() * 20) + 10, // 10-30 points
+        '2B': () => Math.floor(Math.random() * 18) + 8,  // 8-26 points
+        '3B': () => Math.floor(Math.random() * 20) + 10, // 10-30 points
+        'SS': () => Math.floor(Math.random() * 18) + 8,  // 8-26 points
+        'OF': () => Math.floor(Math.random() * 20) + 8,  // 8-28 points
+      },
+      'nhl': {
+        'C': () => Math.floor(Math.random() * 15) + 15,  // 15-30 points
+        'W': () => Math.floor(Math.random() * 15) + 12,  // 12-27 points
+        'D': () => Math.floor(Math.random() * 12) + 8,   // 8-20 points
+        'G': () => Math.floor(Math.random() * 20) + 10,  // 10-30 points
+      }
+    };
+    
+    const sportProj = sportProjections[sport.toLowerCase()];
+    if (sportProj && sportProj[position]) {
+      return sportProj[position]();
+    }
+    return Math.floor(Math.random() * 20) + 10; // fallback
+  }
 
   function getPlayerRecommendation(position: string) {
     const recommendations = {
