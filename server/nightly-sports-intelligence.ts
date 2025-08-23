@@ -4,7 +4,7 @@
  * Runs daily at 2:00 AM CST
  */
 
-import { yahooAPI } from './yahooAuth';
+// Import will be added after fixing yahooAuth exports
 import cron from 'node-cron';
 
 // Sports data sources for comparison
@@ -267,7 +267,7 @@ export class NightlySportsIntelligence {
       ]
     };
 
-    return queries[sport] || [];
+    return (queries as any)[sport] || [];
   }
 
   /**
@@ -483,7 +483,7 @@ export class NightlySportsIntelligence {
       projectedPoints: Math.floor(Math.random() * 20) + 15,
       confidence: Math.floor(confidence + Math.random() * 20),
       trend: Math.random() > 0.5 ? 'up' : 'down',
-      reasoning: this.generateRanking Reasoning(sport, confidence, agreement)
+      reasoning: this.generateRankingReasoning(sport, confidence, agreement)
     }));
   }
 
@@ -584,7 +584,7 @@ export class NightlySportsIntelligence {
     };
 
     const organizedRoster: any = {};
-    const sportPositions = positions[sport] || [];
+    const sportPositions = (positions as any)[sport] || [];
 
     sportPositions.forEach(position => {
       organizedRoster[position] = players
@@ -613,7 +613,7 @@ export class NightlySportsIntelligence {
       mlb: ['LAD', 'NYY', 'HOU', 'ATL', 'TB', 'TOR', 'SF', 'SD', 'PHI', 'STL', 'CLE', 'MIL'],
       nhl: ['EDM', 'COL', 'BOS', 'TBL', 'NYR', 'CGY', 'CHI', 'BUF', 'VGK', 'CAR', 'WSH', 'PIT']
     };
-    const sportTeams = teams[sport] || ['TEAM'];
+    const sportTeams = (teams as any)[sport] || ['TEAM'];
     return sportTeams[Math.floor(Math.random() * sportTeams.length)];
   }
 

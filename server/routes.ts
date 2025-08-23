@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { nightlySportsIntelligence } from './nightly-sports-intelligence';
 import { getStorage } from "./storage";
 import { emailService } from "./emailService";
 import supportTeamRoutes from "./supportTeamRoutes";
@@ -1416,6 +1417,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Roster API error:', error);
       res.status(500).json({ success: false, message: 'Failed to load roster data' });
+    }
+  });
+
+  // 🌙 NIGHTLY SPORTS INTELLIGENCE ENDPOINTS
+  app.get('/api/intelligence/status', (req, res) => {
+    try {
+      const status = nightlySportsIntelligence.getSystemStatus();
+      res.json({
+        success: true,
+        ...status,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Intelligence status error:', error);
+      res.status(500).json({ success: false, message: 'Failed to get system status' });
+    }
+  });
+
+  app.get('/api/intelligence/latest', (req, res) => {
+    try {
+      const results = nightlySportsIntelligence.getLatestResults();
+      res.json({
+        success: true,
+        results,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Intelligence data error:', error);
+      res.status(500).json({ success: false, message: 'Failed to get latest intelligence' });
+    }
+  });
+
+  app.post('/api/intelligence/run-manual', async (req, res) => {
+    try {
+      console.log('🔧 MANUAL INTELLIGENCE RUN TRIGGERED');
+      const results = await nightlySportsIntelligence.runManualAnalysis();
+      res.json({
+        success: true,
+        message: 'Manual analysis completed',
+        results,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Manual intelligence run failed:', error);
+      res.status(500).json({ success: false, message: 'Manual analysis failed' });
     }
   });
 
