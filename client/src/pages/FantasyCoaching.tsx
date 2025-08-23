@@ -438,7 +438,7 @@ export default function FantasyCoaching() {
                     <span className="block text-xs opacity-70">Opponent strength (10 = easiest)</span>
                   </div>
                   <div className="text-2xl font-bold text-orange-600">
-                    {playerAnalysis.analysis.matchupRating}/10
+                    {playerAnalysis?.analysis?.matchupRating || playerAnalysis?.analysis?.matchup_grade || playerAnalysis?.matchupRating || 'N/A'}/10
                   </div>
                 </div>
               </div>
@@ -446,29 +446,29 @@ export default function FantasyCoaching() {
               <div className="mt-4">
                 <div className="text-sm font-semibold mb-2">Recommendation</div>
                 <div className="text-sm text-muted-foreground">
-                  {playerAnalysis.analysis.recommendation}
+                  {playerAnalysis?.analysis?.recommendation || playerAnalysis?.recommendation || 'No recommendation available'}
                 </div>
               </div>
               
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                 <div>
                   <div className="text-xs text-muted-foreground">Injury Risk</div>
-                  <Badge variant={playerAnalysis.analysis.injuryRisk === 'Low' ? 'default' : 'destructive'}>
-                    {playerAnalysis.analysis.injuryRisk}
+                  <Badge variant={(playerAnalysis?.analysis?.injuryRisk || playerAnalysis?.analysis?.injury_risk || playerAnalysis?.injuryRisk) === 'Low' ? 'default' : 'destructive'}>
+                    {playerAnalysis?.analysis?.injuryRisk || playerAnalysis?.analysis?.injury_risk || playerAnalysis?.injuryRisk || 'Unknown'}
                   </Badge>
                 </div>
                 <div>
                   <div className="text-xs text-muted-foreground">Ownership</div>
-                  <div className="text-sm">{playerAnalysis.analysis.ownership}</div>
+                  <div className="text-sm">{playerAnalysis?.analysis?.ownership || playerAnalysis?.ownership || 'N/A'}</div>
                 </div>
                 <div>
                   <div className="text-xs text-muted-foreground">Game Script</div>
-                  <div className="text-sm">{playerAnalysis.analysis.gameScript}</div>
+                  <div className="text-sm">{playerAnalysis?.analysis?.gameScript || playerAnalysis?.gameScript || 'N/A'}</div>
                 </div>
-                {playerAnalysis.analysis.weather && (
+                {(playerAnalysis?.analysis?.weather || playerAnalysis?.weather) && (
                   <div>
                     <div className="text-xs text-muted-foreground">Weather</div>
-                    <div className="text-sm">{playerAnalysis.analysis.weather}</div>
+                    <div className="text-sm">{playerAnalysis?.analysis?.weather || playerAnalysis?.weather}</div>
                   </div>
                 )}
               </div>
@@ -476,7 +476,7 @@ export default function FantasyCoaching() {
               <div className="mt-4">
                 <div className="text-sm font-semibold mb-2">Key Factors</div>
                 <div className="flex flex-wrap gap-2">
-                  {playerAnalysis.analysis.keyFactors.map((factor: string, index: number) => (
+                  {(playerAnalysis?.analysis?.keyFactors || playerAnalysis?.keyFactors || []).map((factor: string, index: number) => (
                     <Badge key={index} variant="outline">{factor}</Badge>
                   ))}
                 </div>
