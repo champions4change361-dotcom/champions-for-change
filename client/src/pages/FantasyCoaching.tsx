@@ -3,7 +3,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -237,18 +236,20 @@ export default function FantasyCoaching() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <Label htmlFor="week-select">NFL Week</Label>
-                <Select value={selectedWeek.toString()} onValueChange={(value) => setSelectedWeek(parseInt(value))}>
-                  <SelectTrigger data-testid="week-selector">
-                    <SelectValue placeholder="Select week" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {getCurrentWeekRange().map(week => (
-                      <SelectItem key={week} value={week.toString()}>
-                        Week {week}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <select 
+                  id="week-select"
+                  value={selectedWeek} 
+                  onChange={(e) => setSelectedWeek(parseInt(e.target.value))}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                  data-testid="week-selector"
+                >
+                  <option value="" disabled>Select week</option>
+                  {getCurrentWeekRange().map(week => (
+                    <option key={week} value={week}>
+                      Week {week}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div>
                 <Label htmlFor="player-search">Player Search</Label>
@@ -443,17 +444,18 @@ export default function FantasyCoaching() {
               </CardHeader>
               <CardContent>
                 <div className="mb-4">
-                  <Label>Select Slate</Label>
-                  <Select value={selectedSlate} onValueChange={(value: any) => setSelectedSlate(value)}>
-                    <SelectTrigger data-testid="slate-selector">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="morning">Morning Slate (1:00 PM ET)</SelectItem>
-                      <SelectItem value="afternoon">Afternoon Slate (4:00 PM ET)</SelectItem>
-                      <SelectItem value="all-day">All-Day Slate</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="slate-select">Select Slate</Label>
+                  <select 
+                    id="slate-select"
+                    value={selectedSlate} 
+                    onChange={(e) => setSelectedSlate(e.target.value as 'morning' | 'afternoon' | 'all-day')}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                    data-testid="slate-selector"
+                  >
+                    <option value="morning">Morning Slate (1:00 PM ET)</option>
+                    <option value="afternoon">Afternoon Slate (4:00 PM ET)</option>
+                    <option value="all-day">All-Day Slate</option>
+                  </select>
                 </div>
 
                 {slateLoading ? (
