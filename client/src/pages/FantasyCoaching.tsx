@@ -95,6 +95,21 @@ export default function FantasyCoaching() {
     retry: false
   });
 
+  // R Analytics Projections - Professional Grade Fantasy Intelligence
+  const { data: rAnalyticsProjections, isLoading: rAnalyticsLoading } = useQuery({
+    queryKey: ['/api/r-analytics/projections', selectedPosition],
+    queryFn: async () => {
+      if (!selectedPosition || !['QB', 'RB', 'WR', 'TE'].includes(selectedPosition)) return null;
+      console.log(`🔬 Loading R analytics for ${selectedPosition}`);
+      const response = await fetch(`/api/r-analytics/projections/${selectedPosition}`);
+      const data = await response.json();
+      console.log('R Analytics data:', data);
+      return data;
+    },
+    enabled: !!(selectedPosition && ['QB', 'RB', 'WR', 'TE'].includes(selectedPosition)),
+    staleTime: 300000 // Cache for 5 minutes
+  });
+
   const handleAskQuestion = async () => {
     if (!question.trim()) return;
     
@@ -459,13 +474,17 @@ export default function FantasyCoaching() {
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} data-testid="coaching-tabs">
-          <TabsList className="grid w-full grid-cols-3 sm:grid-cols-5 gap-1 h-auto p-1">
+          <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 gap-1 h-auto p-1">
             <TabsTrigger value="ai-coach" data-testid="tab-ai-coach" className="flex flex-col items-center justify-center text-xs px-1 py-2 min-h-[3rem]">
               <Brain className="w-4 h-4 mb-1" />
               <span>AI</span>
             </TabsTrigger>
-            <TabsTrigger value="slate-analysis" data-testid="tab-slate-analysis" className="flex flex-col items-center justify-center text-xs px-1 py-2 min-h-[3rem]">
+            <TabsTrigger value="r-analytics" data-testid="tab-r-analytics" className="flex flex-col items-center justify-center text-xs px-1 py-2 min-h-[3rem]">
               <BarChart3 className="w-4 h-4 mb-1" />
+              <span>R Pro</span>
+            </TabsTrigger>
+            <TabsTrigger value="slate-analysis" data-testid="tab-slate-analysis" className="flex flex-col items-center justify-center text-xs px-1 py-2 min-h-[3rem]">
+              <TrendingUp className="w-4 h-4 mb-1" />
               <span>Slate</span>
             </TabsTrigger>
             <TabsTrigger value="injury-reports" data-testid="tab-injury-reports" className="flex flex-col items-center justify-center text-xs px-1 py-2 min-h-[3rem]">
@@ -606,6 +625,109 @@ export default function FantasyCoaching() {
                       )}
                     </CardContent>
                   </Card>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* R Analytics Tab - Professional Grade Fantasy Intelligence */}
+          <TabsContent value="r-analytics" className="space-y-6" data-testid="r-analytics-content">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5 text-blue-600" />
+                  R Analytics - Professional Projections
+                </CardTitle>
+                <CardDescription>
+                  Advanced statistical analysis powered by R with ffanalytics integration. 
+                  Professional-grade projections with confidence ratings.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {!selectedPosition || !['QB', 'RB', 'WR', 'TE'].includes(selectedPosition) ? (
+                  <Alert>
+                    <BarChart3 className="h-4 w-4" />
+                    <AlertDescription>
+                      Select a position (QB, RB, WR, or TE) above to view R Analytics projections.
+                    </AlertDescription>
+                  </Alert>
+                ) : rAnalyticsLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Activity className="w-6 h-6 animate-spin mr-2" />
+                    Loading R Analytics for {selectedPosition}...
+                  </div>
+                ) : rAnalyticsProjections?.success ? (
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-4 mb-4">
+                      <Badge className="bg-blue-600 text-white">
+                        {selectedPosition} Rankings
+                      </Badge>
+                      <span className="text-sm text-muted-foreground">
+                        Source: {rAnalyticsProjections.source} • {rAnalyticsProjections.timestamp}
+                      </span>
+                    </div>
+
+                    <div className="grid gap-3">
+                      {rAnalyticsProjections.projections?.map((player: any, index: number) => (
+                        <div key={index} className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold">
+                                {player.rank}
+                              </div>
+                              <div>
+                                <div className="font-semibold text-lg">{player.player}</div>
+                                <div className="text-sm text-gray-600">{player.team} {selectedPosition}</div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-6">
+                              <div className="text-center">
+                                <div className="text-2xl font-bold text-blue-600">{player.points}</div>
+                                <div className="text-xs text-muted-foreground">Proj Points</div>
+                              </div>
+                              <div className="text-center">
+                                <div className="text-lg font-bold text-green-600">{player.confidence}%</div>
+                                <div className="text-xs text-muted-foreground">Confidence</div>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Confidence Bar */}
+                          <div className="mt-3">
+                            <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                              <span>Confidence Level</span>
+                              <span>{player.confidence}%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div 
+                                className={`h-2 rounded-full ${
+                                  player.confidence >= 90 ? 'bg-green-500' :
+                                  player.confidence >= 80 ? 'bg-yellow-500' : 'bg-red-500'
+                                }`}
+                                style={{ width: `${player.confidence}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {rAnalyticsProjections.projections?.length === 0 && (
+                      <Alert>
+                        <AlertTriangle className="h-4 w-4" />
+                        <AlertDescription>
+                          No projections available for {selectedPosition} at this time.
+                        </AlertDescription>
+                      </Alert>
+                    )}
+                  </div>
+                ) : (
+                  <Alert>
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertDescription>
+                      Failed to load R Analytics projections. The analytics service may be unavailable.
+                    </AlertDescription>
+                  </Alert>
                 )}
               </CardContent>
             </Card>

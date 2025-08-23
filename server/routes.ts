@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import { exec } from "child_process";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { nightlySportsIntelligence } from './nightly-sports-intelligence';
 import { getStorage } from "./storage";
@@ -33,6 +34,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/ping', (req, res) => {
     res.status(200).send('pong');
+  });
+
+  // 🔬 R ANALYTICS TEST - Simple test endpoint first
+  app.get('/api/r-analytics/test', (req, res) => {
+    res.json({
+      success: true,
+      message: 'R Analytics endpoint is accessible',
+      timestamp: new Date().toISOString()
+    });
+  });
+
+  // 🔬 R ANALYTICS INTEGRATION - Public endpoint for ffanalytics powered projections
+  app.get('/api/r-analytics/projections/:position', (req, res) => {
+    const { position } = req.params;
+    console.log(`🔬 Calling R analytics for ${position} projections`);
+    
+    const command = `cd r-analytics && R --slave --no-restore -e ".libPaths(c('R-libs', .libPaths())); library(jsonlite); source('test-api.R'); cat(toJSON(get_projections('${position}'), auto_unbox=TRUE))"`;
+    
+    exec(command, { timeout: 10000 }, (error, stdout, stderr) => {
+      if (error) {
+        console.error('R analytics error:', error);
+        return res.status(500).json({ 
+          success: false, 
+          error: 'R analytics service unavailable',
+          debug: error.message 
+        });
+      }
+      
+      try {
+        // Parse the JSON output from R - extract the final JSON line directly  
+        const jsonMatch = stdout.match(/\{\"success\":true.*?\}(?=\s*$)/);
+        const jsonLine = jsonMatch ? jsonMatch[0] : null;
+        
+        if (jsonLine) {
+          const result = JSON.parse(jsonLine);
+          console.log(`✅ R analytics returned ${result.projections?.length || 0} ${position} projections`);
+          res.json(result);
+        } else {
+          res.status(500).json({ 
+            success: false, 
+            error: 'No JSON output found',
+            debug: stdout 
+          });
+        }
+      } catch (parseError) {
+        console.error('Failed to parse R output:', parseError);
+        res.status(500).json({ 
+          success: false, 
+          error: 'Failed to parse analytics data',
+          debug: stdout 
+        });
+      }
+    });
   });
 
   // Setup authentication
@@ -2769,6 +2823,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ success: false, message: 'Failed to load injury reports' });
     }
   });
+
 
   app.get("/api/fantasy/projections/:position", async (req, res) => {
     try {
