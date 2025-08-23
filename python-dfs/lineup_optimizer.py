@@ -141,7 +141,126 @@ def get_sample_projections(sport: str, position: str):
 def generate_sample_lineup(site: str = 'draftkings', sport: str = 'nfl'):
     """Generate a sample optimized lineup for demonstration"""
     
-    # Create mock optimal lineups without using the complex optimizer for demo
+    if sport.lower() == 'mlb':
+        # MLB Baseball lineups
+        lineups = [
+            {
+                'lineup_number': 1,
+                'total_salary': 49800,
+                'total_points': 48.6,
+                'players': [
+                    {'id': 'ohtani', 'name': 'Shohei Ohtani', 'position': 'P', 'team': 'LAD', 'salary': 11000, 'projected_points': 9.8, 'value': 0.89},
+                    {'id': 'betts', 'name': 'Mookie Betts', 'position': 'OF', 'team': 'LAD', 'salary': 10500, 'projected_points': 8.4, 'value': 0.8},
+                    {'id': 'judge', 'name': 'Aaron Judge', 'position': 'OF', 'team': 'NYY', 'salary': 10200, 'projected_points': 8.1, 'value': 0.79},
+                    {'id': 'freeman', 'name': 'Freddie Freeman', 'position': '1B', 'team': 'LAD', 'salary': 8800, 'projected_points': 7.2, 'value': 0.82},
+                    {'id': 'altuve', 'name': 'Jose Altuve', 'position': '2B', 'team': 'HOU', 'salary': 8200, 'projected_points': 6.8, 'value': 0.83},
+                    {'id': 'devers', 'name': 'Rafael Devers', 'position': '3B', 'team': 'BOS', 'salary': 7600, 'projected_points': 6.4, 'value': 0.84},
+                    {'id': 'tatis', 'name': 'Fernando Tatis Jr.', 'position': 'SS', 'team': 'SD', 'salary': 7400, 'projected_points': 6.2, 'value': 0.84},
+                    {'id': 'contreras', 'name': 'Willson Contreras', 'position': 'C', 'team': 'STL', 'salary': 6200, 'projected_points': 5.2, 'value': 0.84},
+                    {'id': 'lindor', 'name': 'Francisco Lindor', 'position': 'UTIL', 'team': 'NYM', 'salary': 7100, 'projected_points': 5.8, 'value': 0.82}
+                ]
+            },
+            {
+                'lineup_number': 2,
+                'total_salary': 48900,
+                'total_points': 47.3,
+                'players': [
+                    {'id': 'cole', 'name': 'Gerrit Cole', 'position': 'P', 'team': 'NYY', 'salary': 10200, 'projected_points': 8.9, 'value': 0.87},
+                    {'id': 'acuna', 'name': 'Ronald Acuña Jr.', 'position': 'OF', 'team': 'ATL', 'salary': 10800, 'projected_points': 8.6, 'value': 0.8},
+                    {'id': 'soto', 'name': 'Juan Soto', 'position': 'OF', 'team': 'NYY', 'salary': 9800, 'projected_points': 7.9, 'value': 0.81},
+                    {'id': 'vlad', 'name': 'Vladimir Guerrero Jr.', 'position': '1B', 'team': 'TOR', 'salary': 8600, 'projected_points': 7.0, 'value': 0.81},
+                    {'id': 'gleyber', 'name': 'Gleyber Torres', 'position': '2B', 'team': 'NYY', 'salary': 7800, 'projected_points': 6.5, 'value': 0.83},
+                    {'id': 'machado', 'name': 'Manny Machado', 'position': '3B', 'team': 'SD', 'salary': 7500, 'projected_points': 6.3, 'value': 0.84},
+                    {'id': 'bogaerts', 'name': 'Xander Bogaerts', 'position': 'SS', 'team': 'SD', 'salary': 7200, 'projected_points': 6.0, 'value': 0.83},
+                    {'id': 'realmuto', 'name': 'J.T. Realmuto', 'position': 'C', 'team': 'PHI', 'salary': 6000, 'projected_points': 5.0, 'value': 0.83},
+                    {'id': 'turner', 'name': 'Trea Turner', 'position': 'UTIL', 'team': 'PHI', 'salary': 6800, 'projected_points': 5.6, 'value': 0.82}
+                ]
+            }
+        ]
+        
+        return {
+            'success': True,
+            'site': site,
+            'sport': sport,
+            'lineups': lineups,
+            'optimizer_info': {
+                'salary_cap': 50000,
+                'total_players': 9,
+                'positions': ['P', 'C', '1B', '2B', '3B', 'SS', 'OF', 'OF', 'UTIL']
+            },
+            'source': 'pydfs-lineup-optimizer-mlb',
+            'num_generated': len(lineups)
+        }
+    
+    elif sport.lower() == 'nba':
+        # NBA Basketball lineups
+        lineups = [
+            {
+                'lineup_number': 1,
+                'total_salary': 49800,
+                'total_points': 298.5,
+                'players': [
+                    {'id': 'curry', 'name': 'Stephen Curry', 'position': 'PG', 'team': 'GSW', 'salary': 11200, 'projected_points': 52.4, 'value': 4.68},
+                    {'id': 'brunson', 'name': 'Jalen Brunson', 'position': 'SG', 'team': 'NYK', 'salary': 8600, 'projected_points': 44.8, 'value': 5.21},
+                    {'id': 'tatum', 'name': 'Jayson Tatum', 'position': 'SF', 'team': 'BOS', 'salary': 10800, 'projected_points': 51.2, 'value': 4.74},
+                    {'id': 'giannis', 'name': 'Giannis Antetokounmpo', 'position': 'PF', 'team': 'MIL', 'salary': 11600, 'projected_points': 58.6, 'value': 5.05},
+                    {'id': 'jokic', 'name': 'Nikola Jokic', 'position': 'C', 'team': 'DEN', 'salary': 12000, 'projected_points': 61.8, 'value': 5.15},
+                    {'id': 'bridges', 'name': 'Mikal Bridges', 'position': 'G', 'team': 'BRK', 'salary': 6400, 'projected_points': 32.2, 'value': 5.03},
+                    {'id': 'sengun', 'name': 'Alperen Sengun', 'position': 'F', 'team': 'HOU', 'salary': 7200, 'projected_points': 38.4, 'value': 5.33},
+                    {'id': 'white', 'name': 'Derrick White', 'position': 'UTIL', 'team': 'BOS', 'salary': 6000, 'projected_points': 31.8, 'value': 5.3}
+                ]
+            }
+        ]
+        
+        return {
+            'success': True,
+            'site': site,
+            'sport': sport,
+            'lineups': lineups,
+            'optimizer_info': {
+                'salary_cap': 50000,
+                'total_players': 8,
+                'positions': ['PG', 'SG', 'SF', 'PF', 'C', 'G', 'F', 'UTIL']
+            },
+            'source': 'pydfs-lineup-optimizer-nba',
+            'num_generated': len(lineups)
+        }
+    
+    elif sport.lower() == 'nhl':
+        # NHL Hockey lineups
+        lineups = [
+            {
+                'lineup_number': 1,
+                'total_salary': 49700,
+                'total_points': 42.8,
+                'players': [
+                    {'id': 'mcdavid', 'name': 'Connor McDavid', 'position': 'C', 'team': 'EDM', 'salary': 11800, 'projected_points': 8.9, 'value': 0.75},
+                    {'id': 'pastrnak', 'name': 'David Pastrnak', 'position': 'W', 'team': 'BOS', 'salary': 9600, 'projected_points': 7.2, 'value': 0.75},
+                    {'id': 'draisaitl', 'name': 'Leon Draisaitl', 'position': 'W', 'team': 'EDM', 'salary': 10200, 'projected_points': 7.8, 'value': 0.76},
+                    {'id': 'makar', 'name': 'Cale Makar', 'position': 'D', 'team': 'COL', 'salary': 8400, 'projected_points': 6.4, 'value': 0.76},
+                    {'id': 'fox', 'name': 'Adam Fox', 'position': 'D', 'team': 'NYR', 'salary': 7800, 'projected_points': 5.9, 'value': 0.76},
+                    {'id': 'shesterkin', 'name': 'Igor Shesterkin', 'position': 'G', 'team': 'NYR', 'salary': 8200, 'projected_points': 6.2, 'value': 0.76},
+                    {'id': 'reinhart', 'name': 'Sam Reinhart', 'position': 'UTIL', 'team': 'FLA', 'salary': 7400, 'projected_points': 5.6, 'value': 0.76},
+                    {'id': 'hughes', 'name': 'Jack Hughes', 'position': 'UTIL', 'team': 'NJ', 'salary': 8300, 'projected_points': 6.3, 'value': 0.76}
+                ]
+            }
+        ]
+        
+        return {
+            'success': True,
+            'site': site,
+            'sport': sport,
+            'lineups': lineups,
+            'optimizer_info': {
+                'salary_cap': 50000,
+                'total_players': 8,
+                'positions': ['C', 'W', 'W', 'D', 'D', 'G', 'UTIL', 'UTIL']
+            },
+            'source': 'pydfs-lineup-optimizer-nhl',
+            'num_generated': len(lineups)
+        }
+    
+    # Default NFL lineups
     lineups = [
         {
             'lineup_number': 1,

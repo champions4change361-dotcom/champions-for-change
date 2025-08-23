@@ -44,7 +44,10 @@ export default function DFSLineupOptimizer() {
 
   const { data: optimizerResult, isLoading, refetch } = useQuery<OptimizerResult>({
     queryKey: ['/api/dfs/optimize', selectedSite, selectedSport],
+    queryFn: () => fetch(`/api/dfs/optimize/${selectedSite}/${selectedSport}`).then(res => res.json()),
     enabled: false, // Don't auto-run, only run when button is clicked
+    staleTime: 0, // Always fetch fresh data
+    cacheTime: 0, // Don't cache results
   });
 
   const handleOptimize = async () => {
