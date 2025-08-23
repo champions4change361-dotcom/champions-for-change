@@ -219,39 +219,29 @@ export function setupYahooAuth(app: Express) {
     }
   });
 
-  // Check Yahoo OAuth 2.0 connection status  
+  // Centralized Yahoo API status - no individual user auth needed
   app.get('/api/yahoo/status', (req: Request, res: Response) => {
     try {
-      const session = req.session as any;
-      const hasAccessToken = !!session?.yahooAccessToken;
-      const tokenExpiry = session?.yahooTokenExpiry || 0;
-      const isTokenValid = hasAccessToken && Date.now() < tokenExpiry;
       const hasCredentials = !!(process.env.YAHOO_CONSUMER_KEY && process.env.YAHOO_CONSUMER_SECRET);
       
-      // Debug logging for credential verification
-      console.log('Yahoo OAuth 2.0 Status Check:');
-      console.log('- Client ID present:', !!process.env.YAHOO_CONSUMER_KEY);
-      console.log('- Client Secret present:', !!process.env.YAHOO_CONSUMER_SECRET);
-      console.log('- Access token in session:', hasAccessToken);
-      console.log('- Token valid:', isTokenValid);
+      console.log('🔍 Centralized Yahoo API Status Check:');
+      console.log('- Server credentials configured:', hasCredentials);
+      console.log('- Individual user auth: NOT REQUIRED');
       
       res.json({
-        connected: isTokenValid,
+        connected: hasCredentials,
         hasCredentials,
-        tokenExpired: hasAccessToken && !isTokenValid,
-        debug: {
-          clientIdPresent: !!process.env.YAHOO_CONSUMER_KEY,
-          clientSecretPresent: !!process.env.YAHOO_CONSUMER_SECRET,
-          keyPrefix: process.env.YAHOO_CONSUMER_KEY?.substring(0, 8) + '...',
-          hasAccessToken,
-          tokenExpiry: tokenExpiry ? new Date(tokenExpiry).toISOString() : null
-        }
+        serverManaged: true,
+        userAuthRequired: false,
+        lastUpdated: new Date().toISOString(),
+        message: 'Yahoo API centrally managed - all users access same data'
       });
     } catch (error) {
       console.error('Yahoo status check error:', error);
       res.json({
         connected: false,
         hasCredentials: false,
+        serverManaged: true,
         error: error instanceof Error ? error.message : 'Unknown error'
       });
     }

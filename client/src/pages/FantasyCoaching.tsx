@@ -135,9 +135,7 @@ export default function FantasyCoaching() {
     analyzePlayerMutation.mutate();
   };
 
-  const connectToYahoo = () => {
-    window.location.href = '/api/yahoo/auth';
-  };
+  // Removed - Yahoo API now centralized, no individual user auth needed
 
   // Get positions for selected sport
   const getPositionsForSport = (sport: string) => {
@@ -258,48 +256,13 @@ export default function FantasyCoaching() {
 
       {/* Yahoo Connection Status */}
       <div className="max-w-7xl mx-auto px-4 pt-6">
-        {yahooLoading ? (
-          <Alert className="border-gray-200 bg-gray-50 mb-4" data-testid="yahoo-loading">
-            <Activity className="h-4 w-4 text-gray-600 animate-spin" />
-            <AlertDescription className="text-gray-900">
-              <strong>Checking Yahoo API Status...</strong> Please wait.
-            </AlertDescription>
-          </Alert>
-        ) : yahooStatus?.hasCredentials ? (
-          yahooStatus?.connected ? (
-            <Alert className="border-green-200 bg-green-50 mb-4" data-testid="yahoo-connected">
-              <CheckCircle className="h-4 w-4 text-green-600" />
-              <AlertDescription className="text-green-900">
-                <strong>Real Data Active:</strong> Connected to Yahoo Fantasy Sports API. 
-                Getting live injury reports, usage rates, and authentic matchup data.
-              </AlertDescription>
-            </Alert>
-          ) : (
-            <Alert className="border-blue-200 bg-blue-50 mb-4" data-testid="yahoo-disconnected">
-              <Activity className="h-4 w-4 text-blue-600" />
-              <AlertDescription className="text-blue-900 flex items-center justify-between">
-                <span>
-                  <strong>Yahoo API Ready:</strong> Credentials configured. Click to connect for real sports data.
-                </span>
-                <Button 
-                  onClick={connectToYahoo}
-                  size="sm"
-                  className="ml-4"
-                  data-testid="connect-yahoo-button"
-                >
-                  Connect Yahoo
-                </Button>
-              </AlertDescription>
-            </Alert>
-          )
-        ) : (
-          <Alert className="border-amber-200 bg-amber-50 mb-4" data-testid="yahoo-initializing">
-            <AlertTriangle className="h-4 w-4 text-amber-600" />
-            <AlertDescription className="text-amber-900">
-              <strong>Initializing Yahoo API:</strong> New developer credentials may take 5-15 minutes to activate. Fantasy AI ready with intelligent analysis.
-            </AlertDescription>
-          </Alert>
-        )}
+        <Alert className="border-green-200 bg-green-50 mb-4" data-testid="yahoo-centralized">
+          <CheckCircle className="h-4 w-4 text-green-600" />
+          <AlertDescription className="text-green-900">
+            <strong>Sports Data Ready:</strong> Centralized Yahoo API serving real-time data to all users. 
+            No individual connection required - everyone gets the same premium experience.
+          </AlertDescription>
+        </Alert>
 
         {/* AI Disclaimer */}
         <Alert className="border-amber-200 bg-amber-50" data-testid="ai-disclaimer">

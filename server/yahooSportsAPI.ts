@@ -59,6 +59,9 @@ export interface SlateAnalysis {
 export class YahooSportsAPI {
   private consumerKey: string;
   private consumerSecret: string;
+  private static instance: YahooSportsAPI;
+  private initialized: boolean = false;
+  // Keep these for the centralized server connection (not per-user)
   private accessToken?: string;
   private accessSecret?: string;
 
@@ -67,10 +70,24 @@ export class YahooSportsAPI {
     this.consumerSecret = consumerSecret || process.env.YAHOO_CONSUMER_SECRET || '';
     
     if (!this.consumerKey || !this.consumerSecret) {
-      console.warn('Yahoo API credentials not found. Using mock data.');
+      console.warn('Yahoo API credentials not found. Using centralized mock data.');
     } else {
-      console.log('Yahoo API credentials loaded successfully');
+      console.log('✅ Yahoo API centralized connection initialized');
     }
+    this.initialized = true;
+  }
+
+  // Singleton pattern - one instance for the entire server
+  static getInstance(): YahooSportsAPI {
+    if (!YahooSportsAPI.instance) {
+      YahooSportsAPI.instance = new YahooSportsAPI();
+    }
+    return YahooSportsAPI.instance;
+  }
+
+  // Check if centralized API is ready
+  isReady(): boolean {
+    return this.initialized && !!(this.consumerKey && this.consumerSecret);
   }
 
   // OAuth signature generation

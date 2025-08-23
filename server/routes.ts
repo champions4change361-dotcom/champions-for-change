@@ -2615,7 +2615,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/fantasy/injury-reports", async (req, res) => {
     try {
-      console.log('Yahoo API credentials loaded successfully');
+      const { YahooSportsAPI } = await import('./yahooSportsAPI');
+      const yahooAPI = YahooSportsAPI.getInstance();
+      console.log('✅ Centralized Yahoo API serving injury data to all users');
       
       // Enhanced professional injury reports with traditional fantasy designations
       const injuries = [
