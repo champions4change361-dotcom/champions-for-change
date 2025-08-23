@@ -70,69 +70,19 @@ export class LiveDataService {
     }
   }
 
-  // PARSE OURLADS NFL DEPTH CHART DATA
+  // PARSE 2025 NFL DEPTH CHART DATA FROM OFFICIAL PDF
   private static async parseOurladsData(): Promise<any> {
-    // Based on the Ourlads data structure we saw
-    return {
-      'QB': [
-        // Current starting QBs from depth charts
-        { id: 'allen_josh', name: 'Josh Allen', team: 'BUF', status: 'starter' },
-        { id: 'jackson_lamar', name: 'Lamar Jackson', team: 'BAL', status: 'starter' },
-        { id: 'murray_kyler', name: 'Kyler Murray', team: 'ARI', status: 'starter' },
-        { id: 'cousins_kirk', name: 'Kirk Cousins', team: 'ATL', status: 'starter' },
-        { id: 'trubisky_mitchell', name: 'Mitchell Trubisky', team: 'BUF', status: 'backup' },
-        { id: 'brissett_jacoby', name: 'Jacoby Brissett', team: 'ARI', status: 'backup' },
-        { id: 'rush_cooper', name: 'Cooper Rush', team: 'BAL', status: 'backup' },
-        { id: 'penix_michael', name: 'Michael Penix Jr.', team: 'ATL', status: 'backup' },
-        // Add more current QBs from actual depth charts...
-      ],
-      'RB': [
-        // Current starting RBs from depth charts  
-        { id: 'cook_james', name: 'James Cook', team: 'BUF', status: 'starter' },
-        { id: 'henry_derrick', name: 'Derrick Henry', team: 'BAL', status: 'starter' },
-        { id: 'conner_james', name: 'James Conner', team: 'ARI', status: 'starter' },
-        { id: 'robinson_bijan', name: 'Bijan Robinson', team: 'ATL', status: 'starter' },
-        { id: 'davis_ray', name: 'Ray Davis', team: 'BUF', status: 'backup' },
-        { id: 'hill_justice', name: 'Justice Hill', team: 'BAL', status: 'backup' },
-        { id: 'benson_trey', name: 'Trey Benson', team: 'ARI', status: 'backup' },
-        { id: 'allgeier_tyler', name: 'Tyler Allgeier', team: 'ATL', status: 'backup' },
-        // Add more current RBs from actual depth charts...
-      ],
-      'WR': [
-        // Current starting WRs from depth charts
-        { id: 'coleman_keon', name: 'Keon Coleman', team: 'BUF', status: 'starter' },
-        { id: 'shakir_khalil', name: 'Khalil Shakir', team: 'BUF', status: 'starter' },
-        { id: 'hopkins_deandre', name: 'DeAndre Hopkins', team: 'BAL', status: 'starter' },
-        { id: 'flowers_zay', name: 'Zay Flowers', team: 'BAL', status: 'starter' },
-        { id: 'harrison_marvin', name: 'Marvin Harrison Jr.', team: 'ARI', status: 'starter' },
-        { id: 'wilson_michael', name: 'Michael Wilson', team: 'ARI', status: 'starter' },
-        { id: 'london_drake', name: 'Drake London', team: 'ATL', status: 'starter' },
-        { id: 'mooney_darnell', name: 'Darnell Mooney', team: 'ATL', status: 'starter' },
-        // Add more current WRs from actual depth charts...
-      ],
-      'TE': [
-        // Current starting TEs from depth charts
-        { id: 'kincaid_dalton', name: 'Dalton Kincaid', team: 'BUF', status: 'starter' },
-        { id: 'andrews_mark', name: 'Mark Andrews', team: 'BAL', status: 'starter' },
-        { id: 'mcbride_trey', name: 'Trey McBride', team: 'ARI', status: 'starter' },
-        { id: 'pitts_kyle', name: 'Kyle Pitts', team: 'ATL', status: 'starter' },
-        { id: 'knox_dawson', name: 'Dawson Knox', team: 'BUF', status: 'backup' },
-        { id: 'likely_isaiah', name: 'Isaiah Likely', team: 'BAL', status: 'backup' },
-        // Add more current TEs from actual depth charts...
-      ],
-      'K': [
-        { id: 'bass_tyler', name: 'Tyler Bass', team: 'BUF', status: 'starter' },
-        { id: 'tucker_justin', name: 'Justin Tucker', team: 'BAL', status: 'starter' },
-        { id: 'ryland_chad', name: 'Chad Ryland', team: 'ARI', status: 'starter' },
-        { id: 'koo_younghoe', name: 'Younghoe Koo', team: 'ATL', status: 'starter' },
-      ],
-      'DEF': [
-        { id: 'bills_def', name: 'Bills Defense', team: 'BUF', status: 'starter' },
-        { id: 'ravens_def', name: 'Ravens Defense', team: 'BAL', status: 'starter' },
-        { id: 'cardinals_def', name: 'Cardinals Defense', team: 'ARI', status: 'starter' },
-        { id: 'falcons_def', name: 'Falcons Defense', team: 'ATL', status: 'starter' },
-      ]
-    };
+    // Import the comprehensive NFL depth chart parser
+    const { NFLDepthChartParser } = await import('./nfl-depth-chart-parser.js');
+    
+    console.log('📊 Loading comprehensive 2025 NFL depth charts...');
+    const depthChartData = NFLDepthChartParser.getAllNFLRosters();
+    
+    const stats = NFLDepthChartParser.getDataStats();
+    console.log(`✅ Loaded ${stats.totalPlayers} players across ${stats.teamCount} teams`);
+    console.log('📈 Position breakdown:', stats.positionBreakdown);
+    
+    return depthChartData;
   }
 
   // PARSE MLB DATA FROM MULTIPLE SOURCES
