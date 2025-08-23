@@ -913,6 +913,160 @@ export async function registerRoutes(app: Express): Promise<Server> {
   setupYahooAuth(app);
 
   // Fantasy Coaching AI endpoints
+  
+  // Roster data by sport and position
+  app.get('/api/fantasy/roster/:sport/:position', async (req, res) => {
+    try {
+      const { sport, position } = req.params;
+      console.log(`Roster request: ${sport} ${position}`);
+
+      const { YahooSportsAPI } = await import('./yahooSportsAPI');
+      const yahooAPI = new YahooSportsAPI();
+      let roster = [];
+
+      switch (sport.toLowerCase()) {
+        case 'nfl':
+          if (position === 'DEF') {
+            // Return NFL team defenses
+            roster = [
+              { id: 'SF', name: 'San Francisco 49ers', team: 'SF' },
+              { id: 'BAL', name: 'Baltimore Ravens', team: 'BAL' },
+              { id: 'CLE', name: 'Cleveland Browns', team: 'CLE' },
+              { id: 'DAL', name: 'Dallas Cowboys', team: 'DAL' },
+              { id: 'BUF', name: 'Buffalo Bills', team: 'BUF' },
+              { id: 'PIT', name: 'Pittsburgh Steelers', team: 'PIT' },
+              { id: 'NE', name: 'New England Patriots', team: 'NE' },
+              { id: 'KC', name: 'Kansas City Chiefs', team: 'KC' },
+              { id: 'MIA', name: 'Miami Dolphins', team: 'MIA' },
+              { id: 'NYJ', name: 'New York Jets', team: 'NYJ' },
+              { id: 'DEN', name: 'Denver Broncos', team: 'DEN' },
+              { id: 'LV', name: 'Las Vegas Raiders', team: 'LV' }
+            ];
+          } else {
+            // Get NFL players for position from Yahoo API
+            try {
+              const projections = await yahooAPI.getPlayerProjections(position);
+              roster = projections.map((player: any) => ({
+                id: player.playerId,
+                name: player.playerName,
+                team: player.team,
+                position: player.position
+              }));
+            } catch (error) {
+              console.error('Yahoo API error, using fallback data:', error);
+              // Fallback roster data for testing
+              roster = [
+                { id: 'mccaffrey', name: 'Christian McCaffrey', team: 'SF', position },
+                { id: 'henry', name: 'Derrick Henry', team: 'BAL', position },
+                { id: 'barkley', name: 'Saquon Barkley', team: 'PHI', position }
+              ];
+            }
+          }
+          break;
+        
+        case 'nba':
+          // NBA roster data by position
+          const nbaRosters: any = {
+            'PG': [
+              { id: 'curry', name: 'Stephen Curry', team: 'GSW' },
+              { id: 'doncic', name: 'Luka Doncic', team: 'DAL' },
+              { id: 'morant', name: 'Ja Morant', team: 'MEM' }
+            ],
+            'SG': [
+              { id: 'edwards', name: 'Anthony Edwards', team: 'MIN' },
+              { id: 'booker', name: 'Devin Booker', team: 'PHX' },
+              { id: 'mitchell', name: 'Donovan Mitchell', team: 'CLE' }
+            ],
+            'SF': [
+              { id: 'tatum', name: 'Jayson Tatum', team: 'BOS' },
+              { id: 'durant', name: 'Kevin Durant', team: 'PHX' },
+              { id: 'lebron', name: 'LeBron James', team: 'LAL' }
+            ],
+            'PF': [
+              { id: 'giannis', name: 'Giannis Antetokounmpo', team: 'MIL' },
+              { id: 'davis', name: 'Anthony Davis', team: 'LAL' },
+              { id: 'zion', name: 'Zion Williamson', team: 'NOP' }
+            ],
+            'C': [
+              { id: 'jokic', name: 'Nikola Jokic', team: 'DEN' },
+              { id: 'embiid', name: 'Joel Embiid', team: 'PHI' },
+              { id: 'wemby', name: 'Victor Wembanyama', team: 'SAS' }
+            ]
+          };
+          roster = nbaRosters[position] || [];
+          break;
+
+        case 'mlb':
+          // MLB roster data by position
+          const mlbRosters: any = {
+            'C': [
+              { id: 'salvador', name: 'Salvador Perez', team: 'KC' },
+              { id: 'smith', name: 'Will Smith', team: 'LAD' }
+            ],
+            'OF': [
+              { id: 'judge', name: 'Aaron Judge', team: 'NYY' },
+              { id: 'ohtani', name: 'Shohei Ohtani', team: 'LAD' },
+              { id: 'acuna', name: 'Ronald Acuna Jr.', team: 'ATL' }
+            ],
+            'SP': [
+              { id: 'cole', name: 'Gerrit Cole', team: 'NYY' },
+              { id: 'alcantara', name: 'Sandy Alcantara', team: 'MIA' }
+            ],
+            'RP': [
+              { id: 'clase', name: 'Emmanuel Clase', team: 'CLE' },
+              { id: 'diaz', name: 'Edwin Diaz', team: 'NYM' }
+            ]
+          };
+          roster = mlbRosters[position] || [];
+          break;
+
+        case 'nhl':
+          // NHL roster data by position
+          const nhlRosters: any = {
+            'C': [
+              { id: 'mcdavid', name: 'Connor McDavid', team: 'EDM' },
+              { id: 'draisaitl', name: 'Leon Draisaitl', team: 'EDM' },
+              { id: 'mackinnon', name: 'Nathan MacKinnon', team: 'COL' }
+            ],
+            'LW': [
+              { id: 'pastrnak', name: 'David Pastrnak', team: 'BOS' },
+              { id: 'panarin', name: 'Artemi Panarin', team: 'NYR' }
+            ],
+            'RW': [
+              { id: 'kucherov', name: 'Nikita Kucherov', team: 'TBL' },
+              { id: 'rantanen', name: 'Mikko Rantanen', team: 'COL' }
+            ],
+            'D': [
+              { id: 'makar', name: 'Cale Makar', team: 'COL' },
+              { id: 'hedman', name: 'Victor Hedman', team: 'TBL' }
+            ],
+            'G': [
+              { id: 'shesterkin', name: 'Igor Shesterkin', team: 'NYR' },
+              { id: 'vasilevskiy', name: 'Andrei Vasilevskiy', team: 'TBL' }
+            ]
+          };
+          roster = nhlRosters[position] || [];
+          break;
+
+        default:
+          return res.status(400).json({ success: false, message: 'Unsupported sport' });
+      }
+
+      res.json({
+        success: true,
+        sport,
+        position,
+        roster,
+        count: roster.length,
+        timestamp: new Date().toISOString()
+      });
+
+    } catch (error) {
+      console.error('Roster API error:', error);
+      res.status(500).json({ success: false, message: 'Failed to load roster data' });
+    }
+  });
+
   app.post("/api/fantasy/analyze-slate", async (req, res) => {
     try {
       const { slate = 'all-day' } = req.body;

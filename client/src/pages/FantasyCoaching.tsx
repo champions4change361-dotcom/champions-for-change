@@ -20,6 +20,8 @@ export default function FantasyCoaching() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [selectedWeek, setSelectedWeek] = useState<number>(1);
+  const [selectedSport, setSelectedSport] = useState<string>('');
+  const [selectedPosition, setSelectedPosition] = useState<string>('');
   const [selectedPlayer, setSelectedPlayer] = useState<string>('');
   const [activeTab, setActiveTab] = useState('ai-coach');
   const [question, setQuestion] = useState('');
@@ -58,13 +60,15 @@ export default function FantasyCoaching() {
     }
   });
 
-  // Player Projections Query
-  const { data: rbProjections } = useQuery({
-    queryKey: ['/api/fantasy/projections/RB', selectedWeek],
+  // Roster Data Query - loads players/teams for selected sport and position
+  const { data: rosterData } = useQuery({
+    queryKey: ['/api/fantasy/roster', selectedSport, selectedPosition],
     queryFn: async () => {
-      const response = await apiRequest(`/api/fantasy/projections/RB?week=${selectedWeek}`, 'GET');
+      if (!selectedSport || !selectedPosition) return null;
+      const response = await apiRequest(`/api/fantasy/roster/${selectedSport}/${selectedPosition}`, 'GET');
       return response;
-    }
+    },
+    enabled: !!(selectedSport && selectedPosition)
   });
 
   // Yahoo Connection Status
@@ -92,6 +96,50 @@ export default function FantasyCoaching() {
 
   const connectToYahoo = () => {
     window.location.href = '/api/yahoo/auth';
+  };
+
+  // Get positions for selected sport
+  const getPositionsForSport = (sport: string) => {
+    switch (sport) {
+      case 'nfl':
+        return [
+          { value: 'QB', label: 'Quarterback (QB)' },
+          { value: 'RB', label: 'Running Back (RB)' },
+          { value: 'WR', label: 'Wide Receiver (WR)' },
+          { value: 'TE', label: 'Tight End (TE)' },
+          { value: 'K', label: 'Kicker (K)' },
+          { value: 'DEF', label: 'Defense/ST (DEF)' }
+        ];
+      case 'nba':
+        return [
+          { value: 'PG', label: 'Point Guard (PG)' },
+          { value: 'SG', label: 'Shooting Guard (SG)' },
+          { value: 'SF', label: 'Small Forward (SF)' },
+          { value: 'PF', label: 'Power Forward (PF)' },
+          { value: 'C', label: 'Center (C)' }
+        ];
+      case 'mlb':
+        return [
+          { value: 'C', label: 'Catcher (C)' },
+          { value: '1B', label: 'First Base (1B)' },
+          { value: '2B', label: 'Second Base (2B)' },
+          { value: '3B', label: 'Third Base (3B)' },
+          { value: 'SS', label: 'Shortstop (SS)' },
+          { value: 'OF', label: 'Outfield (OF)' },
+          { value: 'SP', label: 'Starting Pitcher (SP)' },
+          { value: 'RP', label: 'Relief Pitcher (RP)' }
+        ];
+      case 'nhl':
+        return [
+          { value: 'C', label: 'Center (C)' },
+          { value: 'LW', label: 'Left Wing (LW)' },
+          { value: 'RW', label: 'Right Wing (RW)' },
+          { value: 'D', label: 'Defense (D)' },
+          { value: 'G', label: 'Goaltender (G)' }
+        ];
+      default:
+        return [];
+    }
   };
 
   // Sample data for demonstration
@@ -229,40 +277,79 @@ export default function FantasyCoaching() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <BarChart3 className="h-5 w-5" />
-              Analysis Settings
+              Multi-Sport Fantasy Analysis
             </CardTitle>
+            <CardDescription>
+              Choose your sport, position, and specific player/team for detailed fantasy analysis
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
-                <Label htmlFor="week-select">NFL Week</Label>
+                <Label htmlFor="sport-select">Choose Sport</Label>
                 <select 
-                  id="week-select"
-                  value={selectedWeek} 
-                  onChange={(e) => setSelectedWeek(parseInt(e.target.value))}
+                  id="sport-select"
+                  value={selectedSport} 
+                  onChange={(e) => {
+                    setSelectedSport(e.target.value);
+                    setSelectedPosition('');
+                    setSelectedPlayer('');
+                  }}
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                  data-testid="week-selector"
+                  data-testid="sport-selector"
                 >
-                  <option value="" disabled>Select week</option>
-                  {getCurrentWeekRange().map(week => (
-                    <option key={week} value={week}>
-                      Week {week}
+                  <option value="">Select Sport</option>
+                  <option value="nfl">🏈 NFL Football</option>
+                  <option value="nba">🏀 NBA Basketball</option>
+                  <option value="mlb">⚾ MLB Baseball</option>
+                  <option value="nhl">🏒 NHL Hockey</option>
+                </select>
+              </div>
+              <div>
+                <Label htmlFor="position-select">Choose Position</Label>
+                <select 
+                  id="position-select"
+                  value={selectedPosition} 
+                  onChange={(e) => {
+                    setSelectedPosition(e.target.value);
+                    setSelectedPlayer('');
+                  }}
+                  disabled={!selectedSport}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  data-testid="position-selector"
+                >
+                  <option value="">Select Position</option>
+                  {getPositionsForSport(selectedSport).map(position => (
+                    <option key={position.value} value={position.value}>
+                      {position.label}
                     </option>
                   ))}
                 </select>
               </div>
               <div>
-                <Label htmlFor="player-search">Player Search</Label>
-                <Input
-                  id="player-search"
-                  placeholder="Search player..."
-                  value={selectedPlayer}
+                <Label htmlFor="player-select">Choose Player/Team</Label>
+                <select 
+                  id="player-select"
+                  value={selectedPlayer} 
                   onChange={(e) => setSelectedPlayer(e.target.value)}
-                  data-testid="player-search"
-                />
+                  disabled={!selectedPosition}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  data-testid="player-selector"
+                >
+                  <option value="">Select Player/Team</option>
+                  {rosterData?.success && rosterData.roster?.map((item: any) => (
+                    <option key={item.id || item.name} value={item.id || item.name}>
+                      {item.name} {item.team ? `(${item.team})` : ''}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="flex items-end">
-                <Button className="w-full" data-testid="analyze-button">
+                <Button 
+                  className="w-full" 
+                  disabled={!selectedSport || !selectedPosition}
+                  data-testid="analyze-button"
+                >
                   <Brain className="h-4 w-4 mr-2" />
                   Analyze
                 </Button>
