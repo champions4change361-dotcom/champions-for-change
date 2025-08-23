@@ -2928,6 +2928,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Tournament management routes
   registerTournamentRoutes(app);
 
+  // 🚀 PRIMARY DFS LINEUP OPTIMIZER - Professional lineup optimization
+  app.get('/api/dfs/optimize/:site/:sport', (req, res) => {
+    const { site, sport } = req.params;
+    const numLineups = parseInt(req.query.lineups as string) || 5;
+    console.log(`🚀 Generating ${numLineups} optimal lineups for ${site.toUpperCase()} ${sport.toUpperCase()}`);
+    
+    const command = `python python-dfs/lineup_optimizer.py demo ${site} ${sport}`;
+    
+    exec(command, { timeout: 15000 }, (error, stdout, stderr) => {
+      if (error) {
+        console.error('DFS optimizer error:', error);
+        return res.status(500).json({ 
+          success: false, 
+          error: 'DFS lineup optimizer unavailable',
+          debug: error.message 
+        });
+      }
+      
+      try {
+        const result = JSON.parse(stdout);
+        if (result.success) {
+          console.log(`✅ Generated ${result.num_generated} optimal lineups for ${site.toUpperCase()} ${sport.toUpperCase()}`);
+          res.json(result);
+        } else {
+          res.status(500).json(result);
+        }
+      } catch (parseError) {
+        console.error('Failed to parse optimizer output:', parseError);
+        res.status(500).json({ 
+          success: false, 
+          error: 'Failed to parse optimizer data',
+          debug: stdout 
+        });
+      }
+    });
+  });
+
+  // 🎯 ADVANCED DFS OPTIMIZATION - With custom player data
+  app.post('/api/dfs/optimize/:site/:sport', (req, res) => {
+    const { site, sport } = req.params;
+    const { players, numLineups = 5 } = req.body;
+    console.log(`🎯 Advanced optimization: ${numLineups} lineups for ${site.toUpperCase()} ${sport.toUpperCase()} with ${players?.length || 0} custom players`);
+    
+    if (!players || !Array.isArray(players)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing or invalid players data'
+      });
+    }
+    
+    const playersJson = JSON.stringify(players);
+    const command = `python python-dfs/lineup_optimizer.py optimize ${site} ${sport} '${playersJson}' ${numLineups}`;
+    
+    exec(command, { timeout: 20000 }, (error, stdout, stderr) => {
+      if (error) {
+        console.error('Advanced DFS optimizer error:', error);
+        return res.status(500).json({ 
+          success: false, 
+          error: 'Advanced DFS optimizer unavailable',
+          debug: error.message 
+        });
+      }
+      
+      try {
+        const result = JSON.parse(stdout);
+        if (result.success) {
+          console.log(`🎯 Advanced optimization complete: ${result.num_generated} lineups generated`);
+          res.json(result);
+        } else {
+          res.status(500).json(result);
+        }
+      } catch (parseError) {
+        console.error('Failed to parse advanced optimizer output:', parseError);
+        res.status(500).json({ 
+          success: false, 
+          error: 'Failed to parse advanced optimizer data',
+          debug: stdout 
+        });
+      }
+    });
+  });
+
   // Create and return server
   const server = createServer(app);
   return server;

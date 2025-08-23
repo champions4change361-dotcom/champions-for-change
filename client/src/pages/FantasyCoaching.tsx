@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Brain, Trophy, TrendingUp, Users, Zap, Target, BarChart3, MessageSquare, Activity, AlertTriangle, CheckCircle } from 'lucide-react';
 import { KeystoneAvatar } from '@/components/KeystoneAvatar';
 import { FantasyLineupCoach } from '@/components/FantasyLineupCoach';
+import DFSLineupOptimizer from '@/components/DFSLineupOptimizer';
 import { LiveScoring } from '@/components/LiveScoring';
 import { useAuth } from '@/hooks/useAuth';
 import { FantasyAgeGate } from '@/components/FantasyAgeGate';
@@ -23,7 +24,7 @@ export default function FantasyCoaching() {
   const [selectedSport, setSelectedSport] = useState<string>('');
   const [selectedPosition, setSelectedPosition] = useState<string>('');
   const [selectedPlayer, setSelectedPlayer] = useState<string>('');
-  const [activeTab, setActiveTab] = useState('ai-coach');
+  const [activeTab, setActiveTab] = useState('dfs-optimizer');
   const [question, setQuestion] = useState('');
   const [selectedSlate, setSelectedSlate] = useState<'morning' | 'afternoon' | 'all-day'>('all-day');
   const [playerAnalysis, setPlayerAnalysis] = useState<any>(null);
@@ -486,7 +487,11 @@ export default function FantasyCoaching() {
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} data-testid="coaching-tabs">
-          <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 gap-1 h-auto p-1">
+          <TabsList className="grid w-full grid-cols-3 sm:grid-cols-7 gap-1 h-auto p-1">
+            <TabsTrigger value="dfs-optimizer" data-testid="tab-dfs-optimizer" className="flex flex-col items-center justify-center text-xs px-1 py-2 min-h-[3rem] bg-gradient-to-r from-yellow-100 to-orange-100 border-2 border-yellow-300">
+              <Trophy className="w-4 h-4 mb-1 text-yellow-600" />
+              <span className="font-bold text-yellow-800">Optimizer</span>
+            </TabsTrigger>
             <TabsTrigger value="ai-coach" data-testid="tab-ai-coach" className="flex flex-col items-center justify-center text-xs px-1 py-2 min-h-[3rem]">
               <Brain className="w-4 h-4 mb-1" />
               <span>AI</span>
@@ -512,6 +517,11 @@ export default function FantasyCoaching() {
               <span>Live</span>
             </TabsTrigger>
           </TabsList>
+
+          {/* DFS Lineup Optimizer Tab - PRIMARY FEATURE */}
+          <TabsContent value="dfs-optimizer" className="space-y-6" data-testid="dfs-optimizer-content">
+            <DFSLineupOptimizer />
+          </TabsContent>
 
           {/* AI Coach Tab - Real Sports Intelligence */}
           <TabsContent value="ai-coach" className="space-y-6" data-testid="ai-coach-content">
