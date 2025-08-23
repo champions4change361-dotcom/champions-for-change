@@ -809,9 +809,15 @@ export default function FantasyCoaching() {
                         .filter((injury: any) => {
                           // Filter by selected sport based on team abbreviations
                           if (selectedInjurySport === 'NFL') {
-                            return ['NYJ', 'SF', 'LAR', 'TB', 'CHI', 'MIA', 'LAC', 'ATL', 'CLE', 'IND'].includes(injury.team);
+                            return ['NYJ', 'SF', 'LAR', 'BAL', 'MIA', 'CHI', 'LAC', 'TB', 'ATL', 'CLE', 'IND', 'KC', 'BUF', 'CIN', 'HOU', 'PHI', 'DET', 'JAC', 'NE', 'LV', 'DEN', 'WAS', 'GB', 'MIN', 'DAL', 'NYG', 'CAR', 'NO', 'ARI', 'SEA', 'TEN', 'PIT'].includes(injury.team);
+                          } else if (selectedInjurySport === 'NBA') {
+                            return ['LAL', 'GSW', 'BOS', 'MIA', 'NYK', 'BRK', 'CHI', 'MIL', 'PHI', 'TOR', 'IND', 'CLE', 'ATL', 'ORL', 'WAS', 'CHA', 'DET', 'SAC', 'LAC', 'PHX', 'POR', 'UTA', 'OKC', 'MIN', 'NOP', 'SAS', 'HOU', 'DAL', 'MEM', 'DEN'].includes(injury.team);
+                          } else if (selectedInjurySport === 'MLB') {
+                            return ['LAD', 'SF', 'NYY', 'BOS', 'HOU', 'TEX', 'ATL', 'NYM', 'PHI', 'MIA', 'WSN', 'CHC', 'MIL', 'STL', 'CIN', 'PIT', 'SD', 'COL', 'ARI', 'LAA', 'OAK', 'SEA', 'MIN', 'CWS', 'DET', 'KC', 'CLE', 'TB', 'TOR', 'BAL'].includes(injury.team);
+                          } else if (selectedInjurySport === 'NHL') {
+                            return ['BOS', 'NYR', 'TOR', 'MTL', 'VGK', 'LAK', 'TB', 'FLA', 'CAR', 'NJD', 'NYI', 'WSH', 'PIT', 'PHI', 'CBJ', 'BUF', 'DET', 'OTT', 'COL', 'DAL', 'MIN', 'WPG', 'STL', 'NSH', 'CHI', 'ARI', 'CGY', 'EDM', 'VAN', 'SEA', 'SJS', 'ANA'].includes(injury.team);
                           }
-                          return true; // For now, show all for other sports
+                          return true;
                         })
                         .map((injury: any, index: number) => (
                         <div key={index} className="flex items-center gap-3 p-4 border rounded-lg bg-white hover:bg-gray-50 transition-colors">
