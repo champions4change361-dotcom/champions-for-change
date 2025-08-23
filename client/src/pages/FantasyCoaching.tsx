@@ -837,7 +837,7 @@ export default function FantasyCoaching() {
                         console.log('Filtered injuries count:', filteredInjuries.length);
                         console.log('Filtered injuries:', filteredInjuries);
 
-                        return filteredInjuries.length > 0 ? filteredInjuries.map((injury: any, index: number) => (
+                        return filteredInjuries && filteredInjuries.length > 0 ? filteredInjuries.map((injury: any, index: number) => (
                           <div key={index} className="flex items-center gap-3 p-4 border rounded-lg bg-white hover:bg-gray-50 transition-colors">
                             {/* Player Avatar - DraftKings Style */}
                             <div className="w-12 h-12 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full flex items-center justify-center text-xs font-bold text-gray-600 shadow-sm">
