@@ -45,10 +45,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  // 🔬 R ANALYTICS INTEGRATION - Public endpoint for ffanalytics powered projections
+  // 🔬 R ANALYTICS INTEGRATION - Multi-sport professional projections
+  app.get('/api/r-analytics/projections/:sport/:position', (req, res) => {
+    const { sport, position } = req.params;
+    console.log(`🔬 Calling R analytics for ${sport.toUpperCase()} ${position} projections`);
+    
+    // Choose the appropriate R script based on sport
+    const scriptFile = sport === 'nfl' ? 'test-api.R' : 'baseball-api.R';
+    const functionName = sport === 'nfl' ? 'get_projections' : 'get_baseball_projections';
+    
+    const command = `cd r-analytics && R --slave --no-restore -e ".libPaths(c('R-libs', .libPaths())); library(jsonlite); source('${scriptFile}'); cat(toJSON(${functionName}('${position}'), auto_unbox=TRUE))"`;
+    
+    exec(command, { timeout: 10000 }, (error, stdout, stderr) => {
+      if (error) {
+        console.error('R analytics error:', error);
+        return res.status(500).json({ 
+          success: false, 
+          error: 'R analytics service unavailable',
+          debug: error.message 
+        });
+      }
+      
+      try {
+        // Parse the JSON output from R - extract the final JSON line directly  
+        const jsonMatch = stdout.match(/\{\"success\":true.*?\}(?=\s*$)/);
+        const jsonLine = jsonMatch ? jsonMatch[0] : null;
+        
+        if (jsonLine) {
+          const result = JSON.parse(jsonLine);
+          console.log(`✅ R analytics returned ${result.projections?.length || 0} ${sport.toUpperCase()} ${position} projections`);
+          res.json(result);
+        } else {
+          res.status(500).json({ 
+            success: false, 
+            error: 'No JSON output found',
+            debug: stdout 
+          });
+        }
+      } catch (parseError) {
+        console.error('Failed to parse R output:', parseError);
+        res.status(500).json({ 
+          success: false, 
+          error: 'Failed to parse analytics data',
+          debug: stdout 
+        });
+      }
+    });
+  });
+
+  // 🔬 R ANALYTICS LEGACY - NFL-only endpoint (for backward compatibility)
   app.get('/api/r-analytics/projections/:position', (req, res) => {
     const { position } = req.params;
-    console.log(`🔬 Calling R analytics for ${position} projections`);
+    console.log(`🔬 Calling R analytics for NFL ${position} projections (legacy endpoint)`);
     
     const command = `cd r-analytics && R --slave --no-restore -e ".libPaths(c('R-libs', .libPaths())); library(jsonlite); source('test-api.R'); cat(toJSON(get_projections('${position}'), auto_unbox=TRUE))"`;
     
@@ -1126,7 +1174,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             
             // Try Yahoo API as backup enhancement
             try {
-              const projections = await yahooAPI.getPlayerProjections(position);
+              const projections = await yahooAPI.getPlayerProjections(position as any);
               if (projections && projections.length > 0) {
                 // Merge with Yahoo data if available
                 const yahooPlayers = projections.map((player: any) => ({
@@ -1578,7 +1626,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }
 
   function getPlayerRecommendation(position: string) {
-    const recommendations = {
+    const recommendations: { [key: string]: string } = {
       'QB': 'Strong play in favorable matchup',
       'RB': 'Solid volume expected, good floor',
       'WR': 'Target-heavy role, ceiling play',
@@ -1595,7 +1643,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }
 
   function getKeyFactors(sport: string, position: string) {
-    const sportFactors = {
+    const sportFactors: { [key: string]: string[] } = {
       'nfl': ['Matchup', 'Usage Rate', 'Game Script', 'Weather'],
       'nba': ['Pace', 'Usage', 'Matchup', 'Rest Advantage'],
       'mlb': ['Ballpark', 'Pitcher Matchup', 'Lineup Position', 'Weather'],
