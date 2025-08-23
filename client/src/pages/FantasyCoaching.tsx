@@ -768,8 +768,52 @@ export default function FantasyCoaching() {
                   Live Injury Reports
                 </CardTitle>
                 <CardDescription>
-                  Real-time injury updates affecting fantasy relevance
+                  Real-time injury updates with traditional fantasy designations
                 </CardDescription>
+                
+                {/* Legend */}
+                <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                  <div className="text-xs font-semibold mb-2 text-gray-700">Fantasy Designations:</div>
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs">
+                    <div className="flex items-center gap-1">
+                      <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center text-white font-bold text-xs">✓</div>
+                      <span>Healthy</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-xs">P</div>
+                      <span>Probable</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-4 h-4 bg-yellow-500 rounded-full flex items-center justify-center text-white font-bold text-xs">Q</div>
+                      <span>Questionable</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-4 h-4 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-xs">D</div>
+                      <span>Doubtful</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-white font-bold text-xs">O</div>
+                      <span>Out</span>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs mt-2">
+                    <div className="flex items-center gap-1">
+                      <div className="w-4 h-4 bg-green-600 rounded flex items-center justify-center text-white font-bold text-xs">✅</div>
+                      <span>Starter</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-4 h-4 bg-gray-500 rounded flex items-center justify-center text-white font-bold text-xs">B</div>
+                      <span>Bench</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-4 h-4 bg-red-600 rounded flex items-center justify-center text-white font-bold text-xs">❌</div>
+                      <span>Not Playing</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs bg-purple-100 text-purple-800 px-1 py-0.5 rounded">Coach's Decision</span>
+                    </div>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 {(injuryReports as any)?.injuries ? (
@@ -777,26 +821,69 @@ export default function FantasyCoaching() {
                     {(injuryReports as any).injuries.map((injury: any, index: number) => (
                       <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                         <div className="flex items-center gap-3">
-                          <div className={`w-3 h-3 rounded-full ${
+                          {/* Traditional Fantasy Designation */}
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm ${
                             injury.status === 'Healthy' ? 'bg-green-500' :
+                            injury.status === 'Probable' ? 'bg-blue-500' :
                             injury.status === 'Questionable' ? 'bg-yellow-500' :
                             injury.status === 'Doubtful' ? 'bg-orange-500' :
                             'bg-red-500'
-                          }`} />
+                          }`}>
+                            {injury.status === 'Healthy' ? '✓' :
+                             injury.status === 'Probable' ? 'P' :
+                             injury.status === 'Questionable' ? 'Q' :
+                             injury.status === 'Doubtful' ? 'D' :
+                             'O'}
+                          </div>
+                          
+                          {/* Starter Status Indicator */}
+                          <div className={`w-6 h-6 rounded flex items-center justify-center text-white font-bold text-xs ${
+                            injury.starterStatus === 'starter' ? 'bg-green-600' :
+                            injury.starterStatus === 'bench' ? 'bg-gray-500' :
+                            injury.starterStatus === 'out' ? 'bg-red-600' :
+                            'bg-gray-400'
+                          }`}>
+                            {injury.starterStatus === 'starter' ? '✅' :
+                             injury.starterStatus === 'bench' ? 'B' :
+                             injury.starterStatus === 'out' ? '❌' :
+                             '?'}
+                          </div>
+                          
                           <div>
-                            <div className="font-medium">{injury.playerName}</div>
-                            <div className="text-sm text-gray-600">{injury.team} - {injury.injury}</div>
+                            <div className="font-medium flex items-center gap-2">
+                              {injury.playerName}
+                              {injury.coachDecision && (
+                                <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">
+                                  Coach's Decision
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-sm text-gray-600">{injury.team} - {injury.position} - {injury.injury}</div>
                           </div>
                         </div>
                         <div className="text-right">
-                          <Badge variant={
-                            injury.status === 'Healthy' ? 'default' :
-                            injury.status === 'Questionable' ? 'secondary' :
-                            'destructive'
-                          }>
-                            {injury.status}
-                          </Badge>
-                          <div className="text-xs text-gray-500 mt-1">{injury.impact}</div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <Badge variant={
+                              injury.status === 'Healthy' ? 'default' :
+                              injury.status === 'Probable' ? 'default' :
+                              injury.status === 'Questionable' ? 'secondary' :
+                              'destructive'
+                            }>
+                              {injury.status}
+                            </Badge>
+                            {injury.starterStatus && (
+                              <Badge variant="outline" className="text-xs">
+                                {injury.starterStatus === 'starter' ? 'STARTER' :
+                                 injury.starterStatus === 'bench' ? 'BENCH' :
+                                 injury.starterStatus === 'out' ? 'OUT' :
+                                 'TBD'}
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="text-xs text-gray-500">{injury.impact}</div>
+                          {injury.lastUpdated && (
+                            <div className="text-xs text-gray-400 mt-1">Updated: {injury.lastUpdated}</div>
+                          )}
                         </div>
                       </div>
                     ))}
