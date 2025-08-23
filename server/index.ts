@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { nightlySportsIntelligence } from "./nightly-intelligence.js";
 
 const app = express();
 
@@ -44,6 +45,11 @@ app.use((req, res, next) => {
   // Set port immediately to ensure fast binding
   const port = parseInt(process.env.PORT || '5000', 10);
   
+  // Initialize live data service
+  const { LiveDataService } = await import('./live-data-service.js');
+  await LiveDataService.scheduleDataRefresh();
+  console.log('🔄 Live data service initialized');
+
   // Create server early to start listening immediately
   const server = await registerRoutes(app);
 

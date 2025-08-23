@@ -1028,12 +1028,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Fantasy Coaching AI endpoints
   
-  // Roster data by sport and position
+  // 🔄 LIVE ROSTER DATA ENDPOINT - INTEGRATION WITH OURLADS + OTHER SOURCES
   app.get('/api/fantasy/roster/:sport/:position', async (req, res) => {
     try {
       const { sport, position } = req.params;
-      console.log(`Roster request: ${sport} ${position}`);
+      console.log(`🔄 LIVE ROSTER REQUEST: ${sport} ${position}`);
 
+      // Import live data service for current roster information
+      const { LiveDataService } = await import('./live-data-service.js');
+      
+      let roster = [];
+      let dataSource = 'live';
+
+      try {
+        // Try to get live data first (Ourlads for NFL, etc.)
+        roster = await LiveDataService.fetchRosterData(sport, position);
+        console.log(`✅ Live data: Found ${roster.length} players for ${sport} ${position}`);
+        
+        if (roster.length === 0) {
+          console.log(`⚠️ No live data available, using enhanced fallback for ${sport} ${position}`);
+          dataSource = 'fallback';
+          roster = await getEnhancedFallbackRoster(sport, position);
+        }
+      } catch (error) {
+        console.log(`⚠️ Live data failed, using enhanced fallback for ${sport} ${position}`);
+        dataSource = 'fallback';
+        roster = await getEnhancedFallbackRoster(sport, position);
+      }
+
+      res.json({
+        success: true,
+        sport: sport.toUpperCase(),
+        position: position,
+        players: roster,
+        dataSource: dataSource,
+        timestamp: new Date().toISOString(),
+        count: roster.length
+      });
+
+    } catch (error) {
+      console.error('❌ Roster endpoint error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to fetch roster data',
+        error: error.message 
+      });
+    }
+  });
+
+  // Enhanced fallback roster with much more comprehensive data
+  async function getEnhancedFallbackRoster(sport: string, position: string): Promise<any[]> {
+    try {
       const { YahooSportsAPI } = await import('./yahooSportsAPI');
       const yahooAPI = new YahooSportsAPI();
       let roster = [];
@@ -1515,23 +1560,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           break;
 
         default:
-          return res.status(400).json({ success: false, message: 'Unsupported sport' });
+          break;
       }
 
-      res.json({
-        success: true,
-        sport,
-        position,
-        roster,
-        count: roster.length,
-        timestamp: new Date().toISOString()
-      });
-
+      return roster;
     } catch (error) {
-      console.error('Roster API error:', error);
-      res.status(500).json({ success: false, message: 'Failed to load roster data' });
+      console.error('Enhanced fallback roster error:', error);
+      return [];
     }
-  });
+  }
 
   // 🌙 NIGHTLY SPORTS INTELLIGENCE ENDPOINTS
   app.get('/api/intelligence/status', (req, res) => {
