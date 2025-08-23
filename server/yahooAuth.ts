@@ -142,81 +142,16 @@ export function setupYahooAuth(app: Express) {
     redirectUri
   });
 
-  // Start OAuth 2.0 flow
+  // DISABLED - Yahoo API now centralized, no individual user auth
   app.get('/api/yahoo/auth', (req: Request, res: Response) => {
-    try {
-      console.log('🎯 Starting Yahoo OAuth 2.0 flow...');
-      console.log('- Client ID:', process.env.YAHOO_CONSUMER_KEY?.substring(0, 8) + '...');
-      console.log('- Client Secret present:', !!process.env.YAHOO_CONSUMER_SECRET);
-      console.log('- Redirect URI:', yahooAuth['config'].redirectUri);
-      
-      // Generate state for security
-      const state = crypto.randomBytes(16).toString('hex');
-      (req.session as any).yahooOAuthState = state;
-      
-      const authUrl = yahooAuth.getAuthorizationUrl(state);
-      console.log('✅ Yahoo OAuth 2.0 authorization URL generated');
-      console.log('🔗 Redirecting to:', authUrl);
-      
-      res.redirect(authUrl);
-    } catch (error) {
-      console.error('❌ Yahoo auth error details:', error);
-      const errorMsg = error instanceof Error ? error.message : 'Unknown OAuth error';
-      console.log('🔄 Falling back to demo mode due to:', errorMsg);
-      res.redirect(`/fantasy-coaching?yahoo=demo&error=${encodeURIComponent(errorMsg)}`);
-    }
+    console.log('🚫 Individual Yahoo auth disabled - using centralized API');
+    res.redirect('/fantasy-coaching?message=centralized');
   });
 
-  // Handle OAuth 2.0 callback
+  // DISABLED - Yahoo API now centralized, no individual user auth
   app.get('/api/yahoo/callback', async (req: Request, res: Response) => {
-    try {
-      const { code, state, error } = req.query;
-      
-      // Check for OAuth error
-      if (error) {
-        console.error('❌ Yahoo OAuth error:', error);
-        return res.redirect(`/fantasy-coaching?yahoo=error&message=${encodeURIComponent(error as string)}`);
-      }
-      
-      // Verify state parameter for security
-      const sessionState = (req.session as any).yahooOAuthState;
-      if (!state || state !== sessionState) {
-        console.error('❌ Invalid OAuth state parameter');
-        return res.redirect('/fantasy-coaching?yahoo=error&message=Invalid+state+parameter');
-      }
-      
-      if (!code) {
-        console.error('❌ Missing authorization code');
-        return res.redirect('/fantasy-coaching?yahoo=error&message=Missing+authorization+code');
-      }
-
-      console.log('🔄 Exchanging authorization code for access token...');
-      const tokenData = await yahooAuth.exchangeCodeForToken(code as string);
-
-      // Store tokens in session
-      (req.session as any).yahooAccessToken = tokenData.access_token;
-      (req.session as any).yahooRefreshToken = tokenData.refresh_token;
-      (req.session as any).yahooTokenExpiry = Date.now() + (tokenData.expires_in * 1000);
-      
-      // Clear OAuth state
-      delete (req.session as any).yahooOAuthState;
-
-      // Force session save to ensure token persistence
-      req.session.save((err) => {
-        if (err) {
-          console.error('❌ Session save error:', err);
-        } else {
-          console.log('💾 Yahoo token saved to session successfully');
-        }
-      });
-
-      console.log('✅ Yahoo OAuth 2.0 authentication successful');
-      res.redirect('/fantasy-coaching?yahoo=connected');
-    } catch (error) {
-      console.error('❌ Yahoo callback error:', error);
-      const errorMsg = error instanceof Error ? error.message : 'OAuth callback error';
-      res.redirect(`/fantasy-coaching?yahoo=error&message=${encodeURIComponent(errorMsg)}`);
-    }
+    console.log('🚫 Individual Yahoo callback disabled - using centralized API');
+    res.redirect('/fantasy-coaching?message=centralized');
   });
 
   // Centralized Yahoo API status - no individual user auth needed
@@ -247,16 +182,10 @@ export function setupYahooAuth(app: Express) {
     }
   });
 
-  // Disconnect Yahoo OAuth 2.0
+  // DISABLED - Yahoo API now centralized, no individual disconnect needed
   app.post('/api/yahoo/disconnect', (req: Request, res: Response) => {
-    const session = req.session as any;
-    delete session.yahooAccessToken;
-    delete session.yahooRefreshToken;
-    delete session.yahooTokenExpiry;
-    delete session.yahooOAuthState;
-    
-    console.log('🔌 Yahoo OAuth 2.0 disconnected');
-    res.json({ success: true });
+    console.log('🚫 Individual Yahoo disconnect disabled - API is centralized');
+    res.json({ success: true, message: 'Yahoo API is now centrally managed' });
   });
 
   // Test Yahoo OAuth 2.0 configuration
