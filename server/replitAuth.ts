@@ -188,7 +188,7 @@ export async function setupAuth(app: Express) {
       const userRole = 'district_athletic_director' as const;
       console.log(`Master admin login - granting full access with role: ${userRole}`);
       
-      // Create user in storage with role-specific configuration
+      // Create user in storage with minimal fantasy sports configuration
       const userConfig = getUserConfig(userType);
       const adminUser = await storage.upsertUser({
         id: userConfig.id,
@@ -198,7 +198,7 @@ export async function setupAuth(app: Express) {
         profileImageUrl: null,
         subscriptionPlan: userConfig.subscriptionPlan,
         subscriptionStatus: 'active',
-        complianceRole: userRole,
+        // Skip all compliance fields for fantasy sports users
         organizationId: userConfig.organizationId,
         organizationName: userConfig.organizationName,
         isWhitelabelClient: userConfig.isWhitelabelClient,
