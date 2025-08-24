@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { GamepadIcon, Shield, Trophy, Users, Star, Clock, Target, Zap } from "lucide-react";
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { FantasyAgeGate } from "@/components/FantasyAgeGate";
 import { FantasyAuth } from "@/components/FantasyAuth";
 import { useFantasyAuth } from "@/hooks/useFantasyAuth";
@@ -64,6 +65,7 @@ export default function FantasyTournaments() {
   const [leagueName, setLeagueName] = useState("");
   
   const { fantasyUser, isFantasyAuthenticated, loginFantasyUser } = useFantasyAuth();
+  const [location, setLocation] = useLocation();
   const [selectedSport, setSelectedSport] = useState("nfl");
   const [selectedFormat, setSelectedFormat] = useState("survivor");
 
@@ -519,11 +521,14 @@ export default function FantasyTournaments() {
               <Button 
                 className="flex-1 bg-green-600 hover:bg-green-700"
                 onClick={() => {
-                  // Now we have fantasy user info!
+                  // Create league and redirect to dashboard
                   const leagueNameFinal = leagueName || 'NFL Survivor Pool';
-                  alert(`🎉 FREE League "${leagueNameFinal}" created by ${fantasyUser?.email}!\n\n🏆 Winner gets bragging rights!\n📅 Created: ${new Date().toLocaleString()}\n\nShare the link with your friends to join for FREE!`);
+                  const leagueId = `league-${Date.now()}`;
+                  
+                  // Close modal and redirect to league dashboard
                   setShowCreateLeague(false);
                   setLeagueName("");
+                  setLocation(`/fantasy/league/${leagueId}`);
                 }}
                 data-testid="button-create-league"
               >
