@@ -759,46 +759,10 @@ export class NFLDepthChartParser {
   }
 
   // 🔍 Get all players in a flat array for searchable table
-  static getAllPlayers() {
-    const allPlayers = [];
+  static getAllPlayers(): any[] {
+    const allPlayers: any[] = [];
     
-    // Get all team methods
-    const teamMethods = [
-      this.getArizonaCardinals,
-      this.getAtlantaFalcons,
-      this.getBaltimoreRavens,
-      this.getBuffaloBills,
-      this.getCarolinaPanthers,
-      this.getChicagoBears,
-      this.getCincinnatiBengals,
-      this.getClevelandBrowns,
-      this.getDallasCowboys,
-      this.getDenverBroncos,
-      this.getDetroitLions,
-      this.getGreenBayPackers,
-      this.getHoustonTexans,
-      this.getIndianapolisColts,
-      this.getJacksonvilleJaguars,
-      this.getKansasCityChiefs,
-      this.getLasVegasRaiders,
-      this.getLosAngelesChargers,
-      this.getLosAngelesRams,
-      this.getMiamiDolphins,
-      this.getMinnesotaVikings,
-      this.getNewEnglandPatriots,
-      this.getNewOrleansSaints,
-      this.getNewYorkGiants,
-      this.getNewYorkJets,
-      this.getPhiladelphiaEagles,
-      this.getPittsburghSteelers,
-      this.getSanFrancisco49ers,
-      this.getSeattleSeahawks,
-      this.getTampaBayBuccaneers,
-      this.getTennesseeTitans,
-      this.getWashingtonCommanders
-    ];
-    
-    // For now, just use the two teams we have implemented
+    // Only use teams we have actually implemented
     const implementedTeams = [
       this.getArizonaCardinals,
       this.getAtlantaFalcons
@@ -809,12 +773,15 @@ export class NFLDepthChartParser {
       const teamRoster = teamMethod();
       
       Object.keys(teamRoster).forEach(position => {
-        teamRoster[position].forEach(player => {
-          allPlayers.push({
-            ...player,
-            position: position // Ensure position is explicitly set
+        const positionPlayers = teamRoster[position as keyof typeof teamRoster];
+        if (Array.isArray(positionPlayers)) {
+          positionPlayers.forEach((player: any) => {
+            allPlayers.push({
+              ...player,
+              position: position // Ensure position is explicitly set
+            });
           });
-        });
+        }
       });
     });
     
