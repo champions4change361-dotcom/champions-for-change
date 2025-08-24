@@ -97,10 +97,11 @@ export default function FantasyTournaments() {
   const getFormatDescription = (format: string) => {
     switch (format) {
       case "survivor": return "Pick one team per week. One wrong pick eliminates you!";
-      case "daily": return "DraftKings-style daily fantasy with salary cap";
-      case "season": return "Full season league with draft and trades";
-      case "weekly": return "Pick winners weekly with confidence points";
-      default: return "Fantasy sports format";
+      case "salary_cap": return "Daily fantasy with salary budget constraints";
+      case "snake_draft": return "Traditional snake draft with season-long scoring";
+      case "head_to_head": return "Direct competition against one opponent";
+      case "best_ball": return "Draft once, optimal lineup set automatically";
+      default: return "Professional fantasy sports format";
     }
   };
 
@@ -176,7 +177,7 @@ export default function FantasyTournaments() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-              {Object.entries(fantasyStatus.systems).map(([system, status]) => (
+              {fantasyStatus.systems && Object.entries(fantasyStatus.systems).map(([system, status]) => (
                 <div key={system} className="text-center">
                   <Badge variant={status === "ACTIVE" ? "default" : "destructive"}>
                     {status}

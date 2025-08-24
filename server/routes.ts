@@ -3441,7 +3441,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           safety_rules_count: 5,
           api_configurations_count: 4,
           supported_sports: ["nfl", "nba", "mlb", "nhl"],
-          supported_formats: ["survivor", "draft_kings", "fanduel", "head_to_head", "best_ball"],
+          supported_formats: ["survivor", "salary_cap", "snake_draft", "head_to_head", "best_ball"],
           min_age_requirement: 21
         }
       };
@@ -3480,7 +3480,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           id: "nfl-dfs-weekly",
           leagueName: "Weekly DFS Showdown",
           sportType: "nfl", 
-          leagueFormat: "draft_kings",
+          leagueFormat: "salary_cap",
           ageRestriction: 21,
           requiresAgeVerification: true,
           maxParticipants: 200,
@@ -3490,7 +3490,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           entryFee: "$10",
           totalPrize: "$500",
           participantCount: 100,
-          description: "Draft Kings style salary cap lineup"
+          description: "Salary cap style daily fantasy lineup"
         }
       ];
       
