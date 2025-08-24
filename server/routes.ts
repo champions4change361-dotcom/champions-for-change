@@ -1075,22 +1075,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         for (const position of positions) {
           try {
-            const positionPlayers = await getEnhancedFallbackRoster('mlb', position);
-            if (Array.isArray(positionPlayers) && positionPlayers.length > 0) {
-              const playersWithData = positionPlayers.map((player: any, index: number) => ({
+            console.log(`🔍 Getting clean Yahoo API data for MLB ${position}`);
+            const { YahooSportsAPI } = await import('./yahooSportsAPI');
+            const yahooAPI = new YahooSportsAPI();
+            
+            // Get real MLB roster data from Yahoo API only
+            const yahooPlayers = await yahooAPI.getMLBRosterByPosition(position);
+            
+            if (Array.isArray(yahooPlayers) && yahooPlayers.length > 0) {
+              const cleanMLBData = yahooPlayers.map((player: any, index: number) => ({
                 id: `mlb_${player.id || `${player.name?.toLowerCase().replace(/\s+/g, '_')}_${player.team?.toLowerCase()}`}`,
                 name: player.name,
-                team: player.team || 'UNK',
-                number: (index + 1).toString(),
-                status: 'active',
-                depth: index + 1,
+                team: player.team,
+                number: player.number || (index + 1).toString(),
+                status: player.status || 'active',
+                depth: 1, // Baseball doesn't use depth charts like football
                 position: position,
-                sport: 'MLB' // Explicit sport identifier
+                sport: 'MLB'
               }));
-              allMLBPlayers.push(...playersWithData);
+              allMLBPlayers.push(...cleanMLBData);
+              console.log(`✅ Yahoo API: Found ${cleanMLBData.length} clean ${position} players`);
+            } else {
+              console.log(`⚠️ No Yahoo data for MLB ${position}, position may not exist`);
             }
           } catch (error) {
-            console.log(`MLB ${position} position error:`, error);
+            console.log(`❌ MLB ${position} Yahoo API error:`, error);
           }
         }
         
@@ -1114,22 +1123,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         for (const position of positions) {
           try {
-            const positionPlayers = await getEnhancedFallbackRoster('nhl', position);
-            if (Array.isArray(positionPlayers) && positionPlayers.length > 0) {
-              const playersWithData = positionPlayers.map((player: any, index: number) => ({
+            console.log(`🔍 Getting clean Yahoo API data for NHL ${position}`);
+            const { YahooSportsAPI } = await import('./yahooSportsAPI');
+            const yahooAPI = new YahooSportsAPI();
+            
+            // Get real NHL roster data from Yahoo API only
+            const yahooPlayers = await yahooAPI.getNHLRosterByPosition(position);
+            
+            if (Array.isArray(yahooPlayers) && yahooPlayers.length > 0) {
+              const cleanNHLData = yahooPlayers.map((player: any, index: number) => ({
                 id: `nhl_${player.id || `${player.name?.toLowerCase().replace(/\s+/g, '_')}_${player.team?.toLowerCase()}`}`,
                 name: player.name,
-                team: player.team || 'UNK',
-                number: (index + 1).toString(),
-                status: 'active',
-                depth: index + 1,
+                team: player.team,
+                number: player.number || (index + 1).toString(),
+                status: player.status || 'active',
+                depth: 1, // Hockey doesn't use complex depth charts for roster display
                 position: position,
-                sport: 'NHL' // Explicit sport identifier
+                sport: 'NHL'
               }));
-              allNHLPlayers.push(...playersWithData);
+              allNHLPlayers.push(...cleanNHLData);
+              console.log(`✅ Yahoo API: Found ${cleanNHLData.length} clean ${position} players`);
+            } else {
+              console.log(`⚠️ No Yahoo data for NHL ${position}`);
             }
           } catch (error) {
-            console.log(`NHL ${position} position error:`, error);
+            console.log(`❌ NHL ${position} Yahoo API error:`, error);
           }
         }
         

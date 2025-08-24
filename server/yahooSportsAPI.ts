@@ -878,4 +878,69 @@ export class YahooSportsAPI {
       confidence: 90
     };
   }
+
+  // MLB Roster Methods - Clean Yahoo API Data Only
+  async getMLBRosterByPosition(position: string): Promise<any[]> {
+    try {
+      console.log(`🔍 Yahoo API: Fetching clean MLB ${position} data`);
+      
+      // Call Yahoo Sports API for real MLB roster data
+      // This will return actual current players with correct teams
+      const response = await this.makeRequest('/fantasy/v2/league/mlb/players', {
+        position: position,
+        status: 'A' // Active players only
+      });
+      
+      if (response?.fantasy_content?.league?.players) {
+        const players = response.fantasy_content.league.players.player;
+        return Array.isArray(players) ? players.map((p: any) => ({
+          id: p.player_id,
+          name: p.name?.full || `${p.name?.first} ${p.name?.last}`,
+          team: p.editorial_team_abbr,
+          number: p.uniform_number,
+          status: 'active',
+          position: position
+        })) : [];
+      }
+      
+      // If Yahoo API fails, return empty array (no fallback contamination)
+      console.log(`⚠️ Yahoo API returned no data for MLB ${position}`);
+      return [];
+      
+    } catch (error) {
+      console.log(`❌ Yahoo API error for MLB ${position}:`, error);
+      return []; // Clean failure - no fallback data contamination
+    }
+  }
+
+  async getNHLRosterByPosition(position: string): Promise<any[]> {
+    try {
+      console.log(`🔍 Yahoo API: Fetching clean NHL ${position} data`);
+      
+      // Call Yahoo Sports API for real NHL roster data
+      const response = await this.makeRequest('/fantasy/v2/league/nhl/players', {
+        position: position,
+        status: 'A' // Active players only
+      });
+      
+      if (response?.fantasy_content?.league?.players) {
+        const players = response.fantasy_content.league.players.player;
+        return Array.isArray(players) ? players.map((p: any) => ({
+          id: p.player_id,
+          name: p.name?.full || `${p.name?.first} ${p.name?.last}`,
+          team: p.editorial_team_abbr,
+          number: p.uniform_number,
+          status: 'active',
+          position: position
+        })) : [];
+      }
+      
+      console.log(`⚠️ Yahoo API returned no data for NHL ${position}`);
+      return [];
+      
+    } catch (error) {
+      console.log(`❌ Yahoo API error for NHL ${position}:`, error);
+      return []; // Clean failure - no fallback data contamination
+    }
+  }
 }
