@@ -598,40 +598,50 @@ export default function FantasyCoaching() {
             <DFSLineupOptimizer />
           </TabsContent>
 
-          {/* Player Search Tab - Searchable Roster Tables */}
+          {/* Player Search Tab - Multi-Sport Searchable Roster Tables */}
           <TabsContent value="player-search" className="space-y-6" data-testid="player-search-content">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Users className="h-5 w-5 text-green-600" />
-                  NFL Player Search & Analysis
+                  {selectedSport ? selectedSport.toUpperCase() : 'Multi-Sport'} Player Search & Analysis
                 </CardTitle>
                 <CardDescription>
-                  Search and click any NFL player for instant AI + R analytics comparison. 
-                  Visual depth chart browsing with smart recommendations.
+                  {selectedSport ? (
+                    `Search and click any ${selectedSport.toUpperCase()} player for instant AI + R analytics comparison. Visual depth chart browsing with smart recommendations.`
+                  ) : (
+                    'Select a sport above (NFL, NBA, MLB, NHL) to search players and get instant AI analytics.'
+                  )}
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <SearchableRosterTable 
-                  sport="nfl"
-                  onPlayerSelect={(playerName, position, team) => {
-                    // Set the selections to trigger analysis
-                    setSelectedSport('nfl');
-                    setSelectedPosition(position);
-                    setSelectedPlayer(playerName);
-                    
-                    // Switch to AI coach tab to show analysis
-                    setActiveTab('ai-coach');
-                    
-                    // Trigger analysis
-                    analyzePlayerMutation.mutate({
-                      sport: 'nfl',
-                      position: position,
-                      player: playerName
-                    });
-                  }}
-                  selectedPlayer={selectedPlayer}
-                />
+                {selectedSport ? (
+                  <SearchableRosterTable 
+                    sport={selectedSport}
+                    onPlayerSelect={(playerName, position, team) => {
+                      // Set the selections to trigger analysis (maintain selected sport)
+                      setSelectedPosition(position);
+                      setSelectedPlayer(playerName);
+                      
+                      // Switch to AI coach tab to show analysis
+                      setActiveTab('ai-coach');
+                      
+                      // Trigger analysis with the currently selected sport
+                      analyzePlayerMutation.mutate({
+                        sport: selectedSport,
+                        position: position,
+                        player: playerName
+                      });
+                    }}
+                    selectedPlayer={selectedPlayer}
+                  />
+                ) : (
+                  <div className="text-center py-12 text-gray-500">
+                    <Users className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                    <h3 className="text-lg font-medium mb-2">Choose Your Sport</h3>
+                    <p>Select NFL, NBA, MLB, or NHL above to start searching players</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
