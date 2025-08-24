@@ -1028,6 +1028,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Fantasy Coaching AI endpoints
   
+  // 🔍 ALL NFL PLAYERS ENDPOINT - For searchable table (MUST COME FIRST!)
+  app.get('/api/fantasy/roster/:sport/all', async (req, res) => {
+    try {
+      const { sport } = req.params;
+      console.log(`🔍 SEARCHABLE ROSTER REQUEST: ${sport} all players`);
+      
+      if (sport.toLowerCase() === 'nfl') {
+        const { NFLDepthChartParser } = await import('./nfl-depth-chart-parser');
+        
+        // Get all players using our fixed method
+        const allPlayers = NFLDepthChartParser.getAllPlayers();
+        
+        console.log(`✅ Searchable data: Found ${allPlayers.length} total NFL players`);
+        console.log('Sample players:', allPlayers.slice(0, 3)); // Debug: show first 3 players
+        
+        res.json({
+          success: true,
+          sport: sport.toUpperCase(),
+          players: allPlayers,
+          count: allPlayers.length
+        });
+      } else {
+        res.status(404).json({ success: false, message: `Sport ${sport} not supported yet` });
+      }
+    } catch (error) {
+      console.error('All players fetch error:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch all players data', error: error.message });
+    }
+  });
+
   // 🔄 LIVE ROSTER DATA ENDPOINT - INTEGRATION WITH OURLADS + OTHER SOURCES
   app.get('/api/fantasy/roster/:sport/:position', async (req, res) => {
     try {
@@ -3192,35 +3222,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  // 🔍 ALL NFL PLAYERS ENDPOINT - For searchable table
-  app.get('/api/fantasy/roster/:sport/all', async (req, res) => {
-    try {
-      const { sport } = req.params;
-      console.log(`🔍 SEARCHABLE ROSTER REQUEST: ${sport} all players`);
-      
-      if (sport.toLowerCase() === 'nfl') {
-        const { NFLDepthChartParser } = await import('./nfl-depth-chart-parser');
-        
-        // Get all players using our fixed method
-        const allPlayers = NFLDepthChartParser.getAllPlayers();
-        
-        console.log(`✅ Searchable data: Found ${allPlayers.length} total NFL players`);
-        console.log('Sample players:', allPlayers.slice(0, 3)); // Debug: show first 3 players
-        
-        res.json({
-          success: true,
-          sport: sport.toUpperCase(),
-          players: allPlayers,
-          count: allPlayers.length
-        });
-      } else {
-        res.status(404).json({ success: false, message: `Sport ${sport} not supported yet` });
-      }
-    } catch (error) {
-      console.error('All players fetch error:', error);
-      res.status(500).json({ success: false, message: 'Failed to fetch all players data', error: error.message });
-    }
-  });
 
   // Create and return server
   const server = createServer(app);

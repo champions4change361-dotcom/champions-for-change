@@ -762,16 +762,14 @@ export class NFLDepthChartParser {
   static getAllPlayers(): any[] {
     const allPlayers: any[] = [];
     
-    // Only use teams we have actually implemented
-    const implementedTeams = [
-      this.getArizonaCardinals,
-      this.getAtlantaFalcons
-    ];
+    // Get data from implemented teams
+    const arizonaRoster = this.getArizonaCardinals();
+    const atlantaRoster = this.getAtlantaFalcons();
+    
+    const teamRosters = [arizonaRoster, atlantaRoster];
     
     // Flatten all players from all teams and positions
-    implementedTeams.forEach(teamMethod => {
-      const teamRoster = teamMethod();
-      
+    teamRosters.forEach(teamRoster => {
       Object.keys(teamRoster).forEach(position => {
         const positionPlayers = teamRoster[position as keyof typeof teamRoster];
         if (Array.isArray(positionPlayers)) {
@@ -784,6 +782,9 @@ export class NFLDepthChartParser {
         }
       });
     });
+    
+    console.log(`🔍 getAllPlayers: Found ${allPlayers.length} total players`);
+    console.log('Sample players:', allPlayers.slice(0, 3));
     
     return allPlayers;
   }
