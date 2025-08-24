@@ -6,6 +6,8 @@ import { nightlySportsIntelligence } from './nightly-sports-intelligence';
 import { getStorage } from "./storage";
 import { emailService } from "./emailService";
 import supportTeamRoutes from "./supportTeamRoutes";
+import NFLDepthChartParser from './nfl-depth-chart-parser';
+import NBADepthChartParser from './nba-depth-chart-parser';
 import { stripe } from "./nonprofitStripeConfig";
 import { registerDomainRoutes } from "./domainRoutes";
 import { registerTournamentRoutes } from "./routes/tournamentRoutes";
@@ -1049,6 +1051,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
           players: allPlayers,
           count: allPlayers.length
         });
+      } else if (sport.toLowerCase() === 'nba') {
+        // Get all NBA players using our comprehensive 2025-2026 parser
+        const allPlayers = NBADepthChartParser.getAllPlayers();
+        
+        console.log(`🏀 Searchable data: Found ${allPlayers.length} total NBA players across ${new Set(allPlayers.map(p => p.team)).size} teams`);
+        console.log('Sample NBA players:', allPlayers.slice(0, 3)); // Debug: show first 3 players
+        
+        res.json({
+          success: true,
+          sport: sport.toUpperCase(),
+          players: allPlayers,
+          count: allPlayers.length
+        });
       } else {
         res.status(404).json({ success: false, message: `Sport ${sport} not supported yet` });
       }
@@ -1281,7 +1296,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           break;
         
         case 'nba':
-          // NBA 2024-25 CURRENT SEASON ROSTERS
+          // Get NBA players from comprehensive 2025-2026 parser
+          const nbaPlayers = NBADepthChartParser.getRosterByPosition(position);
+          roster = nbaPlayers;
+          break;
+          
+        case 'nba_fallback_old':
+          // NBA 2024-25 CURRENT SEASON ROSTERS (BACKUP)
           const nbaRosters: any = {
             'PG': [
               // Tier 1 Elite - Current 2024-25
