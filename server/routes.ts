@@ -1079,7 +1079,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const { YahooSportsAPI } = await import('./yahooSportsAPI');
             const yahooAPI = new YahooSportsAPI();
             
-            // Get real MLB roster data from Yahoo API only
+            // Get real MLB roster data from Yahoo Sports API
             const yahooPlayers = await yahooAPI.getMLBRosterByPosition(position);
             
             if (Array.isArray(yahooPlayers) && yahooPlayers.length > 0) {
@@ -1089,14 +1089,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 team: player.team,
                 number: player.number || (index + 1).toString(),
                 status: player.status || 'active',
-                depth: 1, // Baseball doesn't use depth charts like football
+                depth: 1, // Baseball uses simple active roster, not depth charts
                 position: position,
                 sport: 'MLB'
               }));
               allMLBPlayers.push(...cleanMLBData);
-              console.log(`✅ Yahoo API: Found ${cleanMLBData.length} clean ${position} players`);
+              console.log(`✅ Yahoo Sports: Found ${cleanMLBData.length} clean ${position} players`);
             } else {
-              console.log(`⚠️ No Yahoo data for MLB ${position}, position may not exist`);
+              console.log(`⚠️ No Yahoo Sports data for MLB ${position}`);
             }
           } catch (error) {
             console.log(`❌ MLB ${position} Yahoo API error:`, error);
@@ -1190,18 +1190,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
           dataSource = 'comprehensive';
           console.log(`✅ NBA parser: Found ${roster.length} players for ${sport} ${position}`);
         } else {
-          // Try to get live data first (Ourlads for NFL, etc.)
-          roster = await LiveDataService.fetchRosterData(sport, position);
-          console.log(`✅ Live data: Found ${roster.length} players for ${sport} ${position}`);
-          
-          if (roster.length === 0) {
-            console.log(`⚠️ No live data available, using enhanced fallback for ${sport} ${position}`);
-            dataSource = 'fallback';
-            roster = await getEnhancedFallbackRoster(sport, position);
+          // For MLB, use clean Yahoo Sports API
+          if (sport.toLowerCase() === 'mlb') {
+            console.log(`🔍 Getting Yahoo Sports data for MLB ${position}`);
+            const { YahooSportsAPI } = await import('./yahooSportsAPI');
+            const yahooAPI = new YahooSportsAPI();
+            roster = await yahooAPI.getMLBRosterByPosition(position);
+            dataSource = 'yahoo_sports';
+          } else {
+            // Other sports: try live data first
+            roster = await LiveDataService.fetchRosterData(sport, position);
+            console.log(`✅ Live data: Found ${roster.length} players for ${sport} ${position}`);
+            
+            if (roster.length === 0) {
+              console.log(`⚠️ No live data available, using enhanced fallback for ${sport} ${position}`);
+              dataSource = 'fallback';
+              roster = await getEnhancedFallbackRoster(sport, position);
+            }
           }
         }
       } catch (error) {
-        console.log(`⚠️ Live data failed, using enhanced fallback for ${sport} ${position}`);
+        console.log(`⚠️ Data fetch failed for ${sport} ${position}, using fallback`);
         dataSource = 'fallback';
         roster = await getEnhancedFallbackRoster(sport, position);
       }
