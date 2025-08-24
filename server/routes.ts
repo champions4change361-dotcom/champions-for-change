@@ -1086,14 +1086,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let dataSource = 'live';
 
       try {
-        // Try to get live data first (Ourlads for NFL, etc.)
-        roster = await LiveDataService.fetchRosterData(sport, position);
-        console.log(`✅ Live data: Found ${roster.length} players for ${sport} ${position}`);
-        
-        if (roster.length === 0) {
-          console.log(`⚠️ No live data available, using enhanced fallback for ${sport} ${position}`);
-          dataSource = 'fallback';
-          roster = await getEnhancedFallbackRoster(sport, position);
+        // Special handling for NBA - use our comprehensive parser
+        if (sport.toLowerCase() === 'nba') {
+          console.log(`🏀 Using comprehensive NBA parser for ${position}`);
+          roster = NBADepthChartParser.getRosterByPosition(position);
+          dataSource = 'comprehensive';
+          console.log(`✅ NBA parser: Found ${roster.length} players for ${sport} ${position}`);
+        } else {
+          // Try to get live data first (Ourlads for NFL, etc.)
+          roster = await LiveDataService.fetchRosterData(sport, position);
+          console.log(`✅ Live data: Found ${roster.length} players for ${sport} ${position}`);
+          
+          if (roster.length === 0) {
+            console.log(`⚠️ No live data available, using enhanced fallback for ${sport} ${position}`);
+            dataSource = 'fallback';
+            roster = await getEnhancedFallbackRoster(sport, position);
+          }
         }
       } catch (error) {
         console.log(`⚠️ Live data failed, using enhanced fallback for ${sport} ${position}`);
