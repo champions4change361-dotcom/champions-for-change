@@ -362,9 +362,14 @@ export function SearchableRosterTable({ sport, onPlayerSelect, selectedPlayer }:
                     #
                   </th>
                   {sport.toLowerCase() === 'mlb' ? (
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Hits
-                    </th>
+                    <>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Throws
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Hits
+                      </th>
+                    </>
                   ) : (
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Depth
@@ -397,19 +402,41 @@ export function SearchableRosterTable({ sport, onPlayerSelect, selectedPlayer }:
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
                       #{player.number}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      {sport.toLowerCase() === 'mlb' ? (
-                        <Badge className="text-white bg-blue-500 hover:bg-blue-600">
-                          {player.hits || 'R'}
-                        </Badge>
-                      ) : (
+                    {sport.toLowerCase() === 'mlb' ? (
+                      <>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <Badge className={`text-white ${
+                            player.position?.includes('-R') ? 'bg-red-500 hover:bg-red-600' :
+                            player.position?.includes('-L') ? 'bg-blue-500 hover:bg-blue-600' :
+                            player.position?.includes('P') ? 'bg-gray-500 hover:bg-gray-600' :
+                            'bg-green-500 hover:bg-green-600'
+                          }`}>
+                            {player.position?.includes('-R') ? 'R' :
+                             player.position?.includes('-L') ? 'L' :
+                             player.position?.includes('P') ? 'R' : // Default for pitchers
+                             'N/A' // Non-pitchers
+                            }
+                          </Badge>
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <Badge className={`text-white ${
+                            player.hits === 'L' ? 'bg-blue-500 hover:bg-blue-600' :
+                            player.hits === 'S' ? 'bg-purple-500 hover:bg-purple-600' :
+                            'bg-green-500 hover:bg-green-600'
+                          }`}>
+                            {player.hits || 'R'}
+                          </Badge>
+                        </td>
+                      </>
+                    ) : (
+                      <td className="px-4 py-3 whitespace-nowrap">
                         <Badge 
                           className={`text-white ${getDepthBadgeColor(player.depth || 1, player.status)}`}
                         >
                           {player.status === 'starter' ? 'Starter' : `${player.depth || 1}${(player.depth || 1) === 2 ? 'nd' : (player.depth || 1) === 3 ? 'rd' : 'th'} String`}
                         </Badge>
-                      )}
-                    </td>
+                      </td>
+                    )}
                     <td className="px-4 py-3 whitespace-nowrap">
                       <Button
                         size="sm"
