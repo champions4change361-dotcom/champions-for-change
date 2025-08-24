@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Brain, Trophy, TrendingUp, Users, Zap, Target, BarChart3, MessageSquare, Activity, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Brain, Trophy, TrendingUp, Users, Zap, Target, BarChart3, MessageSquare, Activity, AlertTriangle, CheckCircle, User } from 'lucide-react';
 import { KeystoneAvatar } from '@/components/KeystoneAvatar';
 import { FantasyLineupCoach } from '@/components/FantasyLineupCoach';
 // DFS component removed - using pure Yahoo Sports API only
@@ -603,6 +603,64 @@ export default function FantasyCoaching() {
                           </div>
                         </div>
                       )}
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Individual Player Analysis Results */}
+                {playerAnalysis && (
+                  <Card className="bg-gradient-to-r from-green-50 to-blue-50 border-green-200" data-testid="player-analysis">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-green-800">
+                        <User className="h-4 w-4" />
+                        Player Analysis: {playerAnalysis.player}
+                        <Badge className="ml-auto bg-green-600">
+                          Pure Yahoo Sports Data
+                        </Badge>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <h4 className="font-semibold text-green-900 mb-2">Analysis:</h4>
+                        <p className="text-green-800">
+                          {playerAnalysis.analysis || 'Player analysis completed using real Yahoo Sports data.'}
+                        </p>
+                      </div>
+                      
+                      {playerAnalysis.insights && (
+                        <div>
+                          <h4 className="font-semibold text-green-900 mb-2">Key Insights:</h4>
+                          <p className="text-green-700">
+                            {playerAnalysis.insights}
+                          </p>
+                        </div>
+                      )}
+
+                      {playerAnalysis.stats && (
+                        <div>
+                          <h4 className="font-semibold text-green-900 mb-2">Player Stats:</h4>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            {Object.entries(playerAnalysis.stats).map(([key, value]: [string, any], index: number) => (
+                              <div key={index} className="bg-white/60 p-3 rounded-lg text-center">
+                                <div className="text-sm text-green-600 font-medium capitalize">
+                                  {key.replace(/([A-Z])/g, ' $1').trim()}
+                                </div>
+                                <div className="text-lg font-bold text-green-900">
+                                  {value}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="bg-white/60 p-3 rounded-lg">
+                        <p className="text-sm text-green-700">
+                          <strong>Team:</strong> {playerAnalysis.team} • 
+                          <strong> Position:</strong> {playerAnalysis.position} • 
+                          <strong> Data Source:</strong> Yahoo Sports API
+                        </p>
+                      </div>
                     </CardContent>
                   </Card>
                 )}
