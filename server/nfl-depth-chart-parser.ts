@@ -906,8 +906,435 @@ export class NFLDepthChartParser {
         { name: 'Andrei Iosivas', number: '80', depth: 2 }
       ]},
       
-      // Add more teams as needed...
+      
+      // Cleveland Browns
+      { team: 'CLE', position: 'QB', players: [
+        { name: 'Joe Flacco', number: '15', depth: 1 },
+        { name: 'Kenny Pickett', number: '8', depth: 2 },
+        { name: 'Dillon Gabriel', number: '5', depth: 3 }
+      ]},
+      { team: 'CLE', position: 'RB', players: [
+        { name: 'Jerome Ford', number: '34', depth: 1 },
+        { name: 'Quinshon Judkins', number: '10', depth: 2 },
+        { name: 'Dylan Sampson', number: '22', depth: 3 }
+      ]},
+      { team: 'CLE', position: 'WR', players: [
+        { name: 'Cedric Tillman', number: '19', depth: 1 },
+        { name: 'Diontae Johnson', number: '16', depth: 1 },
+        { name: 'David Bell', number: '18', depth: 1 },
+        { name: 'Jerry Jeudy', number: '3', depth: 1 }
+      ]},
+      
+      // Miami Dolphins
+      { team: 'MIA', position: 'QB', players: [
+        { name: 'Tua Tagovailoa', number: '1', depth: 1 },
+        { name: 'Zach Wilson', number: '0', depth: 2 },
+        { name: 'Quinn Ewers', number: '14', depth: 3 }
+      ]},
+      { team: 'MIA', position: 'RB', players: [
+        { name: 'De\'Von Achane', number: '28', depth: 1 },
+        { name: 'Jaylen Wright', number: '5', depth: 2 },
+        { name: 'Ollie Gordon II', number: '31', depth: 3 }
+      ]},
+      { team: 'MIA', position: 'WR', players: [
+        { name: 'Jaylen Waddle', number: '17', depth: 1 },
+        { name: 'Tyreek Hill', number: '10', depth: 1 },
+        { name: 'Malik Washington', number: '6', depth: 2 }
+      ]},
+      
+      // Denver Broncos  
+      { team: 'DEN', position: 'QB', players: [
+        { name: 'Bo Nix', number: '10', depth: 1 },
+        { name: 'Jarrett Stidham', number: '8', depth: 2 },
+        { name: 'Sam Ehlinger', number: '4', depth: 3 }
+      ]},
+      { team: 'DEN', position: 'RB', players: [
+        { name: 'RJ Harvey', number: '37', depth: 1 },
+        { name: 'J.K. Dobbins', number: '27', depth: 2 },
+        { name: 'Jaleel McLaughlin', number: '38', depth: 3 }
+      ]},
+      { team: 'DEN', position: 'WR', players: [
+        { name: 'Courtland Sutton', number: '14', depth: 1 },
+        { name: 'Marvin Mims Jr.', number: '19', depth: 1 },
+        { name: 'Troy Franklin', number: '11', depth: 2 }
+      ]},
+      
+      // Pittsburgh Steelers
+      { team: 'PIT', position: 'QB', players: [
+        { name: 'Aaron Rodgers', number: '8', depth: 1 },
+        { name: 'Mason Rudolph', number: '2', depth: 2 },
+        { name: 'Will Howard', number: '18', depth: 3 }
+      ]},
+      { team: 'PIT', position: 'RB', players: [
+        { name: 'Jaylen Warren', number: '30', depth: 1 },
+        { name: 'Kaleb Johnson', number: '20', depth: 2 },
+        { name: 'Kenneth Gainwell', number: '14', depth: 3 }
+      ]},
+      { team: 'PIT', position: 'WR', players: [
+        { name: 'DK Metcalf', number: '4', depth: 1 },
+        { name: 'Roman Wilson', number: '10', depth: 1 },
+        { name: 'Calvin Austin III', number: '19', depth: 2 }
+      ]},
+      
+      // Los Angeles Chargers
+      { team: 'LAC', position: 'QB', players: [
+        { name: 'Justin Herbert', number: '10', depth: 1 },
+        { name: 'Taylor Heinicke', number: '4', depth: 2 },
+        { name: 'Trey Lance', number: '5', depth: 3 }
+      ]},
+      { team: 'LAC', position: 'RB', players: [
+        { name: 'Omarion Hampton', number: '8', depth: 1 },
+        { name: 'Najee Harris', number: '22', depth: 2 },
+        { name: 'Kimani Vidal', number: '30', depth: 3 }
+      ]},
+      { team: 'LAC', position: 'WR', players: [
+        { name: 'Keenan Allen', number: '13', depth: 1 },
+        { name: 'Quentin Johnston', number: '1', depth: 1 },
+        { name: 'Ladd McConkey', number: '15', depth: 2 }
+      ]},
+      
+      // New York Jets
+      { team: 'NYJ', position: 'QB', players: [
+        { name: 'Justin Fields', number: '7', depth: 1 },
+        { name: 'Tyrod Taylor', number: '2', depth: 2 },
+        { name: 'Adrian Martinez', number: '15', depth: 3 }
+      ]},
+      { team: 'NYJ', position: 'RB', players: [
+        { name: 'Breece Hall', number: '20', depth: 1 },
+        { name: 'Braelon Allen', number: '0', depth: 2 },
+        { name: 'Isaiah Davis', number: '32', depth: 3 }
+      ]},
+      { team: 'NYJ', position: 'WR', players: [
+        { name: 'Garrett Wilson', number: '5', depth: 1 },
+        { name: 'Josh Reynolds', number: '83', depth: 1 },
+        { name: 'Tyler Johnson', number: '16', depth: 2 }
+      ]},
+      
+      // Philadelphia Eagles
+      { team: 'PHI', position: 'QB', players: [
+        { name: 'Jalen Hurts', number: '1', depth: 1 },
+        { name: 'Tanner McKee', number: '16', depth: 2 },
+        { name: 'Kyle McCord', number: '19', depth: 3 }
+      ]},
+      { team: 'PHI', position: 'RB', players: [
+        { name: 'Saquon Barkley', number: '26', depth: 1 },
+        { name: 'Will Shipley', number: '28', depth: 2 },
+        { name: 'A.J. Dillon', number: '29', depth: 3 }
+      ]},
+      { team: 'PHI', position: 'WR', players: [
+        { name: 'A.J. Brown', number: '11', depth: 1 },
+        { name: 'DeVonta Smith', number: '6', depth: 1 },
+        { name: 'Jahan Dotson', number: '2', depth: 2 }
+      ]},
+      
+      // Houston Texans
+      { team: 'HOU', position: 'QB', players: [
+        { name: 'C.J. Stroud', number: '7', depth: 1 },
+        { name: 'Davis Mills', number: '10', depth: 2 },
+        { name: 'Graham Mertz', number: '18', depth: 3 }
+      ]},
+      { team: 'HOU', position: 'RB', players: [
+        { name: 'Joe Mixon', number: '28', depth: 1 },
+        { name: 'Nick Chubb', number: '21', depth: 2 },
+        { name: 'Dameon Pierce', number: '31', depth: 3 }
+      ]},
+      { team: 'HOU', position: 'WR', players: [
+        { name: 'Nico Collins', number: '12', depth: 1 },
+        { name: 'Jayden Higgins', number: '81', depth: 1 },
+        { name: 'Tank Dell', number: '3', depth: 1 }
+      ]},
+      
+      // Green Bay Packers
+      { team: 'GB', position: 'QB', players: [
+        { name: 'Jordan Love', number: '10', depth: 1 },
+        { name: 'Malik Willis', number: '2', depth: 2 },
+        { name: 'Sean Clifford', number: '16', depth: 3 }
+      ]},
+      { team: 'GB', position: 'RB', players: [
+        { name: 'Josh Jacobs', number: '8', depth: 1 },
+        { name: 'Emanuel Wilson', number: '31', depth: 2 },
+        { name: 'MarShawn Lloyd', number: '32', depth: 3 }
+      ]},
+      { team: 'GB', position: 'WR', players: [
+        { name: 'Romeo Doubs', number: '87', depth: 1 },
+        { name: 'Christian Watson', number: '9', depth: 1 },
+        { name: 'Jayden Reed', number: '11', depth: 1 }
+      ]},
+      
+      // Minnesota Vikings
+      { team: 'MIN', position: 'QB', players: [
+        { name: 'J.J. McCarthy', number: '9', depth: 1 },
+        { name: 'Sam Howell', number: '8', depth: 2 },
+        { name: 'Max Brosmer', number: '12', depth: 3 }
+      ]},
+      { team: 'MIN', position: 'RB', players: [
+        { name: 'Aaron Jones Sr.', number: '33', depth: 1 },
+        { name: 'Jordan Mason', number: '27', depth: 2 },
+        { name: 'Ty Chandler', number: '32', depth: 3 }
+      ]},
+      { team: 'MIN', position: 'WR', players: [
+        { name: 'Justin Jefferson', number: '18', depth: 1 },
+        { name: 'Tai Felton', number: '13', depth: 2 },
+        { name: 'Jalen Nailor', number: '1', depth: 3 }
+      ]},
+      
+      // Detroit Lions
+      { team: 'DET', position: 'QB', players: [
+        { name: 'Jared Goff', number: '16', depth: 1 },
+        { name: 'Kyle Allen', number: '8', depth: 2 },
+        { name: 'Hendon Hooker', number: '2', depth: 3 }
+      ]},
+      { team: 'DET', position: 'RB', players: [
+        { name: 'Jahmyr Gibbs', number: '0', depth: 1 },
+        { name: 'David Montgomery', number: '5', depth: 2 },
+        { name: 'Craig Reynolds', number: '13', depth: 3 }
+      ]},
+      { team: 'DET', position: 'WR', players: [
+        { name: 'Jameson Williams', number: '1', depth: 1 },
+        { name: 'Amon-Ra St. Brown', number: '14', depth: 1 },
+        { name: 'Tim Patrick', number: '12', depth: 2 }
+      ]},
+      
+      // Chicago Bears
+      { team: 'CHI', position: 'QB', players: [
+        { name: 'Caleb Williams', number: '18', depth: 1 },
+        { name: 'Tyson Bagent', number: '17', depth: 2 },
+        { name: 'Case Keenum', number: '11', depth: 3 }
+      ]},
+      { team: 'CHI', position: 'RB', players: [
+        { name: 'D\'Andre Swift', number: '4', depth: 1 },
+        { name: 'Roschon Johnson', number: '23', depth: 2 },
+        { name: 'Kyle Monangai', number: '25', depth: 3 }
+      ]},
+      { team: 'CHI', position: 'WR', players: [
+        { name: 'Rome Odunze', number: '15', depth: 1 },
+        { name: 'DJ Moore', number: '2', depth: 1 },
+        { name: 'Olamide Zaccheaus', number: '14', depth: 2 }
+      ]},
+      
+      
+      // Carolina Panthers
+      { team: 'CAR', position: 'QB', players: [
+        { name: 'Bryce Young', number: '9', depth: 1 },
+        { name: 'Andy Dalton', number: '14', depth: 2 },
+        { name: 'Jack Plummer', number: '16', depth: 3 }
+      ]},
+      { team: 'CAR', position: 'RB', players: [
+        { name: 'Chuba Hubbard', number: '30', depth: 1 },
+        { name: 'Rico Dowdle', number: '5', depth: 2 },
+        { name: 'Trevor Etienne', number: '23', depth: 3 }
+      ]},
+      { team: 'CAR', position: 'WR', players: [
+        { name: 'Tetairoa McMillan', number: '4', depth: 1 },
+        { name: 'Xavier Legette', number: '17', depth: 1 },
+        { name: 'Adam Thielen', number: '19', depth: 1 }
+      ]},
+      
+      // Indianapolis Colts
+      { team: 'IND', position: 'QB', players: [
+        { name: 'Anthony Richardson Sr.', number: '5', depth: 1 },
+        { name: 'Daniel Jones', number: '17', depth: 2 },
+        { name: 'Riley Leonard', number: '15', depth: 3 }
+      ]},
+      { team: 'IND', position: 'RB', players: [
+        { name: 'Jonathan Taylor', number: '28', depth: 1 },
+        { name: 'Tyler Goodson', number: '31', depth: 2 },
+        { name: 'DJ Giddens', number: '21', depth: 3 }
+      ]},
+      { team: 'IND', position: 'WR', players: [
+        { name: 'Michael Pittman Jr.', number: '11', depth: 1 },
+        { name: 'Alec Pierce', number: '14', depth: 1 },
+        { name: 'Josh Downs', number: '1', depth: 1 }
+      ]},
+      
+      // Jacksonville Jaguars
+      { team: 'JAX', position: 'QB', players: [
+        { name: 'Trevor Lawrence', number: '16', depth: 1 },
+        { name: 'Nick Mullens', number: '14', depth: 2 },
+        { name: 'John Wolford', number: '18', depth: 3 }
+      ]},
+      { team: 'JAX', position: 'RB', players: [
+        { name: 'Travis Etienne Jr.', number: '1', depth: 1 },
+        { name: 'Tank Bigsby', number: '4', depth: 2 },
+        { name: 'Bhayshul Tuten', number: '33', depth: 3 }
+      ]},
+      { team: 'JAX', position: 'WR', players: [
+        { name: 'Brian Thomas Jr.', number: '7', depth: 1 },
+        { name: 'Dyami Brown', number: '5', depth: 1 },
+        { name: 'Travis Hunter', number: '12', depth: 1 }
+      ]},
+      
+      // Los Angeles Rams
+      { team: 'LAR', position: 'QB', players: [
+        { name: 'Matthew Stafford', number: '9', depth: 1 },
+        { name: 'Jimmy Garoppolo', number: '11', depth: 2 },
+        { name: 'Stetson Bennett IV', number: '13', depth: 3 }
+      ]},
+      { team: 'LAR', position: 'RB', players: [
+        { name: 'Kyren Williams', number: '23', depth: 1 },
+        { name: 'Blake Corum', number: '22', depth: 2 },
+        { name: 'Jarquez Hunter', number: '35', depth: 3 }
+      ]},
+      { team: 'LAR', position: 'WR', players: [
+        { name: 'Davante Adams', number: '17', depth: 1 },
+        { name: 'Puka Nacua', number: '12', depth: 1 },
+        { name: 'Tutu Atwell', number: '5', depth: 2 }
+      ]},
+      
+      // Las Vegas Raiders
+      { team: 'LV', position: 'QB', players: [
+        { name: 'Geno Smith', number: '7', depth: 1 },
+        { name: 'Aidan O\'Connell', number: '12', depth: 2 },
+        { name: 'Cam Miller', number: '5', depth: 3 }
+      ]},
+      { team: 'LV', position: 'RB', players: [
+        { name: 'Ashton Jeanty', number: '2', depth: 1 },
+        { name: 'Raheem Mostert', number: '31', depth: 2 },
+        { name: 'Zamir White', number: '3', depth: 3 }
+      ]},
+      { team: 'LV', position: 'WR', players: [
+        { name: 'Dont\'e Thornton Jr.', number: '10', depth: 1 },
+        { name: 'Tre Tucker', number: '1', depth: 1 },
+        { name: 'Jakobi Meyers', number: '16', depth: 2 }
+      ]},
+      
+      // New England Patriots
+      { team: 'NE', position: 'QB', players: [
+        { name: 'Drake Maye', number: '10', depth: 1 },
+        { name: 'Joshua Dobbs', number: '11', depth: 2 }
+      ]},
+      { team: 'NE', position: 'RB', players: [
+        { name: 'Rhamondre Stevenson', number: '38', depth: 1 },
+        { name: 'TreVeyon Henderson', number: '32', depth: 2 },
+        { name: 'Antonio Gibson', number: '4', depth: 3 }
+      ]},
+      { team: 'NE', position: 'WR', players: [
+        { name: 'Stefon Diggs', number: '8', depth: 1 },
+        { name: 'Kayshon Boutte', number: '9', depth: 1 },
+        { name: 'Javon Baker', number: '6', depth: 2 }
+      ]},
+      
+      // New Orleans Saints
+      { team: 'NO', position: 'QB', players: [
+        { name: 'Spencer Rattler', number: '2', depth: 1 },
+        { name: 'Tyler Shough', number: '6', depth: 2 },
+        { name: 'Jake Haener', number: '3', depth: 3 }
+      ]},
+      { team: 'NO', position: 'RB', players: [
+        { name: 'Alvin Kamara', number: '41', depth: 1 },
+        { name: 'Kendre Miller', number: '5', depth: 2 },
+        { name: 'Velus Jones Jr.', number: '13', depth: 3 }
+      ]},
+      { team: 'NO', position: 'WR', players: [
+        { name: 'Chris Olave', number: '12', depth: 1 },
+        { name: 'Rashid Shaheed', number: '22', depth: 1 },
+        { name: 'Brandin Cooks', number: '10', depth: 2 }
+      ]},
+      
+      // New York Giants
+      { team: 'NYG', position: 'QB', players: [
+        { name: 'Russell Wilson', number: '3', depth: 1 },
+        { name: 'Jameis Winston', number: '19', depth: 2 },
+        { name: 'Jaxson Dart', number: '6', depth: 3 }
+      ]},
+      { team: 'NYG', position: 'RB', players: [
+        { name: 'Tyrone Tracy Jr.', number: '29', depth: 1 },
+        { name: 'Devin Singletary', number: '26', depth: 2 },
+        { name: 'Cam Skattebo', number: '44', depth: 3 }
+      ]},
+      { team: 'NYG', position: 'WR', players: [
+        { name: 'Malik Nabers', number: '1', depth: 1 },
+        { name: 'Darius Slayton', number: '18', depth: 1 },
+        { name: 'Wan\'Dale Robinson', number: '17', depth: 2 }
+      ]},
+      
+      // San Francisco 49ers
+      { team: 'SF', position: 'QB', players: [
+        { name: 'Brock Purdy', number: '13', depth: 1 },
+        { name: 'Mac Jones', number: '10', depth: 2 },
+        { name: 'Kurtis Rourke', number: '4', depth: 3 }
+      ]},
+      { team: 'SF', position: 'RB', players: [
+        { name: 'Christian McCaffrey', number: '23', depth: 1 },
+        { name: 'Brian Robinson Jr.', number: '8', depth: 2 },
+        { name: 'Isaac Guerendo', number: '31', depth: 3 }
+      ]},
+      { team: 'SF', position: 'WR', players: [
+        { name: 'Brandon Aiyuk', number: '11', depth: 1 },
+        { name: 'Ricky Pearsall', number: '1', depth: 1 },
+        { name: 'Jauan Jennings', number: '15', depth: 2 }
+      ]},
+      
+      // Seattle Seahawks
+      { team: 'SEA', position: 'QB', players: [
+        { name: 'Sam Darnold', number: '14', depth: 1 },
+        { name: 'Drew Lock', number: '2', depth: 2 },
+        { name: 'Jalen Milroe', number: '6', depth: 3 }
+      ]},
+      { team: 'SEA', position: 'RB', players: [
+        { name: 'Kenneth Walker III', number: '9', depth: 1 },
+        { name: 'Zach Charbonnet', number: '26', depth: 2 },
+        { name: 'George Holani', number: '36', depth: 3 }
+      ]},
+      { team: 'SEA', position: 'WR', players: [
+        { name: 'Jaxon Smith-Njigba', number: '11', depth: 1 },
+        { name: 'Cooper Kupp', number: '10', depth: 1 },
+        { name: 'Tory Horton', number: '15', depth: 2 }
+      ]},
+      
+      // Tampa Bay Buccaneers
+      { team: 'TB', position: 'QB', players: [
+        { name: 'Baker Mayfield', number: '6', depth: 1 },
+        { name: 'Kyle Trask', number: '2', depth: 2 },
+        { name: 'Teddy Bridgewater', number: '16', depth: 3 }
+      ]},
+      { team: 'TB', position: 'RB', players: [
+        { name: 'Bucky Irving', number: '7', depth: 1 },
+        { name: 'Rachaad White', number: '1', depth: 2 },
+        { name: 'Sean Tucker', number: '44', depth: 3 }
+      ]},
+      { team: 'TB', position: 'WR', players: [
+        { name: 'Mike Evans', number: '13', depth: 1 },
+        { name: 'Chris Godwin Jr.', number: '14', depth: 1 },
+        { name: 'Jalen McMillan', number: '15', depth: 2 }
+      ]},
+      
+      // Tennessee Titans
+      { team: 'TEN', position: 'QB', players: [
+        { name: 'Cam Ward', number: '1', depth: 1 },
+        { name: 'Brandon Allen', number: '10', depth: 2 },
+        { name: 'Trevor Siemian', number: '15', depth: 3 }
+      ]},
+      { team: 'TEN', position: 'RB', players: [
+        { name: 'Tony Pollard', number: '20', depth: 1 },
+        { name: 'Tyjae Spears', number: '2', depth: 2 },
+        { name: 'Kalel Mullings', number: '28', depth: 3 }
+      ]},
+      { team: 'TEN', position: 'WR', players: [
+        { name: 'Van Jefferson', number: '11', depth: 1 },
+        { name: 'Calvin Ridley', number: '0', depth: 1 },
+        { name: 'Tyler Lockett', number: '4', depth: 1 }
+      ]},
+      
+      // Washington Commanders
+      { team: 'WAS', position: 'QB', players: [
+        { name: 'Jayden Daniels', number: '5', depth: 1 },
+        { name: 'Marcus Mariota', number: '18', depth: 2 },
+        { name: 'Josh Johnson', number: '14', depth: 3 }
+      ]},
+      { team: 'WAS', position: 'RB', players: [
+        { name: 'Austin Ekeler', number: '30', depth: 1 },
+        { name: 'Jacory Croskey-Merritt', number: '32', depth: 2 },
+        { name: 'Chris Rodriguez Jr.', number: '36', depth: 3 }
+      ]},
+      { team: 'WAS', position: 'WR', players: [
+        { name: 'Terry McLaurin', number: '17', depth: 1 },
+        { name: 'Deebo Samuel', number: '1', depth: 1 },
+        { name: 'Noah Brown', number: '85', depth: 2 }
+      ]}
     ];
+
+    // ALL 32 NFL TEAMS NOW COMPLETE!
 
     // Convert comprehensive data to flat player array
     comprehensiveData.forEach(teamPositionGroup => {
