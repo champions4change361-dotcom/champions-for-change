@@ -314,10 +314,10 @@ export default function FantasyCoaching() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Week Selection */}
-        <Card className="mb-6" data-testid="week-selection">
+        {/* Sport Selection - Mobile Optimized */}
+        <Card className="mb-6" data-testid="sport-selection">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
               <BarChart3 className="h-5 w-5" />
               Multi-Sport Fantasy Analysis
             </CardTitle>
@@ -326,29 +326,89 @@ export default function FantasyCoaching() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 space-y-2 sm:space-y-0">
-              <div>
-                <Label htmlFor="sport-select">Choose Sport</Label>
-                <select 
-                  id="sport-select"
-                  value={selectedSport} 
-                  onChange={(e) => {
-                    setSelectedSport(e.target.value);
+            {/* Mobile-First Sport Selection */}
+            <div className="mb-6">
+              <Label className="text-base font-semibold mb-3 block">Choose Sport:</Label>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                <Button
+                  variant={selectedSport === 'nfl' ? 'default' : 'outline'}
+                  onClick={() => {
+                    setSelectedSport('nfl');
                     setSelectedPosition('');
                     setSelectedPlayer('');
                   }}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                  data-testid="sport-selector"
+                  className="h-14 flex flex-col items-center gap-1 text-xs font-medium"
+                  data-testid="sport-nfl"
                 >
-                  <option value="">Select Sport</option>
-                  <option value="nfl">🏈 NFL Football</option>
-                  <option value="nba">🏀 NBA Basketball</option>
-                  <option value="mlb">⚾ MLB Baseball</option>
-                  <option value="nhl">🏒 NHL Hockey</option>
-                </select>
+                  <span className="text-lg">🏈</span>
+                  NFL
+                </Button>
+                <Button
+                  variant={selectedSport === 'nba' ? 'default' : 'outline'}
+                  onClick={() => {
+                    setSelectedSport('nba');
+                    setSelectedPosition('');
+                    setSelectedPlayer('');
+                  }}
+                  className="h-14 flex flex-col items-center gap-1 text-xs font-medium"
+                  data-testid="sport-nba"
+                >
+                  <span className="text-lg">🏀</span>
+                  NBA
+                </Button>
+                <Button
+                  variant={selectedSport === 'mlb' ? 'default' : 'outline'}
+                  onClick={() => {
+                    setSelectedSport('mlb');
+                    setSelectedPosition('');
+                    setSelectedPlayer('');
+                  }}
+                  className="h-14 flex flex-col items-center gap-1 text-xs font-medium"
+                  data-testid="sport-mlb"
+                >
+                  <span className="text-lg">⚾</span>
+                  MLB
+                </Button>
+                <Button
+                  variant={selectedSport === 'nhl' ? 'default' : 'outline'}
+                  onClick={() => {
+                    setSelectedSport('nhl');
+                    setSelectedPosition('');
+                    setSelectedPlayer('');
+                  }}
+                  className="h-14 flex flex-col items-center gap-1 text-xs font-medium"
+                  data-testid="sport-nhl"
+                >
+                  <span className="text-lg">🏒</span>
+                  NHL
+                </Button>
               </div>
+              
+              {/* Current Sport Display */}
+              {selectedSport && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">
+                      {selectedSport === 'nfl' && '🏈'}
+                      {selectedSport === 'nba' && '🏀'}
+                      {selectedSport === 'mlb' && '⚾'}
+                      {selectedSport === 'nhl' && '🏒'}
+                    </span>
+                    <span className="font-semibold text-blue-900">
+                      {selectedSport === 'nfl' && 'NFL Football Selected'}
+                      {selectedSport === 'nba' && 'NBA Basketball Selected'}
+                      {selectedSport === 'mlb' && 'MLB Baseball Selected'}
+                      {selectedSport === 'nhl' && 'NHL Hockey Selected'}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {/* Position and Player Selection */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 space-y-2 sm:space-y-0">
               <div>
-                <Label htmlFor="position-select">Choose Position</Label>
+                <Label htmlFor="position-select" className="text-sm font-semibold">Choose Position</Label>
                 <select 
                   id="position-select"
                   value={selectedPosition} 
@@ -369,7 +429,7 @@ export default function FantasyCoaching() {
                 </select>
               </div>
               <div>
-                <Label htmlFor="player-select">
+                <Label htmlFor="player-select" className="text-sm font-semibold">
                   Choose {selectedPosition === 'DEF' ? 'Team' : 'Player'}
                 </Label>
                 <select 
@@ -398,9 +458,9 @@ export default function FantasyCoaching() {
                   }
                 </select>
               </div>
-              <div className="flex items-end">
+              <div className="flex items-end sm:col-span-2 lg:col-span-1">
                 <Button 
-                  className="w-full h-12 text-base font-semibold" 
+                  className="w-full h-12 text-base font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700" 
                   disabled={!selectedSport || !selectedPosition || !selectedPlayer || analyzePlayerMutation.isPending}
                   onClick={handleAnalyzePlayer}
                   data-testid="analyze-button"
