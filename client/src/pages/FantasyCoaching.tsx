@@ -550,8 +550,8 @@ export default function FantasyCoaching() {
               <span className="font-bold text-purple-800">🧠 Training</span>
             </TabsTrigger>
             <TabsTrigger value="r-analytics" data-testid="tab-r-analytics" className="flex flex-col items-center justify-center text-xs px-1 py-2 min-h-[3rem]">
-              <BarChart3 className="w-4 h-4 mb-1" />
-              <span>R Pro</span>
+              <Target className="w-4 h-4 mb-1" />
+              <span>Pure</span>
             </TabsTrigger>
             <TabsTrigger value="slate-analysis" data-testid="tab-slate-analysis" className="flex flex-col items-center justify-center text-xs px-1 py-2 min-h-[3rem]">
               <TrendingUp className="w-4 h-4 mb-1" />

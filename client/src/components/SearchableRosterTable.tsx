@@ -370,7 +370,7 @@ export function SearchableRosterTable({ sport, onPlayerSelect, selectedPlayer }:
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredPlayers.map((player, index) => (
                   <tr 
-                    key={player.id}
+                    key={`${sport}_${player.id}_${index}`}
                     className={`hover:bg-gray-50 transition-colors ${
                       selectedPlayer === player.name ? 'bg-blue-50 border-l-4 border-blue-500' : ''
                     }`}

@@ -1073,30 +1073,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let dataSource = 'live';
 
       try {
-        // Special handling for NBA - use our comprehensive parser
+        // NBA only - prevent contamination
         if (sport.toLowerCase() === 'nba') {
-          console.log(`🏀 Using comprehensive NBA parser for ${position}`);
+          console.log(`🏀 Using NBA parser for ${position}`);
           roster = NBADepthChartParser.getRosterByPosition(position);
           dataSource = 'comprehensive';
           console.log(`✅ NBA parser: Found ${roster.length} players for ${sport} ${position}`);
+        } else if (sport.toLowerCase() === 'mlb') {
+          // Pure MLB only - no NBA contamination
+          console.log(`🔍 Getting Yahoo Sports data for MLB ${position}`);
+          const { YahooSportsAPI } = await import('./yahooSportsAPI');
+          const yahooAPI = new YahooSportsAPI();
+          roster = await yahooAPI.getMLBRosterByPosition(position);
+          dataSource = 'yahoo_sports';
         } else {
-          // For MLB, use clean Yahoo Sports API
-          if (sport.toLowerCase() === 'mlb') {
-            console.log(`🔍 Getting Yahoo Sports data for MLB ${position}`);
-            const { YahooSportsAPI } = await import('./yahooSportsAPI');
-            const yahooAPI = new YahooSportsAPI();
-            roster = await yahooAPI.getMLBRosterByPosition(position);
-            dataSource = 'yahoo_sports';
-          } else {
-            // Other sports: try live data first
-            roster = await LiveDataService.fetchRosterData(sport, position);
-            console.log(`✅ Live data: Found ${roster.length} players for ${sport} ${position}`);
-            
-            if (roster.length === 0) {
-              console.log(`⚠️ No live data available, using enhanced fallback for ${sport} ${position}`);
-              dataSource = 'fallback';
-              roster = await getEnhancedFallbackRoster(sport, position);
-            }
+          // Other sports: try live data first
+          roster = await LiveDataService.fetchRosterData(sport, position);
+          console.log(`✅ Live data: Found ${roster.length} players for ${sport} ${position}`);
+          
+          if (roster.length === 0) {
+            console.log(`⚠️ No live data available, using enhanced fallback for ${sport} ${position}`);
+            dataSource = 'fallback';
+            roster = await getEnhancedFallbackRoster(sport, position);
           }
         }
       } catch (error) {
@@ -1300,9 +1298,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           break;
         
         case 'nba':
-          // Get NBA players from comprehensive 2025-2026 parser
+          // Get NBA players from comprehensive 2025-2026 parser ONLY for NBA requests
+          console.log(`🏀 NBA fallback requested for ${position}`);
           const nbaPlayers = NBADepthChartParser.getRosterByPosition(position);
           roster = nbaPlayers;
+          break;
+          
+        case 'mlb':
+          // Pure MLB data only - no NBA contamination
+          console.log(`⚾ Pure MLB fallback for ${position}`);
+          roster = await yahooAPI.getMLBRosterByPosition(position);
           break;
           
         case 'nba_fallback_old':
