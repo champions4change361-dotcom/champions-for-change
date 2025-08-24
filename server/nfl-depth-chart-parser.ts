@@ -790,6 +790,29 @@ export class NFLDepthChartParser {
       teamCount: stats.teamCoverage.size
     };
   }
+
+  // 🏈 GET ALL PLAYERS METHOD
+  static getAllPlayers() {
+    const allPlayers = [];
+    
+    // Get all team data (only teams that have depth chart methods)
+    const teams = [
+      this.getArizonaCardinals(),
+      this.getAtlantaFalcons()
+      // Add more teams as they're implemented
+    ];
+    
+    // Extract all players from all teams
+    teams.forEach(team => {
+      Object.values(team).forEach((position: any) => {
+        if (Array.isArray(position)) {
+          allPlayers.push(...position);
+        }
+      });
+    });
+    
+    return allPlayers;
+  }
 }
 
 export default NFLDepthChartParser;

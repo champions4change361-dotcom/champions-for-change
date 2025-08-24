@@ -1632,14 +1632,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  function getRealisticProjection(sport: string, position: string) {
+  function getRealisticProjection(sport: string, position: string, depthPosition: number = 1) {
     const sportProjections: any = {
       'nfl': {
-        'QB': () => Math.floor(Math.random() * 11) + 15, // 15-25 points
-        'RB': () => Math.floor(Math.random() * 15) + 8,  // 8-22 points  
-        'WR': () => Math.floor(Math.random() * 15) + 6,  // 6-20 points
-        'TE': () => Math.floor(Math.random() * 15) + 4,  // 4-18 points
-        'K': () => Math.floor(Math.random() * 10) + 6,   // 6-15 points
+        'QB': () => {
+          if (depthPosition >= 3) return Math.floor(Math.random() * 4) + 0; // 0-3 points for 3rd string
+          if (depthPosition === 2) return Math.floor(Math.random() * 8) + 2; // 2-9 points for backup
+          return Math.floor(Math.random() * 11) + 15; // 15-25 points for starter
+        },
+        'RB': () => {
+          if (depthPosition >= 3) return Math.floor(Math.random() * 6) + 0; // 0-5 points for 3rd string
+          if (depthPosition === 2) return Math.floor(Math.random() * 8) + 3; // 3-10 points for backup
+          return Math.floor(Math.random() * 15) + 8; // 8-22 points for starter
+        },
+        'WR': () => {
+          if (depthPosition >= 3) return Math.floor(Math.random() * 5) + 0; // 0-4 points for depth
+          if (depthPosition === 2) return Math.floor(Math.random() * 8) + 2; // 2-9 points for backup
+          return Math.floor(Math.random() * 15) + 6; // 6-20 points for starter
+        },
+        'TE': () => {
+          if (depthPosition >= 3) return Math.floor(Math.random() * 4) + 0; // 0-3 points for depth
+          if (depthPosition === 2) return Math.floor(Math.random() * 6) + 1; // 1-6 points for backup
+          return Math.floor(Math.random() * 15) + 4; // 4-18 points for starter
+        },
+        'K': () => Math.floor(Math.random() * 10) + 6,   // 6-15 points (kickers don't have backups)
         'DEF': () => Math.floor(Math.random() * 17) + 2, // 2-18 points (realistic!)
       },
       'nba': {
@@ -1717,6 +1733,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // 🏆 SPORT-SPECIFIC PROFESSIONAL ANALYSIS ENGINE  
   async function generateSportSpecificAnalysis(sport: string, position: string, player: string, team: string) {
+    // Get depth chart position for realistic projections
+    let depthPosition = 1;
+    let playerStatus = 'starter';
+    
+    if (sport.toLowerCase() === 'nfl') {
+      try {
+        const { NFLDepthChartParser } = await import('./nfl-depth-chart-parser');
+        const allPlayers = NFLDepthChartParser.getAllPlayers();
+        const playerData = allPlayers.find(p => 
+          p.name.toLowerCase().includes(player.toLowerCase()) || 
+          player.toLowerCase().includes(p.name.toLowerCase())
+        );
+        
+        if (playerData) {
+          depthPosition = playerData.depth || 1;
+          playerStatus = playerData.status || 'starter';
+          console.log(`📊 Depth Chart: ${player} is ${playerStatus} (depth ${depthPosition})`);
+        }
+      } catch (error) {
+        console.log('⚠️ Could not load depth chart data');
+      }
+    }
+    
     // Import the AI analysis functions
     const { KeystoneFantasyCoachingAI } = await import('./fantasy-coaching-ai.js');
     
@@ -1746,7 +1785,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
     }
 
-    const baseProjection = getRealisticProjection(sport, position);
+    const baseProjection = getRealisticProjection(sport, position, depthPosition);
     const floorProjection = Math.max(1, baseProjection - (baseProjection * 0.35));
     const ceilingProjection = baseProjection + (baseProjection * 0.45);
 
