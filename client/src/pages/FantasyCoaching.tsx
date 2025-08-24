@@ -14,6 +14,7 @@ import { LiveScoring } from '@/components/LiveScoring';
 import { useAuth } from '@/hooks/useAuth';
 import { FantasyAgeGate } from '@/components/FantasyAgeGate';
 import HistoricalAIStatus from '@/components/HistoricalAIStatus';
+import { SearchableRosterTable } from '@/components/SearchableRosterTable';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -27,6 +28,7 @@ export default function FantasyCoaching() {
   const [selectedPlayer, setSelectedPlayer] = useState<string>('');
   const [activeTab, setActiveTab] = useState('dfs-optimizer');
   const [question, setQuestion] = useState('');
+  const [playerSearchTab, setPlayerSearchTab] = useState('nfl');
   const [selectedSlate, setSelectedSlate] = useState<'morning' | 'afternoon' | 'all-day'>('all-day');
   const [playerAnalysis, setPlayerAnalysis] = useState<any>(null);
   const [selectedInjurySport, setSelectedInjurySport] = useState('NFL');
@@ -133,12 +135,16 @@ export default function FantasyCoaching() {
 
   // Player Analysis Mutation
   const analyzePlayerMutation = useMutation({
-    mutationFn: async () => {
-      const selectedPlayerName = rosterData?.players?.find((p: any) => p.id === selectedPlayer)?.name || selectedPlayer;
+    mutationFn: async (params?: { sport: string; position: string; player: string }) => {
+      // Use provided parameters or fall back to state
+      const sport = params?.sport || selectedSport;
+      const position = params?.position || selectedPosition;
+      const playerName = params?.player || (rosterData?.players?.find((p: any) => p.id === selectedPlayer)?.name || selectedPlayer);
+      
       const analysisData = {
-        sport: selectedSport,
-        position: selectedPosition,
-        player: selectedPlayerName,
+        sport,
+        position,
+        player: playerName,
         team: rosterData?.players?.find((p: any) => p.id === selectedPlayer)?.team
       };
       
@@ -150,7 +156,7 @@ export default function FantasyCoaching() {
       setPlayerAnalysis(data);
       toast({
         title: "Analysis Complete",
-        description: `Generated analysis for ${rosterData?.players?.find((p: any) => p.id === selectedPlayer)?.name}`,
+        description: `Generated analysis for player`,
       });
     },
     onError: (error) => {
@@ -488,10 +494,14 @@ export default function FantasyCoaching() {
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} data-testid="coaching-tabs">
-          <TabsList className="grid w-full grid-cols-3 sm:grid-cols-7 gap-1 h-auto p-1">
+          <TabsList className="grid w-full grid-cols-4 sm:grid-cols-8 gap-1 h-auto p-1">
             <TabsTrigger value="dfs-optimizer" data-testid="tab-dfs-optimizer" className="flex flex-col items-center justify-center text-xs px-1 py-2 min-h-[3rem] bg-gradient-to-r from-yellow-100 to-orange-100 border-2 border-yellow-300">
               <Trophy className="w-4 h-4 mb-1 text-yellow-600" />
               <span className="font-bold text-yellow-800">Optimizer</span>
+            </TabsTrigger>
+            <TabsTrigger value="player-search" data-testid="tab-player-search" className="flex flex-col items-center justify-center text-xs px-1 py-2 min-h-[3rem] bg-gradient-to-r from-green-100 to-emerald-100 border-2 border-green-300">
+              <Users className="w-4 h-4 mb-1 text-green-600" />
+              <span className="font-bold text-green-800">Search</span>
             </TabsTrigger>
             <TabsTrigger value="ai-coach" data-testid="tab-ai-coach" className="flex flex-col items-center justify-center text-xs px-1 py-2 min-h-[3rem]">
               <Brain className="w-4 h-4 mb-1" />
@@ -526,6 +536,44 @@ export default function FantasyCoaching() {
           {/* DFS Lineup Optimizer Tab - PRIMARY FEATURE */}
           <TabsContent value="dfs-optimizer" className="space-y-6" data-testid="dfs-optimizer-content">
             <DFSLineupOptimizer />
+          </TabsContent>
+
+          {/* Player Search Tab - Searchable Roster Tables */}
+          <TabsContent value="player-search" className="space-y-6" data-testid="player-search-content">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5 text-green-600" />
+                  NFL Player Search & Analysis
+                </CardTitle>
+                <CardDescription>
+                  Search and click any NFL player for instant AI + R analytics comparison. 
+                  Visual depth chart browsing with smart recommendations.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <SearchableRosterTable 
+                  sport="nfl"
+                  onPlayerSelect={(playerName, position, team) => {
+                    // Set the selections to trigger analysis
+                    setSelectedSport('nfl');
+                    setSelectedPosition(position);
+                    setSelectedPlayer(playerName);
+                    
+                    // Switch to AI coach tab to show analysis
+                    setActiveTab('ai-coach');
+                    
+                    // Trigger analysis
+                    analyzePlayerMutation.mutate({
+                      sport: 'nfl',
+                      position: position,
+                      player: playerName
+                    });
+                  }}
+                  selectedPlayer={selectedPlayer}
+                />
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* AI Coach Tab - Real Sports Intelligence */}

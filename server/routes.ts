@@ -3192,6 +3192,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // 🔍 ALL NFL PLAYERS ENDPOINT - For searchable table
+  app.get('/api/fantasy/roster/:sport/all', async (req, res) => {
+    try {
+      const { sport } = req.params;
+      console.log(`🔍 SEARCHABLE ROSTER REQUEST: ${sport} all players`);
+      
+      if (sport.toLowerCase() === 'nfl') {
+        const { NFLDepthChartParser } = await import('./nfl-depth-chart-parser');
+        const allPlayers = NFLDepthChartParser.getAllPlayers();
+        
+        console.log(`✅ Searchable data: Found ${allPlayers.length} total NFL players`);
+        
+        res.json({
+          success: true,
+          sport: sport.toUpperCase(),
+          players: allPlayers
+        });
+      } else {
+        res.status(404).json({ success: false, message: `Sport ${sport} not supported yet` });
+      }
+    } catch (error) {
+      console.error('All players fetch error:', error);
+      res.status(500).json({ success: false, message: 'Failed to fetch all players data' });
+    }
+  });
+
   // Create and return server
   const server = createServer(app);
   return server;

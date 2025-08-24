@@ -758,6 +758,69 @@ export class NFLDepthChartParser {
     return consolidatedRosters;
   }
 
+  // 🔍 Get all players in a flat array for searchable table
+  static getAllPlayers() {
+    const allPlayers = [];
+    
+    // Get all team methods
+    const teamMethods = [
+      this.getArizonaCardinals,
+      this.getAtlantaFalcons,
+      this.getBaltimoreRavens,
+      this.getBuffaloBills,
+      this.getCarolinaPanthers,
+      this.getChicagoBears,
+      this.getCincinnatiBengals,
+      this.getClevelandBrowns,
+      this.getDallasCowboys,
+      this.getDenverBroncos,
+      this.getDetroitLions,
+      this.getGreenBayPackers,
+      this.getHoustonTexans,
+      this.getIndianapolisColts,
+      this.getJacksonvilleJaguars,
+      this.getKansasCityChiefs,
+      this.getLasVegasRaiders,
+      this.getLosAngelesChargers,
+      this.getLosAngelesRams,
+      this.getMiamiDolphins,
+      this.getMinnesotaVikings,
+      this.getNewEnglandPatriots,
+      this.getNewOrleansSaints,
+      this.getNewYorkGiants,
+      this.getNewYorkJets,
+      this.getPhiladelphiaEagles,
+      this.getPittsburghSteelers,
+      this.getSanFrancisco49ers,
+      this.getSeattleSeahawks,
+      this.getTampaBayBuccaneers,
+      this.getTennesseeTitans,
+      this.getWashingtonCommanders
+    ];
+    
+    // For now, just use the two teams we have implemented
+    const implementedTeams = [
+      this.getArizonaCardinals,
+      this.getAtlantaFalcons
+    ];
+    
+    // Flatten all players from all teams and positions
+    implementedTeams.forEach(teamMethod => {
+      const teamRoster = teamMethod();
+      
+      Object.keys(teamRoster).forEach(position => {
+        teamRoster[position].forEach(player => {
+          allPlayers.push({
+            ...player,
+            position: position // Ensure position is explicitly set
+          });
+        });
+      });
+    });
+    
+    return allPlayers;
+  }
+
   // GET ROSTER BY POSITION
   static getRosterByPosition(position: string): any[] {
     const allRosters = this.getAllNFLRosters();
