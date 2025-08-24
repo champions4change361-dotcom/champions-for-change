@@ -229,7 +229,7 @@ export default function FantasyTournaments() {
             <select 
               value={selectedSport} 
               onChange={(e) => setSelectedSport(e.target.value)}
-              className="w-full p-2 border rounded-md"
+              className="w-full p-4 text-lg bg-white border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 appearance-none cursor-pointer shadow-sm hover:border-gray-300 transition-colors"
               data-testid="select-sport"
             >
               {fantasyStatus?.stats.supported_sports.map((sport) => (
@@ -249,7 +249,7 @@ export default function FantasyTournaments() {
             <select 
               value={selectedFormat} 
               onChange={(e) => setSelectedFormat(e.target.value)}
-              className="w-full p-2 border rounded-md"
+              className="w-full p-4 text-lg bg-white border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 appearance-none cursor-pointer shadow-sm hover:border-gray-300 transition-colors"
               data-testid="select-format"
             >
               {fantasyStatus?.stats.supported_formats.map((format) => (
@@ -258,7 +258,7 @@ export default function FantasyTournaments() {
                 </option>
               ))}
             </select>
-            <p className="text-sm text-muted-foreground mt-2">
+            <p className="text-sm text-muted-foreground mt-3 font-medium">
               {getFormatDescription(selectedFormat)}
             </p>
           </CardContent>
