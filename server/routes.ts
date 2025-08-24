@@ -1088,14 +1088,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { sport } = req.params;
       
-      // Sample NFL players for survivor pool
+      // Sample NFL players for survivor pool with proper interface
       const nflPlayers = [
-        { id: 1, name: "Patrick Mahomes", team: "KC", position: "QB" },
-        { id: 2, name: "Josh Allen", team: "BUF", position: "QB" },
-        { id: 3, name: "Lamar Jackson", team: "BAL", position: "QB" },
-        { id: 4, name: "Joe Burrow", team: "CIN", position: "QB" },
-        { id: 5, name: "Christian McCaffrey", team: "SF", position: "RB" },
-        { id: 6, name: "Saquon Barkley", team: "PHI", position: "RB" }
+        { 
+          id: "1", 
+          playerName: "Patrick Mahomes", 
+          teamName: "Kansas City Chiefs",
+          teamAbbreviation: "KC", 
+          position: "QB",
+          sport: "nfl",
+          jerseyNumber: 15,
+          salary: 9800,
+          injuryStatus: "healthy",
+          isActive: true
+        },
+        { 
+          id: "2", 
+          playerName: "Josh Allen", 
+          teamName: "Buffalo Bills",
+          teamAbbreviation: "BUF", 
+          position: "QB",
+          sport: "nfl",
+          jerseyNumber: 17,
+          salary: 9600,
+          injuryStatus: "healthy",
+          isActive: true
+        },
+        { 
+          id: "3", 
+          playerName: "Lamar Jackson", 
+          teamName: "Baltimore Ravens",
+          teamAbbreviation: "BAL", 
+          position: "QB",
+          sport: "nfl",
+          jerseyNumber: 8,
+          salary: 9400,
+          injuryStatus: "healthy",
+          isActive: true
+        },
+        { 
+          id: "4", 
+          playerName: "Christian McCaffrey", 
+          teamName: "San Francisco 49ers",
+          teamAbbreviation: "SF", 
+          position: "RB",
+          sport: "nfl",
+          jerseyNumber: 23,
+          salary: 9200,
+          injuryStatus: "healthy",
+          isActive: true
+        }
       ];
       
       const players = sport === "nfl" ? nflPlayers : [];
@@ -3383,14 +3425,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/fantasy/status", async (req, res) => {
     try {
       const fantasyStatus = {
-        status: "active",
+        fantasy_status: "active",
         message: "NFL Survivor Pool & DFS Platform Ready",
         deployment_time: new Date().toISOString(),
+        systems: {
+          fantasy_leagues: "ACTIVE",
+          professional_players: "ACTIVE", 
+          age_verification: "ACTIVE",
+          api_integrations: "ACTIVE",
+          safety_rules: "ACTIVE"
+        },
         stats: {
+          fantasy_leagues_count: 12,
+          professional_players_count: 1847,
+          safety_rules_count: 5,
+          api_configurations_count: 4,
           supported_sports: ["nfl", "nba", "mlb", "nhl"],
           supported_formats: ["survivor", "draft_kings", "fanduel", "head_to_head", "best_ball"],
-          active_leagues: 12,
-          professional_players_count: 1847
+          min_age_requirement: 21
         }
       };
       
@@ -3413,21 +3465,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
           leagueName: "NFL Survivor Challenge",
           sportType: "nfl",
           leagueFormat: "survivor",
+          ageRestriction: 21,
+          requiresAgeVerification: true,
+          maxParticipants: 100,
+          scoringConfig: {},
+          leagueSettings: {},
+          status: "open",
           entryFee: "$25",
           totalPrize: "$1,250",
           participantCount: 50,
-          status: "Active",
           description: "Pick one team per week. One wrong pick eliminates you!"
         },
         {
           id: "nfl-dfs-weekly",
           leagueName: "Weekly DFS Showdown",
-          sportType: "nfl",
+          sportType: "nfl", 
           leagueFormat: "draft_kings",
+          ageRestriction: 21,
+          requiresAgeVerification: true,
+          maxParticipants: 200,
+          scoringConfig: {},
+          leagueSettings: {},
+          status: "open",
           entryFee: "$10",
           totalPrize: "$500",
           participantCount: 100,
-          status: "Open",
           description: "Draft Kings style salary cap lineup"
         }
       ];
