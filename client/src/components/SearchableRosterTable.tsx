@@ -286,6 +286,40 @@ export function SearchableRosterTable({ sport, onPlayerSelect, selectedPlayer }:
             >
               All Teams
             </Button>
+            {getTeams().slice(0, showAllTeams ? undefined : 8).map(team => (
+              <Button
+                key={team}
+                variant={teamFilter === team ? 'default' : 'outline'}
+                onClick={() => setTeamFilter(team)}
+                size="sm"
+                data-testid={`button-filter-team-${team.toLowerCase()}`}
+              >
+                {team}
+              </Button>
+            ))}
+            {getTeams().length > 8 && (
+              <Button
+                variant="ghost"
+                onClick={() => setShowAllTeams(!showAllTeams)}
+                size="sm"
+                data-testid="button-toggle-all-teams"
+              >
+                {showAllTeams ? 'Show Less' : `Show All ${getTeams().length} Teams`}
+              </Button>
+            )}
+          </div>
+
+          {/* Team Filters */}
+          <div className="flex flex-wrap gap-2">
+            <span className="text-sm font-medium text-gray-600 py-2">Team:</span>
+            <Button
+              variant={teamFilter === '' ? 'default' : 'outline'}
+              onClick={() => setTeamFilter('')}
+              size="sm"
+              data-testid="button-filter-all-teams"
+            >
+              All Teams
+            </Button>
             {(showAllTeams ? getTeams() : getTeams().slice(0, 8)).map(team => (
               <Button
                 key={team}
