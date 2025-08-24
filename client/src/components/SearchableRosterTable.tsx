@@ -45,15 +45,18 @@ export function SearchableRosterTable({ sport, onPlayerSelect, selectedPlayer }:
       
       if (sport.toLowerCase() === 'nfl') {
         // Get all NFL players from our depth chart parser
-        const response = await apiRequest('/api/fantasy/roster/nfl/all', 'GET');
-        const data = response;
+        const data = await apiRequest('/api/fantasy/roster/nfl/all', 'GET');
         
-        if (data.success) {
+        console.log('Raw API response:', data);
+        
+        if (data && data.success) {
           console.log('Received player data:', data);
           console.log('Players array:', data.players);
+          console.log('Player count:', data.count);
           setPlayers(data.players || []);
         } else {
           console.error('API returned error:', data);
+          setPlayers([]); // Clear players on error
         }
       }
       // Add other sports later (NBA, MLB, NHL)
