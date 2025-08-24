@@ -161,33 +161,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Basic user authentication endpoint - modified to check session
+  // Basic user authentication endpoint - modified to check passport authentication
   app.get("/api/auth/user", async (req: any, res) => {
     try {
       console.log('Auth user check - Session ID:', req.sessionID);
       console.log('Auth user check - Session user:', req.session?.user ? 'present' : 'missing');
       console.log('Auth user check - OAuth user:', req.user ? 'present' : 'missing');
+      console.log('Auth user check - isAuthenticated():', req.isAuthenticated ? req.isAuthenticated() : 'no method');
       
-      // Check session-based auth first
-      if (req.session?.user) {
-        console.log('Returning session user:', req.session.user.email);
-        return res.json(req.session.user);
-      }
-      
-      // Then check OAuth auth
-      if (req.user && req.user.claims) {
-        console.log('Returning OAuth user:', req.user.claims.email);
-        res.json({
+      // Check passport authentication first (most common after login)
+      if (req.isAuthenticated && req.isAuthenticated() && req.user?.claims) {
+        console.log('✅ Returning authenticated passport user:', req.user.claims.email);
+        return res.json({
           id: req.user.claims.sub,
           email: req.user.claims.email,
           firstName: req.user.claims.first_name,
           lastName: req.user.claims.last_name,
           profileImageUrl: req.user.claims.profile_image_url,
         });
-      } else {
-        console.log('No valid user found, returning 401');
-        res.status(401).json({ message: "Unauthorized" });
       }
+      
+      // Fallback: Check session-based auth (form login)
+      if (req.session?.user) {
+        console.log('✅ Returning session user:', req.session.user.email);
+        return res.json(req.session.user);
+      }
+      
+      // Fallback: Check OAuth auth (legacy)
+      if (req.user && req.user.claims) {
+        console.log('✅ Returning OAuth user:', req.user.claims.email);
+        return res.json({
+          id: req.user.claims.sub,
+          email: req.user.claims.email,
+          firstName: req.user.claims.first_name,
+          lastName: req.user.claims.last_name,
+          profileImageUrl: req.user.claims.profile_image_url,
+        });
+      } 
+      
+      console.log('❌ No valid user found, returning 401');
+      res.status(401).json({ message: "Unauthorized" });
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ error: "Failed to fetch user" });
@@ -197,14 +210,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Enhanced authentication check middleware
   const checkAuth = (req: any, res: any, next: any) => {
     console.log('Auth check - Session user:', req.session?.user ? 'present' : 'missing');
-    console.log('Auth check - OAuth user:', req.user ? 'present' : 'missing');
+    console.log('Auth check - OAuth user:', req.user ? 'present' : 'missing'); 
     console.log('Auth check - Session ID:', req.sessionID);
+    console.log('Auth check - isAuthenticated():', req.isAuthenticated ? req.isAuthenticated() : 'no method');
     
-    // Check for session-based auth (form login) OR OAuth-based auth
-    if (req.session?.user || (req.user && req.user.claims)) {
+    // Check passport authentication first (most common)
+    if (req.isAuthenticated && req.isAuthenticated()) {
+      console.log('✅ Authenticated via passport');
+      next();
+    } 
+    // Fallback: Check for explicit session user (form login)
+    else if (req.session?.user) {
+      console.log('✅ Authenticated via session');
+      next();
+    } 
+    // Fallback: Check for OAuth user with claims
+    else if (req.user && req.user.claims) {
+      console.log('✅ Authenticated via OAuth claims');
       next();
     } else {
-      console.log('Authentication failed - no valid session or OAuth');
+      console.log('❌ Authentication failed - no valid session or OAuth');
       res.status(401).json({ message: "Unauthorized" });
     }
   };
