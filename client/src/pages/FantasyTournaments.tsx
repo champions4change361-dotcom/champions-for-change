@@ -130,6 +130,21 @@ export default function FantasyTournaments() {
             </Badge>
           </div>
         )}
+        
+        {/* Create Tournament Button */}
+        <div className="pt-6">
+          <Button 
+            size="lg" 
+            className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 text-lg font-semibold shadow-lg"
+            onClick={() => window.location.href = '/create-tournament?sport=football&format=knockout&participants=20&goals=competitive&budget=mid&features=["survivor_pool","weekly_picks","elimination"]&complexity=simple'}
+            data-testid="create-knockout-tournament"
+          >
+            🏈 Create Your NFL Knockout Tournament
+          </Button>
+          <p className="text-sm text-muted-foreground mt-2">
+            Start your own survivor pool competition - Perfect for your work group!
+          </p>
+        </div>
       </div>
 
       {/* Age Verification Warning */}
