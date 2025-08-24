@@ -12,8 +12,10 @@ interface Player {
   team: string;
   number: string;
   status: string;
-  depth: number;
+  depth?: number; // Optional - not used in MLB
   position?: string;
+  hits?: string; // Batting handedness for MLB (R/L/S)
+  sport?: string;
 }
 
 interface SearchableRosterTableProps {
@@ -359,9 +361,15 @@ export function SearchableRosterTable({ sport, onPlayerSelect, selectedPlayer }:
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     #
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Depth
-                  </th>
+                  {sport.toLowerCase() === 'mlb' ? (
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Hits
+                    </th>
+                  ) : (
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Depth
+                    </th>
+                  )}
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Action
                   </th>
@@ -390,11 +398,17 @@ export function SearchableRosterTable({ sport, onPlayerSelect, selectedPlayer }:
                       #{player.number}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <Badge 
-                        className={`text-white ${getDepthBadgeColor(player.depth, player.status)}`}
-                      >
-                        {player.status === 'starter' ? 'Starter' : `${player.depth}${player.depth === 2 ? 'nd' : player.depth === 3 ? 'rd' : 'th'} String`}
-                      </Badge>
+                      {sport.toLowerCase() === 'mlb' ? (
+                        <Badge className="text-white bg-blue-500 hover:bg-blue-600">
+                          {player.hits || 'R'}
+                        </Badge>
+                      ) : (
+                        <Badge 
+                          className={`text-white ${getDepthBadgeColor(player.depth || 1, player.status)}`}
+                        >
+                          {player.status === 'starter' ? 'Starter' : `${player.depth || 1}${(player.depth || 1) === 2 ? 'nd' : (player.depth || 1) === 3 ? 'rd' : 'th'} String`}
+                        </Badge>
+                      )}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <Button
