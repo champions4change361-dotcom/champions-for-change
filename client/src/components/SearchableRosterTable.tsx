@@ -42,9 +42,11 @@ export function SearchableRosterTable({ sport, onPlayerSelect, selectedPlayer }:
   const loadRosterData = async () => {
     try {
       setLoading(true);
+      const sportLower = sport.toLowerCase();
+      console.log(`Loading roster: ${sportLower}/all players`);
       
-      if (sport.toLowerCase() === 'nfl') {
-        // Get all NFL players from our depth chart parser
+      if (sportLower === 'nfl') {
+        // Get all NFL players from optimized depth chart parser
         const response = await fetch('/api/fantasy/roster/nfl/all');
         const data = await response.json();
         
@@ -57,12 +59,61 @@ export function SearchableRosterTable({ sport, onPlayerSelect, selectedPlayer }:
           setPlayers(data.players || []);
         } else {
           console.error('API returned error:', data);
-          setPlayers([]); // Clear players on error
+          setPlayers([]);
         }
+        
+      } else if (sportLower === 'nba') {
+        // Get all NBA players using Yahoo Sports API optimized system
+        const response = await fetch('/api/fantasy/roster/nba/all');
+        const data = await response.json();
+        
+        console.log(`🏀 NBA API response:`, data);
+        
+        if (data && data.success) {
+          setPlayers(data.players || []);
+          console.log(`✅ Loaded ${data.players?.length || 0} NBA players`);
+        } else {
+          console.error('NBA API returned error:', data);
+          setPlayers([]);
+        }
+        
+      } else if (sportLower === 'mlb') {
+        // Get all MLB players using Yahoo Sports API optimized system  
+        const response = await fetch('/api/fantasy/roster/mlb/all');
+        const data = await response.json();
+        
+        console.log(`⚾ MLB API response:`, data);
+        
+        if (data && data.success) {
+          setPlayers(data.players || []);
+          console.log(`✅ Loaded ${data.players?.length || 0} MLB players`);
+        } else {
+          console.error('MLB API returned error:', data);
+          setPlayers([]);
+        }
+        
+      } else if (sportLower === 'nhl') {
+        // Get all NHL players using Yahoo Sports API optimized system
+        const response = await fetch('/api/fantasy/roster/nhl/all');
+        const data = await response.json();
+        
+        console.log(`🏒 NHL API response:`, data);
+        
+        if (data && data.success) {
+          setPlayers(data.players || []);
+          console.log(`✅ Loaded ${data.players?.length || 0} NHL players`);
+        } else {
+          console.error('NHL API returned error:', data);
+          setPlayers([]);
+        }
+        
+      } else {
+        console.warn(`Unsupported sport: ${sport}`);
+        setPlayers([]);
       }
-      // Add other sports later (NBA, MLB, NHL)
     } catch (error) {
-      console.error('Error loading roster data:', error);
+      console.error(`Error loading ${sport} roster data:`, error);
+      setPlayers([]);
     } finally {
       setLoading(false);
     }
@@ -91,12 +142,45 @@ export function SearchableRosterTable({ sport, onPlayerSelect, selectedPlayer }:
   };
 
   const getPositionFromId = (playerId: string): string => {
-    // Extract position from player ID structure
+    // Extract position from player ID structure - Multi-sport support
+    
+    // NFL Positions
     if (playerId.includes('qb_') || playerId.includes('_qb')) return 'QB';
     if (playerId.includes('rb_') || playerId.includes('_rb')) return 'RB';
     if (playerId.includes('wr_') || playerId.includes('_wr')) return 'WR';
     if (playerId.includes('te_') || playerId.includes('_te')) return 'TE';
-    return 'QB'; // Default fallback
+    if (playerId.includes('k_') || playerId.includes('_k')) return 'K';
+    if (playerId.includes('def_') || playerId.includes('_def')) return 'DEF';
+    
+    // NBA Positions
+    if (playerId.includes('pg_') || playerId.includes('_pg')) return 'PG';
+    if (playerId.includes('sg_') || playerId.includes('_sg')) return 'SG';
+    if (playerId.includes('sf_') || playerId.includes('_sf')) return 'SF';
+    if (playerId.includes('pf_') || playerId.includes('_pf')) return 'PF';
+    if (playerId.includes('c_') || playerId.includes('_c')) return 'C';
+    
+    // MLB Positions
+    if (playerId.includes('p_') || playerId.includes('_p')) return 'P';
+    if (playerId.includes('1b_') || playerId.includes('_1b')) return '1B';
+    if (playerId.includes('2b_') || playerId.includes('_2b')) return '2B';
+    if (playerId.includes('3b_') || playerId.includes('_3b')) return '3B';
+    if (playerId.includes('ss_') || playerId.includes('_ss')) return 'SS';
+    if (playerId.includes('of_') || playerId.includes('_of')) return 'OF';
+    
+    // NHL Positions
+    if (playerId.includes('g_') || playerId.includes('_g')) return 'G';
+    if (playerId.includes('d_') || playerId.includes('_d')) return 'D';
+    if (playerId.includes('lw_') || playerId.includes('_lw')) return 'LW';
+    if (playerId.includes('rw_') || playerId.includes('_rw')) return 'RW';
+    
+    // Smart sport-based fallback
+    const sportLower = sport?.toLowerCase() || '';
+    if (sportLower === 'nfl') return 'QB';
+    if (sportLower === 'nba') return 'PG';
+    if (sportLower === 'mlb') return 'P';
+    if (sportLower === 'nhl') return 'C';
+    
+    return 'Unknown';
   };
 
   const getDepthBadgeColor = (depth: number, status: string) => {

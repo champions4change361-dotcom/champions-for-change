@@ -1064,6 +1064,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
           players: allPlayers,
           count: allPlayers.length
         });
+        
+      } else if (sport.toLowerCase() === 'mlb') {
+        // Get all MLB players using enhanced fallback with comprehensive 2025 roster
+        console.log('⚾ Loading comprehensive MLB roster data for search');
+        
+        // Use the enhanced fallback which has comprehensive MLB rosters
+        const positions = ['P', 'C', '1B', '2B', '3B', 'SS', 'OF'];
+        const allMLBPlayers: any[] = [];
+        
+        for (const position of positions) {
+          const positionPlayers = getEnhancedFallbackRoster('mlb', position);
+          const playersWithData = positionPlayers.map((player: any, index: number) => ({
+            id: player.id || `${player.name?.toLowerCase().replace(/\s+/g, '_')}_${player.team?.toLowerCase()}_mlb`,
+            name: player.name,
+            team: player.team || 'UNK',
+            number: (index + 1).toString(),
+            status: 'active',
+            depth: index + 1,
+            position: position
+          }));
+          allMLBPlayers.push(...playersWithData);
+        }
+        
+        console.log(`⚾ Searchable data: Found ${allMLBPlayers.length} total MLB players`);
+        console.log('Sample MLB players:', allMLBPlayers.slice(0, 3));
+        
+        res.json({
+          success: true,
+          sport: sport.toUpperCase(),
+          players: allMLBPlayers,
+          count: allMLBPlayers.length
+        });
+        
+      } else if (sport.toLowerCase() === 'nhl') {
+        // Get all NHL players using enhanced fallback with comprehensive 2024-2025 roster
+        console.log('🏒 Loading comprehensive NHL roster data for search');
+        
+        // Use the enhanced fallback which has comprehensive NHL rosters
+        const positions = ['G', 'D', 'LW', 'RW', 'C'];
+        const allNHLPlayers: any[] = [];
+        
+        for (const position of positions) {
+          const positionPlayers = getEnhancedFallbackRoster('nhl', position);
+          const playersWithData = positionPlayers.map((player: any, index: number) => ({
+            id: player.id || `${player.name?.toLowerCase().replace(/\s+/g, '_')}_${player.team?.toLowerCase()}_nhl`,
+            name: player.name,
+            team: player.team || 'UNK',
+            number: (index + 1).toString(),
+            status: 'active',
+            depth: index + 1,
+            position: position
+          }));
+          allNHLPlayers.push(...playersWithData);
+        }
+        
+        console.log(`🏒 Searchable data: Found ${allNHLPlayers.length} total NHL players`);
+        console.log('Sample NHL players:', allNHLPlayers.slice(0, 3));
+        
+        res.json({
+          success: true,
+          sport: sport.toUpperCase(),
+          players: allNHLPlayers,
+          count: allNHLPlayers.length
+        });
+        
       } else {
         res.status(404).json({ success: false, message: `Sport ${sport} not supported yet` });
       }
