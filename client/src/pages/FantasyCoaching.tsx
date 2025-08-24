@@ -611,43 +611,43 @@ export default function FantasyCoaching() {
 
                 {/* Individual Player Analysis Results */}
                 {playerAnalysis && (
-                  <Card className="bg-gradient-to-r from-green-50 to-blue-50 border-green-200" data-testid="player-analysis">
+                  <Card className="bg-gradient-to-r from-blue-50 to-gray-50 border-blue-200" data-testid="player-analysis">
                     <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-green-800">
+                      <CardTitle className="flex items-center gap-2 text-blue-800">
                         <User className="h-4 w-4" />
                         Player Analysis: {playerAnalysis.player}
-                        <Badge className="ml-auto bg-green-600">
-                          Pure Yahoo Sports Data
+                        <Badge className="ml-auto bg-blue-600">
+                          {playerAnalysis.recommendation || 'ANALYSIS'}
                         </Badge>
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div>
-                        <h4 className="font-semibold text-green-900 mb-2">Analysis:</h4>
-                        <p className="text-green-800">
-                          {playerAnalysis.analysis || 'Player analysis completed using real Yahoo Sports data.'}
-                        </p>
+                        <h4 className="font-semibold text-blue-900 mb-2">Analysis:</h4>
+                        <div className="text-blue-800 whitespace-pre-line">
+                          {playerAnalysis.analysis || 'Analysis completed with available data.'}
+                        </div>
                       </div>
                       
                       {playerAnalysis.insights && (
                         <div>
-                          <h4 className="font-semibold text-green-900 mb-2">Key Insights:</h4>
-                          <p className="text-green-700">
+                          <h4 className="font-semibold text-blue-900 mb-2">Key Insights:</h4>
+                          <p className="text-blue-700">
                             {playerAnalysis.insights}
                           </p>
                         </div>
                       )}
 
-                      {playerAnalysis.stats && (
+                      {playerAnalysis.stats && Object.keys(playerAnalysis.stats).length > 0 && (
                         <div>
-                          <h4 className="font-semibold text-green-900 mb-2">Player Stats:</h4>
+                          <h4 className="font-semibold text-blue-900 mb-2">Performance Metrics:</h4>
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                             {Object.entries(playerAnalysis.stats).map(([key, value]: [string, any], index: number) => (
                               <div key={index} className="bg-white/60 p-3 rounded-lg text-center">
-                                <div className="text-sm text-green-600 font-medium capitalize">
+                                <div className="text-sm text-blue-600 font-medium capitalize">
                                   {key.replace(/([A-Z])/g, ' $1').trim()}
                                 </div>
-                                <div className="text-lg font-bold text-green-900">
+                                <div className="text-lg font-bold text-blue-900">
                                   {value}
                                 </div>
                               </div>
@@ -657,11 +657,16 @@ export default function FantasyCoaching() {
                       )}
 
                       <div className="bg-white/60 p-3 rounded-lg">
-                        <p className="text-sm text-green-700">
-                          <strong>Team:</strong> {playerAnalysis.team} • 
-                          <strong> Position:</strong> {playerAnalysis.position} • 
-                          <strong> Data Source:</strong> Yahoo Sports API
-                        </p>
+                        <div className="grid grid-cols-2 gap-4 text-sm text-blue-700">
+                          <div>
+                            <strong>Team:</strong> {playerAnalysis.team}<br/>
+                            <strong>Position:</strong> {playerAnalysis.position}
+                          </div>
+                          <div>
+                            <strong>Confidence:</strong> {playerAnalysis.confidence}%<br/>
+                            <strong>Source:</strong> {playerAnalysis.dataSource || 'Analytics Engine'}
+                          </div>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
