@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "wouter";
+import { useParams, useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,6 +51,7 @@ export default function LeagueDashboard() {
   const leagueId = params.id;
   const { fantasyUser, isFantasyAuthenticated } = useFantasyAuth();
   const { toast } = useToast();
+  const [location, setLocation] = useLocation();
   
   const [leagueData, setLeagueData] = useState<LeagueData | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
@@ -379,7 +380,13 @@ export default function LeagueDashboard() {
                   
                   <div className="border-t my-3" />
                   
-                  <Button variant="outline" size="sm" className="w-full" data-testid="league-settings">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full" 
+                    onClick={() => setLocation(`/fantasy/league/${leagueId}/settings`)}
+                    data-testid="league-settings"
+                  >
                     <Settings className="h-4 w-4 mr-2" />
                     League Settings
                   </Button>

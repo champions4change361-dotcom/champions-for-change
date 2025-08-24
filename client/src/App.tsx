@@ -25,6 +25,7 @@ import WebpageBuilder from './pages/WebpageBuilder';
 import TournamentEmpire from './pages/TournamentEmpire';
 import FantasyTournaments from './pages/FantasyTournaments';
 import LeagueDashboard from './pages/LeagueDashboard';
+import LeagueSettings from './pages/LeagueSettings';
 import CoachesLoungeLanding from './pages/CoachesLoungeLanding';
 import FantasyLanding from './pages/FantasyLanding';
 import FantasyCoaching from './pages/FantasyCoaching';
@@ -249,6 +250,9 @@ function AppRouter() {
       
       {/* League Dashboard - Fantasy League Management */}
       <Route path="/fantasy/league/:id" component={LeagueDashboard} />
+      
+      {/* League Settings - Commissioner Controls */}
+      <Route path="/fantasy/league/:id/settings" component={LeagueSettings} />
       
       {/* Platform Selection Page */}
       <Route path="/platform-options" component={PlatformOptions} />
