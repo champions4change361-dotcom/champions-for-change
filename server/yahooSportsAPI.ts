@@ -1044,6 +1044,226 @@ export class YahooSportsAPI {
         { id: 'pivetta_nick', name: 'Nick Pivetta', team: 'BOS', position: 'SP-R', number: '37', hits: 'R' },
         { id: 'jansen_kenley', name: 'Kenley Jansen', team: 'BOS', position: 'RP-R', number: '74', hits: 'R' },
         { id: 'wong_connor', name: 'Connor Wong', team: 'BOS', position: 'C', number: '74', hits: 'R' }
+      ],
+      'BAL': [
+        { id: 'henderson_gunnar', name: 'Gunnar Henderson', team: 'BAL', position: 'SS', number: '2', hits: 'L' },
+        { id: 'rutschman_adley', name: 'Adley Rutschman', team: 'BAL', position: 'C', number: '35', hits: 'S' },
+        { id: 'mullins_cedric', name: 'Cedric Mullins', team: 'BAL', position: 'OF', number: '31', hits: 'L' },
+        { id: 'mountcastle_ryan', name: 'Ryan Mountcastle', team: 'BAL', position: '1B', number: '19', hits: 'R' },
+        { id: 'rodriguez_grayson', name: 'Grayson Rodriguez', team: 'BAL', position: 'SP-R', number: '30', hits: 'R' },
+        { id: 'bradish_kyle', name: 'Kyle Bradish', team: 'BAL', position: 'SP-R', number: '39', hits: 'R' },
+        { id: 'kimbrel_craig_bal', name: 'Craig Kimbrel', team: 'BAL', position: 'RP-R', number: '46', hits: 'R' },
+        { id: 'santander_anthony', name: 'Anthony Santander', team: 'BAL', position: 'OF', number: '25', hits: 'S' }
+      ],
+      'TB': [
+        { id: 'franco_wander', name: 'Wander Franco', team: 'TB', position: 'SS', number: '5', hits: 'S' },
+        { id: 'arozarena_randy', name: 'Randy Arozarena', team: 'TB', position: 'OF', number: '56', hits: 'R' },
+        { id: 'diaz_yandy', name: 'Yandy Díaz', team: 'TB', position: '1B', number: '2', hits: 'R' },
+        { id: 'lowe_brandon', name: 'Brandon Lowe', team: 'TB', position: '2B', number: '8', hits: 'L' },
+        { id: 'mclanahan_shane', name: 'Shane McClanahan', team: 'TB', position: 'SP-L', number: '29', hits: 'R' },
+        { id: 'glasnow_tyler_tb', name: 'Tyler Glasnow', team: 'TB', position: 'SP-R', number: '20', hits: 'L' },
+        { id: 'fairbanks_pete', name: 'Pete Fairbanks', team: 'TB', position: 'RP-R', number: '29', hits: 'R' },
+        { id: 'bethancourt_christian', name: 'Christian Bethancourt', team: 'TB', position: 'C', number: '17', hits: 'R' }
+      ],
+      'CLE': [
+        { id: 'ramirez_jose', name: 'José Ramírez', team: 'CLE', position: '3B', number: '11', hits: 'S' },
+        { id: 'bieber_shane', name: 'Shane Bieber', team: 'CLE', position: 'SP-R', number: '57', hits: 'R' },
+        { id: 'clase_emmanuel', name: 'Emmanuel Clase', team: 'CLE', position: 'RP-R', number: '48', hits: 'R' },
+        { id: 'kwan_steven', name: 'Steven Kwan', team: 'CLE', position: 'OF', number: '38', hits: 'L' },
+        { id: 'naylor_josh', name: 'Josh Naylor', team: 'CLE', position: '1B', number: '22', hits: 'L' },
+        { id: 'gimenez_andres', name: 'Andrés Giménez', team: 'CLE', position: '2B', number: '0', hits: 'L' },
+        { id: 'hedges_austin', name: 'Austin Hedges', team: 'CLE', position: 'C', number: '17', hits: 'R' },
+        { id: 'mckenzi_triston', name: 'Triston McKenzie', team: 'CLE', position: 'SP-R', number: '24', hits: 'R' }
+      ],
+      'DET': [
+        { id: 'torkelson_spencer', name: 'Spencer Torkelson', team: 'DET', position: '1B', number: '20', hits: 'R' },
+        { id: 'greene_riley', name: 'Riley Greene', team: 'DET', position: 'OF', number: '31', hits: 'L' },
+        { id: 'baez_javier', name: 'Javier Báez', team: 'DET', position: 'SS', number: '28', hits: 'R' },
+        { id: 'canha_mark', name: 'Mark Canha', team: 'DET', position: 'OF', number: '21', hits: 'R' },
+        { id: 'skubal_tarik', name: 'Tarik Skubal', team: 'DET', position: 'SP-L', number: '29', hits: 'R' },
+        { id: 'rodriguez_eduardo', name: 'Eduardo Rodriguez', team: 'DET', position: 'SP-L', number: '57', hits: 'L' },
+        { id: 'lange_alex', name: 'Alex Lange', team: 'DET', position: 'RP-R', number: '54', hits: 'R' },
+        { id: 'haase_eric', name: 'Eric Haase', team: 'DET', position: 'C', number: '13', hits: 'R' }
+      ],
+      'KC': [
+        { id: 'witt_bobby', name: 'Bobby Witt Jr.', team: 'KC', position: 'SS', number: '7', hits: 'R' },
+        { id: 'perez_salvador', name: 'Salvador Perez', team: 'KC', position: 'C', number: '13', hits: 'R' },
+        { id: 'pasquantino_vinnie', name: 'Vinnie Pasquantino', team: 'KC', position: '1B', number: '9', hits: 'L' },
+        { id: 'melendez_mj', name: 'MJ Melendez', team: 'KC', position: 'OF', number: '1', hits: 'L' },
+        { id: 'singer_brady', name: 'Brady Singer', team: 'KC', position: 'SP-R', number: '51', hits: 'R' },
+        { id: 'greinke_zack', name: 'Zack Greinke', team: 'KC', position: 'SP-R', number: '23', hits: 'R' },
+        { id: 'barlow_scott', name: 'Scott Barlow', team: 'KC', position: 'RP-R', number: '58', hits: 'R' },
+        { id: 'garcia_maikel', name: 'Maikel Garcia', team: 'KC', position: '3B', number: '11', hits: 'R' }
+      ],
+      'MIN': [
+        { id: 'buxton_byron', name: 'Byron Buxton', team: 'MIN', position: 'OF', number: '25', hits: 'R' },
+        { id: 'correa_carlos', name: 'Carlos Correa', team: 'MIN', position: 'SS', number: '4', hits: 'R' },
+        { id: 'polanco_jorge', name: 'Jorge Polanco', team: 'MIN', position: '2B', number: '11', hits: 'S' },
+        { id: 'kirilloff_alex', name: 'Alex Kirilloff', team: 'MIN', position: '1B', number: '19', hits: 'L' },
+        { id: 'ryan_joe', name: 'Joe Ryan', team: 'MIN', position: 'SP-R', number: '41', hits: 'R' },
+        { id: 'lopez_pablo', name: 'Pablo López', team: 'MIN', position: 'SP-R', number: '49', hits: 'R' },
+        { id: 'duran_jhoan', name: 'Jhoan Duran', team: 'MIN', position: 'RP-R', number: '59', hits: 'R' },
+        { id: 'vazquez_christian', name: 'Christian Vázquez', team: 'MIN', position: 'C', number: '8', hits: 'R' }
+      ],
+      'CWS': [
+        { id: 'robert_luis', name: 'Luis Robert Jr.', team: 'CWS', position: 'OF', number: '88', hits: 'R' },
+        { id: 'anderson_tim', name: 'Tim Anderson', team: 'CWS', position: 'SS', number: '7', hits: 'R' },
+        { id: 'moncada_yoan', name: 'Yoán Moncada', team: 'CWS', position: '3B', number: '10', hits: 'S' },
+        { id: 'jimenez_eloy', name: 'Eloy Jiménez', team: 'CWS', position: 'OF', number: '74', hits: 'R' },
+        { id: 'cease_dylan', name: 'Dylan Cease', team: 'CWS', position: 'SP-R', number: '84', hits: 'R' },
+        { id: 'kopech_michael', name: 'Michael Kopech', team: 'CWS', position: 'SP-R', number: '34', hits: 'R' },
+        { id: 'hendriks_liam', name: 'Liam Hendriks', team: 'CWS', position: 'RP-R', number: '31', hits: 'R' },
+        { id: 'grandal_yasmani', name: 'Yasmani Grandal', team: 'CWS', position: 'C', number: '24', hits: 'S' }
+      ],
+      'TEX': [
+        { id: 'seager_corey', name: 'Corey Seager', team: 'TEX', position: 'SS', number: '5', hits: 'L' },
+        { id: 'semien_marcus', name: 'Marcus Semien', team: 'TEX', position: '2B', number: '2', hits: 'R' },
+        { id: 'garcia_adolis', name: 'Adolis García', team: 'TEX', position: 'OF', number: '53', hits: 'R' },
+        { id: 'lowe_nathaniel', name: 'Nathaniel Lowe', team: 'TEX', position: '1B', number: '30', hits: 'L' },
+        { id: 'degrom_jacob', name: 'Jacob deGrom', team: 'TEX', position: 'SP-R', number: '48', hits: 'L' },
+        { id: 'eovaldi_nathan', name: 'Nathan Eovaldi', team: 'TEX', position: 'SP-R', number: '17', hits: 'R' },
+        { id: 'leclerc_jose', name: 'José Leclerc', team: 'TEX', position: 'RP-R', number: '25', hits: 'R' },
+        { id: 'heim_jonah', name: 'Jonah Heim', team: 'TEX', position: 'C', number: '28', hits: 'S' }
+      ],
+      'SEA': [
+        { id: 'rodriguez_julio', name: 'Julio Rodríguez', team: 'SEA', position: 'OF', number: '44', hits: 'R' },
+        { id: 'france_ty', name: 'Ty France', team: 'SEA', position: '1B', number: '23', hits: 'R' },
+        { id: 'suarez_eugenio', name: 'Eugenio Suárez', team: 'SEA', position: '3B', number: '28', hits: 'R' },
+        { id: 'crawford_jp', name: 'J.P. Crawford', team: 'SEA', position: 'SS', number: '3', hits: 'L' },
+        { id: 'castillo_luis', name: 'Luis Castillo', team: 'SEA', position: 'SP-R', number: '58', hits: 'R' },
+        { id: 'gilbert_logan', name: 'Logan Gilbert', team: 'SEA', position: 'SP-R', number: '36', hits: 'R' },
+        { id: 'munoz_andres', name: 'Andrés Muñoz', team: 'SEA', position: 'RP-R', number: '55', hits: 'R' },
+        { id: 'raleigh_cal', name: 'Cal Raleigh', team: 'SEA', position: 'C', number: '29', hits: 'S' }
+      ],
+      'LAA': [
+        { id: 'trout_mike', name: 'Mike Trout', team: 'LAA', position: 'OF', number: '27', hits: 'R' },
+        { id: 'rendon_anthony', name: 'Anthony Rendon', team: 'LAA', position: '3B', number: '6', hits: 'R' },
+        { id: 'ward_taylor', name: 'Taylor Ward', team: 'LAA', position: 'OF', number: '3', hits: 'R' },
+        { id: 'fletcher_david', name: 'David Fletcher', team: 'LAA', position: '2B', number: '22', hits: 'R' },
+        { id: 'sandoval_patrick', name: 'Patrick Sandoval', team: 'LAA', position: 'SP-L', number: '43', hits: 'R' },
+        { id: 'detmers_reid', name: 'Reid Detmers', team: 'LAA', position: 'SP-L', number: '48', hits: 'L' },
+        { id: 'iglesias_raisel_laa', name: 'Raisel Iglesias', team: 'LAA', position: 'RP-R', number: '32', hits: 'R' },
+        { id: 'stassi_max', name: 'Max Stassi', team: 'LAA', position: 'C', number: '33', hits: 'R' }
+      ],
+      'OAK': [
+        { id: 'murphy_sean_oak', name: 'Sean Murphy', team: 'OAK', position: 'C', number: '12', hits: 'R' },
+        { id: 'brown_seth', name: 'Seth Brown', team: 'OAK', position: '1B', number: '15', hits: 'L' },
+        { id: 'gelof_zack', name: 'Zack Gelof', team: 'OAK', position: '2B', number: '5', hits: 'R' },
+        { id: 'langeliers_shea', name: 'Shea Langeliers', team: 'OAK', position: 'C', number: '23', hits: 'R' },
+        { id: 'blackburn_paul', name: 'Paul Blackburn', team: 'OAK', position: 'SP-R', number: '58', hits: 'R' },
+        { id: 'irvin_cole', name: 'Cole Irvin', team: 'OAK', position: 'SP-L', number: '19', hits: 'L' },
+        { id: 'jimenez_dany', name: 'Dany Jiménez', team: 'OAK', position: 'RP-R', number: '62', hits: 'R' },
+        { id: 'rooker_brent', name: 'Brent Rooker', team: 'OAK', position: 'OF', number: '25', hits: 'R' }
+      ],
+      'NYM': [
+        { id: 'lindor_francisco', name: 'Francisco Lindor', team: 'NYM', position: 'SS', number: '12', hits: 'S' },
+        { id: 'alonso_pete', name: 'Pete Alonso', team: 'NYM', position: '1B', number: '20', hits: 'R' },
+        { id: 'mcneil_jeff', name: 'Jeff McNeil', team: 'NYM', position: '2B', number: '6', hits: 'L' },
+        { id: 'nimmo_brandon', name: 'Brandon Nimmo', team: 'NYM', position: 'OF', number: '9', hits: 'L' },
+        { id: 'scherzer_max_met', name: 'Max Scherzer', team: 'NYM', position: 'SP-R', number: '31', hits: 'R' },
+        { id: 'verlander_justin_met', name: 'Justin Verlander', team: 'NYM', position: 'SP-R', number: '35', hits: 'R' },
+        { id: 'diaz_edwin', name: 'Edwin Díaz', team: 'NYM', position: 'RP-R', number: '39', hits: 'R' },
+        { id: 'alvarez_francisco', name: 'Francisco Álvarez', team: 'NYM', position: 'C', number: '4', hits: 'R' }
+      ],
+      'WSH': [
+        { id: 'soto_juan_was', name: 'Juan Soto', team: 'WSH', position: 'OF', number: '22', hits: 'L' },
+        { id: 'cruz_nelson', name: 'Nelson Cruz', team: 'WSH', position: 'OF', number: '23', hits: 'R' },
+        { id: 'bell_josh', name: 'Josh Bell', team: 'WSH', position: '1B', number: '19', hits: 'S' },
+        { id: 'ruiz_keibert', name: 'Keibert Ruiz', team: 'WSH', position: 'C', number: '20', hits: 'S' },
+        { id: 'gray_josiah', name: 'Josiah Gray', team: 'WSH', position: 'SP-R', number: '46', hits: 'R' },
+        { id: 'corbin_patrick', name: 'Patrick Corbin', team: 'WSH', position: 'SP-L', number: '46', hits: 'L' },
+        { id: 'finnegan_kyle', name: 'Kyle Finnegan', team: 'WSH', position: 'RP-R', number: '67', hits: 'R' },
+        { id: 'garcia_luis_was', name: 'Luis García', team: 'WSH', position: '2B', number: '2', hits: 'L' }
+      ],
+      'MIA': [
+        { id: 'soler_jorge', name: 'Jorge Soler', team: 'MIA', position: 'OF', number: '12', hits: 'R' },
+        { id: 'anderson_brian', name: 'Brian Anderson', team: 'MIA', position: '3B', number: '15', hits: 'R' },
+        { id: 'chisholm_jazz', name: 'Jazz Chisholm Jr.', team: 'MIA', position: '2B', number: '2', hits: 'L' },
+        { id: 'cooper_garrett', name: 'Garrett Cooper', team: 'MIA', position: '1B', number: '26', hits: 'R' },
+        { id: 'alcantara_sandy', name: 'Sandy Alcántara', team: 'MIA', position: 'SP-R', number: '22', hits: 'R' },
+        { id: 'lopez_pablo_mia', name: 'Pablo López', team: 'MIA', position: 'SP-R', number: '49', hits: 'R' },
+        { id: 'bass_anthony', name: 'Anthony Bass', team: 'MIA', position: 'RP-R', number: '52', hits: 'R' },
+        { id: 'fortes_nick', name: 'Nick Fortes', team: 'MIA', position: 'C', number: '7', hits: 'R' }
+      ],
+      'MIL': [
+        { id: 'yelich_christian', name: 'Christian Yelich', team: 'MIL', position: 'OF', number: '22', hits: 'L' },
+        { id: 'adames_willy', name: 'Willy Adames', team: 'MIL', position: 'SS', number: '27', hits: 'R' },
+        { id: 'cain_lorenzo', name: 'Lorenzo Cain', team: 'MIL', position: 'OF', number: '6', hits: 'R' },
+        { id: 'tellez_rowdy', name: 'Rowdy Tellez', team: 'MIL', position: '1B', number: '11', hits: 'L' },
+        { id: 'burnes_corbin', name: 'Corbin Burnes', team: 'MIL', position: 'SP-R', number: '39', hits: 'R' },
+        { id: 'woodruff_brandon', name: 'Brandon Woodruff', team: 'MIL', position: 'SP-R', number: '53', hits: 'L' },
+        { id: 'hader_josh_mil', name: 'Josh Hader', team: 'MIL', position: 'RP-L', number: '71', hits: 'L' },
+        { id: 'caratini_victor', name: 'Victor Caratini', team: 'MIL', position: 'C', number: '7', hits: 'S' }
+      ],
+      'STL': [
+        { id: 'goldschmidt_paul', name: 'Paul Goldschmidt', team: 'STL', position: '1B', number: '46', hits: 'R' },
+        { id: 'arenado_nolan', name: 'Nolan Arenado', team: 'STL', position: '3B', number: '28', hits: 'R' },
+        { id: 'ozuna_marcell', name: 'Marcell Ozuna', team: 'STL', position: 'OF', number: '23', hits: 'R' },
+        { id: 'edman_tommy', name: 'Tommy Edman', team: 'STL', position: '2B', number: '19', hits: 'S' },
+        { id: 'wainwright_adam', name: 'Adam Wainwright', team: 'STL', position: 'SP-R', number: '50', hits: 'R' },
+        { id: 'montgomery_jordan', name: 'Jordan Montgomery', team: 'STL', position: 'SP-L', number: '47', hits: 'L' },
+        { id: 'gallegos_giovanny', name: 'Giovanny Gallegos', team: 'STL', position: 'RP-R', number: '65', hits: 'R' },
+        { id: 'contreras_willson', name: 'Willson Contreras', team: 'STL', position: 'C', number: '40', hits: 'R' }
+      ],
+      'CHC': [
+        { id: 'bellinger_cody', name: 'Cody Bellinger', team: 'CHC', position: 'OF', number: '24', hits: 'L' },
+        { id: 'hoerner_nico', name: 'Nico Hoerner', team: 'CHC', position: '2B', number: '2', hits: 'R' },
+        { id: 'happ_ian', name: 'Ian Happ', team: 'CHC', position: 'OF', number: '8', hits: 'S' },
+        { id: 'swanson_dansby', name: 'Dansby Swanson', team: 'CHC', position: 'SS', number: '7', hits: 'R' },
+        { id: 'steele_justin', name: 'Justin Steele', team: 'CHC', position: 'SP-L', number: '35', hits: 'L' },
+        { id: 'hendricks_kyle', name: 'Kyle Hendricks', team: 'CHC', position: 'SP-R', number: '28', hits: 'R' },
+        { id: 'fulmer_michael', name: 'Michael Fulmer', team: 'CHC', position: 'RP-R', number: '38', hits: 'R' },
+        { id: 'gomes_yan', name: 'Yan Gomes', team: 'CHC', position: 'C', number: '60', hits: 'R' }
+      ],
+      'CIN': [
+        { id: 'india_jonathan', name: 'Jonathan India', team: 'CIN', position: '2B', number: '6', hits: 'R' },
+        { id: 'votto_joey', name: 'Joey Votto', team: 'CIN', position: '1B', number: '19', hits: 'L' },
+        { id: 'stephenson_tyler', name: 'Tyler Stephenson', team: 'CIN', position: 'C', number: '37', hits: 'R' },
+        { id: 'fraley_jake', name: 'Jake Fraley', team: 'CIN', position: 'OF', number: '27', hits: 'L' },
+        { id: 'greene_hunter', name: 'Hunter Greene', team: 'CIN', position: 'SP-R', number: '21', hits: 'R' },
+        { id: 'lodolo_nick', name: 'Nick Lodolo', team: 'CIN', position: 'SP-L', number: '29', hits: 'L' },
+        { id: 'diaz_alexis', name: 'Alexis Díaz', team: 'CIN', position: 'RP-R', number: '35', hits: 'R' },
+        { id: 'de_la_cruz_elly', name: 'Elly De La Cruz', team: 'CIN', position: 'SS', number: '44', hits: 'S' }
+      ],
+      'PIT': [
+        { id: 'reynolds_bryan', name: 'Bryan Reynolds', team: 'PIT', position: 'OF', number: '10', hits: 'S' },
+        { id: 'cruz_oneil', name: 'Oneil Cruz', team: 'PIT', position: 'SS', number: '15', hits: 'L' },
+        { id: 'hayes_ke_bryan', name: 'Ke\'Bryan Hayes', team: 'PIT', position: '3B', number: '13', hits: 'R' },
+        { id: 'suwinski_jack', name: 'Jack Suwinski', team: 'PIT', position: 'OF', number: '65', hits: 'L' },
+        { id: 'keller_mitch', name: 'Mitch Keller', team: 'PIT', position: 'SP-R', number: '23', hits: 'R' },
+        { id: 'contreras_roansy', name: 'Roansy Contreras', team: 'PIT', position: 'SP-R', number: '43', hits: 'R' },
+        { id: 'bednar_david', name: 'David Bednar', team: 'PIT', position: 'RP-R', number: '51', hits: 'L' },
+        { id: 'davis_henry', name: 'Henry Davis', team: 'PIT', position: 'C', number: '32', hits: 'R' }
+      ],
+      'SF': [
+        { id: 'chapman_matt', name: 'Matt Chapman', team: 'SF', position: '3B', number: '26', hits: 'R' },
+        { id: 'webb_logan', name: 'Logan Webb', team: 'SF', position: 'SP-R', number: '62', hits: 'R' },
+        { id: 'crawford_brandon', name: 'Brandon Crawford', team: 'SF', position: 'SS', number: '35', hits: 'L' },
+        { id: 'flores_wilmer', name: 'Wilmer Flores', team: 'SF', position: '2B', number: '41', hits: 'R' },
+        { id: 'snell_blake', name: 'Blake Snell', team: 'SF', position: 'SP-L', number: '4', hits: 'L' },
+        { id: 'ray_robbie', name: 'Robbie Ray', team: 'SF', position: 'SP-L', number: '38', hits: 'R' },
+        { id: 'rogers_taylor', name: 'Taylor Rogers', team: 'SF', position: 'RP-L', number: '56', hits: 'L' },
+        { id: 'bart_joey', name: 'Joey Bart', team: 'SF', position: 'C', number: '21', hits: 'R' }
+      ],
+      'ARI': [
+        { id: 'marte_ketel', name: 'Ketel Marte', team: 'ARI', position: '2B', number: '4', hits: 'S' },
+        { id: 'carroll_corbin', name: 'Corbin Carroll', team: 'ARI', position: 'OF', number: '7', hits: 'L' },
+        { id: 'walker_christian', name: 'Christian Walker', team: 'ARI', position: '1B', number: '53', hits: 'R' },
+        { id: 'longoria_evan', name: 'Evan Longoria', team: 'ARI', position: '3B', number: '3', hits: 'R' },
+        { id: 'gallen_zac', name: 'Zac Gallen', team: 'ARI', position: 'SP-R', number: '23', hits: 'R' },
+        { id: 'kelly_merrill', name: 'Merrill Kelly', team: 'ARI', position: 'SP-R', number: '29', hits: 'R' },
+        { id: 'sewald_paul', name: 'Paul Sewald', team: 'ARI', position: 'RP-R', number: '38', hits: 'R' },
+        { id: 'moreno_gabriel', name: 'Gabriel Moreno', team: 'ARI', position: 'C', number: '14', hits: 'R' }
+      ],
+      'COL': [
+        { id: 'story_trevor_col', name: 'Trevor Story', team: 'COL', position: 'SS', number: '27', hits: 'R' },
+        { id: 'cron_cj', name: 'C.J. Cron', team: 'COL', position: '1B', number: '25', hits: 'R' },
+        { id: 'mcmahon_ryan', name: 'Ryan McMahon', team: 'COL', position: '3B', number: '24', hits: 'L' },
+        { id: 'blackmon_charlie', name: 'Charlie Blackmon', team: 'COL', position: 'OF', number: '19', hits: 'L' },
+        { id: 'freeland_kyle', name: 'Kyle Freeland', team: 'COL', position: 'SP-L', number: '21', hits: 'L' },
+        { id: 'marquez_german', name: 'Germán Márquez', team: 'COL', position: 'SP-R', number: '48', hits: 'R' },
+        { id: 'bard_daniel', name: 'Daniel Bard', team: 'COL', position: 'RP-R', number: '52', hits: 'R' },
+        { id: 'diaz_elias', name: 'Elias Díaz', team: 'COL', position: 'C', number: '35', hits: 'R' }
       ]
     };
 
