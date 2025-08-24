@@ -328,30 +328,30 @@ export default function CoachesLoungeLanding() {
           </CardContent>
         </Card>
 
-        {/* Featured: Fantasy Coaching AI */}
+        {/* Step 1: Fantasy Coaching AI - Data Analysis */}
         <Card className="mb-8 bg-gradient-to-r from-purple-100 via-blue-100 to-green-100 border-purple-300">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-purple-900">
               <Brain className="h-6 w-6" />
-              🧠 KEYSTONE AI FANTASY COACHING BRAIN
+              🧠 STEP 1: FANTASY COACHING BRAIN
             </CardTitle>
             <CardDescription className="text-purple-700">
-              The smartest fantasy coaching system ever built - Get AI insights like "Jahmyr Gibbs runs left 75% of the time"
+              Start here: Get AI insights like "Jahmyr Gibbs runs left 75%" to make better decisions
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-sm text-purple-800">
                 <CheckCircle className="h-4 w-4 text-green-600" />
-                <span>Player tendency analysis & defensive matchup insights</span>
+                <span>📊 <strong>Data Analysis:</strong> Player tendencies & defensive matchups</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-purple-800">
                 <CheckCircle className="h-4 w-4 text-green-600" />
-                <span>Real-time coaching during games with confidence scores</span>
+                <span>🎯 <strong>Smart Picks:</strong> Real-time coaching with confidence scores</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-purple-800">
                 <CheckCircle className="h-4 w-4 text-green-600" />
-                <span>Educational tool - Professional sports data only (Texas compliant)</span>
+                <span>🏫 <strong>Educational:</strong> Professional sports data (Texas compliant)</span>
               </div>
               <Button 
                 onClick={() => {
@@ -362,7 +362,47 @@ export default function CoachesLoungeLanding() {
                 data-testid="access-fantasy-coaching-button"
               >
                 <Brain className="h-4 w-4 mr-2" />
-                Access Fantasy Coaching AI
+                Step 1: Analyze Data & Get Insights
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Step 2: Fantasy League Creation */}
+        <Card className="mb-8 bg-gradient-to-r from-orange-100 via-red-100 to-yellow-100 border-orange-300">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-orange-900">
+              <Trophy className="h-6 w-6" />
+              🏈 STEP 2: CREATE FANTASY COMPETITIONS  
+            </CardTitle>
+            <CardDescription className="text-orange-700">
+              Ready to compete? Build NFL Survivor pools and fantasy leagues with friends
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-sm text-orange-800">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+                <span>🏈 <strong>NFL Survivor:</strong> Pick 1 team per week, wrong = eliminated</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-orange-800">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+                <span>🔄 <strong>Second Chance:</strong> Commissioners can re-enter eliminated players</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-orange-800">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+                <span>💚 <strong>100% FREE:</strong> No gambling, just friends having fun</span>
+              </div>
+              <Button 
+                onClick={() => {
+                  console.log('Navigating to Fantasy League Creation...');
+                  setLocation('/coaches-lounge/fantasy');
+                }}
+                className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white"
+                data-testid="create-fantasy-leagues-button"
+              >
+                <Trophy className="h-4 w-4 mr-2" />
+                Step 2: Create Fantasy Competitions
               </Button>
             </div>
           </CardContent>

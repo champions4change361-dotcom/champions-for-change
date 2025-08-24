@@ -16,16 +16,29 @@ export default function FantasyLanding() {
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="relative container mx-auto px-4 py-16">
           <div className="text-center text-white mb-16">
+            {/* Navigation Back to Coaches Lounge */}
+            <div className="flex items-center justify-center gap-2 mb-6">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.location.href = '/coaches-lounge'}
+                className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+              >
+                ← Back to Coaches Lounge
+              </Button>
+            </div>
+            
             <div className="flex justify-center mb-6">
               <div className="p-4 bg-white/10 rounded-full backdrop-blur-sm">
                 <Zap className="h-12 w-12" />
               </div>
             </div>
             <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-white to-green-200 bg-clip-text text-transparent">
-              NFL Survivor Pool
+              🏈 STEP 2: Fantasy Creation
             </h1>
             <p className="text-xl text-green-100 mb-8 max-w-2xl mx-auto">
-              Pick one NFL team each week to win. Last person standing wins the prize pool!
+              Now that you've analyzed the data in Step 1, let's create your NFL Survivor pools! 
+              100% FREE - Supporting Champions for Change educational mission.
             </p>
             
             {!showSignup ? (

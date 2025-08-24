@@ -328,8 +328,13 @@ function AppRouter() {
       <Route path="/role-dashboard" component={RoleBasedDashboards} />
       {/* Miller White-Label Homepage */}
       <Route path="/miller-homepage" component={MillerHomepage} />
-      {/* Fantasy Sports Landing Page */}
-      <Route path="/fantasy" component={FantasyLanding} />
+      {/* Fantasy Sports - Route through Coaches Lounge */}
+      <Route path="/coaches-lounge/fantasy" component={FantasyLanding} />
+      <Route path="/fantasy" component={() => {
+        // Redirect to proper flow through Coaches Lounge
+        window.location.href = '/coaches-lounge';
+        return null;
+      }} />
       
       {/* Show Coaches Lounge landing page */}
       <Route path="/coaches-lounge">
