@@ -78,6 +78,7 @@ export default function CoachesLoungeLanding() {
       });
     },
     onSuccess: (data: any) => {
+      console.log('League creation response:', data); // Debug the response structure
       toast({
         title: "League Created!",
         description: `Your ${selectedLeagueType} league is ready. Share code: ${data.registrationCode}`,
@@ -87,6 +88,10 @@ export default function CoachesLoungeLanding() {
       setTimeout(() => {
         if (data.league?.id) {
           setLocation(`/league/${data.league.id}/commissioner`);
+        } else {
+          // Fallback - redirect to a leagues list or home
+          console.log('No league.id found, redirecting to leagues list');
+          setLocation('/leagues');
         }
       }, 2000);
     }
@@ -98,6 +103,19 @@ export default function CoachesLoungeLanding() {
   };
 
   const handleCreateLeague = (type: string) => {
+    // Check if user is authenticated before creating league
+    if (!user) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to create a league. Redirecting to login...",
+        variant: "destructive",
+      });
+      setTimeout(() => {
+        window.location.href = '/api/login';
+      }, 1500);
+      return;
+    }
+    
     setSelectedLeagueType(type);
     createLeagueMutation.mutate(type);
   };
