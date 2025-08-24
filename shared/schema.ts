@@ -2930,10 +2930,26 @@ export const usageAnalytics = pgTable("usage_analytics", {
   metadata: jsonb("metadata"), // Additional context
 });
 
+// Nightly Analysis Storage - PERSISTENT ACROSS DEPLOYMENTS
+export const nightlyAnalysis = pgTable("nightly_analysis", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  runDate: timestamp("run_date").defaultNow(),
+  yahooData: jsonb("yahoo_data"),
+  freeSourceData: jsonb("free_source_data"),
+  comparisonAnalysis: jsonb("comparison_analysis"),
+  predictions: jsonb("predictions"),
+  processingTime: integer("processing_time_ms"),
+  status: varchar("status").default("completed"), // completed, failed, running
+  dataPointsCollected: integer("data_points_collected"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export type TournamentCredit = typeof tournamentCredits.$inferSelect;
 export type InsertTournamentCredit = typeof tournamentCredits.$inferInsert;
 export type UsageAnalytic = typeof usageAnalytics.$inferSelect;
 export type InsertUsageAnalytic = typeof usageAnalytics.$inferInsert;
+export type NightlyAnalysis = typeof nightlyAnalysis.$inferSelect;
+export type InsertNightlyAnalysis = typeof nightlyAnalysis.$inferInsert;
 export type CoachEventAssignment = typeof coachEventAssignments.$inferSelect;
 export type InsertCoachEventAssignment = typeof coachEventAssignments.$inferInsert;
 export type InsertUser = z.infer<typeof insertUserSchema>;

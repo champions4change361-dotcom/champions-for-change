@@ -6,6 +6,9 @@
 
 // Import will be added after fixing yahooAuth exports
 import cron from 'node-cron';
+import { db } from './db.js';
+import { nightlyAnalysis, type InsertNightlyAnalysis } from '@shared/schema.js';
+import { desc, eq } from 'drizzle-orm';
 
 // Sports data sources for comparison
 const FREE_DATA_SOURCES = {
@@ -41,7 +44,74 @@ export class NightlySportsIntelligence {
   private analysisResults: any = {};
 
   constructor() {
+    this.initializeFromDatabase();
     this.scheduleNightlyRun();
+  }
+
+  /**
+   * Initialize system state from database - PREVENTS DATA LOSS ON REDEPLOY
+   */
+  async initializeFromDatabase(): Promise<void> {
+    try {
+      console.log('🔄 Loading previous analysis results from database...');
+      
+      // Get latest analysis result
+      const latestAnalysis = await db
+        .select()
+        .from(nightlyAnalysis)
+        .orderBy(desc(nightlyAnalysis.runDate))
+        .limit(1);
+
+      if (latestAnalysis.length > 0) {
+        const latest = latestAnalysis[0];
+        this.lastRun = latest.runDate;
+        this.analysisResults = {
+          yahooData: latest.yahooData,
+          freeSourceData: latest.freeSourceData,
+          comparisonAnalysis: latest.comparisonAnalysis,
+          predictions: latest.predictions,
+          processingTime: latest.processingTime,
+          timestamp: latest.runDate
+        };
+        console.log(`✅ Restored analysis from ${latest.runDate?.toISOString()}`);
+        console.log(`📊 Data points: ${latest.dataPointsCollected || 0}`);
+      } else {
+        console.log('📝 No previous analysis found - fresh start');
+      }
+
+      // Check if we missed a scheduled run and need to run immediately
+      await this.checkForMissedRun();
+      
+    } catch (error) {
+      console.error('⚠️ Failed to initialize from database:', error);
+    }
+  }
+
+  /**
+   * Check if analysis was missed due to deployment and run immediately if needed
+   */
+  async checkForMissedRun(): Promise<void> {
+    if (!this.lastRun) {
+      console.log('🆕 First run - waiting for tonight\'s scheduled analysis');
+      return;
+    }
+
+    const now = new Date();
+    const timeSinceLastRun = now.getTime() - this.lastRun.getTime();
+    const hoursAgo = timeSinceLastRun / (1000 * 60 * 60);
+
+    // If it's been more than 25 hours since last run, we missed one
+    if (hoursAgo > 25) {
+      console.log(`⏰ MISSED RUN DETECTED: Last run was ${hoursAgo.toFixed(1)} hours ago`);
+      console.log('🚀 Triggering immediate analysis to catch up...');
+      
+      // Run immediately in background
+      setTimeout(() => {
+        this.runNightlyAnalysis();
+      }, 5000); // Give system 5 seconds to finish startup
+    } else {
+      console.log(`✅ Analysis is current (${hoursAgo.toFixed(1)} hours ago)`);
+    }
   }
 
   /**
@@ -618,17 +688,48 @@ export class NightlySportsIntelligence {
   }
 
   /**
-   * Phase 6: Store analysis results
+   * Phase 6: Store analysis results - PERSISTENT DATABASE STORAGE
    */
   async storeAnalysisResults(results: any): Promise<void> {
-    this.analysisResults = {
-      ...results,
-      id: `analysis_${Date.now()}`,
-      version: '1.0'
-    };
-    
-    // In production, save to database
-    console.log('💾 Analysis results stored successfully');
+    try {
+      // Store in memory for quick access
+      this.analysisResults = {
+        ...results,
+        id: `analysis_${Date.now()}`,
+        version: '1.0'
+      };
+      
+      // Calculate total data points collected
+      const totalDataPoints = this.getTotalDataPoints(results.yahooData) + 
+                             this.getTotalDataPoints(results.freeSourceData);
+      
+      // Save to database - SURVIVES DEPLOYMENTS
+      const analysisRecord: InsertNightlyAnalysis = {
+        runDate: results.timestamp || new Date(),
+        yahooData: results.yahooData,
+        freeSourceData: results.freeSourceData,
+        comparisonAnalysis: results.comparisonAnalysis,
+        predictions: results.predictions,
+        processingTime: results.processingTime,
+        dataPointsCollected: totalDataPoints,
+        status: 'completed'
+      };
+      
+      await db.insert(nightlyAnalysis).values(analysisRecord);
+      
+      console.log('💾 Analysis results stored successfully in database');
+      console.log(`📊 Total data points collected: ${totalDataPoints}`);
+      console.log('🔒 Data will persist through deployments');
+      
+    } catch (error) {
+      console.error('❌ Failed to store analysis results:', error);
+      // Still keep in memory as fallback
+      this.analysisResults = {
+        ...results,
+        id: `analysis_${Date.now()}`,
+        version: '1.0'
+      };
+    }
   }
 
   /**
