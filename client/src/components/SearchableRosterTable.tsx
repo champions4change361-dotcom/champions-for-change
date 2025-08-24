@@ -49,7 +49,11 @@ export function SearchableRosterTable({ sport, onPlayerSelect, selectedPlayer }:
         const data = response;
         
         if (data.success) {
+          console.log('Received player data:', data);
+          console.log('Players array:', data.players);
           setPlayers(data.players || []);
+        } else {
+          console.error('API returned error:', data);
         }
       }
       // Add other sports later (NBA, MLB, NHL)
