@@ -42,7 +42,7 @@ export default function FantasyLanding() {
                 <div className="text-green-200">
                   <p>or</p>
                 </div>
-                <Link href="/fantasy/create-league">
+                <Link href="/fantasy-tournaments">
                   <Button 
                     variant="outline" 
                     size="lg" 
@@ -222,7 +222,7 @@ export default function FantasyLanding() {
           </div>
           
           <div className="text-center mt-12">
-            <Link href="/fantasy/create-league">
+            <Link href="/fantasy-tournaments">
               <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700" data-testid="button-create-own">
                 Create Your Own League
                 <ArrowRight className="ml-2 h-5 w-5" />
