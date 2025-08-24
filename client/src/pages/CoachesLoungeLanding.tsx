@@ -51,6 +51,15 @@ export default function CoachesLoungeLanding() {
         title: "Welcome to the League!",
         description: `Successfully joined ${data.leagueName || 'the league'}`,
       });
+      
+      // Redirect to league dashboard after successful join
+      setTimeout(() => {
+        if (data.leagueId) {
+          setLocation(`/league/${data.leagueId}`);
+        } else {
+          setLocation('/leagues'); // Show league selection if multiple
+        }
+      }, 1500);
     },
     onError: (error) => {
       toast({
@@ -61,16 +70,27 @@ export default function CoachesLoungeLanding() {
     }
   });
 
-  // Create league mutation
+  // Create league mutation  
   const createLeagueMutation = useMutation({
     mutationFn: async (leagueType: string) => {
-      return await apiRequest('POST', '/api/leagues/create', { type: leagueType });
+      return await apiRequest('POST', '/api/leagues/create', { 
+        type: leagueType,
+        format: leagueType === 'knockout-nfl' ? 'knockout' : 'standard',
+        sport: leagueType === 'knockout-nfl' ? 'nfl' : 'general'
+      });
     },
     onSuccess: (data: any) => {
       toast({
         title: "League Created!",
         description: `Your ${selectedLeagueType} league is ready. Share code: ${data.registrationCode || 'LEAGUE123'}`,
       });
+      
+      // Redirect to commissioner dashboard for the new league
+      setTimeout(() => {
+        if (data.leagueId) {
+          setLocation(`/league/${data.leagueId}/commissioner`);
+        }
+      }, 2000);
     }
   });
 
@@ -129,10 +149,10 @@ export default function CoachesLoungeLanding() {
   };
 
   const leagueTypes = [
-    { id: 'fantasy-sports', label: 'Fantasy Sports', icon: Trophy, color: 'orange' },
-    { id: 'gaming', label: 'Gaming League', icon: Gamepad2, color: 'green' },
-    { id: 'office', label: 'Office Challenge', icon: Code, color: 'blue' },
-    { id: 'custom', label: 'Custom League', icon: Users, color: 'purple' }
+    { id: 'knockout-nfl', label: '🏈 NFL Knockout', icon: Trophy, color: 'orange' },
+    { id: 'knockout-nba', label: '🏀 NBA Knockout', icon: Gamepad2, color: 'green' },
+    { id: 'office-pool', label: '💼 Office Pool', icon: Code, color: 'blue' },
+    { id: 'custom-knockout', label: '⚔️ Custom Knockout', icon: Users, color: 'purple' }
   ];
 
   return (
@@ -267,24 +287,24 @@ export default function CoachesLoungeLanding() {
               <div className="bg-white p-4 rounded-lg border border-purple-200">
                 <h4 className="flex items-center gap-2 font-semibold text-purple-900 mb-2">
                   <Users className="h-4 w-4" />
-                  What We Offer
+                  Start with Knockout Pools
                 </h4>
                 <ul className="text-purple-800 text-sm space-y-1">
                   <li className="flex items-center gap-2">
                     <Trophy className="h-3 w-3" />
-                    Fantasy Sports Leagues (NFL, NBA)
+                    🏈 NFL Survivor: Pick 1 team per week
                   </li>
                   <li className="flex items-center gap-2">
                     <Gamepad2 className="h-3 w-3" />
-                    Video Gaming Tournaments
+                    ❌ Wrong pick = Elimination
                   </li>
                   <li className="flex items-center gap-2">
                     <Code className="h-3 w-3" />
-                    Office Competitions & Challenges
+                    🧠 Strategy: Save good teams for later
                   </li>
                   <li className="flex items-center gap-2">
                     <Users className="h-3 w-3" />
-                    Custom League Management
+                    🏆 Last person standing wins
                   </li>
                 </ul>
               </div>
@@ -456,23 +476,23 @@ export default function CoachesLoungeLanding() {
               <ul className="text-sm space-y-1 text-gray-200">
                 <li className="flex items-center gap-2">
                   <CheckCircle className="h-3 w-3 text-green-400" />
-                  NFL Survivor Pools
+                  🏈 NFL Knockout/Survivor Pools
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle className="h-3 w-3 text-green-400" />
-                  NBA Fantasy Leagues
+                  🏀 NBA Elimination Contests
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle className="h-3 w-3 text-green-400" />
-                  Season-long competitions
+                  ⚾ MLB Last Team Standing
                 </li>
                 <li className="flex items-center gap-2">
                   <Zap className="h-3 w-3 text-yellow-400" />
-                  Live score tracking
+                  Real team tracking
                 </li>
                 <li className="flex items-center gap-2">
                   <Star className="h-3 w-3 text-blue-400" />
-                  Custom scoring rules
+                  No salary caps - pure strategy
                 </li>
               </ul>
             </CardContent>
