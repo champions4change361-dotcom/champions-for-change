@@ -27,17 +27,21 @@ export function SearchableRosterTable({ sport, onPlayerSelect, selectedPlayer }:
   const [filteredPlayers, setFilteredPlayers] = useState<Player[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [positionFilter, setPositionFilter] = useState('');
+  const [teamFilter, setTeamFilter] = useState('');
   const [loading, setLoading] = useState(true);
 
-  // Load roster data on mount
+  // Load roster data on mount and reset filters when sport changes
   useEffect(() => {
     loadRosterData();
+    setPositionFilter('');
+    setTeamFilter('');
+    setSearchTerm('');
   }, [sport]);
 
-  // Filter players when search term or position filter changes
+  // Filter players when search term, position filter, or team filter changes
   useEffect(() => {
     filterPlayers();
-  }, [searchTerm, positionFilter, players]);
+  }, [searchTerm, positionFilter, teamFilter, players]);
 
   const loadRosterData = async () => {
     try {
@@ -138,6 +142,11 @@ export function SearchableRosterTable({ sport, onPlayerSelect, selectedPlayer }:
       });
     }
 
+    // Apply team filter
+    if (teamFilter) {
+      filtered = filtered.filter(player => player.team === teamFilter);
+    }
+
     setFilteredPlayers(filtered);
   };
 
@@ -195,6 +204,11 @@ export function SearchableRosterTable({ sport, onPlayerSelect, selectedPlayer }:
     return Array.from(positions).sort();
   };
 
+  const getTeams = () => {
+    const teams = new Set(players.map(p => p.team));
+    return Array.from(teams).sort();
+  };
+
   const handlePlayerClick = (player: Player) => {
     const position = player.position || getPositionFromId(player.id);
     onPlayerSelect(player.name, position, player.team);
@@ -222,8 +236,9 @@ export function SearchableRosterTable({ sport, onPlayerSelect, selectedPlayer }:
         </CardTitle>
         
         {/* Search and Filter Controls */}
-        <div className="flex flex-col sm:flex-row gap-4 mt-4">
-          <div className="relative flex-1">
+        <div className="flex flex-col gap-4 mt-4">
+          {/* Search Input */}
+          <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
             <Input
               placeholder="Search by player name or team..."
@@ -234,14 +249,16 @@ export function SearchableRosterTable({ sport, onPlayerSelect, selectedPlayer }:
             />
           </div>
           
-          <div className="flex gap-2">
+          {/* Position Filters */}
+          <div className="flex flex-wrap gap-2">
+            <span className="text-sm font-medium text-gray-600 py-2">Position:</span>
             <Button
               variant={positionFilter === '' ? 'default' : 'outline'}
               onClick={() => setPositionFilter('')}
               size="sm"
-              data-testid="button-filter-all"
+              data-testid="button-filter-all-positions"
             >
-              All
+              All Positions
             </Button>
             {getPositions().map(position => (
               <Button
@@ -255,12 +272,75 @@ export function SearchableRosterTable({ sport, onPlayerSelect, selectedPlayer }:
               </Button>
             ))}
           </div>
+
+          {/* Team Filters */}
+          <div className="flex flex-wrap gap-2">
+            <span className="text-sm font-medium text-gray-600 py-2">Team:</span>
+            <Button
+              variant={teamFilter === '' ? 'default' : 'outline'}
+              onClick={() => setTeamFilter('')}
+              size="sm"
+              data-testid="button-filter-all-teams"
+            >
+              All Teams
+            </Button>
+            {getTeams().slice(0, 8).map(team => (
+              <Button
+                key={team}
+                variant={teamFilter === team ? 'default' : 'outline'}
+                onClick={() => setTeamFilter(team)}
+                size="sm"
+                data-testid={`button-filter-team-${team.toLowerCase()}`}
+                className="font-mono text-xs"
+              >
+                {team}
+              </Button>
+            ))}
+            {getTeams().length > 8 && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs text-gray-500"
+                disabled
+              >
+                +{getTeams().length - 8} more
+              </Button>
+            )}
+          </div>
         </div>
       </CardHeader>
 
       <CardContent>
-        <div className="text-sm text-gray-600 mb-4">
-          Showing {filteredPlayers.length} of {players.length} players
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
+          <div className="text-sm text-gray-600">
+            Showing {filteredPlayers.length} of {players.length} players
+            {(positionFilter || teamFilter || searchTerm) && (
+              <span className="ml-2 text-blue-600">
+                (filtered)
+              </span>
+            )}
+          </div>
+          
+          {/* Active Filters Summary */}
+          {(positionFilter || teamFilter || searchTerm) && (
+            <div className="flex flex-wrap gap-1 text-xs">
+              {searchTerm && (
+                <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                  Search: "{searchTerm}"
+                </span>
+              )}
+              {positionFilter && (
+                <span className="bg-green-100 text-green-800 px-2 py-1 rounded">
+                  Position: {positionFilter}
+                </span>
+              )}
+              {teamFilter && (
+                <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded font-mono">
+                  Team: {teamFilter}
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Roster Table */}
