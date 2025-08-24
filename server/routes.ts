@@ -1756,6 +1756,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
     
+    // Calculate projection first
+    const baseProjection = getRealisticProjection(sport, position, depthPosition);
+    
     // Import the AI analysis functions
     const { KeystoneFantasyCoachingAI } = await import('./fantasy-coaching-ai.js');
     
@@ -1766,7 +1769,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sportAnalysis = KeystoneFantasyCoachingAI.generateBaseballAnalysis(player, position, team);
         break;
       case 'nfl':
-        sportAnalysis = KeystoneFantasyCoachingAI.generateFootballAnalysis(player, position, team);
+        sportAnalysis = KeystoneFantasyCoachingAI.generateFootballAnalysis(player, position, team, baseProjection, depthPosition);
         break;
       case 'nba':
         sportAnalysis = KeystoneFantasyCoachingAI.generateBasketballAnalysis(player, position, team);
@@ -1784,8 +1787,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           downside: "Standard variance expected"
         };
     }
-
-    const baseProjection = getRealisticProjection(sport, position, depthPosition);
+    
     const floorProjection = Math.max(1, baseProjection - (baseProjection * 0.35));
     const ceilingProjection = baseProjection + (baseProjection * 0.45);
 

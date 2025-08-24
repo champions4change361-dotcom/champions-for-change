@@ -351,7 +351,7 @@ export class KeystoneFantasyCoachingAI {
     };
   }
 
-  static generateFootballAnalysis(playerName: string, position: string, team: string): any {
+  static generateFootballAnalysis(playerName: string, position: string, team: string, projectedPoints?: number, depthPosition?: number): any {
     const footballInsights = {
       'QB': [
         "Clean pocket expected vs weak pass rush",
@@ -403,7 +403,7 @@ export class KeystoneFantasyCoachingAI {
     return {
       insight: `🏈 FOOTBALL ANALYSIS: ${playerName} (${team}) - ${randomInsight}`,
       confidence: Math.floor(Math.random() * 25) + 70, // 70-95%
-      recommendation: "STRONG NFL PLAY", 
+      recommendation: this.getSmartRecommendation(projectedPoints, depthPosition, 'nfl'), 
       riskLevel: "medium" as const,
       upside: "Touchdown and yardage upside in favorable spot",
       downside: "Game script could limit opportunities",
@@ -578,6 +578,37 @@ export class KeystoneFantasyCoachingAI {
     // Machine learning component - adjust weights based on prediction accuracy
     // This would improve the AI over time
     console.log(`Insight ${insight.id} accuracy: ${accuracy}% - adjusting weights`);
+  }
+
+  // 🧠 SMART RECOMMENDATION ENGINE
+  static getSmartRecommendation(projectedPoints?: number, depthPosition?: number, sport?: string): string {
+    // If no projection data, default to moderate recommendation
+    if (!projectedPoints) {
+      return "MONITOR CLOSELY";
+    }
+
+    // Handle NFL depth chart logic
+    if (sport === 'nfl' && depthPosition) {
+      if (depthPosition >= 3) {
+        return "AVOID - 3RD STRING";
+      }
+      if (depthPosition === 2 && projectedPoints < 10) {
+        return "EMERGENCY BACKUP ONLY";
+      }
+    }
+
+    // Smart recommendations based on projected points
+    if (projectedPoints >= 20) {
+      return "STRONG PLAY";
+    } else if (projectedPoints >= 15) {
+      return "SOLID PLAY";
+    } else if (projectedPoints >= 10) {
+      return "RISKY PLAY";
+    } else if (projectedPoints >= 5) {
+      return "BENCH/DESPERATION PLAY";
+    } else {
+      return "AVOID - LOW PROJECTION";
+    }
   }
 }
 
