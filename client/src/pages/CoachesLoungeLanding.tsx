@@ -74,21 +74,19 @@ export default function CoachesLoungeLanding() {
   const createLeagueMutation = useMutation({
     mutationFn: async (leagueType: string) => {
       return await apiRequest('POST', '/api/leagues/create', { 
-        type: leagueType,
-        format: leagueType === 'knockout-nfl' ? 'knockout' : 'standard',
-        sport: leagueType === 'knockout-nfl' ? 'nfl' : 'general'
+        type: leagueType
       });
     },
     onSuccess: (data: any) => {
       toast({
         title: "League Created!",
-        description: `Your ${selectedLeagueType} league is ready. Share code: ${data.registrationCode || 'LEAGUE123'}`,
+        description: `Your ${selectedLeagueType} league is ready. Share code: ${data.registrationCode}`,
       });
       
       // Redirect to commissioner dashboard for the new league
       setTimeout(() => {
-        if (data.leagueId) {
-          setLocation(`/league/${data.leagueId}/commissioner`);
+        if (data.league?.id) {
+          setLocation(`/league/${data.league.id}/commissioner`);
         }
       }, 2000);
     }
