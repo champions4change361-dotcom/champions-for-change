@@ -1507,8 +1507,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           break;
 
         case 'mlb':
-          // Comprehensive MLB rosters with backups - DraftKings style  
-          console.log(`🔍 MLB Fallback: Getting ${position} players for pure MLB data`);
+          // Comprehensive MLB rosters - PURE MLB ONLY (no NBA/NFL contamination)
+          console.log(`🔍 MLB Pure Data: Getting ${position} players - MLB sport only`);
+          
+          // Validate MLB position to prevent cross-sport contamination
+          const validMLBPositions = ['P', 'C', '1B', '2B', '3B', 'SS', 'OF'];
+          if (!validMLBPositions.includes(position)) {
+            console.log(`❌ Invalid MLB position: ${position}. Valid positions: ${validMLBPositions.join(', ')}`);
+            roster = [];
+            break;
+          }
+          
           const mlbRosters: any = {
             'P': [
               // Top Starters
@@ -1791,7 +1800,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/fantasy/analyze-player', async (req, res) => {
     try {
       const { sport, position, player, team } = req.body;
-      console.log(`🔬 PROFESSIONAL ANALYSIS: ${sport} ${position} ${player} (${team})`);
+      console.log(`🎯 Pure ${sport.toUpperCase()} analysis: ${player} (${team})`);
 
       // Generate SPORT-SPECIFIC professional analysis with proper context
       const professionalAnalysis = await generateSportSpecificAnalysis(sport, position, player, team);

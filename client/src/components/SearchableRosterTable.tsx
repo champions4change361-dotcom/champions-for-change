@@ -308,53 +308,6 @@ export function SearchableRosterTable({ sport, onPlayerSelect, selectedPlayer }:
               </Button>
             )}
           </div>
-
-          {/* Team Filters */}
-          <div className="flex flex-wrap gap-2">
-            <span className="text-sm font-medium text-gray-600 py-2">Team:</span>
-            <Button
-              variant={teamFilter === '' ? 'default' : 'outline'}
-              onClick={() => setTeamFilter('')}
-              size="sm"
-              data-testid="button-filter-all-teams"
-            >
-              All Teams
-            </Button>
-            {(showAllTeams ? getTeams() : getTeams().slice(0, 8)).map(team => (
-              <Button
-                key={team}
-                variant={teamFilter === team ? 'default' : 'outline'}
-                onClick={() => setTeamFilter(team)}
-                size="sm"
-                data-testid={`button-filter-team-${team.toLowerCase()}`}
-                className="font-mono text-xs"
-              >
-                {team}
-              </Button>
-            ))}
-            {getTeams().length > 8 && !showAllTeams && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-xs text-blue-600 hover:text-blue-800"
-                onClick={() => setShowAllTeams(true)}
-                data-testid="button-show-more-teams"
-              >
-                +{getTeams().length - 8} more
-              </Button>
-            )}
-            {showAllTeams && getTeams().length > 8 && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-xs text-gray-600"
-                onClick={() => setShowAllTeams(false)}
-                data-testid="button-show-fewer-teams"
-              >
-                Show Less
-              </Button>
-            )}
-          </div>
         </div>
       </CardHeader>
 

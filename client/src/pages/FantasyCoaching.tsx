@@ -99,32 +99,10 @@ export default function FantasyCoaching() {
     retry: false
   });
 
-  // R Analytics Projections - Professional Grade Fantasy Intelligence (NFL + MLB)
-  const { data: rAnalyticsProjections, isLoading: rAnalyticsLoading } = useQuery({
-    queryKey: ['/api/r-analytics/projections', selectedPosition, selectedSport],
-    queryFn: async () => {
-      const supportedSports = ['nfl', 'mlb'];
-      if (!selectedPosition || !selectedSport || !supportedSports.includes(selectedSport)) return null;
-      
-      // Position validation by sport
-      const nflPositions = ['QB', 'RB', 'WR', 'TE'];
-      const mlbPositions = ['C', '1B', '2B', '3B', 'SS', 'OF', 'SP', 'RP'];
-      
-      const validPosition = selectedSport === 'nfl' 
-        ? nflPositions.includes(selectedPosition)
-        : mlbPositions.includes(selectedPosition);
-        
-      if (!validPosition) return null;
-      
-      console.log(`🔬 Loading R analytics for ${selectedSport.toUpperCase()} ${selectedPosition}`);
-      const response = await fetch(`/api/r-analytics/projections/${selectedSport}/${selectedPosition}`);
-      const data = await response.json();
-      console.log('R Analytics data:', data);
-      return data;
-    },
-    enabled: !!(selectedPosition && selectedSport && ['nfl', 'mlb'].includes(selectedSport)),
-    staleTime: 300000 // Cache for 5 minutes
-  });
+  // Pure sport data only - no R analytics mixing to prevent cross-contamination
+  console.log(`⚾ Using pure ${selectedSport?.toUpperCase()} data only`);
+  const rAnalyticsProjections = null;
+  const rAnalyticsLoading = false;
 
   const handleAskQuestion = async () => {
     if (!question.trim()) return;
