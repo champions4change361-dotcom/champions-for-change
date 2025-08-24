@@ -70,6 +70,25 @@ interface RateLimiter {
   windowMs: number;
 }
 
+// MLB Player interface for roster data
+export interface MLBPlayer {
+  playerId: string;
+  playerName: string;
+  team: string;
+  position: string;
+  jerseyNumber?: number;
+  battingOrder?: number;
+  status: 'Active' | 'DL' | 'Minors' | 'Suspended';
+  stats?: {
+    avg?: number;
+    hr?: number;
+    rbi?: number;
+    era?: number;
+    wins?: number;
+    saves?: number;
+  };
+}
+
 export class YahooSportsAPI {
   private consumerKey: string;
   private consumerSecret: string;
@@ -269,6 +288,123 @@ export class YahooSportsAPI {
   clearCache(): void {
     this.cache.clear();
     console.log('🗑️ Cache cleared - next requests will be fresh');
+  }
+  
+  // 🏟️ MLB TEAM ROSTERS - Optimized batch collection
+  async getAllMLBRosters(): Promise<any> {
+    const cacheKey = this.getCacheKey('mlb', 'all_rosters');
+    
+    // Check cache first (rosters change less frequently than games)
+    const cachedData = this.getCachedData(cacheKey);
+    if (cachedData) {
+      console.log('💾 Cache hit for MLB rosters - using fresh data');
+      return cachedData;
+    }
+    
+    console.log('🏟️ Fetching fresh MLB rosters for all 30 teams...');
+    await this.checkRateLimit();
+    
+    try {
+      // In real implementation, this would make actual Yahoo API calls
+      // For now, using comprehensive MLB roster data structure
+      const mlbRosters = await this.fetchMLBRosterData();
+      
+      // Cache for 6 hours (rosters change less frequently than games)
+      this.setCacheData(cacheKey, mlbRosters, 360);
+      
+      return mlbRosters;
+    } catch (error) {
+      console.error('Error fetching MLB rosters:', error);
+      return this.getFallbackMLBRosters();
+    }
+  }
+  
+  private async fetchMLBRosterData(): Promise<any> {
+    // This would make actual Yahoo Sports API calls like:
+    // GET /fantasy/v2/teams/{team_key}/roster
+    // For now, returning comprehensive 2025 MLB roster structure
+    
+    const teams = this.getMLBTeams();
+    const rosters: any = {};
+    
+    for (const team of teams) {
+      try {
+        // Single API call per team for complete roster
+        const teamRoster = await this.fetchSingleTeamRoster(team.code);
+        rosters[team.code] = {
+          teamInfo: team,
+          roster: teamRoster,
+          lastUpdated: new Date().toISOString()
+        };
+        console.log(`✅ ${team.name}: ${teamRoster.length} players`);
+        
+        // Small delay to respect rate limits
+        await new Promise(resolve => setTimeout(resolve, 100));
+      } catch (error) {
+        console.log(`⚠️ ${team.name} roster unavailable, using fallback`);
+        rosters[team.code] = {
+          teamInfo: team,
+          roster: [],
+          lastUpdated: new Date().toISOString()
+        };
+      }
+    }
+    
+    return rosters;
+  }
+  
+  private async fetchSingleTeamRoster(teamCode: string): Promise<any[]> {
+    // Real Yahoo API endpoint would be:
+    // https://fantasysports.yahooapis.com/fantasy/v2/teams/{league_key}.t.{team_id}/roster
+    
+    // For now, return realistic roster structure
+    return this.getRealisticMLBRoster(teamCode);
+  }
+  
+  private getMLBTeams(): Array<{code: string, name: string, division: string, league: string}> {
+    return [
+      // American League East
+      { code: 'NYY', name: 'New York Yankees', division: 'AL East', league: 'American' },
+      { code: 'TOR', name: 'Toronto Blue Jays', division: 'AL East', league: 'American' },
+      { code: 'TB', name: 'Tampa Bay Rays', division: 'AL East', league: 'American' },
+      { code: 'BOS', name: 'Boston Red Sox', division: 'AL East', league: 'American' },
+      { code: 'BAL', name: 'Baltimore Orioles', division: 'AL East', league: 'American' },
+      
+      // American League Central
+      { code: 'CLE', name: 'Cleveland Guardians', division: 'AL Central', league: 'American' },
+      { code: 'DET', name: 'Detroit Tigers', division: 'AL Central', league: 'American' },
+      { code: 'KC', name: 'Kansas City Royals', division: 'AL Central', league: 'American' },
+      { code: 'MIN', name: 'Minnesota Twins', division: 'AL Central', league: 'American' },
+      { code: 'CWS', name: 'Chicago White Sox', division: 'AL Central', league: 'American' },
+      
+      // American League West
+      { code: 'HOU', name: 'Houston Astros', division: 'AL West', league: 'American' },
+      { code: 'TEX', name: 'Texas Rangers', division: 'AL West', league: 'American' },
+      { code: 'SEA', name: 'Seattle Mariners', division: 'AL West', league: 'American' },
+      { code: 'LAA', name: 'Los Angeles Angels', division: 'AL West', league: 'American' },
+      { code: 'OAK', name: 'Oakland Athletics', division: 'AL West', league: 'American' },
+      
+      // National League East
+      { code: 'PHI', name: 'Philadelphia Phillies', division: 'NL East', league: 'National' },
+      { code: 'ATL', name: 'Atlanta Braves', division: 'NL East', league: 'National' },
+      { code: 'NYM', name: 'New York Mets', division: 'NL East', league: 'National' },
+      { code: 'WSH', name: 'Washington Nationals', division: 'NL East', league: 'National' },
+      { code: 'MIA', name: 'Miami Marlins', division: 'NL East', league: 'National' },
+      
+      // National League Central
+      { code: 'MIL', name: 'Milwaukee Brewers', division: 'NL Central', league: 'National' },
+      { code: 'STL', name: 'St. Louis Cardinals', division: 'NL Central', league: 'National' },
+      { code: 'CHC', name: 'Chicago Cubs', division: 'NL Central', league: 'National' },
+      { code: 'CIN', name: 'Cincinnati Reds', division: 'NL Central', league: 'National' },
+      { code: 'PIT', name: 'Pittsburgh Pirates', division: 'NL Central', league: 'National' },
+      
+      // National League West
+      { code: 'LAD', name: 'Los Angeles Dodgers', division: 'NL West', league: 'National' },
+      { code: 'SD', name: 'San Diego Padres', division: 'NL West', league: 'National' },
+      { code: 'SF', name: 'San Francisco Giants', division: 'NL West', league: 'National' },
+      { code: 'ARI', name: 'Arizona Diamondbacks', division: 'NL West', league: 'National' },
+      { code: 'COL', name: 'Colorado Rockies', division: 'NL West', league: 'National' },
+    ];
   }
 
   // OAuth signature generation
