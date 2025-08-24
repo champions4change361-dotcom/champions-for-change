@@ -333,7 +333,7 @@ export class KeystoneFantasyCoachingAI {
       ]
     };
 
-    const insights = baseballInsights[position] || baseballInsights['OF'];
+    const insights = baseballInsights[position as keyof typeof baseballInsights] || baseballInsights['OF'];
     const randomInsight = insights[Math.floor(Math.random() * insights.length)];
     
     return {
@@ -397,7 +397,7 @@ export class KeystoneFantasyCoachingAI {
       ]
     };
 
-    const insights = footballInsights[position] || footballInsights['WR'];
+    const insights = footballInsights[position as keyof typeof footballInsights] || footballInsights['WR'];
     const randomInsight = insights[Math.floor(Math.random() * insights.length)];
     
     return {
@@ -454,7 +454,7 @@ export class KeystoneFantasyCoachingAI {
       ]
     };
 
-    const insights = basketballInsights[position] || basketballInsights['SF'];
+    const insights = basketballInsights[position as keyof typeof basketballInsights] || basketballInsights['SF'];
     const randomInsight = insights[Math.floor(Math.random() * insights.length)];
     
     return {
@@ -504,7 +504,7 @@ export class KeystoneFantasyCoachingAI {
       ]
     };
 
-    const insights = hockeyInsights[position] || hockeyInsights['W'];
+    const insights = hockeyInsights[position as keyof typeof hockeyInsights] || hockeyInsights['W'];
     const randomInsight = insights[Math.floor(Math.random() * insights.length)];
     
     return {

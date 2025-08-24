@@ -499,7 +499,7 @@ export default function FantasyCoaching() {
             </TabsTrigger>
             <TabsTrigger value="historical-ai" data-testid="tab-historical-ai" className="flex flex-col items-center justify-center text-xs px-1 py-2 min-h-[3rem] bg-gradient-to-r from-purple-100 to-blue-100 border-2 border-purple-300">
               <span className="text-xs font-bold text-purple-600 mb-1">📊</span>
-              <span className="font-bold text-purple-800">2020-24</span>
+              <span className="font-bold text-purple-800">🧠 Training</span>
             </TabsTrigger>
             <TabsTrigger value="r-analytics" data-testid="tab-r-analytics" className="flex flex-col items-center justify-center text-xs px-1 py-2 min-h-[3rem]">
               <BarChart3 className="w-4 h-4 mb-1" />
