@@ -62,7 +62,6 @@ export default function FantasyTournaments() {
   const [showCreateLeague, setShowCreateLeague] = useState(false);
   const [showFantasyAuth, setShowFantasyAuth] = useState(false);
   const [leagueName, setLeagueName] = useState("");
-  const [entryFee, setEntryFee] = useState("25");
   
   const { fantasyUser, isFantasyAuthenticated, loginFantasyUser } = useFantasyAuth();
   const [selectedSport, setSelectedSport] = useState("nfl");
@@ -500,21 +499,20 @@ export default function FantasyTournaments() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Entry Fee</label>
+              <label className="block text-sm font-medium mb-2">League Description (Optional)</label>
               <Input
-                placeholder="25"
-                value={entryFee}
-                onChange={(e) => setEntryFee(e.target.value)}
-                data-testid="input-entry-fee"
+                placeholder="e.g., Family fun league, Office competition, Friends group"
+                data-testid="input-league-description"
               />
             </div>
             <div className="bg-green-50 p-4 rounded-lg">
-              <h4 className="font-semibold text-green-800 mb-2">NFL Survivor Rules</h4>
+              <h4 className="font-semibold text-green-800 mb-2">🏆 FREE NFL Survivor Fun</h4>
               <ul className="text-sm text-green-700 space-y-1">
                 <li>• Pick one NFL team each week to win</li>
                 <li>• You can only use each team once per season</li>
                 <li>• If your team loses, you're eliminated</li>
-                <li>• Last person standing wins the prize pool</li>
+                <li>• Last person standing wins bragging rights!</li>
+                <li>• <strong>100% FREE - No entry fees or gambling</strong></li>
               </ul>
             </div>
             <div className="flex space-x-2">
@@ -523,10 +521,9 @@ export default function FantasyTournaments() {
                 onClick={() => {
                   // Now we have fantasy user info!
                   const leagueNameFinal = leagueName || 'NFL Survivor Pool';
-                  alert(`🎉 League "${leagueNameFinal}" created by ${fantasyUser?.email}!\n\nEntry Fee: $${entryFee}\nCreated: ${new Date().toLocaleString()}\n\nShare the link with your friends to join!`);
+                  alert(`🎉 FREE League "${leagueNameFinal}" created by ${fantasyUser?.email}!\n\n🏆 Winner gets bragging rights!\n📅 Created: ${new Date().toLocaleString()}\n\nShare the link with your friends to join for FREE!`);
                   setShowCreateLeague(false);
                   setLeagueName("");
-                  setEntryFee("25");
                 }}
                 data-testid="button-create-league"
               >
