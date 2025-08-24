@@ -25,6 +25,7 @@ import WebpageBuilder from './pages/WebpageBuilder';
 import TournamentEmpire from './pages/TournamentEmpire';
 import FantasyTournaments from './pages/FantasyTournaments';
 import CoachesLoungeLanding from './pages/CoachesLoungeLanding';
+import FantasyLanding from './pages/FantasyLanding';
 import FantasyCoaching from './pages/FantasyCoaching';
 import PlatformOptions from './pages/PlatformOptions';
 import CommissionerDashboard from './pages/CommissionerDashboard';
@@ -319,6 +320,9 @@ function AppRouter() {
       <Route path="/role-dashboard" component={RoleBasedDashboards} />
       {/* Miller White-Label Homepage */}
       <Route path="/miller-homepage" component={MillerHomepage} />
+      {/* Fantasy Sports Landing Page */}
+      <Route path="/fantasy" component={FantasyLanding} />
+      
       {/* Show Coaches Lounge landing page */}
       <Route path="/coaches-lounge">
         <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900">
