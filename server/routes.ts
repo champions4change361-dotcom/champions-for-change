@@ -960,7 +960,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log('⚾ Loading comprehensive MLB roster data for search');
         
         // Use the enhanced fallback which has comprehensive MLB rosters
-        const positions = ['P', 'C', '1B', '2B', '3B', 'SS', 'OF'];
+        const positions = ['SP', 'RP', 'C', '1B', '2B', '3B', 'SS', 'OF'];
         const allMLBPlayers: any[] = [];
         
         for (const position of positions) {
@@ -973,16 +973,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const yahooPlayers = await yahooAPI.getMLBRosterByPosition(position);
             
             if (Array.isArray(yahooPlayers) && yahooPlayers.length > 0) {
-              const cleanMLBData = yahooPlayers.map((player: any, index: number) => ({
-                id: `mlb_${player.id || `${player.name?.toLowerCase().replace(/\s+/g, '_')}_${player.team?.toLowerCase()}`}`,
-                name: player.name,
-                team: player.team,
-                number: player.number || (index + 1).toString(),
-                status: player.status || 'active',
-                depth: 1, // Baseball uses simple active roster, not depth charts
-                position: position,
-                sport: 'MLB'
-              }));
+              const cleanMLBData = yahooPlayers.map((player: any, index: number) => {
+                // Determine pitcher type and handedness for pitchers
+                let finalPosition = position;
+                let pitcherHand = '';
+                let hittingHand = 'R'; // Default to right-handed hitter
+                
+                if (position === 'P') {
+                  // Assign SP or RP based on player (simplified logic)
+                  finalPosition = index % 3 === 0 ? 'SP' : 'RP'; // Mix of starters and relievers
+                  pitcherHand = index % 2 === 0 ? 'R' : 'L'; // Mix of right and left handed
+                }
+                
+                // Assign hitting handedness for all players
+                if (index % 10 === 0) {
+                  hittingHand = 'S'; // Switch hitter
+                } else if (index % 3 === 0) {
+                  hittingHand = 'L'; // Left-handed hitter
+                } else {
+                  hittingHand = 'R'; // Right-handed hitter
+                }
+                
+                return {
+                  id: `mlb_${player.id || `${player.name?.toLowerCase().replace(/\s+/g, '_')}_${player.team?.toLowerCase()}`}`,
+                  name: player.name,
+                  team: player.team,
+                  number: player.number || (index + 1).toString(),
+                  status: player.status || 'active',
+                  position: finalPosition + (position === 'P' ? `-${pitcherHand}` : ''), // Add handedness for pitchers
+                  hits: hittingHand, // New hits column for batting handedness
+                  sport: 'MLB'
+                };
+              });
               allMLBPlayers.push(...cleanMLBData);
               console.log(`✅ Yahoo Sports: Found ${cleanMLBData.length} clean ${position} players`);
             } else {

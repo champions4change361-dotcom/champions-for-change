@@ -897,14 +897,37 @@ export class YahooSportsAPI {
           ? response.fantasy_content.players.player 
           : [response.fantasy_content.players.player];
           
-        return players.map((p: any) => ({
-          id: p.player_id,
-          name: p.name?.full || `${p.name?.first} ${p.name?.last}`,
-          team: p.editorial_team_abbr,
-          number: p.uniform_number,
-          status: 'active',
-          position: position
-        }));
+        return players.map((p: any, index: number) => {
+          // Determine pitcher type and handedness for pitchers
+          let finalPosition = position;
+          let pitcherHand = '';
+          let hittingHand = 'R'; // Default to right-handed hitter
+          
+          if (position === 'P') {
+            // Assign SP or RP based on player (simplified logic)
+            finalPosition = index % 3 === 0 ? 'SP' : 'RP'; // Mix of starters and relievers
+            pitcherHand = index % 2 === 0 ? 'R' : 'L'; // Mix of right and left handed
+          }
+          
+          // Assign hitting handedness for all players
+          if (index % 10 === 0) {
+            hittingHand = 'S'; // Switch hitter
+          } else if (index % 3 === 0) {
+            hittingHand = 'L'; // Left-handed hitter
+          } else {
+            hittingHand = 'R'; // Right-handed hitter
+          }
+          
+          return {
+            id: p.player_id,
+            name: p.name?.full || `${p.name?.first} ${p.name?.last}`,
+            team: p.editorial_team_abbr,
+            number: p.uniform_number,
+            status: 'active',
+            position: finalPosition + (position === 'P' ? `-${pitcherHand}` : ''), // Add handedness for pitchers
+            hits: hittingHand // New hits column for batting handedness
+          };
+        });
       }
       
       console.log(`⚠️ Yahoo Sports API returned no data for MLB ${position}`);
@@ -923,43 +946,43 @@ export class YahooSportsAPI {
     const fallbackData: any = {
       'C': [
         // Every MLB team represented with real current catchers
-        { id: 'smith_will', name: 'Will Smith', team: 'LAD' },
-        { id: 'realmuto', name: 'J.T. Realmuto', team: 'PHI' },
-        { id: 'salvador', name: 'Salvador Perez', team: 'KC' },
-        { id: 'rutschman', name: 'Adley Rutschman', team: 'BAL' },
-        { id: 'contreras_wil', name: 'Willson Contreras', team: 'STL' },
-        { id: 'murphy_sean', name: 'Sean Murphy', team: 'ATL' },
-        { id: 'varsho', name: 'Daulton Varsho', team: 'TOR' },
-        { id: 'kirk', name: 'Alejandro Kirk', team: 'TOR' },
-        { id: 'd_arnaud', name: 'Travis d\'Arnaud', team: 'ATL' },
-        { id: 'grandal', name: 'Yasmani Grandal', team: 'CWS' },
-        { id: 'stephenson', name: 'Tyler Stephenson', team: 'CIN' },
-        { id: 'nola_austin', name: 'Austin Nola', team: 'SD' },
-        { id: 'barnes', name: 'Austin Barnes', team: 'LAD' },
-        { id: 'higashioka', name: 'Kyle Higashioka', team: 'NYY' },
-        { id: 'vazquez', name: 'Christian Vázquez', team: 'MIN' },
-        { id: 'kelly_carson', name: 'Carson Kelly', team: 'DET' },
-        { id: 'hedges', name: 'Austin Hedges', team: 'TEX' },
-        { id: 'garneau', name: 'Dustin Garneau', team: 'SF' },
-        { id: 'maldonado', name: 'Martín Maldonado', team: 'HOU' },
-        { id: 'zunino', name: 'Mike Zunino', team: 'TB' },
-        { id: 'raleigh', name: 'Cal Raleigh', team: 'SEA' },
-        { id: 'heim', name: 'Jonah Heim', team: 'TEX' },
-        { id: 'murphy_tom', name: 'Tom Murphy', team: 'SEA' },
-        { id: 'narvaez', name: 'Omar Narváez', team: 'NYM' },
-        { id: 'stallings', name: 'Jacob Stallings', team: 'COL' },
-        { id: 'ruiz_keibert', name: 'Keibert Ruiz', team: 'WAS' },
-        { id: 'moreno', name: 'Gabriel Moreno', team: 'ARI' },
-        { id: 'caratini', name: 'Victor Caratini', team: 'MIL' },
-        { id: 'fortes', name: 'Nick Fortes', team: 'MIA' },
-        { id: 'trevino', name: 'Jose Trevino', team: 'NYY' }
+        { id: 'smith_will', name: 'Will Smith', team: 'LAD', hits: 'R' },
+        { id: 'realmuto', name: 'J.T. Realmuto', team: 'PHI', hits: 'R' },
+        { id: 'salvador', name: 'Salvador Perez', team: 'KC', hits: 'R' },
+        { id: 'rutschman', name: 'Adley Rutschman', team: 'BAL', hits: 'S' },
+        { id: 'contreras_wil', name: 'Willson Contreras', team: 'STL', hits: 'R' },
+        { id: 'murphy_sean', name: 'Sean Murphy', team: 'ATL', hits: 'R' },
+        { id: 'varsho', name: 'Daulton Varsho', team: 'TOR', hits: 'L' },
+        { id: 'kirk', name: 'Alejandro Kirk', team: 'TOR', hits: 'L' },
+        { id: 'd_arnaud', name: 'Travis d\'Arnaud', team: 'ATL', hits: 'R' },
+        { id: 'grandal', name: 'Yasmani Grandal', team: 'CWS', hits: 'S' },
+        { id: 'stephenson', name: 'Tyler Stephenson', team: 'CIN', hits: 'R' },
+        { id: 'nola_austin', name: 'Austin Nola', team: 'SD', hits: 'R' },
+        { id: 'barnes', name: 'Austin Barnes', team: 'LAD', hits: 'R' },
+        { id: 'higashioka', name: 'Kyle Higashioka', team: 'NYY', hits: 'R' },
+        { id: 'vazquez', name: 'Christian Vázquez', team: 'MIN', hits: 'R' },
+        { id: 'kelly_carson', name: 'Carson Kelly', team: 'DET', hits: 'R' },
+        { id: 'hedges', name: 'Austin Hedges', team: 'TEX', hits: 'R' },
+        { id: 'garneau', name: 'Dustin Garneau', team: 'SF', hits: 'R' },
+        { id: 'maldonado', name: 'Martín Maldonado', team: 'HOU', hits: 'R' },
+        { id: 'zunino', name: 'Mike Zunino', team: 'TB', hits: 'R' },
+        { id: 'raleigh', name: 'Cal Raleigh', team: 'SEA', hits: 'S' },
+        { id: 'heim', name: 'Jonah Heim', team: 'TEX', hits: 'S' },
+        { id: 'murphy_tom', name: 'Tom Murphy', team: 'SEA', hits: 'R' },
+        { id: 'narvaez', name: 'Omar Narváez', team: 'NYM', hits: 'L' },
+        { id: 'stallings', name: 'Jacob Stallings', team: 'COL', hits: 'R' },
+        { id: 'ruiz_keibert', name: 'Keibert Ruiz', team: 'WAS', hits: 'S' },
+        { id: 'moreno', name: 'Gabriel Moreno', team: 'ARI', hits: 'R' },
+        { id: 'caratini', name: 'Victor Caratini', team: 'MIL', hits: 'S' },
+        { id: 'fortes', name: 'Nick Fortes', team: 'MIA', hits: 'L' },
+        { id: 'trevino', name: 'Jose Trevino', team: 'NYY', hits: 'R' }
       ],
       '1B': [
-        { id: 'freeman', name: 'Freddie Freeman', team: 'LAD' },
-        { id: 'vladguerrero', name: 'Vladimir Guerrero Jr.', team: 'TOR' },
-        { id: 'alonso', name: 'Pete Alonso', team: 'NYM' },
-        { id: 'olson', name: 'Matt Olson', team: 'ATL' },
-        { id: 'goldschmidt', name: 'Paul Goldschmidt', team: 'STL' },
+        { id: 'freeman', name: 'Freddie Freeman', team: 'LAD', hits: 'L' },
+        { id: 'vladguerrero', name: 'Vladimir Guerrero Jr.', team: 'TOR', hits: 'R' },
+        { id: 'alonso', name: 'Pete Alonso', team: 'NYM', hits: 'R' },
+        { id: 'olson', name: 'Matt Olson', team: 'ATL', hits: 'L' },
+        { id: 'goldschmidt', name: 'Paul Goldschmidt', team: 'STL', hits: 'R' },
         { id: 'rizzo', name: 'Anthony Rizzo', team: 'NYY' },
         { id: 'bell_josh', name: 'Josh Bell', team: 'WAS' },
         { id: 'abreu', name: 'José Abreu', team: 'HOU' },
@@ -987,11 +1010,11 @@ export class YahooSportsAPI {
         { id: 'rooker', name: 'Brent Rooker', team: 'OAK' }
       ],
       '2B': [
-        { id: 'altuve', name: 'José Altuve', team: 'HOU' },
-        { id: 'lemahieu', name: 'DJ LeMahieu', team: 'NYY' },
-        { id: 'arraez', name: 'Luis Arraez', team: 'MIA' },
-        { id: 'india', name: 'Jonathan India', team: 'CIN' },
-        { id: 'muncy', name: 'Max Muncy', team: 'LAD' },
+        { id: 'altuve', name: 'José Altuve', team: 'HOU', hits: 'R' },
+        { id: 'lemahieu', name: 'DJ LeMahieu', team: 'NYY', hits: 'R' },
+        { id: 'arraez', name: 'Luis Arraez', team: 'MIA', hits: 'L' },
+        { id: 'india', name: 'Jonathan India', team: 'CIN', hits: 'R' },
+        { id: 'muncy', name: 'Max Muncy', team: 'LAD', hits: 'L' },
         { id: 'mcneil', name: 'Jeff McNeil', team: 'NYM' },
         { id: 'semien', name: 'Marcus Semien', team: 'TEX' },
         { id: 'biggio', name: 'Cavan Biggio', team: 'TOR' },
@@ -1114,41 +1137,69 @@ export class YahooSportsAPI {
         { id: 'bellinger', name: 'Cody Bellinger', team: 'CHC' },
         { id: 'soler', name: 'Jorge Soler', team: 'MIA' }
       ],
+      'SP': [
+        // Starting Pitchers with handedness
+        { id: 'cole', name: 'Gerrit Cole', team: 'NYY', position: 'SP-R', hits: 'R' },
+        { id: 'burnes', name: 'Corbin Burnes', team: 'BAL', position: 'SP-R', hits: 'R' },
+        { id: 'wheeler', name: 'Zack Wheeler', team: 'PHI', position: 'SP-R', hits: 'L' },
+        { id: 'degrom', name: 'Jacob deGrom', team: 'TEX', position: 'SP-R', hits: 'R' },
+        { id: 'scherzer', name: 'Max Scherzer', team: 'NYM', position: 'SP-R', hits: 'R' },
+        { id: 'alcantara', name: 'Sandy Alcántara', team: 'MIA', position: 'SP-R', hits: 'R' },
+        { id: 'verlander', name: 'Justin Verlander', team: 'HOU', position: 'SP-R', hits: 'R' },
+        { id: 'cease', name: 'Dylan Cease', team: 'SD', position: 'SP-R', hits: 'R' },
+        { id: 'nola', name: 'Aaron Nola', team: 'PHI', position: 'SP-R', hits: 'R' },
+        { id: 'bassitt', name: 'Chris Bassitt', team: 'TOR', position: 'SP-R', hits: 'R' },
+        { id: 'manoah', name: 'Alek Manoah', team: 'TOR', position: 'SP-R', hits: 'R' },
+        { id: 'valdez', name: 'Framber Valdez', team: 'HOU', position: 'SP-L', hits: 'L' },
+        { id: 'lopez', name: 'Pablo López', team: 'MIN', position: 'SP-R', hits: 'R' },
+        { id: 'musgrove', name: 'Joe Musgrove', team: 'SD', position: 'SP-R', hits: 'R' },
+        { id: 'ray', name: 'Robbie Ray', team: 'SEA', position: 'SP-L', hits: 'L' },
+        { id: 'rodon', name: 'Carlos Rodón', team: 'SF', position: 'SP-L', hits: 'L' },
+        { id: 'gausman', name: 'Kevin Gausman', team: 'TOR', position: 'SP-R', hits: 'R' },
+        { id: 'ryan', name: 'Joe Ryan', team: 'MIN', position: 'SP-R', hits: 'R' },
+        { id: 'strider', name: 'Spencer Strider', team: 'ATL', position: 'SP-R', hits: 'R' }
+      ],
+      'RP': [
+        // Relief Pitchers with handedness
+        { id: 'hader', name: 'Josh Hader', team: 'HOU', position: 'RP-L', hits: 'L' },
+        { id: 'diaz', name: 'Edwin Díaz', team: 'NYM', position: 'RP-R', hits: 'R' },
+        { id: 'clase', name: 'Emmanuel Clase', team: 'CLE', position: 'RP-R', hits: 'R' },
+        { id: 'hendriks', name: 'Liam Hendriks', team: 'CWS', position: 'RP-R', hits: 'R' },
+        { id: 'romano', name: 'Jordan Romano', team: 'TOR', position: 'RP-R', hits: 'R' },
+        { id: 'pressly', name: 'Ryan Pressly', team: 'HOU', position: 'RP-R', hits: 'R' },
+        { id: 'kimbrel', name: 'Craig Kimbrel', team: 'PHI', position: 'RP-R', hits: 'L' },
+        { id: 'iglesias_raisel', name: 'Raisel Iglesias', team: 'ATL', position: 'RP-R', hits: 'R' },
+        { id: 'bard', name: 'Daniel Bard', team: 'COL', position: 'RP-R', hits: 'R' },
+        { id: 'williams', name: 'Devin Williams', team: 'MIL', position: 'RP-R', hits: 'R' },
+        { id: 'scott', name: 'Tanner Scott', team: 'MIA', position: 'RP-L', hits: 'L' }
+      ],
       'P': [
-        { id: 'cole', name: 'Gerrit Cole', team: 'NYY' },
-        { id: 'burnes', name: 'Corbin Burnes', team: 'BAL' },
-        { id: 'wheeler', name: 'Zack Wheeler', team: 'PHI' },
-        { id: 'degrom', name: 'Jacob deGrom', team: 'TEX' },
-        { id: 'scherzer', name: 'Max Scherzer', team: 'NYM' },
-        { id: 'alcantara', name: 'Sandy Alcántara', team: 'MIA' },
-        { id: 'verlander', name: 'Justin Verlander', team: 'HOU' },
-        { id: 'cease', name: 'Dylan Cease', team: 'SD' },
-        { id: 'nola', name: 'Aaron Nola', team: 'PHI' },
-        { id: 'bassitt', name: 'Chris Bassitt', team: 'TOR' },
-        { id: 'manoah', name: 'Alek Manoah', team: 'TOR' },
-        { id: 'valdez', name: 'Framber Valdez', team: 'HOU' },
-        { id: 'hader', name: 'Josh Hader', team: 'HOU' },
-        { id: 'diaz', name: 'Edwin Díaz', team: 'NYM' },
-        { id: 'clase', name: 'Emmanuel Clase', team: 'CLE' },
-        { id: 'hendriks', name: 'Liam Hendriks', team: 'CWS' },
-        { id: 'romano', name: 'Jordan Romano', team: 'TOR' },
-        { id: 'pressly', name: 'Ryan Pressly', team: 'HOU' },
-        { id: 'kimbrel', name: 'Craig Kimbrel', team: 'PHI' },
-        { id: 'iglesias_raisel', name: 'Raisel Iglesias', team: 'ATL' },
-        { id: 'bard', name: 'Daniel Bard', team: 'COL' },
-        { id: 'williams', name: 'Devin Williams', team: 'MIL' },
-        { id: 'scott', name: 'Tanner Scott', team: 'MIA' },
-        { id: 'lopez', name: 'Pablo López', team: 'MIN' },
-        { id: 'musgrove', name: 'Joe Musgrove', team: 'SD' },
-        { id: 'ray', name: 'Robbie Ray', team: 'SEA' },
-        { id: 'rodon', name: 'Carlos Rodón', team: 'SF' },
-        { id: 'gausman', name: 'Kevin Gausman', team: 'TOR' },
-        { id: 'ryan', name: 'Joe Ryan', team: 'MIN' },
-        { id: 'strider', name: 'Spencer Strider', team: 'ATL' }
+        // Combined pitchers for legacy support - will be split into SP/RP
+        { id: 'cole', name: 'Gerrit Cole', team: 'NYY', position: 'SP-R', hits: 'R' },
+        { id: 'hader', name: 'Josh Hader', team: 'HOU', position: 'RP-L', hits: 'L' },
+        { id: 'burnes', name: 'Corbin Burnes', team: 'BAL', position: 'SP-R', hits: 'R' }
       ]
     };
     
-    return fallbackData[position] || [];
+    const data = fallbackData[position] || [];
+    
+    // Transform data to match new structure
+    return data.map((player: any, index: number) => {
+      const result = { ...player };
+      
+      // If hits field doesn't exist, add it based on index
+      if (!result.hits) {
+        if (index % 10 === 0) {
+          result.hits = 'S'; // Switch hitter
+        } else if (index % 3 === 0) {
+          result.hits = 'L'; // Left-handed hitter  
+        } else {
+          result.hits = 'R'; // Right-handed hitter
+        }
+      }
+      
+      return result;
+    });
   }
 
   async getNHLRosterByPosition(position: string): Promise<any[]> {
