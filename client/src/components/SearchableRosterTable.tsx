@@ -45,8 +45,8 @@ export function SearchableRosterTable({ sport, onPlayerSelect, selectedPlayer }:
       
       if (sport.toLowerCase() === 'nfl') {
         // Get all NFL players from our depth chart parser
-        const response = await fetch('/api/fantasy/roster/nfl/all');
-        const data = await response.json();
+        const response = await apiRequest('/api/fantasy/roster/nfl/all', 'GET');
+        const data = response;
         
         if (data.success) {
           setPlayers(data.players || []);
