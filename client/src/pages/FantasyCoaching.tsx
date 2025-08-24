@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Brain, Trophy, TrendingUp, Users, Zap, Target, BarChart3, MessageSquare, Activity, AlertTriangle, CheckCircle } from 'lucide-react';
 import { KeystoneAvatar } from '@/components/KeystoneAvatar';
 import { FantasyLineupCoach } from '@/components/FantasyLineupCoach';
-import DFSLineupOptimizer from '@/components/DFSLineupOptimizer';
+// DFS component removed - using pure Yahoo Sports API only
 import { LiveScoring } from '@/components/LiveScoring';
 import { useAuth } from '@/hooks/useAuth';
 import { FantasyAgeGate } from '@/components/FantasyAgeGate';
@@ -573,7 +573,9 @@ export default function FantasyCoaching() {
 
           {/* DFS Lineup Optimizer Tab - PRIMARY FEATURE */}
           <TabsContent value="dfs-optimizer" className="space-y-6" data-testid="dfs-optimizer-content">
-            <DFSLineupOptimizer />
+            <div className="text-center py-8">
+              <p className="text-gray-600">🎯 Pure Yahoo Sports API - Clean data only</p>
+            </div>
           </TabsContent>
 
           {/* Player Search Tab - Multi-Sport Searchable Roster Tables */}

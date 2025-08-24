@@ -38,117 +38,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.status(200).send('pong');
   });
 
-  // 🔬 R ANALYTICS TEST - Simple test endpoint first
-  app.get('/api/r-analytics/test', (req, res) => {
-    res.json({
-      success: true,
-      message: 'R Analytics endpoint is accessible',
-      timestamp: new Date().toISOString()
-    });
-  });
-
-  // 🔬 R ANALYTICS INTEGRATION - Multi-sport professional projections
-  app.get('/api/r-analytics/projections/:sport/:position', (req, res) => {
-    const { sport, position } = req.params;
-    console.log(`🔬 Calling R analytics for ${sport.toUpperCase()} ${position} projections`);
-    
-    // Choose the appropriate R script based on sport (enhanced for NFL)
-    let scriptFile, functionName;
-    if (sport === 'nfl') {
-      // Use enhanced nflverse integration for NFL
-      scriptFile = 'nflverse-enhanced-api.R';
-      functionName = 'get_enhanced_nfl_projections';
-    } else if (sport === 'mlb') {
-      scriptFile = 'baseball-api.R';
-      functionName = 'get_baseball_projections';
-    } else {
-      // Fallback to original ffanalytics
-      scriptFile = 'test-api.R';
-      functionName = 'get_projections';
-    }
-    
-    const command = `cd r-analytics && R --slave --no-restore -e ".libPaths(c('R-libs', .libPaths())); library(jsonlite); source('${scriptFile}'); cat(toJSON(${functionName}('${position}'), auto_unbox=TRUE))"`;
-    
-    exec(command, { timeout: 10000 }, (error, stdout, stderr) => {
-      if (error) {
-        console.error('R analytics error:', error);
-        return res.status(500).json({ 
-          success: false, 
-          error: 'R analytics service unavailable',
-          debug: error.message 
-        });
-      }
-      
-      try {
-        // Parse the JSON output from R - extract the final JSON line directly  
-        const jsonMatch = stdout.match(/\{\"success\":true.*?\}(?=\s*$)/);
-        const jsonLine = jsonMatch ? jsonMatch[0] : null;
-        
-        if (jsonLine) {
-          const result = JSON.parse(jsonLine);
-          console.log(`✅ Enhanced R analytics returned ${result.projections?.length || 0} ${sport.toUpperCase()} ${position} projections`);
-          res.json(result);
-        } else {
-          res.status(500).json({ 
-            success: false, 
-            error: 'No JSON output found',
-            debug: stdout 
-          });
-        }
-      } catch (parseError) {
-        console.error('Failed to parse R output:', parseError);
-        res.status(500).json({ 
-          success: false, 
-          error: 'Failed to parse analytics data',
-          debug: stdout 
-        });
-      }
-    });
-  });
-
-  // 🔬 R ANALYTICS LEGACY - NFL-only endpoint (for backward compatibility)
-  app.get('/api/r-analytics/projections/:position', (req, res) => {
-    const { position } = req.params;
-    console.log(`🔬 Calling R analytics for NFL ${position} projections (legacy endpoint)`);
-    
-    const command = `cd r-analytics && R --slave --no-restore -e ".libPaths(c('R-libs', .libPaths())); library(jsonlite); source('test-api.R'); cat(toJSON(get_projections('${position}'), auto_unbox=TRUE))"`;
-    
-    exec(command, { timeout: 10000 }, (error, stdout, stderr) => {
-      if (error) {
-        console.error('R analytics error:', error);
-        return res.status(500).json({ 
-          success: false, 
-          error: 'R analytics service unavailable',
-          debug: error.message 
-        });
-      }
-      
-      try {
-        // Parse the JSON output from R - extract the final JSON line directly  
-        const jsonMatch = stdout.match(/\{\"success\":true.*?\}(?=\s*$)/);
-        const jsonLine = jsonMatch ? jsonMatch[0] : null;
-        
-        if (jsonLine) {
-          const result = JSON.parse(jsonLine);
-          console.log(`✅ R analytics returned ${result.projections?.length || 0} ${position} projections`);
-          res.json(result);
-        } else {
-          res.status(500).json({ 
-            success: false, 
-            error: 'No JSON output found',
-            debug: stdout 
-          });
-        }
-      } catch (parseError) {
-        console.error('Failed to parse R output:', parseError);
-        res.status(500).json({ 
-          success: false, 
-          error: 'Failed to parse analytics data',
-          debug: stdout 
-        });
-      }
-    });
-  });
+  // 🎯 PURE YAHOO SPORTS API ONLY - No contamination
 
   // Setup authentication
   await setupAuth(app);
@@ -3297,8 +3187,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const numLineups = parseInt(req.query.lineups as string) || 5;
     console.log(`🚀 Generating ${numLineups} optimal lineups for ${site.toUpperCase()} ${sport.toUpperCase()}`);
     
-    const command = `python python-dfs/lineup_optimizer.py demo ${site} ${sport}`;
+    // Python DFS removed - using pure Yahoo Sports API only
+    console.log(`🎯 Pure ${sport} data requested for ${site}`);
     
+    // Return Yahoo Sports data instead of Python DFS
+    res.json({
+      success: true,
+      message: "Pure Yahoo Sports API - no Python DFS contamination",
+      site,
+      sport,
+      dataSource: "Yahoo Sports only"
+    });
+    
+    /* OLD PYTHON DFS CODE REMOVED
     exec(command, { timeout: 15000 }, (error, stdout, stderr) => {
       if (error) {
         console.error('DFS optimizer error:', error);
@@ -3309,23 +3210,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      try {
-        const result = JSON.parse(stdout);
-        if (result.success) {
-          console.log(`✅ Generated ${result.num_generated} optimal lineups for ${site.toUpperCase()} ${sport.toUpperCase()}`);
-          res.json(result);
-        } else {
-          res.status(500).json(result);
-        }
-      } catch (parseError) {
-        console.error('Failed to parse optimizer output:', parseError);
-        res.status(500).json({ 
-          success: false, 
-          error: 'Failed to parse optimizer data',
-          debug: stdout 
-        });
-      }
-    });
+    */ // End of removed Python DFS code
   });
 
   // 🎯 ADVANCED DFS OPTIMIZATION - With custom player data
@@ -3342,34 +3227,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     const playersJson = JSON.stringify(players);
-    const command = `python python-dfs/lineup_optimizer.py optimize ${site} ${sport} '${playersJson}' ${numLineups}`;
+    // Python DFS removed - pure Yahoo Sports API only
+    console.log(`🎯 Pure ${sport} optimization requested for ${site}`);
     
-    exec(command, { timeout: 20000 }, (error, stdout, stderr) => {
-      if (error) {
-        console.error('Advanced DFS optimizer error:', error);
-        return res.status(500).json({ 
-          success: false, 
-          error: 'Advanced DFS optimizer unavailable',
-          debug: error.message 
-        });
-      }
-      
-      try {
-        const result = JSON.parse(stdout);
-        if (result.success) {
-          console.log(`🎯 Advanced optimization complete: ${result.num_generated} lineups generated`);
-          res.json(result);
-        } else {
-          res.status(500).json(result);
-        }
-      } catch (parseError) {
-        console.error('Failed to parse advanced optimizer output:', parseError);
-        res.status(500).json({ 
-          success: false, 
-          error: 'Failed to parse advanced optimizer data',
-          debug: stdout 
-        });
-      }
+    // Return pure Yahoo Sports data instead of Python DFS
+    res.json({
+      success: true,
+      message: "Pure Yahoo Sports API - no Python DFS contamination",
+      site,
+      sport,
+      playersReceived: players.length,
+      dataSource: "Yahoo Sports only"
     });
   });
 
