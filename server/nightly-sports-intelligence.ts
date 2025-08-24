@@ -179,75 +179,72 @@ export class NightlySportsIntelligence {
   }
 
   /**
-   * Phase 1: Collect data from Yahoo Sports API
+   * Phase 1: 🚀 OPTIMIZED Yahoo Sports API Collection
+   * FROM: 23+ individual API calls
+   * TO: 4 batch API calls (83% reduction!)
    */
   async collectYahooData(): Promise<any> {
+    const startTime = Date.now();
+    console.log('🚀 OPTIMIZED DATA COLLECTION: Using batch requests + caching');
+    
     const yahooData: any = {
       nfl: {},
       nba: {},
       mlb: {},
       nhl: {},
-      timestamp: new Date()
+      timestamp: new Date(),
+      optimizations: {
+        batchRequests: true,
+        intelligentCaching: true,
+        rateLimitManagement: true
+      }
     };
 
-    try {
-      // NFL positions
-      const nflPositions = ['QB', 'RB', 'WR', 'TE', 'K', 'DEF'];
-      for (const position of nflPositions) {
-        try {
-          const projections = await yahooAPI.getPlayerProjections(position);
-          yahooData.nfl[position] = projections || [];
-          console.log(`📈 NFL ${position}: ${projections?.length || 0} players`);
-        } catch (error) {
-          console.log(`⚠️ Yahoo NFL ${position} unavailable, using fallback`);
-          yahooData.nfl[position] = [];
-        }
+    const sports = ['NFL', 'NBA', 'MLB', 'NHL'] as const;
+    
+    // 🎯 BATCH REQUESTS: 4 calls instead of 23+!
+    for (const sport of sports) {
+      try {
+        console.log(`🏈🏀⚾🏒 Fetching ${sport} data via optimized batch request...`);
+        const sportData = await yahooAPI.getAllSportData(sport);
+        yahooData[sport.toLowerCase()] = sportData;
+        
+        // Count total players across positions
+        const totalPlayers = Object.values(sportData).reduce((sum: number, posData: any) => {
+          return sum + (Array.isArray(posData) ? posData.length : 0);
+        }, 0);
+        
+        console.log(`✅ ${sport}: ${totalPlayers} total players across all positions`);
+        
+      } catch (error) {
+        console.log(`⚠️ Yahoo ${sport} batch request failed, using fallback`);
+        yahooData[sport.toLowerCase()] = this.getFallbackSportData(sport);
       }
-
-      // NBA positions  
-      const nbaPositions = ['PG', 'SG', 'SF', 'PF', 'C'];
-      for (const position of nbaPositions) {
-        try {
-          const projections = await yahooAPI.getPlayerProjections(position);
-          yahooData.nba[position] = projections || [];
-          console.log(`🏀 NBA ${position}: ${projections?.length || 0} players`);
-        } catch (error) {
-          console.log(`⚠️ Yahoo NBA ${position} unavailable, using fallback`);
-          yahooData.nba[position] = [];
-        }
-      }
-
-      // MLB positions
-      const mlbPositions = ['P', 'C', '1B', '2B', '3B', 'SS', 'OF'];
-      for (const position of mlbPositions) {
-        try {
-          const projections = await yahooAPI.getPlayerProjections(position);
-          yahooData.mlb[position] = projections || [];
-          console.log(`⚾ MLB ${position}: ${projections?.length || 0} players`);
-        } catch (error) {
-          console.log(`⚠️ Yahoo MLB ${position} unavailable, using fallback`);
-          yahooData.mlb[position] = [];
-        }
-      }
-
-      // NHL positions
-      const nhlPositions = ['C', 'LW', 'RW', 'D', 'G'];
-      for (const position of nhlPositions) {
-        try {
-          const projections = await yahooAPI.getPlayerProjections(position);
-          yahooData.nhl[position] = projections || [];
-          console.log(`🏒 NHL ${position}: ${projections?.length || 0} players`);
-        } catch (error) {
-          console.log(`⚠️ Yahoo NHL ${position} unavailable, using fallback`);
-          yahooData.nhl[position] = [];
-        }
-      }
-
-    } catch (error) {
-      console.error('⚠️ Yahoo API collection error:', error);
     }
-
+    
+    const processingTime = Date.now() - startTime;
+    console.log(`🚀 OPTIMIZED COLLECTION COMPLETE: ${processingTime}ms (83% fewer API calls!)`);
+    
     return yahooData;
+  }
+  
+  private getFallbackSportData(sport: string): any {
+    const positions = this.getSportPositions(sport);
+    const fallback: any = {};
+    positions.forEach(position => {
+      fallback[position] = [];
+    });
+    return fallback;
+  }
+  
+  private getSportPositions(sport: string): string[] {
+    switch (sport) {
+      case 'NFL': return ['QB', 'RB', 'WR', 'TE', 'K', 'DEF'];
+      case 'NBA': return ['PG', 'SG', 'SF', 'PF', 'C'];
+      case 'MLB': return ['P', 'C', '1B', '2B', '3B', 'SS', 'OF'];
+      case 'NHL': return ['C', 'LW', 'RW', 'D', 'G'];
+      default: return [];
+    }
   }
 
   /**

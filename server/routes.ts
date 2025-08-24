@@ -3252,6 +3252,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
 
+  // 🚀 YAHOO API EFFICIENCY ENDPOINTS
+  app.get('/api/yahoo/status', async (req, res) => {
+    try {
+      const { YahooSportsAPI } = await import('./yahooSportsAPI');
+      const yahooAPI = YahooSportsAPI.getInstance();
+      res.json({
+        ready: yahooAPI.isReady(),
+        status: yahooAPI.isReady() ? 'Connected' : 'Mock Mode',
+        efficiency: yahooAPI.getEfficiencyStats(),
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      res.status(500).json({ error: 'Yahoo API status unavailable' });
+    }
+  });
+  
+  // 🚀 EFFICIENCY DEMO: Test the optimized batch requests
+  app.get('/api/yahoo/efficiency-demo', async (req, res) => {
+    try {
+      const { YahooSportsAPI } = await import('./yahooSportsAPI');
+      const yahooAPI = YahooSportsAPI.getInstance();
+      const startTime = Date.now();
+      
+      console.log('🚀 EFFICIENCY DEMO: Testing optimized batch requests...');
+      
+      // This will demonstrate cache hits on subsequent calls
+      const nflData = await yahooAPI.getAllSportData('NFL');
+      const nbaData = await yahooAPI.getAllSportData('NBA');
+      
+      const processingTime = Date.now() - startTime;
+      const efficiency = yahooAPI.getEfficiencyStats();
+      
+      res.json({
+        demo: 'Optimized Yahoo API Efficiency',
+        processingTime: `${processingTime}ms`,
+        dataCollected: {
+          nfl: Object.keys(nflData).length + ' positions',
+          nba: Object.keys(nbaData).length + ' positions'
+        },
+        efficiency,
+        note: 'Subsequent calls will show cache hits!'
+      });
+    } catch (error) {
+      res.status(500).json({ error: 'Demo failed', details: error });
+    }
+  });
+
   // Create and return server
   const server = createServer(app);
   return server;
