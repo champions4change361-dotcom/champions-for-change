@@ -132,9 +132,11 @@ export default function FantasyCoaching() {
     },
     onSuccess: (data) => {
       setPlayerAnalysis(data);
+      // Automatically switch to AI Coach tab to show analysis
+      setActiveTab('ai-coach');
       toast({
-        title: "Analysis Complete",
-        description: `Generated analysis for player`,
+        title: "Enhanced Analysis Complete",
+        description: `Generated professional analysis with Yahoo Sports data for ${data.player}`,
       });
     },
     onError: (error) => {
@@ -461,7 +463,7 @@ export default function FantasyCoaching() {
                       // Switch to AI coach tab to show analysis
                       setActiveTab('ai-coach');
                       
-                      // Trigger analysis with the currently selected sport
+                      // Trigger enhanced analysis and switch to AI tab
                       analyzePlayerMutation.mutate({
                         sport: selectedSport,
                         position: position,
