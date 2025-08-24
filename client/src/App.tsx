@@ -242,6 +242,9 @@ function AppRouter() {
       {/* Fantasy Coaching AI - High Priority Route */}
       <Route path="/fantasy-coaching" component={FantasyCoaching} />
       
+      {/* Fantasy Tournaments - Public Access for Demo */}
+      <Route path="/fantasy-tournaments" component={FantasyTournaments} />
+      
       {/* Platform Selection Page */}
       <Route path="/platform-options" component={PlatformOptions} />
       
