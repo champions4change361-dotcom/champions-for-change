@@ -1078,13 +1078,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const positionPlayers = await getEnhancedFallbackRoster('mlb', position);
             if (Array.isArray(positionPlayers) && positionPlayers.length > 0) {
               const playersWithData = positionPlayers.map((player: any, index: number) => ({
-                id: player.id || `${player.name?.toLowerCase().replace(/\s+/g, '_')}_${player.team?.toLowerCase()}_mlb`,
+                id: `mlb_${player.id || `${player.name?.toLowerCase().replace(/\s+/g, '_')}_${player.team?.toLowerCase()}`}`,
                 name: player.name,
                 team: player.team || 'UNK',
                 number: (index + 1).toString(),
                 status: 'active',
                 depth: index + 1,
-                position: position
+                position: position,
+                sport: 'MLB' // Explicit sport identifier
               }));
               allMLBPlayers.push(...playersWithData);
             }
@@ -1116,13 +1117,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const positionPlayers = await getEnhancedFallbackRoster('nhl', position);
             if (Array.isArray(positionPlayers) && positionPlayers.length > 0) {
               const playersWithData = positionPlayers.map((player: any, index: number) => ({
-                id: player.id || `${player.name?.toLowerCase().replace(/\s+/g, '_')}_${player.team?.toLowerCase()}_nhl`,
+                id: `nhl_${player.id || `${player.name?.toLowerCase().replace(/\s+/g, '_')}_${player.team?.toLowerCase()}`}`,
                 name: player.name,
                 team: player.team || 'UNK',
                 number: (index + 1).toString(),
                 status: 'active',
                 depth: index + 1,
-                position: position
+                position: position,
+                sport: 'NHL' // Explicit sport identifier
               }));
               allNHLPlayers.push(...playersWithData);
             }
@@ -1478,7 +1480,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           break;
 
         case 'mlb':
-          // Comprehensive MLB rosters with backups - DraftKings style
+          // Comprehensive MLB rosters with backups - DraftKings style  
+          console.log(`🔍 MLB Fallback: Getting ${position} players for pure MLB data`);
           const mlbRosters: any = {
             'P': [
               // Top Starters
@@ -1575,13 +1578,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
               { id: 'pena', name: 'Jeremy Pena', team: 'HOU' }
             ],
             'OF': [
-              // Tier 1 Elite - 2025 CURRENT SEASON
+              // Tier 1 Elite - 2025 CURRENT SEASON  
               { id: 'ohtani', name: 'Shohei Ohtani', team: 'LAD' }, // Dodgers lineup 1-hole DH
               { id: 'betts', name: 'Mookie Betts', team: 'LAD' }, // Moved to SS in 2025
               { id: 'hernandez_t', name: 'Teoscar Hernández', team: 'LAD' }, // Current RF
-              { id: 'freeman', name: 'Freddie Freeman', team: 'LAD' }, // Dodgers 1B
               { id: 'edman', name: 'Tommy Edman', team: 'LAD' }, // Center field
-              { id: 'smith_will', name: 'Will Smith', team: 'LAD' }, // Catcher
               // Blue Jays 2025 Opening Day Lineup
               { id: 'bichette2', name: 'Bo Bichette', team: 'TOR' }, // 2025 leadoff SS
               { id: 'vladguerrero2', name: 'Vladimir Guerrero Jr.', team: 'TOR' }, // 1B cleanup
@@ -1601,10 +1602,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
               { id: 'acuna2', name: 'Ronald Acuña Jr.', team: 'ATL' },
               { id: 'soto2', name: 'Juan Soto', team: 'SD' },
               { id: 'trout2', name: 'Mike Trout', team: 'LAA' },
-              { id: 'harper2', name: 'Bryce Harper', team: 'PHI' }
+              { id: 'harper2', name: 'Bryce Harper', team: 'PHI' },
+              { id: 'judge_aaron', name: 'Aaron Judge', team: 'NYY' },
+              { id: 'acuna_ronald', name: 'Ronald Acuña Jr.', team: 'ATL' },
+              { id: 'soto_juan', name: 'Juan Soto', team: 'SD' },
+              { id: 'trout_mike', name: 'Mike Trout', team: 'LAA' }
             ]
           };
-          roster = mlbRosters[position] || [];
+          
+          // Ensure we get clean MLB data without sport mixing
+          const cleanMLBRoster = mlbRosters[position] || [];
+          console.log(`✅ Clean MLB ${position} data: ${cleanMLBRoster.length} players`);
+          roster = cleanMLBRoster;
           break;
 
         case 'nhl':
