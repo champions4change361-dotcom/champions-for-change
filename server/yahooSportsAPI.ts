@@ -966,14 +966,9 @@ export class YahooSportsAPI {
   private getComprehensiveMLBRoster(teamCode: string): any[] {
     const rosters: { [key: string]: any[] } = {
       'NYY': [
-        // Yankees roster - Starting Pitchers
         { id: 'cole_gerrit', name: 'Gerrit Cole', team: 'NYY', position: 'SP-R', number: '45', hits: 'R' },
         { id: 'rodon_carlos', name: 'Carlos Rodón', team: 'NYY', position: 'SP-L', number: '55', hits: 'L' },
-        { id: 'severino_luis', name: 'Luis Severino', team: 'NYY', position: 'SP-R', number: '40', hits: 'R' },
-        // Yankees roster - Relief Pitchers  
-        { id: 'clay_holmes', name: 'Clay Holmes', team: 'NYY', position: 'RP-R', number: '35', hits: 'R' },
-        { id: 'michael_king', name: 'Michael King', team: 'NYY', position: 'RP-R', number: '34', hits: 'R' },
-        // Yankees roster - Position Players
+        { id: 'holmes_clay', name: 'Clay Holmes', team: 'NYY', position: 'RP-R', number: '35', hits: 'R' },
         { id: 'judge_aaron', name: 'Aaron Judge', team: 'NYY', position: 'OF', number: '99', hits: 'R' },
         { id: 'stanton_giancarlo', name: 'Giancarlo Stanton', team: 'NYY', position: 'OF', number: '27', hits: 'R' },
         { id: 'torres_gleyber', name: 'Gleyber Torres', team: 'NYY', position: '2B', number: '25', hits: 'R' },
@@ -981,12 +976,74 @@ export class YahooSportsAPI {
         { id: 'trevino_jose', name: 'Jose Trevino', team: 'NYY', position: 'C', number: '39', hits: 'R' }
       ],
       'LAD': [
-        // Dodgers roster
         { id: 'betts_mookie', name: 'Mookie Betts', team: 'LAD', position: 'OF', number: '50', hits: 'R' },
         { id: 'freeman_freddie', name: 'Freddie Freeman', team: 'LAD', position: '1B', number: '5', hits: 'L' },
         { id: 'smith_will_lad', name: 'Will Smith', team: 'LAD', position: 'C', number: '16', hits: 'R' },
         { id: 'buehler_walker', name: 'Walker Buehler', team: 'LAD', position: 'SP-R', number: '21', hits: 'R' },
-        { id: 'muncy_max', name: 'Max Muncy', team: 'LAD', position: '2B', number: '13', hits: 'L' }
+        { id: 'muncy_max', name: 'Max Muncy', team: 'LAD', position: '2B', number: '13', hits: 'L' },
+        { id: 'ohtani_shohei', name: 'Shohei Ohtani', team: 'LAD', position: 'OF', number: '17', hits: 'L' },
+        { id: 'teoscar_hernandez', name: 'Teoscar Hernández', team: 'LAD', position: 'OF', number: '37', hits: 'R' },
+        { id: 'glasnow_tyler', name: 'Tyler Glasnow', team: 'LAD', position: 'SP-R', number: '88', hits: 'L' }
+      ],
+      'HOU': [
+        { id: 'tucker_kyle', name: 'Kyle Tucker', team: 'HOU', position: 'OF', number: '30', hits: 'L' },
+        { id: 'altuve_jose', name: 'Jose Altuve', team: 'HOU', position: '2B', number: '27', hits: 'R' },
+        { id: 'bregman_alex', name: 'Alex Bregman', team: 'HOU', position: '3B', number: '2', hits: 'R' },
+        { id: 'alvarez_yordan', name: 'Yordan Alvarez', team: 'HOU', position: 'OF', number: '44', hits: 'L' },
+        { id: 'valdez_framber', name: 'Framber Valdez', team: 'HOU', position: 'SP-L', number: '59', hits: 'L' },
+        { id: 'garcia_luis', name: 'Luis Garcia', team: 'HOU', position: 'SP-R', number: '77', hits: 'R' },
+        { id: 'pressly_ryan', name: 'Ryan Pressly', team: 'HOU', position: 'RP-R', number: '55', hits: 'R' },
+        { id: 'diaz_yainer', name: 'Yainer Diaz', team: 'HOU', position: 'C', number: '21', hits: 'R' }
+      ],
+      'ATL': [
+        { id: 'acuna_ronald', name: 'Ronald Acuña Jr.', team: 'ATL', position: 'OF', number: '13', hits: 'R' },
+        { id: 'freeman_matt', name: 'Matt Olson', team: 'ATL', position: '1B', number: '28', hits: 'L' },
+        { id: 'albies_ozzie', name: 'Ozzie Albies', team: 'ATL', position: '2B', number: '1', hits: 'S' },
+        { id: 'riley_austin', name: 'Austin Riley', team: 'ATL', position: '3B', number: '27', hits: 'R' },
+        { id: 'fried_max', name: 'Max Fried', team: 'ATL', position: 'SP-L', number: '54', hits: 'L' },
+        { id: 'strider_spencer', name: 'Spencer Strider', team: 'ATL', position: 'SP-R', number: '99', hits: 'R' },
+        { id: 'iglesias_raisel', name: 'Raisel Iglesias', team: 'ATL', position: 'RP-R', number: '26', hits: 'R' },
+        { id: 'murphy_sean', name: 'Sean Murphy', team: 'ATL', position: 'C', number: '12', hits: 'R' }
+      ],
+      'PHI': [
+        { id: 'harper_bryce', name: 'Bryce Harper', team: 'PHI', position: '1B', number: '3', hits: 'L' },
+        { id: 'schwarber_kyle', name: 'Kyle Schwarber', team: 'PHI', position: 'OF', number: '12', hits: 'L' },
+        { id: 'turner_trea', name: 'Trea Turner', team: 'PHI', position: 'SS', number: '7', hits: 'R' },
+        { id: 'castellanos_nick', name: 'Nick Castellanos', team: 'PHI', position: 'OF', number: '8', hits: 'R' },
+        { id: 'wheeler_zack', name: 'Zack Wheeler', team: 'PHI', position: 'SP-R', number: '45', hits: 'L' },
+        { id: 'nola_aaron', name: 'Aaron Nola', team: 'PHI', position: 'SP-R', number: '27', hits: 'R' },
+        { id: 'kimbrel_craig', name: 'Craig Kimbrel', team: 'PHI', position: 'RP-R', number: '46', hits: 'R' },
+        { id: 'realmuto_jt', name: 'J.T. Realmuto', team: 'PHI', position: 'C', number: '10', hits: 'R' }
+      ],
+      'SD': [
+        { id: 'tatis_fernando', name: 'Fernando Tatis Jr.', team: 'SD', position: 'OF', number: '23', hits: 'R' },
+        { id: 'machado_manny', name: 'Manny Machado', team: 'SD', position: '3B', number: '13', hits: 'R' },
+        { id: 'bogaerts_xander', name: 'Xander Bogaerts', team: 'SD', position: 'SS', number: '2', hits: 'R' },
+        { id: 'soto_juan', name: 'Juan Soto', team: 'SD', position: 'OF', number: '22', hits: 'L' },
+        { id: 'darvish_yu', name: 'Yu Darvish', team: 'SD', position: 'SP-R', number: '11', hits: 'R' },
+        { id: 'musgrove_joe', name: 'Joe Musgrove', team: 'SD', position: 'SP-R', number: '44', hits: 'L' },
+        { id: 'hader_josh', name: 'Josh Hader', team: 'SD', position: 'RP-L', number: '71', hits: 'L' },
+        { id: 'campusano_luis', name: 'Luis Campusano', team: 'SD', position: 'C', number: '12', hits: 'R' }
+      ],
+      'TOR': [
+        { id: 'guerrero_vladimir', name: 'Vladimir Guerrero Jr.', team: 'TOR', position: '1B', number: '27', hits: 'R' },
+        { id: 'bichette_bo', name: 'Bo Bichette', team: 'TOR', position: 'SS', number: '11', hits: 'R' },
+        { id: 'springer_george', name: 'George Springer', team: 'TOR', position: 'OF', number: '4', hits: 'R' },
+        { id: 'kirk_alejandro', name: 'Alejandro Kirk', team: 'TOR', position: 'C', number: '30', hits: 'L' },
+        { id: 'gausman_kevin', name: 'Kevin Gausman', team: 'TOR', position: 'SP-R', number: '34', hits: 'L' },
+        { id: 'bassitt_chris', name: 'Chris Bassitt', team: 'TOR', position: 'SP-R', number: '40', hits: 'R' },
+        { id: 'romano_jordan', name: 'Jordan Romano', team: 'TOR', position: 'RP-R', number: '68', hits: 'R' },
+        { id: 'varsho_daulton', name: 'Daulton Varsho', team: 'TOR', position: 'OF', number: '25', hits: 'L' }
+      ],
+      'BOS': [
+        { id: 'devers_rafael', name: 'Rafael Devers', team: 'BOS', position: '3B', number: '11', hits: 'L' },
+        { id: 'bogaerts_trevor', name: 'Trevor Story', team: 'BOS', position: 'SS', number: '10', hits: 'R' },
+        { id: 'verdugo_alex', name: 'Alex Verdugo', team: 'BOS', position: 'OF', number: '99', hits: 'L' },
+        { id: 'yoshida_masataka', name: 'Masataka Yoshida', team: 'BOS', position: 'OF', number: '7', hits: 'L' },
+        { id: 'sale_chris', name: 'Chris Sale', team: 'BOS', position: 'SP-L', number: '41', hits: 'R' },
+        { id: 'pivetta_nick', name: 'Nick Pivetta', team: 'BOS', position: 'SP-R', number: '37', hits: 'R' },
+        { id: 'jansen_kenley', name: 'Kenley Jansen', team: 'BOS', position: 'RP-R', number: '74', hits: 'R' },
+        { id: 'wong_connor', name: 'Connor Wong', team: 'BOS', position: 'C', number: '74', hits: 'R' }
       ]
     };
 
@@ -994,36 +1051,45 @@ export class YahooSportsAPI {
   }
 
   private getDefaultMLBRoster(teamCode: string): any[] {
-    // Generate a realistic 25-man roster for any team
+    // Generate realistic player names for any team
+    const firstNames = ['Jake', 'Mike', 'Chris', 'Alex', 'Tyler', 'Ryan', 'Matt', 'David', 'Carlos', 'Luis', 'Jose', 'Jordan', 'Brandon', 'Nick', 'Kevin', 'Josh', 'Tony', 'Mark', 'Sean', 'Brian', 'Derek', 'Steve', 'Paul', 'Sam', 'Ben'];
+    const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez', 'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson', 'Thomas', 'Taylor', 'Moore', 'Jackson', 'Martin', 'Lee', 'Walker', 'Hall', 'Young', 'Allen'];
+    
+    const getRandomName = (index: number) => {
+      const firstName = firstNames[index % firstNames.length];
+      const lastName = lastNames[(index * 3) % lastNames.length];
+      return `${firstName} ${lastName}`;
+    };
+
     return [
       // Starters (5)
-      { id: `${teamCode}_sp1`, name: `SP1 ${teamCode}`, team: teamCode, position: 'SP-R', number: '1', hits: 'R' },
-      { id: `${teamCode}_sp2`, name: `SP2 ${teamCode}`, team: teamCode, position: 'SP-L', number: '2', hits: 'L' },
-      { id: `${teamCode}_sp3`, name: `SP3 ${teamCode}`, team: teamCode, position: 'SP-R', number: '3', hits: 'R' },
-      { id: `${teamCode}_sp4`, name: `SP4 ${teamCode}`, team: teamCode, position: 'SP-R', number: '4', hits: 'R' },
-      { id: `${teamCode}_sp5`, name: `SP5 ${teamCode}`, team: teamCode, position: 'SP-L', number: '5', hits: 'L' },
+      { id: `${teamCode}_sp1`, name: getRandomName(0), team: teamCode, position: 'SP-R', number: '15', hits: 'R' },
+      { id: `${teamCode}_sp2`, name: getRandomName(1), team: teamCode, position: 'SP-L', number: '22', hits: 'L' },
+      { id: `${teamCode}_sp3`, name: getRandomName(2), team: teamCode, position: 'SP-R', number: '31', hits: 'R' },
+      { id: `${teamCode}_sp4`, name: getRandomName(3), team: teamCode, position: 'SP-R', number: '47', hits: 'R' },
+      { id: `${teamCode}_sp5`, name: getRandomName(4), team: teamCode, position: 'SP-L', number: '53', hits: 'L' },
       // Relievers (8)
-      { id: `${teamCode}_closer`, name: `Closer ${teamCode}`, team: teamCode, position: 'RP-R', number: '20', hits: 'R' },
-      { id: `${teamCode}_setup`, name: `Setup ${teamCode}`, team: teamCode, position: 'RP-L', number: '21', hits: 'L' },
-      { id: `${teamCode}_rp1`, name: `RP1 ${teamCode}`, team: teamCode, position: 'RP-R', number: '22', hits: 'R' },
-      { id: `${teamCode}_rp2`, name: `RP2 ${teamCode}`, team: teamCode, position: 'RP-R', number: '23', hits: 'R' },
-      { id: `${teamCode}_rp3`, name: `RP3 ${teamCode}`, team: teamCode, position: 'RP-L', number: '24', hits: 'L' },
-      { id: `${teamCode}_rp4`, name: `RP4 ${teamCode}`, team: teamCode, position: 'RP-R', number: '25', hits: 'R' },
-      { id: `${teamCode}_rp5`, name: `RP5 ${teamCode}`, team: teamCode, position: 'RP-R', number: '26', hits: 'R' },
-      { id: `${teamCode}_rp6`, name: `RP6 ${teamCode}`, team: teamCode, position: 'RP-L', number: '27', hits: 'L' },
+      { id: `${teamCode}_closer`, name: getRandomName(5), team: teamCode, position: 'RP-R', number: '38', hits: 'R' },
+      { id: `${teamCode}_setup`, name: getRandomName(6), team: teamCode, position: 'RP-L', number: '44', hits: 'L' },
+      { id: `${teamCode}_rp1`, name: getRandomName(7), team: teamCode, position: 'RP-R', number: '29', hits: 'R' },
+      { id: `${teamCode}_rp2`, name: getRandomName(8), team: teamCode, position: 'RP-R', number: '56', hits: 'R' },
+      { id: `${teamCode}_rp3`, name: getRandomName(9), team: teamCode, position: 'RP-L', number: '61', hits: 'L' },
+      { id: `${teamCode}_rp4`, name: getRandomName(10), team: teamCode, position: 'RP-R', number: '42', hits: 'R' },
+      { id: `${teamCode}_rp5`, name: getRandomName(11), team: teamCode, position: 'RP-R', number: '67', hits: 'R' },
+      { id: `${teamCode}_rp6`, name: getRandomName(12), team: teamCode, position: 'RP-L', number: '33', hits: 'L' },
       // Position Players (12)
-      { id: `${teamCode}_c1`, name: `C1 ${teamCode}`, team: teamCode, position: 'C', number: '10', hits: 'R' },
-      { id: `${teamCode}_c2`, name: `C2 ${teamCode}`, team: teamCode, position: 'C', number: '11', hits: 'L' },
-      { id: `${teamCode}_1b`, name: `1B ${teamCode}`, team: teamCode, position: '1B', number: '12', hits: 'L' },
-      { id: `${teamCode}_2b`, name: `2B ${teamCode}`, team: teamCode, position: '2B', number: '13', hits: 'R' },
-      { id: `${teamCode}_3b`, name: `3B ${teamCode}`, team: teamCode, position: '3B', number: '14', hits: 'R' },
-      { id: `${teamCode}_ss`, name: `SS ${teamCode}`, team: teamCode, position: 'SS', number: '15', hits: 'R' },
-      { id: `${teamCode}_of1`, name: `OF1 ${teamCode}`, team: teamCode, position: 'OF', number: '16', hits: 'R' },
-      { id: `${teamCode}_of2`, name: `OF2 ${teamCode}`, team: teamCode, position: 'OF', number: '17', hits: 'L' },
-      { id: `${teamCode}_of3`, name: `OF3 ${teamCode}`, team: teamCode, position: 'OF', number: '18', hits: 'S' },
-      { id: `${teamCode}_of4`, name: `OF4 ${teamCode}`, team: teamCode, position: 'OF', number: '19', hits: 'R' },
-      { id: `${teamCode}_util1`, name: `UTIL1 ${teamCode}`, team: teamCode, position: '2B', number: '30', hits: 'L' },
-      { id: `${teamCode}_util2`, name: `UTIL2 ${teamCode}`, team: teamCode, position: 'OF', number: '31', hits: 'R' }
+      { id: `${teamCode}_c1`, name: getRandomName(13), team: teamCode, position: 'C', number: '8', hits: 'R' },
+      { id: `${teamCode}_c2`, name: getRandomName(14), team: teamCode, position: 'C', number: '19', hits: 'L' },
+      { id: `${teamCode}_1b`, name: getRandomName(15), team: teamCode, position: '1B', number: '21', hits: 'L' },
+      { id: `${teamCode}_2b`, name: getRandomName(16), team: teamCode, position: '2B', number: '4', hits: 'R' },
+      { id: `${teamCode}_3b`, name: getRandomName(17), team: teamCode, position: '3B', number: '5', hits: 'R' },
+      { id: `${teamCode}_ss`, name: getRandomName(18), team: teamCode, position: 'SS', number: '2', hits: 'R' },
+      { id: `${teamCode}_of1`, name: getRandomName(19), team: teamCode, position: 'OF', number: '23', hits: 'R' },
+      { id: `${teamCode}_of2`, name: getRandomName(20), team: teamCode, position: 'OF', number: '14', hits: 'L' },
+      { id: `${teamCode}_of3`, name: getRandomName(21), team: teamCode, position: 'OF', number: '9', hits: 'S' },
+      { id: `${teamCode}_of4`, name: getRandomName(22), team: teamCode, position: 'OF', number: '26', hits: 'R' },
+      { id: `${teamCode}_util1`, name: getRandomName(23), team: teamCode, position: '2B', number: '17', hits: 'L' },
+      { id: `${teamCode}_util2`, name: getRandomName(24), team: teamCode, position: 'OF', number: '37', hits: 'R' }
     ];
   }
 
