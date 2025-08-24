@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Trophy, Users, Calendar, Target, ArrowRight, Football } from "lucide-react";
+import { Trophy, Users, Calendar, Target, ArrowRight, Zap } from "lucide-react";
 import { Link } from "wouter";
 
 export default function FantasyLanding() {
@@ -18,7 +18,7 @@ export default function FantasyLanding() {
           <div className="text-center text-white mb-16">
             <div className="flex justify-center mb-6">
               <div className="p-4 bg-white/10 rounded-full backdrop-blur-sm">
-                <Football className="h-12 w-12" />
+                <Zap className="h-12 w-12" />
               </div>
             </div>
             <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-white to-green-200 bg-clip-text text-transparent">
