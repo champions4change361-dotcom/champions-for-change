@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { GamepadIcon, Shield, Trophy, Users, Star, Clock, Target, Zap } from "lucide-react";
 import { useState } from "react";
 import { FantasyAgeGate } from "@/components/FantasyAgeGate";
+import { FantasyAuth } from "@/components/FantasyAuth";
+import { useFantasyAuth } from "@/hooks/useFantasyAuth";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -58,8 +60,11 @@ interface ProfessionalPlayer {
 
 export default function FantasyTournaments() {
   const [showCreateLeague, setShowCreateLeague] = useState(false);
+  const [showFantasyAuth, setShowFantasyAuth] = useState(false);
   const [leagueName, setLeagueName] = useState("");
   const [entryFee, setEntryFee] = useState("25");
+  
+  const { fantasyUser, isFantasyAuthenticated, loginFantasyUser } = useFantasyAuth();
   const [selectedSport, setSelectedSport] = useState("nfl");
   const [selectedFormat, setSelectedFormat] = useState("survivor");
 
@@ -141,7 +146,13 @@ export default function FantasyTournaments() {
           <Button 
             size="lg" 
             className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 text-lg font-semibold shadow-lg"
-            onClick={() => setShowCreateLeague(true)}
+            onClick={() => {
+              if (isFantasyAuthenticated) {
+                setShowCreateLeague(true);
+              } else {
+                setShowFantasyAuth(true);
+              }
+            }}
             data-testid="create-knockout-tournament"
           >
             🏈 Create Your NFL Knockout Tournament
@@ -462,6 +473,16 @@ export default function FantasyTournaments() {
         </div>
       </div>
 
+      {/* Fantasy Authentication Modal */}
+      <FantasyAuth
+        open={showFantasyAuth}
+        onOpenChange={setShowFantasyAuth}
+        onAuthSuccess={(user) => {
+          loginFantasyUser(user);
+          setShowCreateLeague(true); // Open create league modal after auth
+        }}
+      />
+
       {/* Create League Modal */}
       <Dialog open={showCreateLeague} onOpenChange={setShowCreateLeague}>
         <DialogContent className="sm:max-w-md">
@@ -500,8 +521,9 @@ export default function FantasyTournaments() {
               <Button 
                 className="flex-1 bg-green-600 hover:bg-green-700"
                 onClick={() => {
-                  // Simple success feedback - no auth required
-                  alert(`🎉 League "${leagueName || 'NFL Survivor Pool'}" created! Entry fee: $${entryFee}. Share the link with your friends to join!`);
+                  // Now we have fantasy user info!
+                  const leagueNameFinal = leagueName || 'NFL Survivor Pool';
+                  alert(`🎉 League "${leagueNameFinal}" created by ${fantasyUser?.email}!\n\nEntry Fee: $${entryFee}\nCreated: ${new Date().toLocaleString()}\n\nShare the link with your friends to join!`);
                   setShowCreateLeague(false);
                   setLeagueName("");
                   setEntryFee("25");
