@@ -44,7 +44,7 @@ export default function CoachesLoungeLanding() {
   // Join league mutation
   const joinLeagueMutation = useMutation({
     mutationFn: async (code: string) => {
-      return await apiRequest('POST', '/api/leagues/join', { code });
+      return await apiRequest('/api/leagues/join', 'POST', { code });
     },
     onSuccess: (data: any) => {
       toast({
@@ -73,7 +73,7 @@ export default function CoachesLoungeLanding() {
   // Create league mutation  
   const createLeagueMutation = useMutation({
     mutationFn: async (leagueType: string) => {
-      return await apiRequest('POST', '/api/leagues/create', { 
+      return await apiRequest('/api/leagues/create', 'POST', { 
         type: leagueType
       });
     },
