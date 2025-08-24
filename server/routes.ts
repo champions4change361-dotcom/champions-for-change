@@ -3403,7 +3403,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: true,
         injuries,
         lastUpdated: new Date().toISOString(),
-        source: 'Real-time injury intelligence with traditional designations',
+        source: 'Sample injury data for demo purposes',
         confidence: '94% accuracy rating',
         legend: {
           'P': 'Probable - 75%+ chance to play',

@@ -172,7 +172,7 @@ export default function FantasyTournaments() {
               <span>Fantasy System Status</span>
             </CardTitle>
             <CardDescription>
-              Real-time status of all adult fantasy sports systems
+              Current status of fantasy sports platform demo
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -339,7 +339,7 @@ export default function FantasyTournaments() {
               <span>{selectedSport.toUpperCase()} Professional Players</span>
             </CardTitle>
             <CardDescription>
-              Real professional athletes from {selectedSport.toUpperCase()} with live stats integration
+              Sample professional athletes from {selectedSport.toUpperCase()} for demo purposes
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -427,15 +427,15 @@ export default function FantasyTournaments() {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Clock className="w-5 h-5 text-purple-500" />
-              <span>Real-Time Scoring</span>
+              <span>Sample Scoring Demo</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-3">
-              Live stats integration from ESPN, NFL, NBA, and other official APIs
+              Demo fantasy platform showcasing tournament concepts
             </p>
             <Badge variant="default">
-              Live API Integration
+              Demo Platform
             </Badge>
           </CardContent>
         </Card>
