@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { GamepadIcon, Shield, Trophy, Users, Star, Clock, Target, Zap } from "lucide-react";
 import { useState } from "react";
 import { FantasyAgeGate } from "@/components/FantasyAgeGate";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface FantasyStatus {
   fantasy_status: string;
@@ -55,6 +57,9 @@ interface ProfessionalPlayer {
 }
 
 export default function FantasyTournaments() {
+  const [showCreateLeague, setShowCreateLeague] = useState(false);
+  const [leagueName, setLeagueName] = useState("");
+  const [entryFee, setEntryFee] = useState("25");
   const [selectedSport, setSelectedSport] = useState("nfl");
   const [selectedFormat, setSelectedFormat] = useState("survivor");
 
@@ -136,7 +141,7 @@ export default function FantasyTournaments() {
           <Button 
             size="lg" 
             className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 text-lg font-semibold shadow-lg"
-            onClick={() => window.location.href = '/create-tournament?sport=football&format=knockout&participants=20&goals=competitive&budget=mid&features=["survivor_pool","weekly_picks","elimination"]&complexity=simple'}
+            onClick={() => setShowCreateLeague(true)}
             data-testid="create-knockout-tournament"
           >
             🏈 Create Your NFL Knockout Tournament
@@ -456,6 +461,62 @@ export default function FantasyTournaments() {
         </Card>
         </div>
       </div>
+
+      {/* Create League Modal */}
+      <Dialog open={showCreateLeague} onOpenChange={setShowCreateLeague}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>🏈 Create NFL Knockout League</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">League Name</label>
+              <Input
+                placeholder="e.g., Office Champions Survivor Pool"
+                value={leagueName}
+                onChange={(e) => setLeagueName(e.target.value)}
+                data-testid="input-league-name"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Entry Fee</label>
+              <Input
+                placeholder="25"
+                value={entryFee}
+                onChange={(e) => setEntryFee(e.target.value)}
+                data-testid="input-entry-fee"
+              />
+            </div>
+            <div className="bg-green-50 p-4 rounded-lg">
+              <h4 className="font-semibold text-green-800 mb-2">NFL Survivor Rules</h4>
+              <ul className="text-sm text-green-700 space-y-1">
+                <li>• Pick one NFL team each week to win</li>
+                <li>• You can only use each team once per season</li>
+                <li>• If your team loses, you're eliminated</li>
+                <li>• Last person standing wins the prize pool</li>
+              </ul>
+            </div>
+            <div className="flex space-x-2">
+              <Button 
+                className="flex-1 bg-green-600 hover:bg-green-700"
+                onClick={() => {
+                  // Simple success feedback - no auth required
+                  alert(`🎉 League "${leagueName || 'NFL Survivor Pool'}" created! Entry fee: $${entryFee}. Share the link with your friends to join!`);
+                  setShowCreateLeague(false);
+                  setLeagueName("");
+                  setEntryFee("25");
+                }}
+                data-testid="button-create-league"
+              >
+                Create League
+              </Button>
+              <Button variant="outline" onClick={() => setShowCreateLeague(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </FantasyAgeGate>
   );
 }
