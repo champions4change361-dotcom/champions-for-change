@@ -28,6 +28,7 @@ export function SearchableRosterTable({ sport, onPlayerSelect, selectedPlayer }:
   const [searchTerm, setSearchTerm] = useState('');
   const [positionFilter, setPositionFilter] = useState('');
   const [teamFilter, setTeamFilter] = useState('');
+  const [showAllTeams, setShowAllTeams] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // Load roster data on mount and reset filters when sport changes
@@ -36,6 +37,7 @@ export function SearchableRosterTable({ sport, onPlayerSelect, selectedPlayer }:
     setPositionFilter('');
     setTeamFilter('');
     setSearchTerm('');
+    setShowAllTeams(false);
   }, [sport]);
 
   // Filter players when search term, position filter, or team filter changes
@@ -284,7 +286,7 @@ export function SearchableRosterTable({ sport, onPlayerSelect, selectedPlayer }:
             >
               All Teams
             </Button>
-            {getTeams().slice(0, 8).map(team => (
+            {(showAllTeams ? getTeams() : getTeams().slice(0, 8)).map(team => (
               <Button
                 key={team}
                 variant={teamFilter === team ? 'default' : 'outline'}
@@ -296,14 +298,26 @@ export function SearchableRosterTable({ sport, onPlayerSelect, selectedPlayer }:
                 {team}
               </Button>
             ))}
-            {getTeams().length > 8 && (
+            {getTeams().length > 8 && !showAllTeams && (
               <Button
                 variant="outline"
                 size="sm"
-                className="text-xs text-gray-500"
-                disabled
+                className="text-xs text-blue-600 hover:text-blue-800"
+                onClick={() => setShowAllTeams(true)}
+                data-testid="button-show-more-teams"
               >
                 +{getTeams().length - 8} more
+              </Button>
+            )}
+            {showAllTeams && getTeams().length > 8 && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs text-gray-600"
+                onClick={() => setShowAllTeams(false)}
+                data-testid="button-show-fewer-teams"
+              >
+                Show Less
               </Button>
             )}
           </div>

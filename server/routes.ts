@@ -1074,17 +1074,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const allMLBPlayers: any[] = [];
         
         for (const position of positions) {
-          const positionPlayers = getEnhancedFallbackRoster('mlb', position);
-          const playersWithData = positionPlayers.map((player: any, index: number) => ({
-            id: player.id || `${player.name?.toLowerCase().replace(/\s+/g, '_')}_${player.team?.toLowerCase()}_mlb`,
-            name: player.name,
-            team: player.team || 'UNK',
-            number: (index + 1).toString(),
-            status: 'active',
-            depth: index + 1,
-            position: position
-          }));
-          allMLBPlayers.push(...playersWithData);
+          try {
+            const positionPlayers = await getEnhancedFallbackRoster('mlb', position);
+            if (Array.isArray(positionPlayers) && positionPlayers.length > 0) {
+              const playersWithData = positionPlayers.map((player: any, index: number) => ({
+                id: player.id || `${player.name?.toLowerCase().replace(/\s+/g, '_')}_${player.team?.toLowerCase()}_mlb`,
+                name: player.name,
+                team: player.team || 'UNK',
+                number: (index + 1).toString(),
+                status: 'active',
+                depth: index + 1,
+                position: position
+              }));
+              allMLBPlayers.push(...playersWithData);
+            }
+          } catch (error) {
+            console.log(`MLB ${position} position error:`, error);
+          }
         }
         
         console.log(`⚾ Searchable data: Found ${allMLBPlayers.length} total MLB players`);
@@ -1106,17 +1112,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const allNHLPlayers: any[] = [];
         
         for (const position of positions) {
-          const positionPlayers = getEnhancedFallbackRoster('nhl', position);
-          const playersWithData = positionPlayers.map((player: any, index: number) => ({
-            id: player.id || `${player.name?.toLowerCase().replace(/\s+/g, '_')}_${player.team?.toLowerCase()}_nhl`,
-            name: player.name,
-            team: player.team || 'UNK',
-            number: (index + 1).toString(),
-            status: 'active',
-            depth: index + 1,
-            position: position
-          }));
-          allNHLPlayers.push(...playersWithData);
+          try {
+            const positionPlayers = await getEnhancedFallbackRoster('nhl', position);
+            if (Array.isArray(positionPlayers) && positionPlayers.length > 0) {
+              const playersWithData = positionPlayers.map((player: any, index: number) => ({
+                id: player.id || `${player.name?.toLowerCase().replace(/\s+/g, '_')}_${player.team?.toLowerCase()}_nhl`,
+                name: player.name,
+                team: player.team || 'UNK',
+                number: (index + 1).toString(),
+                status: 'active',
+                depth: index + 1,
+                position: position
+              }));
+              allNHLPlayers.push(...playersWithData);
+            }
+          } catch (error) {
+            console.log(`NHL ${position} position error:`, error);
+          }
         }
         
         console.log(`🏒 Searchable data: Found ${allNHLPlayers.length} total NHL players`);
