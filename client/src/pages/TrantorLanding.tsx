@@ -75,33 +75,35 @@ export default function TrantorLanding() {
               🏆 Professional Tournament Platform
             </Badge>
             <h1 className="text-4xl lg:text-6xl font-bold text-white mb-6">
-              Professional Tournament
-              <span className="block text-orange-300">Management Platform</span>
+              Fantasy Sports &
+              <span className="block text-orange-300">Tournament Management</span>
             </h1>
             <p className="text-xl text-orange-100 max-w-3xl mx-auto mb-8">
-              Complete tournament management solution for organizers, businesses, and organizations. From fantasy leagues to corporate competitions to nonprofit fundraisers.
+              Join professional fantasy leagues with overnight scoring OR create your own traditional tournaments. Complete platform for organizers, businesses, and fantasy enthusiasts.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
                 size="lg"
+                onClick={() => setLocation('/fantasy-tournaments')}
+                className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 text-lg font-semibold border border-purple-500 shadow-lg"
+                data-testid="button-join-fantasy"
+              >
+                <Target className="mr-2 h-5 w-5" />
+                Join Fantasy Leagues
+              </Button>
+              <Button 
+                size="lg"
                 onClick={() => setLocation('/create')}
-                className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-4 text-lg font-semibold"
+                className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-4 text-lg font-semibold border border-orange-500 shadow-lg"
                 data-testid="button-create-tournament"
               >
                 <Trophy className="mr-2 h-5 w-5" />
                 Create Tournament
               </Button>
-              <Button 
-                size="lg"
-                variant="outline"
-                onClick={() => setLocation('/tournament-empire')}
-                className="border-orange-400 text-orange-100 hover:bg-orange-800 hover:text-white px-8 py-4 text-lg"
-                data-testid="button-explore-platform"
-              >
-                <Globe className="mr-2 h-5 w-5" />
-                Explore Platform
-              </Button>
             </div>
+            <p className="text-orange-300 text-sm mt-4">
+              Fantasy results update overnight at 2 AM - Family-friendly, sustainable fantasy sports
+            </p>
           </div>
         </div>
       </div>
@@ -110,17 +112,18 @@ export default function TrantorLanding() {
       <div className="py-16 bg-orange-800/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-white mb-4">Every Type of Tournament</h2>
-            <p className="text-orange-200 text-lg">From fantasy leagues to corporate competitions</p>
+            <h2 className="text-3xl font-bold text-white mb-4">Fantasy Sports & Tournament Management</h2>
+            <p className="text-orange-200 text-lg">Professional fantasy leagues and traditional tournaments</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="bg-orange-900/50 border-orange-600/30">
+            <Card className="bg-purple-900/50 border-purple-600/30 ring-2 ring-purple-500">
               <CardHeader className="text-center">
-                <Target className="h-12 w-12 text-orange-400 mx-auto mb-4" />
-                <CardTitle className="text-2xl text-white">Fantasy Leagues</CardTitle>
-                <CardDescription className="text-orange-200">
-                  NFL Survivor pools, pick'em leagues, and fantasy tournaments
+                <Target className="h-12 w-12 text-purple-400 mx-auto mb-4" />
+                <CardTitle className="text-2xl text-white">Fantasy Sports</CardTitle>
+                <CardDescription className="text-purple-200">
+                  NFL Survivor, Daily Fantasy, Season-Long, Pick'em Leagues with overnight scoring
                 </CardDescription>
+                <Badge className="mt-3 bg-purple-600 text-white">Next-Day Results</Badge>
               </CardHeader>
             </Card>
             <Card className="bg-orange-900/50 border-orange-600/30">
@@ -153,12 +156,12 @@ export default function TrantorLanding() {
             <p className="text-orange-200 text-lg">Everything you need to run successful tournaments</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Card className="bg-orange-900/30 border-orange-600/30">
+            <Card className="bg-purple-900/30 border-purple-600/30">
               <CardHeader>
-                <Zap className="h-8 w-8 text-orange-400 mb-2" />
-                <CardTitle className="text-white">Lightning Setup</CardTitle>
-                <CardDescription className="text-orange-200">
-                  Create tournaments in minutes with our guided setup wizard
+                <Target className="h-8 w-8 text-purple-400 mb-2" />
+                <CardTitle className="text-white">Professional Fantasy</CardTitle>
+                <CardDescription className="text-purple-200">
+                  NFL, NBA, MLB fantasy leagues with Yahoo Sports data integration
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -198,12 +201,12 @@ export default function TrantorLanding() {
                 </CardDescription>
               </CardHeader>
             </Card>
-            <Card className="bg-orange-900/30 border-orange-600/30">
+            <Card className="bg-purple-900/30 border-purple-600/30">
               <CardHeader>
-                <Clock className="h-8 w-8 text-orange-400 mb-2" />
-                <CardTitle className="text-white">Live Updates</CardTitle>
-                <CardDescription className="text-orange-200">
-                  Real-time brackets, scoring, and participant communication
+                <Clock className="h-8 w-8 text-purple-400 mb-2" />
+                <CardTitle className="text-white">Overnight Scoring</CardTitle>
+                <CardDescription className="text-purple-200">
+                  Fantasy results update nightly at 2 AM - sustainable and family-friendly
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -304,19 +307,19 @@ export default function TrantorLanding() {
       {/* Call to Action */}
       <div className="py-16 bg-gradient-to-r from-orange-600/20 to-red-600/20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold text-white mb-6">Ready to Run Professional Tournaments?</h2>
+          <h2 className="text-3xl font-bold text-white mb-6">Ready for Fantasy Sports & Tournaments?</h2>
           <p className="text-orange-200 text-lg mb-8">
-            Join tournament organizers who trust Trantor Tournaments for their biggest events.
+            Join fantasy leagues with overnight scoring OR create your own traditional tournaments.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
               size="lg"
-              onClick={() => setLocation('/create')}
-              className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-4 text-lg font-semibold"
-              data-testid="button-start-tournament-cta"
+              onClick={() => setLocation('/fantasy-tournaments')}
+              className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 text-lg font-semibold border border-purple-500 shadow-lg"
+              data-testid="button-join-fantasy-cta"
             >
-              <Trophy className="mr-2 h-5 w-5" />
-              Start Your Tournament
+              <Target className="mr-2 h-5 w-5" />
+              Join Fantasy Leagues
             </Button>
             <Button 
               size="lg"
