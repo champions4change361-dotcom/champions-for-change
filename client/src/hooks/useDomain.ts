@@ -28,54 +28,58 @@ export function useDomain() {
     console.log('Domain detection - hostname:', hostname); // Debug logging
     let config: DomainConfig;
 
-    if (hostname.includes('fantasy') || hostname.includes('coaches')) {
+    // Champions for Change - Nonprofit Mission Domain
+    if (hostname === 'championsforchange.net' || hostname === 'www.championsforchange.net') {
       config = {
-        type: 'fantasy',
-        brand: 'COACHES_LOUNGE',
-        theme: 'entertainment',
-        allowFantasyPromo: false, // Already on fantasy
-        allowProPromo: true,      // Can promote pro tournaments
-        allowSchoolPromo: false,  // No school content on fantasy
-        primaryColor: 'purple',
+        type: 'school',
+        brand: 'CHAMPIONS_FOR_CHANGE',
+        theme: 'nonprofit',
+        allowFantasyPromo: true,
+        allowProPromo: true,
+        allowSchoolPromo: false,
+        primaryColor: 'green',
         features: {
-          fantasyLeagues: true,
-          ageVerification: true,
+          fantasyLeagues: true,   // Fantasy sports for charity
+          ageVerification: false, // Family-friendly
           crossSelling: true,
           guestAccess: true,
           registration: true
         }
       };
-    } else if (hostname.includes('pro') || hostname.includes('business')) {
+    }
+    // Competitive Education Hub - School Athletics Domain
+    else if (hostname === 'competitiveeducationhub.com' || hostname === 'www.competitiveeducationhub.com') {
       config = {
-        type: 'pro',
-        brand: 'TOURNAMENT_PRO',
-        theme: 'professional',
-        allowFantasyPromo: true,  // KEY: Business users can see fantasy
-        allowProPromo: false,     // Already on pro
-        allowSchoolPromo: false,  // Keep business separate from schools
+        type: 'school',
+        brand: 'COMPETITIVE_EDUCATION_HUB',
+        theme: 'educational',
+        allowFantasyPromo: false, // Pure educational focus
+        allowProPromo: false,
+        allowSchoolPromo: false,
         primaryColor: 'blue',
         features: {
-          fantasyLeagues: false,  // Not directly, but can promote
+          fantasyLeagues: false,  // No fantasy in education domain
           ageVerification: false,
-          crossSelling: true,     // KEY: Enable cross-selling
+          crossSelling: false,    // Keep education separate
           guestAccess: true,
           registration: true
         }
       };
-    } else if (hostname.includes('trantortournaments.org') || hostname.includes('tournaments')) {
-      // Main Champions for Change domain - educational focus
+    }
+    // Trantor Tournaments - Commercial Tournament Management
+    else if (hostname === 'trantortournaments.org' || hostname === 'www.trantortournaments.org') {
       config = {
-        type: 'school',
-        brand: 'CHAMPIONS_FOR_CHANGE',
-        theme: 'educational',
-        allowFantasyPromo: true,  // Allow fantasy features for Champions for Change 
-        allowProPromo: true,      // Allow pro features for Champions for Change
-        allowSchoolPromo: false,  // Already on main domain
-        primaryColor: 'green',
+        type: 'pro',
+        brand: 'TRANTOR_TOURNAMENTS',
+        theme: 'professional',
+        allowFantasyPromo: true,
+        allowProPromo: false,    // Already on pro domain
+        allowSchoolPromo: true,  // Can promote school services
+        primaryColor: 'orange',
         features: {
-          fantasyLeagues: true,   // Enable fantasy for comprehensive platform
-          ageVerification: false,
-          crossSelling: true,     // Enable cross-selling features
+          fantasyLeagues: true,   // Commercial fantasy leagues
+          ageVerification: true,  // Professional tournaments
+          crossSelling: true,
           guestAccess: true,
           registration: true
         }

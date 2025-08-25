@@ -8,6 +8,9 @@ import { useDomain } from "@/hooks/useDomain";
 import DomainNavigation from "@/components/DomainNavigation";
 import Home from './pages/Home';
 import Landing from './pages/Landing';
+import ChampionsLanding from './pages/ChampionsLanding';
+import EducationHubLanding from './pages/EducationHubLanding';
+import TrantorLanding from './pages/TrantorLanding';
 import DonationFlow from './pages/DonationFlow';
 import PaymentMethods from './pages/PaymentMethods';
 import Checkout from './pages/Checkout';
@@ -196,14 +199,17 @@ function AuthenticatedRoutes() {
 }
 
 function getDomainBackgroundClass(brand: string) {
-  if (brand === 'SCHOLASTIC_TOURNAMENTS') {
-    return "min-h-screen bg-gradient-to-br from-blue-50 to-slate-50";
+  if (brand === 'CHAMPIONS_FOR_CHANGE') {
+    return "min-h-screen bg-gradient-to-br from-green-900 via-green-800 to-emerald-900";
+  }
+  if (brand === 'COMPETITIVE_EDUCATION_HUB') {
+    return "min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900";
+  }
+  if (brand === 'TRANTOR_TOURNAMENTS') {
+    return "min-h-screen bg-gradient-to-br from-orange-900 via-orange-800 to-red-900";
   }
   if (brand === 'COACHES_LOUNGE') {
     return "min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900";
-  }
-  if (brand === 'TOURNAMENT_PRO') {
-    return "min-h-screen bg-gradient-to-br from-blue-50 to-slate-100";
   }
   return "min-h-screen bg-gradient-to-br from-slate-50 to-slate-100";
 }
@@ -342,21 +348,37 @@ function AppRouter() {
           <CoachesLoungeLanding />
         </div>
       </Route>
-      {/* Show Landing page if not authenticated or on school-safe domains */}
+      {/* Show Domain-Specific Landing page if not authenticated or on guest-access domains */}
       {(!isAuthenticated || allowGuestAccess) && (
         <Route path="/">
-          <div className={config ? getDomainBackgroundClass(config.brand) : "min-h-screen bg-gradient-to-br from-blue-50 to-slate-50"}>
-            <Landing />
-          </div>
+          {config?.brand === 'CHAMPIONS_FOR_CHANGE' ? (
+            <ChampionsLanding />
+          ) : config?.brand === 'COMPETITIVE_EDUCATION_HUB' ? (
+            <EducationHubLanding />
+          ) : config?.brand === 'TRANTOR_TOURNAMENTS' ? (
+            <TrantorLanding />
+          ) : (
+            <div className={config ? getDomainBackgroundClass(config.brand) : "min-h-screen bg-gradient-to-br from-blue-50 to-slate-50"}>
+              <Landing />
+            </div>
+          )}
         </Route>
       )}
       {/* Show authenticated routes if authenticated */}
       {isAuthenticated && <AuthenticatedRoutes />}
-      {/* Default fallback */}
+      {/* Default fallback - show domain-specific landing */}
       <Route>
-        <div className={config ? getDomainBackgroundClass(config.brand) : "min-h-screen bg-gradient-to-br from-blue-50 to-slate-50"}>
-          <Landing />
-        </div>
+        {config?.brand === 'CHAMPIONS_FOR_CHANGE' ? (
+          <ChampionsLanding />
+        ) : config?.brand === 'COMPETITIVE_EDUCATION_HUB' ? (
+          <EducationHubLanding />
+        ) : config?.brand === 'TRANTOR_TOURNAMENTS' ? (
+          <TrantorLanding />
+        ) : (
+          <div className={config ? getDomainBackgroundClass(config.brand) : "min-h-screen bg-gradient-to-br from-blue-50 to-slate-50"}>
+            <Landing />
+          </div>
+        )}
       </Route>
     </Switch>
   );
