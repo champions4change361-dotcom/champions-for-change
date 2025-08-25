@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Users, Heart, GraduationCap, BookOpen, Award, Globe, Star, Target, Shield, Check } from "lucide-react";
+import { Trophy, Users, Heart, GraduationCap, BookOpen, Award, Globe, Star, Target, Shield, Check, Building } from "lucide-react";
 import { useLocation } from "wouter";
 import React, { useState } from "react";
 import championLogo from "@assets/IMG_1442_1754896656003.jpeg";
@@ -59,7 +59,7 @@ export default function ChampionsLanding() {
               <div className="flex flex-col space-y-2 lg:flex-row lg:space-y-0 lg:space-x-3 lg:ml-auto">
                 <Button 
                   onClick={() => setLocation('/donate')}
-                  className="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base w-full lg:w-auto"
+                  className="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base w-full lg:w-auto border border-green-500"
                   data-testid="button-donate-champions"
                 >
                   <Heart className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4" />
@@ -67,8 +67,7 @@ export default function ChampionsLanding() {
                 </Button>
                 <Button 
                   onClick={() => setLocation('/register')}
-                  variant="outline"
-                  className="border-green-400 text-green-100 hover:bg-green-800 hover:text-white px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base w-full lg:w-auto"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base w-full lg:w-auto border border-emerald-500"
                   data-testid="button-get-involved-champions"
                 >
                   <Users className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4" />
@@ -80,40 +79,84 @@ export default function ChampionsLanding() {
         </div>
       </header>
 
-      {/* Mission Statement Hero */}
+      {/* Two-Path Hero Section */}
       <div className="relative py-16 lg:py-24">
         <div className="absolute inset-0 bg-gradient-to-r from-green-600/10 via-transparent to-green-600/10"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <Badge className="mb-6 bg-green-600 text-white px-4 py-2">
-              🎓 Educational Mission
+              🎓 Champions for Change
             </Badge>
             <h1 className="text-4xl lg:text-6xl font-bold text-white mb-6">
-              Every Student Deserves
-              <span className="block text-green-300">Educational Opportunities</span>
+              Which describes you?
             </h1>
-            <p className="text-xl text-green-100 max-w-3xl mx-auto mb-8">
-              Through charity tournaments and fundraising events, we create pathways for underprivileged youth to access educational trips, programs, and experiences that transform lives.
+            <p className="text-xl text-green-100 max-w-3xl mx-auto mb-12">
+              Choose your path to get started with Champions for Change
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            
+            {/* Two-Path Split */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
+              
+              {/* Tournament Organizer Path */}
+              <div className="bg-green-800/40 backdrop-blur-sm border border-green-600/30 rounded-2xl p-8 hover:bg-green-700/50 transition-all duration-300">
+                <div className="text-center">
+                  <Trophy className="h-16 w-16 text-green-400 mx-auto mb-6" />
+                  <h2 className="text-2xl font-bold text-white mb-4">I'm a Tournament Organizer</h2>
+                  <p className="text-green-200 mb-6">
+                    I want to license tournament management technology or learn about white-label platform solutions
+                  </p>
+                  <Button 
+                    size="lg"
+                    onClick={() => setLocation('/pricing')}
+                    className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 text-lg font-semibold w-full border border-green-500 shadow-lg"
+                    data-testid="button-tournament-organizer"
+                  >
+                    <Building className="mr-2 h-5 w-5" />
+                    Platform Solutions
+                  </Button>
+                </div>
+              </div>
+
+              {/* Tournament Participant Path */}
+              <div className="bg-green-800/40 backdrop-blur-sm border border-green-600/30 rounded-2xl p-8 hover:bg-green-700/50 transition-all duration-300">
+                <div className="text-center">
+                  <Users className="h-16 w-16 text-green-400 mx-auto mb-6" />
+                  <h2 className="text-2xl font-bold text-white mb-4">Register for Tournaments</h2>
+                  <p className="text-green-200 mb-6">
+                    I want to sign up my child/team for Champions for Change basketball tournaments that support education
+                  </p>
+                  <Button 
+                    size="lg"
+                    onClick={() => setLocation('/tournaments')}
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 text-lg font-semibold w-full border border-emerald-500 shadow-lg"
+                    data-testid="button-register-tournament"
+                  >
+                    <Award className="mr-2 h-5 w-5" />
+                    View Tournaments
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Secondary Actions */}
+            <div className="mt-12 flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
-                size="lg"
-                onClick={() => setLocation('/coaches-lounge')}
-                className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 text-lg font-semibold"
-                data-testid="button-start-fundraising"
-              >
-                <Trophy className="mr-2 h-5 w-5" />
-                Start Fundraising Tournament
-              </Button>
-              <Button 
-                size="lg"
                 variant="outline"
                 onClick={() => setLocation('/your-why')}
-                className="border-green-400 text-green-100 hover:bg-green-800 hover:text-white px-8 py-4 text-lg"
+                className="border-green-400 bg-green-900/50 text-green-100 hover:bg-green-700 hover:text-white px-6 py-3 text-base"
                 data-testid="button-our-mission"
               >
-                <Heart className="mr-2 h-5 w-5" />
+                <Heart className="mr-2 h-4 w-4" />
                 Our Mission Story
+              </Button>
+              <Button 
+                variant="outline"
+                onClick={() => setLocation('/donate')}
+                className="border-green-400 bg-green-900/50 text-green-100 hover:bg-green-700 hover:text-white px-6 py-3 text-base"
+                data-testid="button-support-mission"
+              >
+                <Heart className="mr-2 h-4 w-4" />
+                Support Our Mission
               </Button>
             </div>
           </div>
@@ -228,29 +271,28 @@ export default function ChampionsLanding() {
       {/* Call to Action */}
       <div className="py-16 bg-gradient-to-r from-green-600/20 to-emerald-600/20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold text-white mb-6">Ready to Change Lives Through Education?</h2>
+          <h2 className="text-3xl font-bold text-white mb-6">Still Not Sure Which Path?</h2>
           <p className="text-green-200 text-lg mb-8">
-            Join Champions for Change and help create educational opportunities for students who need them most.
+            Get personalized recommendations based on your specific needs and goals.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
               size="lg"
-              onClick={() => setLocation('/donate')}
-              className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 text-lg font-semibold"
-              data-testid="button-donate-cta"
+              onClick={() => setIsRegistrationAssistantOpen(true)}
+              className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 text-lg font-semibold border border-green-500 shadow-lg"
+              data-testid="button-get-help"
             >
-              <Heart className="mr-2 h-5 w-5" />
-              Support Our Mission
+              <Users className="mr-2 h-5 w-5" />
+              Get Personalized Help
             </Button>
             <Button 
               size="lg"
-              variant="outline"
-              onClick={() => setIsRegistrationAssistantOpen(true)}
-              className="border-green-400 text-green-100 hover:bg-green-800 hover:text-white px-8 py-4 text-lg"
-              data-testid="button-get-started-champions"
+              onClick={() => setLocation('/donate')}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 text-lg font-semibold border border-emerald-500 shadow-lg"
+              data-testid="button-donate-cta"
             >
-              <Trophy className="mr-2 h-5 w-5" />
-              Start Your Tournament
+              <Heart className="mr-2 h-5 w-5" />
+              Support Education
             </Button>
           </div>
         </div>
