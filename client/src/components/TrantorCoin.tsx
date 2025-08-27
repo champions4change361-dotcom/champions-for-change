@@ -80,9 +80,10 @@ export default function TrantorCoin({
           <img 
             src={trantorCityscape} 
             alt="Trantor Cityscape"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover scale-110"
+            style={{ objectPosition: 'center center' }}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-purple-900/30 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-purple-900/20 to-transparent" />
         </div>
 
         {/* Back Side - Trantor Spaceship */}
@@ -96,9 +97,10 @@ export default function TrantorCoin({
           <img 
             src={trantorSpaceship} 
             alt="Trantor Spaceship"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover scale-125"
+            style={{ objectPosition: 'center center' }}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-blue-900/30 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-blue-900/20 to-transparent" />
         </div>
 
         {/* Coin Edge (Optional Detail) */}
