@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import coinLogo from '@assets/generated_images/Trantor_Tournaments_dual-sided_logo_94168881.png';
+import trantorCityscape from '@assets/Untitled design_1756267317246.png';
+import trantorSpaceship from '@assets/Untitled design_1756267358077.png';
 
 interface TrantorCoinProps {
   isFlipping?: boolean;
@@ -68,34 +69,36 @@ export default function TrantorCoin({
             : undefined
         }}
       >
-        {/* Front Side - Cityscape */}
+        {/* Front Side - Trantor Cityscape */}
         <div 
-          className="absolute inset-0 rounded-full shadow-lg backface-hidden bg-gradient-to-br from-orange-500 to-orange-600 border-2 border-orange-400 flex items-center justify-center"
+          className="absolute inset-0 rounded-full shadow-xl backface-hidden border-2 border-purple-400 overflow-hidden"
           style={{ 
             backfaceVisibility: 'hidden',
             transform: 'rotateY(0deg)'
           }}
         >
-          <div className="w-8 h-8 bg-orange-100 rounded-sm flex items-center justify-center">
-            {/* Cityscape Icon */}
-            <svg viewBox="0 0 24 24" className="w-6 h-6 fill-orange-600">
-              <path d="M2 20h4V10H2v10zm6 0h4V6H8v14zm6 0h4v-8h-4v8zm6 0h4V2h-4v18z"/>
-            </svg>
-          </div>
+          <img 
+            src={trantorCityscape} 
+            alt="Trantor Cityscape"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-purple-900/30 to-transparent" />
         </div>
 
-        {/* Back Side - Mathematical Symbol */}
+        {/* Back Side - Trantor Spaceship */}
         <div 
-          className="absolute inset-0 rounded-full shadow-lg backface-hidden bg-gradient-to-br from-purple-600 to-purple-700 border-2 border-purple-500 flex items-center justify-center"
+          className="absolute inset-0 rounded-full shadow-xl backface-hidden border-2 border-blue-400 overflow-hidden"
           style={{ 
             backfaceVisibility: 'hidden',
             transform: 'rotateY(180deg)'
           }}
         >
-          <div className="w-8 h-8 bg-purple-100 rounded-sm flex items-center justify-center">
-            {/* Mathematical Symbol */}
-            <div className="text-purple-600 font-bold text-xl">ℌ</div>
-          </div>
+          <img 
+            src={trantorSpaceship} 
+            alt="Trantor Spaceship"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-blue-900/30 to-transparent" />
         </div>
 
         {/* Coin Edge (Optional Detail) */}
