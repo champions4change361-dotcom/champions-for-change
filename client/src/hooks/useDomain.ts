@@ -85,18 +85,18 @@ export function useDomain() {
         }
       };
     } else {
-      // Default for development - enable all features for testing
+      // Default for development - Trantor commercial platform
       config = {
-        type: 'school',
-        brand: 'CHAMPIONS_FOR_CHANGE',
-        theme: 'educational',
+        type: 'pro',
+        brand: 'TRANTOR_TOURNAMENTS',
+        theme: 'professional',
         allowFantasyPromo: true,
-        allowProPromo: true,
-        allowSchoolPromo: true,
-        primaryColor: 'green',
+        allowProPromo: false,    // Already on pro domain
+        allowSchoolPromo: true,  // Can promote school services
+        primaryColor: 'orange',
         features: {
-          fantasyLeagues: true,  // Enable for development testing
-          ageVerification: false,
+          fantasyLeagues: true,   // Commercial fantasy leagues
+          ageVerification: true,  // Professional tournaments
           crossSelling: true,
           guestAccess: true,
           registration: true
