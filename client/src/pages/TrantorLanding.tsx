@@ -324,12 +324,12 @@ export default function TrantorLanding() {
             <Button 
               size="lg"
               variant="outline"
-              onClick={() => setIsRegistrationAssistantOpen(true)}
+              onClick={() => setLocation('/login/business')}
               className="border-orange-400 text-orange-100 hover:bg-orange-800 hover:text-white px-8 py-4 text-lg"
-              data-testid="button-learn-more-trantor"
+              data-testid="button-business-signup"
             >
-              <Users className="mr-2 h-5 w-5" />
-              Learn More
+              <Building className="mr-2 h-5 w-5" />
+              Business Signup
             </Button>
           </div>
         </div>
