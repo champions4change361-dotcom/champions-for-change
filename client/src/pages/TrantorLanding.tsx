@@ -53,8 +53,7 @@ export default function TrantorLanding() {
                 </Button>
                 <Button 
                   onClick={() => setLocation('/pricing')}
-                  variant="outline"
-                  className="border-orange-400 text-orange-100 hover:bg-orange-800 hover:text-white px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base w-full lg:w-auto"
+                  className="bg-orange-600 hover:bg-orange-700 text-white font-semibold px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base w-full lg:w-auto border border-orange-500 shadow-lg"
                   data-testid="button-pricing-trantor"
                 >
                   <CreditCard className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4" />
@@ -323,9 +322,8 @@ export default function TrantorLanding() {
             </Button>
             <Button 
               size="lg"
-              variant="outline"
               onClick={() => setLocation('/login/business')}
-              className="border-orange-400 text-orange-100 hover:bg-orange-800 hover:text-white px-8 py-4 text-lg"
+              className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-4 text-lg font-semibold border border-orange-500 shadow-lg"
               data-testid="button-business-signup"
             >
               <Building className="mr-2 h-5 w-5" />
