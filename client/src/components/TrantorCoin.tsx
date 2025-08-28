@@ -82,18 +82,53 @@ export default function TrantorCoin({
 
   const colors = getVariantColors();
 
+  const coinDiameter = size === 'sm' ? 64 : size === 'md' ? 96 : 128;
+  const textRadius = coinDiameter / 2 + 12;
+
   return (
     <div className="relative flex flex-col items-center">
-      {/* Top Curved Text */}
+      {/* Curved Text Above Coin */}
       {topText && (
         <div 
-          className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold text-white text-center"
+          className="absolute"
           style={{
-            textShadow: '0 0 4px rgba(0,0,0,0.8)',
+            top: `-${textRadius + 20}px`,
+            left: '50%',
+            transform: 'translateX(-50%)',
             zIndex: 10
           }}
         >
-          {topText}
+          <svg 
+            width={coinDiameter + 40} 
+            height={textRadius + 30}
+            style={{ overflow: 'visible' }}
+          >
+            <defs>
+              <path
+                id={`textPath-${variant}-${Math.random()}`}
+                d={`M 20 ${textRadius + 20} A ${textRadius} ${textRadius} 0 0 1 ${coinDiameter + 20} ${textRadius + 20}`}
+                fill="none"
+                stroke="none"
+              />
+            </defs>
+            <text
+              fontSize="12"
+              fontWeight="bold"
+              fill="white"
+              textAnchor="middle"
+              style={{
+                filter: 'drop-shadow(0 0 6px rgba(0,0,0,0.8))',
+                letterSpacing: '1px'
+              }}
+            >
+              <textPath 
+                href={`#textPath-${variant}-${Math.random()}`}
+                startOffset="50%"
+              >
+                {topText}
+              </textPath>
+            </text>
+          </svg>
         </div>
       )}
       
