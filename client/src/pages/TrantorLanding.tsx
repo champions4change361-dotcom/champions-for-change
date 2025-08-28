@@ -79,25 +79,23 @@ export default function TrantorLanding() {
             <p className="text-xl text-orange-100 max-w-3xl mx-auto mb-8">
               Join professional fantasy leagues with overnight scoring OR create your own traditional tournaments. Complete platform for organizers, businesses, and fantasy enthusiasts.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
+            <div className="flex flex-col sm:flex-row gap-12 justify-center items-center">
+              <TrantorCoin
                 size="lg"
-                onClick={() => setLocation('/fantasy-tournaments')}
-                className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 text-lg font-semibold border border-purple-500 shadow-lg"
-                data-testid="button-join-fantasy"
-              >
-                <Target className="mr-2 h-5 w-5" />
-                Join Fantasy Leagues
-              </Button>
-              <Button 
+                variant="fantasy"
+                topText="Join Fantasy Leagues"
+                bottomText="Fantasy Sports"
+                redirectTo="/fantasy-tournaments"
+                data-testid="coin-join-fantasy"
+              />
+              <TrantorCoin
                 size="lg"
-                onClick={() => setLocation('/create')}
-                className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-4 text-lg font-semibold border border-orange-500 shadow-lg"
-                data-testid="button-create-tournament"
-              >
-                <Trophy className="mr-2 h-5 w-5" />
-                Create Tournament
-              </Button>
+                variant="tournament"
+                topText="Create Tournament"
+                bottomText="Tournament Platform"
+                redirectTo="/create"
+                data-testid="coin-create-tournament"
+              />
             </div>
             <p className="text-orange-300 text-sm mt-4">
               Fantasy results update overnight at 2 AM - Family-friendly, sustainable fantasy sports
@@ -309,25 +307,23 @@ export default function TrantorLanding() {
           <p className="text-orange-200 text-lg mb-8">
             Join fantasy leagues with overnight scoring OR create your own traditional tournaments.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button 
+          <div className="flex flex-col sm:flex-row gap-12 justify-center items-center">
+            <TrantorCoin
               size="lg"
-              onClick={() => setLocation('/fantasy-tournaments')}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 text-lg font-semibold border border-purple-500 shadow-lg"
-              data-testid="button-join-fantasy-cta"
-            >
-              <Target className="mr-2 h-5 w-5" />
-              Join Fantasy Leagues
-            </Button>
-            <Button 
+              variant="fantasy"
+              topText="Join Fantasy Leagues"
+              bottomText="Fantasy Sports"
+              redirectTo="/fantasy-tournaments"
+              data-testid="coin-join-fantasy-cta"
+            />
+            <TrantorCoin
               size="lg"
-              onClick={() => setLocation('/login/business')}
-              className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-4 text-lg font-semibold border border-orange-500 shadow-lg"
-              data-testid="button-business-signup"
-            >
-              <Building className="mr-2 h-5 w-5" />
-              Business Signup
-            </Button>
+              variant="tournament"
+              topText="Business Signup"
+              bottomText="Enterprise Platform"
+              redirectTo="/login/business"
+              data-testid="coin-business-signup"
+            />
           </div>
         </div>
       </div>
