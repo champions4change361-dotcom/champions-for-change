@@ -13,9 +13,9 @@ export default function TrantorLanding() {
   const [isRegistrationAssistantOpen, setIsRegistrationAssistantOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-900 via-orange-800 to-red-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
       {/* Professional Tournament Header */}
-      <header className="relative border-b border-orange-500/20 bg-orange-900/80 backdrop-blur-sm">
+      <header className="relative border-b border-yellow-500/20 bg-slate-900/80 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="lg:flex lg:items-center lg:justify-between lg:h-16">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between w-full py-4 lg:py-0 space-y-4 lg:space-y-0">
@@ -25,7 +25,7 @@ export default function TrantorLanding() {
                 <TrantorCoin size="lg" />
                 <div>
                   <h1 className="text-xl font-bold text-white">Trantor Tournaments</h1>
-                  <p className="text-xs text-orange-300">Click coin to create account</p>
+                  <p className="text-xs text-yellow-300">Click coin to create account</p>
                 </div>
               </div>
 
@@ -33,9 +33,9 @@ export default function TrantorLanding() {
               <div className="hidden lg:flex items-center space-x-6">
                 <div className="flex items-center space-x-2">
                   <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                  <span className="text-sm text-orange-200">Live Platform</span>
+                  <span className="text-sm text-slate-200">Live Platform</span>
                 </div>
-                <Badge variant="outline" className="border-orange-400 text-orange-300">
+                <Badge variant="outline" className="border-yellow-400 text-yellow-300">
                   Commercial Ready
                 </Badge>
               </div>
@@ -44,7 +44,7 @@ export default function TrantorLanding() {
               <div className="flex flex-col space-y-2 lg:flex-row lg:space-y-0 lg:space-x-3 lg:ml-auto">
                 <Button 
                   onClick={() => setLocation('/create')}
-                  className="bg-orange-600 hover:bg-orange-700 text-white font-semibold px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base w-full lg:w-auto"
+                  className="bg-yellow-600 hover:bg-yellow-700 text-slate-900 font-semibold px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base w-full lg:w-auto"
                   data-testid="button-start-tournament-trantor"
                 >
                   <Trophy className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4" />
@@ -52,7 +52,7 @@ export default function TrantorLanding() {
                 </Button>
                 <Button 
                   onClick={() => setLocation('/pricing')}
-                  className="bg-orange-600 hover:bg-orange-700 text-white font-semibold px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base w-full lg:w-auto border border-orange-500 shadow-lg"
+                  className="bg-slate-700 hover:bg-slate-600 text-yellow-300 font-semibold px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base w-full lg:w-auto border border-yellow-500 shadow-lg"
                   data-testid="button-pricing-trantor"
                 >
                   <CreditCard className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4" />
@@ -66,10 +66,10 @@ export default function TrantorLanding() {
 
       {/* Tournament Management Hero */}
       <div className="relative py-16 lg:py-24">
-        <div className="absolute inset-0 bg-gradient-to-r from-orange-600/10 via-transparent to-orange-600/10"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-yellow-600/10 via-transparent to-yellow-600/10"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <Badge className="mb-6 bg-orange-600 text-white px-4 py-2">
+            <Badge className="mb-6 bg-yellow-600 text-slate-900 px-4 py-2">
               🏆 Professional Tournament Platform
             </Badge>
             <h1 className="text-4xl lg:text-6xl font-bold text-white mb-6">
