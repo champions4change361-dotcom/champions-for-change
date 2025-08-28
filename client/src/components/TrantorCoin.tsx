@@ -95,34 +95,35 @@ export default function TrantorCoin({
             top: `-${textRadius + 20}px`,
             left: '50%',
             transform: 'translateX(-50%)',
-            zIndex: 10
+            zIndex: 10,
+            width: `${coinDiameter + 40}px`,
+            height: `${textRadius + 30}px`
           }}
         >
           <svg 
             width={coinDiameter + 40} 
             height={textRadius + 30}
+            viewBox={`0 0 ${coinDiameter + 40} ${textRadius + 30}`}
             style={{ overflow: 'visible' }}
           >
             <defs>
               <path
-                id={`textPath-${variant}-${Math.random()}`}
-                d={`M 20 ${textRadius + 20} A ${textRadius} ${textRadius} 0 0 1 ${coinDiameter + 20} ${textRadius + 20}`}
-                fill="none"
-                stroke="none"
+                id={`curve-${variant}-${size}`}
+                d={`M 20 ${textRadius + 15} A ${textRadius} ${textRadius} 0 0 1 ${coinDiameter + 20} ${textRadius + 15}`}
               />
             </defs>
             <text
-              fontSize="12"
+              fontSize="11"
               fontWeight="bold"
               fill="white"
               textAnchor="middle"
               style={{
-                filter: 'drop-shadow(0 0 6px rgba(0,0,0,0.8))',
-                letterSpacing: '1px'
+                textShadow: '0 0 6px rgba(0,0,0,0.8)',
+                letterSpacing: '0.5px'
               }}
             >
               <textPath 
-                href={`#textPath-${variant}-${Math.random()}`}
+                href={`#curve-${variant}-${size}`}
                 startOffset="50%"
               >
                 {topText}
