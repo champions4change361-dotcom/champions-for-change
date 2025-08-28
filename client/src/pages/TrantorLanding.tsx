@@ -22,10 +22,10 @@ export default function TrantorLanding() {
               
               {/* Trantor Tournaments Logo */}
               <div className="flex items-center space-x-3 mb-5 lg:mb-0">
-                <TrantorCoin size="lg" autoFlip={true} flipInterval={5000} />
+                <TrantorCoin size="lg" />
                 <div>
                   <h1 className="text-xl font-bold text-white">Trantor Tournaments</h1>
-                  <p className="text-xs text-orange-300">Professional Tournament Management</p>
+                  <p className="text-xs text-orange-300">Click coin to create account</p>
                 </div>
               </div>
 

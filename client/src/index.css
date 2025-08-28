@@ -157,6 +157,16 @@
   transform-style: preserve-3d;
 }
 
+/* Trantor Coin Interactive Styles */
+.coin.flipped {
+  transform: rotateY(180deg);
+}
+
+.coin:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+}
+
 @layer base {
   * {
     @apply border-border;

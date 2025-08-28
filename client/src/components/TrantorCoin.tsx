@@ -1,120 +1,136 @@
 import React, { useState } from 'react';
-import trantorCityscape from '@assets/Untitled design_1756267317246.png';
-import trantorSpaceship from '@assets/Untitled design_1756267358077.png';
+import { useLocation } from 'wouter';
 
 interface TrantorCoinProps {
-  isFlipping?: boolean;
-  onFlipComplete?: () => void;
   size?: 'sm' | 'md' | 'lg';
-  autoFlip?: boolean;
-  flipInterval?: number;
+  onClick?: () => void;
 }
 
 export default function TrantorCoin({ 
-  isFlipping = false, 
-  onFlipComplete, 
   size = 'md',
-  autoFlip = false,
-  flipInterval = 3000 
+  onClick
 }: TrantorCoinProps) {
   const [isFlipped, setIsFlipped] = useState(false);
-  const [currentlyFlipping, setCurrentlyFlipping] = useState(isFlipping);
+  const [, setLocation] = useLocation();
 
-  const sizeClasses = {
-    sm: 'w-12 h-12',
-    md: 'w-16 h-16',
-    lg: 'w-24 h-24'
+  const sizeMap = {
+    sm: { width: 60, height: 60 },
+    md: { width: 80, height: 80 },
+    lg: { width: 100, height: 100 }
   };
 
-  const handleFlip = () => {
-    if (!currentlyFlipping) {
-      setCurrentlyFlipping(true);
-      setTimeout(() => {
-        setIsFlipped(!isFlipped);
-        setCurrentlyFlipping(false);
-        onFlipComplete?.();
-      }, 400); // Half of animation duration
+  const coinSize = sizeMap[size];
+
+  const handleCoinClick = () => {
+    if (onClick) {
+      onClick();
+      return;
     }
+
+    // Flip the coin
+    setIsFlipped(true);
+    
+    // Navigate to signup after animation
+    setTimeout(() => {
+      setLocation('/login/organizer');
+    }, 600);
   };
-
-  // Auto flip effect
-  React.useEffect(() => {
-    if (autoFlip) {
-      const interval = setInterval(handleFlip, flipInterval);
-      return () => clearInterval(interval);
-    }
-  }, [autoFlip, flipInterval, isFlipped]);
-
-  // External flip control
-  React.useEffect(() => {
-    if (isFlipping && !currentlyFlipping) {
-      handleFlip();
-    }
-  }, [isFlipping]);
 
   return (
-    <div className="flex items-center justify-center">
+    <div className="coin-container" style={{ perspective: '1000px' }}>
       <div 
-        className={`
-          ${sizeClasses[size]} 
-          relative cursor-pointer 
-          preserve-3d
-          ${currentlyFlipping ? 'animate-flip' : ''}
-          hover:scale-110 transition-transform duration-200
-        `}
-        onClick={handleFlip}
+        className={`coin ${isFlipped ? 'flipped' : ''}`}
+        onClick={handleCoinClick}
+        role="button"
+        aria-label="Flip coin to create account"
         style={{
-          transform: !currentlyFlipping 
-            ? (isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)')
-            : undefined
+          width: `${coinSize.width}px`,
+          height: `${coinSize.height}px`,
+          position: 'relative',
+          transformStyle: 'preserve-3d',
+          transition: 'transform 0.5s',
+          cursor: 'pointer'
         }}
       >
-        {/* Front Side - Trantor Cityscape */}
+        {/* Front Side SVG */}
         <div 
-          className="absolute inset-0 rounded-full shadow-xl backface-hidden border-2 border-purple-400 overflow-hidden"
-          style={{ 
+          className="front"
+          style={{
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
             backfaceVisibility: 'hidden',
-            transform: 'rotateY(0deg)'
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderRadius: '50%',
+            boxShadow: '0 0 10px rgba(0, 0, 0, 0.2)'
           }}
         >
-          <img 
-            src={trantorCityscape} 
-            alt="Trantor Cityscape"
-            className="w-full h-full object-cover scale-110"
-            style={{ objectPosition: 'center center' }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-purple-900/20 to-transparent" />
+          <svg width={coinSize.width} height={coinSize.height} viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <radialGradient id="frontGrad" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+                <stop offset="0%" style={{stopColor: '#0A2540', stopOpacity: 1}} />
+                <stop offset="100%" style={{stopColor: '#D4AF37', stopOpacity: 1}} />
+              </radialGradient>
+            </defs>
+            {/* Coin base */}
+            <circle cx="50" cy="50" r="48" fill="url(#frontGrad)" stroke="#C0C0C0" strokeWidth="4"/>
+            {/* Cityscape elements */}
+            <path d="M20 70 L20 90 L40 90 L40 80 L30 70 Z" fill="#FFD700"/> {/* Coliseum dome */}
+            <rect x="40" y="50" width="20" height="20" fill="none" stroke="#00FFFF" strokeWidth="1" strokeDasharray="2,2"/> {/* VR grid */}
+            <path d="M60 60 L60 90 L80 90 L80 70 L70 60 Z" fill="#C0C0C0"/> {/* Forum hall */}
+            {/* Stars */}
+            <circle cx="30" cy="20" r="1" fill="#FFFFFF"/>
+            <circle cx="50" cy="15" r="1" fill="#FFFFFF"/>
+            <circle cx="70" cy="25" r="1" fill="#FFFFFF"/>
+            <text x="50" y="95" fontSize="8" textAnchor="middle" fill="#000000">Trantor</text>
+          </svg>
         </div>
 
-        {/* Back Side - Trantor Spaceship */}
+        {/* Back Side SVG */}
         <div 
-          className="absolute inset-0 rounded-full shadow-xl backface-hidden border-2 border-blue-400 overflow-hidden"
-          style={{ 
+          className="back"
+          style={{
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
             backfaceVisibility: 'hidden',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderRadius: '50%',
+            boxShadow: '0 0 10px rgba(0, 0, 0, 0.2)',
             transform: 'rotateY(180deg)'
           }}
         >
-          <img 
-            src={trantorSpaceship} 
-            alt="Trantor Spaceship"
-            className="w-full h-full object-cover scale-125"
-            style={{ objectPosition: 'center center' }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-blue-900/20 to-transparent" />
+          <svg width={coinSize.width} height={coinSize.height} viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="backGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style={{stopColor: '#C0C0C0', stopOpacity: 1}} />
+                <stop offset="100%" style={{stopColor: '#D4AF37', stopOpacity: 1}} />
+              </linearGradient>
+            </defs>
+            {/* Coin base */}
+            <circle cx="50" cy="50" r="48" fill="url(#backGrad)" stroke="#D4AF37" strokeWidth="4"/>
+            {/* Helix with gears */}
+            <path d="M30 30 Q50 50 30 70 M70 30 Q50 50 70 70" stroke="#FFD700" strokeWidth="3" fill="none"/> {/* Helix strands */}
+            <circle cx="50" cy="50" r="5" fill="#FFD700"/> {/* Gear nodes */}
+            <circle cx="30" cy="40" r="3" fill="#C0C0C0"/>
+            <circle cx="70" cy="60" r="3" fill="#C0C0C0"/>
+            {/* Trophy */}
+            <path d="M45 40 L55 40 L52 30 L48 30 Z" fill="#FFD700"/> {/* Trophy cup */}
+            <line x1="50" y1="30" x2="50" y2="70" stroke="#FFD700" strokeWidth="2"/> {/* Stem */}
+            <line x1="40" y1="25" x2="60" y2="25" stroke="#FFFF00" strokeWidth="1"/> {/* Rays */}
+            <line x1="40" y1="35" x2="60" y2="35" stroke="#FFFF00" strokeWidth="1"/>
+            {/* Subtle eagle and stars */}
+            <path d="M80 20 L85 25 L90 20 L85 15 Z" fill="#000000" fillOpacity="0.3"/> {/* Eagle */}
+            <circle cx="20" cy="80" r="1" fill="#FFFFFF" fillOpacity="0.5"/>
+            <circle cx="25" cy="85" r="1" fill="#FFFFFF" fillOpacity="0.5"/>
+            <text x="50" y="95" fontSize="8" textAnchor="middle" fill="#000000">Create</text>
+          </svg>
         </div>
-
-        {/* Coin Edge (Optional Detail) */}
-        <div 
-          className={`
-            absolute inset-0 rounded-full 
-            border-4 border-amber-300 
-            shadow-inner
-            ${currentlyFlipping ? 'opacity-30' : 'opacity-0'}
-            transition-opacity duration-200
-          `}
-        />
       </div>
-
     </div>
   );
 }
