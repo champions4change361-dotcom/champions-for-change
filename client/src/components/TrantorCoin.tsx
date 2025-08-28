@@ -70,8 +70,8 @@ export default function TrantorCoin({
           <svg width={coinSize.width} height={coinSize.height} viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <radialGradient id="frontGrad" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-                <stop offset="0%" style={{stopColor: '#0A2540', stopOpacity: 1}} />
-                <stop offset="100%" style={{stopColor: '#D4AF37', stopOpacity: 1}} />
+                <stop offset="0%" style={{stopColor: '#9A3412', stopOpacity: 1}} />
+                <stop offset="100%" style={{stopColor: '#F97316', stopOpacity: 1}} />
               </radialGradient>
             </defs>
             {/* Coin base */}
@@ -107,8 +107,8 @@ export default function TrantorCoin({
           <svg width={coinSize.width} height={coinSize.height} viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <linearGradient id="backGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style={{stopColor: '#C0C0C0', stopOpacity: 1}} />
-                <stop offset="100%" style={{stopColor: '#D4AF37', stopOpacity: 1}} />
+                <stop offset="0%" style={{stopColor: '#EA580C', stopOpacity: 1}} />
+                <stop offset="100%" style={{stopColor: '#FBBF24', stopOpacity: 1}} />
               </linearGradient>
             </defs>
             {/* Coin base */}
