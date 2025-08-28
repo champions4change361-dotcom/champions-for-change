@@ -93,7 +93,7 @@ export default function TrantorLanding() {
                 variant="tournament"
                 topText="Create Tournament"
                 bottomText="Tournament Platform"
-                redirectTo="/create"
+                redirectTo="/pricing"
                 data-testid="coin-create-tournament"
               />
             </div>

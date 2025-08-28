@@ -30,8 +30,6 @@ export default function TrantorCoin({
   };
 
   const handleCoinClick = () => {
-    console.log('Coin clicked!', { variant, redirectTo, topText });
-    
     if (onClick) {
       onClick();
       return;
@@ -46,7 +44,6 @@ export default function TrantorCoin({
           clearInterval(flipInterval);
           // Navigate after 4 flips
           setTimeout(() => {
-            console.log('About to navigate to:', redirectTo || '/login/organizer');
             if (redirectTo) {
               setLocation(redirectTo);
             } else {
