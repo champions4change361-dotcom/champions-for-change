@@ -83,43 +83,43 @@ export default function TrantorCoin({
   const colors = getVariantColors();
 
   const coinDiameter = size === 'sm' ? 64 : size === 'md' ? 96 : 128;
-  const textRadius = coinDiameter / 2 + 12;
+  const textRadius = coinDiameter / 2 - 2; // Text sits right on the coin edge
 
   return (
     <div className="relative flex flex-col items-center">
-      {/* Curved Text Above Coin */}
+      {/* Curved Text Resting on Coin Edge */}
       {topText && (
         <div 
           className="absolute"
           style={{
-            top: `-${textRadius + 20}px`,
+            top: `-8px`, // Position text to sit on the coin's upper edge
             left: '50%',
             transform: 'translateX(-50%)',
             zIndex: 10,
-            width: `${coinDiameter + 40}px`,
-            height: `${textRadius + 30}px`
+            width: `${coinDiameter + 20}px`,
+            height: `${coinDiameter / 2 + 10}px`
           }}
         >
           <svg 
-            width={coinDiameter + 40} 
-            height={textRadius + 30}
-            viewBox={`0 0 ${coinDiameter + 40} ${textRadius + 30}`}
+            width={coinDiameter + 20} 
+            height={coinDiameter / 2 + 10}
+            viewBox={`0 0 ${coinDiameter + 20} ${coinDiameter / 2 + 10}`}
             style={{ overflow: 'visible' }}
           >
             <defs>
               <path
                 id={`curve-${variant}-${size}`}
-                d={`M 20 ${textRadius + 15} A ${textRadius} ${textRadius} 0 0 1 ${coinDiameter + 20} ${textRadius + 15}`}
+                d={`M 10 ${coinDiameter / 2 + 2} A ${textRadius} ${textRadius} 0 0 1 ${coinDiameter + 10} ${coinDiameter / 2 + 2}`}
               />
             </defs>
             <text
-              fontSize="11"
+              fontSize="10"
               fontWeight="bold"
               fill="white"
               textAnchor="middle"
               style={{
-                textShadow: '0 0 6px rgba(0,0,0,0.8)',
-                letterSpacing: '0.5px'
+                textShadow: '0 0 8px rgba(0,0,0,0.9)',
+                letterSpacing: '0.3px'
               }}
             >
               <textPath 
