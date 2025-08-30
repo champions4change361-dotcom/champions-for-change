@@ -74,6 +74,7 @@ import MillerHomepage from './pages/MillerHomepage';
 import RoleDashboard from './pages/RoleDashboard';
 import BulkRegistration from './pages/BulkRegistration';
 import OrganizerAnalyticsDemo from './pages/OrganizerAnalyticsDemo';
+import TournamentOnboarding from './pages/TournamentOnboarding';
 import AthleteDashboard from './pages/AthleteDashboard';
 import AthleteManagement from './pages/AthleteManagement';
 import HealthCommunication from './pages/HealthCommunication';
@@ -299,6 +300,7 @@ function AppRouter() {
       <Route path="/demo/health" component={HealthDemo} />
       <Route path="/discount-demo" component={DiscountDemo} />
       <Route path="/organizer-analytics" component={OrganizerAnalyticsDemo} />
+      <Route path="/tournament-onboarding" component={TournamentOnboarding} />
       <Route path="/grant-funding" component={GrantFunding} />
       <Route path="/nonprofit-resources" component={NonprofitResources} />
       <Route path="/register-organization" component={() => { window.location.href = '/smart-signup?type=business'; return null; }} />

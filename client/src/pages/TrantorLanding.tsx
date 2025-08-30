@@ -53,10 +53,10 @@ export default function TrantorLanding() {
                 <Button 
                   onClick={() => setLocation('/smart-signup?type=individual')}
                   className="bg-slate-700 hover:bg-slate-600 text-yellow-300 font-semibold px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base w-full lg:w-auto border border-yellow-500 shadow-lg"
-                  data-testid="button-pricing-trantor"
+                  data-testid="button-signup-trantor"
                 >
                   <CreditCard className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4" />
-                  View Pricing
+                  Sign Up
                 </Button>
               </div>
             </div>
@@ -91,10 +91,10 @@ export default function TrantorLanding() {
               <TrantorCoin
                 size="lg"
                 variant="tournament"
-                topText="Create Tournament"
-                bottomText="Tournament Platform"
-                redirectTo="/pricing"
-                data-testid="coin-create-tournament"
+                topText="Start Tournament Platform"
+                bottomText="Sign Up & Get Started"
+                redirectTo="/tournament-onboarding"
+                data-testid="coin-start-platform"
               />
             </div>
             <p className="text-orange-300 text-sm mt-4">
