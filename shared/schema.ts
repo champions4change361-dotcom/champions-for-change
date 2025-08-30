@@ -1025,6 +1025,26 @@ export const rolePermissions = pgTable("role_permissions", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// DISCOUNT CODES - Tournament-specific discount codes  
+export const discountCodes = pgTable("discount_codes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tournamentId: varchar("tournament_id").notNull(),
+  code: varchar("code").notNull().unique(), // "EARLY2024", "TEAM15", etc.
+  description: varchar("description"), // Optional description for organizers
+  discountType: text("discount_type", {
+    enum: ["percentage", "fixed_amount"]
+  }).notNull(),
+  discountValue: numeric("discount_value", { precision: 10, scale: 2 }).notNull(), // 15 (for 15%) or 25.00 (for $25 off)
+  maxUses: integer("max_uses"), // null = unlimited uses
+  currentUses: integer("current_uses").default(0),
+  validFrom: timestamp("valid_from").defaultNow(),
+  validUntil: timestamp("valid_until"), // null = no expiration
+  isActive: boolean("is_active").default(true),
+  createdBy: varchar("created_by").notNull(), // Tournament organizer user ID
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const tournaments = pgTable("tournaments", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
@@ -3320,3 +3340,15 @@ export const insertModularPageSchema = createInsertSchema(modularPages).omit({
   createdAt: true,
   updatedAt: true,
 });
+
+// Insert schemas for discount codes
+export const insertDiscountCodeSchema = createInsertSchema(discountCodes).omit({
+  id: true,
+  currentUses: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Type definitions for discount codes
+export type DiscountCode = typeof discountCodes.$inferSelect;
+export type InsertDiscountCode = z.infer<typeof insertDiscountCodeSchema>;

@@ -9,10 +9,11 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Heart, Users, Trophy, Calendar, Info, Phone, 
-  Palette, Upload, X, Plus, Trash2, Eye, Settings 
+  Palette, Upload, X, Plus, Trash2, Eye, Settings, Tag 
 } from "lucide-react";
 import FormBuilder from "@/components/FormBuilder";
 import RegistrationPreview from "@/components/RegistrationPreview";
+import DiscountCodeManager from "@/components/DiscountCodeManager";
 
 interface ModuleConfig {
   id: string;
@@ -73,10 +74,14 @@ export default function ModuleConfigurator({ module, isOpen, onClose, onSave }: 
 
   const renderRegistrationConfig = () => (
     <Tabs defaultValue="settings" className="w-full">
-      <TabsList className="grid w-full grid-cols-2">
+      <TabsList className="grid w-full grid-cols-3">
         <TabsTrigger value="settings" className="flex items-center space-x-2">
           <Settings className="h-4 w-4" />
           <span>Settings</span>
+        </TabsTrigger>
+        <TabsTrigger value="discounts" className="flex items-center space-x-2">
+          <Tag className="h-4 w-4" />
+          <span>Discounts</span>
         </TabsTrigger>
         <TabsTrigger value="preview" className="flex items-center space-x-2">
           <Eye className="h-4 w-4" />
@@ -161,6 +166,13 @@ export default function ModuleConfigurator({ module, isOpen, onClose, onSave }: 
         </div>
       </TabsContent>
       
+      <TabsContent value="discounts" className="mt-6">
+        <DiscountCodeManager
+          tournamentId={localModule.tournamentId || "temp-tournament"}
+          onDiscountCodesChange={(codes) => updateConfig('discountCodes', codes)}
+        />
+      </TabsContent>
+      
       <TabsContent value="preview" className="mt-6">
         <div className="border rounded-lg p-4 bg-gray-50">
           <div className="mb-4 text-center">
@@ -176,7 +188,8 @@ export default function ModuleConfigurator({ module, isOpen, onClose, onSave }: 
                 maxParticipants: localModule.config.maxParticipants || 32,
                 registrationDeadline: localModule.config.registrationDeadline || "",
                 requiresApproval: localModule.config.requiresApproval || false,
-                formFields: localModule.config.formFields || []
+                formFields: localModule.config.formFields || [],
+                discountCodes: localModule.config.discountCodes || []
               }}
             />
           </div>

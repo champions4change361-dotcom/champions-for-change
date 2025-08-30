@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { 
   DollarSign, Clock, Users, CheckCircle, AlertCircle,
-  User, Calendar, Phone, Mail, MapPin, FileText
+  User, Calendar, Phone, Mail, MapPin, FileText, Tag, Percent
 } from "lucide-react";
 
 interface FormField {
@@ -20,6 +20,16 @@ interface FormField {
   options?: string[];
 }
 
+interface DiscountCode {
+  id: string;
+  code: string;
+  discountType: 'percentage' | 'fixed_amount';
+  discountValue: number;
+  maxUses?: number;
+  currentUses: number;
+  isActive: boolean;
+}
+
 interface RegistrationConfig {
   title: string;
   description: string;
@@ -28,6 +38,7 @@ interface RegistrationConfig {
   registrationDeadline: string;
   requiresApproval: boolean;
   formFields: FormField[];
+  discountCodes?: DiscountCode[];
 }
 
 interface RegistrationPreviewProps {
@@ -37,9 +48,66 @@ interface RegistrationPreviewProps {
 export default function RegistrationPreview({ config }: RegistrationPreviewProps) {
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [currentParticipants] = useState(Math.floor(Math.random() * (config.maxParticipants * 0.7))); // Demo data
+  const [discountCode, setDiscountCode] = useState('');
+  const [appliedDiscount, setAppliedDiscount] = useState<DiscountCode | null>(null);
+  const [discountError, setDiscountError] = useState('');
 
   const updateFormField = (fieldId: string, value: any) => {
     setFormData(prev => ({ ...prev, [fieldId]: value }));
+  };
+
+  const applyDiscountCode = () => {
+    if (!discountCode.trim()) return;
+    
+    setDiscountError('');
+    const availableCodes = config.discountCodes || [];
+    const matchingCode = availableCodes.find(
+      code => code.code.toUpperCase() === discountCode.toUpperCase() && code.isActive
+    );
+
+    if (!matchingCode) {
+      setDiscountError('Invalid or expired discount code');
+      return;
+    }
+
+    if (matchingCode.maxUses && matchingCode.currentUses >= matchingCode.maxUses) {
+      setDiscountError('This discount code has reached its usage limit');
+      return;
+    }
+
+    setAppliedDiscount(matchingCode);
+    setDiscountError('');
+  };
+
+  const removeDiscount = () => {
+    setAppliedDiscount(null);
+    setDiscountCode('');
+    setDiscountError('');
+  };
+
+  const calculateFinalPrice = () => {
+    let price = config.registrationFee || 0;
+    
+    if (appliedDiscount) {
+      if (appliedDiscount.discountType === 'percentage') {
+        price = price - (price * (appliedDiscount.discountValue / 100));
+      } else {
+        price = Math.max(0, price - appliedDiscount.discountValue);
+      }
+    }
+    
+    return Math.max(0, price);
+  };
+
+  const getDiscountAmount = () => {
+    if (!appliedDiscount) return 0;
+    
+    const originalPrice = config.registrationFee || 0;
+    if (appliedDiscount.discountType === 'percentage') {
+      return originalPrice * (appliedDiscount.discountValue / 100);
+    } else {
+      return Math.min(originalPrice, appliedDiscount.discountValue);
+    }
   };
 
   const formatDeadline = (deadline: string) => {
@@ -248,14 +316,102 @@ export default function RegistrationPreview({ config }: RegistrationPreviewProps
             </div>
           ))}
 
+          {/* Discount Code Section */}
+          <div className="pt-6 border-t space-y-4">
+            <div>
+              <h3 className="text-lg font-medium text-gray-700 mb-4">Payment Summary</h3>
+              
+              {/* Price Breakdown */}
+              <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Registration Fee</span>
+                  <span className="font-medium">${(config.registrationFee || 0).toFixed(2)}</span>
+                </div>
+                
+                {appliedDiscount && (
+                  <div className="flex justify-between items-center text-green-600">
+                    <span className="flex items-center space-x-2">
+                      <Tag className="h-4 w-4" />
+                      <span>Discount ({appliedDiscount.code})</span>
+                    </span>
+                    <span className="font-medium">-${getDiscountAmount().toFixed(2)}</span>
+                  </div>
+                )}
+                
+                <div className="flex justify-between items-center text-lg font-bold border-t pt-3">
+                  <span>Total</span>
+                  <span className="text-green-600">${calculateFinalPrice().toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Discount Code Input */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Have a discount code?
+              </label>
+              
+              {!appliedDiscount ? (
+                <div className="flex space-x-2">
+                  <Input
+                    value={discountCode}
+                    onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
+                    placeholder="Enter discount code"
+                    className="uppercase"
+                    data-testid="input-discount-code-checkout"
+                  />
+                  <Button 
+                    variant="outline"
+                    onClick={applyDiscountCode}
+                    disabled={!discountCode.trim()}
+                    data-testid="button-apply-discount"
+                  >
+                    Apply
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-lg p-3">
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <span className="font-medium text-green-800">
+                      {appliedDiscount.code} applied
+                    </span>
+                    <Badge variant="secondary" className="text-xs">
+                      {appliedDiscount.discountType === 'percentage' 
+                        ? `${appliedDiscount.discountValue}% off`
+                        : `$${appliedDiscount.discountValue} off`
+                      }
+                    </Badge>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={removeDiscount}
+                    className="text-gray-500 hover:text-gray-700"
+                    data-testid="button-remove-discount"
+                  >
+                    Remove
+                  </Button>
+                </div>
+              )}
+              
+              {discountError && (
+                <p className="text-sm text-red-600 mt-2 flex items-center space-x-1">
+                  <AlertCircle className="h-4 w-4" />
+                  <span>{discountError}</span>
+                </p>
+              )}
+            </div>
+          </div>
+
           {/* Submit Button */}
-          <div className="pt-6 border-t">
+          <div className="pt-4">
             <Button 
               className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 text-lg font-semibold"
               data-testid="preview-submit-button"
             >
               {config.requiresApproval ? 'Submit for Approval' : 'Register Now'}
-              <span className="ml-2">${config.registrationFee || 0}</span>
+              <span className="ml-2">${calculateFinalPrice().toFixed(2)}</span>
             </Button>
             
             {config.requiresApproval && (
