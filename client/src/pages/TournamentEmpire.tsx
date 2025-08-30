@@ -1,9 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Crown, Shield, Users, Settings, Trophy, CreditCard, DollarSign } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -39,6 +39,18 @@ export default function TournamentEmpire() {
   const [selectedTier, setSelectedTier] = useState("district_enterprise");
   const [isSettingUpPayments, setIsSettingUpPayments] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Handle OAuth success - refresh auth state if coming from OAuth callback
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('auth') === 'success') {
+      // Force refresh of auth state after OAuth success
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      // Clean up URL
+      window.history.replaceState({}, '', '/tournament-empire');
+    }
+  }, [queryClient]);
 
   // Fetch Empire status
   const { data: empireStatus, isLoading: statusLoading } = useQuery<EmpireStatus>({
