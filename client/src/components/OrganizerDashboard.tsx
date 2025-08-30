@@ -118,19 +118,19 @@ export default function OrganizerDashboard({ organizerId }: OrganizerDashboardPr
   const pageViewData = processPageViewData();
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
+    <div className="max-w-7xl mx-auto p-3 md:p-6 space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Organizer Analytics</h1>
-          <p className="text-gray-600 mt-2">Complete tournament analytics and contact management dashboard</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Organizer Analytics</h1>
+          <p className="text-gray-600 mt-1 text-sm md:text-base">Complete tournament analytics and contact management dashboard</p>
         </div>
         
-        <div className="flex items-center space-x-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
           <select
             value={dateRange}
             onChange={(e) => setDateRange(Number(e.target.value))}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
             data-testid="date-range-selector"
           >
             <option value={7}>Last 7 days</option>
@@ -139,7 +139,7 @@ export default function OrganizerDashboard({ organizerId }: OrganizerDashboardPr
             <option value={365}>Last year</option>
           </select>
           
-          <Button variant="outline" data-testid="export-data">
+          <Button variant="outline" data-testid="export-data" className="text-sm">
             <Download className="h-4 w-4 mr-2" />
             Export Data
           </Button>
@@ -147,14 +147,14 @@ export default function OrganizerDashboard({ organizerId }: OrganizerDashboardPr
       </div>
 
       {/* Key Metrics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Total Page Views</CardTitle>
-            <Eye className="h-4 w-4 text-blue-600" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 md:pb-2">
+            <CardTitle className="text-xs md:text-sm font-medium text-gray-600">Page Views</CardTitle>
+            <Eye className="h-3 w-3 md:h-4 md:w-4 text-blue-600" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-gray-900">
+          <CardContent className="pt-1 md:pt-2">
+            <div className="text-lg md:text-2xl font-bold text-gray-900">
               {analytics?.metrics?.totalPageViews?.toLocaleString() || 0}
             </div>
             <p className="text-xs text-gray-500 mt-1">
@@ -164,12 +164,12 @@ export default function OrganizerDashboard({ organizerId }: OrganizerDashboardPr
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Total Contacts</CardTitle>
-            <Users className="h-4 w-4 text-green-600" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 md:pb-2">
+            <CardTitle className="text-xs md:text-sm font-medium text-gray-600">Contacts</CardTitle>
+            <Users className="h-3 w-3 md:h-4 md:w-4 text-green-600" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-gray-900">
+          <CardContent className="pt-1 md:pt-2">
+            <div className="text-lg md:text-2xl font-bold text-gray-900">
               {analytics?.metrics?.totalContacts?.toLocaleString() || 0}
             </div>
             <p className="text-xs text-gray-500 mt-1">
@@ -179,28 +179,28 @@ export default function OrganizerDashboard({ organizerId }: OrganizerDashboardPr
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Email Subscribers</CardTitle>
-            <Mail className="h-4 w-4 text-orange-600" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 md:pb-2">
+            <CardTitle className="text-xs md:text-sm font-medium text-gray-600">Email Subs</CardTitle>
+            <Mail className="h-3 w-3 md:h-4 md:w-4 text-orange-600" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-gray-900">
+          <CardContent className="pt-1 md:pt-2">
+            <div className="text-lg md:text-2xl font-bold text-gray-900">
               {analytics?.metrics?.emailOptIns?.toLocaleString() || 0}
             </div>
             <p className="text-xs text-gray-500 mt-1">
               {analytics?.metrics?.totalContacts ? 
-                Math.round((analytics.metrics.emailOptIns / analytics.metrics.totalContacts) * 100) : 0}% opt-in rate
+                Math.round((analytics.metrics.emailOptIns / analytics.metrics.totalContacts) * 100) : 0}% opt-in
             </p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Avg. Session Time</CardTitle>
-            <Activity className="h-4 w-4 text-purple-600" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 md:pb-2">
+            <CardTitle className="text-xs md:text-sm font-medium text-gray-600">Session Time</CardTitle>
+            <Activity className="h-3 w-3 md:h-4 md:w-4 text-purple-600" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-gray-900">
+          <CardContent className="pt-1 md:pt-2">
+            <div className="text-lg md:text-2xl font-bold text-gray-900">
               {analytics?.metrics?.avgSessionDuration ? 
                 Math.round(analytics.metrics.avgSessionDuration / 60) : 0}m
             </div>
@@ -212,15 +212,23 @@ export default function OrganizerDashboard({ organizerId }: OrganizerDashboardPr
       </div>
 
       {/* Analytics Tabs */}
-      <Tabs defaultValue="analytics" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="analytics" data-testid="tab-analytics">Page Analytics</TabsTrigger>
-          <TabsTrigger value="contacts" data-testid="tab-contacts">Contact Management</TabsTrigger>
-          <TabsTrigger value="demographics" data-testid="tab-demographics">Demographics</TabsTrigger>
+      <Tabs defaultValue="analytics" className="space-y-4 md:space-y-6">
+        <TabsList className="grid w-full grid-cols-3 h-auto">
+          <TabsTrigger value="analytics" data-testid="tab-analytics" className="text-xs md:text-sm py-2 md:py-3">
+            <span className="hidden sm:inline">Page Analytics</span>
+            <span className="sm:hidden">Analytics</span>
+          </TabsTrigger>
+          <TabsTrigger value="contacts" data-testid="tab-contacts" className="text-xs md:text-sm py-2 md:py-3">
+            <span className="hidden sm:inline">Contact Management</span>
+            <span className="sm:hidden">Contacts</span>
+          </TabsTrigger>
+          <TabsTrigger value="demographics" data-testid="tab-demographics" className="text-xs md:text-sm py-2 md:py-3">
+            Demographics
+          </TabsTrigger>
         </TabsList>
 
         {/* Page Analytics Tab */}
-        <TabsContent value="analytics" className="space-y-6">
+        <TabsContent value="analytics" className="space-y-4 md:space-y-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
@@ -232,7 +240,7 @@ export default function OrganizerDashboard({ organizerId }: OrganizerDashboardPr
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={400}>
+              <ResponsiveContainer width="100%" height={300} className="md:!h-[400px]">
                 <LineChart data={pageViewData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="date" />
@@ -265,7 +273,7 @@ export default function OrganizerDashboard({ organizerId }: OrganizerDashboardPr
           </Card>
 
           {/* Page Performance Breakdown */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
             <Card>
               <CardHeader>
                 <CardTitle>Top Pages</CardTitle>
@@ -338,7 +346,7 @@ export default function OrganizerDashboard({ organizerId }: OrganizerDashboardPr
         </TabsContent>
 
         {/* Contact Management Tab */}
-        <TabsContent value="contacts" className="space-y-6">
+        <TabsContent value="contacts" className="space-y-4 md:space-y-6">
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -359,7 +367,7 @@ export default function OrganizerDashboard({ organizerId }: OrganizerDashboardPr
                       placeholder="Search contacts..."
                       value={contactFilter}
                       onChange={(e) => setContactFilter(e.target.value)}
-                      className="pl-10 w-64"
+                      className="pl-10 w-full sm:w-64"
                       data-testid="contact-search"
                     />
                   </div>
@@ -468,8 +476,8 @@ export default function OrganizerDashboard({ organizerId }: OrganizerDashboardPr
         </TabsContent>
 
         {/* Demographics Tab */}
-        <TabsContent value="demographics" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <TabsContent value="demographics" className="space-y-4 md:space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
             <Card>
               <CardHeader>
                 <CardTitle>Top Cities</CardTitle>
