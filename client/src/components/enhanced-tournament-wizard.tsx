@@ -20,7 +20,7 @@ import TeamManagement from "@/components/team-management";
 import { type TeamData } from "@/utils/csv-utils";
 
 const formSchema = insertTournamentSchema.extend({
-  teamSize: z.number().min(4).max(32),
+  teamSize: z.number().min(2).max(128), // Support up to 128 teams for large tournaments
   tournamentType: z.enum(["single", "double", "pool-play", "round-robin", "swiss-system"]).default("single"),
   competitionFormat: z.enum(["bracket", "leaderboard", "series", "bracket-to-series", "multi-stage"]).default("bracket"),
   ageGroup: z.string().optional(),
@@ -218,11 +218,9 @@ export default function EnhancedTournamentWizard({
       if (age_group && age_group !== "All Ages") form.setValue("ageGroup", age_group);
       if (gender_division) form.setValue("genderDivision", gender_division);
       if (teamSize) {
-        const validSizes = [4, 8, 16, 32];
-        const closestSize = validSizes.reduce((prev, curr) => 
-          Math.abs(curr - teamSize) < Math.abs(prev - teamSize) ? curr : prev
-        );
-        form.setValue("teamSize", closestSize);
+        // Clamp to valid range and use the provided value directly
+        const clampedSize = Math.max(2, Math.min(128, teamSize));
+        form.setValue("teamSize", clampedSize);
       }
       
       // Use provided name or auto-generate tournament name
@@ -539,19 +537,51 @@ export default function EnhancedTournamentWizard({
                 <Label htmlFor="teamSize" className="block text-sm font-medium text-gray-700 mb-2">
                   {competitionFormat === 'leaderboard' ? 'Number of Participants' : 'Number of Teams'} *
                 </Label>
-                <Select
-                  value={teamSize?.toString()}
-                  onValueChange={(value) => form.setValue("teamSize", parseInt(value))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select size" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="8">8 {competitionFormat === 'leaderboard' ? 'Participants' : 'Teams'}</SelectItem>
-                    <SelectItem value="16">16 {competitionFormat === 'leaderboard' ? 'Participants' : 'Teams'}</SelectItem>
-                    <SelectItem value="32">32 {competitionFormat === 'leaderboard' ? 'Participants' : 'Teams'}</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="space-y-3">
+                  {/* Quick Selection Buttons */}
+                  <div className="flex flex-wrap gap-2">
+                    {[4, 8, 16, 32, 64].map((size) => (
+                      <Button
+                        key={size}
+                        type="button"
+                        variant={teamSize === size ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => form.setValue("teamSize", size)}
+                        className="h-8 px-3"
+                      >
+                        {size}
+                      </Button>
+                    ))}
+                  </div>
+                  
+                  {/* Custom Input */}
+                  <div className="relative">
+                    <Input
+                      type="number"
+                      min="2"
+                      max="128"
+                      value={teamSize || ""}
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value);
+                        if (!isNaN(value) && value >= 2 && value <= 128) {
+                          form.setValue("teamSize", value);
+                        }
+                      }}
+                      placeholder="Or enter custom number (2-128)"
+                      className="w-full"
+                      data-testid="input-team-size"
+                    />
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-400">
+                      Max: 128
+                    </div>
+                  </div>
+                </div>
+                
+                {teamSize && teamSize > 64 && (
+                  <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-700">
+                    <strong>Large Tournament:</strong> Tournaments with {teamSize}+ teams may require multiple rounds and extended time.
+                  </div>
+                )}
               </div>
 
               <div className="p-4 bg-blue-50 rounded-lg">
