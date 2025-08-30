@@ -447,6 +447,7 @@ export default function SmartSignup() {
                     disabled={submitMutation.isPending || selectedSports.length === 0}
                     className="bg-blue-600 hover:bg-blue-700 px-8 flex items-center"
                     data-testid="button-submit"
+                    onClick={() => console.log('Submit button clicked! Sports:', selectedSports)}
                   >
                     {submitMutation.isPending ? 'Creating Account...' : (
                       <>
