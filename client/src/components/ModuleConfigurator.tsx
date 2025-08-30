@@ -62,7 +62,12 @@ export default function ModuleConfigurator({ module, isOpen, onClose, onSave }: 
       ...prev,
       styling: { 
         ...prev.styling, 
-        background: { ...prev.styling.background, [key]: value }
+        background: { 
+          type: 'color' as const,
+          value: '',
+          ...prev.styling.background, 
+          [key]: value 
+        }
       }
     }));
   };
@@ -156,6 +161,139 @@ export default function ModuleConfigurator({ module, isOpen, onClose, onSave }: 
           </div>
         </div>
 
+        {/* Jersey Watch-style Registration Type Selector */}
+        <div className="border-t pt-6 space-y-4">
+          <h3 className="text-lg font-semibold text-gray-900">Registration Type</h3>
+          <p className="text-sm text-gray-600">Choose how participants will register for your tournament</p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div 
+              className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
+                (localModule.config.registrationType || "individual") === "individual" 
+                  ? "border-blue-500 bg-blue-50" 
+                  : "border-gray-200 hover:border-gray-300"
+              }`}
+              onClick={() => updateConfig('registrationType', 'individual')}
+              data-testid="registration-type-individual"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="font-medium">Individual Registration</h4>
+                <input
+                  type="radio"
+                  checked={(localModule.config.registrationType || "individual") === "individual"}
+                  onChange={() => updateConfig('registrationType', 'individual')}
+                  className="text-blue-600"
+                />
+              </div>
+              <p className="text-sm text-gray-600">
+                Each participant registers individually. Perfect for tennis, golf, wrestling, swimming, and other individual sports.
+              </p>
+            </div>
+            
+            <div 
+              className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
+                localModule.config.registrationType === "team" 
+                  ? "border-blue-500 bg-blue-50" 
+                  : "border-gray-200 hover:border-gray-300"
+              }`}
+              onClick={() => updateConfig('registrationType', 'team')}
+              data-testid="registration-type-team"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="font-medium">Team Registration</h4>
+                <input
+                  type="radio"
+                  checked={localModule.config.registrationType === "team"}
+                  onChange={() => updateConfig('registrationType', 'team')}
+                  className="text-blue-600"
+                />
+              </div>
+              <p className="text-sm text-gray-600">
+                Team captains create teams and share codes with members. Perfect for basketball, soccer, volleyball, and other team sports.
+              </p>
+            </div>
+          </div>
+          
+          {/* Team Registration Specific Settings */}
+          {localModule.config.registrationType === "team" && (
+            <div className="mt-6 p-4 bg-blue-50 rounded-lg space-y-4">
+              <h4 className="font-medium text-blue-900">Team Registration Settings</h4>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-blue-800">Minimum Team Size</label>
+                  <Input
+                    type="number"
+                    value={localModule.config.minTeamSize || 3}
+                    onChange={(e) => updateConfig('minTeamSize', parseInt(e.target.value) || 3)}
+                    min={1}
+                    data-testid="input-min-team-size"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-blue-800">Maximum Team Size</label>
+                  <Input
+                    type="number"
+                    value={localModule.config.maxTeamSize || 5}
+                    onChange={(e) => updateConfig('maxTeamSize', parseInt(e.target.value) || 5)}
+                    min={localModule.config.minTeamSize || 3}
+                    data-testid="input-max-team-size"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-blue-800">Registration Fee Per</label>
+                  <Select
+                    value={localModule.config.feeStructure || "per_player"}
+                    onValueChange={(value) => updateConfig('feeStructure', value)}
+                  >
+                    <SelectTrigger data-testid="select-fee-structure">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="per_player">Per Player</SelectItem>
+                      <SelectItem value="per_team">Per Team</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              <div className="space-y-3">
+                <h5 className="font-medium text-blue-800">Payment Options</h5>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={localModule.config.allowCaptainPaysAll !== false}
+                    onChange={(e) => updateConfig('allowCaptainPaysAll', e.target.checked)}
+                    className="rounded"
+                    data-testid="checkbox-captain-pays-all"
+                  />
+                  <label className="text-sm text-blue-800">Allow team captain to pay for entire team</label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={localModule.config.allowIndividualPayments !== false}
+                    onChange={(e) => updateConfig('allowIndividualPayments', e.target.checked)}
+                    className="rounded"
+                    data-testid="checkbox-individual-payments"
+                  />
+                  <label className="text-sm text-blue-800">Allow individual players to pay separately</label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={localModule.config.allowPartialPayments !== false}
+                    onChange={(e) => updateConfig('allowPartialPayments', e.target.checked)}
+                    className="rounded"
+                    data-testid="checkbox-partial-payments"
+                  />
+                  <label className="text-sm text-blue-800">Allow partial team payments (mixed payment methods)</label>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Form Builder */}
         <div className="border-t pt-6">
           <FormBuilder
@@ -168,7 +306,7 @@ export default function ModuleConfigurator({ module, isOpen, onClose, onSave }: 
       
       <TabsContent value="discounts" className="mt-6">
         <DiscountCodeManager
-          tournamentId={localModule.tournamentId || "temp-tournament"}
+          tournamentId={localModule.config.tournamentId || "temp-tournament"}
           onDiscountCodesChange={(codes) => updateConfig('discountCodes', codes)}
         />
       </TabsContent>

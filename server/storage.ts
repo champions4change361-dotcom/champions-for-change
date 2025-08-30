@@ -10,7 +10,7 @@ import {
   type Donor, type InsertDonor, type Donation, type InsertDonation, type RegistrationRequest, type InsertRegistrationRequest,
   type TaxExemptionDocument, type InsertTaxExemptionDocument, type NonprofitSubscription, type InsertNonprofitSubscription, type NonprofitInvoice, type InsertNonprofitInvoice,
   type SupportTeam, type InsertSupportTeam, type SupportTeamMember, type InsertSupportTeamMember, type SupportTeamInjury, type InsertSupportTeamInjury, type SupportTeamAiConsultation, type InsertSupportTeamAiConsultation,
-  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog, taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices, supportTeams, supportTeamMembers, supportTeamInjuries, supportTeamAiConsultations
+  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog, taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices, supportTeams, supportTeamMembers, supportTeamInjuries, supportTeamAiConsultations, jerseyTeamMembers
 } from "@shared/schema";
 
 type SportCategory = typeof sportCategories.$inferSelect;
@@ -85,6 +85,13 @@ export interface IStorage {
   getTeamRegistrationsByCoach(coachId: string): Promise<TeamRegistration[]>;
   updateTeamRegistration(id: string, updates: Partial<TeamRegistration>): Promise<TeamRegistration | undefined>;
   deleteTeamRegistration(id: string): Promise<boolean>;
+  getTeamByCode(teamCode: string): Promise<TeamRegistration | undefined>;
+  
+  // Team member methods
+  createTeamMember(member: any): Promise<any>;
+  getTeamMembers(teamRegistrationId: string): Promise<any[]>;
+  updateTeamMember(id: string, updates: any): Promise<any>;
+  deleteTeamMember(id: string): Promise<boolean>;
 
   // Organization methods
   createOrganization(organization: InsertOrganization): Promise<Organization>;
@@ -605,6 +612,67 @@ export class DbStorage implements IStorage {
   async deleteTeamRegistration(id: string): Promise<boolean> {
     try {
       const result = await this.db.delete(teamRegistrations).where(eq(teamRegistrations.id, id));
+      return result.rowCount > 0;
+    } catch (error) {
+      console.error("Database error:", error);
+      return false;
+    }
+  }
+
+  async getTeamByCode(teamCode: string): Promise<TeamRegistration | undefined> {
+    try {
+      const result = await this.db
+        .select()
+        .from(teamRegistrations)
+        .where(eq(teamRegistrations.teamCode, teamCode));
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  // Team member methods
+  async createTeamMember(member: any): Promise<any> {
+    try {
+      const result = await this.db.insert(jerseyTeamMembers).values(member).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to create team member");
+    }
+  }
+
+  async getTeamMembers(teamRegistrationId: string): Promise<any[]> {
+    try {
+      const result = await this.db
+        .select()
+        .from(jerseyTeamMembers)
+        .where(eq(jerseyTeamMembers.teamRegistrationId, teamRegistrationId));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async updateTeamMember(id: string, updates: any): Promise<any> {
+    try {
+      const result = await this.db
+        .update(jerseyTeamMembers)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(jerseyTeamMembers.id, id))
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async deleteTeamMember(id: string): Promise<boolean> {
+    try {
+      const result = await this.db.delete(jerseyTeamMembers).where(eq(jerseyTeamMembers.id, id));
       return result.rowCount > 0;
     } catch (error) {
       console.error("Database error:", error);

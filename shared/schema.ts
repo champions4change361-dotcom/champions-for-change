@@ -1173,6 +1173,14 @@ export const tournaments = pgTable("tournaments", {
   
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
   updatedAt: timestamp("updated_at").notNull().default(sql`now()`),
+  
+  // JERSEY WATCH-STYLE TEAM REGISTRATION FIELDS
+  registrationType: text("registration_type", { 
+    enum: ["individual", "team"] 
+  }).default("individual"),
+  allowPartialTeamPayments: boolean("allow_partial_team_payments").default(true),
+  maxTeamSize: integer("max_team_size"), // For team tournaments
+  minTeamSize: integer("min_team_size"), // Minimum players required
 });
 
 // CORPORATE COMPETITION DATABASE SYSTEM
@@ -2609,17 +2617,29 @@ export type InsertDonor = typeof donors.$inferInsert;
 export type Donation = typeof donations.$inferSelect;
 export type InsertDonation = typeof donations.$inferInsert;
 
-// Team registrations - coaches register their teams for tournaments
+// Team registrations - Jersey Watch-style team creation with shareable codes
 export const teamRegistrations = pgTable("team_registrations", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   tournamentId: varchar("tournament_id").notNull().references(() => tournaments.id),
-  coachId: varchar("coach_id").notNull().references(() => users.id),
+  coachId: varchar("coach_id").references(() => users.id), // Optional - for logged in users
   teamName: varchar("team_name").notNull(),
   organizationName: varchar("organization_name"), // School/club name
+  
+  // JERSEY WATCH-STYLE TEAM CAPTAIN FEATURES
+  teamCode: varchar("team_code").notNull().unique(), // Shareable 8-character code
+  captainName: varchar("captain_name").notNull(),
+  captainEmail: varchar("captain_email").notNull(),
+  captainPhone: varchar("captain_phone"),
+  
+  // FLEXIBLE PAYMENT CONFIGURATION
+  paymentMethod: text("payment_method", {
+    enum: ["captain_pays_all", "individual_payments", "mixed"]
+  }).default("individual_payments"),
+  
   playerList: jsonb("player_list"), // Array of player details
   registeredEvents: jsonb("registered_events"), // Which events this team is competing in
   registrationStatus: text("registration_status", {
-    enum: ["incomplete", "pending_approval", "approved", "rejected", "waitlisted"]
+    enum: ["incomplete", "pending_approval", "approved", "rejected", "waitlisted", "partial", "complete", "tournament_ready"]
   }).default("incomplete"),
   
   // Enhanced payment tracking
@@ -2638,6 +2658,16 @@ export const teamRegistrations = pgTable("team_registrations", {
     transactionId?: string;
   }>>().default([]),
   
+  // TEAM REQUIREMENTS
+  requiredPlayers: integer("required_players"),
+  currentPlayers: integer("current_players").default(0),
+  maxPlayers: integer("max_players"),
+  
+  // DISCOUNT & PAYMENT PLAN INTEGRATION
+  appliedDiscountCode: varchar("applied_discount_code"),
+  discountAmount: decimal("discount_amount", { precision: 10, scale: 2 }).default("0"),
+  paymentPlanId: varchar("payment_plan_id").references(() => paymentPlans.id),
+  
   // Document compliance tracking
   requiredDocuments: jsonb("required_documents").$type<Array<{
     type: string;
@@ -2655,6 +2685,84 @@ export const teamRegistrations = pgTable("team_registrations", {
   rejectionReason: text("rejection_reason"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Jersey Watch-style team members within a team registration
+export const jerseyTeamMembers = pgTable("jersey_team_members", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  teamRegistrationId: varchar("team_registration_id").notNull().references(() => teamRegistrations.id),
+  
+  // PLAYER INFORMATION
+  playerName: varchar("player_name").notNull(),
+  dateOfBirth: date("date_of_birth"),
+  jerseyNumber: varchar("jersey_number"),
+  position: varchar("position"),
+  
+  // PARENT/GUARDIAN INFORMATION
+  parentName: varchar("parent_name").notNull(),
+  parentEmail: varchar("parent_email").notNull(),
+  parentPhone: varchar("parent_phone"),
+  emergencyContactName: varchar("emergency_contact_name"),
+  emergencyContactPhone: varchar("emergency_contact_phone"),
+  
+  // REGISTRATION STATUS
+  memberStatus: text("member_status", {
+    enum: ["invited", "registered", "payment_pending", "complete"]
+  }).default("invited"),
+  
+  // PAYMENT TRACKING (for individual payments)
+  individualFee: decimal("individual_fee", { precision: 10, scale: 2 }),
+  paymentStatus: text("payment_status", {
+    enum: ["unpaid", "paid", "refunded"]
+  }).default("unpaid"),
+  paymentDate: timestamp("payment_date"),
+  stripePaymentIntentId: varchar("stripe_payment_intent_id"),
+  
+  // DOCUMENTS & FORMS
+  documentsRequired: jsonb("documents_required").$type<{
+    birthCertificate: boolean;
+    medicalForm: boolean;
+    photoConsent: boolean;
+    liabilityWaiver: boolean;
+  }>(),
+  documentsComplete: boolean("documents_complete").default(false),
+  
+  // REGISTRATION FORM DATA (JotForm-style fields)
+  customFormData: jsonb("custom_form_data"),
+  
+  joinedAt: timestamp("joined_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Jersey Watch-style team payment tracking for flexible payment models
+export const jerseyTeamPayments = pgTable("jersey_team_payments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  teamRegistrationId: varchar("team_registration_id").notNull().references(() => teamRegistrations.id),
+  payerName: varchar("payer_name").notNull(), // Who made the payment
+  payerEmail: varchar("payer_email").notNull(),
+  
+  // PAYMENT DETAILS
+  paymentAmount: decimal("payment_amount", { precision: 10, scale: 2 }).notNull(),
+  paymentType: text("payment_type", {
+    enum: ["team_captain", "individual_member", "parent_guardian", "sponsor"]
+  }).notNull(),
+  paymentMethod: text("payment_method", {
+    enum: ["stripe", "check", "cash", "payment_plan"]
+  }).notNull(),
+  
+  // STRIPE INTEGRATION
+  stripePaymentIntentId: varchar("stripe_payment_intent_id"),
+  stripeCustomerId: varchar("stripe_customer_id"),
+  
+  // PAYMENT PLAN INTEGRATION
+  paymentPlanEnrollmentId: varchar("payment_plan_enrollment_id").references(() => paymentPlanEnrollments.id),
+  
+  // ALLOCATION (which team members this payment covers)
+  coversMembers: jsonb("covers_members").$type<string[]>(), // Array of team member IDs
+  allocationNotes: text("allocation_notes"),
+  
+  paymentDate: timestamp("payment_date").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Teams - core team entity for better organization
@@ -2834,6 +2942,13 @@ export const usersRelations = relations(users, ({ one, many }) => ({
 
 export type TeamRegistration = typeof teamRegistrations.$inferSelect;
 export type InsertTeamRegistration = typeof teamRegistrations.$inferInsert;
+
+// Jersey Watch-style team registration types
+export type JerseyTeamMember = typeof jerseyTeamMembers.$inferSelect;
+export type InsertJerseyTeamMember = typeof jerseyTeamMembers.$inferInsert;
+export type JerseyTeamPayment = typeof jerseyTeamPayments.$inferSelect;
+export type InsertJerseyTeamPayment = typeof jerseyTeamPayments.$inferInsert;
+
 // Live scoring and messaging system types
 export type LiveScore = typeof liveScores.$inferSelect;
 export type InsertLiveScore = typeof liveScores.$inferInsert;

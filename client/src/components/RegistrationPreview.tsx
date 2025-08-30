@@ -59,6 +59,20 @@ export default function RegistrationPreview({ config }: RegistrationPreviewProps
   const [discountError, setDiscountError] = useState('');
   const [selectedPaymentOption, setSelectedPaymentOption] = useState('full');
 
+  const calculateFinalPrice = () => {
+    let price = config.registrationFee || 0;
+    
+    if (appliedDiscount) {
+      if (appliedDiscount.discountType === 'percentage') {
+        price = price - (price * (appliedDiscount.discountValue / 100));
+      } else {
+        price = Math.max(0, price - appliedDiscount.discountValue);
+      }
+    }
+    
+    return price;
+  };
+
   // Use tournament date or registration deadline as fallback
   const tournamentDate = config.tournamentDate || config.registrationDeadline;
   
@@ -100,20 +114,6 @@ export default function RegistrationPreview({ config }: RegistrationPreviewProps
     setAppliedDiscount(null);
     setDiscountCode('');
     setDiscountError('');
-  };
-
-  const calculateFinalPrice = () => {
-    let price = config.registrationFee || 0;
-    
-    if (appliedDiscount) {
-      if (appliedDiscount.discountType === 'percentage') {
-        price = price - (price * (appliedDiscount.discountValue / 100));
-      } else {
-        price = Math.max(0, price - appliedDiscount.discountValue);
-      }
-    }
-    
-    return Math.max(0, price);
   };
 
   const getDiscountAmount = () => {

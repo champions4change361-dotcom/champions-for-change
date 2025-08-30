@@ -4071,6 +4071,245 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ⚡ JERSEY WATCH-STYLE TEAM REGISTRATION API
+  
+  // Create a new team registration
+  app.post('/api/team-registrations', async (req, res) => {
+    try {
+      const {
+        tournamentId,
+        teamName,
+        organizationName,
+        captainName,
+        captainEmail,
+        captainPhone,
+        paymentMethod,
+        initialPlayers
+      } = req.body;
+
+      // Validate required fields
+      if (!tournamentId || !teamName || !captainName || !captainEmail) {
+        return res.status(400).json({ 
+          error: 'Missing required fields: tournamentId, teamName, captainName, captainEmail' 
+        });
+      }
+
+      // Generate unique 8-character team code
+      const teamCode = Math.random().toString(36).substring(2, 10).toUpperCase();
+      
+      const storage = getStorage();
+      
+      // Create team registration
+      const teamRegistration = await storage.createTeamRegistration({
+        tournamentId,
+        teamName,
+        organizationName,
+        teamCode,
+        captainName,
+        captainEmail,
+        captainPhone,
+        paymentMethod: paymentMethod || "individual_payments",
+        currentPlayers: initialPlayers?.length || 0,
+        registrationStatus: "incomplete"
+      });
+
+      // Add initial players if provided
+      if (initialPlayers && initialPlayers.length > 0) {
+        for (const player of initialPlayers) {
+          await storage.createTeamMember({
+            teamRegistrationId: teamRegistration.id,
+            playerName: player.playerName,
+            parentName: player.parentName,
+            parentEmail: player.parentEmail,
+            parentPhone: player.parentPhone,
+            memberStatus: "invited"
+          });
+        }
+      }
+
+      // Send confirmation email to captain
+      try {
+        await emailService.sendTeamCaptainConfirmation({
+          captainEmail,
+          captainName,
+          teamName,
+          teamCode,
+          tournamentTitle: "Tournament" // TODO: Get actual tournament title
+        });
+      } catch (emailError) {
+        console.error('Failed to send captain confirmation email:', emailError);
+      }
+
+      res.json({
+        success: true,
+        teamCode,
+        teamId: teamRegistration.id,
+        message: 'Team created successfully'
+      });
+
+    } catch (error) {
+      console.error('Team registration error:', error);
+      res.status(500).json({ 
+        error: 'Failed to create team registration',
+        details: error.message 
+      });
+    }
+  });
+
+  // Search for team by code
+  app.get('/api/teams/search', async (req, res) => {
+    try {
+      const { code } = req.query;
+      
+      if (!code || typeof code !== 'string') {
+        return res.status(400).json({ error: 'Team code is required' });
+      }
+
+      const storage = getStorage();
+      const team = await storage.getTeamByCode(code.toUpperCase());
+      
+      if (!team) {
+        return res.json({ team: null, message: 'Team not found' });
+      }
+
+      // Return team information for the join flow
+      res.json({
+        team: {
+          id: team.id,
+          teamName: team.teamName,
+          organizationName: team.organizationName,
+          captainName: team.captainName,
+          currentPlayers: team.currentPlayers,
+          maxPlayers: team.maxPlayers || 12, // Default max players
+          registrationFee: 50, // TODO: Get from tournament settings
+          feeStructure: "per_player", // TODO: Get from tournament settings
+          paymentMethod: team.paymentMethod,
+          tournamentTitle: "Tournament Registration", // TODO: Get actual tournament title
+          registrationDeadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // TODO: Get from tournament
+        }
+      });
+
+    } catch (error) {
+      console.error('Team search error:', error);
+      res.status(500).json({ 
+        error: 'Failed to search for team',
+        details: error.message 
+      });
+    }
+  });
+
+  // Join a team as a player
+  app.post('/api/team-members/join', async (req, res) => {
+    try {
+      const {
+        teamCode,
+        playerName,
+        dateOfBirth,
+        jerseyNumber,
+        position,
+        parentName,
+        parentEmail,
+        parentPhone,
+        emergencyContactName,
+        emergencyContactPhone
+      } = req.body;
+
+      // Validate required fields
+      if (!teamCode || !playerName || !parentName || !parentEmail) {
+        return res.status(400).json({ 
+          error: 'Missing required fields: teamCode, playerName, parentName, parentEmail' 
+        });
+      }
+
+      const storage = getStorage();
+      
+      // Find the team
+      const team = await storage.getTeamByCode(teamCode.toUpperCase());
+      if (!team) {
+        return res.status(404).json({ error: 'Team not found' });
+      }
+
+      // Check if team is full
+      if (team.currentPlayers >= (team.maxPlayers || 12)) {
+        return res.status(400).json({ error: 'Team is full' });
+      }
+
+      // Create team member
+      const teamMember = await storage.createTeamMember({
+        teamRegistrationId: team.id,
+        playerName,
+        dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : undefined,
+        jerseyNumber,
+        position,
+        parentName,
+        parentEmail,
+        parentPhone,
+        emergencyContactName,
+        emergencyContactPhone,
+        memberStatus: "registered"
+      });
+
+      // Update team player count
+      await storage.updateTeamRegistration(team.id, {
+        currentPlayers: team.currentPlayers + 1
+      });
+
+      // Send confirmation email to parent
+      try {
+        await emailService.sendPlayerJoinConfirmation({
+          parentEmail,
+          parentName,
+          playerName,
+          teamName: team.teamName,
+          captainName: team.captainName
+        });
+      } catch (emailError) {
+        console.error('Failed to send player join confirmation email:', emailError);
+      }
+
+      res.json({
+        success: true,
+        memberId: teamMember.id,
+        message: 'Successfully joined team'
+      });
+
+    } catch (error) {
+      console.error('Team join error:', error);
+      res.status(500).json({ 
+        error: 'Failed to join team',
+        details: error.message 
+      });
+    }
+  });
+
+  // Get team details and members
+  app.get('/api/teams/:teamId', async (req, res) => {
+    try {
+      const { teamId } = req.params;
+      const storage = getStorage();
+      
+      const team = await storage.getTeamRegistration(teamId);
+      if (!team) {
+        return res.status(404).json({ error: 'Team not found' });
+      }
+
+      const members = await storage.getTeamMembers(teamId);
+      
+      res.json({
+        team,
+        members,
+        totalMembers: members.length
+      });
+
+    } catch (error) {
+      console.error('Get team error:', error);
+      res.status(500).json({ 
+        error: 'Failed to get team details',
+        details: error.message 
+      });
+    }
+  });
+
   // Create and return server
   const server = createServer(app);
   return server;
