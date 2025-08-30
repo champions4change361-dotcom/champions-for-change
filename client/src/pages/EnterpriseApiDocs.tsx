@@ -27,7 +27,7 @@ export default function EnterpriseApiDocs() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [selectedEndpoint, setSelectedEndpoint] = useState("tournaments");
-  const [apiKey, setApiKey] = useState("sk_test_1234567890abcdef");
+  const [apiKey, setApiKey] = useState(process.env.VITE_STRIPE_PUBLIC_KEY || "your_api_key_here");
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -229,7 +229,7 @@ export default function EnterpriseApiDocs() {
     "id": "wh_123456",
     "url": "https://yourapp.com/webhooks/tournament",
     "events": ["tournament.created", "registration.completed"],
-    "secret": "whsec_abc123def456"
+    "secret": "whsec_[generated_webhook_secret]"
   }
 }`
         }
