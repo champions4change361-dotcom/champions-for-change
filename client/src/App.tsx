@@ -73,6 +73,7 @@ import Capabilities from './pages/Capabilities';
 import MillerHomepage from './pages/MillerHomepage';
 import RoleDashboard from './pages/RoleDashboard';
 import BulkRegistration from './pages/BulkRegistration';
+import OrganizerAnalyticsDemo from './pages/OrganizerAnalyticsDemo';
 import AthleteDashboard from './pages/AthleteDashboard';
 import AthleteManagement from './pages/AthleteManagement';
 import HealthCommunication from './pages/HealthCommunication';
@@ -159,6 +160,7 @@ function AuthenticatedRoutes() {
         <Route path="/domains" component={DomainManager} />
 
         <Route path="/bulk-registration" component={BulkRegistration} />
+        <Route path="/organizer-analytics" component={OrganizerAnalyticsDemo} />
         <Route path="/staff-registration" component={StaffRegistration} />
         <Route path="/staff-onboarding" component={StaffOnboarding} />
         <Route path="/staff-roles" component={StaffRoles} />

@@ -3527,3 +3527,117 @@ export type PaymentPlanEnrollment = typeof paymentPlanEnrollments.$inferSelect;
 export type InsertPaymentPlanEnrollment = typeof paymentPlanEnrollments.$inferInsert;
 export type PaymentPlanInstallment = typeof paymentPlanInstallments.$inferSelect;
 export type InsertPaymentPlanInstallment = typeof paymentPlanInstallments.$inferInsert;
+
+// ⚡ JERSEY WATCH-STYLE ORGANIZER ANALYTICS
+
+// Page view tracking for organizer analytics (Jersey Watch style)
+export const organizerPageViews = pgTable("organizer_page_views", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizerId: varchar("organizer_id").notNull().references(() => users.id),
+  tournamentId: varchar("tournament_id").references(() => tournaments.id),
+  
+  // PAGE VIEW DETAILS
+  pageUrl: varchar("page_url").notNull(),
+  pageTitle: varchar("page_title"),
+  pageType: varchar("page_type").notNull(), // tournament_home, registration, teams, brackets, etc.
+  
+  // VISITOR INFORMATION
+  visitorId: varchar("visitor_id"), // Anonymous visitor tracking
+  visitorIp: varchar("visitor_ip"),
+  userAgent: text("user_agent"),
+  referrer: varchar("referrer"),
+  
+  // LOCATION & DEVICE
+  country: varchar("country"),
+  city: varchar("city"),
+  deviceType: varchar("device_type"), // mobile, desktop, tablet
+  browserName: varchar("browser_name"),
+  
+  // SESSION TRACKING
+  sessionId: varchar("session_id"),
+  sessionDuration: integer("session_duration"), // seconds on page
+  isNewVisitor: boolean("is_new_visitor").default(true),
+  
+  viewedAt: timestamp("viewed_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Contact collection from tournament participants (Jersey Watch style)
+export const organizerContacts = pgTable("organizer_contacts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizerId: varchar("organizer_id").notNull().references(() => users.id),
+  tournamentId: varchar("tournament_id").references(() => tournaments.id),
+  
+  // CONTACT INFORMATION
+  contactName: varchar("contact_name").notNull(),
+  contactEmail: varchar("contact_email").notNull(),
+  contactPhone: varchar("contact_phone"),
+  
+  // CONTACT SOURCE
+  contactSource: varchar("contact_source").notNull(), // registration, team_captain, parent, spectator, volunteer
+  contactRole: varchar("contact_role"), // player, parent, coach, official, volunteer
+  
+  // ORGANIZATION DETAILS
+  organizationName: varchar("organization_name"),
+  teamName: varchar("team_name"),
+  
+  // CONTACT PREFERENCES
+  emailOptIn: boolean("email_opt_in").default(false),
+  smsOptIn: boolean("sms_opt_in").default(false),
+  marketingOptIn: boolean("marketing_opt_in").default(false),
+  
+  // ENGAGEMENT TRACKING
+  lastEmailSent: timestamp("last_email_sent"),
+  lastEmailOpened: timestamp("last_email_opened"),
+  emailOpenCount: integer("email_open_count").default(0),
+  totalTournaments: integer("total_tournaments").default(1), // How many tournaments they've participated in
+  
+  // GEOGRAPHIC INFO
+  city: varchar("city"),
+  state: varchar("state"),
+  zipCode: varchar("zip_code"),
+  
+  collectedAt: timestamp("collected_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Organizer dashboard metrics aggregation (Jersey Watch style)
+export const organizerMetrics = pgTable("organizer_metrics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizerId: varchar("organizer_id").notNull().references(() => users.id),
+  
+  // METRICS DATE
+  metricDate: date("metric_date").notNull(), // Daily aggregation
+  
+  // PAGE VIEW METRICS
+  totalPageViews: integer("total_page_views").default(0),
+  uniqueVisitors: integer("unique_visitors").default(0),
+  newVisitors: integer("new_visitors").default(0),
+  avgSessionDuration: integer("avg_session_duration").default(0),
+  
+  // CONTACT METRICS
+  totalContacts: integer("total_contacts").default(0),
+  newContactsToday: integer("new_contacts_today").default(0),
+  emailOptIns: integer("email_opt_ins").default(0),
+  smsOptIns: integer("sms_opt_ins").default(0),
+  
+  // TOURNAMENT METRICS
+  activeTournaments: integer("active_tournaments").default(0),
+  totalRegistrations: integer("total_registrations").default(0),
+  newRegistrationsToday: integer("new_registrations_today").default(0),
+  
+  // GEOGRAPHIC DISTRIBUTION
+  topCities: jsonb("top_cities").$type<Array<{city: string, count: number}>>().default([]),
+  topStates: jsonb("top_states").$type<Array<{state: string, count: number}>>().default([]),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Type exports for Jersey Watch-style analytics
+export type OrganizerPageView = typeof organizerPageViews.$inferSelect;
+export type InsertOrganizerPageView = typeof organizerPageViews.$inferInsert;
+export type OrganizerContact = typeof organizerContacts.$inferSelect;
+export type InsertOrganizerContact = typeof organizerContacts.$inferInsert;
+export type OrganizerMetric = typeof organizerMetrics.$inferSelect;
+export type InsertOrganizerMetric = typeof organizerMetrics.$inferInsert;

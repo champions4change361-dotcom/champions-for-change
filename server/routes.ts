@@ -4528,6 +4528,211 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ⚡ JERSEY WATCH-STYLE ORGANIZER ANALYTICS
+  
+  // Get organizer analytics dashboard data
+  app.get('/api/organizer-analytics/:organizerId', async (req, res) => {
+    try {
+      const { organizerId } = req.params;
+      const { days = 365 } = req.query;
+      const storage = getStorage();
+
+      // Generate mock data for demonstration - in production this would come from real tracking
+      const generatePageViewData = (daysBack: number) => {
+        const data = [];
+        const today = new Date();
+        
+        for (let i = daysBack; i >= 0; i--) {
+          const date = new Date(today);
+          date.setDate(date.getDate() - i);
+          
+          // Generate realistic page view patterns
+          const baseViews = Math.floor(Math.random() * 100) + 50;
+          const weekendMultiplier = [0, 6].includes(date.getDay()) ? 0.7 : 1.0;
+          const views = Math.floor(baseViews * weekendMultiplier);
+          
+          data.push({
+            date: date.toISOString().split('T')[0],
+            views: views,
+            uniqueVisitors: Math.floor(views * 0.8),
+            newVisitors: Math.floor(views * 0.3)
+          });
+        }
+        return data;
+      };
+
+      // Generate mock contact data
+      const generateContactData = () => {
+        const sources = ['registration', 'team_captain', 'parent', 'spectator', 'volunteer'];
+        const roles = ['player', 'parent', 'coach', 'official', 'volunteer'];
+        const cities = ['Austin', 'Dallas', 'Houston', 'San Antonio', 'Fort Worth', 'Plano', 'Irving'];
+        const states = ['TX', 'OK', 'LA', 'AR', 'NM'];
+        const organizations = ['Central High', 'Eagles Soccer Club', 'Lions Basketball', 'Hawks Tennis', 'Panthers Track'];
+        const teams = ['Varsity', 'JV', 'Freshman', 'U16', 'U14', 'U12'];
+
+        const contacts = [];
+        const contactCount = Math.floor(Math.random() * 200) + 100;
+
+        for (let i = 0; i < contactCount; i++) {
+          const firstName = ['John', 'Sarah', 'Mike', 'Lisa', 'David', 'Jennifer', 'Chris', 'Amy'][Math.floor(Math.random() * 8)];
+          const lastName = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis'][Math.floor(Math.random() * 8)];
+          
+          contacts.push({
+            id: `contact_${i}`,
+            contactName: `${firstName} ${lastName}`,
+            contactEmail: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@email.com`,
+            contactPhone: `(${Math.floor(Math.random() * 900) + 100}) ${Math.floor(Math.random() * 900) + 100}-${Math.floor(Math.random() * 9000) + 1000}`,
+            contactSource: sources[Math.floor(Math.random() * sources.length)],
+            contactRole: roles[Math.floor(Math.random() * roles.length)],
+            organizationName: organizations[Math.floor(Math.random() * organizations.length)],
+            teamName: teams[Math.floor(Math.random() * teams.length)],
+            city: cities[Math.floor(Math.random() * cities.length)],
+            state: states[Math.floor(Math.random() * states.length)],
+            emailOptIn: Math.random() > 0.3,
+            smsOptIn: Math.random() > 0.7,
+            totalTournaments: Math.floor(Math.random() * 5) + 1,
+            collectedAt: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString()
+          });
+        }
+        return contacts;
+      };
+
+      const pageViews = generatePageViewData(Number(days));
+      const contacts = generateContactData();
+
+      // Calculate metrics
+      const totalPageViews = pageViews.reduce((sum, day) => sum + day.views, 0);
+      const totalContacts = contacts.length;
+      const emailOptIns = contacts.filter(c => c.emailOptIn).length;
+      const smsOptIns = contacts.filter(c => c.smsOptIn).length;
+
+      // Calculate top cities and states
+      const cityCount: Record<string, number> = {};
+      const stateCount: Record<string, number> = {};
+
+      contacts.forEach(contact => {
+        cityCount[contact.city] = (cityCount[contact.city] || 0) + 1;
+        stateCount[contact.state] = (stateCount[contact.state] || 0) + 1;
+      });
+
+      const topCities = Object.entries(cityCount)
+        .map(([city, count]) => ({ city, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10);
+
+      const topStates = Object.entries(stateCount)
+        .map(([state, count]) => ({ state, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10);
+
+      res.json({
+        pageViews,
+        contacts,
+        metrics: {
+          totalPageViews,
+          totalContacts,
+          emailOptIns,
+          smsOptIns,
+          avgSessionDuration: 180 + Math.floor(Math.random() * 120), // 3-5 minutes
+          topCities,
+          topStates
+        }
+      });
+
+    } catch (error) {
+      console.error('Organizer analytics error:', error);
+      res.status(500).json({ 
+        error: 'Failed to get organizer analytics',
+        details: error.message 
+      });
+    }
+  });
+
+  // Track page view (Jersey Watch style)
+  app.post('/api/track-page-view', async (req, res) => {
+    try {
+      const {
+        organizerId,
+        tournamentId,
+        pageUrl,
+        pageTitle,
+        pageType,
+        visitorId,
+        sessionId,
+        visitorIp,
+        userAgent,
+        referrer
+      } = req.body;
+
+      const storage = getStorage();
+
+      // In production, you would save this to the database
+      // For now, we'll just acknowledge the tracking request
+      console.log('Page view tracked:', {
+        organizerId,
+        pageUrl,
+        pageType,
+        visitorId,
+        timestamp: new Date().toISOString()
+      });
+
+      res.json({ success: true, message: 'Page view tracked' });
+
+    } catch (error) {
+      console.error('Page view tracking error:', error);
+      res.status(500).json({ 
+        error: 'Failed to track page view',
+        details: error.message 
+      });
+    }
+  });
+
+  // Collect contact information (Jersey Watch style)
+  app.post('/api/collect-contact', async (req, res) => {
+    try {
+      const {
+        organizerId,
+        tournamentId,
+        contactName,
+        contactEmail,
+        contactPhone,
+        contactSource,
+        contactRole,
+        organizationName,
+        teamName,
+        emailOptIn,
+        smsOptIn,
+        city,
+        state,
+        zipCode
+      } = req.body;
+
+      const storage = getStorage();
+
+      // In production, you would save this to the organizerContacts table
+      console.log('Contact collected:', {
+        organizerId,
+        contactName,
+        contactEmail,
+        contactSource,
+        timestamp: new Date().toISOString()
+      });
+
+      res.json({ 
+        success: true, 
+        message: 'Contact information collected successfully',
+        contactId: `contact_${Date.now()}`
+      });
+
+    } catch (error) {
+      console.error('Contact collection error:', error);
+      res.status(500).json({ 
+        error: 'Failed to collect contact information',
+        details: error.message 
+      });
+    }
+  });
+
   // Create and return server
   const server = createServer(app);
   return server;
