@@ -1045,6 +1045,59 @@ export const discountCodes = pgTable("discount_codes", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Payment Plans for Registration Forms (Jersey Watch-style installment payments)
+export const paymentPlans = pgTable("payment_plans", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tournamentId: varchar("tournament_id").notNull(),
+  planName: varchar("plan_name").notNull(), // "Monthly Payment Plan", "Quarterly Plan"
+  planType: text("plan_type", {
+    enum: ["monthly", "quarterly", "custom"]
+  }).notNull(),
+  minimumAmount: numeric("minimum_amount", { precision: 10, scale: 2 }).notNull(), // Minimum registration fee to qualify
+  installmentCount: integer("installment_count").notNull(), // Number of payments
+  firstPaymentPercentage: numeric("first_payment_percentage", { precision: 5, scale: 2 }).default("50.00"), // % due upfront
+  processingFeePercentage: numeric("processing_fee_percentage", { precision: 5, scale: 2 }).default("2.50"), // Fee for payment plan
+  cutoffDaysBeforeTournament: integer("cutoff_days_before_tournament").default(14), // Stop payment plans X days before tournament
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Payment Plan Enrollments - Track who enrolled in payment plans
+export const paymentPlanEnrollments = pgTable("payment_plan_enrollments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  registrationId: varchar("registration_id").notNull(), // Reference to tournament registration
+  paymentPlanId: varchar("payment_plan_id").notNull().references(() => paymentPlans.id),
+  participantEmail: varchar("participant_email").notNull(),
+  totalAmount: numeric("total_amount", { precision: 10, scale: 2 }).notNull(),
+  processingFee: numeric("processing_fee", { precision: 10, scale: 2 }).notNull(),
+  firstPaymentAmount: numeric("first_payment_amount", { precision: 10, scale: 2 }).notNull(),
+  remainingPaymentAmount: numeric("remaining_payment_amount", { precision: 10, scale: 2 }).notNull(),
+  enrollmentStatus: text("enrollment_status", {
+    enum: ["active", "completed", "defaulted", "canceled"]
+  }).default("active"),
+  stripeCustomerId: varchar("stripe_customer_id"), // For processing payments
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Payment Plan Installments - Individual payment schedule
+export const paymentPlanInstallments = pgTable("payment_plan_installments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  enrollmentId: varchar("enrollment_id").notNull().references(() => paymentPlanEnrollments.id),
+  installmentNumber: integer("installment_number").notNull(), // 1, 2, 3, etc.
+  dueDate: date("due_date").notNull(),
+  amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+  paymentStatus: text("payment_status", {
+    enum: ["pending", "paid", "failed", "overdue"]
+  }).default("pending"),
+  stripePaymentIntentId: varchar("stripe_payment_intent_id"),
+  paidDate: timestamp("paid_date"),
+  failureReason: text("failure_reason"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const tournaments = pgTable("tournaments", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
@@ -3352,3 +3405,10 @@ export const insertDiscountCodeSchema = createInsertSchema(discountCodes).omit({
 // Type definitions for discount codes
 export type DiscountCode = typeof discountCodes.$inferSelect;
 export type InsertDiscountCode = z.infer<typeof insertDiscountCodeSchema>;
+
+export type PaymentPlan = typeof paymentPlans.$inferSelect;
+export type InsertPaymentPlan = typeof paymentPlans.$inferInsert;
+export type PaymentPlanEnrollment = typeof paymentPlanEnrollments.$inferSelect;
+export type InsertPaymentPlanEnrollment = typeof paymentPlanEnrollments.$inferInsert;
+export type PaymentPlanInstallment = typeof paymentPlanInstallments.$inferSelect;
+export type InsertPaymentPlanInstallment = typeof paymentPlanInstallments.$inferInsert;

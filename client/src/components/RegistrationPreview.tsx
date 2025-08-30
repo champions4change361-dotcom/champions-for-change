@@ -5,10 +5,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import { 
   DollarSign, Clock, Users, CheckCircle, AlertCircle,
-  User, Calendar, Phone, Mail, MapPin, FileText, Tag, Percent
+  User, Calendar, Phone, Mail, MapPin, FileText, Tag, Percent, CreditCard, CalendarDays
 } from "lucide-react";
+import { usePaymentPlanCalculator } from "./PaymentPlanCalculator";
+import { PaymentPlan } from "@shared/schema";
 
 interface FormField {
   id: string;
@@ -39,6 +43,8 @@ interface RegistrationConfig {
   requiresApproval: boolean;
   formFields: FormField[];
   discountCodes?: DiscountCode[];
+  paymentPlans?: PaymentPlan[];
+  tournamentDate?: string;
 }
 
 interface RegistrationPreviewProps {
@@ -51,6 +57,17 @@ export default function RegistrationPreview({ config }: RegistrationPreviewProps
   const [discountCode, setDiscountCode] = useState('');
   const [appliedDiscount, setAppliedDiscount] = useState<DiscountCode | null>(null);
   const [discountError, setDiscountError] = useState('');
+  const [selectedPaymentOption, setSelectedPaymentOption] = useState('full');
+
+  // Use tournament date or registration deadline as fallback
+  const tournamentDate = config.tournamentDate || config.registrationDeadline;
+  
+  // Calculate payment options
+  const { paymentOptions } = usePaymentPlanCalculator({
+    registrationFee: calculateFinalPrice(),
+    tournamentDate: tournamentDate,
+    availablePaymentPlans: config.paymentPlans || []
+  });
 
   const updateFormField = (fieldId: string, value: any) => {
     setFormData(prev => ({ ...prev, [fieldId]: value }));
@@ -402,6 +419,94 @@ export default function RegistrationPreview({ config }: RegistrationPreviewProps
                 </p>
               )}
             </div>
+
+            {/* Payment Plan Options */}
+            {paymentOptions.length > 1 && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  <CreditCard className="inline h-4 w-4 mr-2" />
+                  Payment Options
+                </label>
+                
+                <RadioGroup 
+                  value={selectedPaymentOption} 
+                  onValueChange={setSelectedPaymentOption}
+                  className="space-y-3"
+                >
+                  {paymentOptions.map((option) => (
+                    <div 
+                      key={option.id}
+                      className={`border rounded-lg p-4 ${
+                        !option.isAvailable 
+                          ? 'border-gray-200 bg-gray-50 opacity-60' 
+                          : 'border-gray-200 hover:border-blue-300'
+                      }`}
+                    >
+                      <div className="flex items-start space-x-3">
+                        <RadioGroupItem 
+                          value={option.id} 
+                          id={option.id}
+                          disabled={!option.isAvailable}
+                          data-testid={`radio-payment-option-${option.id}`}
+                        />
+                        <div className="flex-1">
+                          <Label 
+                            htmlFor={option.id} 
+                            className={`font-medium ${!option.isAvailable ? 'text-gray-500' : 'text-gray-900'}`}
+                          >
+                            {option.name}
+                          </Label>
+                          
+                          {option.isAvailable ? (
+                            <div className="mt-2 space-y-2">
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm text-gray-600">Total Amount:</span>
+                                <span className="font-semibold">${option.totalAmount.toFixed(2)}</span>
+                              </div>
+                              
+                              {option.type !== "full" && (
+                                <>
+                                  <div className="flex justify-between items-center text-sm">
+                                    <span className="text-gray-600">Due Today:</span>
+                                    <span>${option.firstPaymentAmount.toFixed(2)}</span>
+                                  </div>
+                                  <div className="flex justify-between items-center text-sm">
+                                    <span className="text-gray-600">Remaining ({option.installmentCount - 1} payments):</span>
+                                    <span>${option.installmentAmount.toFixed(2)} each</span>
+                                  </div>
+                                  {option.processingFee > 0 && (
+                                    <div className="flex justify-between items-center text-sm">
+                                      <span className="text-gray-600">Processing Fee:</span>
+                                      <span>${option.processingFee.toFixed(2)}</span>
+                                    </div>
+                                  )}
+                                  <div className="mt-2 p-2 bg-blue-50 rounded text-xs">
+                                    <CalendarDays className="inline h-3 w-3 mr-1" />
+                                    <strong>Payment Schedule:</strong>
+                                    <ul className="mt-1 space-y-1">
+                                      {option.paymentDates.slice(0, 3).map((date, index) => (
+                                        <li key={index}>
+                                          {date}: ${index === 0 ? option.firstPaymentAmount.toFixed(2) : option.installmentAmount.toFixed(2)}
+                                        </li>
+                                      ))}
+                                      {option.paymentDates.length > 3 && (
+                                        <li className="text-gray-500">+ {option.paymentDates.length - 3} more payments</li>
+                                      )}
+                                    </ul>
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                          ) : (
+                            <p className="text-sm text-red-600 mt-1">{option.reason}</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </RadioGroup>
+              </div>
+            )}
           </div>
 
           {/* Submit Button */}
@@ -411,7 +516,15 @@ export default function RegistrationPreview({ config }: RegistrationPreviewProps
               data-testid="preview-submit-button"
             >
               {config.requiresApproval ? 'Submit for Approval' : 'Register Now'}
-              <span className="ml-2">${calculateFinalPrice().toFixed(2)}</span>
+              <span className="ml-2">
+                {(() => {
+                  const selectedOption = paymentOptions.find(opt => opt.id === selectedPaymentOption);
+                  if (!selectedOption || selectedOption.type === 'full') {
+                    return `$${calculateFinalPrice().toFixed(2)}`;
+                  }
+                  return `$${selectedOption.firstPaymentAmount.toFixed(2)} today`;
+                })()}
+              </span>
             </Button>
             
             {config.requiresApproval && (
