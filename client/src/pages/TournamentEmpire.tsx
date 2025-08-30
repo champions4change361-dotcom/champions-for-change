@@ -108,7 +108,7 @@ export default function TournamentEmpire() {
           <Crown className="w-8 h-8 text-yellow-500" />
         </div>
         <p className="text-lg text-muted-foreground">
-          Role-Based Dashboard & Organization Management System
+          Tournament Management & Payment Processing for Private Schools, Charter Schools & Community Organizations
         </p>
         {empireStatus && (
           <Badge variant="secondary" className="text-sm">
@@ -126,7 +126,7 @@ export default function TournamentEmpire() {
               <span>Empire Systems Status</span>
             </CardTitle>
             <CardDescription>
-              Real-time status of all Tournament Empire systems
+              Comprehensive tournament management system designed for private schools, charter schools, and independent educational organizations
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -316,10 +316,14 @@ export default function TournamentEmpire() {
             </CardTitle>
             <CardDescription>
               {selectedTier === "foundation" 
-                ? "As a fan, collect registration fees and donations with our 2% platform fee supporting student education."
+                ? "Foundation tier: Perfect for individual coaches and small programs. 2% platform fee supports student education."
                 : selectedTier === "annual_pro"
-                ? "Premium subscribers enjoy 0% platform fees - keep 100% of payments after Stripe's standard processing fees."
-                : "Collect registration fees and donations with reduced 1% platform fee supporting Champions for Change mission."
+                ? "Annual Pro: Designed for high-volume tournament organizers (50+ events/year). 0% platform fees - keep 100% after Stripe fees."
+                : selectedTier === "business_enterprise"
+                ? "Business Enterprise: Ideal for private or independent school districts with 10+ schools. 1% platform fee with enterprise features."
+                : selectedTier === "district_enterprise" || selectedTier.includes('pro')
+                ? "Professional tier: Perfect for smaller private/charter districts and consolidated school systems. 1% platform fee with advanced management."
+                : "Collect registration fees and donations with reduced platform fee supporting Champions for Change mission."
               }
             </CardDescription>
           </CardHeader>
@@ -395,7 +399,7 @@ export default function TournamentEmpire() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-3">
-              Five-tier user hierarchy system with granular permissions
+              Educational hierarchy from athletic directors to coaches - same roles whether private, charter, or independent schools
             </p>
             <div className="space-y-2">
               {empireStatus?.stats.supported_roles.slice(0, 3).map((role) => (
