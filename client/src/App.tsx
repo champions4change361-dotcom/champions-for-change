@@ -274,13 +274,13 @@ function AppRouter() {
       <Route path="/business-pricing-test" component={BusinessPricingTest} />
       <Route path="/capabilities" component={Capabilities} />
       <Route path="/your-why" component={YourWhy} />
-      <Route path="/register" component={RegistrationForm} />
-      <Route path="/business-register" component={BusinessRegister} />
+      <Route path="/register" component={() => { window.location.href = '/smart-signup'; return null; }} />
+      <Route path="/business-register" component={() => { window.location.href = '/smart-signup?type=business'; return null; }} />
       <Route path="/admin/approvals" component={AdminApprovals} />
       <Route path="/smart-signup" component={SmartSignup} />
       <Route path="/signup" component={SignupSelector} />
       <Route path="/tournament/design" component={TournamentDesign} />
-      <Route path="/register-old" component={Register} />
+      <Route path="/register-old" component={() => { window.location.href = '/smart-signup'; return null; }} />
       
       {/* Tournament Creation requires login */}
       
@@ -294,7 +294,7 @@ function AppRouter() {
       <Route path="/demo/health" component={HealthDemo} />
       <Route path="/grant-funding" component={GrantFunding} />
       <Route path="/nonprofit-resources" component={NonprofitResources} />
-      <Route path="/register-organization" component={OrganizationRegistration} />
+      <Route path="/register-organization" component={() => { window.location.href = '/smart-signup?type=business'; return null; }} />
       {/* Main Login Form */}
       <Route path="/login" component={Login} />
       {/* User Type Selection Portal */}
