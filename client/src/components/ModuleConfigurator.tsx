@@ -6,11 +6,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Heart, Users, Trophy, Calendar, Info, Phone, 
-  Palette, Upload, X, Plus, Trash2 
+  Palette, Upload, X, Plus, Trash2, Eye, Settings 
 } from "lucide-react";
 import FormBuilder from "@/components/FormBuilder";
+import RegistrationPreview from "@/components/RegistrationPreview";
 
 interface ModuleConfig {
   id: string;
@@ -70,81 +72,117 @@ export default function ModuleConfigurator({ module, isOpen, onClose, onSave }: 
   };
 
   const renderRegistrationConfig = () => (
-    <div className="space-y-6">
-      {/* Basic Registration Settings */}
-      <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium mb-2">Registration Title</label>
-          <Input
-            value={localModule.config.title || ""}
-            onChange={(e) => updateConfig('title', e.target.value)}
-            placeholder="Tournament Registration"
-            data-testid="input-registration-title"
-          />
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium mb-2">Description</label>
-          <Textarea
-            value={localModule.config.description || ""}
-            onChange={(e) => updateConfig('description', e.target.value)}
-            placeholder="Register your team or individual athlete"
-            data-testid="textarea-registration-description"
-          />
-        </div>
-        
-        <div className="grid grid-cols-2 gap-4">
+    <Tabs defaultValue="settings" className="w-full">
+      <TabsList className="grid w-full grid-cols-2">
+        <TabsTrigger value="settings" className="flex items-center space-x-2">
+          <Settings className="h-4 w-4" />
+          <span>Settings</span>
+        </TabsTrigger>
+        <TabsTrigger value="preview" className="flex items-center space-x-2">
+          <Eye className="h-4 w-4" />
+          <span>Preview</span>
+        </TabsTrigger>
+      </TabsList>
+      
+      <TabsContent value="settings" className="space-y-6 mt-6">
+        {/* Basic Registration Settings */}
+        <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2">Registration Fee ($)</label>
+            <label className="block text-sm font-medium mb-2">Registration Title</label>
             <Input
-              type="number"
-              value={localModule.config.registrationFee || 0}
-              onChange={(e) => updateConfig('registrationFee', parseFloat(e.target.value) || 0)}
-              data-testid="input-registration-fee"
+              value={localModule.config.title || ""}
+              onChange={(e) => updateConfig('title', e.target.value)}
+              placeholder="Hoops for History Capital Classic 12u"
+              data-testid="input-registration-title"
             />
           </div>
+          
           <div>
-            <label className="block text-sm font-medium mb-2">Max Participants</label>
-            <Input
-              type="number"
-              value={localModule.config.maxParticipants || 32}
-              onChange={(e) => updateConfig('maxParticipants', parseInt(e.target.value) || 32)}
-              data-testid="input-max-participants"
+            <label className="block text-sm font-medium mb-2">Tournament Description</label>
+            <Textarea
+              value={localModule.config.description || ""}
+              onChange={(e) => updateConfig('description', e.target.value)}
+              placeholder="Join us for an exciting basketball tournament supporting youth education. All proceeds go toward funding educational trips for underprivileged students."
+              className="min-h-[100px]"
+              data-testid="textarea-registration-description"
             />
           </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Registration Fee ($)</label>
+              <Input
+                type="number"
+                value={localModule.config.registrationFee || 0}
+                onChange={(e) => updateConfig('registrationFee', parseFloat(e.target.value) || 0)}
+                data-testid="input-registration-fee"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Max Participants</label>
+              <Input
+                type="number"
+                value={localModule.config.maxParticipants || 32}
+                onChange={(e) => updateConfig('maxParticipants', parseInt(e.target.value) || 32)}
+                data-testid="input-max-participants"
+              />
+            </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium mb-2">Registration Deadline</label>
+            <Input
+              type="datetime-local"
+              value={localModule.config.registrationDeadline || ""}
+              onChange={(e) => updateConfig('registrationDeadline', e.target.value)}
+              data-testid="input-registration-deadline"
+            />
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              checked={localModule.config.requiresApproval || false}
+              onChange={(e) => updateConfig('requiresApproval', e.target.checked)}
+              className="rounded"
+              data-testid="checkbox-requires-approval"
+            />
+            <label className="text-sm">Require manual approval for registrations</label>
+          </div>
         </div>
-        
-        <div>
-          <label className="block text-sm font-medium mb-2">Registration Deadline</label>
-          <Input
-            type="datetime-local"
-            value={localModule.config.registrationDeadline || ""}
-            onChange={(e) => updateConfig('registrationDeadline', e.target.value)}
-            data-testid="input-registration-deadline"
-          />
-        </div>
-        
-        <div className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            checked={localModule.config.requiresApproval || false}
-            onChange={(e) => updateConfig('requiresApproval', e.target.checked)}
-            className="rounded"
-            data-testid="checkbox-requires-approval"
-          />
-          <label className="text-sm">Require manual approval for registrations</label>
-        </div>
-      </div>
 
-      {/* Form Builder */}
-      <div className="border-t pt-6">
-        <FormBuilder
-          moduleId={localModule.id}
-          initialFields={localModule.config.formFields || []}
-          onChange={(fields) => updateConfig('formFields', fields)}
-        />
-      </div>
-    </div>
+        {/* Form Builder */}
+        <div className="border-t pt-6">
+          <FormBuilder
+            moduleId={localModule.id}
+            initialFields={localModule.config.formFields || []}
+            onChange={(fields) => updateConfig('formFields', fields)}
+          />
+        </div>
+      </TabsContent>
+      
+      <TabsContent value="preview" className="mt-6">
+        <div className="border rounded-lg p-4 bg-gray-50">
+          <div className="mb-4 text-center">
+            <h3 className="text-lg font-semibold text-gray-700">Registration Page Preview</h3>
+            <p className="text-sm text-gray-500">This is how participants will see your registration</p>
+          </div>
+          <div className="bg-white rounded-lg shadow-sm max-h-[600px] overflow-y-auto">
+            <RegistrationPreview 
+              config={{
+                title: localModule.config.title || "Tournament Registration",
+                description: localModule.config.description || "",
+                registrationFee: localModule.config.registrationFee || 0,
+                maxParticipants: localModule.config.maxParticipants || 32,
+                registrationDeadline: localModule.config.registrationDeadline || "",
+                requiresApproval: localModule.config.requiresApproval || false,
+                formFields: localModule.config.formFields || []
+              }}
+            />
+          </div>
+        </div>
+      </TabsContent>
+    </Tabs>
   );
 
   const renderDonationConfig = () => (
