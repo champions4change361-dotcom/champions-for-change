@@ -165,16 +165,30 @@ export async function setupAuth(app: Express) {
   app.get("/api/login", async (req, res, next) => {
     console.log(`Login attempt for hostname: ${req.hostname}, IP: ${req.ip}, User-Agent: ${req.get('User-Agent')}`);
     
-    // Get user type from query parameter
+    // Get user type and provider from query parameters
     const userType = req.query.user_type as string;
-    console.log(`User type specified: ${userType}`);
+    const provider = req.query.provider as string;
+    console.log(`User type specified: ${userType}, Provider: ${provider}`);
     
     // Check if OAuth is configured for this domain
     const strategyName = `replitauth:${req.hostname}`;
     
-    // Always use fallback authentication for development to avoid OAuth redirect loops
+    // For mobile compatibility, ensure proper redirect handling
     console.log(`Domain check: ${req.hostname} in [${supportedDomains.join(', ')}] = ${supportedDomains.includes(req.hostname)}`);
-    console.log(`Forcing fallback authentication to avoid OAuth redirect loops`);
+    
+    // Try OAuth first if properly configured and requested
+    if (supportedDomains.includes(req.hostname) && provider === 'google') {
+      console.log(`Attempting OAuth for provider: ${provider}`);
+      return passport.authenticate(strategyName, {
+        prompt: "login consent",
+        scope: ["openid", "email", "profile", "offline_access"],
+        // Ensure proper mobile redirect
+        successReturnToOrRedirect: "/tournaments",
+        failureRedirect: "/login?error=auth_failed",
+      })(req, res, next);
+    }
+    
+    console.log(`Using fallback authentication for development/testing`);
     
     // Skip OAuth for development and always use fallback
     // OAuth will be enabled after deployment to production domains
@@ -276,8 +290,8 @@ export async function setupAuth(app: Express) {
     }
     
     passport.authenticate(strategyName, {
-      successReturnToOrRedirect: "/",
-      failureRedirect: "/api/login",
+      successReturnToOrRedirect: "/tournaments",
+      failureRedirect: "/login?error=callback_failed",
     })(req, res, next);
   });
 
