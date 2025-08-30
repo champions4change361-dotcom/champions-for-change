@@ -124,6 +124,15 @@ export default function Register() {
   });
 
   const onSubmit = (data: RegistrationForm) => {
+    // Validate sports selection manually since it's in state
+    if (selectedSports.length === 0) {
+      form.setError('sportsInvolved', {
+        type: 'manual',
+        message: 'Please select at least one sport'
+      });
+      return;
+    }
+    
     submitMutation.mutate({
       ...data,
       sportsInvolved: selectedSports,
@@ -507,8 +516,11 @@ export default function Register() {
                       </label>
                     ))}
                   </div>
-                  {selectedSports.length === 0 && (
-                    <p className="text-red-500 text-sm mt-1">Please select at least one sport</p>
+                  {form.formState.errors.sportsInvolved && (
+                    <p className="text-red-500 text-sm mt-1">{form.formState.errors.sportsInvolved.message}</p>
+                  )}
+                  {selectedSports.length > 0 && (
+                    <p className="text-green-600 text-sm mt-1">✓ {selectedSports.length} sport{selectedSports.length > 1 ? 's' : ''} selected</p>
                   )}
                 </div>
 
