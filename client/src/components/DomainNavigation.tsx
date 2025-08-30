@@ -2,10 +2,32 @@ import { Link, useLocation } from "wouter";
 import { useDomain } from "@/hooks/useDomain";
 import { Button } from "@/components/ui/button";
 import { Brain } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 
 export default function DomainNavigation() {
   const [location] = useLocation();
   const { config, isFeatureEnabled } = useDomain();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close mobile menu when location changes
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location]);
+
+  // Close mobile menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
+        setMobileMenuOpen(false);
+      }
+    }
+
+    if (mobileMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [mobileMenuOpen]);
   
   if (!config) return null;
 
@@ -106,47 +128,49 @@ export default function DomainNavigation() {
         </div>
 
         {/* Mobile Navigation Menu */}
-        <div className="md:hidden">
-          <details className="relative">
-            <summary className="list-none cursor-pointer">
-              <div className="w-6 h-6 flex flex-col justify-center items-center text-white">
-                <div className="w-4 h-0.5 bg-white mb-1"></div>
-                <div className="w-4 h-0.5 bg-white mb-1"></div>
-                <div className="w-4 h-0.5 bg-white"></div>
-              </div>
-            </summary>
+        <div className="md:hidden" ref={mobileMenuRef}>
+          <button 
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="relative w-6 h-6 flex flex-col justify-center items-center text-white cursor-pointer"
+            data-testid="button-mobile-menu"
+          >
+            <div className="w-4 h-0.5 bg-white mb-1"></div>
+            <div className="w-4 h-0.5 bg-white mb-1"></div>
+            <div className="w-4 h-0.5 bg-white"></div>
+          </button>
+          {mobileMenuOpen && (
             <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg z-50">
               <Link href="/">
-                <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-t-md">Home</a>
+                <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-t-md" data-testid="link-mobile-home">Home</a>
               </Link>
               {config.brand !== 'COACHES_LOUNGE' && (
                 <>
                   <Link href="/tournament-empire">
-                    <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Tournaments</a>
+                    <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-testid="link-mobile-tournaments">Tournaments</a>
                   </Link>
                   <div className="px-4 py-2 text-xs font-medium text-gray-500 bg-gray-50">CCISD VLC Schools</div>
                   <Link href="/miller-vlc-demo">
-                    <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 ml-2">Miller High School</a>
+                    <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 ml-2" data-testid="link-mobile-miller">Miller High School</a>
                   </Link>
                   <Link href="/carroll-vlc-demo">
-                    <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 ml-2">Carroll High School</a>
+                    <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 ml-2" data-testid="link-mobile-carroll">Carroll High School</a>
                   </Link>
                   <Link href="/veterans-vlc-demo">
-                    <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 ml-2">Veterans Memorial</a>
+                    <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 ml-2" data-testid="link-mobile-veterans">Veterans Memorial</a>
                   </Link>
                   <Link href="/ray-vlc-demo">
-                    <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 ml-2">Ray High School</a>
+                    <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 ml-2" data-testid="link-mobile-ray">Ray High School</a>
                   </Link>
                   <Link href="/schools">
-                    <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Schools</a>
+                    <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-testid="link-mobile-schools">Schools</a>
                   </Link>
                   <Link href="/role-hierarchy">
-                    <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-b-md">Roles</a>
+                    <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-b-md" data-testid="link-mobile-roles">Roles</a>
                   </Link>
                 </>
               )}
             </div>
-          </details>
+          )}
         </div>
         
         {/* Desktop Additional Navigation */}
