@@ -146,6 +146,7 @@ export const users = pgTable("users", {
   // STRIPE INTEGRATION (OPTIONAL)
   stripeCustomerId: varchar("stripe_customer_id"),
   stripeSubscriptionId: varchar("stripe_subscription_id"),
+  stripeConnectAccountId: varchar("stripe_connect_account_id"), // For Stripe Connect platform payments
 
   // BUSINESS REGISTRATION FIELDS
   phone: varchar("phone"),

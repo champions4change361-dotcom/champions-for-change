@@ -2,8 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Crown, Shield, Users, Settings, Trophy } from "lucide-react";
+import { Crown, Shield, Users, Settings, Trophy, CreditCard, DollarSign } from "lucide-react";
 import { useState } from "react";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 interface EmpireStatus {
   empire_status: string;
@@ -35,6 +37,8 @@ interface DashboardConfig {
 export default function TournamentEmpire() {
   const [selectedRole, setSelectedRole] = useState("tournament_manager");
   const [selectedTier, setSelectedTier] = useState("district_enterprise");
+  const [isSettingUpPayments, setIsSettingUpPayments] = useState(false);
+  const { toast } = useToast();
 
   // Fetch Empire status
   const { data: empireStatus, isLoading: statusLoading } = useQuery<EmpireStatus>({
@@ -60,6 +64,35 @@ export default function TournamentEmpire() {
       return JSON.parse(jsonString);
     } catch {
       return {};
+    }
+  };
+
+  const handleSetupPayments = async () => {
+    setIsSettingUpPayments(true);
+    try {
+      // Create Connect account
+      const accountResponse = await apiRequest("POST", "/api/stripe/create-connect-account");
+      const accountData = await accountResponse.json();
+      
+      if (accountData.accountId) {
+        // Create account link for onboarding
+        const linkResponse = await apiRequest("POST", "/api/stripe/create-account-link");
+        const linkData = await linkResponse.json();
+        
+        if (linkData.url) {
+          // Redirect to Stripe onboarding
+          window.location.href = linkData.url;
+        }
+      }
+    } catch (error) {
+      console.error("Payment setup error:", error);
+      toast({
+        title: "Setup Error",
+        description: "Unable to set up payment processing. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSettingUpPayments(false);
     }
   };
 
@@ -264,6 +297,63 @@ export default function TournamentEmpire() {
           )}
         </CardContent>
       </Card>
+
+      {/* Payment Processing Setup for Fans */}
+      {selectedTier === "foundation" && (
+        <Card className="border-green-200 bg-green-50">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <CreditCard className="w-5 h-5 text-green-600" />
+              <span>Enable Payment Processing</span>
+              <Badge variant="secondary" className="bg-green-100 text-green-800">Free for Fans!</Badge>
+            </CardTitle>
+            <CardDescription>
+              As a fan, you can now collect registration fees and donations to support your tournaments. 
+              Champions for Change takes a small 2% platform fee to fund educational opportunities for students.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="bg-white p-4 rounded-lg border">
+              <h4 className="font-semibold mb-2 flex items-center">
+                <DollarSign className="w-4 h-4 mr-2 text-green-600" />
+                How It Works
+              </h4>
+              <ul className="text-sm space-y-1 text-gray-600">
+                <li>• Collect tournament registration fees instantly</li>
+                <li>• Accept donations for your sports programs</li>
+                <li>• 2% platform fee supports underprivileged student education</li>
+                <li>• You keep 98% of all payments received</li>
+                <li>• Upgrade anytime to reduce or eliminate platform fees</li>
+              </ul>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">Ready to start collecting payments?</p>
+                <p className="text-xs text-gray-500">Setup takes 2-3 minutes with Stripe</p>
+              </div>
+              <Button 
+                onClick={handleSetupPayments}
+                disabled={isSettingUpPayments}
+                className="bg-green-600 hover:bg-green-700"
+                data-testid="setup-payments-button"
+              >
+                {isSettingUpPayments ? (
+                  <>
+                    <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2" />
+                    Setting up...
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="w-4 h-4 mr-2" />
+                    Setup Payments
+                  </>
+                )}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Features Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

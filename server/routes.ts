@@ -927,6 +927,173 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ========================================
+  // STRIPE CONNECT ENDPOINTS FOR FAN PAYMENTS
+  // ========================================
+
+  // Create Stripe Connect Express account for fans
+  app.post("/api/stripe/create-connect-account", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      const storage = getStorage();
+      
+      // Check if user already has a Connect account
+      if (user.stripeConnectAccountId) {
+        return res.json({ 
+          accountId: user.stripeConnectAccountId,
+          message: "Connect account already exists" 
+        });
+      }
+
+      // Create Express account for platform payments
+      const account = await stripe.accounts.create({
+        type: 'express',
+        country: 'US',
+        email: user.email,
+        capabilities: {
+          card_payments: { requested: true },
+          transfers: { requested: true },
+        },
+        business_type: 'individual',
+        business_profile: {
+          product_description: 'Tournament registration and sports event payments',
+          mcc: '7941', // Sporting and recreational camps
+        },
+        metadata: {
+          platform: 'Champions for Change',
+          user_id: user.id,
+          user_role: user.userRole,
+          subscription_tier: user.subscriptionPlan || 'foundation'
+        }
+      });
+
+      // Update user with Connect account ID
+      await storage.updateUser(user.id, {
+        stripeConnectAccountId: account.id
+      });
+
+      res.json({ 
+        accountId: account.id,
+        message: "Connect account created successfully" 
+      });
+
+    } catch (error: any) {
+      console.error("Stripe Connect account creation error:", error);
+      res.status(500).json({ 
+        error: "Error creating Connect account: " + error.message 
+      });
+    }
+  });
+
+  // Create account link for Connect onboarding
+  app.post("/api/stripe/create-account-link", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      
+      if (!user.stripeConnectAccountId) {
+        return res.status(400).json({ 
+          error: "No Connect account found. Create account first." 
+        });
+      }
+
+      const accountLink = await stripe.accountLinks.create({
+        account: user.stripeConnectAccountId,
+        refresh_url: `${req.protocol}://${req.get('host')}/tournament-empire?setup=refresh`,
+        return_url: `${req.protocol}://${req.get('host')}/tournament-empire?setup=complete`,
+        type: 'account_onboarding',
+      });
+
+      res.json({ 
+        url: accountLink.url,
+        expires_at: accountLink.expires_at 
+      });
+
+    } catch (error: any) {
+      console.error("Stripe account link error:", error);
+      res.status(500).json({ 
+        error: "Error creating account link: " + error.message 
+      });
+    }
+  });
+
+  // Check Connect account status
+  app.get("/api/stripe/connect-status", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user;
+      
+      if (!user.stripeConnectAccountId) {
+        return res.json({ 
+          hasAccount: false,
+          canAcceptPayments: false 
+        });
+      }
+
+      const account = await stripe.accounts.retrieve(user.stripeConnectAccountId);
+      
+      res.json({
+        hasAccount: true,
+        accountId: account.id,
+        canAcceptPayments: account.charges_enabled,
+        payouts_enabled: account.payouts_enabled,
+        details_submitted: account.details_submitted,
+        requirements: account.requirements
+      });
+
+    } catch (error: any) {
+      console.error("Stripe Connect status error:", error);
+      res.status(500).json({ 
+        error: "Error checking Connect status: " + error.message 
+      });
+    }
+  });
+
+  // Create payment intent with Connect account and platform fees
+  app.post("/api/stripe/create-connect-payment", isAuthenticated, async (req, res) => {
+    try {
+      const { amount, description, connectedAccountId } = req.body;
+      const user = req.user;
+      
+      if (!amount || amount < 5) {
+        return res.status(400).json({ 
+          error: "Invalid amount. Minimum payment is $5." 
+        });
+      }
+
+      // Calculate platform fee (2% for nonprofit mission)
+      const platformFeeAmount = Math.round(amount * 100 * 0.02); // 2% platform fee
+      const totalAmount = Math.round(amount * 100); // Convert to cents
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: totalAmount,
+        currency: 'usd',
+        description: description || 'Tournament registration payment',
+        application_fee_amount: platformFeeAmount,
+        transfer_data: {
+          destination: connectedAccountId || user.stripeConnectAccountId,
+        },
+        metadata: {
+          platform: 'Champions for Change',
+          user_id: user.id,
+          platform_fee: (platformFeeAmount / 100).toString(),
+          supports_education: 'true'
+        }
+      });
+
+      res.json({ 
+        clientSecret: paymentIntent.client_secret,
+        amount: amount,
+        platformFee: platformFeeAmount / 100,
+        paymentIntentId: paymentIntent.id
+      });
+
+    } catch (error: any) {
+      console.error("Stripe Connect payment error:", error);
+      res.status(500).json({ 
+        error: "Error creating Connect payment: " + error.message 
+      });
+    }
+  });
+
+  // ========================================
   // COACHES LOUNGE LEAGUE ENDPOINTS
   // ========================================
 
@@ -1960,14 +2127,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           baseConfig.availableFeatures = {
             create_tournaments: true,
             manage_brackets: true,
-            process_payments: subscriptionTier !== 'free_starter',
+            process_payments: true, // Enabled for all tiers with Stripe Connect
             advanced_analytics: subscriptionTier === 'annual_pro',
             white_label_branding: subscriptionTier !== 'free_starter'
           };
           baseConfig.uiPermissions = {
             can_delete_tournaments: true,
             can_modify_brackets: true,
-            can_access_financials: subscriptionTier !== 'free_starter'
+            can_access_financials: true // Enabled for all tiers with Connect platform fees
           };
           baseConfig.navigationConfig = {
             main_nav: ["Dashboard", "Tournaments", "Brackets", "Reports"],
