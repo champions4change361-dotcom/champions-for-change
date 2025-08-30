@@ -123,7 +123,7 @@ export default function OrganizerDashboard({ organizerId }: OrganizerDashboardPr
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Organizer Analytics</h1>
-          <p className="text-gray-600 mt-2">Jersey Watch-style tournament analytics and contact management</p>
+          <p className="text-gray-600 mt-2">Complete tournament analytics and contact management dashboard</p>
         </div>
         
         <div className="flex items-center space-x-3">

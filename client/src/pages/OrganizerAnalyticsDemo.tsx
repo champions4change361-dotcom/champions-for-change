@@ -28,7 +28,7 @@ export default function OrganizerAnalyticsDemo() {
             
             <Badge variant="default" className="bg-green-600">
               <Star className="h-3 w-3 mr-1" />
-              Jersey Watch Style
+              Tournament Analytics
             </Badge>
           </div>
         </div>
@@ -46,12 +46,12 @@ export default function OrganizerAnalyticsDemo() {
           <div className="flex items-center justify-center space-x-2">
             <BarChart3 className="h-10 w-10 text-blue-600" />
             <h1 className="text-4xl font-bold text-gray-900">
-              Jersey Watch-Style Analytics
+              Tournament Analytics Dashboard
             </h1>
           </div>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            The same powerful organizer dashboard features that made Jersey Watch popular - 
-            contact collection, page view tracking, and comprehensive analytics.
+            Powerful organizer dashboard with contact collection, page view tracking, 
+            and comprehensive analytics to grow your tournaments.
           </p>
           
           <div className="flex items-center justify-center space-x-4">
@@ -70,7 +70,7 @@ export default function OrganizerAnalyticsDemo() {
           </div>
         </div>
 
-        {/* Jersey Watch Features Showcase */}
+        {/* Analytics Features Showcase */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <Card className="border-2 border-blue-200 bg-blue-50/50">
             <CardHeader>
@@ -157,14 +157,14 @@ export default function OrganizerAnalyticsDemo() {
           </Card>
         </div>
 
-        {/* Jersey Watch Comparison */}
+        {/* Analytics Features */}
         <Card className="bg-gradient-to-r from-blue-600 to-green-600 text-white border-0">
           <CardHeader>
             <CardTitle className="text-2xl text-center">
-              What Made Jersey Watch Special
+              Complete Tournament Analytics
             </CardTitle>
             <CardDescription className="text-blue-100 text-center text-lg">
-              We've replicated the key features that tournament organizers loved most
+              Everything you need to track and grow your tournament events
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -200,7 +200,7 @@ export default function OrganizerAnalyticsDemo() {
             </h3>
             <p className="text-gray-600 max-w-2xl mx-auto">
               This demo includes realistic tournament data with page views, contact information, 
-              and analytics spanning a full year - just like Jersey Watch provided.
+              and analytics spanning a full year to show the complete capabilities.
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto mb-8">
@@ -233,8 +233,8 @@ export default function OrganizerAnalyticsDemo() {
         {/* Footer */}
         <div className="text-center text-gray-500 text-sm">
           <p>
-            This dashboard replicates the contact collection and analytics features that made Jersey Watch 
-            a favorite among tournament organizers. Data shown is for demonstration purposes.
+            Complete tournament organizer analytics dashboard with contact collection and page view tracking. 
+            Data shown is for demonstration purposes.
           </p>
         </div>
       </div>

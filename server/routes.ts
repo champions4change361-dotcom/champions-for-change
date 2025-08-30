@@ -4528,7 +4528,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // ⚡ JERSEY WATCH-STYLE ORGANIZER ANALYTICS
+  // ⚡ TOURNAMENT ORGANIZER ANALYTICS
   
   // Get organizer analytics dashboard data
   app.get('/api/organizer-analytics/:organizerId', async (req, res) => {
@@ -4648,7 +4648,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Track page view (Jersey Watch style)
+  // Track page view for analytics
   app.post('/api/track-page-view', async (req, res) => {
     try {
       const {
@@ -4687,7 +4687,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Collect contact information (Jersey Watch style)
+  // Collect contact information for analytics
   app.post('/api/collect-contact', async (req, res) => {
     try {
       const {
