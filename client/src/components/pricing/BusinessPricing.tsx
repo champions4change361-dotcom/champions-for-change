@@ -173,7 +173,7 @@ export function BusinessPricingSection() {
                       console.log(`${tier.name} button clicked - ${tier.cta}`);
                       // Route to dedicated business registration page
                       if (tier.name === 'Starter') {
-                        window.location.href = '/business-register?plan=free';
+                        window.location.href = '/smart-signup?type=nonprofit';
                       } else if (tier.name === 'Tournament Organizer') {
                         window.location.href = '/business-register?plan=tournament-organizer&price=39';
                       } else if (tier.name === 'Business Enterprise') {

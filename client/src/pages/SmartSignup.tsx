@@ -54,7 +54,7 @@ export default function SmartSignup() {
   useEffect(() => {
     if (preselectedType) {
       setSelectedOrgType(preselectedType);
-      setStep(2);
+      // Don't skip to step 2, let user see organization selection first
     }
   }, [preselectedType]);
 

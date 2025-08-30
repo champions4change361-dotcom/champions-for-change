@@ -92,7 +92,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Send welcome email
       if (emailService) {
         try {
-          await emailService.sendEmail({
+          await emailService.send({
             to: email,
             subject: 'Welcome to Champions for Change!',
             html: `
