@@ -2447,6 +2447,76 @@ export const modularPagesRelations = relations(modularPages, ({ one, many }) => 
 export type ModularPage = typeof modularPages.$inferSelect;
 export type InsertModularPage = typeof modularPages.$inferInsert;
 
+// Dynamic form fields for registration modules
+export const registrationFormFields = pgTable("registration_form_fields", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  pageId: varchar("page_id").notNull().references(() => modularPages.id),
+  moduleId: varchar("module_id").notNull(), // corresponds to module.id in modularPages.modules
+  fieldType: text("field_type", {
+    enum: ["text", "email", "phone", "number", "textarea", "select", "checkbox", "radio", "date", "file"]
+  }).notNull(),
+  label: varchar("label").notNull(),
+  placeholder: varchar("placeholder"),
+  isRequired: boolean("is_required").default(false),
+  position: integer("position").notNull(),
+  options: jsonb("options").$type<string[]>(), // for select, radio, checkbox
+  validation: jsonb("validation").$type<{
+    minLength?: number;
+    maxLength?: number;
+    pattern?: string; // regex pattern
+    min?: number; // for number/date
+    max?: number; // for number/date
+  }>(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Registration form responses
+export const registrationResponses = pgTable("registration_responses", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  pageId: varchar("page_id").notNull().references(() => modularPages.id),
+  moduleId: varchar("module_id").notNull(),
+  participantEmail: varchar("participant_email"),
+  participantName: varchar("participant_name"),
+  formData: jsonb("form_data").$type<Record<string, any>>(), // field_id -> value mapping
+  paymentStatus: text("payment_status", {
+    enum: ["pending", "paid", "failed", "refunded"]
+  }).default("pending"),
+  paymentAmount: decimal("payment_amount", { precision: 10, scale: 2 }),
+  stripePaymentIntentId: varchar("stripe_payment_intent_id"),
+  approvalStatus: text("approval_status", {
+    enum: ["pending", "approved", "rejected"]
+  }).default("pending"),
+  submittedAt: timestamp("submitted_at").defaultNow(),
+  approvedAt: timestamp("approved_at"),
+  approvedById: varchar("approved_by_id").references(() => users.id),
+});
+
+// Relations for form fields
+export const registrationFormFieldsRelations = relations(registrationFormFields, ({ one }) => ({
+  page: one(modularPages, {
+    fields: [registrationFormFields.pageId],
+    references: [modularPages.id],
+  }),
+}));
+
+// Relations for responses
+export const registrationResponsesRelations = relations(registrationResponses, ({ one }) => ({
+  page: one(modularPages, {
+    fields: [registrationResponses.pageId],
+    references: [modularPages.id],
+  }),
+  approvedBy: one(users, {
+    fields: [registrationResponses.approvedById],
+    references: [users.id],
+  }),
+}));
+
+export type RegistrationFormField = typeof registrationFormFields.$inferSelect;
+export type InsertRegistrationFormField = typeof registrationFormFields.$inferInsert;
+export type RegistrationResponse = typeof registrationResponses.$inferSelect;
+export type InsertRegistrationResponse = typeof registrationResponses.$inferInsert;
+
 // Update white-label configs with relations
 export const whitelabelConfigsRelations = relations(whitelabelConfigs, ({ one }) => ({
   user: one(users, {

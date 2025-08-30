@@ -10,6 +10,7 @@ import {
   Heart, Users, Trophy, Calendar, Info, Phone, 
   Palette, Upload, X, Plus, Trash2 
 } from "lucide-react";
+import FormBuilder from "@/components/FormBuilder";
 
 interface ModuleConfig {
   id: string;
@@ -69,67 +70,79 @@ export default function ModuleConfigurator({ module, isOpen, onClose, onSave }: 
   };
 
   const renderRegistrationConfig = () => (
-    <div className="space-y-4">
-      <div>
-        <label className="block text-sm font-medium mb-2">Registration Title</label>
-        <Input
-          value={localModule.config.title || ""}
-          onChange={(e) => updateConfig('title', e.target.value)}
-          placeholder="Tournament Registration"
-          data-testid="input-registration-title"
-        />
-      </div>
-      
-      <div>
-        <label className="block text-sm font-medium mb-2">Description</label>
-        <Textarea
-          value={localModule.config.description || ""}
-          onChange={(e) => updateConfig('description', e.target.value)}
-          placeholder="Register your team or individual athlete"
-          data-testid="textarea-registration-description"
-        />
-      </div>
-      
-      <div className="grid grid-cols-2 gap-4">
+    <div className="space-y-6">
+      {/* Basic Registration Settings */}
+      <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium mb-2">Registration Fee ($)</label>
+          <label className="block text-sm font-medium mb-2">Registration Title</label>
           <Input
-            type="number"
-            value={localModule.config.registrationFee || 0}
-            onChange={(e) => updateConfig('registrationFee', parseFloat(e.target.value) || 0)}
-            data-testid="input-registration-fee"
+            value={localModule.config.title || ""}
+            onChange={(e) => updateConfig('title', e.target.value)}
+            placeholder="Tournament Registration"
+            data-testid="input-registration-title"
           />
         </div>
+        
         <div>
-          <label className="block text-sm font-medium mb-2">Max Participants</label>
-          <Input
-            type="number"
-            value={localModule.config.maxParticipants || 32}
-            onChange={(e) => updateConfig('maxParticipants', parseInt(e.target.value) || 32)}
-            data-testid="input-max-participants"
+          <label className="block text-sm font-medium mb-2">Description</label>
+          <Textarea
+            value={localModule.config.description || ""}
+            onChange={(e) => updateConfig('description', e.target.value)}
+            placeholder="Register your team or individual athlete"
+            data-testid="textarea-registration-description"
           />
         </div>
+        
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-2">Registration Fee ($)</label>
+            <Input
+              type="number"
+              value={localModule.config.registrationFee || 0}
+              onChange={(e) => updateConfig('registrationFee', parseFloat(e.target.value) || 0)}
+              data-testid="input-registration-fee"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">Max Participants</label>
+            <Input
+              type="number"
+              value={localModule.config.maxParticipants || 32}
+              onChange={(e) => updateConfig('maxParticipants', parseInt(e.target.value) || 32)}
+              data-testid="input-max-participants"
+            />
+          </div>
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium mb-2">Registration Deadline</label>
+          <Input
+            type="datetime-local"
+            value={localModule.config.registrationDeadline || ""}
+            onChange={(e) => updateConfig('registrationDeadline', e.target.value)}
+            data-testid="input-registration-deadline"
+          />
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            checked={localModule.config.requiresApproval || false}
+            onChange={(e) => updateConfig('requiresApproval', e.target.checked)}
+            className="rounded"
+            data-testid="checkbox-requires-approval"
+          />
+          <label className="text-sm">Require manual approval for registrations</label>
+        </div>
       </div>
-      
-      <div>
-        <label className="block text-sm font-medium mb-2">Registration Deadline</label>
-        <Input
-          type="datetime-local"
-          value={localModule.config.registrationDeadline || ""}
-          onChange={(e) => updateConfig('registrationDeadline', e.target.value)}
-          data-testid="input-registration-deadline"
+
+      {/* Form Builder */}
+      <div className="border-t pt-6">
+        <FormBuilder
+          moduleId={localModule.id}
+          initialFields={localModule.config.formFields || []}
+          onChange={(fields) => updateConfig('formFields', fields)}
         />
-      </div>
-      
-      <div className="flex items-center space-x-2">
-        <input
-          type="checkbox"
-          checked={localModule.config.requiresApproval || false}
-          onChange={(e) => updateConfig('requiresApproval', e.target.checked)}
-          className="rounded"
-          data-testid="checkbox-requires-approval"
-        />
-        <label className="text-sm">Require manual approval for registrations</label>
       </div>
     </div>
   );
