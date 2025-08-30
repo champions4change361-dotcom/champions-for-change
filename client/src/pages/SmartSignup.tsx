@@ -112,15 +112,26 @@ export default function SmartSignup() {
   });
 
   const submitMutation = useMutation({
-    mutationFn: (data: SmartSignupForm) => {
+    mutationFn: async (data: SmartSignupForm) => {
       const selectedOrg = orgTypes.find(org => org.id === selectedOrgType);
-      return apiRequest('POST', '/api/registration/smart-signup', {
+      const payload = {
         ...data,
         sportsInvolved: selectedSports,
         recommendedPlan: selectedOrg?.recommendedPlan,
         organizationType: selectedOrgType,
         paymentMethod: selectedOrg?.requiresPayment ? paymentMethod : undefined
-      });
+      };
+      
+      console.log('Making API request to /api/registration/smart-signup with payload:', payload);
+      
+      try {
+        const response = await apiRequest('POST', '/api/registration/smart-signup', payload);
+        console.log('API request successful:', response);
+        return response;
+      } catch (error) {
+        console.error('API request failed:', error);
+        throw error;
+      }
     },
     onSuccess: (response) => {
       console.log('Signup successful!', response);
