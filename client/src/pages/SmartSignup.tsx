@@ -401,12 +401,13 @@ export default function SmartSignup() {
                           type="checkbox"
                           checked={selectedSports.includes(sport)}
                           onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedSports([...selectedSports, sport]);
-                            } else {
-                              setSelectedSports(selectedSports.filter(s => s !== sport));
-                            }
+                            const newSports = e.target.checked 
+                              ? [...selectedSports, sport]
+                              : selectedSports.filter(s => s !== sport);
                             
+                            setSelectedSports(newSports);
+                            // Update the form field so validation passes
+                            form.setValue('sportsInvolved', newSports);
                           }}
                           className="rounded"
                           data-testid={`checkbox-sport-${sport.toLowerCase()}`}
