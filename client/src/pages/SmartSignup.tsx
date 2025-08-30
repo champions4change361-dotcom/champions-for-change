@@ -125,7 +125,7 @@ export default function SmartSignup() {
     onSuccess: () => {
       const selectedOrg = orgTypes.find(org => org.id === selectedOrgType);
       if (!selectedOrg?.requiresPayment) {
-        // Free plan - redirect to dashboard
+        // Free plan - redirect to tournament creation dashboard
         window.location.href = '/tournaments';
       } else if (paymentMethod === 'stripe') {
         setStep(4); // Go to payment step
@@ -182,12 +182,19 @@ export default function SmartSignup() {
             </Alert>
             
             <div className="p-4 rounded-lg bg-green-50">
-              <h4 className="font-semibold mb-2 text-green-900">Next Steps</h4>
-              <p className="text-green-800">
-                🚀 <strong>Get Started:</strong> Create your first tournament<br />
-                💡 <strong>Support:</strong> Contact us at champions4change361@gmail.com<br />
-                📞 <strong>Phone:</strong> 361-300-1552
-              </p>
+              <h4 className="font-semibold mb-2 text-green-900">Ready to Get Started?</h4>
+              <div className="space-y-3">
+                <Button 
+                  onClick={() => window.location.href = '/tournaments'}
+                  className="w-full bg-green-600 hover:bg-green-700"
+                >
+                  <Trophy className="h-4 w-4 mr-2" />
+                  Create Your First Tournament
+                </Button>
+                <p className="text-green-800 text-sm text-center">
+                  💡 <strong>Need help?</strong> Contact us at champions4change361@gmail.com or 361-300-1552
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -282,7 +289,13 @@ export default function SmartSignup() {
                   </Button>
                 </CardTitle>
                 <CardDescription>
-                  {orgTypes.find(org => org.id === selectedOrgType)?.name} Registration
+                  {(() => {
+                    const selectedOrg = orgTypes.find(org => org.id === selectedOrgType);
+                    if (selectedOrg?.requiresPayment === false) {
+                      return `${selectedOrg.name} Registration - Free Plan`;
+                    }
+                    return `${selectedOrg?.name} Registration`;
+                  })()}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
