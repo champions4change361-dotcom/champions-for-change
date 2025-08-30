@@ -12,6 +12,7 @@ import { CheckCircle, Trophy, Users, Building, GraduationCap, ArrowLeft, ArrowRi
 import { useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useDomain } from '@/hooks/useDomain';
+import { useToast } from '@/hooks/use-toast';
 import TrantorCoin from '@/components/TrantorCoin';
 
 // Smart signup schema that adapts based on organization type
@@ -45,6 +46,7 @@ export default function SmartSignup() {
   const [selectedSports, setSelectedSports] = useState<string[]>([]);
   const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'check'>('stripe');
   const { isSchoolSafe } = useDomain();
+  const { toast } = useToast();
 
   // Get URL parameters for pre-selection
   const urlParams = new URLSearchParams(window.location.search);
@@ -455,22 +457,31 @@ export default function SmartSignup() {
 
                 <div className="flex justify-center">
                   <Button 
-                    type="submit" 
-                    disabled={submitMutation.isPending || selectedSports.length === 0}
+                    type="button"
                     className="bg-blue-600 hover:bg-blue-700 px-8 flex items-center"
                     data-testid="button-submit"
                     onClick={() => {
-                      console.log('Submit button clicked! Sports:', selectedSports);
-                      console.log('Form errors:', form.formState.errors);
-                      console.log('Form values:', form.getValues());
+                      console.log('Redirecting to Google signup for:', selectedOrgType);
+                      const selectedOrg = orgTypes.find(org => org.id === selectedOrgType);
+                      
+                      // Show appropriate message
+                      toast({
+                        title: "Starting Signup!",
+                        description: selectedOrg?.requiresPayment 
+                          ? "Sign up with Google, then set up payment to access all features."
+                          : "Sign up with Google to start creating tournaments for free!",
+                      });
+                      
+                      // Redirect to Google OAuth
+                      setTimeout(() => {
+                        window.location.href = '/api/login';
+                      }, 1000);
                     }}
                   >
-                    {submitMutation.isPending ? 'Creating Account...' : (
-                      <>
-                        Create Account
-                        <ArrowRight className="h-4 w-4 ml-2" />
-                      </>
-                    )}
+                    <>
+                      Sign Up with Google
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </>
                   </Button>
                 </div>
               </CardContent>
