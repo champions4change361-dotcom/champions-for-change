@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 export default function Home() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [liveMatches, setLiveMatches] = useState(3);
+  const { user } = useAuth();
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -34,7 +35,7 @@ export default function Home() {
                   <Trophy className="h-6 w-6 text-slate-900" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-white">Champions Arena</h1>
+                  <h1 className="text-xl font-bold text-white">{user?.organizationName === 'Champions for Change' ? 'Champions Arena' : `${user?.organizationName || 'Tournament'} Arena`}</h1>
                   <p className="text-xs text-yellow-400">Tournament Central</p>
                 </div>
               </div>
@@ -69,15 +70,20 @@ export default function Home() {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-4xl font-bold text-white mb-2">
-                  Welcome Back, <span className="text-yellow-400">Champion</span>
+                  Welcome Back, <span className="text-yellow-400">{user?.firstName || 'Champion'}</span>
                 </h2>
                 <p className="text-xl text-slate-300 mb-4">
-                  Every tournament creates opportunities for underprivileged student competitors
+                  {user?.organizationName === 'Champions for Change' 
+                    ? 'Every tournament creates opportunities for underprivileged student competitors'
+                    : `Manage tournaments and athletics for ${user?.organizationName || 'your organization'}`
+                  }
                 </p>
                 <div className="flex items-center space-x-6">
                   <div className="flex items-center space-x-2 text-yellow-400">
                     <Award className="h-5 w-5" />
-                    <span className="font-semibold">Supporting Education</span>
+                    <span className="font-semibold">
+                      {user?.organizationName === 'Champions for Change' ? 'Supporting Education' : 'Professional Athletics'}
+                    </span>
                   </div>
                   <div className="flex items-center space-x-2 text-yellow-400">
                     <Users className="h-5 w-5" />
@@ -86,9 +92,19 @@ export default function Home() {
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-5xl font-bold text-yellow-400">$2,600+</div>
-                <div className="text-lg text-slate-300">Per Student Trip</div>
-                <div className="text-sm text-slate-400">Costs covered first</div>
+                {user?.organizationName === 'Champions for Change' ? (
+                  <>
+                    <div className="text-5xl font-bold text-yellow-400">$2,600+</div>
+                    <div className="text-lg text-slate-300">Per Student Trip</div>
+                    <div className="text-sm text-slate-400">Costs covered first</div>
+                  </>
+                ) : (
+                  <>
+                    <div className="text-5xl font-bold text-yellow-400">{activeTournaments.length}</div>
+                    <div className="text-lg text-slate-300">Active Tournaments</div>
+                    <div className="text-sm text-slate-400">Manage your events</div>
+                  </>
+                )}
               </div>
             </div>
           </div>
