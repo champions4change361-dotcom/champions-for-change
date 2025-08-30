@@ -122,19 +122,25 @@ export default function SmartSignup() {
         paymentMethod: selectedOrg?.requiresPayment ? paymentMethod : undefined
       });
     },
-    onSuccess: () => {
+    onSuccess: (response) => {
+      console.log('Signup successful!', response);
       const selectedOrg = orgTypes.find(org => org.id === selectedOrgType);
       if (!selectedOrg?.requiresPayment) {
+        console.log('Free plan - redirecting to tournaments page');
         // Free plan - redirect to tournament creation dashboard
         window.location.href = '/tournaments';
       } else if (paymentMethod === 'stripe') {
+        console.log('Paid plan with Stripe - going to payment step');
         setStep(4); // Go to payment step
       } else {
+        console.log('Paid plan with check - going to success step');
         setStep(3); // Go to success step
       }
     },
     onError: (error) => {
       console.error('Smart signup failed:', error);
+      // Show user-friendly error
+      alert('There was an error creating your account. Please try again or contact support.');
     }
   });
 
@@ -143,6 +149,12 @@ export default function SmartSignup() {
     if (selectedSports.length === 0) {
       return;
     }
+
+    console.log('Submitting form with data:', {
+      ...data,
+      sportsInvolved: selectedSports,
+      organizationType: selectedOrgType
+    });
 
     submitMutation.mutate({
       ...data,

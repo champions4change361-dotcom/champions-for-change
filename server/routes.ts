@@ -48,6 +48,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Smart Signup API endpoint for streamlined registration
   app.post('/api/registration/smart-signup', async (req, res) => {
+    console.log('📝 Smart signup request received:', {
+      body: req.body,
+      headers: req.headers['content-type']
+    });
+    
     try {
       const {
         firstName,
@@ -120,6 +125,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      console.log('✅ Smart signup successful, sending response');
+      
       res.status(201).json({ 
         success: true, 
         message: 'Registration completed successfully',
