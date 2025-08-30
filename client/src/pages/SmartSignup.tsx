@@ -139,14 +139,22 @@ export default function SmartSignup() {
   });
 
   const onSubmit = (data: SmartSignupForm) => {
+    // Clear any previous errors first
+    form.clearErrors('sportsInvolved');
+    
+    console.log('Form submitted - Selected sports:', selectedSports);
+    
     // Validate sports selection
     if (selectedSports.length === 0) {
+      console.log('Sports validation failed - no sports selected');
       form.setError('sportsInvolved', {
         type: 'manual',
         message: 'Please select at least one sport'
       });
       return;
     }
+    
+    console.log('Sports validation passed, submitting form...');
 
     submitMutation.mutate({
       ...data,
@@ -387,10 +395,12 @@ export default function SmartSignup() {
                             } else {
                               setSelectedSports(selectedSports.filter(s => s !== sport));
                             }
-                            // Clear any previous sports validation error
-                            if (form.formState.errors.sportsInvolved) {
-                              form.clearErrors('sportsInvolved');
-                            }
+                            // Clear any previous sports validation error after state update
+                            setTimeout(() => {
+                              if (form.formState.errors.sportsInvolved) {
+                                form.clearErrors('sportsInvolved');
+                              }
+                            }, 0);
                           }}
                           className="rounded"
                           data-testid={`checkbox-sport-${sport.toLowerCase()}`}
@@ -439,7 +449,7 @@ export default function SmartSignup() {
                 <div className="flex justify-center">
                   <Button 
                     type="submit" 
-                    disabled={submitMutation.isPending || selectedSports.length === 0}
+                    disabled={submitMutation.isPending}
                     className="bg-blue-600 hover:bg-blue-700 px-8 flex items-center"
                     data-testid="button-submit"
                   >
