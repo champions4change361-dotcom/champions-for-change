@@ -54,10 +54,38 @@ export const users = pgTable("users", {
   organizationId: varchar("organization_id"), // School district, club, etc.
   organizationName: varchar("organization_name"), // Name of school/club they represent
   mission: text("mission"), // Their goals and mission statement for branding
-  customBranding: jsonb("custom_branding"), // Logo, colors, website theming
+  customBranding: jsonb("custom_branding").$type<{
+    primaryColor?: string;
+    secondaryColor?: string;
+    backgroundColor?: string;
+    textColor?: string;
+    accentColor?: string;
+    logoUrl?: string;
+    theme?: 'light' | 'dark' | 'neutral';
+  }>().default({
+    primaryColor: '#000000',
+    secondaryColor: '#666666', 
+    backgroundColor: '#ffffff',
+    textColor: '#1a1a1a',
+    accentColor: '#3b82f6',
+    theme: 'neutral'
+  }), // Clean neutral defaults for new organizers
   isWhitelabelClient: boolean("is_whitelabel_client").default(false),
   whitelabelDomain: varchar("whitelabel_domain"),
-  whitelabelBranding: jsonb("whitelabel_branding"), // Custom colors, logos, etc
+  whitelabelBranding: jsonb("whitelabel_branding").$type<{
+    primaryColor?: string;
+    secondaryColor?: string;
+    backgroundColor?: string;
+    logoUrl?: string;
+    companyName?: string;
+    customDomain?: string;
+    theme?: 'light' | 'dark' | 'neutral';
+  }>().default({
+    primaryColor: '#000000',
+    secondaryColor: '#666666',
+    backgroundColor: '#ffffff',
+    theme: 'neutral'
+  }), // Clean neutral defaults for white-label clients
   
   // AI PREFERENCE FIELDS
   aiPreferences: jsonb("ai_preferences").$type<{
