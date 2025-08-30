@@ -298,18 +298,29 @@ export default function TournamentEmpire() {
         </CardContent>
       </Card>
 
-      {/* Payment Processing Setup for Fans */}
-      {selectedTier === "foundation" && (
+      {/* Payment Processing Setup for All Tiers */}
+      {(
         <Card className="border-green-200 bg-green-50">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <CreditCard className="w-5 h-5 text-green-600" />
-              <span>Enable Payment Processing</span>
-              <Badge variant="secondary" className="bg-green-100 text-green-800">Free for Fans!</Badge>
+              <span>Payment Processing</span>
+              {selectedTier === "foundation" && (
+                <Badge variant="secondary" className="bg-green-100 text-green-800">Free Setup!</Badge>
+              )}
+              {selectedTier !== "foundation" && (
+                <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                  {selectedTier === "annual_pro" ? "0% Platform Fee" : "1% Platform Fee"}
+                </Badge>
+              )}
             </CardTitle>
             <CardDescription>
-              As a fan, you can now collect registration fees and donations to support your tournaments. 
-              Champions for Change takes a small 2% platform fee to fund educational opportunities for students.
+              {selectedTier === "foundation" 
+                ? "As a fan, collect registration fees and donations with our 2% platform fee supporting student education."
+                : selectedTier === "annual_pro"
+                ? "Premium subscribers enjoy 0% platform fees - keep 100% of payments after Stripe's standard processing fees."
+                : "Collect registration fees and donations with reduced 1% platform fee supporting Champions for Change mission."
+              }
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -321,9 +332,27 @@ export default function TournamentEmpire() {
               <ul className="text-sm space-y-1 text-gray-600">
                 <li>• Collect tournament registration fees instantly</li>
                 <li>• Accept donations for your sports programs</li>
-                <li>• 2% platform fee supports underprivileged student education</li>
-                <li>• You keep 98% of all payments received</li>
-                <li>• Upgrade anytime to reduce or eliminate platform fees</li>
+                {selectedTier === "foundation" && (
+                  <>
+                    <li>• 2% platform fee supports underprivileged student education</li>
+                    <li>• You keep 98% of all payments received</li>
+                    <li>• Upgrade anytime to reduce platform fees</li>
+                  </>
+                )}
+                {selectedTier === "annual_pro" && (
+                  <>
+                    <li>• 0% platform fee - keep 100% after Stripe fees</li>
+                    <li>• Premium benefit for annual subscribers</li>
+                    <li>• Full financial control and reporting</li>
+                  </>
+                )}
+                {selectedTier !== "foundation" && selectedTier !== "annual_pro" && (
+                  <>
+                    <li>• 1% platform fee supports Champions for Change mission</li>
+                    <li>• You keep 99% of all payments received</li>
+                    <li>• Upgrade to Annual Pro to eliminate platform fees</li>
+                  </>
+                )}
               </ul>
             </div>
             
