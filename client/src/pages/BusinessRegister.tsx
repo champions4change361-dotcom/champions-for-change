@@ -113,6 +113,15 @@ export default function BusinessRegister() {
   });
 
   const onSubmit = (data: BusinessRegistrationForm) => {
+    // Validate sports selection manually since it's in state
+    if (selectedSports.length === 0) {
+      form.setError('sportsInvolved', {
+        type: 'manual',
+        message: 'Please select at least one sport'
+      });
+      return;
+    }
+    
     submitMutation.mutate({
       ...data,
       sportsInvolved: selectedSports,
@@ -357,6 +366,10 @@ export default function BusinessRegister() {
                           } else {
                             setSelectedSports(selectedSports.filter(s => s !== sport));
                           }
+                          // Clear any previous sports validation error
+                          if (form.formState.errors.sportsInvolved) {
+                            form.clearErrors('sportsInvolved');
+                          }
                         }}
                         className="rounded"
                         data-testid={`checkbox-sport-${sport.toLowerCase()}`}
@@ -367,6 +380,9 @@ export default function BusinessRegister() {
                 </div>
                 {form.formState.errors.sportsInvolved && (
                   <p className="text-red-500 text-sm mt-1">{form.formState.errors.sportsInvolved.message}</p>
+                )}
+                {selectedSports.length > 0 && !form.formState.errors.sportsInvolved && (
+                  <p className="text-green-600 text-sm mt-1">✓ {selectedSports.length} sport{selectedSports.length > 1 ? 's' : ''} selected</p>
                 )}
               </div>
 
