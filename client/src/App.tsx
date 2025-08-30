@@ -160,7 +160,6 @@ function AuthenticatedRoutes() {
         <Route path="/domains" component={DomainManager} />
 
         <Route path="/bulk-registration" component={BulkRegistration} />
-        <Route path="/organizer-analytics" component={OrganizerAnalyticsDemo} />
         <Route path="/staff-registration" component={StaffRegistration} />
         <Route path="/staff-onboarding" component={StaffOnboarding} />
         <Route path="/staff-roles" component={StaffRoles} />
@@ -299,6 +298,7 @@ function AppRouter() {
       <Route path="/health-benefits" component={HealthBenefits} />
       <Route path="/demo/health" component={HealthDemo} />
       <Route path="/discount-demo" component={DiscountDemo} />
+      <Route path="/organizer-analytics" component={OrganizerAnalyticsDemo} />
       <Route path="/grant-funding" component={GrantFunding} />
       <Route path="/nonprofit-resources" component={NonprofitResources} />
       <Route path="/register-organization" component={() => { window.location.href = '/smart-signup?type=business'; return null; }} />
