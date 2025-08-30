@@ -139,22 +139,15 @@ export default function SmartSignup() {
   });
 
   const onSubmit = (data: SmartSignupForm) => {
-    // Clear any previous errors first
-    form.clearErrors('sportsInvolved');
-    
     console.log('Form submitted - Selected sports:', selectedSports);
     
-    // Validate sports selection
+    // Since the button is only enabled when sports are selected, we can skip validation
     if (selectedSports.length === 0) {
-      console.log('Sports validation failed - no sports selected');
-      form.setError('sportsInvolved', {
-        type: 'manual',
-        message: 'Please select at least one sport'
-      });
+      console.log('No sports selected, but this should not happen');
       return;
     }
     
-    console.log('Sports validation passed, submitting form...');
+    console.log('Submitting form with sports:', selectedSports);
 
     submitMutation.mutate({
       ...data,
@@ -415,8 +408,8 @@ export default function SmartSignup() {
                       </label>
                     ))}
                   </div>
-                  {form.formState.errors.sportsInvolved && (
-                    <p className="text-red-500 text-sm mt-1">{form.formState.errors.sportsInvolved.message}</p>
+                  {selectedSports.length === 0 && (
+                    <p className="text-red-500 text-sm mt-1">Please select at least one sport</p>
                   )}
                   <p className="text-blue-600 text-sm mt-1">Debug: {selectedSports.length} sports in state: [{selectedSports.join(', ')}]</p>
                   {selectedSports.length > 0 && !form.formState.errors.sportsInvolved && (
@@ -456,7 +449,7 @@ export default function SmartSignup() {
                 <div className="flex justify-center">
                   <Button 
                     type="submit" 
-                    disabled={submitMutation.isPending}
+                    disabled={submitMutation.isPending || selectedSports.length === 0}
                     className="bg-blue-600 hover:bg-blue-700 px-8 flex items-center"
                     data-testid="button-submit"
                   >
