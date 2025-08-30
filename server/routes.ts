@@ -4310,6 +4310,224 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ⚡ JERSEY WATCH-STYLE FLEXIBLE PAYMENT PROCESSING
+  
+  // Get team payment information
+  app.get('/api/team-payments/:teamId', async (req, res) => {
+    try {
+      const { teamId } = req.params;
+      const storage = getStorage();
+      
+      const team = await storage.getTeamRegistration(teamId);
+      if (!team) {
+        return res.status(404).json({ error: 'Team not found' });
+      }
+
+      const members = await storage.getTeamMembers(teamId);
+      
+      // Calculate payment breakdown
+      const registrationFee = 50; // TODO: Get from tournament settings
+      const feeStructure = "per_player"; // TODO: Get from tournament settings
+      
+      const totalAmount = feeStructure === "per_team" 
+        ? registrationFee 
+        : registrationFee * members.length;
+      
+      const paymentBreakdown = members.map((member: any) => ({
+        playerId: member.id,
+        playerName: member.playerName,
+        amount: feeStructure === "per_team" ? registrationFee / members.length : registrationFee,
+        paidBy: member.paidBy || null,
+        paidAt: member.paymentDate || null,
+        paymentStatus: member.paymentStatus || "unpaid"
+      }));
+
+      const paidAmount = paymentBreakdown
+        .filter(p => p.paymentStatus === "paid")
+        .reduce((sum, p) => sum + p.amount, 0);
+      
+      const paidPlayers = paymentBreakdown.filter(p => p.paymentStatus === "paid").length;
+
+      res.json({
+        teamId: team.id,
+        teamName: team.teamName,
+        organizationName: team.organizationName,
+        captainName: team.captainName,
+        paymentMethod: team.paymentMethod,
+        registrationFee,
+        feeStructure,
+        totalPlayers: members.length,
+        paidPlayers,
+        totalAmount,
+        paidAmount,
+        paymentBreakdown
+      });
+
+    } catch (error) {
+      console.error('Get team payment info error:', error);
+      res.status(500).json({ 
+        error: 'Failed to get team payment information',
+        details: error.message 
+      });
+    }
+  });
+
+  // Create Stripe payment intent for team payments
+  app.post('/api/team-payments/create-intent', async (req, res) => {
+    try {
+      const { amount, description, billing_details } = req.body;
+
+      if (!amount || amount <= 0) {
+        return res.status(400).json({ error: 'Invalid payment amount' });
+      }
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount), // Amount should already be in cents
+        currency: 'usd',
+        description: description || 'Team registration payment',
+        metadata: {
+          type: 'team_registration',
+          billing_name: billing_details?.name || 'Unknown'
+        }
+      });
+
+      res.json({
+        client_secret: paymentIntent.client_secret,
+        payment_intent_id: paymentIntent.id
+      });
+
+    } catch (error) {
+      console.error('Payment intent creation error:', error);
+      res.status(500).json({ 
+        error: 'Failed to create payment intent',
+        details: error.message 
+      });
+    }
+  });
+
+  // Record successful team payment
+  app.post('/api/team-payments/record', async (req, res) => {
+    try {
+      const { 
+        teamId, 
+        paymentIntentId, 
+        amount, 
+        paidFor, 
+        paymentMethod 
+      } = req.body;
+
+      if (!teamId || !paymentIntentId || !amount) {
+        return res.status(400).json({ 
+          error: 'Missing required fields: teamId, paymentIntentId, amount' 
+        });
+      }
+
+      const storage = getStorage();
+      
+      // Verify payment intent with Stripe
+      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+      
+      if (paymentIntent.status !== 'succeeded') {
+        return res.status(400).json({ error: 'Payment not successful' });
+      }
+
+      // Create team payment record
+      const teamPayment = await storage.createTeamPayment({
+        teamRegistrationId: teamId,
+        payerName: paymentIntent.metadata?.billing_name || 'Unknown',
+        payerEmail: 'unknown@email.com', // TODO: Get from payment metadata
+        amount: amount / 100, // Convert from cents
+        stripePaymentIntentId: paymentIntentId,
+        paymentStatus: 'completed',
+        paymentType: paymentMethod,
+        playersIncluded: paidFor || [],
+        paymentDate: new Date()
+      });
+
+      // Update individual player payment statuses
+      if (paidFor && paidFor.length > 0) {
+        for (const playerId of paidFor) {
+          await storage.updateTeamMember(playerId, {
+            paymentStatus: 'paid',
+            paymentDate: new Date(),
+            stripePaymentIntentId: paymentIntentId
+          });
+        }
+      }
+
+      // Update team registration payment status
+      const team = await storage.getTeamRegistration(teamId);
+      const members = await storage.getTeamMembers(teamId);
+      const paidMembers = members.filter((m: any) => m.paymentStatus === 'paid');
+      
+      let teamPaymentStatus = 'unpaid';
+      if (paidMembers.length === members.length) {
+        teamPaymentStatus = 'paid';
+      } else if (paidMembers.length > 0) {
+        teamPaymentStatus = 'partial';
+      }
+
+      await storage.updateTeamRegistration(teamId, {
+        paymentStatus: teamPaymentStatus,
+        paidAmount: paidMembers.length * (amount / 100 / (paidFor?.length || 1)) // Rough calculation
+      });
+
+      // Send confirmation emails
+      try {
+        await emailService.sendPaymentConfirmation({
+          recipientEmail: paymentIntent.metadata?.billing_email || 'unknown@email.com',
+          paymentAmount: amount / 100,
+          teamName: team?.teamName || 'Unknown Team',
+          paymentIntentId
+        });
+      } catch (emailError) {
+        console.error('Failed to send payment confirmation email:', emailError);
+      }
+
+      res.json({
+        success: true,
+        paymentId: teamPayment.id,
+        message: 'Payment recorded successfully'
+      });
+
+    } catch (error) {
+      console.error('Payment recording error:', error);
+      res.status(500).json({ 
+        error: 'Failed to record payment',
+        details: error.message 
+      });
+    }
+  });
+
+  // Get payment history for a team
+  app.get('/api/team-payments/:teamId/history', async (req, res) => {
+    try {
+      const { teamId } = req.params;
+      const storage = getStorage();
+      
+      const payments = await storage.getTeamPayments(teamId);
+      
+      res.json({
+        payments: payments.map((payment: any) => ({
+          id: payment.id,
+          payerName: payment.payerName,
+          amount: payment.amount,
+          paymentDate: payment.paymentDate,
+          paymentType: payment.paymentType,
+          playersIncluded: payment.playersIncluded,
+          status: payment.paymentStatus
+        }))
+      });
+
+    } catch (error) {
+      console.error('Get payment history error:', error);
+      res.status(500).json({ 
+        error: 'Failed to get payment history',
+        details: error.message 
+      });
+    }
+  });
+
   // Create and return server
   const server = createServer(app);
   return server;
