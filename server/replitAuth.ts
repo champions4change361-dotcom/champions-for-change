@@ -290,7 +290,7 @@ export async function setupAuth(app: Express) {
     }
     
     passport.authenticate(strategyName, {
-      successReturnToOrRedirect: "/tournaments",
+      successReturnToOrRedirect: "/tournament-empire",
       failureRedirect: "/login?error=callback_failed",
     })(req, res, next);
   });
