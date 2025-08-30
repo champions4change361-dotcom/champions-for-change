@@ -26,6 +26,7 @@ import LiveMatches from './pages/LiveMatches';
 import Championships from './pages/Championships';
 import WebpageBuilder from './pages/WebpageBuilder';
 import ModularPageBuilder from './pages/ModularPageBuilder';
+import DiscountDemo from './pages/DiscountDemo';
 import TournamentEmpire from './pages/TournamentEmpire';
 import FantasyTournaments from './pages/FantasyTournaments';
 import LeagueDashboard from './pages/LeagueDashboard';
@@ -295,6 +296,7 @@ function AppRouter() {
 
       <Route path="/health-benefits" component={HealthBenefits} />
       <Route path="/demo/health" component={HealthDemo} />
+      <Route path="/discount-demo" component={DiscountDemo} />
       <Route path="/grant-funding" component={GrantFunding} />
       <Route path="/nonprofit-resources" component={NonprofitResources} />
       <Route path="/register-organization" component={() => { window.location.href = '/smart-signup?type=business'; return null; }} />
