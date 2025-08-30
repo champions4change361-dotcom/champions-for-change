@@ -2400,6 +2400,53 @@ export const pagesRelations = relations(pages, ({ one }) => ({
 export type Page = typeof pages.$inferSelect;
 export type InsertPage = typeof pages.$inferInsert;
 
+// Modular page system - stores page layout and styling
+export const modularPages = pgTable("modular_pages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  title: varchar("title").notNull(),
+  slug: varchar("slug").notNull(),
+  description: text("description"),
+  pageBackground: jsonb("page_background").$type<{
+    type: 'color' | 'gradient' | 'image';
+    value: string; // hex color, gradient CSS, or image URL
+    opacity?: number;
+  }>(),
+  modules: jsonb("modules").$type<Array<{
+    id: string;
+    type: 'registration' | 'donation' | 'sponsors' | 'schedule' | 'brackets' | 'info' | 'contact';
+    position: number; // for ordering
+    config: any; // module-specific configuration
+    styling: {
+      background?: {
+        type: 'color' | 'gradient' | 'image';
+        value: string;
+        opacity?: number;
+      };
+      textColor?: string;
+      borderColor?: string;
+      borderRadius?: number;
+      padding?: number;
+      margin?: number;
+    };
+  }>>().default([]),
+  isPublished: boolean("is_published").default(false),
+  isRegistrationOpen: boolean("is_registration_open").default(false),
+  customDomain: varchar("custom_domain"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const modularPagesRelations = relations(modularPages, ({ one, many }) => ({
+  user: one(users, {
+    fields: [modularPages.userId],
+    references: [users.id],
+  }),
+}));
+
+export type ModularPage = typeof modularPages.$inferSelect;
+export type InsertModularPage = typeof modularPages.$inferInsert;
+
 // Update white-label configs with relations
 export const whitelabelConfigsRelations = relations(whitelabelConfigs, ({ one }) => ({
   user: one(users, {
@@ -3196,3 +3243,10 @@ export const schoolAssetsRelations = relations(schoolAssets, ({ one }) => ({
     references: [users.id],
   }),
 }));
+
+// Insert schemas for modular pages
+export const insertModularPageSchema = createInsertSchema(modularPages).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});

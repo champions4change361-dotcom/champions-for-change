@@ -25,6 +25,7 @@ import Settings from './pages/Settings';
 import LiveMatches from './pages/LiveMatches';
 import Championships from './pages/Championships';
 import WebpageBuilder from './pages/WebpageBuilder';
+import ModularPageBuilder from './pages/ModularPageBuilder';
 import TournamentEmpire from './pages/TournamentEmpire';
 import FantasyTournaments from './pages/FantasyTournaments';
 import LeagueDashboard from './pages/LeagueDashboard';
@@ -129,6 +130,7 @@ function AuthenticatedRoutes() {
         <Route path="/live-matches" component={LiveMatches} />
         <Route path="/championships" component={Championships} />
         <Route path="/webpage-builder" component={WebpageBuilder} />
+        <Route path="/modular-builder" component={ModularPageBuilder} />
         <Route path="/corporate-competitions" component={CorporateCompetitions} />
         <Route path="/athlete-analytics" component={() => <AthleteAnalytics isCoachView={true} />} />
         <Route path="/corporate-analytics" component={() => <CorporateAnalytics isPublic={true} />} />

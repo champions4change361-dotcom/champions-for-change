@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Trophy, Zap, Users, Calendar, Settings, Award, Timer, Star, ChevronRight, LogOut, Palette } from 'lucide-react';
+import { Trophy, Zap, Users, Calendar, Settings, Award, Timer, Star, ChevronRight, LogOut, Palette, Layout } from 'lucide-react';
 import { Link } from "wouter";
 import MoxyMessage from "../components/MoxyMessage";
 import UserMenu from "@/components/UserMenu";
@@ -173,6 +173,19 @@ export default function Home() {
                 </div>
                 <h3 className="text-lg font-bold text-white mb-2">Arena Settings</h3>
                 <p className="text-sm text-slate-400">Account & preferences</p>
+              </div>
+            </div>
+          </Link>
+
+          {/* Modular Page Builder */}
+          <Link href="/modular-builder">
+            <div data-testid="card-modular-builder" className="lg:col-span-1 bg-slate-800 border border-emerald-500/30 rounded-xl p-6 hover:border-emerald-400/50 transition-all cursor-pointer group">
+              <div className="text-center">
+                <div className="w-12 h-12 bg-gradient-to-br from-emerald-500/20 to-blue-500/20 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:from-emerald-500/30 group-hover:to-blue-500/30 transition-colors">
+                  <Layout className="h-6 w-6 text-emerald-400" />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">Page Builder</h3>
+                <p className="text-sm text-slate-400">Drag & drop modules</p>
               </div>
             </div>
           </Link>

@@ -70,6 +70,14 @@ export interface IStorage {
   updatePage(id: string, updates: Partial<Page>): Promise<Page | undefined>;
   deletePage(id: string): Promise<boolean>;
 
+  // Modular page management methods
+  createModularPage(page: any): Promise<any>;
+  getModularPage(id: string): Promise<any | undefined>;
+  getModularPageBySlug(slug: string, userId?: string): Promise<any | undefined>;
+  getModularPagesByUserId(userId: string): Promise<any[]>;
+  updateModularPage(id: string, updates: any): Promise<any | undefined>;
+  deleteModularPage(id: string): Promise<boolean>;
+
   // Team registration methods
   createTeamRegistration(registration: InsertTeamRegistration): Promise<TeamRegistration>;
   getTeamRegistration(id: string): Promise<TeamRegistration | undefined>;
