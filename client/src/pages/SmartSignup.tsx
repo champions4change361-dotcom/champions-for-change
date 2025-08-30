@@ -390,11 +390,17 @@ export default function SmartSignup() {
                           type="checkbox"
                           checked={selectedSports.includes(sport)}
                           onChange={(e) => {
+                            console.log(`${sport} checkbox clicked:`, e.target.checked);
+                            let newSelectedSports;
                             if (e.target.checked) {
-                              setSelectedSports([...selectedSports, sport]);
+                              newSelectedSports = [...selectedSports, sport];
+                              setSelectedSports(newSelectedSports);
                             } else {
-                              setSelectedSports(selectedSports.filter(s => s !== sport));
+                              newSelectedSports = selectedSports.filter(s => s !== sport);
+                              setSelectedSports(newSelectedSports);
                             }
+                            console.log('Updated selected sports:', newSelectedSports);
+                            
                             // Clear any previous sports validation error after state update
                             setTimeout(() => {
                               if (form.formState.errors.sportsInvolved) {
@@ -412,6 +418,7 @@ export default function SmartSignup() {
                   {form.formState.errors.sportsInvolved && (
                     <p className="text-red-500 text-sm mt-1">{form.formState.errors.sportsInvolved.message}</p>
                   )}
+                  <p className="text-blue-600 text-sm mt-1">Debug: {selectedSports.length} sports in state: [{selectedSports.join(', ')}]</p>
                   {selectedSports.length > 0 && !form.formState.errors.sportsInvolved && (
                     <p className="text-green-600 text-sm mt-1">✓ {selectedSports.length} sport{selectedSports.length > 1 ? 's' : ''} selected</p>
                   )}
