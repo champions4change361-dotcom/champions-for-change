@@ -134,7 +134,7 @@ export function registerTournamentRoutes(app: Express) {
         }
       }
 
-      res.status(201).json(tournament);
+      res.status(201).json({ tournament });
     } catch (error) {
       console.error("Error creating tournament:", error);
       if (error instanceof z.ZodError) {
