@@ -14,7 +14,7 @@ export function registerTournamentRoutes(app: Express) {
         return res.status(401).json({ message: "Authentication required" });
       }
 
-      const tournaments = await storage.getAllTournaments();
+      const tournaments = await storage.getTournaments();
       res.json(tournaments);
     } catch (error) {
       console.error("Error fetching tournaments:", error);
