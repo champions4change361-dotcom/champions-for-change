@@ -74,6 +74,7 @@ import BulkRegistration from './pages/BulkRegistration';
 import AthleteDashboard from './pages/AthleteDashboard';
 import AthleteManagement from './pages/AthleteManagement';
 import HealthCommunication from './pages/HealthCommunication';
+import UnifiedLogin from './pages/UnifiedLogin';
 import EquipmentManagement from './pages/EquipmentManagement';
 import SmartScheduler from './pages/SmartScheduler';
 import ComplianceManagement from './pages/ComplianceManagement';
@@ -295,8 +296,10 @@ function AppRouter() {
       <Route path="/grant-funding" component={GrantFunding} />
       <Route path="/nonprofit-resources" component={NonprofitResources} />
       <Route path="/register-organization" component={() => { window.location.href = '/smart-signup?type=business'; return null; }} />
-      {/* Main Login Form */}
-      <Route path="/login" component={Login} />
+      {/* Unified Login for All Methods */}
+      <Route path="/login" component={UnifiedLogin} />
+      {/* Legacy Login Form */}
+      <Route path="/legacy-login" component={Login} />
       {/* User Type Selection Portal */}
       <Route path="/login-portal" component={LoginPortal} />
       {/* User Type Login Portals */}

@@ -43,12 +43,12 @@ export default function TrantorLanding() {
               {/* Start Tournament and Pricing Buttons */}
               <div className="flex flex-col space-y-2 lg:flex-row lg:space-y-0 lg:space-x-3 lg:ml-auto">
                 <Button 
-                  onClick={() => setLocation('/create')}
+                  onClick={() => setLocation('/login')}
                   className="bg-yellow-600 hover:bg-yellow-700 text-slate-900 font-semibold px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base w-full lg:w-auto"
                   data-testid="button-start-tournament-trantor"
                 >
                   <Trophy className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4" />
-                  Start Tournament
+                  Sign In
                 </Button>
                 <Button 
                   onClick={() => setLocation('/smart-signup?type=individual')}
