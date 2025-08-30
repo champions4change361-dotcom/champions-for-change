@@ -139,15 +139,10 @@ export default function SmartSignup() {
   });
 
   const onSubmit = (data: SmartSignupForm) => {
-    console.log('Form submitted - Selected sports:', selectedSports);
-    
     // Since the button is only enabled when sports are selected, we can skip validation
     if (selectedSports.length === 0) {
-      console.log('No sports selected, but this should not happen');
       return;
     }
-    
-    console.log('Submitting form with sports:', selectedSports);
 
     submitMutation.mutate({
       ...data,
@@ -383,23 +378,12 @@ export default function SmartSignup() {
                           type="checkbox"
                           checked={selectedSports.includes(sport)}
                           onChange={(e) => {
-                            console.log(`${sport} checkbox clicked:`, e.target.checked);
-                            let newSelectedSports;
                             if (e.target.checked) {
-                              newSelectedSports = [...selectedSports, sport];
-                              setSelectedSports(newSelectedSports);
+                              setSelectedSports([...selectedSports, sport]);
                             } else {
-                              newSelectedSports = selectedSports.filter(s => s !== sport);
-                              setSelectedSports(newSelectedSports);
+                              setSelectedSports(selectedSports.filter(s => s !== sport));
                             }
-                            console.log('Updated selected sports:', newSelectedSports);
                             
-                            // Clear any previous sports validation error after state update
-                            setTimeout(() => {
-                              if (form.formState.errors.sportsInvolved) {
-                                form.clearErrors('sportsInvolved');
-                              }
-                            }, 0);
                           }}
                           className="rounded"
                           data-testid={`checkbox-sport-${sport.toLowerCase()}`}
@@ -411,8 +395,7 @@ export default function SmartSignup() {
                   {selectedSports.length === 0 && (
                     <p className="text-red-500 text-sm mt-1">Please select at least one sport</p>
                   )}
-                  <p className="text-blue-600 text-sm mt-1">Debug: {selectedSports.length} sports in state: [{selectedSports.join(', ')}]</p>
-                  {selectedSports.length > 0 && !form.formState.errors.sportsInvolved && (
+                  {selectedSports.length > 0 && (
                     <p className="text-green-600 text-sm mt-1">✓ {selectedSports.length} sport{selectedSports.length > 1 ? 's' : ''} selected</p>
                   )}
                 </div>
