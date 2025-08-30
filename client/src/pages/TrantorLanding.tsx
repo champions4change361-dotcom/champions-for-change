@@ -51,7 +51,7 @@ export default function TrantorLanding() {
                   Start Tournament
                 </Button>
                 <Button 
-                  onClick={() => setLocation('/pricing')}
+                  onClick={() => setLocation('/smart-signup?type=individual')}
                   className="bg-slate-700 hover:bg-slate-600 text-yellow-300 font-semibold px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base w-full lg:w-auto border border-yellow-500 shadow-lg"
                   data-testid="button-pricing-trantor"
                 >

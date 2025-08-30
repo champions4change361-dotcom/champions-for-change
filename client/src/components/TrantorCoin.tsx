@@ -47,7 +47,7 @@ export default function TrantorCoin({
             if (redirectTo) {
               setLocation(redirectTo);
             } else {
-              setLocation('/login/organizer');
+              setLocation('/smart-signup?fromCoin=true');
             }
           }, 100);
         }

@@ -84,7 +84,7 @@ export default function Landing() {
                     <span className="hidden lg:inline">Login to Arena</span>
                   </Button>
                   <Button 
-                    onClick={() => setLocation('/pricing')}
+                    onClick={() => setLocation('/smart-signup')}
                     variant="outline"
                     className="border-orange-500 text-orange-400 hover:bg-orange-500/10 hover:border-orange-400 px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base font-semibold w-full lg:w-auto"
                     data-testid="button-signup"

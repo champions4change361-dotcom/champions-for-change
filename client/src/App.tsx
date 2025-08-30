@@ -100,6 +100,7 @@ import StaffRoles from './pages/StaffRoles';
 import DistrictOverview from './pages/DistrictOverview';
 import AthleticTrainerDemo from './pages/AthleticTrainerDemo';
 import SignupSelector from './pages/SignupSelector';
+import SmartSignup from './pages/SmartSignup';
 import { StaffOnboarding } from './components/StaffOnboarding';
 
 function AuthenticatedRoutes() {
@@ -276,6 +277,7 @@ function AppRouter() {
       <Route path="/register" component={RegistrationForm} />
       <Route path="/business-register" component={BusinessRegister} />
       <Route path="/admin/approvals" component={AdminApprovals} />
+      <Route path="/smart-signup" component={SmartSignup} />
       <Route path="/signup" component={SignupSelector} />
       <Route path="/tournament/design" component={TournamentDesign} />
       <Route path="/register-old" component={Register} />

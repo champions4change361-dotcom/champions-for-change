@@ -107,7 +107,7 @@ export default function ChampionsLanding() {
                   </p>
                   <Button 
                     size="lg"
-                    onClick={() => setLocation('/pricing')}
+                    onClick={() => setLocation('/smart-signup?type=individual')}
                     className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 text-lg font-semibold w-full border border-green-500 shadow-lg"
                     data-testid="button-tournament-organizer"
                   >

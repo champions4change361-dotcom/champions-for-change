@@ -46,6 +46,94 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Support team routes for cheerleading, dance teams, marching band, color guard
   app.use('/api', supportTeamRoutes);
 
+  // Smart Signup API endpoint for streamlined registration
+  app.post('/api/registration/smart-signup', async (req, res) => {
+    try {
+      const {
+        firstName,
+        lastName,
+        email,
+        phone,
+        organizationName,
+        organizationType,
+        description,
+        sportsInvolved,
+        recommendedPlan,
+        paymentMethod
+      } = req.body;
+
+      // Validate required fields
+      if (!firstName || !lastName || !email || !organizationName || !organizationType || !sportsInvolved?.length) {
+        return res.status(400).json({ 
+          error: 'Missing required fields: firstName, lastName, email, organizationName, organizationType, sportsInvolved' 
+        });
+      }
+
+      // Store registration data
+      const storage = getStorage();
+      const registrationData = {
+        firstName,
+        lastName,
+        email,
+        phone,
+        organizationName,
+        organizationType,
+        description,
+        sportsInvolved,
+        recommendedPlan,
+        paymentMethod,
+        createdAt: new Date().toISOString(),
+        status: 'pending'
+      };
+
+      // For now, just log the registration (in production this would save to database)
+      console.log('Smart signup registration:', registrationData);
+
+      // Send welcome email
+      if (emailService) {
+        try {
+          await emailService.sendEmail({
+            to: email,
+            subject: 'Welcome to Champions for Change!',
+            html: `
+              <h2>Welcome to Champions for Change, ${firstName}!</h2>
+              <p>Thank you for joining our mission to support educational opportunities for students through tournament management.</p>
+              <p><strong>Organization:</strong> ${organizationName}</p>
+              <p><strong>Organization Type:</strong> ${organizationType}</p>
+              <p><strong>Sports:</strong> ${sportsInvolved.join(', ')}</p>
+              <p><strong>Recommended Plan:</strong> ${recommendedPlan || 'Free Starter'}</p>
+              ${paymentMethod === 'check' ? '<p><strong>Payment Method:</strong> Check payment - we will contact you with instructions</p>' : ''}
+              <br>
+              <p>Next steps:</p>
+              <ul>
+                <li>Access your dashboard to start creating tournaments</li>
+                <li>Contact us at champions4change361@gmail.com for support</li>
+                <li>Call us at 361-300-1552 for assistance</li>
+              </ul>
+              <br>
+              <p>Best regards,<br>Champions for Change Team</p>
+            `
+          });
+        } catch (emailError) {
+          console.error('Failed to send welcome email:', emailError);
+          // Don't fail the registration due to email issues
+        }
+      }
+
+      res.status(201).json({ 
+        success: true, 
+        message: 'Registration completed successfully',
+        redirectTo: recommendedPlan === 'free-starter' ? '/tournaments' : null
+      });
+
+    } catch (error) {
+      console.error('Smart signup error:', error);
+      res.status(500).json({ 
+        error: 'Registration failed. Please try again or contact support.' 
+      });
+    }
+  });
+
   // Miller VLC Demo route for district firewall compatibility
   app.get('/', (req, res, next) => {
     if (req.query.demo === 'miller' || req.query.vlc === 'true') {
