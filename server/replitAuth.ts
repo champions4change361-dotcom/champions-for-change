@@ -46,17 +46,17 @@ export function getSession() {
   return session({
     secret: process.env.SESSION_SECRET || 'champions-for-change-secret-key',
     store: sessionStore,
-    resave: true, // Force session save on every request
-    saveUninitialized: true, // Save uninitialized sessions
+    resave: false, // Don't force session save on every request
+    saveUninitialized: false, // Don't save uninitialized sessions
     rolling: true, // Reset cookie maxAge on every request
     cookie: {
-      httpOnly: true,
+      httpOnly: false, // Allow JavaScript access for mobile compatibility
       secure: false, // Allow HTTP for development
       maxAge: sessionTtl,
-      sameSite: 'lax', // More compatible for same-site requests
+      sameSite: 'none', // Required for OAuth redirects on mobile
       path: '/', // Ensure cookie is available site-wide
     },
-    name: 'connect.sid', // Use standard session name
+    name: 'replit.sid', // Use custom session name to avoid conflicts
   });
 }
 
