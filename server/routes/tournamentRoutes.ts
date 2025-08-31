@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { storage } from "../storage";
 import { insertTournamentSchema } from "@shared/schema";
-// import { BracketGenerator } from "../../client/src/utils/bracket-generator";
+import { BracketGenerator } from "../utils/bracket-generator";
 import { z } from "zod";
 
 export function registerTournamentRoutes(app: Express) {
@@ -100,13 +100,13 @@ export function registerTournamentRoutes(app: Express) {
       const teams = Array.isArray(validatedData.teams) ? validatedData.teams : [];
       const teamNames = teams.map((team: any) => typeof team === 'string' ? team : team.teamName);
       
-      // Simple bracket structure for now - will generate proper brackets later
-      const bracketStructure = {
-        matches: [],
-        totalRounds: Math.ceil(Math.log2(teamNames.length || 2)),
-        totalMatches: Math.max(0, (teamNames.length || 2) - 1),
-        format: validatedData.tournamentType || 'single'
-      };
+      // Generate proper bracket structure
+      const bracketStructure = BracketGenerator.generateBracket(
+        teamNames,
+        '',  // Tournament ID will be set after creation
+        validatedData.tournamentType || 'single',
+        validatedData.sport || 'Basketball'
+      );
 
       // Create tournament with generated bracket and user association
       const tournamentData = {
@@ -118,7 +118,22 @@ export function registerTournamentRoutes(app: Express) {
 
       const tournament = await storage.createTournament(tournamentData);
       
-      // Bracket generation will be handled in frontend for now
+      // Create matches for the tournament
+      if (bracketStructure.matches.length > 0) {
+        for (const match of bracketStructure.matches) {
+          await storage.createMatch({
+            tournamentId: tournament.id,
+            round: match.round,
+            position: match.position,
+            team1: match.team1 || null,
+            team2: match.team2 || null,
+            team1Score: match.team1Score || 0,
+            team2Score: match.team2Score || 0,
+            winner: match.winner || null,
+            status: match.status
+          });
+        }
+      }
 
       res.status(201).json({ tournament });
     } catch (error) {
