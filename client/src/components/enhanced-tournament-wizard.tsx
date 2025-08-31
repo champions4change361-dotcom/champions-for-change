@@ -245,7 +245,7 @@ export default function EnhancedTournamentWizard({
 
   const createTournamentMutation = useMutation({
     mutationFn: async (data: FormData & { teams: TeamData[] }) => {
-      const response = await apiRequest("POST", "/api/tournaments", {
+      const response = await apiRequest("/api/tournaments", "POST", {
         ...data,
         teams: data.teams,
         scoringMethod: selectedSport?.scoringMethod || "wins",
