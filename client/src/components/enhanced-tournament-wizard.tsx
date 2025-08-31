@@ -556,21 +556,21 @@ export default function EnhancedTournamentWizard({
                     ))}
                   </div>
                   
-                  {/* Custom Input */}
+                  {/* Custom Input - Better UX */}
                   <div className="relative">
                     <Input
-                      type="number"
-                      min="2"
-                      max="128"
+                      type="text"
+                      inputMode="numeric"
                       value={teamSize || ""}
                       onChange={(e) => {
-                        const value = parseInt(e.target.value);
-                        if (!isNaN(value) && value >= 2 && value <= 128) {
-                          form.setValue("teamSize", value);
+                        const value = e.target.value.replace(/[^0-9]/g, ''); // Only allow numbers
+                        const numValue = parseInt(value);
+                        if (value === "" || (numValue >= 2 && numValue <= 128)) {
+                          form.setValue("teamSize", value === "" ? undefined : numValue);
                         }
                       }}
-                      placeholder="Or enter custom number (2-128)"
-                      className="w-full"
+                      placeholder="Enter number of teams (2-128)"
+                      className="w-full text-center text-lg font-semibold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       data-testid="input-team-size"
                     />
                     <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-400">
