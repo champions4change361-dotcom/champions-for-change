@@ -145,7 +145,7 @@ export default function DomainNavigation() {
               </Link>
               {config.brand !== 'COACHES_LOUNGE' && (
                 <>
-                  <Link href="/tournament-empire">
+                  <Link href="/tournaments">
                     <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-testid="link-mobile-tournaments">Tournaments</a>
                   </Link>
                   <div className="px-4 py-2 text-xs font-medium text-gray-500 bg-gray-50">CCISD VLC Schools</div>
