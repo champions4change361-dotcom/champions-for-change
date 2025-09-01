@@ -188,11 +188,14 @@ export function registerTournamentRoutes(app: Express) {
       const sanitizedData = {
         ...validatedData,
         entryFee: sanitizeNumericField(validatedData.entryFee, "0"),
+        donationGoal: sanitizeNumericField(validatedData.donationGoal, "0"),
         maxParticipants: sanitizeNumericField(validatedData.maxParticipants, null),
         teamSize: sanitizeNumericField(validatedData.teamSize, 8),
         seriesLength: sanitizeNumericField(validatedData.seriesLength, 7),
         currentStage: sanitizeNumericField(validatedData.currentStage, 1),
-        totalStages: sanitizeNumericField(validatedData.totalStages, 1)
+        totalStages: sanitizeNumericField(validatedData.totalStages, 1),
+        maxTeamSize: sanitizeNumericField(validatedData.maxTeamSize, null),
+        minTeamSize: sanitizeNumericField(validatedData.minTeamSize, null)
       };
       
       console.log("Sanitized tournament data:", JSON.stringify(sanitizedData, null, 2));
