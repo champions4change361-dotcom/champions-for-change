@@ -111,6 +111,7 @@ import AthleticTrainerDemo from './pages/AthleticTrainerDemo';
 import SignupSelector from './pages/SignupSelector';
 import SmartSignup from './pages/SmartSignup';
 import { StaffOnboarding } from './components/StaffOnboarding';
+import TournamentRegistration from './pages/TournamentRegistration';
 
 function AuthenticatedRoutes() {
   const { isFeatureEnabled, isFantasyDomain, config } = useDomain();
@@ -131,6 +132,7 @@ function AuthenticatedRoutes() {
         <Route path="/tournaments/:id/edit" component={TournamentEditPage} />
         <Route path="/create" component={CreateTournament} />
         <Route path="/tournament/:id" component={Tournament} />
+        <Route path="/tournaments/:tournamentId/register" component={TournamentRegistration} />
         <Route path="/contacts" component={Contacts} />
         <Route path="/ai-consultation" component={AIConsultation} />
         <Route path="/ai-chat" component={AIChat} />

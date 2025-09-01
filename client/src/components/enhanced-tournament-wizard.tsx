@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, ArrowRight, Check, CheckCircle, Play, Trophy, Users, Settings, DollarSign, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, CheckCircle, Play, Trophy, Users, Settings, DollarSign, X, Target } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { insertTournamentSchema } from "@shared/schema";
 import TeamManagement from "@/components/team-management";
@@ -43,22 +43,20 @@ interface EnhancedTournamentWizardProps {
   userType?: 'district' | 'enterprise' | 'free' | 'general';
 }
 
-type WizardStep = 'sport' | 'size' | 'teams' | 'preview' | 'start';
+type WizardStep = 'sport' | 'events' | 'settings' | 'launch';
 
 const stepTitles = {
   sport: 'Choose Sport & Format',
-  size: 'Set Tournament Size',
-  teams: 'Enter Team Names',
-  preview: 'Review & Generate',
-  start: 'Start Tournament'
+  events: 'Select Events & Results Recorders',
+  settings: 'Tournament Settings',
+  launch: 'Launch Tournament'
 };
 
 const stepDescriptions = {
   sport: 'Select your sport and competition format',
-  size: 'Choose how many teams will participate',
-  teams: 'Add team names manually or import from CSV',
-  preview: 'Review all details and generate bracket/leaderboard',
-  start: 'Tournament is ready to begin!'
+  events: 'Choose events and assign Results Recorders for each',
+  settings: 'Configure tournament details and registration settings',
+  launch: 'Tournament is ready for participant registration!'
 };
 
 export default function EnhancedTournamentWizard({ 
@@ -71,9 +69,8 @@ export default function EnhancedTournamentWizard({
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [currentStep, setCurrentStep] = useState<WizardStep>('sport');
-  const [teams, setTeams] = useState<TeamData[]>([]);
   const [selectedEvents, setSelectedEvents] = useState<SportEventDefinition[]>([]);
-  const [skipTeamSetup, setSkipTeamSetup] = useState(false);
+  const [eventRecorders, setEventRecorders] = useState<Record<string, string>>({});
   const [createdTournament, setCreatedTournament] = useState<any>(null);
   const [isDraftSaving, setIsDraftSaving] = useState(false);
   const [autoSaveStatus, setAutoSaveStatus] = useState<'saved' | 'saving' | 'error' | null>(null);
@@ -276,8 +273,9 @@ export default function EnhancedTournamentWizard({
             form.setValue(key as any, draftData[key]);
           }
         });
-        // Restore teams and step
-        if (draftData.teams) setTeams(draftData.teams);
+        // Restore events and step
+        if (draftData.selectedEvents) setSelectedEvents(draftData.selectedEvents);
+        if (draftData.eventRecorders) setEventRecorders(draftData.eventRecorders);
         if (draftData.currentStep) setCurrentStep(draftData.currentStep);
         
         toast({
@@ -295,13 +293,13 @@ export default function EnhancedTournamentWizard({
   useEffect(() => {
     const subscription = form.watch((value) => {
       if (value.name || value.sport) { // Only save if there's meaningful content
-        const draftData = { ...value, teams, currentStep };
+        const draftData = { ...value, selectedEvents, eventRecorders, currentStep };
         localStorage.setItem('tournamentDraft', JSON.stringify(draftData));
         setAutoSaveStatus('saved');
       }
     });
     return () => subscription.unsubscribe();
-  }, [form, teams, currentStep]);
+  }, [form, selectedEvents, eventRecorders, currentStep]);
 
   const selectedSport = sports.find(sport => sport.sportName === form.watch("sport"));
   const isLeaderboardSport = selectedSport?.competitionType === "leaderboard";
@@ -379,7 +377,7 @@ export default function EnhancedTournamentWizard({
       queryClient.invalidateQueries({ queryKey: ["/api/my-tournaments"] });
       
       // Update localStorage with saved draft ID
-      const draftData = { ...form.getValues(), teams, currentStep, draftId: data.tournament.id };
+      const draftData = { ...form.getValues(), selectedEvents, eventRecorders, currentStep, draftId: data.tournament.id };
       localStorage.setItem('tournamentDraft', JSON.stringify(draftData));
     },
     onError: (error) => {
@@ -394,7 +392,7 @@ export default function EnhancedTournamentWizard({
     },
   });
 
-  const steps: WizardStep[] = ['sport', 'size', 'teams', 'preview', 'start'];
+  const steps: WizardStep[] = ['sport', 'events', 'settings', 'launch'];
   const currentStepIndex = steps.indexOf(currentStep);
   const progress = ((currentStepIndex + 1) / steps.length) * 100;
 
@@ -402,14 +400,11 @@ export default function EnhancedTournamentWizard({
     switch (step) {
       case 'sport':
         return !!(form.watch("sport") && form.watch("competitionFormat"));
-      case 'size':
-        return !!(form.watch("teamSize") && form.watch("name"));
-      case 'teams':
-        // Names are now optional - always allow proceeding
-        return true;
-      case 'preview':
-        return true;
-      case 'start':
+      case 'events':
+        return selectedEvents.length > 0;
+      case 'settings':
+        return !!(form.watch("name"));
+      case 'launch':
         return !!createdTournament;
       default:
         return false;
@@ -434,20 +429,19 @@ export default function EnhancedTournamentWizard({
 
   const handleCreateTournament = () => {
     const formData = form.getValues();
-    createTournamentMutation.mutate({ ...formData, teams });
+    createTournamentMutation.mutate({ ...formData, teams: [], selectedEvents, eventRecorders });
   };
 
-  const handleTeamsUpdate = (updatedTeams: TeamData[]) => {
-    setTeams(updatedTeams);
+  const handleEventRecorderUpdate = (eventName: string, recorder: string) => {
+    setEventRecorders(prev => ({ ...prev, [eventName]: recorder }));
   };
 
   const getStepIcon = (step: WizardStep) => {
     switch (step) {
-      case 'sport': return <Settings className="w-5 h-5" />;
-      case 'size': return <Users className="w-5 h-5" />;
-      case 'teams': return <Users className="w-5 h-5" />;
-      case 'preview': return <Trophy className="w-5 h-5" />;
-      case 'start': return <Play className="w-5 h-5" />;
+      case 'sport': return <Trophy className="w-5 h-5" />;
+      case 'events': return <Target className="w-5 h-5" />;
+      case 'settings': return <Settings className="w-5 h-5" />;
+      case 'launch': return <Play className="w-5 h-5" />;
     }
   };
 
@@ -455,7 +449,8 @@ export default function EnhancedTournamentWizard({
   const clearCachedData = () => {
     localStorage.removeItem('tournament_draft');
     form.reset();
-    setTeams([]);
+    setSelectedEvents([]);
+    setEventRecorders({});
     setCurrentStep('sport');
     toast({
       title: "Cache Cleared",
@@ -511,7 +506,7 @@ export default function EnhancedTournamentWizard({
                   onClick={() => {
                     setIsDraftSaving(true);
                     const formData = form.getValues();
-                    saveDraftMutation.mutate({ ...formData, teams, status: 'draft' as const });
+                    saveDraftMutation.mutate({ ...formData, teams: [], status: 'draft' as const });
                   }}
                   disabled={isDraftSaving || saveDraftMutation.isPending || !form.watch("name")}
                   className="flex items-center gap-1 text-xs"
@@ -639,76 +634,6 @@ export default function EnhancedTournamentWizard({
                 </div>
               )}
 
-              {/* Event Selection for Multi-Event Sports - Fixed to allow re-adding events */}
-              {form.watch("sport") && getEventsForSport(form.watch("sport")).length > 0 && (
-                <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <h4 className="font-medium text-blue-900 mb-3 flex items-center gap-2">
-                    <Trophy className="h-4 w-4" />
-                    {form.watch("sport")} Events ({selectedEvents.length} of {getEventsForSport(form.watch("sport")).length} selected)
-                  </h4>
-                  
-                  <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {getEventsForSport(form.watch("sport")).map((event, index) => {
-                      const isSelected = selectedEvents.some(e => e.eventName === event.eventName);
-                      return (
-                        <div key={index} className={`flex items-center justify-between p-2 rounded border ${
-                          isSelected ? 'bg-white border-blue-200' : 'bg-gray-50 border-gray-200'
-                        }`}>
-                          <div className="flex items-center gap-2">
-                            <Checkbox
-                              checked={isSelected}
-                              onCheckedChange={(checked) => {
-                                if (checked) {
-                                  // Add event back if checked
-                                  setSelectedEvents(prev => [...prev, event]);
-                                } else {
-                                  // Remove event if unchecked
-                                  setSelectedEvents(prev => prev.filter(e => e.eventName !== event.eventName));
-                                }
-                              }}
-                            />
-                            <span className={`font-medium ${
-                              isSelected ? 'text-gray-900' : 'text-gray-500'
-                            }`}>{event.eventName}</span>
-                          </div>
-                          
-                          <div className="flex items-center gap-2">
-                            <Badge variant={isSelected ? "default" : "secondary"} className="text-xs">
-                              {event.eventType}
-                            </Badge>
-                            <span className="text-xs text-gray-500">
-                              {event.scoringUnit}
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  
-                  <div className="mt-3 flex items-center justify-between">
-                    <div className="text-sm text-blue-700">
-                      <p>✓ Events auto-selected based on your sport choice</p>
-                      <p>Check/uncheck any events to customize your competition</p>
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setSelectedEvents(getEventsForSport(form.watch("sport")))}
-                        className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
-                      >
-                        Select All
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedEvents([])}
-                        className="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
-                      >
-                        Clear All
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
 
               <div>
                 <Label htmlFor="competitionFormat" className="block text-sm font-medium text-gray-700 mb-2">
@@ -790,7 +715,121 @@ export default function EnhancedTournamentWizard({
             </div>
           )}
 
-          {currentStep === 'size' && (
+          {currentStep === 'events' && (
+            <div className="space-y-6">
+              {form.watch("sport") && getEventsForSport(form.watch("sport")).length > 0 ? (
+                <div className="space-y-6">
+                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <h4 className="font-medium text-blue-900 mb-3 flex items-center gap-2">
+                      <Target className="h-4 w-4" />
+                      {form.watch("sport")} Events ({selectedEvents.length} of {getEventsForSport(form.watch("sport")).length} selected)
+                    </h4>
+                    
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {getEventsForSport(form.watch("sport")).map((event, index) => {
+                        const isSelected = selectedEvents.some(e => e.eventName === event.eventName);
+                        return (
+                          <div key={index} className={`flex items-center justify-between p-2 rounded border ${
+                            isSelected ? 'bg-white border-blue-200' : 'bg-gray-50 border-gray-200'
+                          }`}>
+                            <div className="flex items-center gap-2">
+                              <Checkbox
+                                checked={isSelected}
+                                onCheckedChange={(checked) => {
+                                  if (checked) {
+                                    setSelectedEvents(prev => [...prev, event]);
+                                  } else {
+                                    setSelectedEvents(prev => prev.filter(e => e.eventName !== event.eventName));
+                                  }
+                                }}
+                              />
+                              <span className={`font-medium ${
+                                isSelected ? 'text-gray-900' : 'text-gray-500'
+                              }`}>{event.eventName}</span>
+                            </div>
+                            
+                            <div className="flex items-center gap-2">
+                              <Badge variant={isSelected ? "default" : "secondary"} className="text-xs">
+                                {event.eventType}
+                              </Badge>
+                              <span className="text-xs text-gray-500">
+                                {event.scoringUnit}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    
+                    <div className="mt-3 flex items-center justify-between">
+                      <div className="text-sm text-blue-700">
+                        <p>Choose which events to include in your tournament</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedEvents(getEventsForSport(form.watch("sport")))}
+                          className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+                        >
+                          Select All
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedEvents([])}
+                          className="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+                        >
+                          Clear All
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Results Recorder Assignment */}
+                  {selectedEvents.length > 0 && (
+                    <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                      <h4 className="font-medium text-green-900 mb-3 flex items-center gap-2">
+                        <Users className="h-4 w-4" />
+                        Assign Results Recorders
+                      </h4>
+                      <p className="text-sm text-green-700 mb-4">
+                        Assign a Results Recorder for each event to manage scoring and results.
+                      </p>
+                      
+                      <div className="space-y-3">
+                        {selectedEvents.map((event, index) => (
+                          <div key={index} className="flex items-center gap-3 p-2 bg-white rounded border">
+                            <span className="font-medium text-gray-900 flex-1">
+                              {event.eventName}
+                            </span>
+                            <Input
+                              placeholder="Results Recorder name or email"
+                              value={eventRecorders[event.eventName] || ''}
+                              onChange={(e) => handleEventRecorderUpdate(event.eventName, e.target.value)}
+                              className="w-64"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Target className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                  <p className="text-gray-600">Please select a sport first to configure events</p>
+                  <Button
+                    variant="outline"
+                    onClick={() => setCurrentStep('sport')}
+                    className="mt-3"
+                  >
+                    Go Back to Sport Selection
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {currentStep === 'settings' && (
             <div className="space-y-6">
               <div>
                 <Label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
@@ -971,37 +1010,16 @@ export default function EnhancedTournamentWizard({
             </div>
           )}
 
-          {currentStep === 'teams' && (
-            <div className="space-y-6">
-              {/* Optional Notice */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h3 className="font-medium text-blue-900 mb-2">Participant Names (Optional)</h3>
-                <p className="text-sm text-blue-700">
-                  You can add participant names now or skip this step. If you skip, we'll create placeholder names 
-                  that you can edit directly in your tournament bracket or leaderboard after creation.
-                </p>
-              </div>
-              
-              <TeamManagement
-                teamCount={teamSize}
-                onTeamsUpdate={handleTeamsUpdate}
-                tournamentType={userType}
-                competitionFormat={competitionFormat}
-              />
-            </div>
-          )}
-
-          {currentStep === 'preview' && (
+          {currentStep === 'launch' && !createdTournament && (
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
-                  <h3 className="font-semibold text-lg">Tournament Details</h3>
+                  <h3 className="font-semibold text-lg">Tournament Summary</h3>
                   <div className="space-y-2 text-sm">
                     <div><strong>Name:</strong> {form.watch("name")}</div>
                     <div><strong>Sport:</strong> {form.watch("sport")}</div>
                     <div><strong>Format:</strong> {competitionFormat}</div>
-                    <div><strong>Type:</strong> {form.watch("tournamentType")}</div>
-                    <div><strong>Size:</strong> {teamSize} {competitionFormat === 'leaderboard' ? 'participants' : 'teams'}</div>
+                    <div><strong>Events:</strong> {selectedEvents.length} selected</div>
                     {form.watch("ageGroup") && <div><strong>Age Group:</strong> {form.watch("ageGroup")}</div>}
                     {form.watch("genderDivision") && <div><strong>Division:</strong> {form.watch("genderDivision")}</div>}
                     {form.watch("tournamentDate") && (
@@ -1011,19 +1029,16 @@ export default function EnhancedTournamentWizard({
                     {form.watch("entryFee") && parseFloat(form.watch("entryFee") || '0') > 0 && (
                       <div><strong>Registration Fee:</strong> ${form.watch("entryFee")}</div>
                     )}
-                    {form.watch("donationsEnabled") && (
-                      <div><strong>Donations:</strong> Enabled {form.watch("donationGoal") && `(Goal: $${form.watch("donationGoal")})`}</div>
-                    )}
                   </div>
                 </div>
 
                 <div className="space-y-4">
-                  <h3 className="font-semibold text-lg">{competitionFormat === 'leaderboard' ? 'Participants' : 'Teams'}</h3>
+                  <h3 className="font-semibold text-lg">Selected Events</h3>
                   <div className="max-h-48 overflow-y-auto space-y-1">
-                    {teams.map((team, index) => (
+                    {selectedEvents.map((event, index) => (
                       <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded text-sm">
-                        <span className="font-medium">{team.teamName}</span>
-                        {team.captainName && <span className="text-gray-600">{team.captainName}</span>}
+                        <span className="font-medium">{event.eventName}</span>
+                        <Badge variant="secondary" className="text-xs">{event.eventType}</Badge>
                       </div>
                     ))}
                   </div>
@@ -1033,16 +1048,16 @@ export default function EnhancedTournamentWizard({
               <div className="p-4 bg-green-50 rounded-lg border border-green-200">
                 <div className="flex items-center gap-2 text-green-800">
                   <CheckCircle className="w-5 h-5" />
-                  <span className="font-medium">Ready to Create Tournament</span>
+                  <span className="font-medium">Ready to Launch Tournament</span>
                 </div>
                 <p className="text-sm text-green-700 mt-1">
-                  All required information is complete. Click "Create Tournament" to generate your {competitionFormat === 'bracket' ? 'bracket' : 'leaderboard'}.
+                  Your tournament will be created with event-specific registration. Participants can sign up for individual events they want to compete in.
                 </p>
               </div>
             </div>
           )}
 
-          {currentStep === 'start' && createdTournament && (
+          {currentStep === 'launch' && createdTournament && (
             <div className="text-center space-y-6">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
                 <Trophy className="w-8 h-8 text-green-600" />
@@ -1091,7 +1106,7 @@ export default function EnhancedTournamentWizard({
                 Back
               </Button>
 
-              {currentStep === 'preview' ? (
+              {currentStep === 'launch' ? (
                 <Button
                   onClick={handleCreateTournament}
                   disabled={createTournamentMutation.isPending || !canProceedFromStep(currentStep)}

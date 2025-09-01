@@ -22,6 +22,7 @@ import PoolPlayBracket from './pool-play-bracket';
 import SportSpecificLeaderboard from './sport-specific-leaderboard';
 import LeaderboardView from './leaderboard-view';
 import MultiStageTournament from './multi-stage-tournament';
+import EventContainerManager from './event-container-manager';
 
 interface Tournament {
   id: string;
@@ -62,7 +63,7 @@ const generateTournamentCsv = (tournament: Tournament) => {
 };
 
 export default function TournamentManager({ tournamentId }: TournamentManagerProps) {
-  const [activeTab, setActiveTab] = useState('bracket');
+  const [activeTab, setActiveTab] = useState('events');
 
   const { data: tournament, isLoading, error } = useQuery<Tournament>({
     queryKey: ["/api/tournaments", tournamentId],
@@ -157,6 +158,7 @@ export default function TournamentManager({ tournamentId }: TournamentManagerPro
 
   const getTabsForTournament = () => {
     const baseTabs = [
+      { value: 'events', label: 'Event Management', icon: <Target className="h-4 w-4" /> },
       { value: 'bracket', label: 'Tournament View', icon: getFormatIcon(tournament.competitionFormat) }
     ];
 
@@ -243,7 +245,8 @@ export default function TournamentManager({ tournamentId }: TournamentManagerPro
               {tab.icon}
               <span className="hidden xs:inline sm:inline">{tab.label}</span>
               <span className="xs:hidden sm:hidden">
-                {tab.value === 'bracket' ? 'View' : 
+                {tab.value === 'events' ? 'Events' :
+                 tab.value === 'bracket' ? 'View' : 
                  tab.value === 'standings' ? 'Stand.' :
                  tab.value === 'analytics' ? 'Stats' :
                  tab.value === 'settings' ? 'Set.' : tab.label}
@@ -251,6 +254,10 @@ export default function TournamentManager({ tournamentId }: TournamentManagerPro
             </TabsTrigger>
           ))}
         </TabsList>
+
+        <TabsContent value="events" className="mt-6">
+          <EventContainerManager tournamentId={tournamentId} />
+        </TabsContent>
 
         <TabsContent value="bracket" className="mt-6">
           {renderTournamentContent()}
