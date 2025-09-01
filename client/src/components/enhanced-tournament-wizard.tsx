@@ -635,6 +635,18 @@ export default function EnhancedTournamentWizard({
                 </div>
               )}
 
+              {/* Track & Field Events Selection */}
+              {form.watch("sport") === "Track & Field" && (
+                <div className="mt-6">
+                  <SportEventsSelector
+                    sportId="track-field"
+                    sportName="Track & Field"
+                    onEventsSelected={setSelectedEvents}
+                    initialSelected={selectedEvents.map(e => e.id)}
+                  />
+                </div>
+              )}
+
               <div>
                 <Label htmlFor="competitionFormat" className="block text-sm font-medium text-gray-700 mb-2">
                   Competition Format *
