@@ -132,13 +132,27 @@ export default function UnifiedLogin() {
 
             {/* Help Text */}
             <div className="text-center text-sm text-slate-400 pt-4">
-              New to Trantor Tournaments?{" "}
-              <button 
-                onClick={() => setLocation('/smart-signup')}
-                className="text-yellow-300 hover:text-yellow-200 underline"
-              >
-                Create account
-              </button>
+              {new URLSearchParams(window.location.search).get('redirect') === 'champions-registration' ? (
+                <>
+                  Need to register as a team?{" "}
+                  <button 
+                    onClick={() => setLocation('/smart-signup?type=participant&redirect=champions-registration')}
+                    className="text-yellow-300 hover:text-yellow-200 underline"
+                  >
+                    Create Team Account
+                  </button>
+                </>
+              ) : (
+                <>
+                  New to Trantor Tournaments?{" "}
+                  <button 
+                    onClick={() => setLocation('/smart-signup')}
+                    className="text-yellow-300 hover:text-yellow-200 underline"
+                  >
+                    Create account
+                  </button>
+                </>
+              )}
             </div>
           </CardContent>
         </Card>

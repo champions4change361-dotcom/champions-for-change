@@ -22,7 +22,7 @@ const baseSignupSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   phone: z.string().optional(),
   organizationName: z.string().min(2, 'Organization name is required'),
-  organizationType: z.enum(['individual', 'business', 'school', 'nonprofit']),
+  organizationType: z.enum(['individual', 'business', 'school', 'nonprofit', 'participant']),
   description: z.string().optional(),
   sportsInvolved: z.array(z.string()).min(1, 'Please select at least one sport'),
   paymentMethod: z.enum(['stripe', 'check']).optional(),
@@ -52,6 +52,7 @@ export default function SmartSignup() {
   const urlParams = new URLSearchParams(window.location.search);
   const preselectedType = urlParams.get('type');
   const fromCoin = urlParams.get('fromCoin');
+  const redirectUrl = urlParams.get('redirect');
 
   useEffect(() => {
     if (preselectedType) {
@@ -61,6 +62,15 @@ export default function SmartSignup() {
   }, [preselectedType]);
 
   const orgTypes: OrgType[] = [
+    {
+      id: 'participant',
+      name: 'Team/Participant',
+      description: 'Teams, coaches, or participants registering for tournaments',
+      icon: <Trophy className="h-8 w-8" />,
+      examples: ['Basketball teams', 'Track & field athletes', 'Swimming teams', 'School teams'],
+      recommendedPlan: 'participant',
+      requiresPayment: false
+    },
     {
       id: 'individual',
       name: 'Tournament Organizer',
@@ -138,6 +148,14 @@ export default function SmartSignup() {
     onSuccess: (response) => {
       console.log('Signup successful!', response);
       const selectedOrg = orgTypes.find(org => org.id === selectedOrgType);
+      
+      // Handle special redirect for Champions participants
+      if (selectedOrgType === 'participant' && redirectUrl === 'champions-registration') {
+        console.log('Participant signup for Champions - redirecting to Champions registration');
+        window.location.href = '/champions-registration';
+        return;
+      }
+      
       if (!selectedOrg?.requiresPayment) {
         console.log('Free plan - redirecting to tournaments page');
         // Free plan - redirect to tournament creation dashboard
