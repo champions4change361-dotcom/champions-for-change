@@ -23,10 +23,19 @@ export function generateRandomName(): string {
 
 export function generateRandomNames(count: number): string[] {
   const names = new Set<string>();
+  const maxAttempts = count * 3; // Prevent infinite loops
+  let attempts = 0;
   
-  while (names.size < count) {
+  while (names.size < count && attempts < maxAttempts) {
     names.add(generateRandomName());
+    attempts++;
   }
   
-  return Array.from(names);
+  // If we couldn't generate enough unique names, fill with numbered fallbacks
+  const nameArray = Array.from(names);
+  while (nameArray.length < count) {
+    nameArray.push(`Participant ${nameArray.length + 1}`);
+  }
+  
+  return nameArray;
 }

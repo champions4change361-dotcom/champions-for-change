@@ -801,9 +801,9 @@ export default function EnhancedTournamentWizard({
                       Donation Goal ($)
                     </Label>
                     <Input
-                      type="number"
-                      step="0.01"
-                      min="0"
+                      type="text"
+                      inputMode="decimal"
+                      pattern="[0-9]+(\.[0-9]{1,2})?"
                       {...form.register("donationGoal")}
                       placeholder="1000.00"
                       className="w-full"
