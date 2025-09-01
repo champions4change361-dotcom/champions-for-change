@@ -79,11 +79,19 @@ export default function TournamentCalendar() {
   // Detect user location on component mount
   React.useEffect(() => {
     const detectLocation = async () => {
+      // Set a timeout to prevent hanging on mobile
+      const locationTimeout = setTimeout(() => {
+        console.log('Location detection timed out, showing all tournaments');
+        setIsLoadingLocation(false);
+        setUserLocation(null);
+      }, 5000); // 5 second timeout
+
       try {
         // Try geolocation first
         if (navigator.geolocation) {
           navigator.geolocation.getCurrentPosition(
             async (position) => {
+              clearTimeout(locationTimeout);
               try {
                 // Use reverse geocoding to get location details
                 const response = await fetch(
@@ -105,6 +113,7 @@ export default function TournamentCalendar() {
             },
             () => {
               // User denied geolocation, fall back to IP-based detection
+              clearTimeout(locationTimeout);
               fallbackToIPLocation();
             }
           );
@@ -822,27 +831,30 @@ export default function TournamentCalendar() {
   ];
 
   // Filter tournaments by selected state and sport
-  const tournaments = allTournaments.filter(tournament => {
-    // Apply state filter
-    let passesStateFilter = false;
-    
-    if (selectedState && selectedState !== 'auto' && selectedState !== '') {
-      // Filter by manually selected state
-      const stateName = getStateFullName(selectedState);
-      passesStateFilter = tournament.location.toLowerCase().includes(stateName.toLowerCase());
-    } else if (userLocation && (selectedState === 'auto' || selectedState === '')) {
-      // Filter by detected region
-      passesStateFilter = tournament.region === userLocation.region;
-    } else {
-      // Show all if no state filter applied
-      passesStateFilter = true;
-    }
-    
-    // Apply sport filter
-    const passesSportFilter = selectedSport === 'all' || tournament.sport === selectedSport;
-    
-    return passesStateFilter && passesSportFilter;
-  });
+  const tournaments = React.useMemo(() => {
+    return allTournaments.filter(tournament => {
+      // Apply state filter
+      let passesStateFilter = false;
+      
+      if (selectedState && selectedState !== 'auto' && selectedState !== '') {
+        // Filter by manually selected state
+        const stateName = getStateFullName(selectedState);
+        passesStateFilter = tournament.location.toLowerCase().includes(stateName.toLowerCase()) || 
+                           tournament.region.toLowerCase() === stateName.toLowerCase();
+      } else if (userLocation && (selectedState === 'auto' || selectedState === '')) {
+        // Filter by detected region
+        passesStateFilter = tournament.region === userLocation.region;
+      } else {
+        // Show all if no state filter applied
+        passesStateFilter = true;
+      }
+      
+      // Apply sport filter
+      const passesSportFilter = selectedSport === 'all' || tournament.sport === selectedSport;
+      
+      return passesStateFilter && passesSportFilter;
+    });
+  }, [allTournaments, selectedState, selectedSport, userLocation]);
 
   const getStateFullName = (stateCode: string) => {
     const state = usStates.find(s => s.value === stateCode);
@@ -897,6 +909,19 @@ export default function TournamentCalendar() {
     };
     return colors[sport as keyof typeof colors] || 'bg-gray-100 text-gray-800 border-gray-200';
   };
+
+  // Show loading screen while location is being detected
+  if (isLoadingLocation) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin w-8 h-8 border-4 border-blue-400 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-white text-lg">Loading tournaments...</p>
+          <p className="text-slate-300 text-sm mt-2">Detecting your location</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
