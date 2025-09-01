@@ -102,6 +102,7 @@ export function ConversationalAI({ domain = 'education', className = '' }: Conve
       });
 
       const data = await response.json();
+      console.log('AI Response received:', data); // Debug log
       
       if (data.error) {
         throw new Error(data.error);
@@ -116,7 +117,12 @@ export function ConversationalAI({ domain = 'education', className = '' }: Conve
         suggestions: data.suggestions || []
       };
 
-      setMessages(prev => [...prev, aiMessage]);
+      console.log('Adding AI message:', aiMessage); // Debug log
+      setMessages(prev => {
+        const newMessages = [...prev, aiMessage];
+        console.log('New messages array:', newMessages); // Debug log
+        return newMessages;
+      });
       
       // Update session with AI response
       sessionManager.addAIMessage({
