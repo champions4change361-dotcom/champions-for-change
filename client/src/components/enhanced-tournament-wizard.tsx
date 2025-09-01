@@ -405,7 +405,8 @@ export default function EnhancedTournamentWizard({
       case 'settings':
         return !!(form.watch("name"));
       case 'launch':
-        return !!createdTournament;
+        // For launch step, check that all required data is present (not that tournament already exists)
+        return !!(form.watch("name") && form.watch("sport") && selectedEvents.length > 0 && !createdTournament);
       default:
         return false;
     }
