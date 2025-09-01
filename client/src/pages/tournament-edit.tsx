@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Settings, Save, Plus, X, Users } from 'lucide-react';
+import { ArrowLeft, Settings, Save, Plus, X, Users, Trophy, Clock, Target, UserCheck, UserX, Edit2, Trash2 } from 'lucide-react';
 import { Link } from 'wouter';
 import { apiRequest } from '@/lib/queryClient';
 
@@ -20,7 +20,9 @@ interface Tournament {
   tournamentType: 'single' | 'double' | 'pool-play' | 'round-robin' | 'swiss-system';
   competitionFormat: 'bracket' | 'leaderboard' | 'series' | 'bracket-to-series' | 'multi-stage';
   status: 'upcoming' | 'stage-1' | 'stage-2' | 'stage-3' | 'completed';
-  teams: { teamName: string }[];
+  teams: { teamName: string; isScratched?: boolean }[];
+  participants?: { id: string; name: string; team?: string; isScratched?: boolean }[];
+  events?: { id: string; eventName: string; resultsRecorderName?: string; resultsRecorderEmail?: string }[];
   ageGroup?: string;
   genderDivision?: string;
   description?: string;
@@ -42,8 +44,13 @@ export default function TournamentEditPage() {
     description: '',
     teamSize: 8
   });
-  const [teams, setTeams] = useState<string[]>([]);
+  const [teams, setTeams] = useState<{ teamName: string; isScratched?: boolean }[]>([]);
+  const [participants, setParticipants] = useState<{ id: string; name: string; team?: string; isScratched?: boolean }[]>([]);
+  const [events, setEvents] = useState<{ id: string; eventName: string; resultsRecorderName?: string; resultsRecorderEmail?: string }[]>([]);
   const [newTeamName, setNewTeamName] = useState('');
+  const [newParticipantName, setNewParticipantName] = useState('');
+  const [editingResultsRecorder, setEditingResultsRecorder] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'basic' | 'participants' | 'events'>('basic');
 
   // Fetch tournament data
   const { data: tournament, isLoading } = useQuery<Tournament>({
@@ -62,7 +69,9 @@ export default function TournamentEditPage() {
         description: tournament.description || '',
         teamSize: tournament.teamSize
       });
-      setTeams(tournament.teams?.map(t => t.teamName) || []);
+      setTeams(tournament.teams || []);
+      setParticipants(tournament.participants || []);
+      setEvents(tournament.events || []);
     }
   }, [tournament]);
 
@@ -91,20 +100,61 @@ export default function TournamentEditPage() {
   const handleSave = () => {
     const updates = {
       ...formData,
-      teams: teams.map(teamName => ({ teamName }))
+      teams,
+      participants,
+      events
     };
     updateMutation.mutate(updates);
   };
 
+  // Team Management
   const addTeam = () => {
-    if (newTeamName.trim() && !teams.includes(newTeamName.trim())) {
-      setTeams([...teams, newTeamName.trim()]);
+    if (newTeamName.trim() && !teams.some(t => t.teamName === newTeamName.trim())) {
+      setTeams([...teams, { teamName: newTeamName.trim() }]);
       setNewTeamName('');
     }
   };
 
   const removeTeam = (teamName: string) => {
-    setTeams(teams.filter(t => t !== teamName));
+    setTeams(teams.filter(t => t.teamName !== teamName));
+  };
+
+  const scratchTeam = (teamName: string) => {
+    setTeams(teams.map(t => 
+      t.teamName === teamName ? { ...t, isScratched: !t.isScratched } : t
+    ));
+  };
+
+  // Participant Management
+  const addParticipant = () => {
+    if (newParticipantName.trim()) {
+      const newParticipant = {
+        id: Date.now().toString(),
+        name: newParticipantName.trim()
+      };
+      setParticipants([...participants, newParticipant]);
+      setNewParticipantName('');
+    }
+  };
+
+  const removeParticipant = (id: string) => {
+    setParticipants(participants.filter(p => p.id !== id));
+  };
+
+  const scratchParticipant = (id: string) => {
+    setParticipants(participants.map(p => 
+      p.id === id ? { ...p, isScratched: !p.isScratched } : p
+    ));
+  };
+
+  // Results Recorder Management
+  const updateResultsRecorder = (eventId: string, name: string, email: string) => {
+    setEvents(events.map(e => 
+      e.id === eventId 
+        ? { ...e, resultsRecorderName: name, resultsRecorderEmail: email }
+        : e
+    ));
+    setEditingResultsRecorder(null);
   };
 
   if (isLoading) {
@@ -131,38 +181,65 @@ export default function TournamentEditPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link href={`/tournaments/${id}`}>
-            <Button variant="outline" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Tournament
+    <div className="min-h-screen bg-gray-50">
+      {/* Mobile-Optimized Header */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Link href={`/tournaments/${id}`}>
+                <Button variant="ghost" size="sm" className="p-2">
+                  <ArrowLeft className="h-5 w-5" />
+                </Button>
+              </Link>
+              <div>
+                <div className="flex items-center gap-2">
+                  <Settings className="h-5 w-5 text-blue-600" />
+                  <h1 className="text-lg font-bold text-gray-900">Edit Tournament</h1>
+                </div>
+                <p className="text-sm text-gray-500">Modify tournament options and team roster</p>
+              </div>
+            </div>
+            
+            <Button 
+              onClick={handleSave} 
+              disabled={updateMutation.isPending}
+              size="sm"
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              <Save className="h-4 w-4 mr-2" />
+              Save Changes
             </Button>
-          </Link>
-          <div>
-            <h1 className="text-3xl font-bold flex items-center gap-3">
-              <Settings className="h-8 w-8 text-primary" />
-              Edit Tournament
-            </h1>
-            <p className="text-gray-600 mt-2">
-              Modify tournament settings and team roster
-            </p>
           </div>
         </div>
-        
-        <Button 
-          onClick={handleSave} 
-          disabled={updateMutation.isPending}
-          className="flex items-center gap-2"
-        >
-          <Save className="h-4 w-4" />
-          {updateMutation.isPending ? 'Saving...' : 'Save Changes'}
-        </Button>
+
+        {/* Tab Navigation */}
+        <div className="flex border-t border-gray-100">
+          {[
+            { key: 'basic', label: 'Basic Info', icon: Settings },
+            { key: 'participants', label: 'Participants', icon: Users },
+            { key: 'events', label: 'Events', icon: Trophy }
+          ].map(tab => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key as any)}
+                className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium border-b-2 transition-colors ${
+                  activeTab === tab.key
+                    ? 'border-blue-600 text-blue-600 bg-blue-50'
+                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="p-4 max-w-4xl mx-auto">
         {/* Basic Information */}
         <Card>
           <CardHeader>
@@ -258,84 +335,252 @@ export default function TournamentEditPage() {
               <Button 
                 onClick={addTeam} 
                 size="sm"
-                disabled={!newTeamName.trim() || teams.includes(newTeamName.trim())}
+                disabled={!newTeamName.trim() || teams.some(t => t.teamName === newTeamName.trim())}
               >
                 <Plus className="h-4 w-4" />
               </Button>
             </div>
-
-            {/* Team List */}
-            <div className="space-y-2 max-h-64 overflow-y-auto">
-              {teams.length === 0 ? (
-                <p className="text-gray-500 text-sm">No teams added yet</p>
-              ) : (
-                teams.map((teamName, index) => (
-                  <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                    <span>{teamName}</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeTeam(teamName)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))
-              )}
-            </div>
-
-            <div className="pt-2 border-t">
-              <p className="text-sm text-gray-600">
-                <strong>{teams.length}</strong> teams registered
-              </p>
-            </div>
           </CardContent>
         </Card>
-      </div>
 
-      {/* Tournament Format Info (Read-only) */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Tournament Format (Read-only)</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
-            <div>
-              <Label className="text-sm font-medium">Tournament Type</Label>
-              <p className="text-sm text-gray-600 mt-1">
-                {tournament.tournamentType === 'single' ? 'Single Elimination' :
-                 tournament.tournamentType === 'double' ? 'Double Elimination' :
-                 tournament.tournamentType === 'pool-play' ? 'Pool Play' :
-                 tournament.tournamentType === 'round-robin' ? 'Round Robin' :
-                 tournament.tournamentType === 'swiss-system' ? 'Swiss System' :
-                 tournament.tournamentType}
-              </p>
-            </div>
-            
-            <div>
-              <Label className="text-sm font-medium">Competition Format</Label>
-              <p className="text-sm text-gray-600 mt-1 capitalize">
-                {tournament.competitionFormat}
-              </p>
-            </div>
-            
-            <div>
-              <Label className="text-sm font-medium">Team Size</Label>
-              <p className="text-sm text-gray-600 mt-1">
-                {tournament.teamSize} per team
-              </p>
-            </div>
+        {/* Basic Information Tab */}
+        {activeTab === 'basic' && (
+          <Card className="border-0 shadow-sm">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg">Basic Information</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="tournament-name" className="text-sm font-medium text-gray-700 mb-2 block">Tournament Name</Label>
+                <div className="text-base font-medium p-3 bg-gray-50 rounded-lg border">
+                  {formData.name}
+                </div>
+              </div>
+              
+              <div>
+                <Label htmlFor="sport" className="text-sm font-medium text-gray-700 mb-2 block">Sport</Label>
+                <div className="text-base p-3 bg-gray-50 rounded-lg border">
+                  {formData.sport}
+                </div>
+              </div>
+              
+              <div>
+                <Label htmlFor="age-group" className="text-sm font-medium text-gray-700 mb-2 block">Age Group</Label>
+                <div className="text-base p-3 bg-gray-50 rounded-lg border">
+                  {formData.ageGroup || 'Not specified'}
+                </div>
+              </div>
+              
+              <div>
+                <Label htmlFor="gender-division" className="text-sm font-medium text-gray-700 mb-2 block">Gender Division</Label>
+                <div className="text-base p-3 bg-gray-50 rounded-lg border">
+                  {formData.genderDivision || 'Not specified'}
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="description" className="text-sm font-medium text-gray-700 mb-2 block">Description</Label>
+                <Textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Optional tournament description"
+                  rows={3}
+                  className="resize-none"
+                />
+              </div>
+
+              <div>
+                <Label className="text-sm font-medium text-gray-700 mb-2 block">Current Status</Label>
+                <Badge className={
+                  tournament.status === 'upcoming' ? 'bg-gray-500' :
+                  tournament.status === 'completed' ? 'bg-green-500' : 'bg-blue-500'
+                }>
+                  {tournament.status === 'stage-1' ? 'Active' :
+                   tournament.status === 'stage-2' ? 'Stage 2' :
+                   tournament.status === 'stage-3' ? 'Stage 3' :
+                   tournament.status}
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Participants/Teams Management Tab */}
+        {activeTab === 'participants' && (
+          <div className="space-y-4">
+            {/* Add Participant/Team */}
+            <Card className="border-0 shadow-sm">
+              <CardContent className="p-4">
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium text-gray-700">Add New Participant</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      value={newParticipantName}
+                      onChange={(e) => setNewParticipantName(e.target.value)}
+                      placeholder="Enter participant name"
+                      onKeyPress={(e) => e.key === 'Enter' && addParticipant()}
+                      className="flex-1"
+                    />
+                    <Button onClick={addParticipant} size="sm">
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Participants List */}
+            <Card className="border-0 shadow-sm">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Participants ({participants.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                {participants.length > 0 ? (
+                  <div className="divide-y divide-gray-100">
+                    {participants.map((participant) => (
+                      <div key={participant.id} className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-2 h-2 rounded-full ${participant.isScratched ? 'bg-red-400' : 'bg-green-400'}`} />
+                            <span className={`font-medium ${participant.isScratched ? 'line-through text-gray-400' : ''}`}>
+                              {participant.name}
+                            </span>
+                            {participant.isScratched && (
+                              <Badge variant="secondary" className="text-xs">Scratched</Badge>
+                            )}
+                          </div>
+                          
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => scratchParticipant(participant.id)}
+                              className={participant.isScratched ? 'text-green-600 hover:text-green-700' : 'text-yellow-600 hover:text-yellow-700'}
+                            >
+                              {participant.isScratched ? <UserCheck className="h-4 w-4" /> : <UserX className="h-4 w-4" />}
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeParticipant(participant.id)}
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <Users className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                    <p className="font-medium">No participants yet</p>
+                    <p className="text-sm">Add participants above to get started</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
-          
-          <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
-            <p className="text-sm text-yellow-800">
-              <strong>Note:</strong> Tournament format and bracket type cannot be changed once the tournament is created. 
-              This prevents disruption to existing matches and bracket structure.
-            </p>
+        )}
+
+        {/* Events & Results Recorders Tab */}
+        {activeTab === 'events' && (
+          <div className="space-y-4">
+            <Card className="border-0 shadow-sm">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Trophy className="h-5 w-5" />
+                  Tournament Events ({events.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                {events.length > 0 ? (
+                  <div className="divide-y divide-gray-100">
+                    {events.map((event) => (
+                      <div key={event.id} className="p-4">
+                        <div className="flex items-start justify-between mb-2">
+                          <div>
+                            <h3 className="font-medium">{event.eventName}</h3>
+                            {event.resultsRecorderName ? (
+                              <div className="text-sm text-gray-600 mt-1">
+                                <p>📋 Results Recorder: {event.resultsRecorderName}</p>
+                                {event.resultsRecorderEmail && (
+                                  <p>📧 {event.resultsRecorderEmail}</p>
+                                )}
+                              </div>
+                            ) : (
+                              <p className="text-sm text-orange-600 mt-1">⚠️ No Results Recorder assigned</p>
+                            )}
+                          </div>
+                          
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setEditingResultsRecorder(event.id)}
+                            className="text-blue-600 hover:text-blue-700"
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+
+                        {editingResultsRecorder === event.id && (
+                          <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                            <h4 className="font-medium text-blue-900 mb-2">Assign Results Recorder</h4>
+                            <div className="space-y-2">
+                              <Input
+                                placeholder="Results Recorder Name"
+                                defaultValue={event.resultsRecorderName || ''}
+                                id={`recorder-name-${event.id}`}
+                              />
+                              <Input
+                                type="email"
+                                placeholder="Results Recorder Email"
+                                defaultValue={event.resultsRecorderEmail || ''}
+                                id={`recorder-email-${event.id}`}
+                              />
+                              <div className="flex gap-2">
+                                <Button
+                                  size="sm"
+                                  onClick={() => {
+                                    const name = (document.getElementById(`recorder-name-${event.id}`) as HTMLInputElement)?.value || '';
+                                    const email = (document.getElementById(`recorder-email-${event.id}`) as HTMLInputElement)?.value || '';
+                                    updateResultsRecorder(event.id, name, email);
+                                  }}
+                                >
+                                  Save
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setEditingResultsRecorder(null)}
+                                >
+                                  Cancel
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <Trophy className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                    <p className="font-medium">No events configured</p>
+                    <p className="text-sm">Events are automatically created based on sport selection</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
-        </CardContent>
-      </Card>
+        )}
+      </div>
     </div>
   );
 }

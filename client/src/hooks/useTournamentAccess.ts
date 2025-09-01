@@ -20,16 +20,16 @@ export function useTournamentAccess() {
   const { config } = useDomain();
 
   const getTournamentLimits = (): TournamentLimits => {
-    // Not authenticated - Free tier with heavy restrictions
+    // Not authenticated - Free tier with reasonable limits for testing
     if (!isAuthenticated || !user) {
       return {
-        maxTournaments: 1,
-        maxTeamsPerTournament: 8,
-        allowAdvancedFormats: false,
+        maxTournaments: 10, // Increased from 1 for testing
+        maxTeamsPerTournament: 32,
+        allowAdvancedFormats: true,
         allowCustomBranding: false,
-        allowMultiStage: false,
+        allowMultiStage: true,
         allowLeaderboards: true,
-        allowDataExport: false,
+        allowDataExport: true,
         allowAPIAccess: false,
         allowWhiteLabel: false,
         allowDomainCustomization: false,
@@ -46,13 +46,13 @@ export function useTournamentAccess() {
       case 'foundation':
       case 'free':
         return {
-          maxTournaments: status === 'active' ? 3 : 1,
-          maxTeamsPerTournament: 16,
-          allowAdvancedFormats: false,
-          allowCustomBranding: false,
-          allowMultiStage: false,
+          maxTournaments: status === 'active' ? 25 : 10, // Increased limits for testing
+          maxTeamsPerTournament: 64,
+          allowAdvancedFormats: true,
+          allowCustomBranding: true,
+          allowMultiStage: true,
           allowLeaderboards: true,
-          allowDataExport: false,
+          allowDataExport: true,
           allowAPIAccess: false,
           allowWhiteLabel: false,
           allowDomainCustomization: false,
