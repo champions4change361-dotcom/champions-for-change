@@ -3952,6 +3952,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI conversation route
   const { handleAIConversation } = await import('./ai-conversation');
   app.post('/api/ai-conversation', handleAIConversation);
+  
+  // Keystone consultation endpoint (forwards to AI conversation)
+  app.post('/api/keystone-consult', async (req, res) => {
+    try {
+      // Transform keystone request to AI conversation format
+      const { user_input, consultation_type, tier, subscription_level } = req.body;
+      
+      const aiRequest = {
+        message: user_input || '',
+        conversation_history: [],
+        domain: 'tournament_creation',
+        user_context: {
+          consultation_type: consultation_type || tier,
+          subscription_level: subscription_level || 'free'
+        }
+      };
+      
+      // Forward to AI conversation handler
+      const mockReq = { ...req, body: aiRequest };
+      await handleAIConversation(mockReq, res);
+      
+    } catch (error) {
+      console.error('Keystone consult error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Keystone consultation service unavailable',
+        response: "I'm having trouble processing that request. Could you try rephrasing it?"
+      });
+    }
+  });
 
   // Session management routes
   const { registerSessionRoutes } = await import('./sessionRoutes');
