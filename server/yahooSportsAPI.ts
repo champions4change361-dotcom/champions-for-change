@@ -315,7 +315,7 @@ export class YahooSportsAPI {
       return mlbRosters;
     } catch (error) {
       console.error('Error fetching MLB rosters:', error);
-      return this.getFallbackMLBRosters();
+      return {};
     }
   }
   
@@ -469,10 +469,11 @@ export class YahooSportsAPI {
       });
       return response.data;
     } catch (error) {
+      const err = error as any;
       console.error('❌ Yahoo API Error:', {
         endpoint,
-        status: error.response?.status,
-        data: error.response?.data?.slice?.(0, 200) + '...' || error.response?.data
+        status: err.response?.status,
+        data: err.response?.data?.slice?.(0, 200) + '...' || err.response?.data
       });
       throw error;
     }
@@ -619,7 +620,7 @@ export class YahooSportsAPI {
         }
       ];
 
-      const filteredProjections = mockProjections.filter(p => p.position === position);
+      const filteredProjections = currentSeasonProjections.filter(p => p.position === position);
       
       // Cache the results
       this.setCacheData(cacheKey, filteredProjections, 30);
@@ -666,7 +667,7 @@ export class YahooSportsAPI {
           playerId: 'nfl.p.32725',
           playerName: 'Christian McCaffrey',
           team: 'SF',
-          status: 'Healthy',
+          status: 'Healthy' as const,
           injury: 'None',
           impact: 'Full go, no restrictions',
           lastUpdated: new Date().toISOString()
@@ -675,7 +676,7 @@ export class YahooSportsAPI {
           playerId: 'nfl.p.30123',
           playerName: 'Cooper Kupp',
           team: 'LAR',
-          status: 'Questionable',
+          status: 'Questionable' as const,
           injury: 'Ankle',
           impact: 'Limited in practice, expected to play but monitor snap count',
           lastUpdated: new Date().toISOString()
