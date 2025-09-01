@@ -80,12 +80,16 @@ export function ConversationalAI({ domain = 'education', className = '' }: Conve
     setIsLoading(true);
 
     // Update session with conversation context
-    sessionManager.addAIMessage({
-      role: 'user',
-      content: text,
-      timestamp: Date.now(),
-      metadata: { intent: 'conversational', extractedData: { domain } }
-    });
+    try {
+      sessionManager.addAIMessage({
+        role: 'user',
+        content: text,
+        timestamp: Date.now(),
+        metadata: { intent: 'conversational', extractedData: { domain } }
+      });
+    } catch (error) {
+      console.log('Session manager error (non-critical):', error);
+    }
 
     try {
       // Call our AI consultation endpoint with conversational context
@@ -125,16 +129,20 @@ export function ConversationalAI({ domain = 'education', className = '' }: Conve
       });
       
       // Update session with AI response
-      sessionManager.addAIMessage({
-        role: 'assistant',
-        content: aiMessage.content,
-        timestamp: Date.now(),
-        metadata: { intent: data.intent, extractedData: data.extracted_context, routingSuggestion: data.suggestions?.[0] }
-      });
+      try {
+        sessionManager.addAIMessage({
+          role: 'assistant',
+          content: aiMessage.content,
+          timestamp: Date.now(),
+          metadata: { intent: data.intent, extractedData: data.extracted_context, routingSuggestion: data.suggestions?.[0] }
+        });
 
-      // Extract any context from the conversation
-      if (data.extracted_context) {
-        sessionManager.updateUserContext(data.extracted_context);
+        // Extract any context from the conversation
+        if (data.extracted_context) {
+          sessionManager.updateUserContext(data.extracted_context);
+        }
+      } catch (error) {
+        console.log('Session manager error (non-critical):', error);
       }
 
     } catch (error) {
