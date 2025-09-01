@@ -1132,7 +1132,7 @@ export const tournaments = pgTable("tournaments", {
   teamSize: integer("team_size").notNull(),
   tournamentType: text("tournament_type", { enum: ["single", "double", "pool-play", "round-robin", "swiss-system"] }).notNull().default("single"),
   competitionFormat: text("competition_format", { enum: ["bracket", "leaderboard", "series", "bracket-to-series", "multi-stage"] }).notNull().default("bracket"),
-  status: text("status", { enum: ["upcoming", "stage-1", "stage-2", "stage-3", "completed"] }).notNull().default("upcoming"),
+  status: text("status", { enum: ["draft", "upcoming", "stage-1", "stage-2", "stage-3", "completed"] }).notNull().default("draft"),
   currentStage: integer("current_stage").default(1),
   totalStages: integer("total_stages").default(1),
   stageConfiguration: jsonb("stage_configuration"), // Defines each stage structure

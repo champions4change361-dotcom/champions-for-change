@@ -67,6 +67,8 @@ export default function EnhancedTournamentWizard({
   const [currentStep, setCurrentStep] = useState<WizardStep>('sport');
   const [teams, setTeams] = useState<TeamData[]>([]);
   const [createdTournament, setCreatedTournament] = useState<any>(null);
+  const [isDraftSaving, setIsDraftSaving] = useState(false);
+  const [autoSaveStatus, setAutoSaveStatus] = useState<'saved' | 'saving' | 'error' | null>(null);
 
   // Cascading dropdown state
   const [selectedCategory, setSelectedCategory] = useState<string>('');
@@ -238,6 +240,46 @@ export default function EnhancedTournamentWizard({
     }
   }, [aiRecommendations, sports, form]);
 
+  // Auto-save functionality
+  useEffect(() => {
+    // Load draft from localStorage on component mount
+    const savedDraft = localStorage.getItem('tournamentDraft');
+    if (savedDraft) {
+      try {
+        const draftData = JSON.parse(savedDraft);
+        // Restore form values
+        Object.keys(draftData).forEach(key => {
+          if (key !== 'teams' && key !== 'currentStep' && key !== 'draftId') {
+            form.setValue(key as any, draftData[key]);
+          }
+        });
+        // Restore teams and step
+        if (draftData.teams) setTeams(draftData.teams);
+        if (draftData.currentStep) setCurrentStep(draftData.currentStep);
+        
+        toast({
+          title: "Draft Restored",
+          description: "Your previous tournament draft has been restored.",
+        });
+      } catch (error) {
+        console.error("Failed to load draft:", error);
+        localStorage.removeItem('tournamentDraft');
+      }
+    }
+  }, [form, toast]);
+
+  // Auto-save to localStorage whenever form data changes
+  useEffect(() => {
+    const subscription = form.watch((value) => {
+      if (value.name || value.sport) { // Only save if there's meaningful content
+        const draftData = { ...value, teams, currentStep };
+        localStorage.setItem('tournamentDraft', JSON.stringify(draftData));
+        setAutoSaveStatus('saved');
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form, teams, currentStep]);
+
   const selectedSport = sports.find(sport => sport.sportName === form.watch("sport"));
   const isLeaderboardSport = selectedSport?.competitionType === "leaderboard";
   const competitionFormat = form.watch("competitionFormat");
@@ -261,6 +303,10 @@ export default function EnhancedTournamentWizard({
         description: `${data.tournament.name} is ready with ${teams.length} ${competitionFormat === 'leaderboard' ? 'participants' : 'teams'}.`,
       });
       
+      // Clear draft data on successful creation
+      localStorage.removeItem('tournamentDraft');
+      setAutoSaveStatus(null);
+      
       // Invalidate tournament queries
       queryClient.invalidateQueries({ queryKey: ["/api/tournaments"] });
       queryClient.invalidateQueries({ queryKey: ["/api/my-tournaments"] });
@@ -275,6 +321,43 @@ export default function EnhancedTournamentWizard({
         description: error.message || "Failed to create tournament",
         variant: "destructive",
       });
+    },
+  });
+
+  const saveDraftMutation = useMutation({
+    mutationFn: async (data: FormData & { teams: TeamData[], status: 'draft' }) => {
+      const response = await apiRequest("/api/tournaments", "POST", {
+        ...data,
+        teams: data.teams,
+        status: 'draft',
+        scoringMethod: selectedSport?.scoringMethod || "wins",
+        isGuestCreated: !user,
+      });
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Draft Saved!",
+        description: "Your tournament draft has been saved successfully.",
+      });
+      setAutoSaveStatus('saved');
+      setIsDraftSaving(false);
+      queryClient.invalidateQueries({ queryKey: ["/api/tournaments"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/my-tournaments"] });
+      
+      // Update localStorage with saved draft ID
+      const draftData = { ...form.getValues(), teams, currentStep, draftId: data.tournament.id };
+      localStorage.setItem('tournamentDraft', JSON.stringify(draftData));
+    },
+    onError: (error) => {
+      toast({
+        title: "Draft Save Failed",
+        description: "Failed to save tournament draft. Your progress is saved locally.",
+        variant: "destructive",
+      });
+      setAutoSaveStatus('error');
+      setIsDraftSaving(false);
+      console.error("Draft save error:", error);
     },
   });
 
@@ -346,10 +429,54 @@ export default function EnhancedTournamentWizard({
                 {stepTitles[currentStep]}
               </CardTitle>
               <CardDescription>{stepDescriptions[currentStep]}</CardDescription>
+              {/* Auto-save status indicator */}
+              {autoSaveStatus && (
+                <div className="flex items-center gap-1 text-sm mt-2">
+                  {autoSaveStatus === 'saved' && (
+                    <>
+                      <Check className="h-4 w-4 text-green-500" />
+                      <span className="text-green-600">Auto-saved</span>
+                    </>
+                  )}
+                  {autoSaveStatus === 'saving' && (
+                    <>
+                      <div className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full" />
+                      <span className="text-blue-600">Saving...</span>
+                    </>
+                  )}
+                  {autoSaveStatus === 'error' && (
+                    <>
+                      <X className="h-4 w-4 text-red-500" />
+                      <span className="text-red-600">Save failed</span>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
-            <Badge variant="outline" className="text-sm">
-              Step {currentStepIndex + 1} of {steps.length}
-            </Badge>
+            <div className="flex items-center gap-4">
+              {/* Save as Draft Button */}
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsDraftSaving(true);
+                  const formData = form.getValues();
+                  saveDraftMutation.mutate({ ...formData, teams, status: 'draft' as const });
+                }}
+                disabled={isDraftSaving || saveDraftMutation.isPending || !form.watch("name")}
+                className="flex items-center gap-2"
+                data-testid="button-save-draft"
+              >
+                {isDraftSaving || saveDraftMutation.isPending ? (
+                  <div className="animate-spin h-4 w-4 border-2 border-gray-500 border-t-transparent rounded-full" />
+                ) : (
+                  <Check className="h-4 w-4" />
+                )}
+                Save Draft
+              </Button>
+              <Badge variant="outline" className="text-sm">
+                Step {currentStepIndex + 1} of {steps.length}
+              </Badge>
+            </div>
           </div>
           <Progress value={progress} className="w-full" />
         </CardHeader>

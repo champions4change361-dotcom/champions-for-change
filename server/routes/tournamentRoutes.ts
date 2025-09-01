@@ -22,6 +22,27 @@ export function registerTournamentRoutes(app: Express) {
     }
   });
 
+  // Get draft tournaments for the current user
+  app.get("/api/tournaments/drafts", async (req: any, res) => {
+    try {
+      // Check authentication
+      if (!req.isAuthenticated || !req.isAuthenticated()) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User ID required" });
+      }
+
+      const drafts = await storage.getDraftTournaments(userId);
+      res.json(drafts);
+    } catch (error) {
+      console.error("Error fetching draft tournaments:", error);
+      res.status(500).json({ message: "Failed to fetch draft tournaments" });
+    }
+  });
+
   // Get a specific tournament by ID
   app.get("/api/tournaments/:id", async (req, res) => {
     try {

@@ -85,6 +85,7 @@ import ComplianceManagement from './pages/ComplianceManagement';
 import CoachDashboard from './pages/CoachDashboard';
 import AthleticTrainerDashboard from './pages/AthleticTrainerDashboard';
 import TournamentsPage from './pages/tournaments';
+import Drafts from './pages/drafts';
 import TournamentDetailPage from './pages/tournament-detail';
 import ScorekeeperDashboard from './pages/ScorekeeperDashboard';
 import ScorekeeperScheduling from './pages/ScorekeeperScheduling';
@@ -122,6 +123,7 @@ function AuthenticatedRoutes() {
         <Switch>
         <Route path="/" component={() => <Home />} />
         <Route path="/tournaments" component={TournamentsPage} />
+        <Route path="/drafts" component={Drafts} />
         <Route path="/tournaments/:id" component={TournamentDetailPage} />
         <Route path="/create" component={CreateTournament} />
         <Route path="/tournament/:id" component={Tournament} />

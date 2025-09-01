@@ -171,6 +171,7 @@ export interface IStorage {
   // Tournament methods
   getTournaments(): Promise<Tournament[]>;
   getTournament(id: string): Promise<Tournament | undefined>;
+  getDraftTournaments(userId: string): Promise<Tournament[]>;
   createTournament(tournament: InsertTournament): Promise<Tournament>;
   updateTournament(id: string, tournament: Partial<Tournament>): Promise<Tournament | undefined>;
   deleteTournament(id: string): Promise<boolean>;
@@ -1113,6 +1114,21 @@ export class DbStorage implements IStorage {
     }
   }
 
+  async getDraftTournaments(userId: string): Promise<Tournament[]> {
+    try {
+      const result = await this.db
+        .select()
+        .from(tournaments)
+        .where(eq(tournaments.status, 'draft'))
+        .where(eq(tournaments.userId, userId))
+        .orderBy(desc(tournaments.updatedAt));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
   async createTournament(insertTournament: InsertTournament): Promise<Tournament> {
     try {
       const result = await this.db.insert(tournaments).values(insertTournament).returning();
@@ -1640,6 +1656,12 @@ export class MemStorage implements IStorage {
 
   async getTournament(id: string): Promise<Tournament | undefined> {
     return this.tournaments.get(id);
+  }
+
+  async getDraftTournaments(userId: string): Promise<Tournament[]> {
+    return Array.from(this.tournaments.values())
+      .filter(tournament => tournament.status === 'draft' && tournament.userId === userId)
+      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
   }
 
   async createTournament(insertTournament: InsertTournament): Promise<Tournament> {
