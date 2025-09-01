@@ -78,7 +78,30 @@ export default function TournamentCalendar() {
 
   // Detect user location on component mount
   React.useEffect(() => {
-    // Define fallback function FIRST to avoid hoisting issues
+    // Define helper functions FIRST to avoid hoisting issues
+    const getRegionFromLocation = (state: string, city: string) => {
+      // Define regional mappings
+      const regionMappings: { [key: string]: string } = {
+        'Texas': city?.toLowerCase().includes('corpus') || city?.toLowerCase().includes('rockport') || city?.toLowerCase().includes('aransas') 
+          ? 'Texas Coastal Bend' 
+          : 'Texas',
+        'Minnesota': 'Minnesota Twin Cities',
+        'California': city?.toLowerCase().includes('angeles') 
+          ? 'Southern California' 
+          : city?.toLowerCase().includes('francisco') || city?.toLowerCase().includes('jose')
+            ? 'Northern California'
+            : 'California',
+        'Florida': city?.toLowerCase().includes('miami') || city?.toLowerCase().includes('fort lauderdale')
+          ? 'South Florida'
+          : 'Florida',
+        'New York': city?.toLowerCase().includes('new york') || city?.toLowerCase().includes('manhattan')
+          ? 'New York City Area'
+          : 'New York State'
+      };
+      
+      return regionMappings[state] || state;
+    };
+
     const fallbackToIPLocation = async () => {
       try {
         // Simple IP-based location as fallback
@@ -154,34 +177,6 @@ export default function TournamentCalendar() {
         });
         setIsLoadingLocation(false);
       }
-    };
-
-    const getRegionFromLocation = (state: string, city: string) => {
-      // Define regional mappings
-      const regionMappings: { [key: string]: string } = {
-        'Texas': city?.toLowerCase().includes('corpus') || city?.toLowerCase().includes('rockport') || city?.toLowerCase().includes('aransas') 
-          ? 'Texas Coastal Bend' 
-          : 'Texas',
-        'Minnesota': 'Minnesota Twin Cities',
-        'California': city?.toLowerCase().includes('angeles') 
-          ? 'Los Angeles Area' 
-          : city?.toLowerCase().includes('francisco') || city?.toLowerCase().includes('san jose')
-          ? 'San Francisco Bay Area'
-          : 'California',
-        'Florida': city?.toLowerCase().includes('miami') 
-          ? 'South Florida' 
-          : city?.toLowerCase().includes('orlando')
-          ? 'Central Florida'
-          : 'Florida',
-        'New York': city?.toLowerCase().includes('new york') || city?.toLowerCase().includes('brooklyn') || city?.toLowerCase().includes('queens')
-          ? 'New York City Area'
-          : 'New York',
-        'Illinois': city?.toLowerCase().includes('chicago')
-          ? 'Chicago Metro'
-          : 'Illinois'
-      };
-
-      return regionMappings[state] || `${city}, ${state}`;
     };
 
     detectLocation();
