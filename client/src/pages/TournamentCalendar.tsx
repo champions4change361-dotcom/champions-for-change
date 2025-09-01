@@ -537,7 +537,9 @@ export default function TournamentCalendar() {
                     {/* Days of the month */}
                     {Array.from({ length: getDaysInMonth(currentMonth) }, (_, i) => {
                       const day = i + 1;
-                      const date = `${currentMonth.getFullYear()}-${(currentMonth.getMonth() + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+                      // Create date object for proper date handling
+                      const dateObj = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+                      const date = `${dateObj.getFullYear()}-${(dateObj.getMonth() + 1).toString().padStart(2, '0')}-${dateObj.getDate().toString().padStart(2, '0')}`;
                       const dayTournaments = getDateTournaments(date);
                       const hasEvents = dayTournaments.length > 0;
                       const isSelected = selectedDate === date;
