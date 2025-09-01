@@ -99,7 +99,7 @@ export default function TrantorLanding() {
               <TrantorCoin
                 size="lg"
                 variant="local"
-                topText="Local Tournaments"
+                topText="Texas Coastal Bend"
                 bottomText="Champions for Change Events"
                 redirectTo="/local-tournaments"
                 data-testid="coin-local-tournaments"
