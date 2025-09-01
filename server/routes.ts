@@ -318,7 +318,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Validate target domain
       const validDomains = [
-        'fantasy.trantortournaments.org',
+        '/coaches-lounge',
         'pro.trantortournaments.org', 
         'trantortournaments.org'
       ];

@@ -42,7 +42,7 @@ export function AccountLinking() {
   
   if (!isFantasyDomain()) {
     availableLinks.push({
-      domain: 'fantasy.trantortournaments.org',
+      domain: '/coaches-lounge',
       name: "Captain's Lounge Fantasy",
       description: "Adult fantasy sports with real money leagues",
       icon: Crown,
@@ -141,10 +141,16 @@ export function AccountLinking() {
                     <Link2 className="ml-2 h-4 w-4" />
                   </Button>
                   <Button
-                    onClick={() => window.open(`https://${link.domain}`, '_blank')}
+                    onClick={() => {
+                      if (link.domain.startsWith('/')) {
+                        window.location.href = link.domain;
+                      } else {
+                        window.open(`https://${link.domain}`, '_blank');
+                      }
+                    }}
                     variant="outline"
                     className={`border-${link.color}-500/50 text-${link.color}-300 hover:bg-${link.color}-500/10 min-h-[44px]`}
-                    data-testid={`button-visit-${link.domain.split('.')[0]}`}
+                    data-testid={`button-visit-${link.domain.replace('/', '').split('.')[0]}`}
                   >
                     Visit
                     <ArrowRight className="ml-2 h-4 w-4" />
