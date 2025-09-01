@@ -28,10 +28,10 @@ export async function handleAIConversation(req: Request, res: Response) {
     const extractedContext = extractContextFromMessage(message);
     
     // Generate contextual response based on Champions for Change platform
-    const response = generatePlatformResponse(message, intent, domain, user_context);
+    const response = generatePlatformResponse(message, intent, domain, user_context, conversation_history);
     
     // Generate helpful suggestions for next steps
-    const suggestions = generateSuggestions(intent, domain);
+    const suggestions = generateSuggestions(intent, domain, message);
 
     res.json({
       response,
@@ -122,15 +122,22 @@ function extractContextFromMessage(message: string): any {
   return context;
 }
 
-function generatePlatformResponse(message: string, intent: string, domain: string, userContext: any): string {
+function generatePlatformResponse(message: string, intent: string, domain: string, userContext: any, conversationHistory?: ConversationMessage[]): string {
+  const lowerMessage = message.toLowerCase();
+  
+  // More conversational responses that actually help users take action
+  if (intent === 'tournament_creation') {
+    if (lowerMessage.includes('how') || lowerMessage.includes('build') || lowerMessage.includes('create') || lowerMessage.includes('start')) {
+      return `Great! Let's build your tournament step by step:\n\n**📋 Step 1: Go to Tournament Creation**\n• Click "Tournaments" in the top navigation\n• Click "Create New Tournament" button\n\n**🏆 Step 2: Choose Your Tournament Type**\n• Single elimination, double elimination, or round robin\n• Pick your sport (basketball, track, academic, etc.)\n\n**⚙️ Step 3: Tournament Settings**\n• Set team size limits\n• Configure registration deadlines\n• Enable payment processing if needed\n\n**🎯 Step 4: Customize & Launch**\n• Add your branding and rules\n• Generate shareable registration codes\n• Invite teams to register\n\nWould you like me to walk through any specific step in detail?`;
+    }
+    
+    return `I can help you create a comprehensive tournament! What type of tournament are you planning? (Track meet, academic competition, multi-sport event, etc.)`;
+  }
+  
   const platformFeatures = {
-    tournament_creation: {
-      response: `I can help you create a comprehensive tournament! Champions for Change offers:\n\n🏆 **Complete Tournament Management:**\n• 5-step tournament creation wizard\n• Automatic bracket generation\n• Real-time scoring and updates\n• Parent/athlete notifications\n\n📊 **Advanced Features:**\n• AI-powered participant matching\n• Budget tracking and cost analysis\n• Health monitoring integration\n• HIPAA/FERPA compliance\n\nWhat type of tournament are you planning? (Track meet, academic competition, multi-sport event, etc.)`,
-      suggestions: ["Create track meet", "Set up academic competition", "Plan multi-sport tournament", "Configure health monitoring"]
-    },
     
     budget_management: {
-      response: `Our Excel-style budget management system is perfect for educational programs!\n\n💰 **Budget Features:**\n• CCISD-approved budget categories\n• Real-time expense tracking\n• Grant funding integration\n• Cost-per-student calculations\n\n🎯 **Smart Analytics:**\n• Predictive cost modeling\n• Multi-year budget planning\n• District-wide allocation\n• Compliance reporting\n\nWhat's your budget planning goal? Transportation costs, equipment purchases, or full program budgets?`,
+      response: `Let's set up your budget tracking:\n\n**💰 Quick Setup Steps:**\n• Go to "Budget Management" in the main menu\n• Click "Create New Budget"\n• Choose your template: Transportation, Equipment, or Full Program\n• Set your total budget amount\n• Add expense categories\n\n**📊 Track Expenses:**\n• Upload receipts for automatic categorization\n• Set spending alerts at 75% and 90%\n• Generate reports for administrators\n\nWhat type of budget are you planning? I can walk you through the specific setup.`,
       suggestions: ["Transportation budgets", "Equipment costs", "Program funding", "Grant applications"]
     },
     
@@ -159,44 +166,61 @@ function generatePlatformResponse(message: string, intent: string, domain: strin
   return config.response;
 }
 
-function generateSuggestions(intent: string, domain: string): string[] {
+function generateSuggestions(intent: string, domain: string, message?: string): string[] {
+  const lowerMessage = message?.toLowerCase() || '';
+  
+  // Contextual suggestions based on intent and what user is asking
+  if (intent === 'tournament_creation') {
+    if (lowerMessage.includes('how') || lowerMessage.includes('build') || lowerMessage.includes('step')) {
+      return [
+        "Walk me through Step 1",
+        "Show me tournament types", 
+        "Explain team registration",
+        "How do I set up brackets?"
+      ];
+    }
+    return [
+      "Create basketball tournament",
+      "Set up track meet",
+      "Academic competition",
+      "Plan multi-sport event"
+    ];
+  }
+  
+  if (intent === 'budget_management') {
+    return [
+      "Show me budget templates",
+      "Set up expense tracking",
+      "How to upload receipts",
+      "Create spending alerts"
+    ];
+  }
+  
   const suggestionMap = {
-    tournament_creation: [
-      "Help me plan a track meet",
-      "Set up basketball tournament",
-      "Create academic competition",
-      "Configure health monitoring"
-    ],
-    budget_management: [
-      "Transportation costs",
-      "Equipment budgets",
-      "Grant funding help",
-      "District allocation"
-    ],
     health_monitoring: [
-      "Football injury tracking",
-      "Concussion protocols",
-      "Athletic trainer setup",
+      "Set up injury tracking",
+      "Configure concussion protocols", 
+      "Athletic trainer dashboard",
       "Emergency notifications"
     ],
     academic_competition: [
       "UIL Speech events",
-      "STEM competitions",
+      "STEM competitions", 
       "Academic Bowl setup",
       "Student tracking"
     ],
     district_management: [
       "Multi-school setup",
       "Role permissions",
-      "Compliance tracking",
+      "Compliance tracking", 
       "Resource sharing"
     ]
   };
 
   return suggestionMap[intent as keyof typeof suggestionMap] || [
-    "Create a tournament",
-    "Manage budgets",
-    "Health monitoring",
-    "Academic events"
+    "Create my first tournament",
+    "Set up budget tracking",
+    "Configure health monitoring",
+    "Plan academic events"
   ];
 }
