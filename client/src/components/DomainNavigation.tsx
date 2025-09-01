@@ -89,42 +89,6 @@ export default function DomainNavigation() {
             </Link>
           )}
 
-          {/* All CCISD VLC Schools - District Athletic Director Access */}
-          {config.brand !== 'COACHES_LOUNGE' && (
-            <div className="relative group">
-              <button className="px-3 py-1 rounded-md transition-colors text-sm text-white/80 hover:text-white hover:bg-white/10">
-                CCISD VLC Schools
-              </button>
-              <div className="absolute right-0 mt-1 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                <Link href="/miller-vlc-demo">
-                  <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-t-md">Miller High School VLC</a>
-                </Link>
-                <Link href="/carroll-vlc-demo">
-                  <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Carroll High School VLC</a>
-                </Link>
-                <Link href="/veterans-vlc-demo">
-                  <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Veterans Memorial VLC</a>
-                </Link>
-                <Link href="/ray-vlc-demo">
-                  <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-b-md">Ray High School VLC</a>
-                </Link>
-              </div>
-            </div>
-          )}
-
-          {/* Schools - District Management */}
-          {config.brand !== 'COACHES_LOUNGE' && (
-            <Link href="/schools">
-              <a className={getNavItemClass("/schools")}>Schools</a>
-            </Link>
-          )}
-
-          {/* Role Hierarchy - District Administration */}
-          {config.brand !== 'COACHES_LOUNGE' && (
-            <Link href="/role-hierarchy">
-              <a className={getNavItemClass("/role-hierarchy")}>Roles</a>
-            </Link>
-          )}
         </div>
 
         {/* Mobile Navigation Menu */}
@@ -146,26 +110,7 @@ export default function DomainNavigation() {
               {config.brand !== 'COACHES_LOUNGE' && (
                 <>
                   <Link href="/tournaments">
-                    <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-testid="link-mobile-tournaments">Tournaments</a>
-                  </Link>
-                  <div className="px-4 py-2 text-xs font-medium text-gray-500 bg-gray-50">CCISD VLC Schools</div>
-                  <Link href="/miller-vlc-demo">
-                    <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 ml-2" data-testid="link-mobile-miller">Miller High School</a>
-                  </Link>
-                  <Link href="/carroll-vlc-demo">
-                    <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 ml-2" data-testid="link-mobile-carroll">Carroll High School</a>
-                  </Link>
-                  <Link href="/veterans-vlc-demo">
-                    <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 ml-2" data-testid="link-mobile-veterans">Veterans Memorial</a>
-                  </Link>
-                  <Link href="/ray-vlc-demo">
-                    <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 ml-2" data-testid="link-mobile-ray">Ray High School</a>
-                  </Link>
-                  <Link href="/schools">
-                    <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-testid="link-mobile-schools">Schools</a>
-                  </Link>
-                  <Link href="/role-hierarchy">
-                    <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-b-md" data-testid="link-mobile-roles">Roles</a>
+                    <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-b-md" data-testid="link-mobile-tournaments">Tournaments</a>
                   </Link>
                 </>
               )}
