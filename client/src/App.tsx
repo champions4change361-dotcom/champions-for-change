@@ -11,6 +11,7 @@ import Landing from './pages/Landing';
 import ChampionsLanding from './pages/ChampionsLanding';
 import EducationHubLanding from './pages/EducationHubLanding';
 import TrantorLanding from './pages/TrantorLanding';
+import LocalTournaments from './pages/LocalTournaments';
 import DonationFlow from './pages/DonationFlow';
 import PaymentMethods from './pages/PaymentMethods';
 import Checkout from './pages/Checkout';
@@ -356,6 +357,9 @@ function AppRouter() {
         window.location.href = '/coaches-lounge';
         return null;
       }} />
+      
+      {/* Local Tournaments - Champions for Change Events */}
+      <Route path="/local-tournaments" component={LocalTournaments} />
       
       {/* Show Coaches Lounge landing page */}
       <Route path="/coaches-lounge">

@@ -24,7 +24,7 @@ export default function TrantorLanding() {
               <div className="flex items-center space-x-3 mb-5 lg:mb-0">
                 <TrantorCoin size="lg" />
                 <div>
-                  <h1 className="text-xl font-bold text-white">Trantor Tournaments</h1>
+                  <h1 className="text-xl font-bold text-white">Champions for Change</h1>
                   <p className="text-xs text-yellow-300">Click coin to create account</p>
                 </div>
               </div>
@@ -79,7 +79,7 @@ export default function TrantorLanding() {
             <p className="text-xl text-orange-100 max-w-3xl mx-auto mb-8">
               Join professional fantasy leagues with overnight scoring OR create your own traditional tournaments. Complete platform for organizers, businesses, and fantasy enthusiasts.
             </p>
-            <div className="flex flex-col sm:flex-row gap-12 justify-center items-center">
+            <div className="flex flex-col sm:flex-row gap-8 justify-center items-center">
               <TrantorCoin
                 size="lg"
                 variant="fantasy"
@@ -95,6 +95,14 @@ export default function TrantorLanding() {
                 bottomText="Sign Up & Get Started"
                 redirectTo="/tournament-onboarding"
                 data-testid="coin-start-platform"
+              />
+              <TrantorCoin
+                size="lg"
+                variant="local"
+                topText="Local Tournaments"
+                bottomText="Champions for Change Events"
+                redirectTo="/local-tournaments"
+                data-testid="coin-local-tournaments"
               />
             </div>
             <p className="text-orange-300 text-sm mt-4">
