@@ -1155,7 +1155,7 @@ export const tournaments = pgTable("tournaments", {
   entryFee: numeric("entry_fee").default("0"), // Tournament entry fee
   maxParticipants: integer("max_participants"),
   registrationDeadline: timestamp("registration_deadline"),
-  tournamentDate: timestamp("tournament_date"),
+  tournamentDate: timestamp("tournament_date", { mode: 'string' }),
   location: text("location"),
   description: text("description"),
   isPublic: boolean("is_public").default(true),

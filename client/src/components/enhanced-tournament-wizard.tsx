@@ -296,7 +296,7 @@ export default function EnhancedTournamentWizard({
         ...data,
         teams: data.teams,
         entryFee: data.entryFee ? String(data.entryFee) : "0", // Convert to string for numeric field
-        tournamentDate: data.tournamentDate ? new Date(data.tournamentDate) : null, // Keep as Date object
+        tournamentDate: data.tournamentDate ? new Date(data.tournamentDate).toISOString() : null, // Convert to ISO string for backend
         scoringMethod: selectedSport?.scoringMethod || "wins",
         isGuestCreated: !user, // Mark as guest-created for tournaments created without login
       };
@@ -341,7 +341,7 @@ export default function EnhancedTournamentWizard({
         teams: data.teams,
         status: 'draft',
         entryFee: data.entryFee ? String(data.entryFee) : "0", // Convert to string for numeric field
-        tournamentDate: data.tournamentDate ? new Date(data.tournamentDate) : null, // Keep as Date object
+        tournamentDate: data.tournamentDate ? new Date(data.tournamentDate).toISOString() : null, // Convert to ISO string for backend
         scoringMethod: selectedSport?.scoringMethod || "wins",
         isGuestCreated: !user,
       };

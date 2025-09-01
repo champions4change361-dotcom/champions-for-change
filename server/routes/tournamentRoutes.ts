@@ -115,7 +115,12 @@ export function registerTournamentRoutes(app: Express) {
         });
       }
 
-      const validatedData = insertTournamentSchema.parse(req.body);
+      // Parse and transform the data to handle date strings
+      const requestData = {
+        ...req.body,
+        tournamentDate: req.body.tournamentDate ? new Date(req.body.tournamentDate) : null
+      };
+      const validatedData = insertTournamentSchema.parse(requestData);
       
       // Generate bracket structure based on tournament type
       const teams = Array.isArray(validatedData.teams) ? validatedData.teams : [];
