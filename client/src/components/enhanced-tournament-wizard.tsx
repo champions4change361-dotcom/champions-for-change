@@ -19,6 +19,7 @@ import { ArrowLeft, ArrowRight, Check, CheckCircle, Play, Trophy, Users, Setting
 import { insertTournamentSchema } from "@shared/schema";
 import TeamManagement from "@/components/team-management";
 import { type TeamData } from "@/utils/csv-utils";
+import AddressAutocomplete from "@/components/AddressAutocomplete";
 
 const formSchema = insertTournamentSchema.extend({
   teamSize: z.number().min(2).max(128), // Support up to 128 teams for large tournaments
@@ -695,15 +696,15 @@ export default function EnhancedTournamentWizard({
                   <Label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-2">
                     Location / Address
                   </Label>
-                  <Input
-                    type="text"
-                    {...form.register("location")}
+                  <AddressAutocomplete
+                    value={form.watch("location") || ""}
+                    onChange={(value) => form.setValue("location", value)}
                     placeholder="Enter venue address or location"
                     className="w-full"
                     data-testid="input-location"
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    Where will the tournament be held?
+                    Where will the tournament be held? Start typing for address suggestions.
                   </p>
                 </div>
               </div>
