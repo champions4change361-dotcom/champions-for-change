@@ -204,27 +204,30 @@ export async function handleAIConversation(req: Request, res: Response) {
 function analyzeIntent(message: string): string {
   const lowerMessage = message.toLowerCase();
   
-  // Tournament creation (including all sports, games, and competition types)
+  // Tournament creation (matching the complete database hierarchy)
   const competitionKeywords = [
     // Tournament/Competition words
-    'tournament', 'tournamenbt', 'tournamenent', 'competition', 'event', 'bracket', 'championship', 'league', 'playoff', 'match', 'contest',
+    'tournament', 'tournamenbt', 'tournamenent', 'competition', 'event', 'bracket', 'championship', 'league', 'playoff', 'match', 'contest', 'meet',
     
-    // Traditional Sports
-    'basketball', 'soccer', 'football', 'volleyball', 'swimming', 'swim', 'tennis', 'baseball', 'softball', 'golf', 'wrestling', 'boxing',
-    'track', 'track and field', 'athletics', 'cross country', 'cheerleading', 'gymnastics', 'diving', 'water polo', 'hockey', 'skating',
-    'cycling', 'fishing', 'martial arts', 'karate', 'taekwondo', 'judo', 'mma',
+    // Athletic - Team Sports
+    'basketball', 'football', 'soccer', 'volleyball', 'baseball', 'softball', 'hockey', 'rugby', 'ultimate frisbee', 'water polo',
     
-    // Board Games & Mental Sports
-    'chess', 'checkers', 'scrabble', 'poker', 'bridge', 'card game',
+    // Athletic - Individual Sports  
+    'track', 'track and field', 'swimming', 'swim', 'diving', 'cross country', 'tennis', 'golf', 'wrestling', 'gymnastics', 
+    'archery', 'bowling', 'martial arts', 'karate', 'taekwondo', 'judo', 'mma', 'cycling', 'fencing',
     
-    // Esports & Gaming
-    'esports', 'e-sports', 'gaming', 'video game',
+    // Athletic - Winter Sports
+    'skiing', 'snowboarding', 'ice hockey', 'figure skating', 'curling',
     
     // Academic Competitions
-    'debate', 'quiz bowl', 'academic bowl', 'spelling bee', 'math competition', 'science fair', 'science olympiad', 'mathcounts', 'forensics',
+    'uil', 'uil academic', 'speech', 'debate', 'forensics', 'stem', 'math competition', 'science fair', 'science olympiad', 'mathcounts',
+    'quiz bowl', 'academic bowl', 'spelling bee', 'trivia', 'knowledge bowl',
     
-    // Other Competition Types
-    'dance', 'trivia', 'knowledge bowl'
+    // Fine Arts Competitions
+    'fine arts', 'music', 'band', 'orchestra', 'choir', 'theater', 'theatre', 'drama', 'visual arts', 'art', 'dance',
+    
+    // Other Competitions
+    'chess', 'esports', 'e-sports', 'gaming', 'video game'
   ];
   
   const hasCompetitionKeyword = competitionKeywords.some(keyword => lowerMessage.includes(keyword));
@@ -272,65 +275,81 @@ function extractContextFromMessage(message: string): any {
     context.participantCount = participantMatch[1];
   }
   
-  // Extract sports and competitions (with variations)
-  const sportsMap = {
-    // Water Sports
-    'swimming': ['swimming', 'swim', 'swim meet', 'swimming meet', 'pool', 'aquatic'],
-    'diving': ['diving', 'dive', 'platform diving', 'springboard'],
-    'water polo': ['water polo', 'polo'],
-    
-    // Team Sports  
+  // Extract sports and competitions matching the tournament creation database hierarchy
+  const competitionMap = {
+    // ATHLETIC COMPETITIONS
+    // Team Sports
+    'basketball (boys)': ['basketball boys', 'boys basketball', 'male basketball'],
+    'basketball (girls)': ['basketball girls', 'girls basketball', 'female basketball'],  
     'basketball': ['basketball', 'bball', 'hoops', 'basketball game', 'basketball match'],
     'football': ['football', 'american football', 'gridiron'],
+    'soccer (boys)': ['soccer boys', 'boys soccer', 'male soccer'],
+    'soccer (girls)': ['soccer girls', 'girls soccer', 'female soccer'],
     'soccer': ['soccer', 'football match', 'futbol', 'association football'],
+    'volleyball (boys)': ['volleyball boys', 'boys volleyball', 'male volleyball'],
+    'volleyball (girls)': ['volleyball girls', 'girls volleyball', 'female volleyball'],
     'volleyball': ['volleyball', 'vball', 'beach volleyball', 'indoor volleyball'],
     'baseball': ['baseball', 'ball game', 'little league'],
     'softball': ['softball', 'slow pitch', 'fast pitch'],
+    'hockey': ['hockey', 'field hockey'],
+    'rugby': ['rugby', 'rugby league', 'rugby union'],
+    'ultimate frisbee': ['ultimate frisbee', 'ultimate', 'frisbee'],
+    'water polo': ['water polo', 'polo'],
     
-    // Individual Sports
+    // Individual Sports  
+    'track & field': ['track', 'track and field', 'track meet', 'field day', 'athletics', 'athletics meet', 'running', 'field events'],
+    'swimming & diving': ['swimming', 'swim', 'swim meet', 'swimming meet', 'diving', 'pool', 'aquatic'],
+    'cross country': ['cross country', 'xc', 'distance running'],
+    'tennis (boys)': ['tennis boys', 'boys tennis', 'male tennis'],
+    'tennis (girls)': ['tennis girls', 'girls tennis', 'female tennis'],
     'tennis': ['tennis', 'tennis match', 'tennis tournament'],
+    'golf (boys)': ['golf boys', 'boys golf', 'male golf'],
+    'golf (girls)': ['golf girls', 'girls golf', 'female golf'],
     'golf': ['golf', 'golf tournament', 'golf competition'],
     'wrestling': ['wrestling', 'wrestling match', 'grappling'],
-    'boxing': ['boxing', 'boxing match', 'boxing tournament'],
+    'gymnastics': ['gymnastics', 'gymnastic', 'tumbling'],
+    'archery': ['archery', 'bow and arrow', 'target shooting'],
+    'bowling': ['bowling', 'ten pin', 'bowling tournament'],
     'martial arts': ['martial arts', 'karate', 'taekwondo', 'judo', 'mma'],
-    
-    // Track & Field
-    'track and field': ['track', 'track and field', 'track meet', 'field day', 'athletics', 'athletics meet', 'running', 'field events'],
-    'cross country': ['cross country', 'xc', 'distance running'],
+    'cycling': ['cycling', 'bike race', 'bicycle', 'cycling competition'],
+    'fencing': ['fencing', 'sword fighting', 'foil', 'epee', 'sabre'],
     
     // Winter Sports
-    'skiing': ['skiing', 'ski', 'downhill', 'slalom'],
+    'skiing': ['skiing', 'ski', 'downhill', 'slalom', 'alpine skiing'],
+    'snowboarding': ['snowboarding', 'snowboard', 'snow boarding'],
     'ice hockey': ['ice hockey', 'hockey', 'puck'],
     'figure skating': ['figure skating', 'skating', 'ice skating'],
+    'curling': ['curling', 'ice curling'],
     
-    // Board Games & Mental Sports
-    'chess': ['chess', 'chess tournament', 'chess match', 'chess competition'],
-    'checkers': ['checkers', 'draughts', 'checker tournament'],
-    'scrabble': ['scrabble', 'word game', 'scrabble tournament'],
-    'poker': ['poker', 'poker tournament', 'texas holdem', 'card tournament'],
-    'bridge': ['bridge', 'contract bridge', 'bridge tournament'],
+    // ACADEMIC COMPETITIONS
+    // UIL Academic Competitions
+    'uil academic': ['uil', 'uil academic', 'university interscholastic league'],
     
-    // Esports & Gaming
-    'esports': ['esports', 'e-sports', 'gaming', 'video game', 'gaming tournament', 'esports tournament'],
-    'chess (digital)': ['online chess', 'digital chess', 'chess.com'],
+    // Speech & Debate
+    'speech & debate': ['speech and debate', 'speech debate', 'forensics'],
+    'debate': ['debate', 'debate tournament', 'policy debate', 'lincoln douglas', 'public forum'],
     
-    // Academic Competitions
-    'debate': ['debate', 'debate tournament', 'forensics', 'speech and debate'],
-    'quiz bowl': ['quiz bowl', 'academic bowl', 'trivia', 'knowledge bowl'],
-    'spelling bee': ['spelling bee', 'spelling', 'spelling competition'],
+    // STEM Competitions  
+    'stem competitions': ['stem', 'science technology engineering math'],
     'math competition': ['math competition', 'mathematics', 'math contest', 'mathcounts'],
     'science fair': ['science fair', 'science competition', 'science olympiad'],
     
-    // Other Sports
-    'cheerleading': ['cheerleading', 'cheer', 'cheerleader competition'],
+    // FINE ARTS COMPETITIONS
+    'fine arts': ['fine arts', 'arts competition', 'creative arts'],
+    'music': ['music', 'band', 'orchestra', 'choir', 'music competition'],
+    'theater': ['theater', 'theatre', 'drama', 'acting', 'play'],
+    'visual arts': ['visual arts', 'art', 'painting', 'drawing', 'sculpture'],
     'dance': ['dance', 'dance competition', 'dance tournament'],
-    'gymnastics': ['gymnastics', 'gymnastic', 'tumbling'],
-    'cycling': ['cycling', 'bike race', 'bicycle', 'cycling competition'],
-    'fishing': ['fishing', 'angling', 'fishing tournament', 'bass tournament']
+    
+    // OTHER COMPETITIONS
+    'chess': ['chess', 'chess tournament', 'chess match', 'chess competition'],
+    'esports': ['esports', 'e-sports', 'gaming', 'video game', 'gaming tournament', 'esports tournament'],
+    'quiz bowl': ['quiz bowl', 'academic bowl', 'trivia', 'knowledge bowl'],
+    'spelling bee': ['spelling bee', 'spelling', 'spelling competition']
   };
   
   const lowerMessage = message.toLowerCase();
-  for (const [sport, variations] of Object.entries(sportsMap)) {
+  for (const [sport, variations] of Object.entries(competitionMap)) {
     for (const variation of variations) {
       if (lowerMessage.includes(variation)) {
         context.sport = sport;
@@ -368,28 +387,74 @@ function generatePlatformResponse(message: string, intent: string, domain: strin
       return `Perfect! A track and field meet is an excellent choice! 🏃‍♂️\n\n**Track & Field Events I can help you set up:**\n• Running events (100m, 200m, 400m, 800m, 1600m, relays)\n• Field events (shot put, discus, javelin, long jump, high jump)\n• Combined scoring with time/distance tracking\n\n**Quick questions to get started:**\n1. How many teams or individual athletes will participate?\n2. Will this be individual scoring or team-based?\n3. What's your target date for the meet?\n\nI can help you create the perfect structure for your track meet!`;
     }
     
+    // Athletic - Team Sports
     if (lowerMessage.includes('basketball')) {
-      return `Awesome! Basketball tournaments are fantastic! 🏀\n\n**I can help you set up:**\n• Single elimination (March Madness style)\n• Double elimination (everyone gets 2 chances)\n• Round robin (everyone plays everyone)\n\n**Quick questions:**\n1. How many teams will participate?\n2. Do you prefer elimination or round robin format?\n3. When are you planning to hold this tournament?\n\nLet's get your basketball tournament rolling!`;
+      const isGender = lowerMessage.includes('boys') || lowerMessage.includes('girls');
+      return `Awesome! Basketball tournaments are fantastic! 🏀\n\n**Basketball Tournament Setup:**\n• Single elimination (March Madness style)\n• Double elimination (everyone gets 2 chances)\n• Round robin (everyone plays everyone)\n${isGender ? '• Gender-specific divisions and rules' : ''}\n\n**Quick questions:**\n1. How many teams will participate?\n2. ${isGender ? 'Boys or girls division?' : 'Mixed or separate gender divisions?'}\n3. Do you prefer elimination or round robin format?\n4. When are you planning to hold this tournament?\n\nLet's get your basketball tournament rolling!`;
     }
     
-    if (lowerMessage.includes('swimming') || lowerMessage.includes('swim')) {
-      return `Great choice! Swimming meets have unique requirements! 🏊‍♀️\n\n**Swimming Meet Setup:**\n• Time-based events (freestyle, backstroke, breaststroke, butterfly)\n• Individual and relay events\n• Heat sheets and lane assignments\n• Automatic timing integration\n\n**Questions to get started:**\n1. How many swimmers/teams are participating?\n2. Which events do you want to include?\n3. Will this be a one-day or multi-day meet?\n\nI'll help you create the perfect swimming competition!`;
+    if (lowerMessage.includes('soccer')) {
+      const isGender = lowerMessage.includes('boys') || lowerMessage.includes('girls');
+      return `Great choice! Soccer tournaments are exciting! ⚽\n\n**Soccer Tournament Setup:**\n• Pool play followed by elimination rounds\n• Round robin for smaller tournaments\n• Field scheduling and referee coordination\n${isGender ? '• Gender-specific rules and divisions' : ''}\n\n**Questions to get started:**\n1. How many teams participating?\n2. ${isGender ? 'Boys or girls division?' : 'Age groups and gender divisions?'}\n3. How many fields available?\n4. Tournament duration (1 day or weekend)?\n\nI'll help you create an amazing soccer tournament!`;
     }
     
+    if (lowerMessage.includes('volleyball')) {
+      const isGender = lowerMessage.includes('boys') || lowerMessage.includes('girls');
+      return `Excellent! Volleyball tournaments are fast-paced! 🏐\n\n**Volleyball Tournament Setup:**\n• Pool play with elimination brackets\n• Best-of-3 or best-of-5 set formats\n• Court rotation and officiating\n${isGender ? '• Gender-specific net heights and rules' : ''}\n\n**Questions to get started:**\n1. How many teams will compete?\n2. ${isGender ? 'Boys or girls division?' : 'Indoor or beach volleyball?'}\n3. How many courts available?\n4. Match format preferences?\n\nLet's spike this volleyball tournament!`;
+    }
+    
+    // Athletic - Individual Sports
+    if (lowerMessage.includes('swimming') || lowerMessage.includes('swim') || lowerMessage.includes('diving')) {
+      return `Great choice! Swimming & diving meets have unique requirements! 🏊‍♀️\n\n**Swimming & Diving Meet Setup:**\n• Time-based events (freestyle, backstroke, breaststroke, butterfly)\n• Individual and relay events\n• Heat sheets and lane assignments\n• Diving platform and scoring\n• Automatic timing integration\n\n**Questions to get started:**\n1. How many swimmers/teams are participating?\n2. Which events do you want to include?\n3. Will this include diving competitions?\n4. Will this be a one-day or multi-day meet?\n\nI'll help you create the perfect aquatic competition!`;
+    }
+    
+    if (lowerMessage.includes('track') || lowerMessage.includes('field')) {
+      return `Perfect! A track and field meet is an excellent choice! 🏃‍♂️\n\n**Track & Field Events I can help you set up:**\n• Running events (100m, 200m, 400m, 800m, 1600m, relays)\n• Field events (shot put, discus, javelin, long jump, high jump)\n• Combined scoring with time/distance tracking\n• Heat sheets and flight assignments\n\n**Quick questions to get started:**\n1. How many teams or individual athletes will participate?\n2. Which events do you want to include?\n3. Will this be individual scoring or team-based?\n4. What's your target date for the meet?\n\nI can help you create the perfect structure for your track meet!`;
+    }
+    
+    if (lowerMessage.includes('tennis')) {
+      const isGender = lowerMessage.includes('boys') || lowerMessage.includes('girls');
+      return `Excellent! Tennis tournaments require precise organization! 🎾\n\n**Tennis Tournament Setup:**\n• Singles and doubles brackets\n• Match scheduling and court assignments\n• Best-of-3 or pro-set formats\n${isGender ? '• Gender-specific divisions' : ''}\n\n**Questions to get started:**\n1. How many players participating?\n2. ${isGender ? 'Boys or girls division?' : 'Singles, doubles, or both?'}\n3. How many courts available?\n4. Match format preferences?\n\nLet's serve up a great tennis tournament!`;
+    }
+    
+    if (lowerMessage.includes('golf')) {
+      const isGender = lowerMessage.includes('boys') || lowerMessage.includes('girls');
+      return `Great choice! Golf tournaments are prestigious events! ⛳\n\n**Golf Tournament Setup:**\n• Stroke play or match play formats\n• Tee time scheduling and pairings\n• Handicap calculations and divisions\n${isGender ? '• Gender-specific tees and scoring' : ''}\n\n**Questions to get started:**\n1. How many golfers participating?\n2. ${isGender ? 'Boys or girls division?' : 'What skill level divisions?'}\n3. 18-hole or 36-hole tournament?\n4. Handicap or scratch play?\n\nI'll help you organize a championship-quality golf tournament!`;
+    }
+    
+    // Academic Competitions
+    if (lowerMessage.includes('uil') || (lowerMessage.includes('academic') && !lowerMessage.includes('bowl'))) {
+      return `Excellent! UIL Academic Competitions are prestigious! 📚\n\n**UIL Academic Setup:**\n• 50+ competition categories (Math, Science, Literary Criticism, etc.)\n• District, Regional, and State advancement paths\n• Grade-level divisions (2nd-12th grade)\n• Team and individual scoring systems\n\n**Questions to get started:**\n1. Which UIL events are you hosting?\n2. What grade levels participating?\n3. District or invitational tournament?\n4. How many schools expected?\n\nI'll help you create a top-tier UIL academic competition!`;
+    }
+    
+    if (lowerMessage.includes('debate') || lowerMessage.includes('forensics') || lowerMessage.includes('speech')) {
+      return `Perfect! Speech & Debate tournaments require careful organization! 🎤\n\n**Speech & Debate Tournament Setup:**\n• Format selection (Policy, Lincoln-Douglas, Public Forum, Extemp, etc.)\n• Round scheduling and judge assignments\n• Topic preparation and evidence rules\n• Elimination bracket management\n• Tab room coordination\n\n**Questions to get started:**\n1. What debate/speech events are you hosting?\n2. How many schools/teams participating?\n3. How many preliminary rounds?\n4. Do you need judge recruitment?\n\nI'll help you create an excellent forensics tournament!`;
+    }
+    
+    if (lowerMessage.includes('stem') || lowerMessage.includes('math competition') || lowerMessage.includes('science')) {
+      return `Great choice! STEM competitions inspire innovation! 🔬\n\n**STEM Competition Setup:**\n• Math contests (AMC, MATHCOUNTS style)\n• Science Olympiad events\n• Engineering challenges and robotics\n• Individual and team categories\n• Multiple difficulty levels\n\n**Questions to get started:**\n1. Which STEM subjects are you featuring?\n2. What grade levels participating?\n3. Individual or team competition?\n4. Hands-on challenges or written tests?\n\nI'll help you organize an inspiring STEM competition!`;
+    }
+    
+    // Fine Arts Competitions  
+    if (lowerMessage.includes('music') || lowerMessage.includes('band') || lowerMessage.includes('choir') || lowerMessage.includes('orchestra')) {
+      return `Wonderful! Music competitions showcase incredible talent! 🎵\n\n**Music Competition Setup:**\n• Solo and ensemble categories\n• Different instrument/voice divisions\n• Sight-reading and performance components\n• Adjudication and scoring rubrics\n• Concert and marching band formats\n\n**Questions to get started:**\n1. What type of music competition? (Band, choir, orchestra, solo)\n2. What skill levels participating?\n3. How many groups/individuals expected?\n4. Performance venue requirements?\n\nI'll help you create a harmonious music competition!`;
+    }
+    
+    if (lowerMessage.includes('theater') || lowerMessage.includes('theatre') || lowerMessage.includes('drama')) {
+      return `Fantastic! Theater competitions celebrate dramatic arts! 🎭\n\n**Theater Competition Setup:**\n• One-act play competitions\n• Individual acting and monologue contests\n• Technical theater challenges\n• Costume and set design categories\n• Adjudication and performance rubrics\n\n**Questions to get started:**\n1. What type of theater competition? (One-act, individual, technical)\n2. What grade levels participating?\n3. How many schools/groups expected?\n4. Performance space and tech requirements?\n\nI'll help you stage an amazing theater competition!`;
+    }
+    
+    // Other Competitions
     if (lowerMessage.includes('chess')) {
-      return `Excellent! Chess tournaments are strategic competitions! ♟️\n\n**Chess Tournament Setup:**\n• Swiss system or round-robin formats\n• Time controls (blitz, rapid, classical)\n• Rating-based pairings\n• Tournament software integration\n\n**Questions to get started:**\n1. How many players will participate?\n2. What time control? (5+0, 15+10, 90+30, etc.)\n3. How many rounds?\n4. Will this be rated or unrated?\n\nI'll help you organize the perfect chess competition!`;
-    }
-    
-    if (lowerMessage.includes('debate') || lowerMessage.includes('forensics')) {
-      return `Perfect! Debate tournaments require careful organization! 🎤\n\n**Debate Tournament Setup:**\n• Format selection (Policy, Lincoln-Douglas, Public Forum)\n• Round scheduling and judge assignments\n• Topic preparation and evidence rules\n• Elimination bracket management\n\n**Questions to get started:**\n1. What debate format are you using?\n2. How many schools/teams participating?\n3. How many preliminary rounds?\n4. Do you need judge recruitment?\n\nI'll help you create an excellent debate tournament!`;
+      return `Excellent! Chess tournaments are strategic competitions! ♟️\n\n**Chess Tournament Setup:**\n• Swiss system or round-robin formats\n• Time controls (blitz, rapid, classical)\n• Rating-based pairings\n• Tournament software integration\n• Age and skill divisions\n\n**Questions to get started:**\n1. How many players will participate?\n2. What time control? (5+0, 15+10, 90+30, etc.)\n3. How many rounds?\n4. Will this be rated or unrated?\n\nI'll help you organize the perfect chess competition!`;
     }
     
     if (lowerMessage.includes('esports') || lowerMessage.includes('gaming') || lowerMessage.includes('video game')) {
-      return `Awesome! Esports tournaments are exciting! 🎮\n\n**Esports Tournament Setup:**\n• Game selection and platform setup\n• Bracket management (single/double elimination)\n• Stream coordination and broadcasting\n• Prize distribution and sponsorships\n\n**Questions to get started:**\n1. What game are you featuring?\n2. Online or LAN tournament?\n3. How many players/teams?\n4. Prize pool or just for fun?\n\nI'll help you create an amazing esports tournament!`;
+      return `Awesome! Esports tournaments are the future of competition! 🎮\n\n**Esports Tournament Setup:**\n• Game selection and platform setup\n• Bracket management (single/double elimination)\n• Stream coordination and broadcasting\n• Prize distribution and sponsorships\n• Anti-cheat and fair play measures\n\n**Questions to get started:**\n1. What game are you featuring?\n2. Online or LAN tournament?\n3. How many players/teams?\n4. Prize pool or just for fun?\n\nI'll help you create an amazing esports tournament!`;
     }
     
-    if (lowerMessage.includes('academic') || lowerMessage.includes('quiz bowl') || lowerMessage.includes('spelling bee')) {
-      return `Great choice! Academic competitions build knowledge! 🧠\n\n**Academic Tournament Setup:**\n• Subject area selection and question preparation\n• Team vs individual format options\n• Scoring systems and tie-breaker rules\n• Achievement recognition and awards\n\n**Questions to get started:**\n1. What academic subject area?\n2. Grade levels participating?\n3. Team competition or individual?\n4. How many rounds/categories?\n\nI'll help you organize an excellent academic competition!`;
+    if (lowerMessage.includes('quiz bowl') || lowerMessage.includes('academic bowl') || lowerMessage.includes('trivia')) {
+      return `Great choice! Quiz Bowl competitions test knowledge! 🧠\n\n**Quiz Bowl Tournament Setup:**\n• Toss-up and bonus question formats\n• Team vs individual competitions\n• Subject area specializations\n• Round-robin and elimination rounds\n• Buzzer system coordination\n\n**Questions to get started:**\n1. What subjects will you cover?\n2. Team or individual format?\n3. How many teams/schools participating?\n4. What grade levels competing?\n\nI'll help you organize an excellent knowledge competition!`;
     }
     
     // Only ask the general question if no specific sport was mentioned
