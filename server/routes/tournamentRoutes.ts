@@ -9,7 +9,7 @@ export function registerTournamentRoutes(app: Express) {
   app.get("/api/sports/:sportId/events", async (req, res) => {
     try {
       const { sportId } = req.params;
-      const events = await storage.getSportEvents(sportId);
+      const events = await storage.getSportEventsBySport(sportId);
       res.json(events);
     } catch (error) {
       console.error("Error fetching sport events:", error);
