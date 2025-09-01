@@ -18,6 +18,7 @@ export default function TournamentCalendar() {
   } | null>(null);
   const [isLoadingLocation, setIsLoadingLocation] = useState(true);
   const [selectedState, setSelectedState] = useState<string>('');
+  const [selectedSport, setSelectedSport] = useState<string>('all');
 
   // US States, territories, and DC
   const usStates = [
@@ -624,21 +625,223 @@ export default function TournamentCalendar() {
       divisions: ['Class A Boys', 'Class A Girls', 'Class B Boys', 'Class B Girls'],
       estimatedTeams: 32,
       status: 'open'
+    },
+    
+    // VOLLEYBALL TOURNAMENTS
+    // Nebraska - NSAA Volleyball Championships
+    {
+      id: '31',
+      title: 'NSAA State Volleyball Championships',
+      organizer: 'Nebraska School Activities Association',
+      organizerEmail: 'volleyball@nsaahome.org',
+      date: '2025-11-06',
+      time: '8:00 AM - 8:00 PM',
+      location: 'Lincoln, Nebraska',
+      region: 'Nebraska',
+      sport: 'Volleyball',
+      divisions: ['Class A', 'Class B', 'Class C1', 'Class C2', 'Class D1', 'Class D2'],
+      estimatedTeams: 96,
+      status: 'open'
+    },
+    
+    // Minnesota - State Volleyball Championships
+    {
+      id: '32',
+      title: 'Minnesota State Volleyball Championships',
+      organizer: 'Minnesota State High School League',
+      organizerEmail: 'volleyball@mshsl.org',
+      date: '2025-11-05',
+      time: '9:00 AM - 9:00 PM',
+      location: 'Hinckley, Minnesota',
+      region: 'Minnesota',
+      sport: 'Volleyball',
+      divisions: ['Class 1A', 'Class 2A', 'Class 3A', 'Class 4A'],
+      estimatedTeams: 64,
+      status: 'open'
+    },
+    
+    // Texas - UIL Volleyball State Tournament
+    {
+      id: '33',
+      title: 'UIL State Volleyball Championships',
+      organizer: 'University Interscholastic League',
+      organizerEmail: 'volleyball@uiltexas.org',
+      date: '2025-11-12',
+      time: '8:00 AM - 8:00 PM',
+      location: 'Garland, Texas',
+      region: 'Texas',
+      sport: 'Volleyball',
+      divisions: ['1A', '2A', '3A', '4A', '5A', '6A'],
+      estimatedTeams: 96,
+      status: 'open'
+    },
+    
+    // BASEBALL TOURNAMENTS
+    // California - CIF Baseball Championships
+    {
+      id: '34',
+      title: 'CIF State Baseball Championships',
+      organizer: 'California Interscholastic Federation',
+      organizerEmail: 'baseball@cifstate.org',
+      date: '2025-05-30',
+      time: '10:00 AM - 6:00 PM',
+      location: 'Fresno, California',
+      region: 'California',
+      sport: 'Baseball',
+      divisions: ['Division I', 'Division II', 'Division III', 'Division IV', 'Division V'],
+      estimatedTeams: 40,
+      status: 'open'
+    },
+    
+    // Texas - UIL Baseball State Tournament
+    {
+      id: '35',
+      title: 'UIL State Baseball Championships',
+      organizer: 'University Interscholastic League',
+      organizerEmail: 'baseball@uiltexas.org',
+      date: '2025-06-05',
+      time: '9:00 AM - 7:00 PM',
+      location: 'Austin, Texas',
+      region: 'Texas',
+      sport: 'Baseball',
+      divisions: ['1A', '2A', '3A', '4A', '5A', '6A'],
+      estimatedTeams: 48,
+      status: 'open'
+    },
+    
+    // CHEER/DANCE TOURNAMENTS
+    // Florida - State Cheer Championships
+    {
+      id: '36',
+      title: 'Florida State Cheer Championships',
+      organizer: 'Florida High School Athletic Association',
+      organizerEmail: 'cheer@fhsaa.org',
+      date: '2025-12-08',
+      time: '9:00 AM - 8:00 PM',
+      location: 'Orlando, Florida',
+      region: 'Florida',
+      sport: 'Cheer/Dance',
+      divisions: ['Small Varsity', 'Medium Varsity', 'Large Varsity', 'Game Day'],
+      estimatedTeams: 80,
+      status: 'open'
+    },
+    
+    // Texas - UIL Spirit State Championships
+    {
+      id: '37',
+      title: 'UIL Spirit State Championships',
+      organizer: 'University Interscholastic League',
+      organizerEmail: 'spirit@uiltexas.org',
+      date: '2025-01-18',
+      time: '8:00 AM - 6:00 PM',
+      location: 'Fort Worth, Texas',
+      region: 'Texas',
+      sport: 'Cheer/Dance',
+      divisions: ['1A-2A Cheer', '3A-4A Cheer', '5A-6A Cheer', 'Dance Team'],
+      estimatedTeams: 120,
+      status: 'open'
+    },
+    
+    // FOOTBALL TOURNAMENTS
+    // Texas - UIL Football State Championships
+    {
+      id: '38',
+      title: 'UIL Football State Championships',
+      organizer: 'University Interscholastic League',
+      organizerEmail: 'football@uiltexas.org',
+      date: '2025-12-19',
+      time: '10:00 AM - 8:00 PM',
+      location: 'Arlington, Texas',
+      region: 'Texas',
+      sport: 'Football',
+      divisions: ['1A Division I', '1A Division II', '2A Division I', '2A Division II', '3A Division I', '3A Division II'],
+      estimatedTeams: 12,
+      status: 'open'
+    },
+    
+    // Ohio - OHSAA Football State Championships
+    {
+      id: '39',
+      title: 'OHSAA Football State Championships',
+      organizer: 'Ohio High School Athletic Association',
+      organizerEmail: 'football@ohsaa.org',
+      date: '2025-12-05',
+      time: '11:00 AM - 7:00 PM',
+      location: 'Canton, Ohio',
+      region: 'Ohio',
+      sport: 'Football',
+      divisions: ['Division I', 'Division II', 'Division III', 'Division IV', 'Division V', 'Division VI', 'Division VII'],
+      estimatedTeams: 14,
+      status: 'open'
+    },
+    
+    // SWIM/DIVE TOURNAMENTS
+    // California - CIF Swimming & Diving Championships
+    {
+      id: '40',
+      title: 'CIF State Swimming & Diving Championships',
+      organizer: 'California Interscholastic Federation',
+      organizerEmail: 'swimming@cifstate.org',
+      date: '2025-05-16',
+      time: '9:00 AM - 6:00 PM',
+      location: 'Fresno, California',
+      region: 'California',
+      sport: 'Swim/Dive',
+      divisions: ['Division I', 'Division II'],
+      estimatedTeams: 60,
+      status: 'open'
+    },
+    
+    // Texas - UIL Swimming & Diving State Meet
+    {
+      id: '41',
+      title: 'UIL Swimming & Diving State Championships',
+      organizer: 'University Interscholastic League',
+      organizerEmail: 'swimming@uiltexas.org',
+      date: '2025-02-21',
+      time: '8:00 AM - 6:00 PM',
+      location: 'Austin, Texas',
+      region: 'Texas',
+      sport: 'Swim/Dive',
+      divisions: ['Class 4A', 'Class 5A', 'Class 6A'],
+      estimatedTeams: 90,
+      status: 'open'
     }
   ];
 
-  // Filter tournaments by selected state or detected region
+  // Define available sports
+  const availableSports = [
+    { value: 'all', label: 'All Sports' },
+    { value: 'Basketball', label: 'Basketball' },
+    { value: 'Baseball', label: 'Baseball' },
+    { value: 'Cheer/Dance', label: 'Cheer/Dance' },
+    { value: 'Football', label: 'Football' },
+    { value: 'Soccer', label: 'Soccer' },
+    { value: 'Swim/Dive', label: 'Swim/Dive' },
+    { value: 'Volleyball', label: 'Volleyball' }
+  ];
+
+  // Filter tournaments by selected state and sport
   const tournaments = allTournaments.filter(tournament => {
-    if (selectedState && selectedState !== 'auto') {
+    // Apply state filter
+    let passesStateFilter = false;
+    
+    if (selectedState && selectedState !== 'auto' && selectedState !== '') {
       // Filter by manually selected state
       const stateName = getStateFullName(selectedState);
-      return tournament.location.toLowerCase().includes(stateName.toLowerCase());
-    } else if (userLocation && (selectedState === 'auto' || !selectedState)) {
+      passesStateFilter = tournament.location.toLowerCase().includes(stateName.toLowerCase());
+    } else if (userLocation && (selectedState === 'auto' || selectedState === '')) {
       // Filter by detected region
-      return tournament.region === userLocation.region;
+      passesStateFilter = tournament.region === userLocation.region;
+    } else {
+      // Show all if no state filter applied
+      passesStateFilter = true;
     }
-    // Show all if no filter applied
-    return true;
+    
+    // Apply sport filter
+    const passesSportFilter = selectedSport === 'all' || tournament.sport === selectedSport;
+    
+    return passesStateFilter && passesSportFilter;
   });
 
   const getStateFullName = (stateCode: string) => {
@@ -743,32 +946,61 @@ export default function TournamentCalendar() {
               Regional Sports Coordination Hub
             </Badge>
             
-            {/* State Filter Dropdown - Native HTML Select */}
-            <div className="mt-6 max-w-sm mx-auto">
-              <select 
-                value={selectedState} 
-                onChange={(e) => {
-                  setSelectedState(e.target.value);
-                  setSelectedDate(null); // Clear selected date when changing filter
-                }}
-                className="w-full px-4 py-3 bg-slate-800/80 border border-blue-500/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:bg-slate-700/80 transition-colors"
-              >
-                <option value="auto" className="bg-slate-800 text-white">
-                  {userLocation 
-                    ? `Show ${userLocation.region} (auto-detected)` 
-                    : 'Show all regions'
-                  }
-                </option>
-                {usStates.map((state) => (
-                  <option 
-                    key={state.value} 
-                    value={state.value}
-                    className="bg-slate-800 text-white"
+            {/* Filter Dropdowns - State and Sport */}
+            <div className="mt-6 max-w-2xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* State Filter */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Filter by State</label>
+                  <select 
+                    value={selectedState} 
+                    onChange={(e) => {
+                      setSelectedState(e.target.value);
+                      setSelectedDate(null); // Clear selected date when changing filter
+                    }}
+                    className="w-full px-4 py-3 bg-slate-800/80 border border-blue-500/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:bg-slate-700/80 transition-colors"
                   >
-                    {state.label}
-                  </option>
-                ))}
-              </select>
+                    <option value="" className="bg-slate-800 text-white">
+                      {userLocation 
+                        ? `Show ${userLocation.region} (auto-detected)` 
+                        : 'All States'
+                      }
+                    </option>
+                    {usStates.map((state) => (
+                      <option 
+                        key={state.value} 
+                        value={state.value}
+                        className="bg-slate-800 text-white"
+                      >
+                        {state.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
+                {/* Sport Filter */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Filter by Sport</label>
+                  <select 
+                    value={selectedSport} 
+                    onChange={(e) => {
+                      setSelectedSport(e.target.value);
+                      setSelectedDate(null); // Clear selected date when changing filter
+                    }}
+                    className="w-full px-4 py-3 bg-slate-800/80 border border-blue-500/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:bg-slate-700/80 transition-colors"
+                  >
+                    {availableSports.map((sport) => (
+                      <option 
+                        key={sport.value} 
+                        value={sport.value}
+                        className="bg-slate-800 text-white"
+                      >
+                        {sport.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
             </div>
           </div>
 
