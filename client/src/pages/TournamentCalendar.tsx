@@ -78,6 +78,31 @@ export default function TournamentCalendar() {
 
   // Detect user location on component mount
   React.useEffect(() => {
+    // Define fallback function FIRST to avoid hoisting issues
+    const fallbackToIPLocation = async () => {
+      try {
+        // Simple IP-based location as fallback
+        const response = await fetch('https://ipapi.co/json/');
+        const data = await response.json();
+        
+        const region = getRegionFromLocation(data.region, data.city);
+        setUserLocation({
+          region: region,
+          state: data.region || 'Unknown',
+          city: data.city || 'Unknown'
+        });
+      } catch (error) {
+        console.error('IP location failed:', error);
+        // Default to Texas Coastal Bend
+        setUserLocation({
+          region: 'Texas Coastal Bend',
+          state: 'Texas',
+          city: 'Corpus Christi'
+        });
+      }
+      setIsLoadingLocation(false);
+    };
+
     const detectLocation = async () => {
       // Set a timeout to prevent hanging on mobile
       const locationTimeout = setTimeout(() => {
@@ -129,30 +154,6 @@ export default function TournamentCalendar() {
         });
         setIsLoadingLocation(false);
       }
-    };
-
-    const fallbackToIPLocation = async () => {
-      try {
-        // Simple IP-based location as fallback
-        const response = await fetch('https://ipapi.co/json/');
-        const data = await response.json();
-        
-        const region = getRegionFromLocation(data.region, data.city);
-        setUserLocation({
-          region: region,
-          state: data.region || 'Unknown',
-          city: data.city || 'Unknown'
-        });
-      } catch (error) {
-        console.error('IP location failed:', error);
-        // Default to Texas Coastal Bend
-        setUserLocation({
-          region: 'Texas Coastal Bend',
-          state: 'Texas',
-          city: 'Corpus Christi'
-        });
-      }
-      setIsLoadingLocation(false);
     };
 
     const getRegionFromLocation = (state: string, city: string) => {
