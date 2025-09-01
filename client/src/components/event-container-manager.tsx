@@ -16,7 +16,8 @@ import {
   Medal,
   AlertCircle,
   CheckCircle,
-  UserPlus
+  UserPlus,
+  Link
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -185,13 +186,13 @@ export default function EventContainerManager({
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold flex items-center gap-2">
-          <Target className="h-6 w-6 text-blue-600" />
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <h2 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
+          <Target className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
           Event Management
         </h2>
-        <Badge variant="outline" className="text-sm">
+        <Badge variant="outline" className="text-xs sm:text-sm w-fit">
           {events.length} Events
         </Badge>
       </div>
@@ -203,67 +204,68 @@ export default function EventContainerManager({
           
           return (
             <Card key={index} className="border-l-4 border-l-blue-500">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="space-y-2">
-                    <CardTitle className="flex items-center gap-2">
-                      <Badge variant={event.eventType === 'Track' ? 'default' : 'secondary'} className="text-xs">
+              <CardHeader className="pb-3">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                  <div className="space-y-2 flex-1">
+                    <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2 text-lg">
+                      <Badge variant={event.eventType === 'Track' ? 'default' : 'secondary'} className="text-xs w-fit">
                         {event.eventType}
                       </Badge>
-                      {event.eventName}
+                      <span className="break-words">{event.eventName}</span>
                     </CardTitle>
                     <p className="text-sm text-gray-600">{event.description}</p>
                   </div>
                   
                   <div className="flex items-center gap-2">
-                    <Badge className={`text-xs ${getStatusColor(event.status)}`}>
+                    <Badge className={`text-xs ${getStatusColor(event.status)} flex items-center gap-1`}>
                       {getStatusIcon(event.status)}
-                      <span className="ml-1 capitalize">{event.status.replace('-', ' ')}</span>
+                      <span className="capitalize">{event.status.replace('-', ' ')}</span>
                     </Badge>
                   </div>
                 </div>
               </CardHeader>
 
               <CardContent className="space-y-4">
-                {/* Event Statistics */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                  <div className="bg-gray-50 rounded p-3 text-center">
+                {/* Event Statistics - Mobile Optimized */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 text-sm">
+                  <div className="bg-gray-50 rounded p-2 sm:p-3 text-center">
                     <Users className="h-4 w-4 mx-auto text-gray-500 mb-1" />
-                    <div className="font-semibold">{event.participants.length}</div>
-                    <div className="text-gray-500">Registered</div>
+                    <div className="font-semibold text-base sm:text-lg">{event.participants.length}</div>
+                    <div className="text-gray-500 text-xs sm:text-sm">Registered</div>
                   </div>
                   
-                  <div className="bg-blue-50 rounded p-3 text-center">
+                  <div className="bg-blue-50 rounded p-2 sm:p-3 text-center">
                     <Target className="h-4 w-4 mx-auto text-blue-500 mb-1" />
-                    <div className="font-semibold">{spotsRemaining}</div>
-                    <div className="text-gray-500">Spots Left</div>
+                    <div className="font-semibold text-base sm:text-lg">{spotsRemaining}</div>
+                    <div className="text-gray-500 text-xs sm:text-sm">Spots Left</div>
                   </div>
                   
-                  <div className="bg-yellow-50 rounded p-3 text-center">
+                  <div className="bg-yellow-50 rounded p-2 sm:p-3 text-center">
                     <Clock className="h-4 w-4 mx-auto text-yellow-500 mb-1" />
-                    <div className="font-semibold">{completedParticipants}</div>
-                    <div className="text-gray-500">Results In</div>
+                    <div className="font-semibold text-base sm:text-lg">{completedParticipants}</div>
+                    <div className="text-gray-500 text-xs sm:text-sm">Results In</div>
                   </div>
                   
-                  <div className="bg-green-50 rounded p-3 text-center">
+                  <div className="bg-green-50 rounded p-2 sm:p-3 text-center">
                     <Trophy className="h-4 w-4 mx-auto text-green-500 mb-1" />
-                    <div className="font-semibold">{event.scoringUnit}</div>
-                    <div className="text-gray-500">Scoring Unit</div>
+                    <div className="font-semibold text-base sm:text-lg">{event.scoringUnit}</div>
+                    <div className="text-gray-500 text-xs sm:text-sm">Scoring Unit</div>
                   </div>
                 </div>
 
                 <Separator />
 
-                {/* Results Recorder */}
-                <div className="flex items-center justify-between">
+                {/* Results Recorder - Mobile Optimized */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div className="flex items-center gap-2 text-sm">
                     <Medal className="h-4 w-4 text-gray-500" />
                     <span>Results Recorder: </span>
                     <span className="font-medium">{event.resultsRecorder || 'Not assigned'}</span>
                   </div>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" className="w-fit">
                     <Edit className="h-3 w-3 mr-1" />
-                    Edit
+                    <span className="hidden sm:inline">Edit</span>
+                    <span className="sm:hidden">Edit</span>
                   </Button>
                 </div>
 
@@ -271,28 +273,33 @@ export default function EventContainerManager({
 
                 {/* Participant Management */}
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-medium flex items-center gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <h4 className="font-medium flex items-center gap-2 text-sm sm:text-base">
                       <Users className="h-4 w-4" />
                       Participants ({event.participants.length}/{event.participantLimit})
                     </h4>
                     
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => copyRegistrationLink(event.registrationUrl)}
+                        className="flex-1 sm:flex-none text-xs sm:text-sm"
                       >
-                        Copy Registration Link
+                        <Link className="h-3 w-3 mr-1" />
+                        <span className="hidden sm:inline">Copy Registration Link</span>
+                        <span className="sm:hidden">Copy Link</span>
                       </Button>
                       
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => setSelectedEvent(selectedEvent === event.eventName ? null : event.eventName)}
+                        className="flex-1 sm:flex-none text-xs sm:text-sm"
                       >
                         <Plus className="h-3 w-3 mr-1" />
-                        Add Participant
+                        <span className="hidden sm:inline">Add Participant</span>
+                        <span className="sm:hidden">Add</span>
                       </Button>
                     </div>
                   </div>
@@ -301,7 +308,7 @@ export default function EventContainerManager({
                   {selectedEvent === event.eventName && (
                     <Card className="bg-blue-50 border-blue-200">
                       <CardContent className="pt-4">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                           <div>
                             <Label htmlFor="participantName" className="text-xs">Name</Label>
                             <Input
@@ -325,14 +332,14 @@ export default function EventContainerManager({
                             />
                           </div>
                           
-                          <div className="flex items-end gap-2">
+                          <div className="flex items-end gap-2 sm:col-span-2 lg:col-span-1">
                             <Button
                               onClick={() => handleAddParticipant(event.eventName)}
                               disabled={spotsRemaining <= 0}
                               size="sm"
                               className="w-full"
                             >
-                              Add
+                              Add Participant
                             </Button>
                           </div>
                         </div>
