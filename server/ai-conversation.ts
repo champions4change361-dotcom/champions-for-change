@@ -277,7 +277,21 @@ function generatePlatformResponse(message: string, intent: string, domain: strin
       return `Great! Let's build your tournament step by step:\n\n**📋 Step 1: Go to Tournament Creation**\n• Click "Tournaments" in the top navigation\n• Click "Create New Tournament" button\n\n**🏆 Step 2: Choose Your Tournament Type**\n• Single elimination, double elimination, or round robin\n• Pick your sport (basketball, track, academic, etc.)\n\n**⚙️ Step 3: Tournament Settings**\n• Set team size limits\n• Configure registration deadlines\n• Enable payment processing if needed\n\n**🎯 Step 4: Customize & Launch**\n• Add your branding and rules\n• Generate shareable registration codes\n• Invite teams to register\n\nWould you like me to walk through any specific step in detail?`;
     }
     
-    return `I can help you create a comprehensive tournament! What type of tournament are you planning? (Track meet, academic competition, multi-sport event, etc.)`;
+    // Check if user is specifying a sport/tournament type
+    if (lowerMessage.includes('track') || lowerMessage.includes('field')) {
+      return `Perfect! A track and field meet is an excellent choice! 🏃‍♂️\n\n**Track & Field Events I can help you set up:**\n• Running events (100m, 200m, 400m, 800m, 1600m, relays)\n• Field events (shot put, discus, javelin, long jump, high jump)\n• Combined scoring with time/distance tracking\n\n**Quick questions to get started:**\n1. How many teams or individual athletes will participate?\n2. Will this be individual scoring or team-based?\n3. What's your target date for the meet?\n\nI can help you create the perfect structure for your track meet!`;
+    }
+    
+    if (lowerMessage.includes('basketball')) {
+      return `Awesome! Basketball tournaments are fantastic! 🏀\n\n**I can help you set up:**\n• Single elimination (March Madness style)\n• Double elimination (everyone gets 2 chances)\n• Round robin (everyone plays everyone)\n\n**Quick questions:**\n1. How many teams will participate?\n2. Do you prefer elimination or round robin format?\n3. When are you planning to hold this tournament?\n\nLet's get your basketball tournament rolling!`;
+    }
+    
+    if (lowerMessage.includes('swimming') || lowerMessage.includes('swim')) {
+      return `Great choice! Swimming meets have unique requirements! 🏊‍♀️\n\n**Swimming Meet Setup:**\n• Time-based events (freestyle, backstroke, breaststroke, butterfly)\n• Individual and relay events\n• Heat sheets and lane assignments\n• Automatic timing integration\n\n**Questions to get started:**\n1. How many swimmers/teams are participating?\n2. Which events do you want to include?\n3. Will this be a one-day or multi-day meet?\n\nI'll help you create the perfect swimming competition!`;
+    }
+    
+    // Only ask the general question if no specific sport was mentioned
+    return `I can help you create a comprehensive tournament! What type of tournament are you planning?\n\n**Popular options:**\n• Track & Field meets\n• Basketball tournaments\n• Swimming competitions\n• Academic competitions\n• Multi-sport events\n\nJust tell me what sport or type of competition you have in mind!`;
   }
   
   const platformFeatures = {
