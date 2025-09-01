@@ -185,14 +185,14 @@ export function CrossPlatformPromotion({ placement }: CrossPlatformPromotionProp
             <CardTitle className="text-white text-lg">Captain's Lounge Fantasy</CardTitle>
           </div>
           <CardDescription className="text-slate-100 text-sm leading-relaxed">
-            Adult fantasy sports platform with professional leagues
+            Compete with friends and coworkers in fantasy sports
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
             <div className="flex items-center space-x-2">
               <Star className="h-4 w-4 text-yellow-400 flex-shrink-0" />
-              <span className="text-slate-100 text-sm">Real money prizes</span>
+              <span className="text-slate-100 text-sm">League competitions</span>
             </div>
             <div className="flex items-center space-x-2">
               <Users className="h-4 w-4 text-blue-400 flex-shrink-0" />

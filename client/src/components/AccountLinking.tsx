@@ -18,7 +18,7 @@ export function AccountLinking() {
 
   const linkAccountMutation = useMutation({
     mutationFn: async (targetDomain: string) => {
-      return apiRequest("POST", "/api/account/link", { targetDomain });
+      return apiRequest("/api/account/link", "POST", { targetDomain });
     },
     onSuccess: () => {
       setLinkingStep('complete');
@@ -44,10 +44,10 @@ export function AccountLinking() {
     availableLinks.push({
       domain: '/coaches-lounge',
       name: "Captain's Lounge Fantasy",
-      description: "Adult fantasy sports with real money leagues",
+      description: "Compete with friends and coworkers for fun",
       icon: Crown,
       color: "purple",
-      benefits: ["Professional fantasy leagues", "Real money prizes", "Advanced statistics", "Age-verified community"]
+      benefits: ["Professional fantasy leagues", "Compete with friends/coworkers", "Advanced statistics", "Age-verified community"]
     });
   }
 
@@ -116,8 +116,8 @@ export function AccountLinking() {
                       </CardDescription>
                     </div>
                   </div>
-                  <Badge variant="outline" className={`border-${link.color}-500/50 text-${link.color}-300 bg-${link.color}-500/10 flex-shrink-0`}>
-                    New Access
+                  <Badge variant="secondary" className="text-slate-400 bg-slate-700/50 border-slate-600 flex-shrink-0">
+                    Available
                   </Badge>
                 </div>
               </CardHeader>
