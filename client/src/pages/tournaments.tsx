@@ -222,24 +222,24 @@ export default function TournamentsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
+          <h1 className="text-3xl font-bold flex items-center gap-3 text-high-contrast">
             <Trophy className="h-8 w-8 text-primary" />
             Tournament Management
             {isDistrictUser && <Badge className="bg-blue-500">District</Badge>}
             {isTournamentManager && <Badge className="bg-green-500">Pro</Badge>}
           </h1>
-          <p className="text-gray-600 mt-2">
+          <p className="text-medium-contrast mt-2">
             Create and manage tournaments with comprehensive bracket systems
           </p>
           <div className="flex items-center gap-4 mt-2 text-sm">
-            <span className="text-gray-500">
+            <span className="text-readable-light">
               Plan: <strong className="capitalize">{userPlan.replace('-', ' ')}</strong>
             </span>
-            <span className="text-gray-500">
+            <span className="text-readable-light">
               Tournaments: <strong>{tournaments.length}</strong>
               {limits.maxTournaments !== -1 && ` / ${limits.maxTournaments}`}
             </span>
-            <span className="text-gray-500">
+            <span className="text-readable-light">
               Max Teams: <strong>{limits.maxTeamsPerTournament === -1 ? 'Unlimited' : limits.maxTeamsPerTournament}</strong>
             </span>
           </div>
@@ -335,13 +335,13 @@ export default function TournamentsPage() {
           ))}
         </div>
       ) : filteredTournaments.length === 0 ? (
-        <Card>
+        <Card className="card-high-contrast">
           <CardContent className="text-center py-12">
-            <Trophy className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+            <Trophy className="h-16 w-16 text-gray-400 mx-auto mb-4" />
             <h3 className="font-semibold text-lg mb-2">
               {tournaments.length === 0 ? 'No Tournaments Yet' : 'No Matching Tournaments'}
             </h3>
-            <p className="text-gray-600 mb-6">
+            <p className="text-gray-700 mb-6">
               {tournaments.length === 0 
                 ? 'Create your first tournament to get started with bracket management'
                 : 'Try adjusting your search or filter criteria'
@@ -363,7 +363,7 @@ export default function TournamentsPage() {
           {filteredTournaments.map((tournament) => (
             <Card 
               key={tournament.id} 
-              className="hover:shadow-lg transition-shadow cursor-pointer"
+              className="hover:shadow-lg transition-shadow cursor-pointer card-high-contrast"
               data-testid={`tournament-card-${tournament.id}`}
             >
               <CardHeader className="pb-3">
@@ -457,7 +457,7 @@ export default function TournamentsPage() {
       <div className="grid gap-6 md:grid-cols-2">
         {/* Tournament Stats */}
         {tournaments.length > 0 && (
-          <Card>
+          <Card className="card-high-contrast">
             <CardHeader>
               <CardTitle>Tournament Overview</CardTitle>
             </CardHeader>
@@ -496,7 +496,7 @@ export default function TournamentsPage() {
         )}
 
         {/* Account Features */}
-        <Card>
+        <Card className="card-high-contrast">
           <CardHeader>
             <CardTitle>Your Account Features</CardTitle>
           </CardHeader>
