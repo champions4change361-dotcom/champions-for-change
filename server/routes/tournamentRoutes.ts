@@ -175,8 +175,19 @@ export function registerTournamentRoutes(app: Express) {
       );
 
       // Create tournament with generated bracket and user association
-      const tournamentData = {
+      // Sanitize numeric fields to prevent empty string errors
+      const sanitizedData = {
         ...validatedData,
+        entryFee: (validatedData.entryFee && validatedData.entryFee !== "") ? validatedData.entryFee : "0",
+        maxParticipants: (validatedData.maxParticipants && validatedData.maxParticipants !== "") ? validatedData.maxParticipants : null,
+        teamSize: (validatedData.teamSize && validatedData.teamSize !== "") ? validatedData.teamSize : 8,
+        seriesLength: (validatedData.seriesLength && validatedData.seriesLength !== "") ? validatedData.seriesLength : 7,
+        currentStage: (validatedData.currentStage && validatedData.currentStage !== "") ? validatedData.currentStage : 1,
+        totalStages: (validatedData.totalStages && validatedData.totalStages !== "") ? validatedData.totalStages : 1
+      };
+
+      const tournamentData = {
+        ...sanitizedData,
         bracket: bracketStructure,
         status: 'upcoming' as const,
         createdBy: userId,
