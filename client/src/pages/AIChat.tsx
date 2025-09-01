@@ -95,24 +95,6 @@ export default function AIChat() {
           />
         </div>
 
-        {/* Tips */}
-        <div className="mt-8 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/10 dark:to-emerald-900/10 rounded-xl p-6 border border-green-200 dark:border-green-800">
-          <h3 className="font-semibold text-gray-900 dark:text-white mb-3">💡 Pro Tips for Better Conversations</h3>
-          <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-600 dark:text-gray-400">
-            <div>
-              <strong className="text-gray-900 dark:text-white">Be Specific:</strong> "Help me plan a 3-day track meet for 200 high school students" works better than just "help with tournament"
-            </div>
-            <div>
-              <strong className="text-gray-900 dark:text-white">Ask Follow-ups:</strong> Continue the conversation with "What about budget?" or "How do I handle injuries?"
-            </div>
-            <div>
-              <strong className="text-gray-900 dark:text-white">Use Context:</strong> Mention your role like "As an athletic director..." or "Our district has 12 schools..."
-            </div>
-            <div>
-              <strong className="text-gray-900 dark:text-white">Click Suggestions:</strong> Use the blue suggestion badges to quickly explore related topics
-            </div>
-          </div>
-        </div>
       </main>
     </div>
   );

@@ -38,14 +38,13 @@ export function ConversationalAI({ domain = 'education', className = '' }: Conve
     {
       id: '1',
       role: 'assistant',
-      content: `Hi! I'm your AI assistant for Champions for Change. I can help you with:\n\n• Tournament creation and management\n• Budget planning and allocation\n• Health monitoring and injury prevention\n• Academic competition setup\n• District-wide coordination\n• Compliance requirements (HIPAA/FERPA)\n\nWhat would you like to work on today? Just ask me naturally - like "Help me plan a track meet for 200 students" or "How do I set up injury monitoring?"`,
+      content: `Hi! I'm your AI assistant for Champions for Change. I can help you with tournament creation, budget planning, health monitoring, and district coordination.\n\nWhat would you like to work on today?`,
       timestamp: new Date(),
       suggestions: [
         "Help me create a tournament",
         "Set up budget tracking",
         "Configure health monitoring",
-        "Plan academic competitions",
-        "Manage district compliance"
+        "Plan academic competitions"
       ]
     }
   ]);
