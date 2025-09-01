@@ -639,44 +639,73 @@ export default function EnhancedTournamentWizard({
                 </div>
               )}
 
-              {/* Event Selection for Multi-Event Sports */}
-              {selectedEvents.length > 0 && (
+              {/* Event Selection for Multi-Event Sports - Fixed to allow re-adding events */}
+              {form.watch("sport") && getEventsForSport(form.watch("sport")).length > 0 && (
                 <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                   <h4 className="font-medium text-blue-900 mb-3 flex items-center gap-2">
                     <Trophy className="h-4 w-4" />
-                    {form.watch("sport")} Events ({selectedEvents.length} selected)
+                    {form.watch("sport")} Events ({selectedEvents.length} of {getEventsForSport(form.watch("sport")).length} selected)
                   </h4>
                   
                   <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {selectedEvents.map((event, index) => (
-                      <div key={index} className="flex items-center justify-between bg-white p-2 rounded border">
-                        <div className="flex items-center gap-2">
-                          <Checkbox
-                            checked={true}
-                            onCheckedChange={(checked) => {
-                              if (!checked) {
-                                setSelectedEvents(prev => prev.filter(e => e.eventName !== event.eventName));
-                              }
-                            }}
-                          />
-                          <span className="font-medium">{event.eventName}</span>
+                    {getEventsForSport(form.watch("sport")).map((event, index) => {
+                      const isSelected = selectedEvents.some(e => e.eventName === event.eventName);
+                      return (
+                        <div key={index} className={`flex items-center justify-between p-2 rounded border ${
+                          isSelected ? 'bg-white border-blue-200' : 'bg-gray-50 border-gray-200'
+                        }`}>
+                          <div className="flex items-center gap-2">
+                            <Checkbox
+                              checked={isSelected}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  // Add event back if checked
+                                  setSelectedEvents(prev => [...prev, event]);
+                                } else {
+                                  // Remove event if unchecked
+                                  setSelectedEvents(prev => prev.filter(e => e.eventName !== event.eventName));
+                                }
+                              }}
+                            />
+                            <span className={`font-medium ${
+                              isSelected ? 'text-gray-900' : 'text-gray-500'
+                            }`}>{event.eventName}</span>
+                          </div>
+                          
+                          <div className="flex items-center gap-2">
+                            <Badge variant={isSelected ? "default" : "secondary"} className="text-xs">
+                              {event.eventType}
+                            </Badge>
+                            <span className="text-xs text-gray-500">
+                              {event.scoringUnit}
+                            </span>
+                          </div>
                         </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <Badge variant="secondary" className="text-xs">
-                            {event.eventType}
-                          </Badge>
-                          <span className="text-xs text-gray-500">
-                            {event.scoringUnit}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                   
-                  <div className="mt-3 text-sm text-blue-700">
-                    <p>✓ Events auto-selected based on your sport choice</p>
-                    <p>Uncheck any events you don't want to include</p>
+                  <div className="mt-3 flex items-center justify-between">
+                    <div className="text-sm text-blue-700">
+                      <p>✓ Events auto-selected based on your sport choice</p>
+                      <p>Check/uncheck any events to customize your competition</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedEvents(getEventsForSport(form.watch("sport")))}
+                        className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+                      >
+                        Select All
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedEvents([])}
+                        className="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+                      >
+                        Clear All
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
