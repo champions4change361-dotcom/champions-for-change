@@ -161,7 +161,7 @@ export default function TournamentEditPage() {
   // Delete Tournament
   const deleteMutation = useMutation({
     mutationFn: async () => {
-      return await apiRequest('DELETE', `/api/tournaments/${id}`);
+      return await apiRequest(`/api/tournaments/${id}`, 'DELETE');
     },
     onSuccess: () => {
       toast({
