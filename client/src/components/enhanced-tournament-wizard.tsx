@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, ArrowRight, Check, CheckCircle, Play, Trophy, Users, Settings, DollarSign } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, CheckCircle, Play, Trophy, Users, Settings, DollarSign, X } from "lucide-react";
 import { insertTournamentSchema } from "@shared/schema";
 import TeamManagement from "@/components/team-management";
 import { type TeamData } from "@/utils/csv-utils";
@@ -26,6 +26,8 @@ const formSchema = insertTournamentSchema.extend({
   competitionFormat: z.enum(["bracket", "leaderboard", "series", "bracket-to-series", "multi-stage"]).default("bracket"),
   ageGroup: z.string().optional(),
   genderDivision: z.string().optional(),
+  entryFee: z.string().optional(), // Convert to string for numeric database field
+  tournamentDate: z.string().optional(), // ISO string for date field
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -287,12 +289,17 @@ export default function EnhancedTournamentWizard({
 
   const createTournamentMutation = useMutation({
     mutationFn: async (data: FormData & { teams: TeamData[] }) => {
-      const response = await apiRequest("/api/tournaments", "POST", {
+      // Transform data to match database schema
+      const transformedData = {
         ...data,
         teams: data.teams,
+        entryFee: data.entryFee ? String(data.entryFee) : "0", // Convert to string for numeric field
+        tournamentDate: data.tournamentDate ? new Date(data.tournamentDate).toISOString() : null, // Convert to ISO string
         scoringMethod: selectedSport?.scoringMethod || "wins",
         isGuestCreated: !user, // Mark as guest-created for tournaments created without login
-      });
+      };
+      
+      const response = await apiRequest("/api/tournaments", "POST", transformedData);
       return response.json();
     },
     onSuccess: (data) => {
@@ -326,13 +333,18 @@ export default function EnhancedTournamentWizard({
 
   const saveDraftMutation = useMutation({
     mutationFn: async (data: FormData & { teams: TeamData[], status: 'draft' }) => {
-      const response = await apiRequest("/api/tournaments", "POST", {
+      // Transform data to match database schema
+      const transformedData = {
         ...data,
         teams: data.teams,
         status: 'draft',
+        entryFee: data.entryFee ? String(data.entryFee) : "0", // Convert to string for numeric field
+        tournamentDate: data.tournamentDate ? new Date(data.tournamentDate).toISOString() : null, // Convert to ISO string
         scoringMethod: selectedSport?.scoringMethod || "wins",
         isGuestCreated: !user,
-      });
+      };
+      
+      const response = await apiRequest("/api/tournaments", "POST", transformedData);
       return response.json();
     },
     onSuccess: (data) => {
@@ -712,7 +724,7 @@ export default function EnhancedTournamentWizard({
                       type="number"
                       step="0.01"
                       min="0"
-                      {...form.register("entryFee", { valueAsNumber: true })}
+                      {...form.register("entryFee")}
                       placeholder="0.00"
                       className="w-full"
                       data-testid="input-entry-fee"
@@ -796,7 +808,7 @@ export default function EnhancedTournamentWizard({
                         const value = e.target.value.replace(/[^0-9]/g, ''); // Only allow numbers
                         const numValue = parseInt(value);
                         if (value === "" || (numValue >= 2 && numValue <= 128)) {
-                          form.setValue("teamSize", value === "" ? undefined : numValue);
+                          form.setValue("teamSize", value === "" ? 2 : numValue);
                         }
                       }}
                       placeholder="Enter number of teams (2-128)"
@@ -820,7 +832,7 @@ export default function EnhancedTournamentWizard({
                 <h4 className="font-medium text-blue-900 mb-2">Tournament Structure</h4>
                 <p className="text-sm text-blue-700">
                   {competitionFormat === 'bracket' 
-                    ? `${Math.ceil(Math.log2(teamSize))} rounds of elimination matches`
+                    ? `${Math.ceil(Math.log2(teamSize || 2))} rounds of elimination matches`
                     : competitionFormat === 'leaderboard'
                     ? 'Individual performance rankings based on scores/times'
                     : `Series format with best-of matches`
@@ -853,10 +865,10 @@ export default function EnhancedTournamentWizard({
                     {form.watch("ageGroup") && <div><strong>Age Group:</strong> {form.watch("ageGroup")}</div>}
                     {form.watch("genderDivision") && <div><strong>Division:</strong> {form.watch("genderDivision")}</div>}
                     {form.watch("tournamentDate") && (
-                      <div><strong>Date:</strong> {new Date(form.watch("tournamentDate")).toLocaleDateString()} at {new Date(form.watch("tournamentDate")).toLocaleTimeString()}</div>
+                      <div><strong>Date:</strong> {new Date(form.watch("tournamentDate") || '').toLocaleDateString()} at {new Date(form.watch("tournamentDate") || '').toLocaleTimeString()}</div>
                     )}
                     {form.watch("location") && <div><strong>Location:</strong> {form.watch("location")}</div>}
-                    {form.watch("entryFee") && form.watch("entryFee") > 0 && (
+                    {form.watch("entryFee") && parseFloat(form.watch("entryFee") || '0') > 0 && (
                       <div><strong>Registration Fee:</strong> ${form.watch("entryFee")}</div>
                     )}
                     {form.watch("donationsEnabled") && (
