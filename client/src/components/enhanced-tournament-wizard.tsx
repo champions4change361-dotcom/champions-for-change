@@ -326,7 +326,7 @@ export default function EnhancedTournamentWizard({
       setCurrentStep('start');
       toast({
         title: "Tournament Created Successfully!",
-        description: `${data.tournament.name} is ready with ${teams.length} ${competitionFormat === 'leaderboard' ? 'participants' : 'teams'}.`,
+        description: `${data.tournament.name} has been created successfully with ${selectedEvents.length} event${selectedEvents.length !== 1 ? 's' : ''}.`,
       });
       
       // Clear draft data on successful creation
@@ -1067,7 +1067,7 @@ export default function EnhancedTournamentWizard({
               <div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">Tournament Created Successfully!</h3>
                 <p className="text-gray-600">
-                  <strong>{createdTournament.name}</strong> is ready with {teams.length} {competitionFormat === 'leaderboard' ? 'participants' : 'teams'}.
+                  <strong>{createdTournament.name}</strong> has been created successfully with {selectedEvents.length} event{selectedEvents.length !== 1 ? 's' : ''}.
                 </p>
               </div>
 
