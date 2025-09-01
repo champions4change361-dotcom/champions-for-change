@@ -16,11 +16,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, ArrowRight, Check, CheckCircle, Play, Trophy, Users, Settings, DollarSign, X } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { insertTournamentSchema } from "@shared/schema";
 import TeamManagement from "@/components/team-management";
 import { type TeamData } from "@/utils/csv-utils";
 import AddressAutocomplete from "@/components/AddressAutocomplete";
-import SportEventsSelector from "@/components/sport-events-selector";
+import { getEventsForSport, type SportEventDefinition } from "@shared/sportEvents";
 import { generateRandomNames } from "@/utils/name-generator";
 
 const formSchema = insertTournamentSchema.extend({
@@ -71,7 +72,7 @@ export default function EnhancedTournamentWizard({
   const queryClient = useQueryClient();
   const [currentStep, setCurrentStep] = useState<WizardStep>('sport');
   const [teams, setTeams] = useState<TeamData[]>([]);
-  const [selectedEvents, setSelectedEvents] = useState<any[]>([]);
+  const [selectedEvents, setSelectedEvents] = useState<SportEventDefinition[]>([]);
   const [skipTeamSetup, setSkipTeamSetup] = useState(false);
   const [createdTournament, setCreatedTournament] = useState<any>(null);
   const [isDraftSaving, setIsDraftSaving] = useState(false);
@@ -190,6 +191,21 @@ export default function EnhancedTournamentWizard({
   const handleSubcategoryChange = (subcategory: string) => {
     setSelectedSubcategory(subcategory);
     form.setValue("sport", "");
+  };
+
+  // Auto-populate events when sport is selected
+  const handleSportChange = (sport: string) => {
+    form.setValue("sport", sport);
+    
+    // Auto-populate events for multi-event sports
+    const availableEvents = getEventsForSport(sport);
+    if (availableEvents.length > 0) {
+      // For swimming and track, auto-select all events
+      // User can deselect what they don't need
+      setSelectedEvents(availableEvents);
+    } else {
+      setSelectedEvents([]);
+    }
   };
 
   const form = useForm<FormData>({
@@ -593,7 +609,7 @@ export default function EnhancedTournamentWizard({
                     Specific Competition *
                   </Label>
                   <select 
-                    onChange={(e) => form.setValue("sport", e.target.value)} 
+                    onChange={(e) => handleSportChange(e.target.value)} 
                     value={form.watch("sport") || ""}
                     className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     data-testid="select-sport"
@@ -623,27 +639,45 @@ export default function EnhancedTournamentWizard({
                 </div>
               )}
 
-              {/* Swimming Events Selection */}
-              {form.watch("sport") === "Swimming & Diving" && (
-                <div className="mt-6">
-                  <SportEventsSelector
-                    sportId="swimming-diving"
-                    sportName="Swimming & Diving"
-                    onEventsSelected={setSelectedEvents}
-                    initialSelected={selectedEvents.map(e => e.id)}
-                  />
-                </div>
-              )}
-
-              {/* Track & Field Events Selection */}
-              {form.watch("sport") === "Track & Field" && (
-                <div className="mt-6">
-                  <SportEventsSelector
-                    sportId="track-field"
-                    sportName="Track & Field"
-                    onEventsSelected={setSelectedEvents}
-                    initialSelected={selectedEvents.map(e => e.id)}
-                  />
+              {/* Event Selection for Multi-Event Sports */}
+              {selectedEvents.length > 0 && (
+                <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <h4 className="font-medium text-blue-900 mb-3 flex items-center gap-2">
+                    <Trophy className="h-4 w-4" />
+                    {form.watch("sport")} Events ({selectedEvents.length} selected)
+                  </h4>
+                  
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {selectedEvents.map((event, index) => (
+                      <div key={index} className="flex items-center justify-between bg-white p-2 rounded border">
+                        <div className="flex items-center gap-2">
+                          <Checkbox
+                            checked={true}
+                            onCheckedChange={(checked) => {
+                              if (!checked) {
+                                setSelectedEvents(prev => prev.filter(e => e.eventName !== event.eventName));
+                              }
+                            }}
+                          />
+                          <span className="font-medium">{event.eventName}</span>
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="text-xs">
+                            {event.eventType}
+                          </Badge>
+                          <span className="text-xs text-gray-500">
+                            {event.scoringUnit}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div className="mt-3 text-sm text-blue-700">
+                    <p>✓ Events auto-selected based on your sport choice</p>
+                    <p>Uncheck any events you don't want to include</p>
+                  </div>
                 </div>
               )}
 

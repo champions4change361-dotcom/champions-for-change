@@ -1211,6 +1211,7 @@ export const tournaments = pgTable("tournaments", {
   minTeamSize: integer("min_team_size"), // Minimum players required
 });
 
+
 // CORPORATE COMPETITION DATABASE SYSTEM
 // Comprehensive database for sales, production, and corporate tournaments
 
@@ -1426,8 +1427,23 @@ export const tournamentEvents = pgTable("tournament_events", {
   tournamentId: varchar("tournament_id").notNull().references(() => tournaments.id),
   sportEventId: varchar("sport_event_id").notNull().references(() => sportEvents.id),
   measurementSystem: text("measurement_system", { enum: ["metric", "imperial"] }).default("metric"),
+  
+  // RESULTS RECORDER SYSTEM
+  resultsRecorderId: varchar("results_recorder_id").references(() => users.id), // Assigned Results Recorder
+  resultsRecorderName: varchar("results_recorder_name"), // Name for display
+  resultsRecorderEmail: varchar("results_recorder_email"), // Contact info
+  
+  // EVENT MANAGEMENT  
+  eventStatus: text("event_status", {
+    enum: ["upcoming", "in_progress", "completed", "canceled"]
+  }).default("upcoming"),
+  eventDateTime: timestamp("event_date_time"),
+  eventOrder: integer("event_order").default(1), // Display order in tournament
+  maxParticipants: integer("max_participants"),
+  
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
 });
 
 // Participant Events Schema (individual registrations for events)
