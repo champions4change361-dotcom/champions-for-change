@@ -120,20 +120,52 @@ export async function handleAIConversation(req: Request, res: Response) {
     let tournamentCreated = false;
     let createdTournament: any = null;
     
-    // Check if user wants to create a tournament and we should actually create it
-    const shouldCreate = shouldCreateTournament(message);
-    console.log(`🤖 AI Analysis: intent=${intent}, shouldCreate=${shouldCreate}, message="${message}"`);
+    // Check if this is part of an ongoing tournament creation conversation
+    const ongoingConversation = detectOngoingTournamentConversation(conversation_history);
+    let conversationState: any = null;
     
-    if (intent === 'tournament_creation' && shouldCreate) {
-      console.log('🏆 Creating tournament via AI...');
-      const createResult = await createTournamentForUser(req, message, extractedContext);
+    if (ongoingConversation) {
+      // Handle ongoing tournament creation conversation
+      const conversationResult = await handleTournamentConversation(req, message, ongoingConversation, conversation_history);
+      response = conversationResult.response;
+      tournamentCreated = conversationResult.tournamentCreated || false;
+      createdTournament = conversationResult.tournament || null;
+      conversationState = conversationResult.conversationState;
+    } else if (intent === 'tournament_creation') {
+      // Start new tournament creation conversation
+      const shouldCreate = shouldCreateTournament(message);
+      console.log(`🤖 AI Analysis: intent=${intent}, shouldCreate=${shouldCreate}, message="${message}"`);
       
-      if (createResult.success) {
-        tournamentCreated = true;
-        createdTournament = createResult.tournament;
-        response = `✅ **Tournament Created Successfully!**\n\n🏆 **${createdTournament.name}**\n• Sport: ${createdTournament.sport}\n• Type: ${createdTournament.tournamentType} elimination\n• Teams: ${createdTournament.teams?.length || 0}\n• Status: ${createdTournament.status}\n\n**📋 Next Steps:**\n• Visit your Tournaments page to see your new tournament\n• Invite teams using registration codes\n• Set up brackets and start matches\n\nWould you like me to help you configure anything else for this tournament?`;
+      if (shouldCreate) {
+        // Try to extract complete details from the message
+        const tournamentDetails = extractTournamentDetailsFromMessage(message, extractedContext);
+        const missingDetails = identifyMissingTournamentDetails(tournamentDetails);
+        
+        if (missingDetails.length === 0) {
+          // All details provided, create immediately
+          console.log('🏆 Creating tournament via AI...');
+          const createResult = await createTournamentForUser(req, message, extractedContext);
+          
+          if (createResult.success) {
+            tournamentCreated = true;
+            createdTournament = createResult.tournament;
+            response = `✅ **Tournament Created Successfully!**\n\n🏆 **${createdTournament.name}**\n• Sport: ${createdTournament.sport}\n• Type: ${createdTournament.tournamentType} elimination\n• Teams: ${createdTournament.teams?.length || 0}\n• Status: ${createdTournament.status}\n\n**📋 Next Steps:**\n• Visit your Tournaments page to see your new tournament\n• Invite teams using registration codes\n• Set up brackets and start matches\n\nWould you like me to help you configure anything else for this tournament?`;
+          } else {
+            response = `❌ **Could not create tournament:** ${createResult.error}\n\nLet me help you with the setup instead. What specific tournament details would you like to configure?`;
+          }
+        } else {
+          // Start conversation to gather missing details
+          conversationState = {
+            type: 'tournament_creation',
+            step: 'gathering_details',
+            providedDetails: tournamentDetails,
+            missingDetails: missingDetails
+          };
+          response = generateQuestionForMissingDetails(tournamentDetails, missingDetails);
+        }
       } else {
-        response = `❌ **Could not create tournament:** ${createResult.error}\n\nLet me help you with the setup instead. What specific tournament details would you like to configure?`;
+        // Generate normal conversational response
+        response = generatePlatformResponse(message, intent, domain, user_context, conversation_history);
       }
     } else {
       // Generate normal conversational response
@@ -150,6 +182,7 @@ export async function handleAIConversation(req: Request, res: Response) {
       intent,
       tournament_created: tournamentCreated,
       tournament: createdTournament,
+      conversation_state: conversationState,
       success: true
     });
 
@@ -305,62 +338,212 @@ function shouldCreateTournament(message: string): boolean {
 
 function extractTournamentDetailsFromMessage(message: string, context: any): any {
   const lowerMessage = message.toLowerCase();
+  const details: any = {};
   
   // Extract tournament type
-  let tournamentType = 'single';
-  if (lowerMessage.includes('double elimination')) tournamentType = 'double';
-  if (lowerMessage.includes('round robin')) tournamentType = 'round-robin';
+  if (lowerMessage.includes('double elimination') || lowerMessage.includes('double elemination')) {
+    details.tournamentType = 'double';
+  } else if (lowerMessage.includes('round robin')) {
+    details.tournamentType = 'round-robin';
+  } else if (lowerMessage.includes('single elimination')) {
+    details.tournamentType = 'single';
+  }
   
-  // Extract sport
-  let sport = context.sport || 'Basketball';
-  if (lowerMessage.includes('basketball')) sport = 'Basketball';
-  if (lowerMessage.includes('football')) sport = 'Football';
-  if (lowerMessage.includes('soccer')) sport = 'Soccer';
-  if (lowerMessage.includes('volleyball')) sport = 'Volleyball';
-  if (lowerMessage.includes('tennis')) sport = 'Tennis';
-  if (lowerMessage.includes('track')) sport = 'Track and Field';
-  if (lowerMessage.includes('baseball')) sport = 'Baseball';
-  if (lowerMessage.includes('softball')) sport = 'Softball';
+  // Extract sport (enhanced with more variations)
+  const sportMap = {
+    'basketball': 'Basketball',
+    'basketabll': 'Basketball', // Handle typo
+    'hoops': 'Basketball',
+    'bball': 'Basketball',
+    'football': 'Football',
+    'soccer': 'Soccer',
+    'volleyball': 'Volleyball',
+    'tennis': 'Tennis',
+    'track': 'Track and Field',
+    'baseball': 'Baseball',
+    'softball': 'Softball',
+    'wrestling': 'Wrestling',
+    'swimming': 'Swimming'
+  };
+  
+  for (const [key, value] of Object.entries(sportMap)) {
+    if (lowerMessage.includes(key)) {
+      details.sport = value;
+      break;
+    }
+  }
   
   // Extract team count
-  let teamCount = 8; // default
-  const teamMatch = message.match(/(\d+)\s*(team|participant|player)/i);
+  const teamMatch = message.match(/(\d+)\s*(team|participant|player|division)/i);
   if (teamMatch) {
-    teamCount = parseInt(teamMatch[1]);
+    const count = parseInt(teamMatch[1]);
+    if (count > 0 && count < 1000) { // Reasonable range
+      details.maxParticipants = count;
+      
+      // Generate teams if not specified
+      const teams = [];
+      for (let i = 1; i <= count; i++) {
+        teams.push(`Team ${i}`);
+      }
+      details.teams = teams;
+    }
   }
   
-  // Generate tournament name
-  let name = `${sport} Tournament`;
-  if (lowerMessage.includes('championship')) name = `${sport} Championship`;
-  if (lowerMessage.includes('league')) name = `${sport} League`;
-  if (lowerMessage.includes('classic')) name = `${sport} Classic`;
+  // Extract tournament name (look for quoted names or specific patterns)
+  const namePatterns = [
+    /(?:called?|name[d]?|title[d]?)\s+["']([^"']+)["']/i,
+    /["']([^"']+)["']\s+(?:tournament|championship|classic|league)/i,
+    /(\w+\s+(?:for|classic|championship|memorial|spring|summer|fall|winter|holiday)\s+\w+)/i
+  ];
   
-  // Add date to name to make it unique
-  const today = new Date();
-  const dateStr = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  name = `${name} - ${dateStr}`;
-  
-  // Generate teams if not specified
-  const teams = [];
-  for (let i = 1; i <= teamCount; i++) {
-    teams.push(`Team ${i}`);
+  for (const pattern of namePatterns) {
+    const match = message.match(pattern);
+    if (match && match[1]) {
+      details.name = match[1].trim();
+      break;
+    }
   }
   
-  return {
-    name,
-    sport,
-    tournamentType,
-    teamSize: 5, // Default team size
-    teams,
-    maxParticipants: teamCount,
-    description: `AI-generated ${sport.toLowerCase()} tournament created from user request`,
-    registrationDeadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 1 week from now
-    tournamentDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 2 weeks from now
-    location: 'TBD',
-    entryFee: "0", // String format as expected by schema
-    isPublic: true,
-    bracket: null // Will be set by BracketGenerator
-  };
+  // Extract location
+  const locationPatterns = [
+    /(?:at|location|venue|held at|taking place at)\s+([^.!?\n]+)(?:on|\.|!|\?|$)/i,
+    /will be at\s+([^.!?\n]+)/i
+  ];
+  
+  for (const pattern of locationPatterns) {
+    const match = message.match(pattern);
+    if (match && match[1]) {
+      details.location = match[1].trim();
+      break;
+    }
+  }
+  
+  // Extract date (enhanced parsing)
+  const datePatterns = [
+    /(\w+ \d{1,2}(?:st|nd|rd|th)?,? \d{4})/i,
+    /(\w+ \d{1,2}(?:st|nd|rd|th)?)/i,
+    /(\d{1,2}\/\d{1,2}\/\d{4})/,
+    /on ([^.!?\n]+?)(?:\s+I|\s+i|\.|!|\?|$)/i
+  ];
+  
+  for (const pattern of datePatterns) {
+    const match = message.match(pattern);
+    if (match && match[1]) {
+      const dateStr = match[1].trim();
+      const parsedDate = new Date(dateStr);
+      if (!isNaN(parsedDate.getTime()) && parsedDate > new Date()) {
+        details.tournamentDate = parsedDate;
+        break;
+      }
+    }
+  }
+  
+  // Extract registration deadline
+  const deadlinePatterns = [
+    /register(?:ed|ation)?.*?(\d+)\s*weeks?\s*before/i,
+    /register(?:ed|ation)?.*?(\d+)\s*days?\s*before/i,
+    /deadline.*?(\w+ \d{1,2}(?:st|nd|rd|th)?)/i
+  ];
+  
+  for (const pattern of deadlinePatterns) {
+    const match = message.match(pattern);
+    if (match && match[1]) {
+      if (match[1].includes('week')) {
+        const weeks = parseInt(match[1]);
+        if (details.tournamentDate) {
+          details.registrationDeadline = new Date(details.tournamentDate.getTime() - weeks * 7 * 24 * 60 * 60 * 1000);
+        }
+      } else if (match[1].includes('day')) {
+        const days = parseInt(match[1]);
+        if (details.tournamentDate) {
+          details.registrationDeadline = new Date(details.tournamentDate.getTime() - days * 24 * 60 * 60 * 1000);
+        }
+      } else {
+        const parsedDate = new Date(match[1]);
+        if (!isNaN(parsedDate.getTime())) {
+          details.registrationDeadline = parsedDate;
+        }
+      }
+      break;
+    }
+  }
+  
+  // Extract team size (players per team)
+  const teamSizePatterns = [
+    /(\d+)v\d+/i, // 3v3, 5v5
+    /(\d+)\s*(?:player|man|person)\s*team/i,
+    /teams?\s*of\s*(\d+)/i
+  ];
+  
+  for (const pattern of teamSizePatterns) {
+    const match = message.match(pattern);
+    if (match && match[1]) {
+      const size = parseInt(match[1]);
+      if (size > 0 && size <= 15) { // Reasonable team size
+        details.teamSize = size;
+        break;
+      }
+    }
+  }
+  
+  // Extract entry fee
+  const feePatterns = [
+    /\$(\d+(?:\.\d{2})?)\s*(?:per team|entry|fee)/i,
+    /(?:fee|cost|entry).*?\$(\d+(?:\.\d{2})?)/i,
+    /(?:free|no fee|no cost)/i
+  ];
+  
+  for (const pattern of feePatterns) {
+    const match = message.match(pattern);
+    if (match) {
+      if (match[0].toLowerCase().includes('free') || match[0].toLowerCase().includes('no fee')) {
+        details.entryFee = "0";
+      } else if (match[1]) {
+        details.entryFee = match[1];
+      }
+      break;
+    }
+  }
+  
+  // Set defaults for missing essential fields
+  if (!details.tournamentType) details.tournamentType = 'single';
+  if (!details.sport) details.sport = context.sport || 'Basketball';
+  if (!details.teamSize) details.teamSize = 5;
+  if (!details.entryFee) details.entryFee = "0";
+  if (!details.isPublic) details.isPublic = true;
+  
+  // Generate default name if not provided
+  if (!details.name) {
+    let name = `${details.sport} Tournament`;
+    if (lowerMessage.includes('championship')) name = `${details.sport} Championship`;
+    if (lowerMessage.includes('league')) name = `${details.sport} League`;
+    if (lowerMessage.includes('classic')) name = `${details.sport} Classic`;
+    
+    // Add date to name to make it unique
+    const today = new Date();
+    const dateStr = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    details.name = `${name} - ${dateStr}`;
+  }
+  
+  // Set default dates if not provided
+  if (!details.tournamentDate) {
+    details.tournamentDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000); // 2 weeks from now
+  }
+  if (!details.registrationDeadline) {
+    details.registrationDeadline = new Date(details.tournamentDate.getTime() - 7 * 24 * 60 * 60 * 1000); // 1 week before tournament
+  }
+  if (!details.location) {
+    details.location = 'TBD';
+  }
+  
+  // Generate default description
+  if (!details.description) {
+    details.description = `AI-generated ${details.sport.toLowerCase()} tournament created from user request`;
+  }
+  
+  details.bracket = null; // Will be set by BracketGenerator
+  
+  return details;
 }
 
 function generateSuggestions(intent: string, domain: string, message?: string, tournamentCreated?: boolean): string[] {
@@ -430,4 +613,162 @@ function generateSuggestions(intent: string, domain: string, message?: string, t
     "Configure health monitoring",
     "Plan academic events"
   ];
+}
+
+// ====================================================
+// CONVERSATIONAL TOURNAMENT CREATION FUNCTIONS
+// ====================================================
+
+function detectOngoingTournamentConversation(conversation_history: any[]): any {
+  if (!conversation_history || conversation_history.length === 0) return null;
+  
+  // Look for conversation state in recent messages
+  for (let i = conversation_history.length - 1; i >= Math.max(0, conversation_history.length - 3); i--) {
+    const message = conversation_history[i];
+    if (message.conversation_state?.type === 'tournament_creation') {
+      return message.conversation_state;
+    }
+  }
+  
+  return null;
+}
+
+async function handleTournamentConversation(req: any, message: string, ongoingConversation: any, conversation_history: any[]): Promise<any> {
+  try {
+    const { providedDetails, missingDetails } = ongoingConversation;
+    
+    // Extract new details from the current message
+    const newDetails = extractTournamentDetailsFromMessage(message, {});
+    
+    // Merge new details with existing provided details
+    const updatedDetails = { ...providedDetails, ...newDetails };
+    
+    // Check what's still missing
+    const stillMissingDetails = identifyMissingTournamentDetails(updatedDetails);
+    
+    if (stillMissingDetails.length === 0) {
+      // All details collected, create the tournament
+      console.log('🏆 Creating tournament via conversational AI...');
+      const createResult = await createTournamentForUser(req, `Create tournament with details: ${JSON.stringify(updatedDetails)}`, updatedDetails);
+      
+      if (createResult.success) {
+        return {
+          response: `✅ **Tournament Created Successfully!**\n\n🏆 **${createResult.tournament.name}**\n• Sport: ${createResult.tournament.sport}\n• Type: ${createResult.tournament.tournamentType} elimination\n• Teams: ${createResult.tournament.teams?.length || 0}\n• Status: ${createResult.tournament.status}\n\n**📋 Next Steps:**\n• Visit your Tournaments page to see your new tournament\n• Invite teams using registration codes\n• Set up brackets and start matches\n\nWould you like me to help you configure anything else for this tournament?`,
+          tournamentCreated: true,
+          tournament: createResult.tournament,
+          conversationState: null // Conversation complete
+        };
+      } else {
+        return {
+          response: `❌ **Could not create tournament:** ${createResult.error}\n\nLet me help you with the setup instead. What specific tournament details would you like to configure?`,
+          tournamentCreated: false,
+          conversationState: null
+        };
+      }
+    } else {
+      // Still missing details, ask for the next one
+      return {
+        response: generateQuestionForMissingDetails(updatedDetails, stillMissingDetails),
+        tournamentCreated: false,
+        conversationState: {
+          type: 'tournament_creation',
+          step: 'gathering_details',
+          providedDetails: updatedDetails,
+          missingDetails: stillMissingDetails
+        }
+      };
+    }
+    
+  } catch (error) {
+    console.error('Tournament conversation error:', error);
+    return {
+      response: "I had trouble processing that. Let's start over - what tournament would you like me to create for you?",
+      tournamentCreated: false,
+      conversationState: null
+    };
+  }
+}
+
+function identifyMissingTournamentDetails(details: any): string[] {
+  const missing = [];
+  
+  if (!details.name || details.name.toLowerCase().includes('tournament')) {
+    missing.push('name');
+  }
+  if (!details.sport) {
+    missing.push('sport');
+  }
+  if (!details.location || details.location === 'TBD') {
+    missing.push('location');
+  }
+  if (!details.tournamentDate) {
+    missing.push('date');
+  }
+  if (!details.registrationDeadline) {
+    missing.push('registration_deadline');
+  }
+  if (!details.teamSize || details.teamSize === 5) {
+    missing.push('team_size');
+  }
+  if (details.entryFee === undefined || details.entryFee === "0") {
+    missing.push('entry_fee');
+  }
+  
+  return missing;
+}
+
+function generateQuestionForMissingDetails(providedDetails: any, missingDetails: string[]): string {
+  const missingDetail = missingDetails[0]; // Ask for one detail at a time
+  
+  let question = `**Absolutely! I'd be happy to help you create`;
+  
+  if (providedDetails.name && !providedDetails.name.toLowerCase().includes('tournament')) {
+    question += ` "${providedDetails.name}"`;
+  } else if (providedDetails.sport) {
+    question += ` your ${providedDetails.sport.toLowerCase()} tournament`;
+  } else {
+    question += ` your tournament`;
+  }
+  
+  question += `!** 🏆\n\n`;
+  
+  // Add summary of what we know so far
+  if (Object.keys(providedDetails).length > 0) {
+    question += `**📋 Tournament Details So Far:**\n`;
+    if (providedDetails.sport) question += `• Sport: ${providedDetails.sport}\n`;
+    if (providedDetails.tournamentType) question += `• Type: ${providedDetails.tournamentType} elimination\n`;
+    if (providedDetails.name && !providedDetails.name.toLowerCase().includes('tournament')) question += `• Name: ${providedDetails.name}\n`;
+    if (providedDetails.location && providedDetails.location !== 'TBD') question += `• Location: ${providedDetails.location}\n`;
+    if (providedDetails.tournamentDate) question += `• Date: ${new Date(providedDetails.tournamentDate).toLocaleDateString()}\n`;
+    question += `\n`;
+  }
+  
+  // Ask for the missing detail
+  switch (missingDetail) {
+    case 'sport':
+      question += `**🏀 What sport is this tournament for?**\n(Basketball, Soccer, Volleyball, Tennis, etc.)`;
+      break;
+    case 'name':
+      question += `**📝 What would you like to call this tournament?**\n(e.g., "Spring Championship 2025", "Memorial Day Classic")`;
+      break;
+    case 'location':
+      question += `**📍 Where will the tournament take place?**\n(e.g., "Central High School Gym", "Community Sports Complex")`;
+      break;
+    case 'date':
+      question += `**📅 When do you want the tournament to start?**\n(e.g., "March 15th, 2025", "Next Saturday")`;
+      break;
+    case 'registration_deadline':
+      question += `**⏰ When should registration close?**\n(e.g., "One week before", "February 28th", "2 weeks prior")`;
+      break;
+    case 'team_size':
+      question += `**👥 How many players per team?**\n(e.g., 5 for basketball, 3 for 3v3, 11 for soccer)`;
+      break;
+    case 'entry_fee':
+      question += `**💰 Is there an entry fee per team?**\n(e.g., "$50 per team", "Free", "$25")`;
+      break;
+    default:
+      question += `**I need a bit more information to create your perfect tournament!**`;
+  }
+  
+  return question;
 }
