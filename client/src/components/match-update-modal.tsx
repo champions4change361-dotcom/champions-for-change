@@ -168,7 +168,7 @@ export default function MatchUpdateModal({
               <SelectTrigger data-testid="select-status">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-[60]">
                 <SelectItem value="upcoming">Upcoming</SelectItem>
                 <SelectItem value="in-progress">In Progress</SelectItem>
                 <SelectItem value="completed">Completed</SelectItem>
@@ -184,7 +184,7 @@ export default function MatchUpdateModal({
                 <SelectTrigger data-testid="select-winner">
                   <SelectValue placeholder="Select winner" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="z-[60]">
                   {match.team1 && <SelectItem value={match.team1}>{match.team1}</SelectItem>}
                   {match.team2 && <SelectItem value={match.team2}>{match.team2}</SelectItem>}
                 </SelectContent>
