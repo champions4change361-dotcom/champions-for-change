@@ -204,17 +204,34 @@ export async function handleAIConversation(req: Request, res: Response) {
 function analyzeIntent(message: string): string {
   const lowerMessage = message.toLowerCase();
   
-  // Tournament creation (including common typos and sports-specific terms)
-  if (lowerMessage.includes('tournament') || lowerMessage.includes('tournamenbt') || lowerMessage.includes('tournamenent') || 
-      lowerMessage.includes('competition') || lowerMessage.includes('event') || lowerMessage.includes('bracket') ||
-      lowerMessage.includes('track meet') || lowerMessage.includes('track and field') || 
-      lowerMessage.includes('basketball') || lowerMessage.includes('soccer') || lowerMessage.includes('football') ||
-      lowerMessage.includes('volleyball') || lowerMessage.includes('swimming') || lowerMessage.includes('swim') || lowerMessage.includes('tennis') ||
-      lowerMessage.includes('baseball') || lowerMessage.includes('softball') || lowerMessage.includes('golf') ||
-      lowerMessage.includes('wrestling') || lowerMessage.includes('cheerleading') || 
-      lowerMessage.includes('championship') || lowerMessage.includes('league') || lowerMessage.includes('playoff') ||
-      (lowerMessage.includes('meet') && (lowerMessage.includes('set up') || lowerMessage.includes('need') || lowerMessage.includes('create') || lowerMessage.includes('build'))) ||
-      (lowerMessage.includes('sport') && (lowerMessage.includes('set up') || lowerMessage.includes('need') || lowerMessage.includes('create') || lowerMessage.includes('build')))) {
+  // Tournament creation (including all sports, games, and competition types)
+  const competitionKeywords = [
+    // Tournament/Competition words
+    'tournament', 'tournamenbt', 'tournamenent', 'competition', 'event', 'bracket', 'championship', 'league', 'playoff', 'match', 'contest',
+    
+    // Traditional Sports
+    'basketball', 'soccer', 'football', 'volleyball', 'swimming', 'swim', 'tennis', 'baseball', 'softball', 'golf', 'wrestling', 'boxing',
+    'track', 'track and field', 'athletics', 'cross country', 'cheerleading', 'gymnastics', 'diving', 'water polo', 'hockey', 'skating',
+    'cycling', 'fishing', 'martial arts', 'karate', 'taekwondo', 'judo', 'mma',
+    
+    // Board Games & Mental Sports
+    'chess', 'checkers', 'scrabble', 'poker', 'bridge', 'card game',
+    
+    // Esports & Gaming
+    'esports', 'e-sports', 'gaming', 'video game',
+    
+    // Academic Competitions
+    'debate', 'quiz bowl', 'academic bowl', 'spelling bee', 'math competition', 'science fair', 'science olympiad', 'mathcounts', 'forensics',
+    
+    // Other Competition Types
+    'dance', 'trivia', 'knowledge bowl'
+  ];
+  
+  const hasCompetitionKeyword = competitionKeywords.some(keyword => lowerMessage.includes(keyword));
+  const hasMeetContext = lowerMessage.includes('meet') && (lowerMessage.includes('set up') || lowerMessage.includes('need') || lowerMessage.includes('create') || lowerMessage.includes('build'));
+  const hasSportContext = lowerMessage.includes('sport') && (lowerMessage.includes('set up') || lowerMessage.includes('need') || lowerMessage.includes('create') || lowerMessage.includes('build'));
+  
+  if (hasCompetitionKeyword || hasMeetContext || hasSportContext) {
     return 'tournament_creation';
   }
   
@@ -255,20 +272,61 @@ function extractContextFromMessage(message: string): any {
     context.participantCount = participantMatch[1];
   }
   
-  // Extract sports (with variations)
+  // Extract sports and competitions (with variations)
   const sportsMap = {
-    'swimming': ['swimming', 'swim'],
-    'basketball': ['basketball', 'bball', 'hoops'],
-    'football': ['football'],
-    'soccer': ['soccer'],
-    'volleyball': ['volleyball', 'vball'],
-    'tennis': ['tennis'],
-    'golf': ['golf'],
-    'track': ['track', 'track and field'],
-    'baseball': ['baseball'],
-    'softball': ['softball'],
-    'wrestling': ['wrestling'],
-    'cross country': ['cross country', 'xc']
+    // Water Sports
+    'swimming': ['swimming', 'swim', 'swim meet', 'swimming meet', 'pool', 'aquatic'],
+    'diving': ['diving', 'dive', 'platform diving', 'springboard'],
+    'water polo': ['water polo', 'polo'],
+    
+    // Team Sports  
+    'basketball': ['basketball', 'bball', 'hoops', 'basketball game', 'basketball match'],
+    'football': ['football', 'american football', 'gridiron'],
+    'soccer': ['soccer', 'football match', 'futbol', 'association football'],
+    'volleyball': ['volleyball', 'vball', 'beach volleyball', 'indoor volleyball'],
+    'baseball': ['baseball', 'ball game', 'little league'],
+    'softball': ['softball', 'slow pitch', 'fast pitch'],
+    
+    // Individual Sports
+    'tennis': ['tennis', 'tennis match', 'tennis tournament'],
+    'golf': ['golf', 'golf tournament', 'golf competition'],
+    'wrestling': ['wrestling', 'wrestling match', 'grappling'],
+    'boxing': ['boxing', 'boxing match', 'boxing tournament'],
+    'martial arts': ['martial arts', 'karate', 'taekwondo', 'judo', 'mma'],
+    
+    // Track & Field
+    'track and field': ['track', 'track and field', 'track meet', 'field day', 'athletics', 'athletics meet', 'running', 'field events'],
+    'cross country': ['cross country', 'xc', 'distance running'],
+    
+    // Winter Sports
+    'skiing': ['skiing', 'ski', 'downhill', 'slalom'],
+    'ice hockey': ['ice hockey', 'hockey', 'puck'],
+    'figure skating': ['figure skating', 'skating', 'ice skating'],
+    
+    // Board Games & Mental Sports
+    'chess': ['chess', 'chess tournament', 'chess match', 'chess competition'],
+    'checkers': ['checkers', 'draughts', 'checker tournament'],
+    'scrabble': ['scrabble', 'word game', 'scrabble tournament'],
+    'poker': ['poker', 'poker tournament', 'texas holdem', 'card tournament'],
+    'bridge': ['bridge', 'contract bridge', 'bridge tournament'],
+    
+    // Esports & Gaming
+    'esports': ['esports', 'e-sports', 'gaming', 'video game', 'gaming tournament', 'esports tournament'],
+    'chess (digital)': ['online chess', 'digital chess', 'chess.com'],
+    
+    // Academic Competitions
+    'debate': ['debate', 'debate tournament', 'forensics', 'speech and debate'],
+    'quiz bowl': ['quiz bowl', 'academic bowl', 'trivia', 'knowledge bowl'],
+    'spelling bee': ['spelling bee', 'spelling', 'spelling competition'],
+    'math competition': ['math competition', 'mathematics', 'math contest', 'mathcounts'],
+    'science fair': ['science fair', 'science competition', 'science olympiad'],
+    
+    // Other Sports
+    'cheerleading': ['cheerleading', 'cheer', 'cheerleader competition'],
+    'dance': ['dance', 'dance competition', 'dance tournament'],
+    'gymnastics': ['gymnastics', 'gymnastic', 'tumbling'],
+    'cycling': ['cycling', 'bike race', 'bicycle', 'cycling competition'],
+    'fishing': ['fishing', 'angling', 'fishing tournament', 'bass tournament']
   };
   
   const lowerMessage = message.toLowerCase();
@@ -316,6 +374,22 @@ function generatePlatformResponse(message: string, intent: string, domain: strin
     
     if (lowerMessage.includes('swimming') || lowerMessage.includes('swim')) {
       return `Great choice! Swimming meets have unique requirements! 🏊‍♀️\n\n**Swimming Meet Setup:**\n• Time-based events (freestyle, backstroke, breaststroke, butterfly)\n• Individual and relay events\n• Heat sheets and lane assignments\n• Automatic timing integration\n\n**Questions to get started:**\n1. How many swimmers/teams are participating?\n2. Which events do you want to include?\n3. Will this be a one-day or multi-day meet?\n\nI'll help you create the perfect swimming competition!`;
+    }
+    
+    if (lowerMessage.includes('chess')) {
+      return `Excellent! Chess tournaments are strategic competitions! ♟️\n\n**Chess Tournament Setup:**\n• Swiss system or round-robin formats\n• Time controls (blitz, rapid, classical)\n• Rating-based pairings\n• Tournament software integration\n\n**Questions to get started:**\n1. How many players will participate?\n2. What time control? (5+0, 15+10, 90+30, etc.)\n3. How many rounds?\n4. Will this be rated or unrated?\n\nI'll help you organize the perfect chess competition!`;
+    }
+    
+    if (lowerMessage.includes('debate') || lowerMessage.includes('forensics')) {
+      return `Perfect! Debate tournaments require careful organization! 🎤\n\n**Debate Tournament Setup:**\n• Format selection (Policy, Lincoln-Douglas, Public Forum)\n• Round scheduling and judge assignments\n• Topic preparation and evidence rules\n• Elimination bracket management\n\n**Questions to get started:**\n1. What debate format are you using?\n2. How many schools/teams participating?\n3. How many preliminary rounds?\n4. Do you need judge recruitment?\n\nI'll help you create an excellent debate tournament!`;
+    }
+    
+    if (lowerMessage.includes('esports') || lowerMessage.includes('gaming') || lowerMessage.includes('video game')) {
+      return `Awesome! Esports tournaments are exciting! 🎮\n\n**Esports Tournament Setup:**\n• Game selection and platform setup\n• Bracket management (single/double elimination)\n• Stream coordination and broadcasting\n• Prize distribution and sponsorships\n\n**Questions to get started:**\n1. What game are you featuring?\n2. Online or LAN tournament?\n3. How many players/teams?\n4. Prize pool or just for fun?\n\nI'll help you create an amazing esports tournament!`;
+    }
+    
+    if (lowerMessage.includes('academic') || lowerMessage.includes('quiz bowl') || lowerMessage.includes('spelling bee')) {
+      return `Great choice! Academic competitions build knowledge! 🧠\n\n**Academic Tournament Setup:**\n• Subject area selection and question preparation\n• Team vs individual format options\n• Scoring systems and tie-breaker rules\n• Achievement recognition and awards\n\n**Questions to get started:**\n1. What academic subject area?\n2. Grade levels participating?\n3. Team competition or individual?\n4. How many rounds/categories?\n\nI'll help you organize an excellent academic competition!`;
     }
     
     // Only ask the general question if no specific sport was mentioned
