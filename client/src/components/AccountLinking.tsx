@@ -85,17 +85,17 @@ export function AccountLinking() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 px-2 sm:px-0">
       <div className="flex items-center space-x-2 mb-4">
         <Link2 className="h-5 w-5 text-white" />
         <h3 className="text-white font-semibold">Link Your Accounts</h3>
       </div>
       
-      <p className="text-slate-300 text-sm mb-4">
+      <p className="text-slate-100 text-sm mb-4 leading-relaxed">
         Connect your account to access multiple platforms with the same login. Your Champions for Change account will work everywhere.
       </p>
 
-      <div className="grid gap-4">
+      <div className="grid gap-4 max-w-full">
         {availableLinks.map((link) => {
           const IconComponent = link.icon;
           const colorClasses = {
@@ -104,37 +104,37 @@ export function AccountLinking() {
           };
           
           return (
-            <Card key={link.domain} className={`bg-gradient-to-br ${colorClasses[link.color as keyof typeof colorClasses]}`}>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <IconComponent className={`h-6 w-6 text-${link.color}-400`} />
-                    <div>
-                      <CardTitle className="text-white">{link.name}</CardTitle>
-                      <CardDescription className={`text-${link.color}-300`}>
+            <Card key={link.domain} className={`bg-gradient-to-br ${colorClasses[link.color as keyof typeof colorClasses]} overflow-hidden`}>
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between flex-col sm:flex-row gap-3 sm:gap-0">
+                  <div className="flex items-center space-x-3 min-w-0 flex-1">
+                    <IconComponent className={`h-6 w-6 text-${link.color}-400 flex-shrink-0`} />
+                    <div className="min-w-0">
+                      <CardTitle className="text-white text-lg sm:text-xl">{link.name}</CardTitle>
+                      <CardDescription className={`text-slate-100 text-sm leading-relaxed`}>
                         {link.description}
                       </CardDescription>
                     </div>
                   </div>
-                  <Badge variant="outline" className={`border-${link.color}-500/50 text-${link.color}-400`}>
+                  <Badge variant="outline" className={`border-${link.color}-500/50 text-${link.color}-300 bg-${link.color}-500/10 flex-shrink-0`}>
                     New Access
                   </Badge>
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-3 mb-4">
+              <CardContent className="pt-0">
+                <div className="space-y-3 mb-6">
                   {link.benefits.map((benefit, index) => (
                     <div key={index} className="flex items-center space-x-2">
-                      <Check className="h-4 w-4 text-green-400" />
-                      <span className="text-white text-sm">{benefit}</span>
+                      <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
+                      <span className="text-slate-100 text-sm leading-relaxed">{benefit}</span>
                     </div>
                   ))}
                 </div>
-                <div className="flex space-x-3">
+                <div className="flex flex-col sm:flex-row gap-3">
                   <Button
                     onClick={() => linkAccountMutation.mutate(link.domain)}
                     disabled={linkAccountMutation.isPending}
-                    className={`bg-${link.color}-600 hover:bg-${link.color}-700 text-white flex-1`}
+                    className={`bg-${link.color}-600 hover:bg-${link.color}-700 text-white flex-1 min-h-[44px]`}
                     data-testid={`button-link-${link.domain.split('.')[0]}`}
                   >
                     {linkAccountMutation.isPending ? "Linking..." : "Link Account"}
@@ -143,7 +143,7 @@ export function AccountLinking() {
                   <Button
                     onClick={() => window.open(`https://${link.domain}`, '_blank')}
                     variant="outline"
-                    className={`border-${link.color}-500/50 text-${link.color}-400`}
+                    className={`border-${link.color}-500/50 text-${link.color}-300 hover:bg-${link.color}-500/10 min-h-[44px]`}
                     data-testid={`button-visit-${link.domain.split('.')[0]}`}
                   >
                     Visit

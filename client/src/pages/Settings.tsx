@@ -17,21 +17,21 @@ export default function Settings() {
       variant="default"
       className="bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900"
     >
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 px-4 sm:px-0">
           <div className="inline-flex items-center space-x-2 bg-blue-500/10 text-blue-400 px-4 py-2 rounded-full text-sm font-medium mb-4">
             <SettingsIcon className="h-4 w-4" />
             <span>Platform Configuration</span>
           </div>
-          <h1 className="text-4xl font-bold text-white mb-4">Settings</h1>
-          <p className="text-xl text-slate-300">
+          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4">Settings</h1>
+          <p className="text-lg sm:text-xl text-slate-100 leading-relaxed max-w-2xl mx-auto">
             Configure your Champions for Change tournament platform
           </p>
         </div>
 
         {/* Account Overview */}
-        <div className="bg-slate-800 border border-yellow-500/30 rounded-2xl p-8 mb-8">
-          <div className="flex items-center space-x-4 mb-6">
-            <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center relative">
+        <div className="bg-slate-800 border border-yellow-500/30 rounded-2xl p-4 sm:p-6 lg:p-8 mb-8 mx-2 sm:mx-0">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-4 mb-6">
+            <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center relative flex-shrink-0">
               <span className="text-slate-900 font-bold text-xl">
                 {(user?.firstName?.[0] || 'D')}
               </span>
@@ -39,12 +39,12 @@ export default function Settings() {
                 <Crown className="h-4 w-4 text-white" />
               </div>
             </div>
-            <div>
-              <h2 className="text-2xl font-bold text-white">
+            <div className="text-center sm:text-left">
+              <h2 className="text-xl sm:text-2xl font-bold text-white mb-1">
                 {user?.firstName || 'Daniel'} {user?.lastName || 'Thornton'}
               </h2>
-              <p className="text-yellow-400 font-medium">Platform Owner • Champions for Change</p>
-              <p className="text-slate-400">{user?.email || 'champions4change361@gmail.com'}</p>
+              <p className="text-yellow-400 font-medium mb-1">Platform Owner • Champions for Change</p>
+              <p className="text-slate-200 text-sm">{user?.email || 'champions4change361@gmail.com'}</p>
             </div>
           </div>
           
@@ -67,7 +67,7 @@ export default function Settings() {
         </div>
 
         {/* Settings Categories */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-8 mx-2 sm:mx-0">
           {/* Platform Branding */}
           <div className="bg-slate-800 border border-purple-500/30 rounded-xl p-6 hover:border-purple-400/50 transition-all cursor-pointer">
             <div className="flex items-center space-x-3 mb-4">
@@ -81,15 +81,15 @@ export default function Settings() {
             </div>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-slate-300">Primary Color</span>
+                <span className="text-slate-100">Primary Color</span>
                 <div className="w-6 h-6 bg-emerald-500 rounded border border-slate-600"></div>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-slate-300">Secondary Color</span>
+                <span className="text-slate-100">Secondary Color</span>
                 <div className="w-6 h-6 bg-blue-500 rounded border border-slate-600"></div>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-slate-300">Logo</span>
+                <span className="text-slate-100">Logo</span>
                 <span className="text-emerald-400 text-sm">Champions for Change</span>
               </div>
             </div>
@@ -108,15 +108,15 @@ export default function Settings() {
             </div>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-slate-300">Primary Domain</span>
+                <span className="text-slate-100">Primary Domain</span>
                 <span className="text-emerald-400 text-sm">trantortournaments.org</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-slate-300">SSL Certificate</span>
+                <span className="text-slate-100">SSL Certificate</span>
                 <span className="text-green-400 text-sm">✓ Active</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-slate-300">CDN Status</span>
+                <span className="text-slate-100">CDN Status</span>
                 <span className="text-green-400 text-sm">✓ Enabled</span>
               </div>
             </div>
@@ -135,15 +135,15 @@ export default function Settings() {
             </div>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-slate-300">Stripe Account</span>
+                <span className="text-slate-100">Stripe Account</span>
                 <span className="text-green-400 text-sm">✓ Connected</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-slate-300">Live Payments</span>
+                <span className="text-slate-100">Live Payments</span>
                 <span className="text-green-400 text-sm">✓ Enabled</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-slate-300">Revenue Share</span>
+                <span className="text-slate-100">Revenue Share</span>
                 <span className="text-emerald-400 text-sm">100% to Education</span>
               </div>
             </div>
@@ -162,15 +162,15 @@ export default function Settings() {
             </div>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-slate-300">Two-Factor Auth</span>
+                <span className="text-slate-100">Two-Factor Auth</span>
                 <span className="text-green-400 text-sm">✓ Enabled</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-slate-300">Session Timeout</span>
-                <span className="text-slate-400 text-sm">24 hours</span>
+                <span className="text-slate-100">Session Timeout</span>
+                <span className="text-slate-200 text-sm">24 hours</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-slate-300">API Access</span>
+                <span className="text-slate-100">API Access</span>
                 <span className="text-green-400 text-sm">✓ Full Access</span>
               </div>
             </div>
@@ -189,15 +189,15 @@ export default function Settings() {
               <h4 className="text-white font-semibold mb-3">Student Trip Fund Settings</h4>
               <div className="space-y-3">
                 <div className="flex items-center justify-between bg-slate-800/50 rounded-lg p-3">
-                  <span className="text-slate-300">Cost per Student Trip</span>
+                  <span className="text-slate-100">Cost per Student Trip</span>
                   <span className="text-emerald-400 font-semibold">$2,600</span>
                 </div>
                 <div className="flex items-center justify-between bg-slate-800/50 rounded-lg p-3">
-                  <span className="text-slate-300">Revenue Allocation</span>
+                  <span className="text-slate-100">Revenue Allocation</span>
                   <span className="text-emerald-400 font-semibold">100% Education</span>
                 </div>
                 <div className="flex items-center justify-between bg-slate-800/50 rounded-lg p-3">
-                  <span className="text-slate-300">Auto Fund Transfer</span>
+                  <span className="text-slate-100">Auto Fund Transfer</span>
                   <span className="text-green-400 font-semibold">✓ Enabled</span>
                 </div>
               </div>
@@ -207,31 +207,33 @@ export default function Settings() {
               <h4 className="text-white font-semibold mb-3">Mission Integration</h4>
               <div className="space-y-3">
                 <div className="flex items-center justify-between bg-slate-800/50 rounded-lg p-3">
-                  <span className="text-slate-300">Impact Tracking</span>
+                  <span className="text-slate-100">Impact Tracking</span>
                   <span className="text-green-400 font-semibold">✓ Active</span>
                 </div>
                 <div className="flex items-center justify-between bg-slate-800/50 rounded-lg p-3">
-                  <span className="text-slate-300">Student Reports</span>
+                  <span className="text-slate-100">Student Reports</span>
                   <span className="text-green-400 font-semibold">✓ Monthly</span>
                 </div>
                 <div className="flex items-center justify-between bg-slate-800/50 rounded-lg p-3">
-                  <span className="text-slate-300">Tax Receipts</span>
+                  <span className="text-slate-100">Tax Receipts</span>
                   <span className="text-green-400 font-semibold">✓ Automatic</span>
                 </div>
               </div>
             </div>
           </div>
           
-          {/* Account Linking Section */}
-          <Card className="md:col-span-2">
-            <CardHeader>
-              <CardTitle>Platform Access</CardTitle>
-              <CardDescription>Link your account to access other Champions for Change platforms</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <AccountLinking />
-            </CardContent>
-          </Card>
+            {/* Account Linking Section */}
+          <div className="md:col-span-2 mt-6">
+            <Card className="bg-slate-800/50 border-slate-700">
+              <CardHeader>
+                <CardTitle className="text-white">Platform Access</CardTitle>
+                <CardDescription className="text-slate-100">Link your account to access other Champions for Change platforms</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <AccountLinking />
+              </CardContent>
+            </Card>
+          </div>
         </div>
         
         {/* Sidebar Promotion */}

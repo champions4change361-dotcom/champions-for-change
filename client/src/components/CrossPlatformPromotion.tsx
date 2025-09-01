@@ -178,33 +178,33 @@ export function CrossPlatformPromotion({ placement }: CrossPlatformPromotionProp
 
   if (placement === 'sidebar' && shouldShowFantasyPromo) {
     return (
-      <Card className="bg-gradient-to-br from-purple-900/30 to-purple-800/20 border-purple-500/20">
+      <Card className="bg-gradient-to-br from-purple-900/30 to-purple-800/20 border-purple-500/20 overflow-hidden max-w-full">
         <CardHeader className="pb-3">
           <div className="flex items-center space-x-2">
-            <Crown className="h-5 w-5 text-purple-400" />
-            <CardTitle className="text-white text-lg">Coaches Lounge</CardTitle>
+            <Crown className="h-5 w-5 text-purple-400 flex-shrink-0" />
+            <CardTitle className="text-white text-lg">Captain's Lounge Fantasy</CardTitle>
           </div>
-          <CardDescription className="text-purple-300">
+          <CardDescription className="text-slate-100 text-sm leading-relaxed">
             Adult fantasy sports platform with professional leagues
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
             <div className="flex items-center space-x-2">
-              <Star className="h-4 w-4 text-yellow-400" />
-              <span className="text-white text-sm">Real money prizes</span>
+              <Star className="h-4 w-4 text-yellow-400 flex-shrink-0" />
+              <span className="text-slate-100 text-sm">Real money prizes</span>
             </div>
             <div className="flex items-center space-x-2">
-              <Users className="h-4 w-4 text-blue-400" />
-              <span className="text-white text-sm">Professional players</span>
+              <Users className="h-4 w-4 text-blue-400 flex-shrink-0" />
+              <span className="text-slate-100 text-sm">Professional players</span>
             </div>
             <div className="flex items-center space-x-2">
-              <Target className="h-4 w-4 text-green-400" />
-              <span className="text-white text-sm">Age-verified leagues</span>
+              <Target className="h-4 w-4 text-green-400 flex-shrink-0" />
+              <span className="text-slate-100 text-sm">Age-verified leagues</span>
             </div>
             <Button 
               onClick={() => window.location.href = '/coaches-lounge'}
-              className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white min-h-[44px] mt-4"
               data-testid="button-fantasy-sidebar"
             >
               Enter Captain's Lounge
