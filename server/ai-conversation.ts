@@ -209,12 +209,12 @@ function analyzeIntent(message: string): string {
       lowerMessage.includes('competition') || lowerMessage.includes('event') || lowerMessage.includes('bracket') ||
       lowerMessage.includes('track meet') || lowerMessage.includes('track and field') || 
       lowerMessage.includes('basketball') || lowerMessage.includes('soccer') || lowerMessage.includes('football') ||
-      lowerMessage.includes('volleyball') || lowerMessage.includes('swimming') || lowerMessage.includes('tennis') ||
+      lowerMessage.includes('volleyball') || lowerMessage.includes('swimming') || lowerMessage.includes('swim') || lowerMessage.includes('tennis') ||
       lowerMessage.includes('baseball') || lowerMessage.includes('softball') || lowerMessage.includes('golf') ||
       lowerMessage.includes('wrestling') || lowerMessage.includes('cheerleading') || 
       lowerMessage.includes('championship') || lowerMessage.includes('league') || lowerMessage.includes('playoff') ||
-      (lowerMessage.includes('meet') && (lowerMessage.includes('set up') || lowerMessage.includes('need') || lowerMessage.includes('create'))) ||
-      (lowerMessage.includes('sport') && (lowerMessage.includes('set up') || lowerMessage.includes('need') || lowerMessage.includes('create')))) {
+      (lowerMessage.includes('meet') && (lowerMessage.includes('set up') || lowerMessage.includes('need') || lowerMessage.includes('create') || lowerMessage.includes('build'))) ||
+      (lowerMessage.includes('sport') && (lowerMessage.includes('set up') || lowerMessage.includes('need') || lowerMessage.includes('create') || lowerMessage.includes('build')))) {
     return 'tournament_creation';
   }
   
@@ -255,11 +255,28 @@ function extractContextFromMessage(message: string): any {
     context.participantCount = participantMatch[1];
   }
   
-  // Extract sports
-  const sports = ['track', 'football', 'basketball', 'volleyball', 'tennis', 'golf', 'swimming', 'soccer', 'baseball', 'softball', 'cross country', 'wrestling'];
-  const foundSport = sports.find(sport => message.toLowerCase().includes(sport));
-  if (foundSport) {
-    context.sport = foundSport;
+  // Extract sports (with variations)
+  const sportsMap = {
+    'swimming': ['swimming', 'swim'],
+    'basketball': ['basketball', 'bball', 'hoops'],
+    'football': ['football'],
+    'soccer': ['soccer'],
+    'volleyball': ['volleyball', 'vball'],
+    'tennis': ['tennis'],
+    'golf': ['golf'],
+    'track': ['track', 'track and field'],
+    'baseball': ['baseball'],
+    'softball': ['softball'],
+    'wrestling': ['wrestling'],
+    'cross country': ['cross country', 'xc']
+  };
+  
+  const lowerMessage = message.toLowerCase();
+  for (const [sport, variations] of Object.entries(sportsMap)) {
+    if (variations.some(variation => lowerMessage.includes(variation))) {
+      context.sport = sport;
+      break;
+    }
   }
   
   // Extract time indicators
