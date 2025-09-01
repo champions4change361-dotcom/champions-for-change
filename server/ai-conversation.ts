@@ -273,10 +273,13 @@ function extractContextFromMessage(message: string): any {
   
   const lowerMessage = message.toLowerCase();
   for (const [sport, variations] of Object.entries(sportsMap)) {
-    if (variations.some(variation => lowerMessage.includes(variation))) {
-      context.sport = sport;
-      break;
+    for (const variation of variations) {
+      if (lowerMessage.includes(variation)) {
+        context.sport = sport;
+        break;
+      }
     }
+    if (context.sport) break;
   }
   
   // Extract time indicators
