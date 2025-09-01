@@ -278,15 +278,15 @@ export default function TournamentsPage() {
 
         {/* Plan info - separate row for better mobile layout */}
         <div className="flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm">
-          <span className="text-readable-light bg-gray-100 px-2 py-1 rounded">
-            Plan: <strong className="capitalize">{userPlan.replace('-', ' ')}</strong>
+          <span className="text-gray-700 bg-white/90 border border-gray-200 shadow-sm px-3 py-2 rounded-lg font-medium">
+            Plan: <strong className="capitalize text-blue-700">{userPlan.replace('-', ' ')}</strong>
           </span>
-          <span className="text-readable-light bg-gray-100 px-2 py-1 rounded">
-            Tournaments: <strong>{tournaments.length}</strong>
-            {limits.maxTournaments !== -1 && ` / ${limits.maxTournaments}`}
+          <span className="text-gray-700 bg-white/90 border border-gray-200 shadow-sm px-3 py-2 rounded-lg font-medium">
+            Tournaments: <strong className="text-green-700">{tournaments.length}</strong>
+            {limits.maxTournaments !== -1 && <strong className="text-gray-500"> / {limits.maxTournaments}</strong>}
           </span>
-          <span className="text-readable-light bg-gray-100 px-2 py-1 rounded">
-            Max Teams: <strong>{limits.maxTeamsPerTournament === -1 ? 'Unlimited' : limits.maxTeamsPerTournament}</strong>
+          <span className="text-gray-700 bg-white/90 border border-gray-200 shadow-sm px-3 py-2 rounded-lg font-medium">
+            Max Teams: <strong className="text-purple-700">{limits.maxTeamsPerTournament === -1 ? 'Unlimited' : limits.maxTeamsPerTournament}</strong>
           </span>
         </div>
       </div>
