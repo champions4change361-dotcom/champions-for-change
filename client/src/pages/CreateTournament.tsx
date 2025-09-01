@@ -143,16 +143,16 @@ function ConversationalAI() {
         )}
       </div>
 
-      {/* Input */}
-      <div className="bg-slate-800 border border-slate-600 rounded-2xl p-4">
-        <div className="flex space-x-4">
+      {/* Input - Mobile optimized */}
+      <div className="bg-slate-800 border border-slate-600 rounded-2xl p-3 sm:p-4">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
           <textarea
             data-testid="input-ai-message"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Ask me about tournaments, sports, or athletic programs..."
-            className="flex-1 bg-slate-700 border border-slate-600 rounded-lg p-3 text-white placeholder-slate-400 focus:border-blue-400 focus:outline-none resize-none"
+            className="flex-1 bg-slate-700 border border-slate-600 rounded-lg p-3 text-white placeholder-slate-400 focus:border-blue-400 focus:outline-none resize-none text-sm sm:text-base"
             rows={2}
             disabled={isLoading}
           />
@@ -160,7 +160,7 @@ function ConversationalAI() {
             data-testid="button-send-message"
             onClick={sendMessage}
             disabled={!input.trim() || isLoading}
-            className="bg-blue-500 hover:bg-blue-600 disabled:bg-slate-600 disabled:cursor-not-allowed text-white p-3 rounded-lg transition-colors flex items-center justify-center min-w-[50px]"
+            className="bg-blue-500 hover:bg-blue-600 disabled:bg-slate-600 disabled:cursor-not-allowed text-white p-3 rounded-lg transition-colors flex items-center justify-center min-w-[50px] self-end sm:self-stretch"
           >
             <Send className="h-5 w-5" />
           </button>
@@ -341,18 +341,19 @@ export default function CreateTournament() {
               </Link>
             </div>
             
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4">
               <Link href="/" className="flex items-center text-slate-300 hover:text-yellow-400 transition-colors">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Dashboard
+                <ArrowLeft className="h-4 w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Back to Dashboard</span>
+                <span className="sm:hidden">Back</span>
               </Link>
               <a 
                 href="/api/logout"
-                className="flex items-center space-x-2 px-3 py-2 text-slate-300 hover:text-yellow-400 transition-colors"
+                className="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-3 py-2 text-slate-300 hover:text-yellow-400 transition-colors"
                 title="Logout"
               >
                 <LogOut className="h-4 w-4" />
-                <span className="text-sm">Logout</span>
+                <span className="text-xs sm:text-sm">Logout</span>
               </a>
             </div>
           </div>
@@ -372,8 +373,8 @@ export default function CreateTournament() {
           </p>
         </div>
 
-        {/* Tournament Creation Options */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        {/* Tournament Creation Options - Mobile optimized */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* AI Tournament Consultation */}
           <div 
             onClick={() => setCreationMode('ai')}

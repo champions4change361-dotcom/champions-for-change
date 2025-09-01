@@ -176,37 +176,41 @@ export default function TournamentManager({ tournamentId }: TournamentManagerPro
 
   return (
     <div className="space-y-6" data-testid="tournament-manager">
-      {/* Tournament Header */}
+      {/* Tournament Header - Mobile Optimized */}
       <Card>
         <CardHeader>
-          <div className="flex items-start justify-between">
-            <div className="space-y-2">
-              <CardTitle className="text-2xl flex items-center gap-3">
+          <div className="space-y-4">
+            {/* Title and basic info */}
+            <div>
+              <CardTitle className="text-xl sm:text-2xl flex items-center gap-2 sm:gap-3 mb-2">
                 {getFormatIcon(tournament.competitionFormat)}
-                {tournament.name}
+                <span className="truncate">{tournament.name}</span>
               </CardTitle>
-              <div className="flex items-center gap-4 text-sm text-gray-600">
+              
+              {/* Mobile-first details layout */}
+              <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-sm text-gray-600">
                 <div className="flex items-center gap-1">
                   <Users className="h-4 w-4" />
-                  {tournament.teams?.length || tournament.teamSize} {tournament.competitionFormat === 'leaderboard' ? 'participants' : 'teams'}
+                  <span className="text-xs sm:text-sm">{tournament.teams?.length || tournament.teamSize} {tournament.competitionFormat === 'leaderboard' ? 'participants' : 'teams'}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Target className="h-4 w-4" />
-                  {tournament.sport}
+                  <span className="text-xs sm:text-sm">{tournament.sport}</span>
                 </div>
                 {tournament.ageGroup && (
-                  <Badge variant="outline">{tournament.ageGroup}</Badge>
+                  <Badge variant="outline" className="text-xs">{tournament.ageGroup}</Badge>
                 )}
                 {tournament.genderDivision && (
-                  <Badge variant="outline">{tournament.genderDivision}</Badge>
+                  <Badge variant="outline" className="text-xs">{tournament.genderDivision}</Badge>
                 )}
               </div>
             </div>
             
-            <div className="flex items-center gap-3">
+            {/* Status badges - separate row on mobile */}
+            <div className="flex flex-wrap items-center gap-2">
               <Badge className={getStatusColor(tournament.status)}>
                 {getStatusIcon(tournament.status)}
-                <span className="ml-1 capitalize">
+                <span className="ml-1 capitalize text-xs">
                   {tournament.status === 'stage-1' ? 'Stage 1' :
                    tournament.status === 'stage-2' ? 'Stage 2' :
                    tournament.status === 'stage-3' ? 'Stage 3' :
@@ -214,12 +218,12 @@ export default function TournamentManager({ tournamentId }: TournamentManagerPro
                 </span>
               </Badge>
               
-              <Badge variant="outline">
-                {tournament.tournamentType === 'single' ? 'Single Elimination' :
-                 tournament.tournamentType === 'double' ? 'Double Elimination' :
+              <Badge variant="outline" className="text-xs">
+                {tournament.tournamentType === 'single' ? 'Single Elim.' :
+                 tournament.tournamentType === 'double' ? 'Double Elim.' :
                  tournament.tournamentType === 'pool-play' ? 'Pool Play' :
                  tournament.tournamentType === 'round-robin' ? 'Round Robin' :
-                 tournament.tournamentType === 'swiss-system' ? 'Swiss System' :
+                 tournament.tournamentType === 'swiss-system' ? 'Swiss' :
                  tournament.tournamentType}
               </Badge>
             </div>
@@ -227,13 +231,23 @@ export default function TournamentManager({ tournamentId }: TournamentManagerPro
         </CardHeader>
       </Card>
 
-      {/* Tournament Content */}
+      {/* Tournament Content - Mobile-friendly tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${getTabsForTournament().length}, 1fr)` }}>
+        <TabsList className="grid w-full gap-1" style={{ gridTemplateColumns: `repeat(${getTabsForTournament().length}, 1fr)` }}>
           {getTabsForTournament().map((tab) => (
-            <TabsTrigger key={tab.value} value={tab.value} className="flex items-center gap-2">
+            <TabsTrigger 
+              key={tab.value} 
+              value={tab.value} 
+              className="flex items-center gap-1 p-2 text-xs sm:text-sm sm:gap-2 sm:p-3"
+            >
               {tab.icon}
-              {tab.label}
+              <span className="hidden xs:inline sm:inline">{tab.label}</span>
+              <span className="xs:hidden sm:hidden">
+                {tab.value === 'bracket' ? 'View' : 
+                 tab.value === 'standings' ? 'Stand.' :
+                 tab.value === 'analytics' ? 'Stats' :
+                 tab.value === 'settings' ? 'Set.' : tab.label}
+              </span>
             </TabsTrigger>
           ))}
         </TabsList>
