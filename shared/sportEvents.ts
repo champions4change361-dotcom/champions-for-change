@@ -385,7 +385,27 @@ export const sportEventMap = {
 
 // Helper function to get events for a sport
 export function getEventsForSport(sport: string): SportEventDefinition[] {
-  return sportEventMap[sport as keyof typeof sportEventMap] || [];
+  // Handle gender-specific sport names by extracting the base sport name
+  let baseSport = sport;
+  
+  // Handle basketball variants
+  if (sport.startsWith('Basketball')) {
+    baseSport = 'Basketball';
+  }
+  // Handle soccer variants
+  else if (sport.startsWith('Soccer')) {
+    baseSport = 'Soccer';
+  }
+  // Handle volleyball variants
+  else if (sport.startsWith('Volleyball')) {
+    baseSport = 'Volleyball';
+  }
+  // Handle other team sports that might have gender divisions
+  else if (sport.includes('(') && sport.includes(')')) {
+    baseSport = sport.split('(')[0].trim();
+  }
+  
+  return sportEventMap[baseSport as keyof typeof sportEventMap] || [];
 }
 
 // Helper function to get all available sports
