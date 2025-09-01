@@ -1,4 +1,7 @@
 import type { Request, Response } from 'express';
+import { storage } from './storage';
+import { insertTournamentSchema } from '@shared/schema';
+import { BracketGenerator } from './utils/bracket-generator';
 
 interface ConversationMessage {
   role: 'user' | 'assistant';
@@ -14,6 +17,92 @@ interface ConversationRequest {
   consultation_type: string;
 }
 
+async function createTournamentForUser(
+  req: Request,
+  message: string,
+  extractedContext: any
+): Promise<{ success: boolean; tournament?: any; error?: string }> {
+  try {
+    // Check if user is authenticated
+    const isAuth = req.isAuthenticated && req.isAuthenticated();
+    if (!isAuth || !req.user?.claims?.sub) {
+      return { success: false, error: 'User not authenticated' };
+    }
+
+    const userId = req.user.claims.sub;
+    
+    // Extract tournament details from the message
+    const tournamentDetails = extractTournamentDetailsFromMessage(message, extractedContext);
+    
+    // Get user to check limits
+    const user = await storage.getUser(userId);
+    if (!user) {
+      return { success: false, error: 'User not found' };
+    }
+
+    // Check tournament limits
+    const existingTournaments = await storage.getTournaments();
+    const userTournaments = existingTournaments.filter((t: any) => t.createdBy === userId);
+    
+    const getTournamentLimit = (plan: string, status: string) => {
+      if (status !== 'active') return 1;
+      switch (plan) {
+        case 'foundation':
+        case 'free':
+          return 3;
+        case 'tournament-organizer':
+          return 25;
+        case 'business-enterprise':
+          return 100;
+        case 'district_enterprise':
+        case 'enterprise':
+        case 'annual-pro':
+          return -1; // Unlimited
+        default:
+          return 2;
+      }
+    };
+
+    const limit = getTournamentLimit(user.subscriptionPlan || 'foundation', user.subscriptionStatus || 'inactive');
+    
+    if (limit !== -1 && userTournaments.length >= limit) {
+      return { 
+        success: false, 
+        error: `Tournament limit reached (${userTournaments.length}/${limit}) for your ${user.subscriptionPlan} plan`
+      };
+    }
+
+    // Validate and create tournament
+    const validatedData = insertTournamentSchema.parse(tournamentDetails);
+    
+    // Generate bracket structure
+    const teams = Array.isArray(validatedData.teams) ? validatedData.teams : [];
+    const teamNames = teams.map((team: any) => typeof team === 'string' ? team : team.teamName);
+    
+    const bracketStructure = BracketGenerator.generateBracket(
+      teamNames,
+      '',
+      validatedData.tournamentType || 'single',
+      validatedData.sport || 'Basketball'
+    );
+
+    // Create tournament
+    const tournamentData = {
+      ...validatedData,
+      bracket: bracketStructure,
+      status: 'upcoming' as const,
+      createdBy: userId
+    };
+
+    const tournament = await storage.createTournament(tournamentData);
+    return { success: true, tournament };
+
+  } catch (error) {
+    console.error('AI tournament creation error:', error);
+    return { success: false, error: (error as Error).message };
+  }
+}
+
 export async function handleAIConversation(req: Request, res: Response) {
   try {
     const { 
@@ -27,17 +116,36 @@ export async function handleAIConversation(req: Request, res: Response) {
     const intent = analyzeIntent(message);
     const extractedContext = extractContextFromMessage(message);
     
-    // Generate contextual response based on Champions for Change platform
-    const response = generatePlatformResponse(message, intent, domain, user_context, conversation_history);
+    let response: string;
+    let tournamentCreated = false;
+    let createdTournament: any = null;
+    
+    // Check if user wants to create a tournament and we should actually create it
+    if (intent === 'tournament_creation' && shouldCreateTournament(message)) {
+      const createResult = await createTournamentForUser(req, message, extractedContext);
+      
+      if (createResult.success) {
+        tournamentCreated = true;
+        createdTournament = createResult.tournament;
+        response = `✅ **Tournament Created Successfully!**\n\n🏆 **${createdTournament.name}**\n• Sport: ${createdTournament.sport}\n• Type: ${createdTournament.tournamentType} elimination\n• Teams: ${createdTournament.teams?.length || 0}\n• Status: ${createdTournament.status}\n\n**📋 Next Steps:**\n• Visit your Tournaments page to see your new tournament\n• Invite teams using registration codes\n• Set up brackets and start matches\n\nWould you like me to help you configure anything else for this tournament?`;
+      } else {
+        response = `❌ **Could not create tournament:** ${createResult.error}\n\nLet me help you with the setup instead. What specific tournament details would you like to configure?`;
+      }
+    } else {
+      // Generate normal conversational response
+      response = generatePlatformResponse(message, intent, domain, user_context, conversation_history);
+    }
     
     // Generate helpful suggestions for next steps
-    const suggestions = generateSuggestions(intent, domain, message);
+    const suggestions = generateSuggestions(intent, domain, message, tournamentCreated);
 
     res.json({
       response,
       suggestions,
       extracted_context: extractedContext,
       intent,
+      tournament_created: tournamentCreated,
+      tournament: createdTournament,
       success: true
     });
 
@@ -166,24 +274,112 @@ function generatePlatformResponse(message: string, intent: string, domain: strin
   return config.response;
 }
 
-function generateSuggestions(intent: string, domain: string, message?: string): string[] {
+function shouldCreateTournament(message: string): boolean {
+  const lowerMessage = message.toLowerCase();
+  
+  // Look for direct creation requests
+  const creationKeywords = [
+    'build me', 'create me', 'make me', 'set up', 'can you build',
+    'can you create', 'can you make', 'please create', 'please build',
+    'I want', 'I need', 'help me create', 'help me build'
+  ];
+  
+  return creationKeywords.some(keyword => lowerMessage.includes(keyword));
+}
+
+function extractTournamentDetailsFromMessage(message: string, context: any): any {
+  const lowerMessage = message.toLowerCase();
+  
+  // Extract tournament type
+  let tournamentType = 'single';
+  if (lowerMessage.includes('double elimination')) tournamentType = 'double';
+  if (lowerMessage.includes('round robin')) tournamentType = 'round-robin';
+  
+  // Extract sport
+  let sport = context.sport || 'Basketball';
+  if (lowerMessage.includes('basketball')) sport = 'Basketball';
+  if (lowerMessage.includes('football')) sport = 'Football';
+  if (lowerMessage.includes('soccer')) sport = 'Soccer';
+  if (lowerMessage.includes('volleyball')) sport = 'Volleyball';
+  if (lowerMessage.includes('tennis')) sport = 'Tennis';
+  if (lowerMessage.includes('track')) sport = 'Track and Field';
+  if (lowerMessage.includes('baseball')) sport = 'Baseball';
+  if (lowerMessage.includes('softball')) sport = 'Softball';
+  
+  // Extract team count
+  let teamCount = 8; // default
+  const teamMatch = message.match(/(\d+)\s*(team|participant|player)/i);
+  if (teamMatch) {
+    teamCount = parseInt(teamMatch[1]);
+  }
+  
+  // Generate tournament name
+  let name = `${sport} Tournament`;
+  if (lowerMessage.includes('championship')) name = `${sport} Championship`;
+  if (lowerMessage.includes('league')) name = `${sport} League`;
+  if (lowerMessage.includes('classic')) name = `${sport} Classic`;
+  
+  // Add date to name to make it unique
+  const today = new Date();
+  const dateStr = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  name = `${name} - ${dateStr}`;
+  
+  // Generate teams if not specified
+  const teams = [];
+  for (let i = 1; i <= teamCount; i++) {
+    teams.push(`Team ${i}`);
+  }
+  
+  return {
+    name,
+    sport,
+    tournamentType,
+    teams,
+    maxTeams: teamCount,
+    description: `AI-generated ${sport.toLowerCase()} tournament created from user request`,
+    registrationDeadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 1 week from now
+    startDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(), // 2 weeks from now
+    endDate: new Date(Date.now() + 16 * 24 * 60 * 60 * 1000).toISOString(), // 2 weeks + 2 days
+    location: 'TBD',
+    entryFee: 0,
+    prizes: [],
+    rules: [`Standard ${sport.toLowerCase()} rules apply`],
+    contactInfo: 'Tournament organizer will provide details',
+    isPublic: true,
+    allowRegistration: true,
+    sponsorships: [],
+    brackets: []
+  };
+}
+
+function generateSuggestions(intent: string, domain: string, message?: string, tournamentCreated?: boolean): string[] {
   const lowerMessage = message?.toLowerCase() || '';
+  
+  // Special suggestions when a tournament was just created
+  if (tournamentCreated) {
+    return [
+      "Show me my tournaments",
+      "How do I invite teams?",
+      "Set up registration codes",
+      "Configure tournament settings"
+    ];
+  }
   
   // Contextual suggestions based on intent and what user is asking
   if (intent === 'tournament_creation') {
     if (lowerMessage.includes('how') || lowerMessage.includes('build') || lowerMessage.includes('step')) {
       return [
-        "Walk me through Step 1",
-        "Show me tournament types", 
-        "Explain team registration",
-        "How do I set up brackets?"
+        "Build me a basketball tournament",
+        "Create me a 16 team soccer tournament", 
+        "Make me a volleyball championship",
+        "Set up a track meet"
       ];
     }
     return [
-      "Create basketball tournament",
-      "Set up track meet",
-      "Academic competition",
-      "Plan multi-sport event"
+      "Build me a basketball tournament",
+      "Create me a soccer tournament",
+      "Make me an 8 team volleyball tournament",
+      "Set up academic competition"
     ];
   }
   

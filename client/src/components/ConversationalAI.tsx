@@ -111,6 +111,20 @@ export function ConversationalAI({ domain = 'education', className = '' }: Conve
         throw new Error(data.error);
       }
 
+      // Check if a tournament was created
+      if (data.tournament_created && data.tournament) {
+        console.log('🏆 Tournament created by AI:', data.tournament);
+        
+        // Notify about tournament creation (could trigger a tournament list refresh)
+        try {
+          window.dispatchEvent(new CustomEvent('tournamentCreated', { 
+            detail: data.tournament 
+          }));
+        } catch (e) {
+          console.log('Event dispatch error (non-critical):', e);
+        }
+      }
+
       // Add AI response
       const aiMessage: ConversationalMessage = {
         id: (Date.now() + 1).toString(),
