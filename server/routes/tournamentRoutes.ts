@@ -206,12 +206,51 @@ export function registerTournamentRoutes(app: Express) {
         return res.status(404).json({ message: "Match not found" });
       }
       
+      // If match is completed with a winner, advance winner to next round
+      if (match.status === 'completed' && match.winner) {
+        await advanceWinner(match);
+      }
+      
       res.json(match);
     } catch (error) {
       console.error("Error updating match:", error);
       res.status(500).json({ message: "Failed to update match" });
     }
   });
+
+  // Helper function to advance winner to next round
+  async function advanceWinner(completedMatch: any) {
+    try {
+      const nextRound = completedMatch.round + 1;
+      const currentPosition = completedMatch.position;
+      
+      // For single elimination: position in next round = ceil(currentPosition / 2)
+      const nextPosition = Math.ceil(currentPosition / 2);
+      
+      // Find the next round match that this winner should advance to
+      const nextMatches = await storage.getMatchesByTournament(completedMatch.tournamentId);
+      const nextMatch = nextMatches.find(m => 
+        m.round === nextRound && 
+        m.position === nextPosition &&
+        (!m.bracket || m.bracket === completedMatch.bracket)
+      );
+      
+      if (nextMatch) {
+        // Determine if winner goes to team1 or team2 slot
+        // Even positions go to team1, odd positions go to team2
+        const isTeam1Slot = (currentPosition % 2 === 1);
+        
+        const updateData = isTeam1Slot 
+          ? { team1: completedMatch.winner }
+          : { team2: completedMatch.winner };
+        
+        await storage.updateMatch(nextMatch.id, updateData);
+        console.log(`✅ Advanced winner ${completedMatch.winner} from Round ${completedMatch.round} to Round ${nextRound}`);
+      }
+    } catch (error) {
+      console.error("Error advancing winner:", error);
+    }
+  }
 
   // Get leaderboard entries for a tournament
   app.get("/api/leaderboard/:tournamentId", async (req, res) => {

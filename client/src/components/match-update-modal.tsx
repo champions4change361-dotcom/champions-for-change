@@ -164,7 +164,7 @@ export default function MatchUpdateModal({
           {/* Status Selection */}
           <div className="space-y-2">
             <Label htmlFor="status">Match Status</Label>
-            <Select value={status} onValueChange={setStatus}>
+            <Select value={status} onValueChange={(value: string) => setStatus(value as 'upcoming' | 'in-progress' | 'completed')}>
               <SelectTrigger data-testid="select-status">
                 <SelectValue />
               </SelectTrigger>

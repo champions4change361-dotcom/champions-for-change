@@ -59,7 +59,7 @@ export default function PoolPlayBracket({ tournament }: PoolPlayBracketProps) {
 
   const updateMatchMutation = useMutation({
     mutationFn: async (matchData: { matchId: string; team1Score: number; team2Score: number; winner: string; status: string }) => {
-      const response = await apiRequest("PATCH", `/api/matches/${matchData.matchId}`, matchData);
+      const response = await apiRequest(`/api/matches/${matchData.matchId}`, "PATCH", matchData);
       return response.json();
     },
     onSuccess: () => {
