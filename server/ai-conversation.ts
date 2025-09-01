@@ -72,29 +72,29 @@ async function createTournamentForUser(
       };
     }
 
-    // Validate and create tournament
-    const validatedData = insertTournamentSchema.parse(tournamentDetails);
-    
-    // Generate bracket structure
-    const teams = Array.isArray(validatedData.teams) ? validatedData.teams : [];
+    // Generate bracket structure first
+    const teams = Array.isArray(tournamentDetails.teams) ? tournamentDetails.teams : [];
     const teamNames = teams.map((team: any) => typeof team === 'string' ? team : team.teamName);
     
     const bracketStructure = BracketGenerator.generateBracket(
       teamNames,
       '',
-      validatedData.tournamentType || 'single',
-      validatedData.sport || 'Basketball'
+      tournamentDetails.tournamentType || 'single',
+      tournamentDetails.sport || 'Basketball'
     );
 
-    // Create tournament
+    // Add bracket to tournament data
     const tournamentData = {
-      ...validatedData,
+      ...tournamentDetails,
       bracket: bracketStructure,
       status: 'upcoming' as const,
       createdBy: userId
     };
 
-    const tournament = await storage.createTournament(tournamentData);
+    // Validate and create tournament
+    const validatedData = insertTournamentSchema.parse(tournamentData);
+
+    const tournament = await storage.createTournament(validatedData);
     return { success: true, tournament };
 
   } catch (error) {
@@ -349,21 +349,16 @@ function extractTournamentDetailsFromMessage(message: string, context: any): any
     name,
     sport,
     tournamentType,
+    teamSize: 5, // Default team size
     teams,
-    maxTeams: teamCount,
+    maxParticipants: teamCount,
     description: `AI-generated ${sport.toLowerCase()} tournament created from user request`,
-    registrationDeadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 1 week from now
-    startDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(), // 2 weeks from now
-    endDate: new Date(Date.now() + 16 * 24 * 60 * 60 * 1000).toISOString(), // 2 weeks + 2 days
+    registrationDeadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 1 week from now
+    tournamentDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 2 weeks from now
     location: 'TBD',
-    entryFee: 0,
-    prizes: [],
-    rules: [`Standard ${sport.toLowerCase()} rules apply`],
-    contactInfo: 'Tournament organizer will provide details',
+    entryFee: "0", // String format as expected by schema
     isPublic: true,
-    allowRegistration: true,
-    sponsorships: [],
-    brackets: []
+    bracket: null // Will be set by BracketGenerator
   };
 }
 
