@@ -67,7 +67,6 @@ import GrantFunding from './pages/GrantFunding';
 import NonprofitResources from './pages/NonprofitResources';
 import OrganizationRegistration from './pages/OrganizationRegistration';
 import RoleHierarchy from './pages/RoleHierarchy';
-import CustomDesignDemo from './pages/CustomDesignDemo';
 import Schools from './pages/Schools';
 import Capabilities from './pages/Capabilities';
 import MillerHomepage from './pages/MillerHomepage';
@@ -151,7 +150,6 @@ function AuthenticatedRoutes() {
         <Route path="/game-practice-scheduler" component={GamePracticeScheduler} />
         <Route path="/nonprofit-billing" component={NonprofitBilling} />
         <Route path="/role-hierarchy" component={RoleHierarchy} />
-        <Route path="/custom-design-demo" component={CustomDesignDemo} />
         <Route path="/schools" component={Schools} />
         <Route path="/dashboard" component={RoleDashboard} />
         <Route path="/athlete-dashboard" component={AthleteDashboard} />
