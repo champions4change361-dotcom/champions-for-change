@@ -623,6 +623,18 @@ export default function EnhancedTournamentWizard({
                 </div>
               )}
 
+              {/* Swimming Events Selection */}
+              {form.watch("sport") === "Swimming & Diving" && (
+                <div className="mt-6">
+                  <SportEventsSelector
+                    sportId="swimming-diving"
+                    sportName="Swimming & Diving"
+                    onEventsSelected={setSelectedEvents}
+                    initialSelected={selectedEvents.map(e => e.id)}
+                  />
+                </div>
+              )}
+
               <div>
                 <Label htmlFor="competitionFormat" className="block text-sm font-medium text-gray-700 mb-2">
                   Competition Format *
