@@ -1,35 +1,80 @@
 import React, { useState } from 'react';
 import { Link } from 'wouter';
-import { ArrowLeft, Trophy, Sparkles, Zap, Brain, Target, Code, Monitor, LogOut, Globe, Users } from 'lucide-react';
+import { ArrowLeft, Trophy, MessageCircle, Send, Bot } from 'lucide-react';
 import { useAuth } from "@/hooks/useAuth";
+
+interface Message {
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+}
 
 export default function AIConsultation() {
   const { user } = useAuth();
-  const [query, setQuery] = useState('');
-  const [response, setResponse] = useState<any>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [consultationType, setConsultationType] = useState<'website' | 'tournament'>('website');
 
-  const handleConsultation = async () => {
-    if (!query.trim()) return;
+  const sendMessage = async () => {
+    if (!input.trim() || isLoading) return;
     
+    const userMessage: Message = {
+      role: 'user',
+      content: input.trim(),
+      timestamp: new Date()
+    };
+    
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
     setIsLoading(true);
+    
     try {
-      const res = await fetch('/api/keystone-consult', {
+      const response = await fetch('/api/ai-conversation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          user_input: query,
-          consultation_type: consultationType,
-          subscription_level: user?.subscriptionPlan || 'free'
+        body: JSON.stringify({
+          message: userMessage.content,
+          conversation_history: messages.map(m => ({
+            role: m.role,
+            content: m.content,
+            timestamp: m.timestamp
+          })),
+          domain: 'tournament_creation',
+          user_context: {
+            subscription_level: user?.subscriptionPlan || 'free'
+          }
         })
       });
-      const data = await res.json();
-      setResponse(data);
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        const assistantMessage: Message = {
+          role: 'assistant',
+          content: data.response,
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+      } else {
+        throw new Error(data.error || 'Failed to get response');
+      }
     } catch (error) {
-      console.error('AI consultation error:', error);
+      console.error('AI conversation error:', error);
+      const errorMessage: Message = {
+        role: 'assistant',
+        content: "I'm having trouble right now. Could you try asking your question again?",
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
     }
   };
 
@@ -45,370 +90,104 @@ export default function AIConsultation() {
                   <Trophy className="h-6 w-6 text-slate-900" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-white">Champions Arena</h1>
-                  <p className="text-xs text-yellow-400">Tournament Central</p>
+                  <h1 className="text-xl font-bold text-white">Champions for Change</h1>
+                  <p className="text-xs text-yellow-400">AI Tournament Assistant</p>
                 </div>
               </Link>
             </div>
             
-            <div className="flex items-center space-x-4">
-              <Link href="/" className="flex items-center text-slate-300 hover:text-yellow-400 transition-colors">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Dashboard
-              </Link>
-              <a 
-                href="/api/logout"
-                className="flex items-center space-x-2 px-3 py-2 text-slate-300 hover:text-yellow-400 transition-colors"
-                title="Logout"
-              >
-                <LogOut className="h-4 w-4" />
-                <span className="text-sm">Logout</span>
-              </a>
-            </div>
+            <Link href="/" className="flex items-center text-slate-300 hover:text-yellow-400 transition-colors">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Dashboard
+            </Link>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 h-screen flex flex-col">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center space-x-2 bg-purple-500/10 text-purple-400 px-4 py-2 rounded-full text-sm font-medium mb-4">
-            <Brain className="h-4 w-4" />
-            <span>Dual AI Consultation System</span>
+          <div className="inline-flex items-center space-x-2 bg-blue-500/10 text-blue-400 px-4 py-2 rounded-full text-sm font-medium mb-4">
+            <Bot className="h-4 w-4" />
+            <span>AI Tournament Assistant</span>
           </div>
-          <h1 className="text-4xl font-bold text-white mb-4">AI Tournament Specialists</h1>
+          <h1 className="text-4xl font-bold text-white mb-4">Tournament Expert AI</h1>
           <p className="text-xl text-slate-300">
-            Choose your AI consultant: Website Builder or Tournament Logic Expert
+            Ask me anything about creating tournaments, managing competitions, or building your athletic program!
           </p>
         </div>
 
-        {/* Consultation Type Selector */}
-        <div className="mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <button
-              data-testid="button-website-consultant"
-              onClick={() => setConsultationType('website')}
-              className={`p-6 rounded-xl border transition-all ${
-                consultationType === 'website'
-                  ? 'bg-blue-500/20 border-blue-400 text-blue-300'
-                  : 'bg-slate-800 border-slate-600 text-slate-300 hover:border-blue-400/50'
-              }`}
-            >
-              <div className="text-center">
-                <Globe className="h-12 w-12 mx-auto mb-3" />
-                <h3 className="text-xl font-bold mb-2">Website Builder AI</h3>
-                <p className="text-sm opacity-90">
-                  Creates complete tournament websites with user hierarchy management. 
-                  Jersey Watch-style link sharing: Tournament Director → Coaches → Players → Scorekeepers.
-                  Role-based access control with Champions for Change styling.
-                </p>
+        {/* Chat Messages */}
+        <div className="flex-1 bg-slate-800 border border-slate-600 rounded-2xl p-6 mb-6 overflow-y-auto">
+          {messages.length === 0 ? (
+            <div className="text-center text-slate-400 mt-20">
+              <MessageCircle className="h-16 w-16 mx-auto mb-4 opacity-50" />
+              <h3 className="text-xl font-semibold mb-2">Start a conversation</h3>
+              <p className="text-sm">Ask me about tournaments, sports management, or any athletic program needs!</p>
+              <div className="mt-6 space-y-2 text-sm">
+                <p className="bg-slate-700 px-4 py-2 rounded-lg">💡 "I need a 26 team double elimination tournament"</p>
+                <p className="bg-slate-700 px-4 py-2 rounded-lg">💡 "How do I set up a basketball bracket?"</p>
+                <p className="bg-slate-700 px-4 py-2 rounded-lg">💡 "Create a swimming meet with timing events"</p>
               </div>
-            </button>
-
-            <button
-              data-testid="button-tournament-consultant"
-              onClick={() => setConsultationType('tournament')}
-              className={`p-6 rounded-xl border transition-all ${
-                consultationType === 'tournament'
-                  ? 'bg-purple-500/20 border-purple-400 text-purple-300'
-                  : 'bg-slate-800 border-slate-600 text-slate-300 hover:border-purple-400/50'
-              }`}
-            >
-              <div className="text-center">
-                <Trophy className="h-12 w-12 mx-auto mb-3" />
-                <h3 className="text-xl font-bold mb-2">Tournament Logic AI</h3>
-                <p className="text-sm opacity-90">
-                  Builds sport-specific tournament structures. Basketball gets March Madness brackets, 
-                  Swimming gets performance leaderboards, Baseball gets playoff-to-World Series formats.
-                </p>
-              </div>
-            </button>
-          </div>
-        </div>
-
-        {/* AI Consultation Interface */}
-        <div className="bg-slate-800 border border-purple-500/30 rounded-2xl p-8 mb-8">
-          <div className="mb-6">
-            <label className="block text-white font-semibold mb-3">
-              {consultationType === 'website' 
-                ? 'Describe your tournament website needs:'
-                : 'Describe your tournament structure requirements:'
-              }
-            </label>
-            <textarea
-              data-testid="input-ai-query"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder={
-                consultationType === 'website'
-                  ? "Try: 'Build a tournament website where I can share links with coaches, coaches can add/remove players, and scorekeepers can only update assigned events'"
-                  : "Try: 'Create a 16-team basketball bracket with March Madness style' or 'Swimming meet with performance leaderboards'"
-              }
-              className="w-full h-32 bg-slate-700 border border-slate-600 rounded-lg p-4 text-white placeholder-slate-400 focus:border-purple-400 focus:outline-none resize-none"
-              autoFocus
-            />
-          </div>
-          
-          <button
-            data-testid="button-get-consultation"
-            onClick={handleConsultation}
-            disabled={isLoading || !query.trim()}
-            className="w-full bg-purple-500 hover:bg-purple-600 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center space-x-2"
-          >
-            {isLoading ? (
-              <>
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                <span>Analyzing...</span>
-              </>
-            ) : (
-              <>
-                <Sparkles className="h-5 w-5" />
-                <span>{consultationType === 'website' ? 'Build Website' : 'Design Tournament'}</span>
-              </>
-            )}
-          </button>
-        </div>
-
-        {/* AI Response */}
-        {response && (
-          <div className="bg-slate-800 border border-emerald-500/30 rounded-2xl p-8 mb-8">
-            <div className="flex items-center space-x-2 mb-6">
-              <Target className="h-6 w-6 text-emerald-400" />
-              <h3 className="text-2xl font-bold text-white">AI Recommendations</h3>
             </div>
-            
-            <div className="space-y-6">
-              <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-6">
-                <h4 className="text-emerald-400 font-semibold mb-3">Strategic Recommendation</h4>
-                <div className="text-white whitespace-pre-line">{response.recommendation}</div>
-              </div>
-
-              {/* Intelligent Tournament Structure Display */}
-              {response.tier2_generation?.intelligent_tournament_structure && (
-                <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/30 rounded-lg p-6">
-                  <h4 className="text-blue-400 font-semibold mb-4 flex items-center">
-                    <Brain className="h-5 w-5 mr-2" />
-                    Intelligent Tournament Structure
-                  </h4>
-                  <div className="space-y-4">
-                    <div className="bg-slate-700/50 rounded-lg p-4">
-                      <div className="text-sm text-slate-400 mb-2">Recommended Format</div>
-                      <div className="text-white font-semibold text-lg">{response.tier2_generation.intelligent_tournament_structure.format}</div>
-                      <div className="text-slate-300 text-sm mt-2">{response.tier2_generation.intelligent_tournament_structure.naturalReason}</div>
-                    </div>
-                    
-                    {response.tier2_generation.intelligent_tournament_structure.events && (
-                      <div className="bg-slate-700/50 rounded-lg p-4">
-                        <div className="text-sm text-slate-400 mb-2">Events Included</div>
-                        <div className="flex flex-wrap gap-2">
-                          {response.tier2_generation.intelligent_tournament_structure.events.map((event: string, idx: number) => (
-                            <span key={idx} className="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-sm">{event}</span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Implementation Code Section */}
-              {response.tier2_generation?.implementation_code && (
-                <div className="bg-slate-900 border border-green-500/30 rounded-lg p-6">
-                  <h4 className="text-green-400 font-semibold mb-4 flex items-center">
-                    <Code className="h-5 w-5 mr-2" />
-                    Copy-Paste Implementation Code
-                  </h4>
-                  <div className="bg-black rounded-lg p-4 overflow-x-auto">
-                    <pre className="text-green-300 text-sm font-mono">
-                      <code>{response.tier2_generation.implementation_code}</code>
-                    </pre>
-                  </div>
-                  <div className="mt-4 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
-                    <div className="text-green-400 text-sm font-semibold">Ready to Deploy</div>
-                    <div className="text-slate-300 text-sm">This code works with any JavaScript framework or vanilla HTML. Copy and paste to implement the tournament structure.</div>
-                  </div>
-                </div>
-              )}
-
-              {/* Complete Website Code - Show if available regardless of subscription for demo */}
-              {(response.tier3_full_service?.intelligent_tournament_logic?.complete_website_template || 
-                response.tier3_full_service?.custom_webpage?.complete_website_html || 
-                response.tier3_full_service?.custom_webpage?.deployable_code) && (
-                <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/30 rounded-lg p-6">
-                  <h4 className="text-purple-400 font-semibold mb-4 flex items-center">
-                    <Monitor className="h-5 w-5 mr-2" />
-                    🚀 Complete Deployable Website
-                  </h4>
-                  
-                  <div className="space-y-4">
-                    <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
-                      <div className="text-yellow-400 font-semibold mb-2">⚡ Ready to Deploy!</div>
-                      <div className="text-slate-300 text-sm">
-                        Complete HTML website with Champions for Change branding, educational impact tracking, and sport-specific tournament structure.
-                      </div>
-                    </div>
-                    
-                    <div className="bg-slate-900 rounded-lg p-4 max-h-96 overflow-y-auto">
-                      <div className="flex justify-between items-center mb-4">
-                        <span className="text-purple-300 font-semibold">Complete Website Code</span>
-                        <button 
-                          data-testid="button-copy-website-code"
-                          onClick={() => {
-                            const code = response.tier3_full_service.intelligent_tournament_logic?.complete_website_template || 
-                                       response.tier3_full_service.custom_webpage?.complete_website_html || 
-                                       response.tier3_full_service.custom_webpage?.deployable_code || 
-                                       'No website code available';
-                            navigator.clipboard.writeText(code);
-                          }}
-                          className="bg-purple-500 hover:bg-purple-600 text-white px-3 py-1 rounded text-sm transition-colors"
-                        >
-                          Copy All
-                        </button>
-                      </div>
-                      <pre className="text-purple-200 text-xs font-mono leading-relaxed">
-                        <code>{
-                          response.tier3_full_service.intelligent_tournament_logic?.complete_website_template || 
-                          response.tier3_full_service.custom_webpage?.complete_website_html || 
-                          response.tier3_full_service.custom_webpage?.deployable_code || 
-                          'Generating complete website code...'
-                        }</code>
-                      </pre>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="bg-slate-700/50 rounded-lg p-4">
-                        <div className="text-sm text-slate-400 mb-2">Implementation</div>
-                        <div className="text-purple-300 text-sm">
-                          {response.tier3_full_service.intelligent_tournament_logic?.implementation_instructions || 
-                           "1. Copy the HTML code 2. Save as .html file 3. Deploy to any web hosting 4. Customize branding as needed"}
-                        </div>
-                      </div>
-                      
-                      <div className="bg-slate-700/50 rounded-lg p-4">
-                        <div className="text-sm text-slate-400 mb-2">Platform Support</div>
-                        <div className="text-purple-300 text-sm">
-                          {response.tier3_full_service.intelligent_tournament_logic?.platform_integration || 
-                           "Complete HTML/CSS/JS website ready to deploy anywhere"}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Custom Webpage Template */}
-              {response.tier3_full_service?.custom_webpage && (
-                <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/30 rounded-lg p-6">
-                  <h4 className="text-purple-400 font-semibold mb-4 flex items-center">
-                    <Monitor className="h-5 w-5 mr-2" />
-                    Website Configuration
-                  </h4>
-                  <div className="space-y-4">
-                    <div className="bg-slate-700/50 rounded-lg p-4">
-                      <div className="text-sm text-slate-400 mb-2">Domain Suggestions</div>
-                      {response.tier3_full_service.custom_webpage.domain_suggestions.map((domain: string, idx: number) => (
-                        <div key={idx} className="text-purple-300 font-mono text-sm bg-slate-800 px-3 py-1 rounded mb-2">{domain}</div>
-                      ))}
-                    </div>
-                    
-                    <div className="bg-slate-700/50 rounded-lg p-4">
-                      <div className="text-sm text-slate-400 mb-2">SEO Optimized</div>
-                      <div className="text-white font-semibold">{response.tier3_full_service.custom_webpage.seo_optimization.title}</div>
-                      <div className="text-slate-300 text-sm mt-1">{response.tier3_full_service.custom_webpage.seo_optimization.description}</div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Subscription Tier Info */}
-              {response.sport !== 'Custom Tournament' && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="bg-slate-700 rounded-lg p-4 text-center">
-                    <div className="text-sm text-slate-400 mb-1">Sport</div>
-                    <div className="text-white font-semibold">{response.sport}</div>
-                  </div>
-                  <div className="bg-slate-700 rounded-lg p-4 text-center">
-                    <div className="text-sm text-slate-400 mb-1">Format</div>
-                    <div className="text-white font-semibold">{response.format}</div>
-                  </div>
-                  <div className="bg-slate-700 rounded-lg p-4 text-center">
-                    <div className="text-sm text-slate-400 mb-1">Age Group</div>
-                    <div className="text-white font-semibold">{response.age_group}</div>
-                  </div>
-                  <div className="bg-slate-700 rounded-lg p-4 text-center">
-                    <div className="text-sm text-slate-400 mb-1">Participants</div>
-                    <div className="text-white font-semibold">{response.estimated_participants}</div>
-                  </div>
-                </div>
-              )}
-
-              {response.tier3_full_service && (
-                <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-6">
-                  <h4 className="text-blue-400 font-semibold mb-3">Webpage Generation Available</h4>
-                  <p className="text-slate-300 mb-4">
-                    Your District Enterprise subscription includes custom webpage generation!
-                  </p>
-                  <Link 
-                    href="/webpage-builder"
-                    className="inline-flex items-center space-x-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors"
+          ) : (
+            <div className="space-y-4">
+              {messages.map((message, index) => (
+                <div
+                  key={index}
+                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div
+                    className={`max-w-[80%] p-4 rounded-2xl ${
+                      message.role === 'user'
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-slate-700 text-slate-100'
+                    }`}
                   >
-                    <Sparkles className="h-4 w-4" />
-                    <span>Build Tournament Webpage</span>
-                  </Link>
-                </div>
-              )}
-
-              {response.tier1_consultation && (
-                <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-6">
-                  <h4 className="text-yellow-400 font-semibold mb-3">Champions for Change Integration</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <h5 className="text-white font-medium mb-2">Fundraising Opportunities</h5>
-                      <ul className="text-slate-300 text-sm space-y-1">
-                        {response.tier1_consultation.champions_for_change_integration.fundraising_opportunities.map((item: string, index: number) => (
-                          <li key={index}>• {item}</li>
-                        ))}
-                      </ul>
+                    <div className="whitespace-pre-wrap">{message.content}</div>
+                    <div className="text-xs opacity-70 mt-2">
+                      {message.timestamp.toLocaleTimeString()}
                     </div>
-                    <div>
-                      <h5 className="text-white font-medium mb-2">Educational Tie-ins</h5>
-                      <ul className="text-slate-300 text-sm space-y-1">
-                        {response.tier1_consultation.champions_for_change_integration.educational_tie_ins.map((item: string, index: number) => (
-                          <li key={index}>• {item}</li>
-                        ))}
-                      </ul>
+                  </div>
+                </div>
+              ))}
+              {isLoading && (
+                <div className="flex justify-start">
+                  <div className="bg-slate-700 text-slate-100 p-4 rounded-2xl">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                      <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                      <span className="text-sm text-slate-400 ml-2">AI is thinking...</span>
                     </div>
                   </div>
                 </div>
               )}
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
-        {/* Feature Examples */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
-            <Zap className="h-8 w-8 text-yellow-400 mb-4" />
-            <h3 className="text-white font-semibold mb-2">Quick Analysis</h3>
-            <p className="text-slate-400 text-sm">
-              Get instant tournament structure recommendations based on your sport and requirements.
-            </p>
-          </div>
-          
-          <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
-            <Brain className="h-8 w-8 text-purple-400 mb-4" />
-            <h3 className="text-white font-semibold mb-2">Smart Suggestions</h3>
-            <p className="text-slate-400 text-sm">
-              AI-powered advice on scheduling, venues, and fundraising strategies for Champions for Change.
-            </p>
-          </div>
-          
-          <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
-            <Target className="h-8 w-8 text-emerald-400 mb-4" />
-            <h3 className="text-white font-semibold mb-2">Mission-Focused</h3>
-            <p className="text-slate-400 text-sm">
-              Every recommendation includes ways to maximize student trip funding and educational impact.
-            </p>
+        {/* Input */}
+        <div className="bg-slate-800 border border-slate-600 rounded-2xl p-4">
+          <div className="flex space-x-4">
+            <textarea
+              data-testid="input-ai-message"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Ask me about tournaments, sports, or athletic programs..."
+              className="flex-1 bg-slate-700 border border-slate-600 rounded-lg p-3 text-white placeholder-slate-400 focus:border-blue-400 focus:outline-none resize-none"
+              rows={2}
+              disabled={isLoading}
+            />
+            <button
+              data-testid="button-send-message"
+              onClick={sendMessage}
+              disabled={!input.trim() || isLoading}
+              className="bg-blue-500 hover:bg-blue-600 disabled:bg-slate-600 disabled:cursor-not-allowed text-white p-3 rounded-lg transition-colors flex items-center justify-center min-w-[50px]"
+            >
+              <Send className="h-5 w-5" />
+            </button>
           </div>
         </div>
       </main>
