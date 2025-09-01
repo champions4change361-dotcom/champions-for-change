@@ -70,6 +70,7 @@ export default function EnhancedTournamentWizard({
   const queryClient = useQueryClient();
   const [currentStep, setCurrentStep] = useState<WizardStep>('sport');
   const [teams, setTeams] = useState<TeamData[]>([]);
+  const [skipTeamSetup, setSkipTeamSetup] = useState(false);
   const [createdTournament, setCreatedTournament] = useState<any>(null);
   const [isDraftSaving, setIsDraftSaving] = useState(false);
   const [autoSaveStatus, setAutoSaveStatus] = useState<'saved' | 'saving' | 'error' | null>(null);
@@ -296,7 +297,7 @@ export default function EnhancedTournamentWizard({
         ...data,
         teams: data.teams,
         entryFee: data.entryFee ? String(data.entryFee) : "0", // Convert to string for numeric field
-        tournamentDate: data.tournamentDate ? new Date(data.tournamentDate).toISOString() : null, // Convert to ISO string for backend
+        tournamentDate: data.tournamentDate || null, // Keep as is for string-based backend
         scoringMethod: selectedSport?.scoringMethod || "wins",
         isGuestCreated: !user, // Mark as guest-created for tournaments created without login
       };
@@ -341,7 +342,7 @@ export default function EnhancedTournamentWizard({
         teams: data.teams,
         status: 'draft',
         entryFee: data.entryFee ? String(data.entryFee) : "0", // Convert to string for numeric field
-        tournamentDate: data.tournamentDate ? new Date(data.tournamentDate).toISOString() : null, // Convert to ISO string for backend
+        tournamentDate: data.tournamentDate || null, // Keep as is for string-based backend
         scoringMethod: selectedSport?.scoringMethod || "wins",
         isGuestCreated: !user,
       };
@@ -386,7 +387,8 @@ export default function EnhancedTournamentWizard({
       case 'size':
         return !!(form.watch("teamSize") && form.watch("name"));
       case 'teams':
-        return teams.filter(t => t.teamName.trim()).length === teamSize;
+        // Names are now optional - always allow proceeding
+        return true;
       case 'preview':
         return true;
       case 'start':
@@ -858,12 +860,23 @@ export default function EnhancedTournamentWizard({
           )}
 
           {currentStep === 'teams' && (
-            <TeamManagement
-              teamCount={teamSize}
-              onTeamsUpdate={handleTeamsUpdate}
-              tournamentType={userType}
-              competitionFormat={competitionFormat}
-            />
+            <div className="space-y-6">
+              {/* Optional Notice */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h3 className="font-medium text-blue-900 mb-2">Participant Names (Optional)</h3>
+                <p className="text-sm text-blue-700">
+                  You can add participant names now or skip this step. If you skip, we'll create placeholder names 
+                  that you can edit directly in your tournament bracket or leaderboard after creation.
+                </p>
+              </div>
+              
+              <TeamManagement
+                teamCount={teamSize}
+                onTeamsUpdate={handleTeamsUpdate}
+                tournamentType={userType}
+                competitionFormat={competitionFormat}
+              />
+            </div>
           )}
 
           {currentStep === 'preview' && (

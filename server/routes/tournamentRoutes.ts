@@ -115,16 +115,21 @@ export function registerTournamentRoutes(app: Express) {
         });
       }
 
-      // Parse and transform the data to handle date strings
-      const requestData = {
-        ...req.body,
-        tournamentDate: req.body.tournamentDate ? new Date(req.body.tournamentDate) : null
-      };
-      const validatedData = insertTournamentSchema.parse(requestData);
+      // Parse the data directly - schema now expects strings
+      const validatedData = insertTournamentSchema.parse(req.body);
       
       // Generate bracket structure based on tournament type
       const teams = Array.isArray(validatedData.teams) ? validatedData.teams : [];
-      const teamNames = teams.map((team: any) => typeof team === 'string' ? team : team.teamName);
+      let teamNames = teams.map((team: any) => typeof team === 'string' ? team : team.teamName);
+      
+      // If no team names provided, generate placeholders
+      if (teamNames.length === 0 || teamNames.every(name => !name || name.trim() === '')) {
+        const teamSize = validatedData.teamSize || 8;
+        const isLeaderboard = validatedData.competitionFormat === 'leaderboard';
+        teamNames = Array.from({ length: teamSize }, (_, i) => 
+          isLeaderboard ? `Participant ${i + 1}` : `Team ${i + 1}`
+        );
+      }
       
       // Generate proper bracket structure
       const bracketStructure = BracketGenerator.generateBracket(
