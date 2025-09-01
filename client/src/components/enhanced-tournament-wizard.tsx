@@ -323,7 +323,8 @@ export default function EnhancedTournamentWizard({
     },
     onSuccess: (data) => {
       setCreatedTournament(data.tournament);
-      setCurrentStep('start');
+      // Stay on launch step to show success message
+      // setCurrentStep('launch'); // Keep on current step
       toast({
         title: "Tournament Created Successfully!",
         description: `${data.tournament.name} has been created successfully with ${selectedEvents.length} event${selectedEvents.length !== 1 ? 's' : ''}.`,
@@ -430,7 +431,9 @@ export default function EnhancedTournamentWizard({
 
   const handleCreateTournament = () => {
     const formData = form.getValues();
-    createTournamentMutation.mutate({ ...formData, teams: [], selectedEvents, eventRecorders });
+    // For event-based tournaments, we create the tournament first
+    // Participants will register for specific events later
+    createTournamentMutation.mutate({ ...formData, teams: [] });
   };
 
   const handleEventRecorderUpdate = (eventName: string, recorder: string) => {
@@ -1067,7 +1070,7 @@ export default function EnhancedTournamentWizard({
               <div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">Tournament Created Successfully!</h3>
                 <p className="text-gray-600">
-                  <strong>{createdTournament.name}</strong> has been created successfully with {selectedEvents.length} event{selectedEvents.length !== 1 ? 's' : ''}.
+                  <strong>{createdTournament.name}</strong> has been created! Participants can now register for events through the event-specific registration system.
                 </p>
               </div>
 
@@ -1093,7 +1096,7 @@ export default function EnhancedTournamentWizard({
       </Card>
 
       {/* Navigation */}
-      {currentStep !== 'start' && (
+      {!createdTournament && (
         <Card>
           <CardContent className="pt-6">
             <div className="flex justify-between">
