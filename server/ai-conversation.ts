@@ -25,11 +25,11 @@ async function createTournamentForUser(
   try {
     // Check if user is authenticated
     const isAuth = req.isAuthenticated && req.isAuthenticated();
-    if (!isAuth || !req.user?.claims?.sub) {
+    if (!isAuth || !(req.user as any)?.claims?.sub) {
       return { success: false, error: 'User not authenticated' };
     }
 
-    const userId = req.user.claims.sub;
+    const userId = (req.user as any).claims.sub;
     
     // Extract tournament details from the message
     const tournamentDetails = extractTournamentDetailsFromMessage(message, extractedContext);
