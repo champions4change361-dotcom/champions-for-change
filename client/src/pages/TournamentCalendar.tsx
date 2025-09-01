@@ -811,6 +811,55 @@ export default function TournamentCalendar() {
       divisions: ['Class 4A', 'Class 5A', 'Class 6A'],
       estimatedTeams: 90,
       status: 'open'
+    },
+
+    // CALIFORNIA CHEER/DANCE TOURNAMENTS
+    // California - Spirit Championships (Cheer/Dance)
+    {
+      id: '43',
+      title: 'California Spirit Championships',
+      organizer: 'California Interscholastic Federation',
+      organizerEmail: 'cheer@cifstate.org',
+      date: '2025-12-12',
+      time: '9:00 AM - 6:00 PM',
+      location: 'Los Angeles, California',
+      region: 'California',
+      sport: 'Cheer/Dance',
+      divisions: ['Small Varsity Cheer', 'Medium Varsity Cheer', 'Large Varsity Cheer', 'Jazz Dance', 'Pom Dance'],
+      estimatedTeams: 95,
+      status: 'open'
+    },
+    
+    // California - Regional Cheer & Dance Invitational
+    {
+      id: '44',
+      title: 'West Coast Cheer & Dance Championships',
+      organizer: 'West Coast Spirit Association',
+      organizerEmail: 'events@westcoastspirit.org',
+      date: '2025-10-04',
+      time: '8:00 AM - 7:00 PM',
+      location: 'San Diego, California',
+      region: 'California',
+      sport: 'Cheer/Dance',
+      divisions: ['Novice Cheer', 'Intermediate Cheer', 'Advanced Cheer', 'Hip Hop Dance', 'Contemporary Dance'],
+      estimatedTeams: 75,
+      status: 'open'
+    },
+    
+    // California - September Basketball Tournament (for current month)
+    {
+      id: '45',
+      title: 'Golden State Basketball Showcase',
+      organizer: 'California Basketball Association',
+      organizerEmail: 'tournaments@cabasketball.org',
+      date: '2025-09-20',
+      time: '9:00 AM - 5:00 PM',
+      location: 'Los Angeles, California',
+      region: 'California',
+      sport: 'Basketball',
+      divisions: ['JV Boys', 'JV Girls', 'Varsity Boys', 'Varsity Girls'],
+      estimatedTeams: 48,
+      status: 'open'
     }
   ];
 
