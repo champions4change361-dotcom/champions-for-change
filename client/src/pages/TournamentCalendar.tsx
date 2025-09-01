@@ -2,16 +2,18 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, ArrowLeft, MapPin, Clock, Users, Trophy, Mail } from 'lucide-react';
+import { Calendar, ArrowLeft, MapPin, Clock, Users, Trophy, Mail, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
 
 export default function TournamentCalendar() {
   const [, setLocation] = useLocation();
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
 
-  // Sample tournament data - this would come from your API
+  // Sample tournament data across multiple months - this would come from your API
   const tournaments = [
+    // September 2025
     {
       id: '1',
       title: 'Youth Basketball Championship',
@@ -50,6 +52,48 @@ export default function TournamentCalendar() {
       divisions: ['14U', '16U'],
       estimatedTeams: 12,
       status: 'open'
+    },
+    // October 2025
+    {
+      id: '4',
+      title: 'Fall Soccer League Championship',
+      organizer: 'Coastal Bend Soccer Association',
+      organizerEmail: 'info@cbsoccer.org',
+      date: '2025-10-12',
+      time: '8:00 AM - 4:00 PM',
+      location: 'Corpus Christi, TX',
+      sport: 'Soccer',
+      divisions: ['U12', 'U14', 'U16'],
+      estimatedTeams: 24,
+      status: 'open'
+    },
+    // November 2025
+    {
+      id: '5',
+      title: 'Thanksgiving Basketball Classic',
+      organizer: 'First Baptist Church',
+      organizerEmail: 'sports@fbccorpus.org',
+      date: '2025-11-28',
+      time: '9:00 AM - 6:00 PM',
+      location: 'Corpus Christi, TX',
+      sport: 'Basketball',
+      divisions: ['Adult Rec', 'High School'],
+      estimatedTeams: 16,
+      status: 'open'
+    },
+    // December 2025
+    {
+      id: '6',
+      title: 'Winter Volleyball Tournament',
+      organizer: 'Aransas Pass Athletic Club',
+      organizerEmail: 'volleyball@apac.com',
+      date: '2025-12-14',
+      time: '10:00 AM - 8:00 PM',
+      location: 'Aransas Pass, TX',
+      sport: 'Volleyball',
+      divisions: ['Women\'s Open', 'Coed Rec'],
+      estimatedTeams: 20,
+      status: 'open'
     }
   ];
 
@@ -59,6 +103,32 @@ export default function TournamentCalendar() {
 
   const getDateTournaments = (date: string) => {
     return tournaments.filter(t => t.date === date);
+  };
+
+  const navigateMonth = (direction: 'prev' | 'next') => {
+    const newMonth = new Date(currentMonth);
+    if (direction === 'prev') {
+      newMonth.setMonth(newMonth.getMonth() - 1);
+    } else {
+      newMonth.setMonth(newMonth.getMonth() + 1);
+    }
+    setCurrentMonth(newMonth);
+    setSelectedDate(null); // Clear selected date when changing months
+  };
+
+  const getDaysInMonth = (date: Date) => {
+    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  };
+
+  const getFirstDayOfMonth = (date: Date) => {
+    return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+  };
+
+  const formatMonthYear = (date: Date) => {
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long' 
+    });
   };
 
   const getSportIcon = (sport: string) => {
@@ -123,10 +193,32 @@ export default function TournamentCalendar() {
             <div className="lg:col-span-2">
               <Card className="bg-slate-800/80 backdrop-blur-sm border-blue-500/20">
                 <CardHeader>
-                  <CardTitle className="text-white">September 2025</CardTitle>
-                  <CardDescription className="text-slate-300">
-                    Click dates to see tournament details
-                  </CardDescription>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-white">{formatMonthYear(currentMonth)}</CardTitle>
+                      <CardDescription className="text-slate-300">
+                        Click dates to see tournament details
+                      </CardDescription>
+                    </div>
+                    <div className="flex space-x-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => navigateMonth('prev')}
+                        className="text-slate-400 hover:text-white"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => navigateMonth('next')}
+                        className="text-slate-400 hover:text-white"
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-7 gap-2 text-center text-sm">
@@ -138,9 +230,15 @@ export default function TournamentCalendar() {
                     ))}
                     
                     {/* Calendar days */}
-                    {Array.from({ length: 30 }, (_, i) => {
+                    {/* Empty cells for days before month starts */}
+                    {Array.from({ length: getFirstDayOfMonth(currentMonth) }, (_, i) => (
+                      <div key={`empty-${i}`} className="p-2"></div>
+                    ))}
+                    
+                    {/* Days of the month */}
+                    {Array.from({ length: getDaysInMonth(currentMonth) }, (_, i) => {
                       const day = i + 1;
-                      const date = `2025-09-${day.toString().padStart(2, '0')}`;
+                      const date = `${currentMonth.getFullYear()}-${(currentMonth.getMonth() + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
                       const dayTournaments = getDateTournaments(date);
                       const hasEvents = dayTournaments.length > 0;
                       const isSelected = selectedDate === date;
