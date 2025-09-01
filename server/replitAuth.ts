@@ -26,10 +26,16 @@ console.log("Supported OAuth domains:", supportedDomains);
 
 const getOidcConfig = memoize(
   async () => {
-    return await client.discovery(
-      new URL(process.env.ISSUER_URL ?? "https://replit.com/oidc"),
-      process.env.REPL_ID!
-    );
+    try {
+      return await client.discovery(
+        new URL(process.env.ISSUER_URL ?? "https://replit.com/oidc"),
+        process.env.REPL_ID!
+      );
+    } catch (error) {
+      console.warn('⚠️  OAuth discovery failed:', error.message);
+      console.warn('🔄 Continuing with simplified authentication');
+      return null;
+    }
   },
   { maxAge: 3600 * 1000 }
 );
@@ -114,6 +120,11 @@ async function upsertUser(
 
 async function setupOAuthStrategies() {
   const config = await getOidcConfig();
+  
+  if (!config) {
+    console.warn('⚠️  OAuth config not available, skipping OAuth strategy setup');
+    return false;
+  }
 
   const verify: VerifyFunction = async (
     tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
@@ -139,6 +150,8 @@ async function setupOAuthStrategies() {
     );
     passport.use(strategy);
   }
+  
+  return true;
 }
 
 export async function setupAuth(app: Express) {
@@ -151,10 +164,18 @@ export async function setupAuth(app: Express) {
   console.log("Setting up OAuth authentication for custom domain support");
   
   // Try to set up real OAuth if configured, otherwise use simplified auth
+  let oauthSetupSuccess = false;
   if (process.env.REPL_ID && supportedDomains.length > 0) {
     console.log("Setting up real OAuth with domains:", supportedDomains);
-    await setupOAuthStrategies();
-  } else {
+    try {
+      oauthSetupSuccess = await setupOAuthStrategies();
+    } catch (error) {
+      console.warn('⚠️  OAuth setup failed:', error.message);
+      console.warn('🔄 Continuing with simplified authentication');
+    }
+  }
+  
+  if (!oauthSetupSuccess) {
     console.log("Using simplified authentication for development");
   }
   

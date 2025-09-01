@@ -121,7 +121,7 @@ export default function Tournament() {
 
   // Determine if user can manage this tournament
   const canManageTournament = user && (
-    tournamentOwnership?.isTournamentOwner ||
+    user.id === tournament.userId ||
     ['tournament_manager', 'head_coach', 'assistant_coach', 'scorekeeper'].includes(user.userRole || '')
   );
 
@@ -254,7 +254,7 @@ export default function Tournament() {
             <div className="flex items-center space-x-3">
               <span className={`px-3 py-1 text-sm rounded-full font-medium ${getStatusColor(tournament.status)}`} data-testid="status-tournament">
                 {tournament.status === 'upcoming' ? 'Upcoming' : 
-                 tournament.status === 'in-progress' ? 'In Progress' : 'Completed'}
+                 tournament.status === 'stage-1' || tournament.status === 'stage-2' || tournament.status === 'stage-3' ? 'In Progress' : 'Completed'}
               </span>
               <button 
                 onClick={() => refetch()} 
@@ -270,11 +270,18 @@ export default function Tournament() {
           {tournament.sport?.includes("Track & Field") ? (
             <TrackFieldTournament tournamentId={tournament.id} tournamentName={tournament.name} />
           ) : tournament.competitionFormat === "multi-stage" ? (
-            <MultiStageTournament tournament={tournament} />
+            <MultiStageTournament tournament={{...tournament, sport: tournament.sport || 'Unknown'}} />
           ) : tournament.competitionFormat === "leaderboard" ? (
-            <LeaderboardView tournament={tournament} />
+            <LeaderboardView tournament={{...tournament, sport: tournament.sport || 'Unknown'}} />
           ) : (
-            <BracketVisualization tournament={tournament} matches={matches} />
+            <BracketVisualization 
+              tournament={{...tournament, sport: tournament.sport || 'Unknown'}} 
+              matches={matches.map(match => ({
+                ...match, 
+                team1: match.team1 || undefined,
+                team2: match.team2 || undefined
+              }))} 
+            />
           )}
         </div>
       </main>

@@ -2323,13 +2323,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       if (sport.toLowerCase() === 'nfl') {
         console.log(`🏈 NFL Season Active - fetching current week data for ${player}`);
-        realPlayerData = await yahooSportsAPI.getCurrentNFLPlayerData(player);
+        // realPlayerData = await yahooSportsAPI.getCurrentNFLPlayerData(player);
+        console.log(`Yahoo Sports API integration pending for NFL data`);
       } else if (sport.toLowerCase() === 'mlb') {
         console.log(`⚾ MLB Playoffs Active - fetching postseason data for ${player}`);
-        realPlayerData = await yahooSportsAPI.getCurrentMLBPlayerData(player);
+        // realPlayerData = await yahooSportsAPI.getCurrentMLBPlayerData(player);
+        console.log(`Yahoo Sports API integration pending for MLB data`);
       } else if (sport.toLowerCase() === 'nba') {
         console.log(`🏀 NBA Preseason - using projected data for ${player} (regular season starts later)`);
-        realPlayerData = await yahooSportsAPI.getCurrentNBAPlayerData(player);
+        // realPlayerData = await yahooSportsAPI.getCurrentNBAPlayerData(player);
+        console.log(`Yahoo Sports API integration pending for NBA data`);
       }
     } catch (error) {
       console.log(`⚠️ Real data unavailable, using enhanced analytics for ${player}`);

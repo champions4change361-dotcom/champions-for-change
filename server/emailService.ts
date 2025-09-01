@@ -157,6 +157,94 @@ class EmailService {
     };
   }
 
+  // Generic send method for custom emails
+  async send(options: { to: string; subject: string; html: string; }) {
+    try {
+      if (!this.transporter) {
+        // Fallback: Log email content to console
+        console.log('📧 EMAIL NOTIFICATION (would be sent to:', options.to, ')');
+        console.log('Subject:', options.subject);
+        console.log('Body:', options.html);
+        return { success: true, method: 'console' };
+      }
+
+      const fromAddress = process.env.SENDGRID_FROM_EMAIL || '"Champions for Change Athletics" <athletics@championsforchange.org>';
+      
+      const info = await this.transporter.sendMail({
+        from: fromAddress,
+        to: options.to,
+        subject: options.subject,
+        html: options.html,
+      });
+
+      if (process.env.SENDGRID_API_KEY) {
+        console.log(`📧 Email sent to ${options.to} via SendGrid:`, info.messageId);
+      } else {
+        console.log('📧 Test email sent:', nodemailer.getTestMessageUrl(info));
+      }
+      
+      return { 
+        success: true, 
+        messageId: info.messageId,
+        previewUrl: process.env.SENDGRID_API_KEY ? null : nodemailer.getTestMessageUrl(info),
+        method: process.env.SENDGRID_API_KEY ? 'sendgrid' : 'ethereal'
+      };
+    } catch (error) {
+      console.error('Failed to send email:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Team captain confirmation email
+  async sendTeamCaptainConfirmation(options: { captainEmail: string; captainName: string; teamName: string; tournamentName: string; }) {
+    const html = `
+      <h2>Team Registration Confirmation</h2>
+      <p>Hi ${options.captainName},</p>
+      <p>Your team "${options.teamName}" has been successfully registered for ${options.tournamentName}.</p>
+      <p>You will receive further instructions as the tournament approaches.</p>
+      <p>Best regards,<br>Tournament Management Team</p>
+    `;
+    
+    return this.send({
+      to: options.captainEmail,
+      subject: `Team Registration Confirmed - ${options.tournamentName}`,
+      html
+    });
+  }
+
+  // Player join confirmation email
+  async sendPlayerJoinConfirmation(options: { parentEmail: string; parentName: string; playerName: string; teamName: string; }) {
+    const html = `
+      <h2>Player Registration Confirmation</h2>
+      <p>Hi ${options.parentName},</p>
+      <p>${options.playerName} has been successfully added to team "${options.teamName}".</p>
+      <p>You will receive further updates about the tournament schedule.</p>
+      <p>Best regards,<br>Tournament Management Team</p>
+    `;
+    
+    return this.send({
+      to: options.parentEmail,
+      subject: `Player Registration Confirmed - ${options.playerName}`,
+      html
+    });
+  }
+
+  // Payment confirmation email
+  async sendPaymentConfirmation(options: { recipientEmail: string; paymentAmount: number; teamName: string; }) {
+    const html = `
+      <h2>Payment Confirmation</h2>
+      <p>Thank you for your payment of $${options.paymentAmount.toFixed(2)} for team "${options.teamName}".</p>
+      <p>Your registration is now complete.</p>
+      <p>Best regards,<br>Tournament Management Team</p>
+    `;
+    
+    return this.send({
+      to: options.recipientEmail,
+      subject: `Payment Confirmed - $${options.paymentAmount.toFixed(2)}`,
+      html
+    });
+  }
+
   private formatRoleDisplay(role: string): string {
     const roleMap: Record<string, string> = {
       'district_athletic_director': 'District Athletic Director',
