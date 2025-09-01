@@ -103,7 +103,16 @@ export function registerTournamentRoutes(app: Express) {
 
       // Check tournament creation limits based on subscription
       const existingTournaments = await storage.getTournaments();
-      const userTournaments = existingTournaments.filter((t: any) => t.createdBy === userId);
+      // Filter by user_id OR created_by since we might have both fields
+      const userTournaments = existingTournaments.filter((t: any) => 
+        t.createdBy === userId || t.user_id === userId
+      );
+      
+      // Only count tournaments that have been actually run (not just created)
+      // Consider tournaments "run" if they have matches with results or status beyond 'upcoming'
+      const activeTournaments = userTournaments.filter((t: any) => 
+        t.status !== 'upcoming' && t.status !== 'draft'
+      );
       
       const getTournamentLimit = (plan: string, status: string) => {
         if (status !== 'active') return 1; // Inactive accounts get 1 tournament
@@ -111,28 +120,33 @@ export function registerTournamentRoutes(app: Express) {
         switch (plan) {
           case 'foundation':
           case 'free':
-            return 3;
+            return 3; // 3 tournaments per month
           case 'tournament-organizer':
-            return 25;
+            return 25; // 25 tournaments per month
           case 'business-enterprise':
-            return 100;
+            return 100; // 100 tournaments per month
           case 'district_enterprise':
           case 'enterprise':
           case 'annual-pro':
             return -1; // Unlimited
           default:
-            return 2;
+            return 2; // Default fallback
         }
       };
 
       const limit = getTournamentLimit(user.subscriptionPlan || 'foundation', user.subscriptionStatus || 'inactive');
       
-      if (limit !== -1 && userTournaments.length >= limit) {
+      // For enterprise accounts, skip limit checking entirely
+      if (user.subscriptionPlan === 'district_enterprise' || user.subscriptionPlan === 'enterprise' || user.subscriptionPlan === 'annual-pro') {
+        console.log(`✅ Enterprise user ${userId} creating tournament - unlimited access`);
+      } else if (limit !== -1 && activeTournaments.length >= limit) {
         return res.status(403).json({ 
-          message: "Tournament limit reached for your subscription plan",
-          currentCount: userTournaments.length,
+          message: "Monthly tournament limit reached for your subscription plan",
+          currentCount: activeTournaments.length,
+          totalCreated: userTournaments.length,
           limit: limit,
-          plan: user.subscriptionPlan
+          plan: user.subscriptionPlan,
+          note: "Only tournaments that have been run count toward your limit"
         });
       }
 
@@ -165,7 +179,8 @@ export function registerTournamentRoutes(app: Express) {
         ...validatedData,
         bracket: bracketStructure,
         status: 'upcoming' as const,
-        createdBy: userId
+        createdBy: userId,
+        user_id: userId // Ensure both fields are set for consistency
       };
 
       const tournament = await storage.createTournament(tournamentData);
