@@ -804,7 +804,7 @@ export default function EnhancedTournamentWizard({
                       type="number"
                       step="0.01"
                       min="0"
-                      {...form.register("donationGoal", { valueAsNumber: true })}
+                      {...form.register("donationGoal")}
                       placeholder="1000.00"
                       className="w-full"
                       data-testid="input-donation-goal"

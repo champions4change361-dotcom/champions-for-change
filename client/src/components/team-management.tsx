@@ -61,6 +61,7 @@ export default function TeamManagement({
     if (competitionFormat !== 'leaderboard') return;
     
     const randomNames = generateRandomNames(teamCount);
+    console.log('Generated names:', randomNames, 'for count:', teamCount);
     const updatedTeams = teams.map((team, index) => ({
       ...team,
       teamName: randomNames[index] || `Participant ${index + 1}`
