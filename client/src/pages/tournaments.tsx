@@ -230,56 +230,64 @@ export default function TournamentsPage() {
       )}
 
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3 text-high-contrast">
-            <Trophy className="h-8 w-8 text-primary" />
-            Tournament Management
-            {isDistrictUser && <Badge className="bg-blue-500">District</Badge>}
-            {isTournamentManager && <Badge className="bg-green-500">Pro</Badge>}
-          </h1>
-          <p className="text-medium-contrast mt-2">
-            Create and manage tournaments with comprehensive bracket systems
-          </p>
-          <div className="flex items-center gap-4 mt-2 text-sm">
-            <span className="text-readable-light">
-              Plan: <strong className="capitalize">{userPlan.replace('-', ' ')}</strong>
-            </span>
-            <span className="text-readable-light">
-              Tournaments: <strong>{tournaments.length}</strong>
-              {limits.maxTournaments !== -1 && ` / ${limits.maxTournaments}`}
-            </span>
-            <span className="text-readable-light">
-              Max Teams: <strong>{limits.maxTeamsPerTournament === -1 ? 'Unlimited' : limits.maxTeamsPerTournament}</strong>
-            </span>
+      <div className="space-y-4">
+        {/* Mobile-first header layout */}
+        <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2 text-high-contrast">
+              <Trophy className="h-6 w-6 sm:h-8 sm:w-8 text-primary flex-shrink-0" />
+              <span className="truncate">Tournament Management</span>
+              <div className="flex gap-1">
+                {isDistrictUser && <Badge className="bg-blue-500 text-xs">District</Badge>}
+                {isTournamentManager && <Badge className="bg-green-500 text-xs">Pro</Badge>}
+              </div>
+            </h1>
+            <p className="text-medium-contrast mt-1 text-sm sm:text-base">
+              Create and manage tournaments with comprehensive bracket systems
+            </p>
+          </div>
+          
+          {/* Mobile-optimized create button */}
+          <div className="flex-shrink-0 w-full sm:w-auto">
+            {!canCreateTournament(tournaments.length) ? (
+              <div className="text-center sm:text-right">
+                <Button 
+                  disabled
+                  className="w-full sm:w-auto flex items-center justify-center gap-2"
+                  data-testid="button-create-tournament-disabled"
+                >
+                  <Lock className="h-4 w-4" />
+                  <span>Limit Reached</span>
+                </Button>
+                <p className="text-xs text-gray-500 mt-1">
+                  {getUpgradeMessage('more tournaments')}
+                </p>
+              </div>
+            ) : (
+              <Button 
+                onClick={() => setShowCreateWizard(true)}
+                className="w-full sm:w-auto flex items-center justify-center gap-2"
+                data-testid="button-create-tournament"
+              >
+                <Plus className="h-4 w-4" />
+                <span>Create Tournament</span>
+              </Button>
+            )}
           </div>
         </div>
-        
-        <div className="flex items-center gap-3">
-          {!canCreateTournament(tournaments.length) ? (
-            <div className="text-right">
-              <Button 
-                disabled
-                className="flex items-center gap-2"
-                data-testid="button-create-tournament-disabled"
-              >
-                <Lock className="h-4 w-4" />
-                Limit Reached
-              </Button>
-              <p className="text-xs text-gray-500 mt-1">
-                {getUpgradeMessage('more tournaments')}
-              </p>
-            </div>
-          ) : (
-            <Button 
-              onClick={() => setShowCreateWizard(true)}
-              className="flex items-center gap-2"
-              data-testid="button-create-tournament"
-            >
-              <Plus className="h-4 w-4" />
-              Create Tournament
-            </Button>
-          )}
+
+        {/* Plan info - separate row for better mobile layout */}
+        <div className="flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm">
+          <span className="text-readable-light bg-gray-100 px-2 py-1 rounded">
+            Plan: <strong className="capitalize">{userPlan.replace('-', ' ')}</strong>
+          </span>
+          <span className="text-readable-light bg-gray-100 px-2 py-1 rounded">
+            Tournaments: <strong>{tournaments.length}</strong>
+            {limits.maxTournaments !== -1 && ` / ${limits.maxTournaments}`}
+          </span>
+          <span className="text-readable-light bg-gray-100 px-2 py-1 rounded">
+            Max Teams: <strong>{limits.maxTeamsPerTournament === -1 ? 'Unlimited' : limits.maxTeamsPerTournament}</strong>
+          </span>
         </div>
       </div>
 
