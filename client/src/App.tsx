@@ -13,6 +13,7 @@ import EducationHubLanding from './pages/EducationHubLanding';
 import TrantorLanding from './pages/TrantorLanding';
 import LocalTournaments from './pages/LocalTournaments';
 import ChampionsRegistration from './pages/ChampionsRegistration';
+import TournamentCalendar from './pages/TournamentCalendar';
 import DonationFlow from './pages/DonationFlow';
 import PaymentMethods from './pages/PaymentMethods';
 import Checkout from './pages/Checkout';
@@ -364,6 +365,9 @@ function AppRouter() {
       
       {/* Champions Registration - Team Registration for Local Tournaments */}
       <Route path="/champions-registration" component={ChampionsRegistration} />
+      
+      {/* Tournament Calendar - Regional Calendar */}
+      <Route path="/tournament-calendar" component={TournamentCalendar} />
       
       {/* Show Coaches Lounge landing page */}
       <Route path="/coaches-lounge">

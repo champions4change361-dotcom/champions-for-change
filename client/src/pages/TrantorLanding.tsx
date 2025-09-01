@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Users, Zap, Globe, CreditCard, Star, Target, Building, CheckCircle, BarChart3, Clock, Smartphone } from "lucide-react";
+import { Trophy, Users, Zap, Globe, CreditCard, Star, Target, Building, CheckCircle, BarChart3, Clock, Smartphone, Calendar } from "lucide-react";
 import { useLocation } from "wouter";
 import React, { useState } from "react";
 import Footer from "@/components/Footer";
@@ -57,6 +57,14 @@ export default function TrantorLanding() {
                 >
                   <CreditCard className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4" />
                   Sign Up
+                </Button>
+                <Button 
+                  onClick={() => setLocation('/tournament-calendar')}
+                  className="bg-blue-700 hover:bg-blue-600 text-blue-200 font-semibold px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base w-full lg:w-auto border border-blue-400 shadow-lg"
+                  data-testid="button-see-tournaments"
+                >
+                  <Calendar className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4" />
+                  See Local Tournaments
                 </Button>
               </div>
             </div>
