@@ -3993,6 +3993,247 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Tournament management routes
   registerTournamentRoutes(app);
 
+  // Event Assignment Routes - Google Sheets Style Scorekeeper System
+  
+  // Get available event assignments for a user
+  app.get('/api/event-assignments/:tournamentId?/:userId?', isAuthenticated, async (req, res) => {
+    try {
+      const storage = getStorage();
+      const { tournamentId, userId } = req.params;
+      const currentUserId = (req as any).user?.claims?.sub || userId;
+      
+      console.log('📋 Event assignments request:', { tournamentId, userId: currentUserId });
+      
+      // Mock data for now - will be replaced with actual database queries
+      const mockAssignments = [
+        {
+          id: 'assignment-1',
+          tournamentEventId: 'event-1',
+          tournamentId: tournamentId || 'tournament-1',
+          eventName: 'Boys Discus',
+          eventType: 'Field Event',
+          scoringUnit: 'meters',
+          eventDate: '2025-09-15',
+          eventTime: '10:00 AM',
+          location: 'Field House',
+          assignmentStatus: 'open',
+          assignmentType: 'self_selected',
+          tournamentName: 'Regional Track & Field Championship'
+        },
+        {
+          id: 'assignment-2',
+          tournamentEventId: 'event-2',
+          tournamentId: tournamentId || 'tournament-1',
+          eventName: 'Girls Triple Jump',
+          eventType: 'Field Event',
+          scoringUnit: 'meters',
+          eventDate: '2025-09-15',
+          eventTime: '1:00 PM',
+          location: 'Jump Pit',
+          assignmentStatus: 'assigned',
+          assignmentType: 'manager_assigned',
+          assignedAt: '2025-09-01T12:00:00Z',
+          assignmentNotes: 'You have experience with this event',
+          tournamentName: 'Regional Track & Field Championship'
+        }
+      ];
+      
+      res.json(mockAssignments);
+    } catch (error) {
+      console.error('❌ Event assignments error:', error);
+      res.status(500).json({ error: 'Failed to fetch event assignments' });
+    }
+  });
+
+  // Update event assignment (claim, accept, decline)
+  app.post('/api/event-assignments/:assignmentId/:action', isAuthenticated, async (req, res) => {
+    try {
+      const storage = getStorage();
+      const { assignmentId, action } = req.params;
+      const { notes } = req.body;
+      const userId = (req as any).user?.claims?.sub;
+      
+      console.log('🎯 Event assignment action:', { assignmentId, action, userId, notes });
+      
+      // Validate action
+      if (!['claim', 'accept', 'decline'].includes(action)) {
+        return res.status(400).json({ error: 'Invalid action. Must be claim, accept, or decline.' });
+      }
+      
+      // Mock response - will be replaced with actual database operations
+      const updatedAssignment = {
+        id: assignmentId,
+        action,
+        status: action === 'claim' ? 'accepted' : action,
+        userId,
+        timestamp: new Date().toISOString(),
+        notes
+      };
+      
+      console.log('✅ Event assignment updated:', updatedAssignment);
+      
+      res.json({
+        success: true,
+        message: `Assignment ${action}ed successfully`,
+        assignment: updatedAssignment
+      });
+    } catch (error) {
+      console.error('❌ Event assignment action error:', error);
+      res.status(500).json({ error: `Failed to ${req.params.action} assignment` });
+    }
+  });
+
+  // Get events for a specific tournament event (for event management dashboard)
+  app.get('/api/events/:tournamentEventId/participants', isAuthenticated, async (req, res) => {
+    try {
+      const storage = getStorage();
+      const { tournamentEventId } = req.params;
+      const userId = (req as any).user?.claims?.sub;
+      
+      console.log('👥 Event participants request:', { tournamentEventId, userId });
+      
+      // Mock data for event participants/schools
+      const mockParticipants = [
+        {
+          id: 'participant-1',
+          schoolName: 'Central High School',
+          athleteName: 'John Smith',
+          attempts: [
+            { attemptNumber: 1, measurement: '35.25', units: 'meters', isValid: true },
+            { attemptNumber: 2, measurement: '37.10', units: 'meters', isValid: true },
+            { attemptNumber: 3, measurement: 'FOUL', units: 'meters', isValid: false }
+          ],
+          bestMark: '37.10',
+          rank: 1,
+          checkedIn: true
+        },
+        {
+          id: 'participant-2',
+          schoolName: 'East Side Academy',
+          athleteName: 'Mike Johnson',
+          attempts: [
+            { attemptNumber: 1, measurement: '33.80', units: 'meters', isValid: true },
+            { attemptNumber: 2, measurement: '34.20', units: 'meters', isValid: true },
+            { attemptNumber: 3, measurement: null, units: 'meters', isValid: null }
+          ],
+          bestMark: '34.20',
+          rank: 2,
+          checkedIn: true
+        }
+      ];
+      
+      res.json({
+        eventId: tournamentEventId,
+        eventName: 'Boys Discus',
+        participants: mockParticipants,
+        totalParticipants: mockParticipants.length,
+        checkedInCount: mockParticipants.filter(p => p.checkedIn).length
+      });
+    } catch (error) {
+      console.error('❌ Event participants error:', error);
+      res.status(500).json({ error: 'Failed to fetch event participants' });
+    }
+  });
+
+  // Add walk-up participant to event (on-the-fly registration)
+  app.post('/api/events/:tournamentEventId/participants', isAuthenticated, async (req, res) => {
+    try {
+      const storage = getStorage();
+      const { tournamentEventId } = req.params;
+      const { schoolName, athleteName } = req.body;
+      const userId = (req as any).user?.claims?.sub;
+      
+      console.log('➕ Adding walk-up participant:', { tournamentEventId, schoolName, athleteName, userId });
+      
+      // Validate required fields
+      if (!schoolName || !athleteName) {
+        return res.status(400).json({ 
+          error: 'Missing required fields: schoolName and athleteName are required' 
+        });
+      }
+      
+      // Mock response - will be replaced with actual database operations
+      const newParticipant = {
+        id: `participant-${Date.now()}`,
+        schoolName,
+        athleteName,
+        attempts: [],
+        bestMark: null,
+        rank: null,
+        checkedIn: true,
+        addedBy: userId,
+        addedAt: new Date().toISOString()
+      };
+      
+      console.log('✅ Walk-up participant added:', newParticipant);
+      
+      res.json({
+        success: true,
+        message: 'Participant added successfully',
+        participant: newParticipant
+      });
+    } catch (error) {
+      console.error('❌ Add participant error:', error);
+      res.status(500).json({ error: 'Failed to add participant' });
+    }
+  });
+
+  // Record attempt for participant
+  app.post('/api/events/:tournamentEventId/attempts', isAuthenticated, async (req, res) => {
+    try {
+      const storage = getStorage();
+      const { tournamentEventId } = req.params;
+      const { participantId, attemptNumber, measurement, isValid } = req.body;
+      const userId = (req as any).user?.claims?.sub;
+      
+      console.log('📊 Recording attempt:', { 
+        tournamentEventId, 
+        participantId, 
+        attemptNumber, 
+        measurement, 
+        isValid, 
+        userId 
+      });
+      
+      // Validate required fields
+      if (!participantId || !attemptNumber || measurement === undefined) {
+        return res.status(400).json({ 
+          error: 'Missing required fields: participantId, attemptNumber, and measurement are required' 
+        });
+      }
+      
+      // Validate attempt number
+      if (attemptNumber < 1 || attemptNumber > 3) {
+        return res.status(400).json({ 
+          error: 'Invalid attempt number. Must be 1, 2, or 3.' 
+        });
+      }
+      
+      // Mock response - will be replaced with actual database operations
+      const recordedAttempt = {
+        id: `attempt-${Date.now()}`,
+        participantId,
+        tournamentEventId,
+        attemptNumber,
+        measurement,
+        isValid: isValid !== false, // Default to valid unless explicitly false
+        recordedBy: userId,
+        recordedAt: new Date().toISOString()
+      };
+      
+      console.log('✅ Attempt recorded:', recordedAttempt);
+      
+      res.json({
+        success: true,
+        message: 'Attempt recorded successfully',
+        attempt: recordedAttempt
+      });
+    } catch (error) {
+      console.error('❌ Record attempt error:', error);
+      res.status(500).json({ error: 'Failed to record attempt' });
+    }
+  });
+
   // 🚀 PRIMARY DFS LINEUP OPTIMIZER - Professional lineup optimization
   app.get('/api/dfs/optimize/:site/:sport', (req, res) => {
     const { site, sport } = req.params;

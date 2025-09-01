@@ -788,31 +788,72 @@ export default function EnhancedTournamentWizard({
                     </div>
                   </div>
                   
-                  {/* Results Recorder Assignment */}
+                  {/* Results Recorder Assignment - Enhanced Google Sheets Style */}
                   {selectedEvents.length > 0 && (
                     <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
                       <h4 className="font-medium text-green-900 mb-3 flex items-center gap-2">
                         <Users className="h-4 w-4" />
-                        Assign Results Recorders
+                        Event Assignments (Like Google Sheets Signup)
                       </h4>
                       <p className="text-sm text-green-700 mb-4">
-                        Assign a Results Recorder for each event to manage scoring and results.
+                        Set up events for coach self-selection, just like your current Google Sheets process. Coaches will log in and claim their preferred events.
                       </p>
                       
                       <div className="space-y-3">
                         {selectedEvents.map((event, index) => (
-                          <div key={index} className="flex items-center gap-3 p-2 bg-white rounded border">
-                            <span className="font-medium text-gray-900 flex-1">
-                              {event.eventName}
-                            </span>
-                            <Input
-                              placeholder="Results Recorder name or email"
-                              value={eventRecorders[event.eventName] || ''}
-                              onChange={(e) => handleEventRecorderUpdate(event.eventName, e.target.value)}
-                              className="w-64"
-                            />
+                          <div key={index} className="flex items-center gap-3 p-3 bg-white rounded border">
+                            <div className="flex-1">
+                              <div className="font-medium text-gray-900 mb-1">
+                                {event.eventName}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {event.eventType} • {event.scoringUnit} • Max {event.maxAttempts || 3} attempts
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center gap-3">
+                              <Select
+                                value={eventRecorders[event.eventName] || 'open'}
+                                onValueChange={(value) => handleEventRecorderUpdate(event.eventName, value)}
+                              >
+                                <SelectTrigger className="w-48">
+                                  <SelectValue placeholder="Assignment type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="open">🟢 Open for Self-Selection</SelectItem>
+                                  <SelectItem value="pre-assigned">🔵 Pre-Assign Specific Coach</SelectItem>
+                                  <SelectItem value="manager-only">🔴 Tournament Manager Only</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              
+                              {eventRecorders[event.eventName] === 'pre-assigned' && (
+                                <Input
+                                  placeholder="Coach name/email"
+                                  className="w-48 text-sm"
+                                  // This would store the actual assignment
+                                />
+                              )}
+                              
+                              <Badge 
+                                variant="outline" 
+                                className="text-xs bg-green-100 text-green-700 border-green-300"
+                              >
+                                {eventRecorders[event.eventName] === 'open' ? 'Available' : 
+                                 eventRecorders[event.eventName] === 'pre-assigned' ? 'Assigned' : 'Restricted'}
+                              </Badge>
+                            </div>
                           </div>
                         ))}
+                      </div>
+                      
+                      <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded">
+                        <h5 className="font-medium text-blue-900 mb-2">🎯 Coach Experience (Based on Your Feedback)</h5>
+                        <div className="text-sm text-blue-700 space-y-1">
+                          <p>• <strong>Open Events:</strong> Coaches log in and claim "I'll take discus on Day 1" (like Google Sheets)</p>
+                          <p>• <strong>Pre-Assigned:</strong> You assign specific coaches, they accept/decline the assignment</p>
+                          <p>• <strong>Traditions:</strong> System remembers "Coach always does discus and triple jump"</p>
+                          <p>• <strong>Event Access:</strong> Each coach only sees their assigned event dashboard on tournament day</p>
+                        </div>
                       </div>
                     </div>
                   )}

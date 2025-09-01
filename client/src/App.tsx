@@ -73,6 +73,8 @@ import RoleHierarchy from './pages/RoleHierarchy';
 import Schools from './pages/Schools';
 import Capabilities from './pages/Capabilities';
 import MillerHomepage from './pages/MillerHomepage';
+import ScorekeeperEventSelection from './pages/ScorekeeperEventSelection';
+import EventScorekeeperDashboard from './pages/EventScorekeeperDashboard';
 import RoleDashboard from './pages/RoleDashboard';
 import BulkRegistration from './pages/BulkRegistration';
 import OrganizerAnalyticsDemo from './pages/OrganizerAnalyticsDemo';
@@ -165,6 +167,8 @@ function AuthenticatedRoutes() {
         <Route path="/compliance-management" component={ComplianceManagement} />
         <Route path="/coach-dashboard" component={CoachDashboard} />
         <Route path="/athletic-trainer-dashboard" component={AthleticTrainerDashboard} />
+        <Route path="/scorekeeper-events" component={ScorekeeperEventSelection} />
+        <Route path="/events/:eventId/manage" component={EventScorekeeperDashboard} />
         <Route path="/domains" component={DomainManager} />
 
         <Route path="/bulk-registration" component={BulkRegistration} />

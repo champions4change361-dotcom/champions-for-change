@@ -1211,6 +1211,76 @@ export const tournaments = pgTable("tournaments", {
   minTeamSize: integer("min_team_size"), // Minimum players required
 });
 
+// ENHANCED EVENT MANAGEMENT SYSTEM 
+// Based on real-world track meet experience where coaches sign up for event assignments
+
+// Event Assignments - Who is recording results for which events 
+export const eventAssignments = pgTable("event_assignments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tournamentEventId: varchar("tournament_event_id").notNull(), // Will reference tournamentEvents table when it exists
+  tournamentId: varchar("tournament_id").notNull().references(() => tournaments.id, { onDelete: "cascade" }),
+  scorekeeperId: varchar("scorekeeper_id").references(() => users.id), // Null if open assignment
+  assignmentStatus: text("assignment_status", {
+    enum: ["open", "assigned", "accepted", "declined", "completed"]
+  }).default("open"),
+  assignmentType: text("assignment_type", {
+    enum: ["self_selected", "manager_assigned"]
+  }).default("self_selected"),
+  assignedAt: timestamp("assigned_at"),
+  acceptedAt: timestamp("accepted_at"),
+  declinedAt: timestamp("declined_at"),
+  assignmentNotes: text("assignment_notes"), // "I always do discus", preferences, etc.
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Event Schools - Schools participating in specific events (dynamic roster)
+export const eventSchools = pgTable("event_schools", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tournamentEventId: varchar("tournament_event_id").notNull(), // References tournament_events table
+  schoolName: varchar("school_name").notNull(), // "CCISD North", "London ISD", "Homeschool Association"
+  schoolType: text("school_type", {
+    enum: ["district_north", "district_south", "visiting", "homeschool", "charter", "private"]
+  }).default("visiting"),
+  isPreRegistered: boolean("is_pre_registered").default(false), // vs walk-up
+  checkedIn: boolean("checked_in").default(false),
+  checkedInAt: timestamp("checked_in_at"),
+  addedBy: varchar("added_by").notNull().references(() => users.id), // Which scorekeeper added them
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Event Participants - Individual athletes in events (live roster management)
+export const eventParticipants = pgTable("event_participants", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tournamentEventId: varchar("tournament_event_id").notNull(), // References tournament_events table
+  eventSchoolId: varchar("event_school_id").notNull(), // References event_schools table
+  athleteName: varchar("athlete_name").notNull(),
+  grade: varchar("grade"), // "8th", "7th", etc.
+  division: text("division", {
+    enum: ["north", "south", "visiting"]
+  }), // For CCISD north/south division tracking
+  participantOrder: integer("participant_order"), // Order in line/heat
+  addedBy: varchar("added_by").notNull().references(() => users.id), // Which scorekeeper added them
+  addedAt: timestamp("added_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Event Results - Individual attempt/performance tracking
+export const eventResults = pgTable("event_results", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  participantId: varchar("participant_id").notNull(), // References event_participants table
+  tournamentEventId: varchar("tournament_event_id").notNull(), // References tournament_events table
+  attemptNumber: integer("attempt_number").notNull(), // 1, 2, 3 for field events
+  resultValue: numeric("result_value"), // Distance, time, points
+  resultUnit: varchar("result_unit").notNull(), // "meters", "seconds", "feet"
+  isFoul: boolean("is_foul").default(false),
+  isPersonalBest: boolean("is_personal_best").default(false),
+  notes: text("notes"), // "Wind assisted", "New school record", etc.
+  recordedBy: varchar("recorded_by").notNull().references(() => users.id),
+  recordedAt: timestamp("recorded_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 
 // CORPORATE COMPETITION DATABASE SYSTEM
 // Comprehensive database for sales, production, and corporate tournaments
