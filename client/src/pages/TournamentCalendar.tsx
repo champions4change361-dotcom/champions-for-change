@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar, ArrowLeft, MapPin, Clock, Users, Trophy, Mail, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
@@ -16,6 +17,63 @@ export default function TournamentCalendar() {
     city?: string;
   } | null>(null);
   const [isLoadingLocation, setIsLoadingLocation] = useState(true);
+  const [selectedState, setSelectedState] = useState<string>('');
+
+  // US States, territories, and DC
+  const usStates = [
+    { value: 'AL', label: 'Alabama' },
+    { value: 'AK', label: 'Alaska' },
+    { value: 'AZ', label: 'Arizona' },
+    { value: 'AR', label: 'Arkansas' },
+    { value: 'CA', label: 'California' },
+    { value: 'CO', label: 'Colorado' },
+    { value: 'CT', label: 'Connecticut' },
+    { value: 'DE', label: 'Delaware' },
+    { value: 'DC', label: 'District of Columbia' },
+    { value: 'FL', label: 'Florida' },
+    { value: 'GA', label: 'Georgia' },
+    { value: 'HI', label: 'Hawaii' },
+    { value: 'ID', label: 'Idaho' },
+    { value: 'IL', label: 'Illinois' },
+    { value: 'IN', label: 'Indiana' },
+    { value: 'IA', label: 'Iowa' },
+    { value: 'KS', label: 'Kansas' },
+    { value: 'KY', label: 'Kentucky' },
+    { value: 'LA', label: 'Louisiana' },
+    { value: 'ME', label: 'Maine' },
+    { value: 'MD', label: 'Maryland' },
+    { value: 'MA', label: 'Massachusetts' },
+    { value: 'MI', label: 'Michigan' },
+    { value: 'MN', label: 'Minnesota' },
+    { value: 'MS', label: 'Mississippi' },
+    { value: 'MO', label: 'Missouri' },
+    { value: 'MT', label: 'Montana' },
+    { value: 'NE', label: 'Nebraska' },
+    { value: 'NV', label: 'Nevada' },
+    { value: 'NH', label: 'New Hampshire' },
+    { value: 'NJ', label: 'New Jersey' },
+    { value: 'NM', label: 'New Mexico' },
+    { value: 'NY', label: 'New York' },
+    { value: 'NC', label: 'North Carolina' },
+    { value: 'ND', label: 'North Dakota' },
+    { value: 'OH', label: 'Ohio' },
+    { value: 'OK', label: 'Oklahoma' },
+    { value: 'OR', label: 'Oregon' },
+    { value: 'PA', label: 'Pennsylvania' },
+    { value: 'PR', label: 'Puerto Rico' },
+    { value: 'RI', label: 'Rhode Island' },
+    { value: 'SC', label: 'South Carolina' },
+    { value: 'SD', label: 'South Dakota' },
+    { value: 'TN', label: 'Tennessee' },
+    { value: 'TX', label: 'Texas' },
+    { value: 'UT', label: 'Utah' },
+    { value: 'VT', label: 'Vermont' },
+    { value: 'VA', label: 'Virginia' },
+    { value: 'WA', label: 'Washington' },
+    { value: 'WV', label: 'West Virginia' },
+    { value: 'WI', label: 'Wisconsin' },
+    { value: 'WY', label: 'Wyoming' }
+  ];
 
   // Detect user location on component mount
   React.useEffect(() => {
@@ -231,19 +289,76 @@ export default function TournamentCalendar() {
       organizerEmail: 'volleyball@apac.com',
       date: '2025-12-14',
       time: '10:00 AM - 8:00 PM',
-      location: 'Aransas Pass, TX',
+      location: 'Aransas Pass, Texas',
       region: 'Texas Coastal Bend',
       sport: 'Volleyball',
       divisions: ['Women\'s Open', 'Coed Rec'],
       estimatedTeams: 20,
       status: 'open'
+    },
+    // More state examples for dropdown filtering
+    {
+      id: '9',
+      title: 'Florida Basketball Classic',
+      organizer: 'Miami Athletic Club',
+      organizerEmail: 'tournaments@miamibasketball.com',
+      date: '2025-11-15',
+      time: '9:00 AM - 5:00 PM',
+      location: 'Miami, Florida',
+      region: 'South Florida',
+      sport: 'Basketball',
+      divisions: ['High School', 'College Prep'],
+      estimatedTeams: 24,
+      status: 'open'
+    },
+    {
+      id: '10',
+      title: 'Illinois Wrestling Championship',
+      organizer: 'Chicago Wrestling Federation',
+      organizerEmail: 'events@chicagowrestling.org',
+      date: '2025-12-07',
+      time: '8:00 AM - 6:00 PM',
+      location: 'Chicago, Illinois',
+      region: 'Chicago Metro',
+      sport: 'Wrestling',
+      divisions: ['JV', 'Varsity'],
+      estimatedTeams: 32,
+      status: 'open'
+    },
+    {
+      id: '11',
+      title: 'New York Soccer Invitational',
+      organizer: 'Brooklyn Soccer Alliance',
+      organizerEmail: 'info@brooklynsoccer.net',
+      date: '2025-10-05',
+      time: '10:00 AM - 4:00 PM',
+      location: 'Brooklyn, New York',
+      region: 'New York City Area',
+      sport: 'Soccer',
+      divisions: ['U16', 'U18'],
+      estimatedTeams: 16,
+      status: 'open'
     }
   ];
 
-  // Filter tournaments by user's region
-  const tournaments = allTournaments.filter(tournament => 
-    !userLocation || tournament.region === userLocation.region
-  );
+  // Filter tournaments by selected state or detected region
+  const tournaments = allTournaments.filter(tournament => {
+    if (selectedState && selectedState !== 'auto') {
+      // Filter by manually selected state
+      const stateName = getStateFullName(selectedState);
+      return tournament.location.toLowerCase().includes(stateName.toLowerCase());
+    } else if (userLocation && (selectedState === 'auto' || !selectedState)) {
+      // Filter by detected region
+      return tournament.region === userLocation.region;
+    }
+    // Show all if no filter applied
+    return true;
+  });
+
+  const getStateFullName = (stateCode: string) => {
+    const state = usStates.find(s => s.value === stateCode);
+    return state ? state.label : stateCode;
+  };
 
   const handleDateClick = (date: string) => {
     setSelectedDate(selectedDate === date ? null : date);
@@ -341,6 +456,42 @@ export default function TournamentCalendar() {
             <Badge className="mt-4 bg-blue-600 text-white">
               Regional Sports Coordination Hub
             </Badge>
+            
+            {/* State Filter Dropdown */}
+            <div className="mt-6 max-w-sm mx-auto">
+              <Select 
+                value={selectedState} 
+                onValueChange={(value) => {
+                  setSelectedState(value);
+                  setSelectedDate(null); // Clear selected date when changing filter
+                }}
+              >
+                <SelectTrigger className="bg-slate-800/80 border-blue-500/20 text-white">
+                  <SelectValue placeholder={
+                    isLoadingLocation 
+                      ? "Select a state to filter tournaments" 
+                      : `Filter by state (currently showing ${userLocation?.state || 'all areas'})`
+                  } />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-blue-500/20">
+                  <SelectItem value="auto" className="text-white hover:bg-slate-700">
+                    {userLocation 
+                      ? `Show ${userLocation.region} (auto-detected)` 
+                      : 'Show all regions'
+                    }
+                  </SelectItem>
+                  {usStates.map((state) => (
+                    <SelectItem 
+                      key={state.value} 
+                      value={state.value}
+                      className="text-white hover:bg-slate-700"
+                    >
+                      {state.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* Calendar Grid */}
