@@ -89,7 +89,7 @@ export default function LocalTournaments() {
                 </div>
                 <Button 
                   className="w-full bg-green-600 hover:bg-green-700 text-white"
-                  onClick={() => setLocation('/login')}
+                  onClick={() => setLocation('/login?redirect=champions-registration')}
                 >
                   Register Your Team
                 </Button>
@@ -111,7 +111,7 @@ export default function LocalTournaments() {
                 <Button 
                   variant="outline"
                   className="w-full border-slate-600 text-slate-300 hover:bg-slate-800"
-                  onClick={() => setLocation('/login')}
+                  onClick={() => setLocation('/login?redirect=champions-registration')}
                 >
                   Get Notified
                 </Button>
@@ -152,7 +152,7 @@ export default function LocalTournaments() {
             <Button 
               size="lg"
               className="bg-green-600 hover:bg-green-700 text-white"
-              onClick={() => setLocation('/login')}
+              onClick={() => setLocation('/login?redirect=champions-registration')}
             >
               Register for Hoops for History
             </Button>
