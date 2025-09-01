@@ -236,8 +236,8 @@ export function ConversationalAI({ domain = 'education', className = '' }: Conve
       </CardHeader>
       
       <CardContent className="flex flex-col flex-1 p-0">
-        <div className="flex-1 px-4 overflow-y-auto">
-          <div className="space-y-4 pb-4">
+        <div className="flex-1 px-4 overflow-y-auto max-h-[500px]">
+          <div className="space-y-4 pb-4 min-h-[200px]">
             {messages.map((message) => (
               <MessageBubble key={message.id} message={message} />
             ))}
