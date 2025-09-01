@@ -10,10 +10,117 @@ export default function TournamentCalendar() {
   const [, setLocation] = useLocation();
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [userLocation, setUserLocation] = useState<{
+    region: string;
+    state: string;
+    city?: string;
+  } | null>(null);
+  const [isLoadingLocation, setIsLoadingLocation] = useState(true);
 
-  // Sample tournament data across multiple months - this would come from your API
-  const tournaments = [
-    // September 2025
+  // Detect user location on component mount
+  React.useEffect(() => {
+    const detectLocation = async () => {
+      try {
+        // Try geolocation first
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            async (position) => {
+              try {
+                // Use reverse geocoding to get location details
+                const response = await fetch(
+                  `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${position.coords.latitude}&longitude=${position.coords.longitude}&localityLanguage=en`
+                );
+                const data = await response.json();
+                
+                const region = getRegionFromLocation(data.principalSubdivision, data.city);
+                setUserLocation({
+                  region: region,
+                  state: data.principalSubdivision || 'Unknown',
+                  city: data.city || 'Unknown'
+                });
+                setIsLoadingLocation(false);
+              } catch (error) {
+                console.error('Geocoding failed:', error);
+                fallbackToIPLocation();
+              }
+            },
+            () => {
+              // User denied geolocation, fall back to IP-based detection
+              fallbackToIPLocation();
+            }
+          );
+        } else {
+          fallbackToIPLocation();
+        }
+      } catch (error) {
+        console.error('Location detection failed:', error);
+        setUserLocation({
+          region: 'Texas Coastal Bend',
+          state: 'Texas',
+          city: 'Corpus Christi'
+        });
+        setIsLoadingLocation(false);
+      }
+    };
+
+    const fallbackToIPLocation = async () => {
+      try {
+        // Simple IP-based location as fallback
+        const response = await fetch('https://ipapi.co/json/');
+        const data = await response.json();
+        
+        const region = getRegionFromLocation(data.region, data.city);
+        setUserLocation({
+          region: region,
+          state: data.region || 'Unknown',
+          city: data.city || 'Unknown'
+        });
+      } catch (error) {
+        console.error('IP location failed:', error);
+        // Default to Texas Coastal Bend
+        setUserLocation({
+          region: 'Texas Coastal Bend',
+          state: 'Texas',
+          city: 'Corpus Christi'
+        });
+      }
+      setIsLoadingLocation(false);
+    };
+
+    const getRegionFromLocation = (state: string, city: string) => {
+      // Define regional mappings
+      const regionMappings: { [key: string]: string } = {
+        'Texas': city?.toLowerCase().includes('corpus') || city?.toLowerCase().includes('rockport') || city?.toLowerCase().includes('aransas') 
+          ? 'Texas Coastal Bend' 
+          : 'Texas',
+        'Minnesota': 'Minnesota Twin Cities',
+        'California': city?.toLowerCase().includes('angeles') 
+          ? 'Los Angeles Area' 
+          : city?.toLowerCase().includes('francisco') || city?.toLowerCase().includes('san jose')
+          ? 'San Francisco Bay Area'
+          : 'California',
+        'Florida': city?.toLowerCase().includes('miami') 
+          ? 'South Florida' 
+          : city?.toLowerCase().includes('orlando')
+          ? 'Central Florida'
+          : 'Florida',
+        'New York': city?.toLowerCase().includes('new york') || city?.toLowerCase().includes('brooklyn') || city?.toLowerCase().includes('queens')
+          ? 'New York City Area'
+          : 'New York',
+        'Illinois': city?.toLowerCase().includes('chicago')
+          ? 'Chicago Metro'
+          : 'Illinois'
+      };
+
+      return regionMappings[state] || `${city}, ${state}`;
+    };
+
+    detectLocation();
+  }, []);
+
+  // All tournament data - will be filtered by user's region
+  const allTournaments = [
+    // Texas Coastal Bend tournaments
     {
       id: '1',
       title: 'Youth Basketball Championship',
@@ -22,6 +129,7 @@ export default function TournamentCalendar() {
       date: '2025-09-15',
       time: '9:00 AM - 3:00 PM',
       location: 'Corpus Christi, TX',
+      region: 'Texas Coastal Bend',
       sport: 'Basketball',
       divisions: ['Middle School Boys', 'Middle School Girls'],
       estimatedTeams: 16,
@@ -35,6 +143,7 @@ export default function TournamentCalendar() {
       date: '2025-09-15',
       time: '8:00 AM - 12:00 PM',
       location: 'Rockport, TX',
+      region: 'Texas Coastal Bend',
       sport: 'Track & Field',
       divisions: ['High School', 'Open'],
       estimatedTeams: 8,
@@ -48,6 +157,7 @@ export default function TournamentCalendar() {
       date: '2025-09-22',
       time: '10:00 AM - 6:00 PM',
       location: 'Aransas Pass, TX',
+      region: 'Texas Coastal Bend',
       sport: 'Baseball',
       divisions: ['14U', '16U'],
       estimatedTeams: 12,
@@ -62,9 +172,40 @@ export default function TournamentCalendar() {
       date: '2025-10-12',
       time: '8:00 AM - 4:00 PM',
       location: 'Corpus Christi, TX',
+      region: 'Texas Coastal Bend',
       sport: 'Soccer',
       divisions: ['U12', 'U14', 'U16'],
       estimatedTeams: 24,
+      status: 'open'
+    },
+    // Minnesota tournaments
+    {
+      id: '7',
+      title: 'Twin Cities Hockey Tournament',
+      organizer: 'Minneapolis Youth Hockey',
+      organizerEmail: 'tournaments@minneapolishockey.org',
+      date: '2025-10-19',
+      time: '8:00 AM - 6:00 PM',
+      location: 'Minneapolis, MN',
+      region: 'Minnesota Twin Cities',
+      sport: 'Hockey',
+      divisions: ['Bantam', 'Midget'],
+      estimatedTeams: 20,
+      status: 'open'
+    },
+    // California tournaments
+    {
+      id: '8',
+      title: 'Bay Area Volleyball Classic',
+      organizer: 'San Francisco Volleyball Club',
+      organizerEmail: 'events@sfvolleyball.com',
+      date: '2025-10-26',
+      time: '9:00 AM - 5:00 PM',
+      location: 'San Francisco, CA',
+      region: 'San Francisco Bay Area',
+      sport: 'Volleyball',
+      divisions: ['JV', 'Varsity'],
+      estimatedTeams: 18,
       status: 'open'
     },
     // November 2025
@@ -76,6 +217,7 @@ export default function TournamentCalendar() {
       date: '2025-11-28',
       time: '9:00 AM - 6:00 PM',
       location: 'Corpus Christi, TX',
+      region: 'Texas Coastal Bend',
       sport: 'Basketball',
       divisions: ['Adult Rec', 'High School'],
       estimatedTeams: 16,
@@ -90,12 +232,18 @@ export default function TournamentCalendar() {
       date: '2025-12-14',
       time: '10:00 AM - 8:00 PM',
       location: 'Aransas Pass, TX',
+      region: 'Texas Coastal Bend',
       sport: 'Volleyball',
       divisions: ['Women\'s Open', 'Coed Rec'],
       estimatedTeams: 20,
       status: 'open'
     }
   ];
+
+  // Filter tournaments by user's region
+  const tournaments = allTournaments.filter(tournament => 
+    !userLocation || tournament.region === userLocation.region
+  );
 
   const handleDateClick = (date: string) => {
     setSelectedDate(selectedDate === date ? null : date);
@@ -178,9 +326,17 @@ export default function TournamentCalendar() {
             <div className="flex justify-center mb-4">
               <Calendar className="h-12 w-12 text-blue-400" />
             </div>
-            <h1 className="text-3xl font-bold text-white mb-2">Texas Coastal Bend Tournament Calendar</h1>
+            <h1 className="text-3xl font-bold text-white mb-2">
+              {isLoadingLocation 
+                ? 'Local Tournament Calendar' 
+                : `${userLocation?.region || 'Local'} Tournament Calendar`
+              }
+            </h1>
             <p className="text-slate-300 text-lg max-w-2xl mx-auto">
-              Discover upcoming tournaments in your area and coordinate with other organizers
+              {isLoadingLocation 
+                ? 'Detecting your location...'
+                : `Discover upcoming tournaments in ${userLocation?.region || 'your area'} and coordinate with other organizers`
+              }
             </p>
             <Badge className="mt-4 bg-blue-600 text-white">
               Regional Sports Coordination Hub
