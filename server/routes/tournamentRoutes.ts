@@ -151,7 +151,9 @@ export function registerTournamentRoutes(app: Express) {
       }
 
       // Parse the data directly - schema now expects strings
+      console.log("Raw tournament data received:", JSON.stringify(req.body, null, 2));
       const validatedData = insertTournamentSchema.parse(req.body);
+      console.log("Validated tournament data:", JSON.stringify(validatedData, null, 2));
       
       // Generate bracket structure based on tournament type
       const teams = Array.isArray(validatedData.teams) ? validatedData.teams : [];
@@ -176,15 +178,24 @@ export function registerTournamentRoutes(app: Express) {
 
       // Create tournament with generated bracket and user association
       // Sanitize numeric fields to prevent empty string errors
+      const sanitizeNumericField = (value: any, defaultValue: any = null) => {
+        if (value === "" || value === null || value === undefined) {
+          return defaultValue;
+        }
+        return value;
+      };
+
       const sanitizedData = {
         ...validatedData,
-        entryFee: (validatedData.entryFee && validatedData.entryFee !== "") ? validatedData.entryFee : "0",
-        maxParticipants: (validatedData.maxParticipants && validatedData.maxParticipants !== "") ? validatedData.maxParticipants : null,
-        teamSize: (validatedData.teamSize && validatedData.teamSize !== "") ? validatedData.teamSize : 8,
-        seriesLength: (validatedData.seriesLength && validatedData.seriesLength !== "") ? validatedData.seriesLength : 7,
-        currentStage: (validatedData.currentStage && validatedData.currentStage !== "") ? validatedData.currentStage : 1,
-        totalStages: (validatedData.totalStages && validatedData.totalStages !== "") ? validatedData.totalStages : 1
+        entryFee: sanitizeNumericField(validatedData.entryFee, "0"),
+        maxParticipants: sanitizeNumericField(validatedData.maxParticipants, null),
+        teamSize: sanitizeNumericField(validatedData.teamSize, 8),
+        seriesLength: sanitizeNumericField(validatedData.seriesLength, 7),
+        currentStage: sanitizeNumericField(validatedData.currentStage, 1),
+        totalStages: sanitizeNumericField(validatedData.totalStages, 1)
       };
+      
+      console.log("Sanitized tournament data:", JSON.stringify(sanitizedData, null, 2));
 
       const tournamentData = {
         ...sanitizedData,
