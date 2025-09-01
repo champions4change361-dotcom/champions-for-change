@@ -87,6 +87,7 @@ import AthleticTrainerDashboard from './pages/AthleticTrainerDashboard';
 import TournamentsPage from './pages/tournaments';
 import Drafts from './pages/drafts';
 import TournamentDetailPage from './pages/tournament-detail';
+import TournamentEditPage from './pages/tournament-edit';
 import ScorekeeperDashboard from './pages/ScorekeeperDashboard';
 import ScorekeeperScheduling from './pages/ScorekeeperScheduling';
 import ParentDashboard from './pages/ParentDashboard';
@@ -125,6 +126,7 @@ function AuthenticatedRoutes() {
         <Route path="/tournaments" component={TournamentsPage} />
         <Route path="/drafts" component={Drafts} />
         <Route path="/tournaments/:id" component={TournamentDetailPage} />
+        <Route path="/tournaments/:id/edit" component={TournamentEditPage} />
         <Route path="/create" component={CreateTournament} />
         <Route path="/tournament/:id" component={Tournament} />
         <Route path="/contacts" component={Contacts} />

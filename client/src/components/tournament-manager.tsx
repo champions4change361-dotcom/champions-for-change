@@ -44,6 +44,23 @@ interface TournamentManagerProps {
   tournamentId: string;
 }
 
+// Helper function to generate CSV export data
+const generateTournamentCsv = (tournament: Tournament) => {
+  const headers = ['Tournament Name', 'Sport', 'Type', 'Format', 'Status', 'Teams', 'Created', 'Updated'];
+  const row = [
+    tournament.name,
+    tournament.sport,
+    tournament.tournamentType,
+    tournament.competitionFormat,
+    tournament.status,
+    tournament.teams?.length || tournament.teamSize,
+    new Date(tournament.createdAt).toLocaleDateString(),
+    new Date(tournament.updatedAt).toLocaleDateString()
+  ];
+  
+  return [headers.join(','), row.join(',')].join('\n');
+};
+
 export default function TournamentManager({ tournamentId }: TournamentManagerProps) {
   const [activeTab, setActiveTab] = useState('bracket');
 
@@ -312,10 +329,31 @@ export default function TournamentManager({ tournamentId }: TournamentManagerPro
                 </div>
                 
                 <div className="pt-4 border-t">
-                  <Button variant="outline" className="mr-2">
+                  <Button 
+                    variant="outline" 
+                    className="mr-2"
+                    onClick={() => window.location.href = `/tournaments/${tournamentId}/edit`}
+                    data-testid="button-edit-tournament"
+                  >
                     Edit Tournament
                   </Button>
-                  <Button variant="outline">
+                  <Button 
+                    variant="outline"
+                    onClick={() => {
+                      // Create and download CSV export
+                      const csvData = generateTournamentCsv(tournament);
+                      const blob = new Blob([csvData], { type: 'text/csv' });
+                      const url = window.URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = `${tournament.name}-results.csv`;
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                      window.URL.revokeObjectURL(url);
+                    }}
+                    data-testid="button-export-results"
+                  >
                     Export Results
                   </Button>
                 </div>
