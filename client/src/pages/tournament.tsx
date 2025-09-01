@@ -48,7 +48,7 @@ export default function Tournament() {
     );
   }
 
-  if (!data) {
+  if (!data || !data.tournament) {
     return (
       <div className="font-inter bg-gray-50 min-h-screen" data-testid="tournament-not-found">
         <header className="bg-white shadow-sm border-b border-gray-200">
