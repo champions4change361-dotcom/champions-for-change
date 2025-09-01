@@ -1,33 +1,41 @@
 import { Link, useLocation } from "wouter";
 import { useDomain } from "@/hooks/useDomain";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Brain } from "lucide-react";
+import { Brain, User, Calendar, Heart, Trophy, Settings, LogOut } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 
 export default function DomainNavigation() {
   const [location] = useLocation();
   const { config, isFeatureEnabled } = useDomain();
+  const { user, isAuthenticated } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
-  // Close mobile menu when location changes
+  // Close menus when location changes
   useEffect(() => {
     setMobileMenuOpen(false);
+    setUserMenuOpen(false);
   }, [location]);
 
-  // Close mobile menu when clicking outside
+  // Close menus when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
         setMobileMenuOpen(false);
       }
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setUserMenuOpen(false);
+      }
     }
 
-    if (mobileMenuOpen) {
+    if (mobileMenuOpen || userMenuOpen) {
       document.addEventListener('mousedown', handleClickOutside);
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
-  }, [mobileMenuOpen]);
+  }, [mobileMenuOpen, userMenuOpen]);
   
   if (!config) return null;
 
@@ -92,30 +100,158 @@ export default function DomainNavigation() {
         </div>
 
         {/* Mobile Navigation Menu */}
-        <div className="md:hidden" ref={mobileMenuRef}>
-          <button 
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="relative w-6 h-6 flex flex-col justify-center items-center text-white cursor-pointer"
-            data-testid="button-mobile-menu"
-          >
-            <div className="w-4 h-0.5 bg-white mb-1"></div>
-            <div className="w-4 h-0.5 bg-white mb-1"></div>
-            <div className="w-4 h-0.5 bg-white"></div>
-          </button>
-          {mobileMenuOpen && (
-            <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg z-50">
-              <Link href="/">
-                <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-t-md" data-testid="link-mobile-home">Home</a>
-              </Link>
-              {config.brand !== 'COACHES_LOUNGE' && (
-                <>
-                  <Link href="/tournaments">
-                    <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-b-md" data-testid="link-mobile-tournaments">Tournaments</a>
+        <div className="md:hidden flex items-center space-x-3">
+          {/* User Profile Button (DT) */}
+          {isAuthenticated && user && (
+            <div className="relative" ref={userMenuRef}>
+              <button
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-white text-sm font-bold"
+                data-testid="button-user-profile"
+              >
+                {user.firstName?.charAt(0) || 'U'}{user.lastName?.charAt(0) || ''}
+              </button>
+              {userMenuOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50">
+                  <div className="px-4 py-3 border-b border-gray-100">
+                    <p className="text-sm font-medium text-gray-900">{user.firstName} {user.lastName}</p>
+                    <p className="text-xs text-gray-500">{user.email}</p>
+                  </div>
+                  <Link href="/profile">
+                    <a className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-testid="link-profile">
+                      <User className="w-4 h-4 mr-3" />
+                      Profile
+                    </a>
                   </Link>
-                </>
+                  <Link href="/settings">
+                    <a className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-testid="link-settings">
+                      <Settings className="w-4 h-4 mr-3" />
+                      Settings
+                    </a>
+                  </Link>
+                  <button
+                    onClick={() => window.location.href = '/api/logout'}
+                    className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-b-md"
+                    data-testid="button-logout"
+                  >
+                    <LogOut className="w-4 h-4 mr-3" />
+                    Sign Out
+                  </button>
+                </div>
               )}
             </div>
           )}
+
+          {/* Hamburger Menu */}
+          <div ref={mobileMenuRef}>
+            <button 
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="relative w-6 h-6 flex flex-col justify-center items-center text-white cursor-pointer"
+              data-testid="button-mobile-menu"
+            >
+              <div className="w-4 h-0.5 bg-white mb-1"></div>
+              <div className="w-4 h-0.5 bg-white mb-1"></div>
+              <div className="w-4 h-0.5 bg-white"></div>
+            </button>
+            {mobileMenuOpen && (
+              <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg z-50">
+                {/* Core Navigation */}
+                <div className="py-2">
+                  <Link href="/">
+                    <a className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-testid="link-mobile-home">
+                      <Trophy className="w-4 h-4 mr-3" />
+                      Home
+                    </a>
+                  </Link>
+                  {config.brand !== 'COACHES_LOUNGE' && (
+                    <Link href="/tournaments">
+                      <a className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-testid="link-mobile-tournaments">
+                        <Trophy className="w-4 h-4 mr-3" />
+                        Tournaments
+                      </a>
+                    </Link>
+                  )}
+                  
+                  {/* Tournament Empire for school-safe and pro domains */}
+                  {config.brand !== 'COACHES_LOUNGE' && (
+                    <Link href="/tournament-empire">
+                      <a className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-testid="link-mobile-tournament-empire">
+                        <Trophy className="w-4 h-4 mr-3" />
+                        Tournament Empire
+                      </a>
+                    </Link>
+                  )}
+
+                  {/* AI Assistant */}
+                  <Link href="/ai-chat">
+                    <a className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-testid="link-mobile-ai-chat">
+                      <Brain className="w-4 h-4 mr-3" />
+                      AI Assistant
+                    </a>
+                  </Link>
+
+                  {/* Fantasy Leagues */}
+                  {isFeatureEnabled('fantasyLeagues') && (
+                    <Link href="/fantasy-tournaments">
+                      <a className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-testid="link-mobile-fantasy">
+                        <Trophy className="w-4 h-4 mr-3" />
+                        Fantasy
+                      </a>
+                    </Link>
+                  )}
+                </div>
+
+                {/* Champions for Change Features */}
+                {config.brand === 'CHAMPIONS_FOR_CHANGE' && (
+                  <div className="border-t border-gray-100 py-2">
+                    <Link href="/athletic-trainer-scheduler">
+                      <a className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-testid="link-mobile-scheduler">
+                        <Calendar className="w-4 h-4 mr-3" />
+                        Athletic Scheduler
+                      </a>
+                    </Link>
+                    <Link href="/comprehensive-health-demo">
+                      <a className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-testid="link-mobile-health">
+                        <Heart className="w-4 h-4 mr-3" />
+                        Health Dashboard
+                      </a>
+                    </Link>
+                    <Link href="/domains">
+                      <a className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-testid="link-mobile-domains">
+                        <Settings className="w-4 h-4 mr-3" />
+                        Domain Management
+                      </a>
+                    </Link>
+                  </div>
+                )}
+
+                {/* Authentication */}
+                {!isAuthenticated ? (
+                  <div className="border-t border-gray-100 py-2">
+                    <button
+                      onClick={() => window.location.href = '/api/login'}
+                      className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      data-testid="button-mobile-login"
+                    >
+                      <User className="w-4 h-4 mr-3" />
+                      Sign In
+                    </button>
+                  </div>
+                ) : (
+                  <div className="border-t border-gray-100 py-2">
+                    <button
+                      onClick={() => window.location.href = '/api/logout'}
+                      className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-b-md"
+                      data-testid="button-mobile-logout"
+                    >
+                      <LogOut className="w-4 h-4 mr-3" />
+                      Sign Out
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
         
         {/* Desktop Additional Navigation */}
