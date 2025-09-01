@@ -3,7 +3,6 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Trophy, Clock, Target } from 'lucide-react';
 
@@ -164,31 +163,34 @@ export default function MatchUpdateModal({
           {/* Status Selection */}
           <div className="space-y-2">
             <Label htmlFor="status">Match Status</Label>
-            <Select value={status} onValueChange={(value: string) => setStatus(value as 'upcoming' | 'in-progress' | 'completed')}>
-              <SelectTrigger data-testid="select-status">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="z-[60]">
-                <SelectItem value="upcoming">Upcoming</SelectItem>
-                <SelectItem value="in-progress">In Progress</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-              </SelectContent>
-            </Select>
+            <select
+              id="status"
+              value={status}
+              onChange={(e) => setStatus(e.target.value as 'upcoming' | 'in-progress' | 'completed')}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              data-testid="select-status"
+            >
+              <option value="upcoming">Upcoming</option>
+              <option value="in-progress">In Progress</option>
+              <option value="completed">Completed</option>
+            </select>
           </div>
 
           {/* Winner Selection (if needed) */}
           {status === 'completed' && parseInt(team1Score) === parseInt(team2Score) && parseInt(team1Score) > 0 && (
             <div className="space-y-2">
               <Label htmlFor="winner">Winner (Tie Game)</Label>
-              <Select value={winner} onValueChange={setWinner}>
-                <SelectTrigger data-testid="select-winner">
-                  <SelectValue placeholder="Select winner" />
-                </SelectTrigger>
-                <SelectContent className="z-[60]">
-                  {match.team1 && <SelectItem value={match.team1}>{match.team1}</SelectItem>}
-                  {match.team2 && <SelectItem value={match.team2}>{match.team2}</SelectItem>}
-                </SelectContent>
-              </Select>
+              <select
+                id="winner"
+                value={winner}
+                onChange={(e) => setWinner(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                data-testid="select-winner"
+              >
+                <option value="">Select winner</option>
+                {match.team1 && <option value={match.team1}>{match.team1}</option>}
+                {match.team2 && <option value={match.team2}>{match.team2}</option>}
+              </select>
             </div>
           )}
 
