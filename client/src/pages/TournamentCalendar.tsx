@@ -184,7 +184,7 @@ export default function TournamentCalendar() {
       title: 'Youth Basketball Championship',
       organizer: 'Community Church',
       organizerEmail: 'tournaments@communitychurch.org',
-      date: '2025-09-15',
+      date: '2025-09-14',
       time: '9:00 AM - 3:00 PM',
       location: 'Corpus Christi, TX',
       region: 'Texas Coastal Bend',
