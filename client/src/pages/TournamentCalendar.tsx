@@ -457,40 +457,32 @@ export default function TournamentCalendar() {
               Regional Sports Coordination Hub
             </Badge>
             
-            {/* State Filter Dropdown */}
+            {/* State Filter Dropdown - Native HTML Select */}
             <div className="mt-6 max-w-sm mx-auto">
-              <Select 
+              <select 
                 value={selectedState} 
-                onValueChange={(value) => {
-                  setSelectedState(value);
+                onChange={(e) => {
+                  setSelectedState(e.target.value);
                   setSelectedDate(null); // Clear selected date when changing filter
                 }}
+                className="w-full px-4 py-3 bg-slate-800/80 border border-blue-500/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:bg-slate-700/80 transition-colors"
               >
-                <SelectTrigger className="bg-slate-800/80 border-blue-500/20 text-white">
-                  <SelectValue placeholder={
-                    isLoadingLocation 
-                      ? "Select a state to filter tournaments" 
-                      : `Filter by state (currently showing ${userLocation?.state || 'all areas'})`
-                  } />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-blue-500/20">
-                  <SelectItem value="auto" className="text-white hover:bg-slate-700">
-                    {userLocation 
-                      ? `Show ${userLocation.region} (auto-detected)` 
-                      : 'Show all regions'
-                    }
-                  </SelectItem>
-                  {usStates.map((state) => (
-                    <SelectItem 
-                      key={state.value} 
-                      value={state.value}
-                      className="text-white hover:bg-slate-700"
-                    >
-                      {state.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                <option value="auto" className="bg-slate-800 text-white">
+                  {userLocation 
+                    ? `Show ${userLocation.region} (auto-detected)` 
+                    : 'Show all regions'
+                  }
+                </option>
+                {usStates.map((state) => (
+                  <option 
+                    key={state.value} 
+                    value={state.value}
+                    className="bg-slate-800 text-white"
+                  >
+                    {state.label}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
