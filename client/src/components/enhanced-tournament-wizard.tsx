@@ -297,7 +297,7 @@ export default function EnhancedTournamentWizard({
         ...data,
         teams: data.teams,
         entryFee: data.entryFee ? String(data.entryFee) : "0", // Convert to string for numeric field
-        tournamentDate: data.tournamentDate ? String(data.tournamentDate) : null, // Convert to string for backend
+        tournamentDate: data.tournamentDate ? (data.tournamentDate instanceof Date ? data.tournamentDate.toISOString().slice(0, 16) : String(data.tournamentDate)) : null, // Ensure string format
         scoringMethod: selectedSport?.scoringMethod || "wins",
         isGuestCreated: !user, // Mark as guest-created for tournaments created without login
       };
@@ -342,7 +342,7 @@ export default function EnhancedTournamentWizard({
         teams: data.teams,
         status: 'draft',
         entryFee: data.entryFee ? String(data.entryFee) : "0", // Convert to string for numeric field
-        tournamentDate: data.tournamentDate ? String(data.tournamentDate) : null, // Convert to string for backend
+        tournamentDate: data.tournamentDate ? (data.tournamentDate instanceof Date ? data.tournamentDate.toISOString().slice(0, 16) : String(data.tournamentDate)) : null, // Ensure string format
         scoringMethod: selectedSport?.scoringMethod || "wins",
         isGuestCreated: !user,
       };
@@ -431,6 +431,18 @@ export default function EnhancedTournamentWizard({
       case 'preview': return <Trophy className="w-5 h-5" />;
       case 'start': return <Play className="w-5 h-5" />;
     }
+  };
+
+  // Function to clear cached data
+  const clearCachedData = () => {
+    localStorage.removeItem('tournament_draft');
+    form.reset();
+    setTeams([]);
+    setCurrentStep('sport');
+    toast({
+      title: "Cache Cleared",
+      description: "All cached tournament data has been cleared.",
+    });
   };
 
   return (
