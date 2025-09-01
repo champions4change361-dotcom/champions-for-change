@@ -121,7 +121,11 @@ export async function handleAIConversation(req: Request, res: Response) {
     let createdTournament: any = null;
     
     // Check if user wants to create a tournament and we should actually create it
-    if (intent === 'tournament_creation' && shouldCreateTournament(message)) {
+    const shouldCreate = shouldCreateTournament(message);
+    console.log(`🤖 AI Analysis: intent=${intent}, shouldCreate=${shouldCreate}, message="${message}"`);
+    
+    if (intent === 'tournament_creation' && shouldCreate) {
+      console.log('🏆 Creating tournament via AI...');
       const createResult = await createTournamentForUser(req, message, extractedContext);
       
       if (createResult.success) {
@@ -281,10 +285,21 @@ function shouldCreateTournament(message: string): boolean {
   const creationKeywords = [
     'build me', 'create me', 'make me', 'set up', 'can you build',
     'can you create', 'can you make', 'please create', 'please build',
-    'I want', 'I need', 'help me create', 'help me build'
+    'I want', 'I need', 'help me create', 'help me build',
+    'i need you to build', 'would like you to build', 'you to build',
+    'build the tournament', 'create the tournament', 'make the tournament'
   ];
   
-  return creationKeywords.some(keyword => lowerMessage.includes(keyword));
+  // Also check for tournament-specific creation requests
+  const tournamentCreationPhrases = [
+    'tournament', 'championship', 'bracket', 'competition'
+  ];
+  
+  const hasCreationKeyword = creationKeywords.some(keyword => lowerMessage.includes(keyword));
+  const hasTournamentContext = tournamentCreationPhrases.some(phrase => lowerMessage.includes(phrase));
+  
+  // If they mention creation AND tournament context, create it
+  return hasCreationKeyword && hasTournamentContext;
 }
 
 function extractTournamentDetailsFromMessage(message: string, context: any): any {
