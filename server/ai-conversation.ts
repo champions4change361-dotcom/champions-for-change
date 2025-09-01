@@ -343,19 +343,29 @@ function shouldCreateTournament(message: string): boolean {
     'can you create', 'can you make', 'please create', 'please build',
     'I want', 'I need', 'help me create', 'help me build',
     'i need you to build', 'would like you to build', 'you to build',
-    'build the tournament', 'create the tournament', 'make the tournament'
+    'build the tournament', 'create the tournament', 'make the tournament',
+    'build it for me', 'create it for me', 'make it for me', 'can you build it'
   ];
   
   // Also check for tournament-specific creation requests (including common typos)
   const tournamentCreationPhrases = [
-    'tournament', 'tournamenbt', 'tournamenent', 'championship', 'bracket', 'competition'
+    'tournament', 'tournamenbt', 'tournamenent', 'championship', 'bracket', 'competition',
+    'meet', 'event', 'game', 'match'
   ];
   
   const hasCreationKeyword = creationKeywords.some(keyword => lowerMessage.includes(keyword));
   const hasTournamentContext = tournamentCreationPhrases.some(phrase => lowerMessage.includes(phrase));
   
-  // If they mention creation AND tournament context, create it
-  return hasCreationKeyword && hasTournamentContext;
+  // Special case: If they say "build it" or "create it" in a tournament conversation context,
+  // that's clearly a creation request even without explicit tournament keywords
+  const isDirectCreationRequest = lowerMessage.includes('build it') || 
+                                 lowerMessage.includes('create it') || 
+                                 lowerMessage.includes('make it') ||
+                                 lowerMessage.includes('can you build') ||
+                                 lowerMessage.includes('can you create');
+  
+  // If they mention creation AND tournament context, OR it's a direct "build it" request, create it
+  return (hasCreationKeyword && hasTournamentContext) || isDirectCreationRequest;
 }
 
 function extractTournamentDetailsFromMessage(message: string, context: any): any {
