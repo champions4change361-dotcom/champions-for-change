@@ -11,8 +11,15 @@ export default function UnifiedLogin() {
 
   const handleOAuthLogin = (provider: string) => {
     // Store the return URL for after authentication
-    const returnUrl = new URLSearchParams(window.location.search).get('return') || '/tournaments';
-    sessionStorage.setItem('auth_return_url', returnUrl);
+    const urlParams = new URLSearchParams(window.location.search);
+    const returnUrl = urlParams.get('return') || urlParams.get('redirect') || '/tournaments';
+    
+    // Handle Champions registration redirect
+    if (urlParams.get('redirect') === 'champions-registration') {
+      sessionStorage.setItem('auth_return_url', '/champions-registration');
+    } else {
+      sessionStorage.setItem('auth_return_url', returnUrl);
+    }
     
     // For mobile compatibility, use a more explicit redirect
     if (provider === 'google') {
