@@ -14,6 +14,7 @@ import {
   validateTeamNames,
   type TeamData 
 } from "@/utils/csv-utils";
+import { generateRandomNames } from "@/utils/name-generator";
 
 interface TeamManagementProps {
   teamCount: number;
@@ -54,6 +55,24 @@ export default function TeamManagement({
     updatedTeams[index] = { ...updatedTeams[index], [field]: value };
     setTeams(updatedTeams);
     onTeamsUpdate(updatedTeams);
+  };
+
+  const handleGenerateRandomNames = () => {
+    if (competitionFormat !== 'leaderboard') return;
+    
+    const randomNames = generateRandomNames(teamCount);
+    const updatedTeams = teams.map((team, index) => ({
+      ...team,
+      teamName: randomNames[index] || `Participant ${index + 1}`
+    }));
+    
+    setTeams(updatedTeams);
+    onTeamsUpdate(updatedTeams);
+    
+    toast({
+      title: "Random Names Generated",
+      description: "Participant names have been generated. You can edit them individually if needed.",
+    });
   };
 
   const handleBulkNamesUpdate = () => {
@@ -239,15 +258,17 @@ export default function TeamManagement({
               Bulk Text Input
             </Button>
 
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={generateRandomNames}
-              data-testid="button-generate-names"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Generate Random Names
-            </Button>
+            {competitionFormat === 'leaderboard' && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleGenerateRandomNames}
+                data-testid="button-generate-names"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Random Names
+              </Button>
+            )}
 
             <input
               ref={fileInputRef}

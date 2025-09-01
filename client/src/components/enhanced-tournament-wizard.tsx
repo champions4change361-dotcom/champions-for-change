@@ -20,6 +20,7 @@ import { insertTournamentSchema } from "@shared/schema";
 import TeamManagement from "@/components/team-management";
 import { type TeamData } from "@/utils/csv-utils";
 import AddressAutocomplete from "@/components/AddressAutocomplete";
+import { generateRandomNames } from "@/utils/name-generator";
 
 const formSchema = insertTournamentSchema.extend({
   teamSize: z.number().min(2).max(128), // Support up to 128 teams for large tournaments
@@ -295,7 +296,7 @@ export default function EnhancedTournamentWizard({
         ...data,
         teams: data.teams,
         entryFee: data.entryFee ? String(data.entryFee) : "0", // Convert to string for numeric field
-        tournamentDate: data.tournamentDate ? new Date(data.tournamentDate).toISOString() : null, // Convert to ISO string
+        tournamentDate: data.tournamentDate ? new Date(data.tournamentDate) : null, // Keep as Date object
         scoringMethod: selectedSport?.scoringMethod || "wins",
         isGuestCreated: !user, // Mark as guest-created for tournaments created without login
       };
@@ -340,7 +341,7 @@ export default function EnhancedTournamentWizard({
         teams: data.teams,
         status: 'draft',
         entryFee: data.entryFee ? String(data.entryFee) : "0", // Convert to string for numeric field
-        tournamentDate: data.tournamentDate ? new Date(data.tournamentDate).toISOString() : null, // Convert to ISO string
+        tournamentDate: data.tournamentDate ? new Date(data.tournamentDate) : null, // Keep as Date object
         scoringMethod: selectedSport?.scoringMethod || "wins",
         isGuestCreated: !user,
       };
@@ -434,64 +435,77 @@ export default function EnhancedTournamentWizard({
     <div className="max-w-4xl mx-auto space-y-6" data-testid="enhanced-tournament-wizard">
       {/* Progress Header */}
       <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <CardTitle className="flex items-center gap-2">
+        <CardHeader className="pb-4">
+          <div className="flex flex-col space-y-3 sm:flex-row sm:items-start sm:justify-between sm:space-y-0">
+            <div className="flex-1 min-w-0">
+              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                 {getStepIcon(currentStep)}
-                {stepTitles[currentStep]}
+                <span className="truncate">{stepTitles[currentStep]}</span>
               </CardTitle>
-              <CardDescription>{stepDescriptions[currentStep]}</CardDescription>
-              {/* Auto-save status indicator */}
+              <CardDescription className="mt-1">{stepDescriptions[currentStep]}</CardDescription>
+            </div>
+            
+            {/* Mobile-first action bar */}
+            <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
+              {/* Auto-save status - more compact */}
               {autoSaveStatus && (
-                <div className="flex items-center gap-1 text-sm mt-2">
+                <div className="flex items-center gap-1 text-xs">
                   {autoSaveStatus === 'saved' && (
                     <>
-                      <Check className="h-4 w-4 text-green-500" />
+                      <Check className="h-3 w-3 text-green-500" />
                       <span className="text-green-600">Auto-saved</span>
                     </>
                   )}
                   {autoSaveStatus === 'saving' && (
                     <>
-                      <div className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full" />
+                      <div className="animate-spin h-3 w-3 border-2 border-blue-500 border-t-transparent rounded-full" />
                       <span className="text-blue-600">Saving...</span>
                     </>
                   )}
                   {autoSaveStatus === 'error' && (
                     <>
-                      <X className="h-4 w-4 text-red-500" />
+                      <X className="h-3 w-3 text-red-500" />
                       <span className="text-red-600">Save failed</span>
                     </>
                   )}
                 </div>
               )}
-            </div>
-            <div className="flex items-center gap-4">
-              {/* Save as Draft Button */}
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setIsDraftSaving(true);
-                  const formData = form.getValues();
-                  saveDraftMutation.mutate({ ...formData, teams, status: 'draft' as const });
-                }}
-                disabled={isDraftSaving || saveDraftMutation.isPending || !form.watch("name")}
-                className="flex items-center gap-2"
-                data-testid="button-save-draft"
-              >
-                {isDraftSaving || saveDraftMutation.isPending ? (
-                  <div className="animate-spin h-4 w-4 border-2 border-gray-500 border-t-transparent rounded-full" />
-                ) : (
-                  <Check className="h-4 w-4" />
-                )}
-                Save Draft
-              </Button>
-              <Badge variant="outline" className="text-sm">
-                Step {currentStepIndex + 1} of {steps.length}
-              </Badge>
+              
+              <div className="flex items-center gap-2">
+                {/* Save Draft - more compact */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setIsDraftSaving(true);
+                    const formData = form.getValues();
+                    saveDraftMutation.mutate({ ...formData, teams, status: 'draft' as const });
+                  }}
+                  disabled={isDraftSaving || saveDraftMutation.isPending || !form.watch("name")}
+                  className="flex items-center gap-1 text-xs"
+                  data-testid="button-save-draft"
+                >
+                  {isDraftSaving || saveDraftMutation.isPending ? (
+                    <div className="animate-spin h-3 w-3 border-2 border-gray-500 border-t-transparent rounded-full" />
+                  ) : (
+                    <Check className="h-3 w-3" />
+                  )}
+                  <span className="hidden sm:inline">Save Draft</span>
+                  <span className="sm:hidden">Save</span>
+                </Button>
+                
+                {/* Step indicator */}
+                <Badge variant="outline" className="text-xs px-2 py-1">
+                  Step {currentStepIndex + 1} of {steps.length}
+                </Badge>
+              </div>
             </div>
           </div>
-          <Progress value={progress} className="w-full" />
+          
+          {/* Progress bar with some breathing room */}
+          <div className="mt-4">
+            <Progress value={progress} className="w-full h-2" />
+          </div>
         </CardHeader>
       </Card>
 
