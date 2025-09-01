@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, ArrowRight, CheckCircle, Play, Trophy, Users, Settings } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle, Play, Trophy, Users, Settings, DollarSign } from "lucide-react";
 import { insertTournamentSchema } from "@shared/schema";
 import TeamManagement from "@/components/team-management";
 import { type TeamData } from "@/utils/csv-utils";
@@ -569,6 +569,75 @@ export default function EnhancedTournamentWizard({
                 </div>
               </div>
 
+              {/* Registration Fee & Payment Settings */}
+              <div className="space-y-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <h4 className="font-medium text-blue-900 flex items-center gap-2">
+                  <DollarSign className="h-4 w-4" />
+                  Registration Fee & Payment (Optional)
+                </h4>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="entryFee" className="block text-sm font-medium text-gray-700 mb-2">
+                      Registration Fee ($)
+                    </Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      {...form.register("entryFee", { valueAsNumber: true })}
+                      placeholder="0.00"
+                      className="w-full"
+                      data-testid="input-entry-fee"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Leave blank for free tournaments
+                    </p>
+                  </div>
+
+                  <div>
+                    <Label className="block text-sm font-medium text-gray-700 mb-2">
+                      Enable Donations
+                    </Label>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        {...form.register("donationsEnabled")}
+                        className="rounded border-gray-300"
+                        data-testid="checkbox-donations-enabled"
+                      />
+                      <span className="text-sm text-gray-600">
+                        Allow additional donations during registration
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Perfect for fundraising tournaments
+                    </p>
+                  </div>
+                </div>
+
+                {form.watch("donationsEnabled") && (
+                  <div>
+                    <Label htmlFor="donationGoal" className="block text-sm font-medium text-gray-700 mb-2">
+                      Donation Goal ($)
+                    </Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      {...form.register("donationGoal", { valueAsNumber: true })}
+                      placeholder="1000.00"
+                      className="w-full"
+                      data-testid="input-donation-goal"
+                    />
+                  </div>
+                )}
+
+                <div className="text-xs text-blue-700 bg-blue-100 p-2 rounded">
+                  <strong>Foundation Plan:</strong> 2% platform fee supports student education. You keep 98% of all payments.
+                </div>
+              </div>
+
               <div>
                 <Label htmlFor="teamSize" className="block text-sm font-medium text-gray-700 mb-2">
                   {competitionFormat === 'leaderboard' ? 'Number of Participants' : 'Number of Teams'} *
@@ -660,6 +729,12 @@ export default function EnhancedTournamentWizard({
                       <div><strong>Date:</strong> {new Date(form.watch("tournamentDate")).toLocaleDateString()} at {new Date(form.watch("tournamentDate")).toLocaleTimeString()}</div>
                     )}
                     {form.watch("location") && <div><strong>Location:</strong> {form.watch("location")}</div>}
+                    {form.watch("entryFee") && form.watch("entryFee") > 0 && (
+                      <div><strong>Registration Fee:</strong> ${form.watch("entryFee")}</div>
+                    )}
+                    {form.watch("donationsEnabled") && (
+                      <div><strong>Donations:</strong> Enabled {form.watch("donationGoal") && `(Goal: $${form.watch("donationGoal")})`}</div>
+                    )}
                   </div>
                 </div>
 
