@@ -5,6 +5,27 @@ import { BracketGenerator } from "../utils/bracket-generator";
 import { z } from "zod";
 
 export function registerTournamentRoutes(app: Express) {
+  // Sport Events API Routes
+  app.get("/api/sports/:sportId/events", async (req, res) => {
+    try {
+      const { sportId } = req.params;
+      const events = await storage.getSportEvents(sportId);
+      res.json(events);
+    } catch (error) {
+      console.error("Error fetching sport events:", error);
+      res.status(500).json({ message: "Error fetching sport events", error: error.message });
+    }
+  });
+
+  app.get("/api/sport-events", async (req, res) => {
+    try {
+      const events = await storage.getAllSportEvents();
+      res.json(events);
+    } catch (error) {
+      console.error("Error fetching all sport events:", error);
+      res.status(500).json({ message: "Error fetching sport events", error: error.message });
+    }
+  });
   
   // Get all tournaments for the current user
   app.get("/api/tournaments", async (req: any, res) => {

@@ -20,6 +20,7 @@ import { insertTournamentSchema } from "@shared/schema";
 import TeamManagement from "@/components/team-management";
 import { type TeamData } from "@/utils/csv-utils";
 import AddressAutocomplete from "@/components/AddressAutocomplete";
+import SportEventsSelector from "@/components/sport-events-selector";
 import { generateRandomNames } from "@/utils/name-generator";
 
 const formSchema = insertTournamentSchema.extend({
@@ -70,6 +71,7 @@ export default function EnhancedTournamentWizard({
   const queryClient = useQueryClient();
   const [currentStep, setCurrentStep] = useState<WizardStep>('sport');
   const [teams, setTeams] = useState<TeamData[]>([]);
+  const [selectedEvents, setSelectedEvents] = useState<any[]>([]);
   const [skipTeamSetup, setSkipTeamSetup] = useState(false);
   const [createdTournament, setCreatedTournament] = useState<any>(null);
   const [isDraftSaving, setIsDraftSaving] = useState(false);

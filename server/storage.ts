@@ -1395,6 +1395,7 @@ export class MemStorage implements IStorage {
   private matches: Map<string, Match>;
   private sportCategories: Map<string, SportCategory>;
   private sportOptions: Map<string, SportOption>;
+  private sportEvents: Map<string, any>; // For swimming/track sub-events
   private tournamentStructures: Map<string, TournamentStructure>;
   private trackEvents: Map<string, TrackEvent>;
   private trackEventTiming: Map<string, TrackEventTiming>;
@@ -1430,6 +1431,7 @@ export class MemStorage implements IStorage {
     this.matches = new Map();
     this.sportCategories = new Map();
     this.sportOptions = new Map();
+    this.sportEvents = new Map();
     this.tournamentStructures = new Map();
     this.trackEvents = new Map();
     this.trackEventTiming = new Map();
@@ -1462,6 +1464,7 @@ export class MemStorage implements IStorage {
     this.initializeDefaultStructures();
     this.initializeSportDivisionRules();
     this.initializeUltimateTrackEvents();
+    this.initializeSwimmingEvents();
     this.initializeTournamentIntegration();
     this.initializeCompetitionFormatTemplates();
     this.initializeKrakenDivisionSystem();
@@ -1830,6 +1833,16 @@ export class MemStorage implements IStorage {
     return Array.from(this.sportOptions.values()).sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
   }
 
+  async getSportEvents(sportId: string): Promise<any[]> {
+    return Array.from(this.sportEvents.values())
+      .filter(event => event.sportId === sportId)
+      .sort((a, b) => (a.sortOrder || 999) - (b.sortOrder || 999));
+  }
+
+  async getAllSportEvents(): Promise<any[]> {
+    return Array.from(this.sportEvents.values()).sort((a, b) => (a.sortOrder || 999) - (b.sortOrder || 999));
+  }
+
   async getTournamentStructures(): Promise<TournamentStructure[]> {
     return Array.from(this.tournamentStructures.values()).sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
   }
@@ -2150,6 +2163,77 @@ export class MemStorage implements IStorage {
   }
 
   // Ultimate Track Events initialization
+  private initializeSwimmingEvents() {
+    // First ensure we have swimming in sport options
+    const swimmingAndDiving = {
+      id: 'swimming-diving',
+      sportName: 'Swimming & Diving',
+      sportCategory: 'Aquatic',
+      sportSubcategory: 'Pool Sports',
+      sortOrder: 8,
+      competitionType: 'leaderboard' as const,
+      scoringMethod: 'time' as const,
+      measurementUnit: 'seconds',
+      hasSubEvents: true,
+      createdAt: new Date()
+    };
+    this.sportOptions.set('swimming-diving', swimmingAndDiving);
+
+    // Swimming Events - Standard pool events
+    const swimmingEvents = [
+      // Freestyle Events
+      { id: 'swim-50-free', eventName: '50m Freestyle', eventType: 'swimming', scoringMethod: 'time', measurementUnit: 'seconds', sortOrder: 1 },
+      { id: 'swim-100-free', eventName: '100m Freestyle', eventType: 'swimming', scoringMethod: 'time', measurementUnit: 'seconds', sortOrder: 2 },
+      { id: 'swim-200-free', eventName: '200m Freestyle', eventType: 'swimming', scoringMethod: 'time', measurementUnit: 'seconds', sortOrder: 3 },
+      { id: 'swim-400-free', eventName: '400m Freestyle', eventType: 'swimming', scoringMethod: 'time', measurementUnit: 'seconds', sortOrder: 4 },
+      { id: 'swim-800-free', eventName: '800m Freestyle', eventType: 'swimming', scoringMethod: 'time', measurementUnit: 'seconds', sortOrder: 5 },
+      { id: 'swim-1500-free', eventName: '1500m Freestyle', eventType: 'swimming', scoringMethod: 'time', measurementUnit: 'seconds', sortOrder: 6 },
+      
+      // Backstroke Events
+      { id: 'swim-50-back', eventName: '50m Backstroke', eventType: 'swimming', scoringMethod: 'time', measurementUnit: 'seconds', sortOrder: 7 },
+      { id: 'swim-100-back', eventName: '100m Backstroke', eventType: 'swimming', scoringMethod: 'time', measurementUnit: 'seconds', sortOrder: 8 },
+      { id: 'swim-200-back', eventName: '200m Backstroke', eventType: 'swimming', scoringMethod: 'time', measurementUnit: 'seconds', sortOrder: 9 },
+      
+      // Breaststroke Events
+      { id: 'swim-50-breast', eventName: '50m Breaststroke', eventType: 'swimming', scoringMethod: 'time', measurementUnit: 'seconds', sortOrder: 10 },
+      { id: 'swim-100-breast', eventName: '100m Breaststroke', eventType: 'swimming', scoringMethod: 'time', measurementUnit: 'seconds', sortOrder: 11 },
+      { id: 'swim-200-breast', eventName: '200m Breaststroke', eventType: 'swimming', scoringMethod: 'time', measurementUnit: 'seconds', sortOrder: 12 },
+      
+      // Butterfly Events
+      { id: 'swim-50-fly', eventName: '50m Butterfly', eventType: 'swimming', scoringMethod: 'time', measurementUnit: 'seconds', sortOrder: 13 },
+      { id: 'swim-100-fly', eventName: '100m Butterfly', eventType: 'swimming', scoringMethod: 'time', measurementUnit: 'seconds', sortOrder: 14 },
+      { id: 'swim-200-fly', eventName: '200m Butterfly', eventType: 'swimming', scoringMethod: 'time', measurementUnit: 'seconds', sortOrder: 15 },
+      
+      // Individual Medley Events
+      { id: 'swim-200-im', eventName: '200m Individual Medley', eventType: 'swimming', scoringMethod: 'time', measurementUnit: 'seconds', sortOrder: 16 },
+      { id: 'swim-400-im', eventName: '400m Individual Medley', eventType: 'swimming', scoringMethod: 'time', measurementUnit: 'seconds', sortOrder: 17 },
+      
+      // Relay Events
+      { id: 'swim-4x50-free-relay', eventName: '4x50m Freestyle Relay', eventType: 'swimming', scoringMethod: 'time', measurementUnit: 'seconds', sortOrder: 18 },
+      { id: 'swim-4x100-free-relay', eventName: '4x100m Freestyle Relay', eventType: 'swimming', scoringMethod: 'time', measurementUnit: 'seconds', sortOrder: 19 },
+      { id: 'swim-4x200-free-relay', eventName: '4x200m Freestyle Relay', eventType: 'swimming', scoringMethod: 'time', measurementUnit: 'seconds', sortOrder: 20 },
+      { id: 'swim-4x100-medley-relay', eventName: '4x100m Medley Relay', eventType: 'swimming', scoringMethod: 'time', measurementUnit: 'seconds', sortOrder: 21 },
+      
+      // Diving Events
+      { id: 'dive-1m-springboard', eventName: '1m Springboard', eventType: 'diving', scoringMethod: 'points', measurementUnit: 'points', sortOrder: 22 },
+      { id: 'dive-3m-springboard', eventName: '3m Springboard', eventType: 'diving', scoringMethod: 'points', measurementUnit: 'points', sortOrder: 23 },
+      { id: 'dive-platform', eventName: '10m Platform', eventType: 'diving', scoringMethod: 'points', measurementUnit: 'points', sortOrder: 24 },
+    ];
+
+    swimmingEvents.forEach(event => {
+      const sportEvent = {
+        ...event,
+        sportId: 'swimming-diving',
+        supportsMetric: true,
+        supportsImperial: false, // Swimming is typically metric only
+        gender: 'mixed' as const,
+        ageGroup: undefined,
+        createdAt: new Date()
+      };
+      this.sportEvents.set(event.id, sportEvent);
+    });
+  }
+
   private initializeUltimateTrackEvents() {
     const ultimateTrackEvents = [
       // SPRINTS (100m family) 
