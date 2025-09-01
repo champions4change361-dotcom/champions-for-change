@@ -1,6 +1,8 @@
 import { useParams, Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, RefreshCw } from "lucide-react";
+import { ArrowLeft, RefreshCw, Settings, Users, Trophy, Menu, X } from "lucide-react";
+import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import BracketVisualization from "@/components/bracket-visualization";
 import LeaderboardView from "@/components/leaderboard-view";
 import MultiStageTournament from "@/components/multi-stage-tournament";
@@ -14,9 +16,18 @@ interface TournamentData {
 
 export default function Tournament() {
   const { id } = useParams<{ id: string }>();
+  const { user } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const { data, isLoading, refetch } = useQuery<TournamentData>({
     queryKey: ["/api/tournaments", id],
+  });
+
+  // Check if user owns this tournament  
+  const { data: tournamentOwnership } = useQuery({
+    queryKey: ["/api/events", "tournament", id, "tournament-owner"],
+    enabled: !!user && !!id,
+    retry: false,
   });
 
   if (isLoading) {
@@ -108,6 +119,12 @@ export default function Tournament() {
 
   const roundInfo = getRoundInfo();
 
+  // Determine if user can manage this tournament
+  const canManageTournament = user && (
+    tournamentOwnership?.isTournamentOwner ||
+    ['tournament_manager', 'head_coach', 'assistant_coach', 'scorekeeper'].includes(user.userRole || '')
+  );
+
   return (
     <div className="font-inter bg-gray-50 min-h-screen" data-testid="tournament-page">
       {/* Header */}
@@ -118,12 +135,111 @@ export default function Tournament() {
               <i className="fas fa-trophy text-tournament-primary text-2xl"></i>
               <h1 className="text-xl font-bold text-neutral">Tournament Manager</h1>
             </div>
-            <Link href="/" data-testid="link-back-home" className="flex items-center text-neutral hover:text-tournament-primary transition-colors">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Home
-            </Link>
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center space-x-6">
+              {canManageTournament && (
+                <>
+                  <Link 
+                    href={`/event-scorekeeper-dashboard/${id}`}
+                    data-testid="link-manage-events" 
+                    className="flex items-center text-neutral hover:text-tournament-primary transition-colors"
+                  >
+                    <Trophy className="w-4 h-4 mr-2" />
+                    Manage Events
+                  </Link>
+                  <Link 
+                    href={`/tournaments/${id}/participants`}
+                    data-testid="link-manage-participants" 
+                    className="flex items-center text-neutral hover:text-tournament-primary transition-colors"
+                  >
+                    <Users className="w-4 h-4 mr-2" />
+                    Participants
+                  </Link>
+                  <Link 
+                    href={`/tournaments/${id}/settings`}
+                    data-testid="link-tournament-settings" 
+                    className="flex items-center text-neutral hover:text-tournament-primary transition-colors"
+                  >
+                    <Settings className="w-4 h-4 mr-2" />
+                    Settings
+                  </Link>
+                </>
+              )}
+              <Link href="/" data-testid="link-back-home" className="flex items-center text-neutral hover:text-tournament-primary transition-colors">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Home
+              </Link>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <div className="md:hidden">
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="text-neutral hover:text-tournament-primary transition-colors p-2"
+                data-testid="button-mobile-menu"
+              >
+                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-white border-t border-gray-200" data-testid="mobile-menu">
+            <div className="px-4 py-2 space-y-1">
+              {canManageTournament && (
+                <>
+                  <Link 
+                    href={`/event-scorekeeper-dashboard/${id}`}
+                    data-testid="mobile-link-manage-events"
+                    className="block px-3 py-2 text-neutral hover:bg-gray-50 hover:text-tournament-primary transition-colors rounded-md"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <div className="flex items-center">
+                      <Trophy className="w-4 h-4 mr-3" />
+                      Manage Events
+                    </div>
+                  </Link>
+                  <Link 
+                    href={`/tournaments/${id}/participants`}
+                    data-testid="mobile-link-manage-participants"
+                    className="block px-3 py-2 text-neutral hover:bg-gray-50 hover:text-tournament-primary transition-colors rounded-md"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <div className="flex items-center">
+                      <Users className="w-4 h-4 mr-3" />
+                      Participants
+                    </div>
+                  </Link>
+                  <Link 
+                    href={`/tournaments/${id}/settings`}
+                    data-testid="mobile-link-tournament-settings"
+                    className="block px-3 py-2 text-neutral hover:bg-gray-50 hover:text-tournament-primary transition-colors rounded-md"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <div className="flex items-center">
+                      <Settings className="w-4 h-4 mr-3" />
+                      Settings
+                    </div>
+                  </Link>
+                </>
+              )}
+              <Link 
+                href="/" 
+                data-testid="mobile-link-back-home"
+                className="block px-3 py-2 text-neutral hover:bg-gray-50 hover:text-tournament-primary transition-colors rounded-md"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <div className="flex items-center">
+                  <ArrowLeft className="w-4 h-4 mr-3" />
+                  Back to Home
+                </div>
+              </Link>
+            </div>
+          </div>
+        )}
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

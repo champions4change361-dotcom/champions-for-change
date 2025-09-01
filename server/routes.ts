@@ -4234,7 +4234,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Check tournament ownership for event access control
+  // Check tournament ownership for event access control (legacy endpoint)
   app.get('/api/events/:tournamentEventId/tournament-owner', isAuthenticated, async (req, res) => {
     try {
       const storage = getStorage();
@@ -4267,6 +4267,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error('❌ Tournament ownership check error:', error);
+      res.status(500).json({ error: 'Failed to check tournament ownership' });
+    }
+  });
+
+  // Check tournament ownership for direct tournament management access
+  app.get('/api/events/tournament/:tournamentId/tournament-owner', isAuthenticated, async (req, res) => {
+    try {
+      const storage = getStorage();
+      const { tournamentId } = req.params;
+      const userId = (req as any).user?.claims?.sub;
+      
+      console.log('🔐 Checking direct tournament ownership:', { tournamentId, userId });
+      
+      // Check if user owns this specific tournament
+      const tournaments = await storage.getTournaments(userId);
+      const tournament = tournaments.find(t => t.id === tournamentId);
+      const isTournamentOwner = tournament && tournament.userId === userId;
+      
+      console.log('✅ Direct tournament ownership check:', { 
+        userId, 
+        tournamentId,
+        foundTournament: !!tournament,
+        isTournamentOwner 
+      });
+      
+      res.json({
+        isTournamentOwner: isTournamentOwner || false,
+        userRole: (req as any).user?.userRole || 'fan',
+        accessType: isTournamentOwner ? 'tournament_owner' : 'role_based'
+      });
+    } catch (error) {
+      console.error('❌ Direct tournament ownership check error:', error);
       res.status(500).json({ error: 'Failed to check tournament ownership' });
     }
   });
