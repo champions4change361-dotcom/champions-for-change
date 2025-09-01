@@ -171,8 +171,9 @@ export async function handleAIConversation(req: Request, res: Response) {
 function analyzeIntent(message: string): string {
   const lowerMessage = message.toLowerCase();
   
-  // Tournament creation
-  if (lowerMessage.includes('tournament') || lowerMessage.includes('competition') || lowerMessage.includes('event') || lowerMessage.includes('bracket')) {
+  // Tournament creation (including common typos)
+  if (lowerMessage.includes('tournament') || lowerMessage.includes('tournamenbt') || lowerMessage.includes('tournamenent') || 
+      lowerMessage.includes('competition') || lowerMessage.includes('event') || lowerMessage.includes('bracket')) {
     return 'tournament_creation';
   }
   
@@ -290,9 +291,9 @@ function shouldCreateTournament(message: string): boolean {
     'build the tournament', 'create the tournament', 'make the tournament'
   ];
   
-  // Also check for tournament-specific creation requests
+  // Also check for tournament-specific creation requests (including common typos)
   const tournamentCreationPhrases = [
-    'tournament', 'championship', 'bracket', 'competition'
+    'tournament', 'tournamenbt', 'tournamenent', 'championship', 'bracket', 'competition'
   ];
   
   const hasCreationKeyword = creationKeywords.some(keyword => lowerMessage.includes(keyword));
