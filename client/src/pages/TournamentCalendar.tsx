@@ -826,6 +826,12 @@ export default function TournamentCalendar() {
     { value: 'Volleyball', label: 'Volleyball' }
   ];
 
+  // Helper function to get state full name
+  const getStateFullName = (stateCode: string) => {
+    const state = usStates.find(s => s.value === stateCode);
+    return state ? state.label : stateCode;
+  };
+
   // Filter tournaments by selected state and sport
   const tournaments = React.useMemo(() => {
     return allTournaments.filter(tournament => {
@@ -851,11 +857,6 @@ export default function TournamentCalendar() {
       return passesStateFilter && passesSportFilter;
     });
   }, [allTournaments, selectedState, selectedSport, userLocation]);
-
-  const getStateFullName = (stateCode: string) => {
-    const state = usStates.find(s => s.value === stateCode);
-    return state ? state.label : stateCode;
-  };
 
   const handleDateClick = (date: string) => {
     setSelectedDate(selectedDate === date ? null : date);
