@@ -1,7 +1,8 @@
 import { useParams } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
 import EventScorekeeperDashboard from "@/components/event-scorekeeper-dashboard";
 
 export default function EventScorekeeperDashboardPage() {
@@ -9,6 +10,14 @@ export default function EventScorekeeperDashboardPage() {
   const { toast } = useToast();
   const params = useParams();
   const tournamentEventId = params.eventId;
+  const [hasAccess, setHasAccess] = useState(false);
+
+  // Query to check tournament ownership for this event
+  const { data: tournamentOwnership } = useQuery({
+    queryKey: ["/api/events", tournamentEventId, "tournament-owner"],
+    enabled: !!user && !!tournamentEventId,
+    retry: false,
+  });
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -25,20 +34,27 @@ export default function EventScorekeeperDashboardPage() {
     }
   }, [isAuthenticated, isLoading, toast]);
 
-  // Check if user has appropriate role
+  // Check if user has appropriate role OR owns the tournament
   useEffect(() => {
-    if (user && !['scorekeeper', 'head_coach', 'assistant_coach', 'tournament_manager'].includes(user.userRole || '')) {
-      toast({
-        title: "Access Restricted",
-        description: "This area is for coaches and tournament officials only.",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 2000);
-      return;
+    if (user && tournamentOwnership !== undefined) {
+      const hasValidRole = ['scorekeeper', 'head_coach', 'assistant_coach', 'tournament_manager'].includes(user.userRole || '');
+      const isTournamentOwner = tournamentOwnership?.isTournamentOwner === true;
+      
+      if (hasValidRole || isTournamentOwner) {
+        setHasAccess(true);
+      } else {
+        toast({
+          title: "Access Restricted",
+          description: "This area is for coaches, tournament officials, and tournament owners only.",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 2000);
+        return;
+      }
     }
-  }, [user, toast]);
+  }, [user, tournamentOwnership, toast]);
 
   if (isLoading) {
     return (
@@ -54,6 +70,17 @@ export default function EventScorekeeperDashboardPage() {
         <div className="text-center">
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Redirecting to Login</h2>
           <p className="text-gray-600">Please wait while we redirect you to the login page...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!hasAccess && tournamentOwnership !== undefined) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Access Denied</h2>
+          <p className="text-gray-600">You don't have permission to access this event management page.</p>
         </div>
       </div>
     );
