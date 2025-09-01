@@ -378,87 +378,48 @@ function generatePlatformResponse(message: string, intent: string, domain: strin
   
   // More conversational responses that actually help users take action
   if (intent === 'tournament_creation') {
-    if (lowerMessage.includes('how') || lowerMessage.includes('build') || lowerMessage.includes('create') || lowerMessage.includes('start')) {
-      return `Great! Let's build your tournament step by step:\n\n**📋 Step 1: Go to Tournament Creation**\n• Click "Tournaments" in the top navigation\n• Click "Create New Tournament" button\n\n**🏆 Step 2: Choose Your Tournament Type**\n• Single elimination, double elimination, or round robin\n• Pick your sport (basketball, track, academic, etc.)\n\n**⚙️ Step 3: Tournament Settings**\n• Set team size limits\n• Configure registration deadlines\n• Enable payment processing if needed\n\n**🎯 Step 4: Customize & Launch**\n• Add your branding and rules\n• Generate shareable registration codes\n• Invite teams to register\n\nWould you like me to walk through any specific step in detail?`;
-    }
-    
-    // Check if user is specifying a sport/tournament type
-    if (lowerMessage.includes('track') || lowerMessage.includes('field')) {
-      return `Perfect! A track and field meet is an excellent choice! 🏃‍♂️\n\n**Track & Field Events I can help you set up:**\n• Running events (100m, 200m, 400m, 800m, 1600m, relays)\n• Field events (shot put, discus, javelin, long jump, high jump)\n• Combined scoring with time/distance tracking\n\n**Quick questions to get started:**\n1. How many teams or individual athletes will participate?\n2. Will this be individual scoring or team-based?\n3. What's your target date for the meet?\n\nI can help you create the perfect structure for your track meet!`;
-    }
+    // Check ALL sport-specific requests FIRST (before generic tutorial)
     
     // Athletic - Team Sports
     if (lowerMessage.includes('basketball')) {
       const isGender = lowerMessage.includes('boys') || lowerMessage.includes('girls');
-      return `Awesome! Basketball tournaments are fantastic! 🏀\n\n**Basketball Tournament Setup:**\n• Single elimination (March Madness style)\n• Double elimination (everyone gets 2 chances)\n• Round robin (everyone plays everyone)\n${isGender ? '• Gender-specific divisions and rules' : ''}\n\n**Quick questions:**\n1. How many teams will participate?\n2. ${isGender ? 'Boys or girls division?' : 'Mixed or separate gender divisions?'}\n3. Do you prefer elimination or round robin format?\n4. When are you planning to hold this tournament?\n\nLet's get your basketball tournament rolling!`;
+      return `I love that you're organizing a basketball tournament! 🏀 I know coordinating teams and schedules can feel overwhelming, but you've got this!\n\n**Let's make this basketball tournament amazing together:**\n• Single elimination (March Madness excitement!)\n• Double elimination (gives everyone a second chance)\n• Round robin (everyone plays everyone - fair and fun!)\n${isGender ? '• Gender-specific divisions with appropriate rules' : ''}\n\n**Let's figure out the details that work best for you:**\n1. How many teams are you hoping to include?\n2. ${isGender ? 'Boys or girls division?' : 'Are you thinking mixed teams or separate divisions?'}\n3. What format feels right for your group?\n4. When would be the perfect time to hold this?\n\nDon't worry about getting everything perfect right now - we'll build this step by step! 💪`;
     }
     
     if (lowerMessage.includes('soccer')) {
       const isGender = lowerMessage.includes('boys') || lowerMessage.includes('girls');
-      return `Great choice! Soccer tournaments are exciting! ⚽\n\n**Soccer Tournament Setup:**\n• Pool play followed by elimination rounds\n• Round robin for smaller tournaments\n• Field scheduling and referee coordination\n${isGender ? '• Gender-specific rules and divisions' : ''}\n\n**Questions to get started:**\n1. How many teams participating?\n2. ${isGender ? 'Boys or girls division?' : 'Age groups and gender divisions?'}\n3. How many fields available?\n4. Tournament duration (1 day or weekend)?\n\nI'll help you create an amazing soccer tournament!`;
-    }
-    
-    if (lowerMessage.includes('volleyball')) {
-      const isGender = lowerMessage.includes('boys') || lowerMessage.includes('girls');
-      return `Excellent! Volleyball tournaments are fast-paced! 🏐\n\n**Volleyball Tournament Setup:**\n• Pool play with elimination brackets\n• Best-of-3 or best-of-5 set formats\n• Court rotation and officiating\n${isGender ? '• Gender-specific net heights and rules' : ''}\n\n**Questions to get started:**\n1. How many teams will compete?\n2. ${isGender ? 'Boys or girls division?' : 'Indoor or beach volleyball?'}\n3. How many courts available?\n4. Match format preferences?\n\nLet's spike this volleyball tournament!`;
-    }
-    
-    // Athletic - Individual Sports
-    if (lowerMessage.includes('swimming') || lowerMessage.includes('swim') || lowerMessage.includes('diving')) {
-      return `Great choice! Swimming & diving meets have unique requirements! 🏊‍♀️\n\n**Swimming & Diving Meet Setup:**\n• Time-based events (freestyle, backstroke, breaststroke, butterfly)\n• Individual and relay events\n• Heat sheets and lane assignments\n• Diving platform and scoring\n• Automatic timing integration\n\n**Questions to get started:**\n1. How many swimmers/teams are participating?\n2. Which events do you want to include?\n3. Will this include diving competitions?\n4. Will this be a one-day or multi-day meet?\n\nI'll help you create the perfect aquatic competition!`;
+      return `Soccer tournaments are so much fun to organize! ⚽ I know juggling field schedules and coordinating teams can be tricky, but let's tackle this together!\n\n**Here's how we can make your soccer tournament incredible:**\n• Pool play followed by elimination (builds excitement!)\n• Round robin for smaller groups (everyone gets lots of games)\n• Smart field scheduling (no more timing headaches!)\n${isGender ? '• Gender-specific divisions that work for your participants' : ''}\n\n**Let's figure out what works best for your situation:**\n1. How many teams are you hoping to bring together?\n2. ${isGender ? 'Boys or girls division?' : 'What age groups and divisions make sense?'}\n3. How many fields can we work with?\n4. Are you thinking one day or a weekend tournament?\n\nWe'll make sure this runs smoothly - I'm here to help every step of the way! 🙌`;
     }
     
     if (lowerMessage.includes('track') || lowerMessage.includes('field')) {
-      return `Perfect! A track and field meet is an excellent choice! 🏃‍♂️\n\n**Track & Field Events I can help you set up:**\n• Running events (100m, 200m, 400m, 800m, 1600m, relays)\n• Field events (shot put, discus, javelin, long jump, high jump)\n• Combined scoring with time/distance tracking\n• Heat sheets and flight assignments\n\n**Quick questions to get started:**\n1. How many teams or individual athletes will participate?\n2. Which events do you want to include?\n3. Will this be individual scoring or team-based?\n4. What's your target date for the meet?\n\nI can help you create the perfect structure for your track meet!`;
+      return `Perfect! A track and field meet is an excellent choice! 🏃‍♂️\n\n**Track & Field Events I can help you set up:**\n• Running events (100m, 200m, 400m, 800m, 1600m, relays)\n• Field events (shot put, discus, javelin, long jump, high jump)\n• Combined scoring with time/distance tracking\n\n**Quick questions to get started:**\n1. How many teams or individual athletes will participate?\n2. Will this be individual scoring or team-based?\n3. What's your target date for the meet?\n\nI can help you create the perfect structure for your track meet!`;
     }
     
-    if (lowerMessage.includes('tennis')) {
-      const isGender = lowerMessage.includes('boys') || lowerMessage.includes('girls');
-      return `Excellent! Tennis tournaments require precise organization! 🎾\n\n**Tennis Tournament Setup:**\n• Singles and doubles brackets\n• Match scheduling and court assignments\n• Best-of-3 or pro-set formats\n${isGender ? '• Gender-specific divisions' : ''}\n\n**Questions to get started:**\n1. How many players participating?\n2. ${isGender ? 'Boys or girls division?' : 'Singles, doubles, or both?'}\n3. How many courts available?\n4. Match format preferences?\n\nLet's serve up a great tennis tournament!`;
-    }
-    
-    if (lowerMessage.includes('golf')) {
-      const isGender = lowerMessage.includes('boys') || lowerMessage.includes('girls');
-      return `Great choice! Golf tournaments are prestigious events! ⛳\n\n**Golf Tournament Setup:**\n• Stroke play or match play formats\n• Tee time scheduling and pairings\n• Handicap calculations and divisions\n${isGender ? '• Gender-specific tees and scoring' : ''}\n\n**Questions to get started:**\n1. How many golfers participating?\n2. ${isGender ? 'Boys or girls division?' : 'What skill level divisions?'}\n3. 18-hole or 36-hole tournament?\n4. Handicap or scratch play?\n\nI'll help you organize a championship-quality golf tournament!`;
-    }
-    
-    // Academic Competitions
+    // Academic Competitions (before generic)
     if (lowerMessage.includes('uil') || (lowerMessage.includes('academic') && !lowerMessage.includes('bowl'))) {
-      return `Excellent! UIL Academic Competitions are prestigious! 📚\n\n**UIL Academic Setup:**\n• 50+ competition categories (Math, Science, Literary Criticism, etc.)\n• District, Regional, and State advancement paths\n• Grade-level divisions (2nd-12th grade)\n• Team and individual scoring systems\n\n**Questions to get started:**\n1. Which UIL events are you hosting?\n2. What grade levels participating?\n3. District or invitational tournament?\n4. How many schools expected?\n\nI'll help you create a top-tier UIL academic competition!`;
+      return `I'm so excited you're organizing UIL Academic Competitions! 📚 These events are incredible for showcasing student talent, and I know the logistics can feel complex with so many events to coordinate.\n\n**Don't worry - we'll organize this step by step:**\n• 50+ amazing competition categories to choose from\n• Clear advancement paths (District → Regional → State)\n• Age-appropriate divisions (2nd-12th grade)\n• Fair scoring that celebrates every participant\n\n**Let's start with what matters most to you:**\n1. Which UIL events do you want to feature?\n2. What grade levels are you bringing together?\n3. Is this a district competition or an invitational?\n4. How many schools are you expecting?\n\nI'll walk you through creating an academic competition that students will remember forever! 🌟`;
     }
     
     if (lowerMessage.includes('debate') || lowerMessage.includes('forensics') || lowerMessage.includes('speech')) {
-      return `Perfect! Speech & Debate tournaments require careful organization! 🎤\n\n**Speech & Debate Tournament Setup:**\n• Format selection (Policy, Lincoln-Douglas, Public Forum, Extemp, etc.)\n• Round scheduling and judge assignments\n• Topic preparation and evidence rules\n• Elimination bracket management\n• Tab room coordination\n\n**Questions to get started:**\n1. What debate/speech events are you hosting?\n2. How many schools/teams participating?\n3. How many preliminary rounds?\n4. Do you need judge recruitment?\n\nI'll help you create an excellent forensics tournament!`;
+      return `What an amazing choice! Speech & Debate tournaments are so rewarding! 🎤 I know coordinating judges and schedules feels overwhelming, but these competitions create incredible opportunities for students to shine.\n\n**Together, we'll make this tournament run beautifully:**\n• Choose the perfect formats for your participants\n• Smart scheduling that works for everyone\n• Judge coordination made simple\n• Brackets that build excitement\n• Tab room that runs like clockwork\n\n**Let's start with your vision:**\n1. What speech and debate events speak to you?\n2. How many schools are you hoping to welcome?\n3. How many rounds feel right for your timeline?\n4. Should we help you find judges, or do you have that covered?\n\nI'm here to support you in creating a tournament where every student can showcase their voice! 💫`;
     }
     
-    if (lowerMessage.includes('stem') || lowerMessage.includes('math competition') || lowerMessage.includes('science')) {
-      return `Great choice! STEM competitions inspire innovation! 🔬\n\n**STEM Competition Setup:**\n• Math contests (AMC, MATHCOUNTS style)\n• Science Olympiad events\n• Engineering challenges and robotics\n• Individual and team categories\n• Multiple difficulty levels\n\n**Questions to get started:**\n1. Which STEM subjects are you featuring?\n2. What grade levels participating?\n3. Individual or team competition?\n4. Hands-on challenges or written tests?\n\nI'll help you organize an inspiring STEM competition!`;
-    }
-    
-    // Fine Arts Competitions  
-    if (lowerMessage.includes('music') || lowerMessage.includes('band') || lowerMessage.includes('choir') || lowerMessage.includes('orchestra')) {
-      return `Wonderful! Music competitions showcase incredible talent! 🎵\n\n**Music Competition Setup:**\n• Solo and ensemble categories\n• Different instrument/voice divisions\n• Sight-reading and performance components\n• Adjudication and scoring rubrics\n• Concert and marching band formats\n\n**Questions to get started:**\n1. What type of music competition? (Band, choir, orchestra, solo)\n2. What skill levels participating?\n3. How many groups/individuals expected?\n4. Performance venue requirements?\n\nI'll help you create a harmonious music competition!`;
-    }
-    
-    if (lowerMessage.includes('theater') || lowerMessage.includes('theatre') || lowerMessage.includes('drama')) {
-      return `Fantastic! Theater competitions celebrate dramatic arts! 🎭\n\n**Theater Competition Setup:**\n• One-act play competitions\n• Individual acting and monologue contests\n• Technical theater challenges\n• Costume and set design categories\n• Adjudication and performance rubrics\n\n**Questions to get started:**\n1. What type of theater competition? (One-act, individual, technical)\n2. What grade levels participating?\n3. How many schools/groups expected?\n4. Performance space and tech requirements?\n\nI'll help you stage an amazing theater competition!`;
-    }
-    
-    // Other Competitions
+    // Other competitions (chess, music, etc.)
     if (lowerMessage.includes('chess')) {
-      return `Excellent! Chess tournaments are strategic competitions! ♟️\n\n**Chess Tournament Setup:**\n• Swiss system or round-robin formats\n• Time controls (blitz, rapid, classical)\n• Rating-based pairings\n• Tournament software integration\n• Age and skill divisions\n\n**Questions to get started:**\n1. How many players will participate?\n2. What time control? (5+0, 15+10, 90+30, etc.)\n3. How many rounds?\n4. Will this be rated or unrated?\n\nI'll help you organize the perfect chess competition!`;
+      return `Excellent! Chess tournaments are strategic competitions! ♟️ I know organizing pairings and time controls can feel complex, but chess tournaments create such wonderful intellectual challenges!\n\n**Let's plan your perfect chess competition:**\n• Swiss system or round-robin formats\n• Time controls (blitz, rapid, classical)\n• Rating-based pairings\n• Tournament software integration\n• Age and skill divisions\n\n**Let's figure out your vision:**\n1. How many players are you hoping to welcome?\n2. What time control feels right? (5+0, 15+10, 90+30, etc.)\n3. How many rounds work for your schedule?\n4. Will this be rated or unrated?\n\nI'll help you organize a chess competition that celebrates strategic thinking! 🧠`;
     }
     
-    if (lowerMessage.includes('esports') || lowerMessage.includes('gaming') || lowerMessage.includes('video game')) {
-      return `Awesome! Esports tournaments are the future of competition! 🎮\n\n**Esports Tournament Setup:**\n• Game selection and platform setup\n• Bracket management (single/double elimination)\n• Stream coordination and broadcasting\n• Prize distribution and sponsorships\n• Anti-cheat and fair play measures\n\n**Questions to get started:**\n1. What game are you featuring?\n2. Online or LAN tournament?\n3. How many players/teams?\n4. Prize pool or just for fun?\n\nI'll help you create an amazing esports tournament!`;
+    if (lowerMessage.includes('music') || lowerMessage.includes('band') || lowerMessage.includes('choir') || lowerMessage.includes('orchestra')) {
+      return `What a wonderful choice! Music competitions showcase incredible talent! 🎵 I know coordinating performance schedules and adjudication can feel overwhelming, but these events create such beautiful opportunities for students to shine.\n\n**Together, we'll create a harmonious competition:**\n• Solo and ensemble categories\n• Different instrument/voice divisions\n• Sight-reading and performance components\n• Fair adjudication and scoring rubrics\n• Concert and marching band formats\n\n**Let's start with your musical vision:**\n1. What type of music competition speaks to you? (Band, choir, orchestra, solo)\n2. What skill levels are you bringing together?\n3. How many groups/individuals are you expecting?\n4. What are your performance venue needs?\n\nI'll help you create a music competition that celebrates every note! 🎼`;
     }
     
-    if (lowerMessage.includes('quiz bowl') || lowerMessage.includes('academic bowl') || lowerMessage.includes('trivia')) {
-      return `Great choice! Quiz Bowl competitions test knowledge! 🧠\n\n**Quiz Bowl Tournament Setup:**\n• Toss-up and bonus question formats\n• Team vs individual competitions\n• Subject area specializations\n• Round-robin and elimination rounds\n• Buzzer system coordination\n\n**Questions to get started:**\n1. What subjects will you cover?\n2. Team or individual format?\n3. How many teams/schools participating?\n4. What grade levels competing?\n\nI'll help you organize an excellent knowledge competition!`;
+    // Generic tutorial response (ONLY for non-sport-specific requests)
+    if (lowerMessage.includes('how') || lowerMessage.includes('build') || lowerMessage.includes('create') || lowerMessage.includes('start')) {
+      return `Great! Let's build your tournament step by step:\n\n**📋 Step 1: Go to Tournament Creation**\n• Click "Tournaments" in the top navigation\n• Click "Create New Tournament" button\n\n**🏆 Step 2: Choose Your Tournament Type**\n• Single elimination, double elimination, or round robin\n• Pick your sport (basketball, track, academic, etc.)\n\n**⚙️ Step 3: Tournament Settings**\n• Set team size limits\n• Configure registration deadlines\n• Enable payment processing if needed\n\n**🎯 Step 4: Customize & Launch**\n• Add your branding and rules\n• Generate shareable registration codes\n• Invite teams to register\n\nWould you like me to walk through any specific step in detail?`;
     }
     
     // Only ask the general question if no specific sport was mentioned
-    return `I can help you create a comprehensive tournament! What type of tournament are you planning?\n\n**Popular options:**\n• Track & Field meets\n• Basketball tournaments\n• Swimming competitions\n• Academic competitions\n• Multi-sport events\n\nJust tell me what sport or type of competition you have in mind!`;
+    return `I'm so glad you're here! 🌟 Creating tournaments can feel like a big undertaking, but you're taking the right step by getting organized early.\n\n**Let's find the perfect tournament format for you:**\n• Track & Field meets (athletic excellence!)\n• Basketball tournaments (March Madness excitement)\n• Swimming competitions (precision and grace)\n• Academic competitions (celebrating student minds)\n• Multi-sport events (something for everyone!)\n\nWhat type of competition is calling to you? I'm here to make this as smooth as possible! 💪`;
   }
   
   const platformFeatures = {
