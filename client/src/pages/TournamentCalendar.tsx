@@ -607,12 +607,17 @@ export default function TournamentCalendar() {
                 <Card className="bg-slate-800/80 backdrop-blur-sm border-yellow-500/20">
                   <CardHeader>
                     <CardTitle className="text-white">
-                      {new Date(selectedDate).toLocaleDateString('en-US', { 
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })}
+                      {(() => {
+                        // Parse the date string properly to avoid timezone issues
+                        const [year, month, day] = selectedDate.split('-').map(Number);
+                        const date = new Date(year, month - 1, day);
+                        return date.toLocaleDateString('en-US', { 
+                          weekday: 'long',
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        });
+                      })()}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
