@@ -535,6 +535,40 @@ export default function EnhancedTournamentWizard({
                 />
               </div>
 
+              {/* Date and Time */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="tournamentDate" className="block text-sm font-medium text-gray-700 mb-2">
+                    Tournament Date & Time
+                  </Label>
+                  <Input
+                    type="datetime-local"
+                    {...form.register("tournamentDate")}
+                    className="w-full"
+                    data-testid="input-tournament-date"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    When will the tournament take place?
+                  </p>
+                </div>
+
+                <div>
+                  <Label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-2">
+                    Location / Address
+                  </Label>
+                  <Input
+                    type="text"
+                    {...form.register("location")}
+                    placeholder="Enter venue address or location"
+                    className="w-full"
+                    data-testid="input-location"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Where will the tournament be held?
+                  </p>
+                </div>
+              </div>
+
               <div>
                 <Label htmlFor="teamSize" className="block text-sm font-medium text-gray-700 mb-2">
                   {competitionFormat === 'leaderboard' ? 'Number of Participants' : 'Number of Teams'} *
@@ -622,6 +656,10 @@ export default function EnhancedTournamentWizard({
                     <div><strong>Size:</strong> {teamSize} {competitionFormat === 'leaderboard' ? 'participants' : 'teams'}</div>
                     {form.watch("ageGroup") && <div><strong>Age Group:</strong> {form.watch("ageGroup")}</div>}
                     {form.watch("genderDivision") && <div><strong>Division:</strong> {form.watch("genderDivision")}</div>}
+                    {form.watch("tournamentDate") && (
+                      <div><strong>Date:</strong> {new Date(form.watch("tournamentDate")).toLocaleDateString()} at {new Date(form.watch("tournamentDate")).toLocaleTimeString()}</div>
+                    )}
+                    {form.watch("location") && <div><strong>Location:</strong> {form.watch("location")}</div>}
                   </div>
                 </div>
 
