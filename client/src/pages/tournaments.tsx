@@ -48,7 +48,7 @@ interface Tournament {
 export default function TournamentsPage() {
   const [showCreateWizard, setShowCreateWizard] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('active'); // Hide completed by default
   const [formatFilter, setFormatFilter] = useState('all');
   
   const { user, isAuthenticated } = useAuth();
@@ -70,7 +70,17 @@ export default function TournamentsPage() {
   const filteredTournaments = tournaments.filter(tournament => {
     const matchesSearch = tournament.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          tournament.sport.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || tournament.status === statusFilter;
+    
+    // Status filtering logic
+    let matchesStatus = false;
+    if (statusFilter === 'all') {
+      matchesStatus = true;
+    } else if (statusFilter === 'active') {
+      matchesStatus = ['upcoming', 'stage-1', 'stage-2', 'stage-3'].includes(tournament.status);
+    } else {
+      matchesStatus = tournament.status === statusFilter;
+    }
+    
     const matchesFormat = formatFilter === 'all' || tournament.competitionFormat === formatFilter;
     
     return matchesSearch && matchesStatus && matchesFormat;
@@ -293,6 +303,7 @@ export default function TournamentsPage() {
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="active">Active Only</SelectItem>
                 <SelectItem value="all">All Statuses</SelectItem>
                 <SelectItem value="upcoming">Upcoming</SelectItem>
                 <SelectItem value="stage-1">In Progress</SelectItem>
