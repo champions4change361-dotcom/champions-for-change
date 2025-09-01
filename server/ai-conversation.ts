@@ -204,9 +204,17 @@ export async function handleAIConversation(req: Request, res: Response) {
 function analyzeIntent(message: string): string {
   const lowerMessage = message.toLowerCase();
   
-  // Tournament creation (including common typos)
+  // Tournament creation (including common typos and sports-specific terms)
   if (lowerMessage.includes('tournament') || lowerMessage.includes('tournamenbt') || lowerMessage.includes('tournamenent') || 
-      lowerMessage.includes('competition') || lowerMessage.includes('event') || lowerMessage.includes('bracket')) {
+      lowerMessage.includes('competition') || lowerMessage.includes('event') || lowerMessage.includes('bracket') ||
+      lowerMessage.includes('track meet') || lowerMessage.includes('track and field') || 
+      lowerMessage.includes('basketball') || lowerMessage.includes('soccer') || lowerMessage.includes('football') ||
+      lowerMessage.includes('volleyball') || lowerMessage.includes('swimming') || lowerMessage.includes('tennis') ||
+      lowerMessage.includes('baseball') || lowerMessage.includes('softball') || lowerMessage.includes('golf') ||
+      lowerMessage.includes('wrestling') || lowerMessage.includes('cheerleading') || 
+      lowerMessage.includes('championship') || lowerMessage.includes('league') || lowerMessage.includes('playoff') ||
+      (lowerMessage.includes('meet') && (lowerMessage.includes('set up') || lowerMessage.includes('need') || lowerMessage.includes('create'))) ||
+      (lowerMessage.includes('sport') && (lowerMessage.includes('set up') || lowerMessage.includes('need') || lowerMessage.includes('create')))) {
     return 'tournament_creation';
   }
   
