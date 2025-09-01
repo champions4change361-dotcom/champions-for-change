@@ -460,7 +460,7 @@ export default function EnhancedTournamentWizard({
             </div>
             
             {/* Mobile-first action bar */}
-            <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
+            <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
               {/* Auto-save status - more compact */}
               {autoSaveStatus && (
                 <div className="flex items-center gap-1 text-xs">
@@ -512,6 +512,17 @@ export default function EnhancedTournamentWizard({
                 <Badge variant="outline" className="text-xs px-2 py-1">
                   Step {currentStepIndex + 1} of {steps.length}
                 </Badge>
+                
+                {/* Clear Cache Button - helpful for mobile users */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={clearCachedData}
+                  className="flex items-center gap-1 text-xs text-red-600 border-red-200 hover:bg-red-50"
+                  data-testid="button-clear-cache"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
               </div>
             </div>
           </div>
