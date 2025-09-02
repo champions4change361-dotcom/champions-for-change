@@ -933,7 +933,13 @@ function detectOngoingTournamentConversation(conversation_history: any[]): any {
           content.includes('great choice on basketball') ||
           content.includes('5k charity run') ||
           content.includes('breast cancer awareness') ||
-          content.includes('where will the tournament take place')) {
+          content.includes('where will the tournament take place') ||
+          content.includes('i love that you\'re organizing a basketball tournament') ||
+          content.includes('basketball tournament') ||
+          content.includes('how many teams are you hoping') ||
+          content.includes('what format feels right') ||
+          content.includes('march madness excitement') ||
+          content.includes('let\'s make this basketball tournament amazing')) {
         // This looks like an ongoing tournament conversation, extract details from the conversation
         return {
           type: 'tournament_creation',
@@ -956,9 +962,15 @@ function extractDetailsFromConversationHistory(conversation_history: any[]): any
     if (message.content) {
       const content = message.content.toLowerCase();
       
-      // Extract sport mentions (enhanced for charity runs)
+      // Extract sport mentions (enhanced for charity runs and specific tournament types)
       if (content.includes('golf')) details.sport = 'Golf';
-      if (content.includes('basketball')) details.sport = 'Basketball';
+      if (content.includes('basketball') || content.includes('3v3 basketball')) {
+        details.sport = 'Basketball';
+        if (content.includes('3v3')) {
+          details.teamSize = 3;
+          details.description = '3v3 Basketball Tournament';
+        }
+      }
       if (content.includes('soccer')) details.sport = 'Soccer';
       if (content.includes('track')) details.sport = 'Track and Field';
       if (content.includes('5k charity run') || content.includes('breast cancer') || content.includes('charity run')) {
@@ -970,6 +982,26 @@ function extractDetailsFromConversationHistory(conversation_history: any[]): any
         }
       } else if (content.includes('5k') || content.includes('run')) {
         details.sport = 'Running';
+      }
+      
+      // Extract team count for basketball and other team sports
+      const basketballTeamMatch = content.match(/(\d+)\s*teams?/i);
+      if (basketballTeamMatch) {
+        details.teamCount = parseInt(basketballTeamMatch[1]);
+      }
+      
+      // Extract division information
+      const divisionMatch = content.match(/(\d+)\s*divisions?/i);
+      if (divisionMatch) {
+        details.divisions = parseInt(divisionMatch[1]);
+      }
+      
+      // Extract dates (including March 7th 2026 format)
+      const marchMatch = content.match(/march\s+(\d+)(?:st|nd|rd|th)?\s*,?\s*(\d{4})/i);
+      if (marchMatch) {
+        const day = parseInt(marchMatch[1]);
+        const year = parseInt(marchMatch[2]);
+        details.eventDate = new Date(year, 2, day); // March is month 2 (0-indexed)
       }
       
       // Extract participant count (enhanced)
@@ -1055,8 +1087,11 @@ async function handleTournamentConversation(req: any, message: string, ongoingCo
     // Extract new details from the current message
     const newDetails = extractTournamentDetailsFromMessage(message, {});
     
-    // Merge new details with existing provided details
-    const updatedDetails = { ...providedDetails, ...newDetails };
+    // Also extract details from the full conversation history
+    const conversationDetails = extractDetailsFromConversationHistory(conversation_history);
+    
+    // Merge all details: conversation history + existing + new message
+    const updatedDetails = { ...conversationDetails, ...providedDetails, ...newDetails };
     
     // Check what's still missing
     const stillMissingDetails = identifyMissingTournamentDetails(updatedDetails);
