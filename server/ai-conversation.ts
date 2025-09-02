@@ -315,6 +315,9 @@ function extractContextFromMessage(message: string): any {
     'martial arts': ['martial arts', 'karate', 'taekwondo', 'judo', 'mma'],
     'cycling': ['cycling', 'bike race', 'bicycle', 'cycling competition'],
     'fencing': ['fencing', 'sword fighting', 'foil', 'epee', 'sabre'],
+    'golf': ['golf', 'golf tournament', 'golf competition', 'golf course', 'golfing'],
+    'fishing': ['fishing', 'fishing tournament', 'fishing competition', 'angling', 'bass fishing'],
+    'golf/fishing combo': ['golf fishing', 'golf and fishing', 'combo tournament', 'dual sport', 'golf/fishing'],
     
     // Winter Sports
     'skiing': ['skiing', 'ski', 'downhill', 'slalom', 'alpine skiing'],
@@ -437,6 +440,20 @@ function generatePlatformResponse(message: string, intent: string, domain: strin
       return `What a wonderful choice! Music competitions showcase incredible talent! 🎵 I know coordinating performance schedules and adjudication can feel overwhelming, but these events create such beautiful opportunities for students to shine.\n\n**Together, we'll create a harmonious competition:**\n• Solo and ensemble categories\n• Different instrument/voice divisions\n• Sight-reading and performance components\n• Fair adjudication and scoring rubrics\n• Concert and marching band formats\n\n**Let's start with your musical vision:**\n1. What type of music competition speaks to you? (Band, choir, orchestra, solo)\n2. What skill levels are you bringing together?\n3. How many groups/individuals are you expecting?\n4. What are your performance venue needs?\n\nI'll help you create a music competition that celebrates every note! 🎼`;
     }
     
+    // Golf/Fishing Combo Tournament
+    if ((lowerMessage.includes('golf') && lowerMessage.includes('fishing')) || lowerMessage.includes('combo')) {
+      return `What an amazing combination! Golf/Fishing combo tournaments are unique charity events that really bring communities together! ⛳🎣\n\n**Perfect for charity fundraising because:**\n• Attracts both golfers and fishing enthusiasts\n• Multiple revenue streams (golf fees, fishing entry, sponsorships)\n• All-day event keeps participants engaged\n• Great for corporate sponsorships and team building\n\n**Here's how we can structure your combo tournament:**\n• Morning: Golf tournament (18 holes, scramble format)\n• Afternoon: Fishing competition (bass tournament, big fish contest)\n• Evening: Awards ceremony and charity auction\n• Sponsorship packages for both activities\n\n**Let's plan your perfect combo event:**\n1. What charity cause will this support?\n2. Do you have a golf course and fishing location in mind?\n3. How many participants are you hoping for? (golf teams + fishing entries)\n4. What's your target date?\n\nI'll help you create a combo tournament that maximizes both fun and fundraising! 🏆`;
+    }
+    
+    // Individual Golf or Fishing
+    if (lowerMessage.includes('golf') && !lowerMessage.includes('fishing')) {
+      return `Excellent! Golf tournaments are fantastic for charity fundraising! ⛳ I know organizing tee times and sponsorships can feel complex, but golf events are proven fundraising champions!\n\n**Let's create your perfect golf tournament:**\n• Scramble, best ball, or individual stroke play\n• Hole sponsorships and corporate packages\n• Longest drive and closest to pin contests\n• Silent auction and raffle integration\n• Professional scoring and leaderboards\n\n**Let's start planning:**\n1. What charity cause will this support?\n2. What golf course are you considering?\n3. How many foursomes are you planning for?\n4. What's your target date?\n\nI'll help you organize a golf tournament that drives results for your cause! 🏆`;
+    }
+    
+    if (lowerMessage.includes('fishing') && !lowerMessage.includes('golf')) {
+      return `Great choice! Fishing tournaments create such exciting community events! 🎣 I know coordinating weigh-ins and safety can feel overwhelming, but fishing competitions are incredibly engaging!\n\n**Let's organize your perfect fishing tournament:**\n• Bass tournament, big fish contest, or multi-species\n• Professional weigh-in stations and live scoring\n• Safety boat coordination and check-in systems\n• Sponsorship packages and prize structures\n• Youth and family categories\n\n**Let's start with your fishing vision:**\n1. What type of fishing competition? (Bass, multi-species, big fish)\n2. What body of water are you considering?\n3. How many boats/participants are you expecting?\n4. Is this for charity or prizes?\n\nI'll help you organize a fishing tournament that creates lasting memories! 🏆`;
+    }
+    
     // Generic tutorial response (ONLY for non-sport-specific requests)
     if (lowerMessage.includes('how') || lowerMessage.includes('build') || lowerMessage.includes('create') || lowerMessage.includes('start')) {
       return `Great! Let's build your tournament step by step:\n\n**📋 Step 1: Go to Tournament Creation**\n• Click "Tournaments" in the top navigation\n• Click "Create New Tournament" button\n\n**🏆 Step 2: Choose Your Tournament Type**\n• Single elimination, double elimination, or round robin\n• Pick your sport (basketball, track, academic, etc.)\n\n**⚙️ Step 3: Tournament Settings**\n• Set team size limits\n• Configure registration deadlines\n• Enable payment processing if needed\n\n**🎯 Step 4: Customize & Launch**\n• Add your branding and rules\n• Generate shareable registration codes\n• Invite teams to register\n\nWould you like me to walk through any specific step in detail?`;
@@ -548,7 +565,13 @@ function extractTournamentDetailsFromMessage(message: string, context: any): any
     'charity walk': 'Charity Walk/Walk-a-thon',
     'walk-a-thon': 'Charity Walk/Walk-a-thon',
     'memorial run': 'Memorial/Awareness Run',
-    'awareness run': 'Memorial/Awareness Run'
+    'awareness run': 'Memorial/Awareness Run',
+    'golf': 'Golf',
+    'fishing': 'Fishing',
+    'golf fishing': 'Golf/Fishing Combo Tournament',
+    'golf and fishing': 'Golf/Fishing Combo Tournament',
+    'combo tournament': 'Golf/Fishing Combo Tournament',
+    'golf/fishing': 'Golf/Fishing Combo Tournament'
   };
   
   for (const [key, value] of Object.entries(sportMap)) {

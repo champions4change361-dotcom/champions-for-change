@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Link } from 'wouter';
-import { ArrowLeft, Trophy, MessageCircle, Send, Bot } from 'lucide-react';
+import { ArrowLeft, Trophy, MessageCircle, Send, Bot, Copy, Check, Paperclip, Download } from 'lucide-react';
 import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
 
 interface Message {
   role: 'user' | 'assistant';
@@ -14,6 +15,8 @@ export default function AIConsultation() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
@@ -78,6 +81,52 @@ export default function AIConsultation() {
     }
   };
 
+  const copyToClipboard = async (text: string, messageId: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedMessageId(messageId);
+      setTimeout(() => setCopiedMessageId(null), 2000);
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+    }
+  };
+
+  const copyConversation = async () => {
+    const conversationText = messages.map(msg => 
+      `${msg.role === 'user' ? 'User' : 'AI'}: ${msg.content}`
+    ).join('\n\n');
+    
+    try {
+      await navigator.clipboard.writeText(conversationText);
+      setCopiedMessageId('conversation');
+      setTimeout(() => setCopiedMessageId(null), 2000);
+    } catch (err) {
+      console.error('Failed to copy conversation: ', err);
+    }
+  };
+
+  const handleFileAttachment = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // For now, just read text files and add content to input
+    if (file.type.startsWith('text/')) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const content = e.target?.result as string;
+        setInput(prev => prev + (prev ? '\n\n' : '') + `[Attached file: ${file.name}]\n${content}`);
+      };
+      reader.readAsText(file);
+    } else {
+      setInput(prev => prev + (prev ? '\n\n' : '') + `[Attached file: ${file.name}]`);
+    }
+    
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
       {/* Header */}
@@ -107,9 +156,33 @@ export default function AIConsultation() {
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 h-screen flex flex-col">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center space-x-2 bg-blue-500/10 text-blue-400 px-4 py-2 rounded-full text-sm font-medium mb-4">
-            <Bot className="h-4 w-4" />
-            <span>AI Tournament Assistant</span>
+          <div className="flex justify-between items-center mb-4">
+            <div className="flex-1"></div>
+            <div className="inline-flex items-center space-x-2 bg-blue-500/10 text-blue-400 px-4 py-2 rounded-full text-sm font-medium">
+              <Bot className="h-4 w-4" />
+              <span>AI Tournament Assistant</span>
+            </div>
+            
+            {/* Header Controls */}
+            <div className="flex-1 flex justify-end">
+              {messages.length > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={copyConversation}
+                  className="h-8 px-3 text-slate-400 hover:text-yellow-400 hover:bg-slate-700"
+                  data-testid="button-copy-conversation"
+                  title="Copy entire conversation"
+                >
+                  {copiedMessageId === 'conversation' ? (
+                    <Check className="w-4 h-4 text-green-400" />
+                  ) : (
+                    <Download className="w-4 h-4" />
+                  )}
+                  <span className="ml-2 text-xs">Copy All</span>
+                </Button>
+              )}
+            </div>
           </div>
           <h1 className="text-4xl font-bold text-white mb-4">Tournament Expert AI</h1>
           <p className="text-xl text-slate-300">
@@ -135,19 +208,36 @@ export default function AIConsultation() {
               {messages.map((message, index) => (
                 <div
                   key={index}
-                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} group`}
                 >
-                  <div
-                    className={`max-w-[80%] p-4 rounded-2xl ${
-                      message.role === 'user'
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-slate-700 text-slate-100'
-                    }`}
-                  >
-                    <div className="whitespace-pre-wrap">{message.content}</div>
-                    <div className="text-xs opacity-70 mt-2">
-                      {message.timestamp.toLocaleTimeString()}
+                  <div className="relative">
+                    <div
+                      className={`max-w-[80%] p-4 rounded-2xl ${
+                        message.role === 'user'
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-slate-700 text-slate-100'
+                      }`}
+                    >
+                      <div className="whitespace-pre-wrap">{message.content}</div>
+                      <div className="text-xs opacity-70 mt-2">
+                        {message.timestamp.toLocaleTimeString()}
+                      </div>
                     </div>
+                    
+                    {/* Copy button for each message */}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={`absolute -top-2 ${message.role === 'user' ? '-left-10' : '-right-10'} opacity-0 group-hover:opacity-100 transition-opacity p-1 h-7 w-7 bg-slate-600 hover:bg-slate-500`}
+                      onClick={() => copyToClipboard(message.content, index.toString())}
+                      data-testid={`copy-message-${index}`}
+                    >
+                      {copiedMessageId === index.toString() ? (
+                        <Check className="w-3 h-3 text-green-400" />
+                      ) : (
+                        <Copy className="w-3 h-3 text-slate-300" />
+                      )}
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -170,16 +260,37 @@ export default function AIConsultation() {
         {/* Input */}
         <div className="bg-slate-800 border border-slate-600 rounded-2xl p-4">
           <div className="flex space-x-4">
-            <textarea
-              data-testid="input-ai-message"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Ask me about tournaments, sports, or athletic programs..."
-              className="flex-1 bg-slate-700 border border-slate-600 rounded-lg p-3 text-white placeholder-slate-400 focus:border-blue-400 focus:outline-none resize-none"
-              rows={2}
-              disabled={isLoading}
-            />
+            <div className="relative flex-1">
+              <textarea
+                data-testid="input-ai-message"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Ask me about tournaments, sports, or athletic programs..."
+                className="w-full bg-slate-700 border border-slate-600 rounded-lg p-3 pr-12 text-white placeholder-slate-400 focus:border-blue-400 focus:outline-none resize-none"
+                rows={2}
+                disabled={isLoading}
+              />
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                onChange={handleFileAttachment}
+                className="hidden"
+                accept=".txt,.md,.json,.csv"
+              />
+              {/* Attachment button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                className="absolute right-2 top-2 p-1 h-7 w-7 hover:bg-slate-600"
+                data-testid="button-attach-file"
+                title="Attach file (txt, md, json, csv)"
+              >
+                <Paperclip className="w-4 h-4 text-slate-400" />
+              </Button>
+            </div>
             <button
               data-testid="button-send-message"
               onClick={sendMessage}
