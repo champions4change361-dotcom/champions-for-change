@@ -4004,9 +4004,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // AI conversation route
-  const { handleAIConversation } = await import('./ai-conversation');
-  app.post('/api/ai-conversation', handleAIConversation);
+  // AI conversation route - using Anthropic Claude
+  const { handleAnthropicAI } = await import('./anthropic-ai');
+  app.post('/api/ai-conversation', handleAnthropicAI);
   
   // Keystone consultation endpoint (forwards to AI conversation)
   app.post('/api/keystone-consult', async (req, res) => {
@@ -4026,7 +4026,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Forward to AI conversation handler
       const mockReq = { ...req, body: aiRequest };
-      await handleAIConversation(mockReq, res);
+      await handleAnthropicAI(mockReq, res);
       
     } catch (error) {
       console.error('Keystone consult error:', error);
