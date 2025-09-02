@@ -108,23 +108,33 @@ async function createTournamentWithAI(
       tournamentDetails.sport || 'Basketball'
     );
 
+    // Handle divisions - split teams into divisions if specified
+    let teamStructure = teams.map(name => ({ teamName: name, teamId: `team_${Date.now()}_${Math.random()}` }));
+    let divisionInfo = '';
+    
+    if (tournamentDetails.divisions && tournamentDetails.divisions > 1) {
+      const teamsPerDivision = Math.ceil(teams.length / tournamentDetails.divisions);
+      divisionInfo = ` (${tournamentDetails.divisions} divisions of ~${teamsPerDivision} teams each)`;
+    }
+
     // Prepare tournament data
     const tournamentData = {
-      name: tournamentDetails.name || `${tournamentDetails.sport} Tournament`,
+      name: tournamentDetails.name || `${tournamentDetails.teamSize ? tournamentDetails.teamSize + 'v' + tournamentDetails.teamSize + ' ' : ''}${tournamentDetails.sport} Tournament`,
       sport: tournamentDetails.sport || 'Basketball',
       tournamentType: tournamentDetails.tournamentType || 'single',
-      teams: teams.map(name => ({ teamName: name, teamId: `team_${Date.now()}_${Math.random()}` })),
-      teamSize: tournamentDetails.teamSize || (tournamentDetails.sport === 'Basketball' ? 5 : 1),
+      teams: teamStructure,
+      teamSize: tournamentDetails.teamSize || 5,
       maxTeams: teams.length,
       eventDate: tournamentDetails.eventDate || new Date(),
       location: tournamentDetails.location || 'TBD',
       entryFee: tournamentDetails.entryFee || '0',
-      description: tournamentDetails.description || `${tournamentDetails.sport} tournament with ${teams.length} teams`,
+      description: tournamentDetails.description || `${tournamentDetails.teamSize ? tournamentDetails.teamSize + 'v' + tournamentDetails.teamSize + ' ' : ''}${tournamentDetails.sport} tournament with ${teams.length} teams${divisionInfo}`,
       bracket: bracketStructure,
       status: 'upcoming' as const,
       createdBy: userId,
       donationsEnabled: tournamentDetails.donationsEnabled || false,
-      donationDescription: tournamentDetails.donationDescription || ''
+      donationDescription: tournamentDetails.donationDescription || '',
+      divisions: tournamentDetails.divisions || 1
     };
 
     // Validate and create tournament
@@ -174,7 +184,7 @@ If the user is asking to create a tournament and you have the key details (sport
 {
   "action": "create_tournament",
   "details": {
-    "name": "Tournament Name",
+    "name": "3v3 Basketball Tournament",
     "sport": "Basketball", 
     "teamCount": 26,
     "teamSize": 3,
@@ -185,6 +195,15 @@ If the user is asking to create a tournament and you have the key details (sport
   },
   "response": "I'll create your 3v3 basketball tournament for March 7th, 2026 with 26 teams in three divisions!"
 }
+
+IMPORTANT DATE FORMATTING:
+- Always format dates as YYYY-MM-DD (e.g., "2026-03-07" for March 7th, 2026)
+- Extract the exact date mentioned by the user
+- For "March 7th, 2026" use "2026-03-07"
+
+TEAM SIZE SPECIFICATION:
+- For 3v3 tournaments, always set "teamSize": 3
+- Include team size in the tournament name (e.g., "3v3 Basketball Tournament")
 
 Otherwise, respond conversationally to help gather the needed information.`;
 
