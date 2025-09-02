@@ -278,6 +278,9 @@ function extractContextFromMessage(message: string): any {
   
   // Extract sports and competitions matching the tournament creation database hierarchy
   const competitionMap = {
+    // COMBO TOURNAMENTS (check these FIRST before individual sports)
+    'golf/fishing combo': ['golf fishing', 'golf and fishing', 'combo tournament', 'dual sport', 'golf/fishing', 'fishing golf', 'combo fishing golf', 'combo golf fishing', 'combo fishing/golf', 'combo golf/fishing', 'fishing and golf'],
+    
     // ATHLETIC COMPETITIONS
     // Team Sports
     'basketball (boys)': ['basketball boys', 'boys basketball', 'male basketball'],
@@ -307,7 +310,7 @@ function extractContextFromMessage(message: string): any {
     'tennis': ['tennis', 'tennis match', 'tennis tournament'],
     'golf (boys)': ['golf boys', 'boys golf', 'male golf'],
     'golf (girls)': ['golf girls', 'girls golf', 'female golf'],
-    'golf': ['golf', 'golf tournament', 'golf competition'],
+    'golf': ['golf', 'golf tournament', 'golf competition', 'golf course', 'golfing'],
     'wrestling': ['wrestling', 'wrestling match', 'grappling'],
     'gymnastics': ['gymnastics', 'gymnastic', 'tumbling'],
     'archery': ['archery', 'bow and arrow', 'target shooting'],
@@ -315,9 +318,7 @@ function extractContextFromMessage(message: string): any {
     'martial arts': ['martial arts', 'karate', 'taekwondo', 'judo', 'mma'],
     'cycling': ['cycling', 'bike race', 'bicycle', 'cycling competition'],
     'fencing': ['fencing', 'sword fighting', 'foil', 'epee', 'sabre'],
-    'golf': ['golf', 'golf tournament', 'golf competition', 'golf course', 'golfing'],
     'fishing': ['fishing', 'fishing tournament', 'fishing competition', 'angling', 'bass fishing'],
-    'golf/fishing combo': ['golf fishing', 'golf and fishing', 'combo tournament', 'dual sport', 'golf/fishing'],
     
     // Winter Sports
     'skiing': ['skiing', 'ski', 'downhill', 'slalom', 'alpine skiing'],
@@ -385,6 +386,19 @@ function generatePlatformResponse(message: string, intent: string, domain: strin
   if (intent === 'tournament_creation') {
     // Check ALL sport-specific requests FIRST (before generic tutorial)
     
+    // COMBINATION TOURNAMENTS (check FIRST before individual sports)
+    // Golf/Fishing Combo Tournament (must be checked before individual golf/fishing)
+    if ((lowerMessage.includes('golf') && lowerMessage.includes('fishing')) || 
+        lowerMessage.includes('combo') || 
+        lowerMessage.includes('golf fishing') || 
+        lowerMessage.includes('golf and fishing') || 
+        lowerMessage.includes('fishing golf') || 
+        lowerMessage.includes('dual sport') || 
+        lowerMessage.includes('golf/fishing') ||
+        lowerMessage.includes('fishing/golf')) {
+      return `What an amazing combination! Golf/Fishing combo tournaments are unique charity events that really bring communities together! ⛳🎣\n\n**Perfect for charity fundraising because:**\n• Attracts both golfers and fishing enthusiasts\n• Multiple revenue streams (golf fees, fishing entry, sponsorships)\n• All-day event keeps participants engaged\n• Great for corporate sponsorships and team building\n\n**Here's how we can structure your combo tournament:**\n• Morning: Golf tournament (18 holes, scramble format)\n• Afternoon: Fishing competition (bass tournament, big fish contest)\n• Evening: Awards ceremony and charity auction\n• Sponsorship packages for both activities\n\n**Let's plan your perfect combo event:**\n1. What charity cause will this support?\n2. Do you have a golf course and fishing location in mind?\n3. How many participants are you hoping for? (golf teams + fishing entries)\n4. What's your target date?\n\nI'll help you create a combo tournament that maximizes both fun and fundraising! 🏆`;
+    }
+    
     // Athletic - Team Sports
     if (lowerMessage.includes('basketball')) {
       const isGender = lowerMessage.includes('boys') || lowerMessage.includes('girls');
@@ -440,10 +454,6 @@ function generatePlatformResponse(message: string, intent: string, domain: strin
       return `What a wonderful choice! Music competitions showcase incredible talent! 🎵 I know coordinating performance schedules and adjudication can feel overwhelming, but these events create such beautiful opportunities for students to shine.\n\n**Together, we'll create a harmonious competition:**\n• Solo and ensemble categories\n• Different instrument/voice divisions\n• Sight-reading and performance components\n• Fair adjudication and scoring rubrics\n• Concert and marching band formats\n\n**Let's start with your musical vision:**\n1. What type of music competition speaks to you? (Band, choir, orchestra, solo)\n2. What skill levels are you bringing together?\n3. How many groups/individuals are you expecting?\n4. What are your performance venue needs?\n\nI'll help you create a music competition that celebrates every note! 🎼`;
     }
     
-    // Golf/Fishing Combo Tournament
-    if ((lowerMessage.includes('golf') && lowerMessage.includes('fishing')) || lowerMessage.includes('combo')) {
-      return `What an amazing combination! Golf/Fishing combo tournaments are unique charity events that really bring communities together! ⛳🎣\n\n**Perfect for charity fundraising because:**\n• Attracts both golfers and fishing enthusiasts\n• Multiple revenue streams (golf fees, fishing entry, sponsorships)\n• All-day event keeps participants engaged\n• Great for corporate sponsorships and team building\n\n**Here's how we can structure your combo tournament:**\n• Morning: Golf tournament (18 holes, scramble format)\n• Afternoon: Fishing competition (bass tournament, big fish contest)\n• Evening: Awards ceremony and charity auction\n• Sponsorship packages for both activities\n\n**Let's plan your perfect combo event:**\n1. What charity cause will this support?\n2. Do you have a golf course and fishing location in mind?\n3. How many participants are you hoping for? (golf teams + fishing entries)\n4. What's your target date?\n\nI'll help you create a combo tournament that maximizes both fun and fundraising! 🏆`;
-    }
     
     // Individual Golf or Fishing
     if (lowerMessage.includes('golf') && !lowerMessage.includes('fishing')) {
