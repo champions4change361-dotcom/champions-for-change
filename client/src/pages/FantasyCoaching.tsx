@@ -131,8 +131,8 @@ export default function FantasyCoaching() {
     },
     onSuccess: (data) => {
       setPlayerAnalysis(data);
-      // Automatically switch to AI Coach tab to show analysis
-      setActiveTab('ai-coach');
+      // Switch to analytics tab since AI is disabled
+      setActiveTab('r-analytics');
       toast({
         title: "Enhanced Analysis Complete",
         description: `Generated professional analysis with Yahoo Sports data for ${data.player}`,
@@ -401,11 +401,11 @@ export default function FantasyCoaching() {
             {/* <TabsTrigger value="ai-coach" data-testid="tab-ai-coach" className="flex flex-col items-center justify-center text-xs px-1 py-2 min-h-[3rem]">
               <Brain className="w-4 h-4 mb-1" />
               <span>AI</span>
-            </TabsTrigger>
-            <TabsTrigger value="historical-ai" data-testid="tab-historical-ai" className="flex flex-col items-center justify-center text-xs px-1 py-2 min-h-[3rem] bg-gradient-to-r from-purple-100 to-blue-100 border-2 border-purple-300">
+            </TabsTrigger> */}
+            {/* <TabsTrigger value="historical-ai" data-testid="tab-historical-ai" className="flex flex-col items-center justify-center text-xs px-1 py-2 min-h-[3rem] bg-gradient-to-r from-purple-100 to-blue-100 border-2 border-purple-300">
               <span className="text-xs font-bold text-purple-600 mb-1">📊</span>
               <span className="font-bold text-purple-800">🧠 Training</span>
-            </TabsTrigger>
+            </TabsTrigger> */}
             <TabsTrigger value="r-analytics" data-testid="tab-r-analytics" className="flex flex-col items-center justify-center text-xs px-1 py-2 min-h-[3rem]">
               <Target className="w-4 h-4 mb-1" />
               <span>Pure</span>
