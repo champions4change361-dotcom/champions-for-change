@@ -1465,6 +1465,7 @@ export class MemStorage implements IStorage {
     this.initializeSportDivisionRules();
     this.initializeUltimateTrackEvents();
     this.initializeSwimmingEvents();
+    this.initializeCommunityRunningEvents();
     this.initializeTournamentIntegration();
     this.initializeCompetitionFormatTemplates();
     this.initializeKrakenDivisionSystem();
@@ -2232,6 +2233,102 @@ export class MemStorage implements IStorage {
       };
       this.sportEvents.set(event.id, sportEvent);
     });
+  }
+
+  private initializeCommunityRunningEvents() {
+    // First create the Community Running Events category if it doesn't exist
+    const communityRunningCategoryId = 'community-running-events';
+    const communityRunningCategory = {
+      id: communityRunningCategoryId,
+      categoryName: 'Community Running Events',
+      categoryDescription: 'Charity runs, fun runs, and community walking events for fundraising and health awareness',
+      sortOrder: 50,
+      createdAt: new Date()
+    };
+    this.sportCategories.set(communityRunningCategoryId, communityRunningCategory);
+
+    // Add Community Running Sports Options
+    const communityRunningOptions = [
+      {
+        id: 'charity-5k-run',
+        sportName: '5K Charity Run',
+        sportCategory: communityRunningCategoryId,
+        sportSubcategory: 'Charity Events',
+        sortOrder: 1,
+        competitionType: 'leaderboard' as const,
+        scoringMethod: 'time' as const,
+        measurementUnit: 'minutes:seconds',
+        hasSubEvents: false,
+        createdAt: new Date()
+      },
+      {
+        id: 'charity-10k-run',
+        sportName: '10K Community Run',
+        sportCategory: communityRunningCategoryId,
+        sportSubcategory: 'Charity Events',
+        sortOrder: 2,
+        competitionType: 'leaderboard' as const,
+        scoringMethod: 'time' as const,
+        measurementUnit: 'minutes:seconds',
+        hasSubEvents: false,
+        createdAt: new Date()
+      },
+      {
+        id: 'charity-walk',
+        sportName: 'Charity Walk/Walk-a-thon',
+        sportCategory: communityRunningCategoryId,
+        sportSubcategory: 'Fundraising Events',
+        sortOrder: 3,
+        competitionType: 'leaderboard' as const,
+        scoringMethod: 'distance' as const,
+        measurementUnit: 'miles',
+        hasSubEvents: false,
+        createdAt: new Date()
+      },
+      {
+        id: 'fun-run',
+        sportName: 'Fun Run (Color Run/Theme Run)',
+        sportCategory: communityRunningCategoryId,
+        sportSubcategory: 'Community Events',
+        sortOrder: 4,
+        competitionType: 'leaderboard' as const,
+        scoringMethod: 'time' as const,
+        measurementUnit: 'minutes:seconds',
+        hasSubEvents: false,
+        createdAt: new Date()
+      },
+      {
+        id: 'memorial-run',
+        sportName: 'Memorial/Awareness Run',
+        sportCategory: communityRunningCategoryId,
+        sportSubcategory: 'Awareness Events',
+        sortOrder: 5,
+        competitionType: 'leaderboard' as const,
+        scoringMethod: 'time' as const,
+        measurementUnit: 'minutes:seconds',
+        hasSubEvents: false,
+        createdAt: new Date()
+      },
+      {
+        id: 'corporate-challenge',
+        sportName: 'Corporate Fitness Challenge',
+        sportCategory: communityRunningCategoryId,
+        sportSubcategory: 'Corporate Events',
+        sortOrder: 6,
+        competitionType: 'leaderboard' as const,
+        scoringMethod: 'time' as const,
+        measurementUnit: 'minutes:seconds',
+        hasSubEvents: false,
+        createdAt: new Date()
+      }
+    ];
+
+    // Add each sport option to our storage
+    communityRunningOptions.forEach(sport => {
+      this.sportOptions.set(sport.id, sport);
+    });
+
+    console.log(`🏃‍♂️ Community Running Events initialized: ${communityRunningOptions.length} event types loaded for charity and community fundraising!`);
   }
 
   private initializeUltimateTrackEvents() {
