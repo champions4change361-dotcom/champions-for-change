@@ -787,15 +787,77 @@ function generateSuggestions(intent: string, domain: string, message?: string, t
 function detectOngoingTournamentConversation(conversation_history: any[]): any {
   if (!conversation_history || conversation_history.length === 0) return null;
   
-  // Look for conversation state in recent messages
-  for (let i = conversation_history.length - 1; i >= Math.max(0, conversation_history.length - 3); i--) {
+  // Look for conversation state in recent messages (check last 5 messages)
+  for (let i = conversation_history.length - 1; i >= Math.max(0, conversation_history.length - 5); i--) {
     const message = conversation_history[i];
     if (message.conversation_state?.type === 'tournament_creation') {
       return message.conversation_state;
     }
   }
   
+  // Also check for recent tournament creation context
+  // If the last assistant message mentioned tournament creation
+  for (let i = conversation_history.length - 1; i >= Math.max(0, conversation_history.length - 3); i--) {
+    const message = conversation_history[i];
+    if (message.role === 'assistant' && message.content) {
+      const content = message.content.toLowerCase();
+      if (content.includes('tournament details so far') || 
+          content.includes('absolutely! i\'d be happy to help you create') ||
+          content.includes('what would you like to call this tournament')) {
+        // This looks like an ongoing tournament conversation, extract details from the conversation
+        return {
+          type: 'tournament_creation',
+          step: 'gathering_details',
+          providedDetails: extractDetailsFromConversationHistory(conversation_history),
+          missingDetails: []
+        };
+      }
+    }
+  }
+  
   return null;
+}
+
+function extractDetailsFromConversationHistory(conversation_history: any[]): any {
+  const details: any = {};
+  
+  // Look through the conversation for tournament details
+  for (const message of conversation_history) {
+    if (message.content) {
+      const content = message.content.toLowerCase();
+      
+      // Extract sport mentions
+      if (content.includes('golf')) details.sport = 'Golf';
+      if (content.includes('basketball')) details.sport = 'Basketball';
+      if (content.includes('soccer')) details.sport = 'Soccer';
+      if (content.includes('track')) details.sport = 'Track and Field';
+      
+      // Extract dates
+      const dateMatch = content.match(/(\d{1,2}\/\d{1,2}\/\d{4})/);
+      if (dateMatch) {
+        details.tournamentDate = new Date(dateMatch[1]);
+      }
+      
+      // Extract tournament type
+      if (content.includes('single elimination')) details.tournamentType = 'single';
+      if (content.includes('double elimination')) details.tournamentType = 'double';
+      if (content.includes('round robin')) details.tournamentType = 'round-robin';
+      
+      // Extract team count
+      const teamMatch = content.match(/(\d+)\s*teams?/);
+      if (teamMatch) {
+        const count = parseInt(teamMatch[1]);
+        details.maxParticipants = count;
+        const teams = [];
+        for (let i = 1; i <= count; i++) {
+          teams.push(`Team ${i}`);
+        }
+        details.teams = teams;
+      }
+    }
+  }
+  
+  return details;
 }
 
 async function handleTournamentConversation(req: any, message: string, ongoingConversation: any, conversation_history: any[]): Promise<any> {

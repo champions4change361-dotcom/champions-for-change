@@ -26,6 +26,7 @@ interface ConversationalMessage {
   content: string;
   timestamp: Date;
   suggestions?: string[];
+  conversation_state?: any;
 }
 
 interface ConversationalAIProps {
@@ -131,7 +132,8 @@ export function ConversationalAI({ domain = 'education', className = '' }: Conve
         role: 'assistant',
         content: data.response || "I'm here to help! Could you tell me more about what you're trying to accomplish?",
         timestamp: new Date(),
-        suggestions: data.suggestions || []
+        suggestions: data.suggestions || [],
+        conversation_state: data.conversation_state
       };
 
       console.log('Adding AI message:', aiMessage); // Debug log
