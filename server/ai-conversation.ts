@@ -515,7 +515,11 @@ function shouldCreateTournament(message: string): boolean {
     'I want', 'I need', 'help me create', 'help me build',
     'i need you to build', 'would like you to build', 'you to build',
     'build the tournament', 'create the tournament', 'make the tournament',
-    'build it for me', 'create it for me', 'make it for me', 'can you build it'
+    'build it for me', 'create it for me', 'make it for me', 'can you build it',
+    'let\'s create', 'lets create', 'let\'s build', 'lets build',
+    'let\'s make', 'lets make', 'let\'s set up', 'lets set up',
+    'go ahead and create', 'go ahead and build', 'perfect! let\'s create',
+    'perfect lets create', 'create this', 'build this', 'make this'
   ];
   
   // Also check for tournament-specific creation requests (including common typos)
