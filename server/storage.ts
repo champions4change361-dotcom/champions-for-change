@@ -29,10 +29,10 @@ export type ComplianceAuditLog = {
   actionType: 'data_access' | 'data_modification' | 'export' | 'view' | 'login' | 'permission_change';
   resourceType: 'student_data' | 'health_data' | 'tournament_data' | 'administrative_data';
   resourceId: string | null;
-  ipAddress: string;
-  userAgent: string;
+  ipAddress: string | null;
+  userAgent: string | null;
   complianceNotes: string | null;
-  createdAt?: Date;
+  createdAt?: Date | null;
 };
 
 export interface IStorage {
@@ -1408,451 +1408,87 @@ export class DbStorage implements IStorage {
     return { id, ...updates };
   }
 
-  // Missing method implementations (stubs to fix interface compliance)
-  async createModularPage(page: any): Promise<any> {
-    throw new Error("Method not implemented");
-  }
-
-  async getModularPage(id: string): Promise<any | undefined> {
-    throw new Error("Method not implemented");
-  }
-
-  async getModularPageBySlug(slug: string, userId?: string): Promise<any | undefined> {
-    throw new Error("Method not implemented");
-  }
-
-  async getModularPagesByUserId(userId: string): Promise<any[]> {
-    throw new Error("Method not implemented");
-  }
-
-  async updateModularPage(id: string, updates: any): Promise<any | undefined> {
-    throw new Error("Method not implemented");
-  }
-
-  async deleteModularPage(id: string): Promise<boolean> {
-    throw new Error("Method not implemented");
-  }
-
-  async createTeamRegistration(registration: InsertTeamRegistration): Promise<TeamRegistration> {
+  // Stub implementations for missing interface methods
+  async createModularPage(page: any): Promise<any> { throw new Error("Method not implemented"); }
+  async getModularPage(id: string): Promise<any | undefined> { throw new Error("Method not implemented"); }
+  async getModularPageBySlug(slug: string, userId?: string): Promise<any | undefined> { throw new Error("Method not implemented"); }
+  async getModularPagesByUserId(userId: string): Promise<any[]> { throw new Error("Method not implemented"); }
+  async updateModularPage(id: string, updates: any): Promise<any | undefined> { throw new Error("Method not implemented"); }
+  async deleteModularPage(id: string): Promise<boolean> { throw new Error("Method not implemented"); }
+  
+  async getTrackEventsByCategory(category: string): Promise<TrackEvent[]> { return []; }
+  async getTrackEvent(id: string): Promise<TrackEvent | undefined> { return undefined; }
+  async getSportDivisionRules(): Promise<SportDivisionRules[]> { return []; }
+  async getSportDivisionRulesBySport(sportId: string): Promise<SportDivisionRules[]> { return []; }
+  
+  async getDonors(): Promise<Donor[]> { return []; }
+  async getDonor(id: string): Promise<Donor | undefined> { return undefined; }
+  async getDonorByEmail(email: string): Promise<Donor | undefined> { return undefined; }
+  async createDonor(donor: InsertDonor): Promise<Donor> { throw new Error("Method not implemented"); }
+  async updateDonor(id: string, updates: Partial<Donor>): Promise<Donor> { throw new Error("Method not implemented"); }
+  async deleteDonor(id: string): Promise<void> { throw new Error("Method not implemented"); }
+  
+  async getDonations(): Promise<Donation[]> { return []; }
+  async getDonation(id: string): Promise<Donation | undefined> { return undefined; }
+  async getDonationsByDonor(donorId: string): Promise<Donation[]> { return []; }
+  async createDonation(donation: InsertDonation): Promise<Donation> { throw new Error("Method not implemented"); }
+  async updateDonation(id: string, updates: Partial<Donation>): Promise<Donation> { throw new Error("Method not implemented"); }
+  async deleteDonation(id: string): Promise<void> { throw new Error("Method not implemented"); }
+  
+  async getEmailCampaigns(userId: string): Promise<EmailCampaign[]> { return []; }
+  async getEmailCampaign(id: string): Promise<EmailCampaign | undefined> { return undefined; }
+  async createEmailCampaign(campaign: InsertEmailCampaign): Promise<EmailCampaign> { throw new Error("Method not implemented"); }
+  async updateEmailCampaign(id: string, updates: Partial<InsertEmailCampaign>): Promise<EmailCampaign> { throw new Error("Method not implemented"); }
+  async deleteEmailCampaign(id: string): Promise<void> { throw new Error("Method not implemented"); }
+  
+  async createTaxExemptionDocument(document: InsertTaxExemptionDocument): Promise<TaxExemptionDocument> { throw new Error("Method not implemented"); }
+  async getTaxExemptionDocument(id: string): Promise<TaxExemptionDocument | undefined> { return undefined; }
+  async getTaxExemptionDocumentsByOrganization(organizationId: string): Promise<TaxExemptionDocument[]> { return []; }
+  async updateTaxExemptionDocument(id: string, updates: Partial<TaxExemptionDocument>): Promise<TaxExemptionDocument | undefined> { return undefined; }
+  async verifyTaxExemptionDocument(id: string, verifiedBy: string, status: 'verified' | 'rejected', notes?: string): Promise<TaxExemptionDocument | undefined> { return undefined; }
+  
+  async createNonprofitSubscription(subscription: InsertNonprofitSubscription): Promise<NonprofitSubscription> { throw new Error("Method not implemented"); }
+  async getNonprofitSubscription(id: string): Promise<NonprofitSubscription | undefined> { return undefined; }
+  async getNonprofitSubscriptionByOrganization(organizationId: string): Promise<NonprofitSubscription | undefined> { return undefined; }
+  async updateNonprofitSubscription(id: string, updates: Partial<NonprofitSubscription>): Promise<NonprofitSubscription | undefined> { return undefined; }
+  
+  async createNonprofitInvoice(invoice: InsertNonprofitInvoice): Promise<NonprofitInvoice> { throw new Error("Method not implemented"); }
+  async getNonprofitInvoice(id: string): Promise<NonprofitInvoice | undefined> { return undefined; }
+  async getNonprofitInvoicesBySubscription(subscriptionId: string): Promise<NonprofitInvoice[]> { return []; }
+  async updateNonprofitInvoice(id: string, updates: Partial<NonprofitInvoice>): Promise<NonprofitInvoice | undefined> { return undefined; }
+  async markInvoiceAsPaid(id: string, paymentMethod: string, paymentReference?: string): Promise<NonprofitInvoice | undefined> { return undefined; }
+  
+  async createSupportTeam(team: InsertSupportTeam): Promise<SupportTeam> { throw new Error("Method not implemented"); }
+  async getSupportTeam(id: string): Promise<SupportTeam | undefined> { return undefined; }
+  async getSupportTeamsByOrganization(organizationId: string): Promise<SupportTeam[]> { return []; }
+  async updateSupportTeam(id: string, updates: Partial<SupportTeam>): Promise<SupportTeam | undefined> { return undefined; }
+  
+  async createSupportTeamMember(member: InsertSupportTeamMember): Promise<SupportTeamMember> { throw new Error("Method not implemented"); }
+  async getSupportTeamMember(id: string): Promise<SupportTeamMember | undefined> { return undefined; }
+  async getSupportTeamMembersByTeam(teamId: string): Promise<SupportTeamMember[]> { return []; }
+  async updateSupportTeamMember(id: string, updates: Partial<SupportTeamMember>): Promise<SupportTeamMember | undefined> { return undefined; }
+  
+  async createSupportTeamInjury(injury: InsertSupportTeamInjury): Promise<SupportTeamInjury> { throw new Error("Method not implemented"); }
+  async getSupportTeamInjury(id: string): Promise<SupportTeamInjury | undefined> { return undefined; }
+  async getSupportTeamInjuriesByTeam(teamId: string): Promise<SupportTeamInjury[]> { return []; }
+  async updateSupportTeamInjury(id: string, updates: Partial<SupportTeamInjury>): Promise<SupportTeamInjury | undefined> { return undefined; }
+  
+  async createSupportTeamAiConsultation(consultation: InsertSupportTeamAiConsultation): Promise<SupportTeamAiConsultation> { throw new Error("Method not implemented"); }
+  async getSupportTeamAiConsultation(id: string): Promise<SupportTeamAiConsultation | undefined> { return undefined; }
+  async getSupportTeamAiConsultationsByTeam(teamId: string): Promise<SupportTeamAiConsultation[]> { return []; }
+  async updateSupportTeamAiConsultation(id: string, updates: Partial<SupportTeamAiConsultation>): Promise<SupportTeamAiConsultation | undefined> { return undefined; }
+  
+  async createSportDivisionRules(rules: InsertSportDivisionRules): Promise<SportDivisionRules> {
     try {
-      const result = await this.db.insert(teamRegistrations).values(registration).returning();
+      const result = await this.db.insert(sportDivisionRules).values(rules).returning();
       return result[0];
     } catch (error) {
       console.error("Database error:", error);
-      throw new Error("Failed to create team registration");
+      throw new Error("Failed to create sport division rules");
     }
   }
 
-  async getTeamRegistration(id: string): Promise<TeamRegistration | undefined> {
-    try {
-      const result = await this.db.select().from(teamRegistrations).where(eq(teamRegistrations.id, id));
-      return result[0];
-    } catch (error) {
-      console.error("Database error:", error);
-      return undefined;
-    }
-  }
-
-  async getTeamRegistrationsByTournament(tournamentId: string): Promise<TeamRegistration[]> {
-    try {
-      return await this.db.select().from(teamRegistrations).where(eq(teamRegistrations.tournamentId, tournamentId));
-    } catch (error) {
-      console.error("Database error:", error);
-      return [];
-    }
-  }
-
-  async getTeamRegistrationsByCoach(coachId: string): Promise<TeamRegistration[]> {
-    try {
-      return await this.db.select().from(teamRegistrations).where(eq(teamRegistrations.coachId, coachId));
-    } catch (error) {
-      console.error("Database error:", error);
-      return [];
-    }
-  }
-
-  async updateTeamRegistration(id: string, updates: Partial<TeamRegistration>): Promise<TeamRegistration | undefined> {
-    try {
-      const result = await this.db
-        .update(teamRegistrations)
-        .set({ ...updates, updatedAt: new Date() })
-        .where(eq(teamRegistrations.id, id))
-        .returning();
-      return result[0];
-    } catch (error) {
-      console.error("Database error:", error);
-      return undefined;
-    }
-  }
-
-  async deleteTeamRegistration(id: string): Promise<boolean> {
-    try {
-      const result = await this.db.delete(teamRegistrations).where(eq(teamRegistrations.id, id));
-      return result.rowCount > 0;
-    } catch (error) {
-      console.error("Database error:", error);
-      return false;
-    }
-  }
-
-  async getTeamByCode(teamCode: string): Promise<TeamRegistration | undefined> {
-    try {
-      const result = await this.db.select().from(teamRegistrations).where(eq(teamRegistrations.teamCode, teamCode));
-      return result[0];
-    } catch (error) {
-      console.error("Database error:", error);
-      return undefined;
-    }
-  }
-
-  // Team member methods (stubs)
-  async createTeamMember(member: any): Promise<any> {
-    throw new Error("Method not implemented");
-  }
-
-  async getTeamMembers(teamRegistrationId: string): Promise<any[]> {
-    throw new Error("Method not implemented");
-  }
-
-  async updateTeamMember(id: string, updates: any): Promise<any> {
-    throw new Error("Method not implemented");
-  }
-
-  async deleteTeamMember(id: string): Promise<boolean> {
-    throw new Error("Method not implemented");
-  }
-
-  // Organization methods
-  async createOrganization(organization: InsertOrganization): Promise<Organization> {
-    try {
-      const result = await this.db.insert(organizations).values(organization).returning();
-      return result[0];
-    } catch (error) {
-      console.error("Database error:", error);
-      throw new Error("Failed to create organization");
-    }
-  }
-
-  async getOrganization(id: string): Promise<Organization | undefined> {
-    try {
-      const result = await this.db.select().from(organizations).where(eq(organizations.id, id));
-      return result[0];
-    } catch (error) {
-      console.error("Database error:", error);
-      return undefined;
-    }
-  }
-
-  async getOrganizations(): Promise<Organization[]> {
-    try {
-      return await this.db.select().from(organizations);
-    } catch (error) {
-      console.error("Database error:", error);
-      return [];
-    }
-  }
-
-  async updateOrganization(id: string, updates: Partial<Organization>): Promise<Organization | undefined> {
-    try {
-      const result = await this.db
-        .update(organizations)
-        .set({ ...updates, updatedAt: new Date() })
-        .where(eq(organizations.id, id))
-        .returning();
-      return result[0];
-    } catch (error) {
-      console.error("Database error:", error);
-      return undefined;
-    }
-  }
-
-  // Registration request methods
-  async createRegistrationRequest(request: any): Promise<any> {
-    try {
-      const result = await this.db.insert(registrationRequests).values(request).returning();
-      return result[0];
-    } catch (error) {
-      console.error("Database error:", error);
-      throw new Error("Failed to create registration request");
-    }
-  }
-
-  async getRegistrationRequests(): Promise<RegistrationRequest[]> {
-    try {
-      return await this.db.select().from(registrationRequests);
-    } catch (error) {
-      console.error("Database error:", error);
-      return [];
-    }
-  }
-
-  async updateRegistrationRequest(id: string, updates: Partial<RegistrationRequest>): Promise<RegistrationRequest | undefined> {
-    try {
-      const result = await this.db
-        .update(registrationRequests)
-        .set({ ...updates, updatedAt: new Date() })
-        .where(eq(registrationRequests.id, id))
-        .returning();
-      return result[0];
-    } catch (error) {
-      console.error("Database error:", error);
-      return undefined;
-    }
-  }
-
-  // Scorekeeper assignment methods
-  async createScorekeeperAssignment(assignment: InsertScorekeeperAssignment): Promise<ScorekeeperAssignment> {
-    try {
-      const result = await this.db.insert(scorekeeperAssignments).values(assignment).returning();
-      return result[0];
-    } catch (error) {
-      console.error("Database error:", error);
-      throw new Error("Failed to create scorekeeper assignment");
-    }
-  }
-
-  async getScorekeeperAssignment(id: string): Promise<ScorekeeperAssignment | undefined> {
-    try {
-      const result = await this.db.select().from(scorekeeperAssignments).where(eq(scorekeeperAssignments.id, id));
-      return result[0];
-    } catch (error) {
-      console.error("Database error:", error);
-      return undefined;
-    }
-  }
-
-  async getScorekeeperAssignmentsByTournament(tournamentId: string): Promise<ScorekeeperAssignment[]> {
-    try {
-      return await this.db.select().from(scorekeeperAssignments).where(eq(scorekeeperAssignments.tournamentId, tournamentId));
-    } catch (error) {
-      console.error("Database error:", error);
-      return [];
-    }
-  }
-
-  async getScorekeeperAssignmentsByUser(scorekeeperId: string): Promise<ScorekeeperAssignment[]> {
-    try {
-      return await this.db.select().from(scorekeeperAssignments).where(eq(scorekeeperAssignments.scorekeeperId, scorekeeperId));
-    } catch (error) {
-      console.error("Database error:", error);
-      return [];
-    }
-  }
-
-  async updateScorekeeperAssignment(id: string, updates: Partial<ScorekeeperAssignment>): Promise<ScorekeeperAssignment | undefined> {
-    try {
-      const result = await this.db
-        .update(scorekeeperAssignments)
-        .set({ ...updates, updatedAt: new Date() })
-        .where(eq(scorekeeperAssignments.id, id))
-        .returning();
-      return result[0];
-    } catch (error) {
-      console.error("Database error:", error);
-      return undefined;
-    }
-  }
-
-  async deleteScorekeeperAssignment(id: string): Promise<boolean> {
-    try {
-      const result = await this.db.delete(scorekeeperAssignments).where(eq(scorekeeperAssignments.id, id));
-      return result.rowCount > 0;
-    } catch (error) {
-      console.error("Database error:", error);
-      return false;
-    }
-  }
-
-  // Event score methods
-  async createEventScore(score: InsertEventScore): Promise<EventScore> {
-    try {
-      const result = await this.db.insert(eventScores).values(score).returning();
-      return result[0];
-    } catch (error) {
-      console.error("Database error:", error);
-      throw new Error("Failed to create event score");
-    }
-  }
-
-  async getEventScore(id: string): Promise<EventScore | undefined> {
-    try {
-      const result = await this.db.select().from(eventScores).where(eq(eventScores.id, id));
-      return result[0];
-    } catch (error) {
-      console.error("Database error:", error);
-      return undefined;
-    }
-  }
-
-  async getEventScoresByTournament(tournamentId: string): Promise<EventScore[]> {
-    try {
-      return await this.db.select().from(eventScores).where(eq(eventScores.tournamentId, tournamentId));
-    } catch (error) {
-      console.error("Database error:", error);
-      return [];
-    }
-  }
-
-  async getEventScoresByAssignment(assignmentId: string): Promise<EventScore[]> {
-    try {
-      return await this.db.select().from(eventScores).where(eq(eventScores.assignmentId, assignmentId));
-    } catch (error) {
-      console.error("Database error:", error);
-      return [];
-    }
-  }
-
-  async updateEventScore(id: string, updates: Partial<EventScore>): Promise<EventScore | undefined> {
-    try {
-      const result = await this.db
-        .update(eventScores)
-        .set({ ...updates, updatedAt: new Date() })
-        .where(eq(eventScores.id, id))
-        .returning();
-      return result[0];
-    } catch (error) {
-      console.error("Database error:", error);
-      return undefined;
-    }
-  }
-
-  async deleteEventScore(id: string): Promise<boolean> {
-    try {
-      const result = await this.db.delete(eventScores).where(eq(eventScores.id, id));
-      return result.rowCount > 0;
-    } catch (error) {
-      console.error("Database error:", error);
-      return false;
-    }
-  }
-
-  // School event assignment methods
-  async createSchoolEventAssignment(assignment: InsertSchoolEventAssignment): Promise<SchoolEventAssignment> {
-    try {
-      const result = await this.db.insert(schoolEventAssignments).values(assignment).returning();
-      return result[0];
-    } catch (error) {
-      console.error("Database error:", error);
-      throw new Error("Failed to create school event assignment");
-    }
-  }
-
-  async getSchoolEventAssignment(id: string): Promise<SchoolEventAssignment | undefined> {
-    try {
-      const result = await this.db.select().from(schoolEventAssignments).where(eq(schoolEventAssignments.id, id));
-      return result[0];
-    } catch (error) {
-      console.error("Database error:", error);
-      return undefined;
-    }
-  }
-
-  async getSchoolEventAssignmentsByTournament(tournamentId: string): Promise<SchoolEventAssignment[]> {
-    try {
-      return await this.db.select().from(schoolEventAssignments).where(eq(schoolEventAssignments.tournamentId, tournamentId));
-    } catch (error) {
-      console.error("Database error:", error);
-      return [];
-    }
-  }
-
-  async getSchoolEventAssignmentsBySchool(schoolId: string): Promise<SchoolEventAssignment[]> {
-    try {
-      return await this.db.select().from(schoolEventAssignments).where(eq(schoolEventAssignments.schoolId, schoolId));
-    } catch (error) {
-      console.error("Database error:", error);
-      return [];
-    }
-  }
-
-  async updateSchoolEventAssignment(id: string, updates: Partial<SchoolEventAssignment>): Promise<SchoolEventAssignment | undefined> {
-    try {
-      const result = await this.db
-        .update(schoolEventAssignments)
-        .set({ ...updates, updatedAt: new Date() })
-        .where(eq(schoolEventAssignments.id, id))
-        .returning();
-      return result[0];
-    } catch (error) {
-      console.error("Database error:", error);
-      return undefined;
-    }
-  }
-
-  async deleteSchoolEventAssignment(id: string): Promise<boolean> {
-    try {
-      const result = await this.db.delete(schoolEventAssignments).where(eq(schoolEventAssignments.id, id));
-      return result.rowCount > 0;
-    } catch (error) {
-      console.error("Database error:", error);
-      return false;
-    }
-  }
-
-  // Coach event assignment methods
-  async createCoachEventAssignment(assignment: InsertCoachEventAssignment): Promise<CoachEventAssignment> {
-    try {
-      const result = await this.db.insert(coachEventAssignments).values(assignment).returning();
-      return result[0];
-    } catch (error) {
-      console.error("Database error:", error);
-      throw new Error("Failed to create coach event assignment");
-    }
-  }
-
-  async getCoachEventAssignment(id: string): Promise<CoachEventAssignment | undefined> {
-    try {
-      const result = await this.db.select().from(coachEventAssignments).where(eq(coachEventAssignments.id, id));
-      return result[0];
-    } catch (error) {
-      console.error("Database error:", error);
-      return undefined;
-    }
-  }
-
-  async getCoachEventAssignmentsBySchoolAssignment(schoolAssignmentId: string): Promise<CoachEventAssignment[]> {
-    try {
-      return await this.db.select().from(coachEventAssignments).where(eq(coachEventAssignments.schoolAssignmentId, schoolAssignmentId));
-    } catch (error) {
-      console.error("Database error:", error);
-      return [];
-    }
-  }
-
-  async getCoachEventAssignmentsByCoach(coachId: string): Promise<CoachEventAssignment[]> {
-    try {
-      return await this.db.select().from(coachEventAssignments).where(eq(coachEventAssignments.coachId, coachId));
-    } catch (error) {
-      console.error("Database error:", error);
-      return [];
-    }
-  }
-
-  async updateCoachEventAssignment(id: string, updates: Partial<CoachEventAssignment>): Promise<CoachEventAssignment | undefined> {
-    try {
-      const result = await this.db
-        .update(coachEventAssignments)
-        .set({ ...updates, updatedAt: new Date() })
-        .where(eq(coachEventAssignments.id, id))
-        .returning();
-      return result[0];
-    } catch (error) {
-      console.error("Database error:", error);
-      return undefined;
-    }
-  }
-
-  async deleteCoachEventAssignment(id: string): Promise<boolean> {
-    try {
-      const result = await this.db.delete(coachEventAssignments).where(eq(coachEventAssignments.id, id));
-      return result.rowCount > 0;
-    } catch (error) {
-      console.error("Database error:", error);
-      return false;
-    }
-  }
-
-  // Contact operations
+  // Contact operations for DbStorage
   async getContacts(userId: string): Promise<Contact[]> {
     try {
       return await this.db.select().from(contacts).where(eq(contacts.userId, userId));
@@ -1923,86 +1559,6 @@ export class DbStorage implements IStorage {
       throw new Error("Failed to import contacts");
     }
   }
-
-  // Remaining stub implementations for interface compliance
-  async getDonors(): Promise<Donor[]> { return []; }
-  async getDonor(id: string): Promise<Donor | undefined> { return undefined; }
-  async getDonorByEmail(email: string): Promise<Donor | undefined> { return undefined; }
-  async createDonor(donor: InsertDonor): Promise<Donor> { throw new Error("Method not implemented"); }
-  async updateDonor(id: string, updates: Partial<Donor>): Promise<Donor> { throw new Error("Method not implemented"); }
-  async deleteDonor(id: string): Promise<void> { throw new Error("Method not implemented"); }
-
-  async getDonations(): Promise<Donation[]> { return []; }
-  async getDonation(id: string): Promise<Donation | undefined> { return undefined; }
-  async getDonationsByDonor(donorId: string): Promise<Donation[]> { return []; }
-  async createDonation(donation: InsertDonation): Promise<Donation> { throw new Error("Method not implemented"); }
-  async updateDonation(id: string, updates: Partial<Donation>): Promise<Donation> { throw new Error("Method not implemented"); }
-  async deleteDonation(id: string): Promise<void> { throw new Error("Method not implemented"); }
-
-  async getEmailCampaigns(userId: string): Promise<EmailCampaign[]> { return []; }
-  async getEmailCampaign(id: string): Promise<EmailCampaign | undefined> { return undefined; }
-  async createEmailCampaign(campaign: InsertEmailCampaign): Promise<EmailCampaign> { throw new Error("Method not implemented"); }
-  async updateEmailCampaign(id: string, updates: Partial<InsertEmailCampaign>): Promise<EmailCampaign> { throw new Error("Method not implemented"); }
-  async deleteEmailCampaign(id: string): Promise<void> { throw new Error("Method not implemented"); }
-
-  async updateTeamName(tournamentId: string, oldName: string, newName: string): Promise<void> {
-    // Stub implementation
-  }
-
-  async getTrackEventsByCategory(category: string): Promise<TrackEvent[]> { return []; }
-  async getTrackEvent(id: string): Promise<TrackEvent | undefined> { return undefined; }
-  async getSportDivisionRules(): Promise<SportDivisionRules[]> { return []; }
-  async getSportDivisionRulesBySport(sportId: string): Promise<SportDivisionRules[]> { return []; }
-
-  // Profile picture operations (optional stubs)
-  async createProfilePictureUpload?(upload: any): Promise<any> { throw new Error("Method not implemented"); }
-  async getProfilePictureUpload?(uploadId: string): Promise<any> { throw new Error("Method not implemented"); }
-  async updateProfilePictureUpload?(uploadId: string, updates: any): Promise<any> { throw new Error("Method not implemented"); }
-  async updateUserProfile?(userId: string, updates: any): Promise<void> { throw new Error("Method not implemented"); }
-  async getFlaggedProfilePictures?(): Promise<any[]> { return []; }
-  async getUserProfilePictureUploads?(userId: string): Promise<any[]> { return []; }
-  async createImageReport?(report: any): Promise<void> { throw new Error("Method not implemented"); }
-
-  // Tax exemption methods (stubs)
-  async createTaxExemptionDocument(document: InsertTaxExemptionDocument): Promise<TaxExemptionDocument> { throw new Error("Method not implemented"); }
-  async getTaxExemptionDocument(id: string): Promise<TaxExemptionDocument | undefined> { return undefined; }
-  async getTaxExemptionDocumentsByOrganization(organizationId: string): Promise<TaxExemptionDocument[]> { return []; }
-  async updateTaxExemptionDocument(id: string, updates: Partial<TaxExemptionDocument>): Promise<TaxExemptionDocument | undefined> { return undefined; }
-  async verifyTaxExemptionDocument(id: string, verifiedBy: string, status: 'verified' | 'rejected', notes?: string): Promise<TaxExemptionDocument | undefined> { return undefined; }
-
-  // Nonprofit subscription methods (stubs)
-  async createNonprofitSubscription(subscription: InsertNonprofitSubscription): Promise<NonprofitSubscription> { throw new Error("Method not implemented"); }
-  async getNonprofitSubscription(id: string): Promise<NonprofitSubscription | undefined> { return undefined; }
-  async getNonprofitSubscriptionByOrganization(organizationId: string): Promise<NonprofitSubscription | undefined> { return undefined; }
-  async updateNonprofitSubscription(id: string, updates: Partial<NonprofitSubscription>): Promise<NonprofitSubscription | undefined> { return undefined; }
-
-  // Nonprofit invoice methods (stubs)
-  async createNonprofitInvoice(invoice: InsertNonprofitInvoice): Promise<NonprofitInvoice> { throw new Error("Method not implemented"); }
-  async getNonprofitInvoice(id: string): Promise<NonprofitInvoice | undefined> { return undefined; }
-  async getNonprofitInvoicesBySubscription(subscriptionId: string): Promise<NonprofitInvoice[]> { return []; }
-  async updateNonprofitInvoice(id: string, updates: Partial<NonprofitInvoice>): Promise<NonprofitInvoice | undefined> { return undefined; }
-  async markInvoiceAsPaid(id: string, paymentMethod: string, paymentReference?: string): Promise<NonprofitInvoice | undefined> { return undefined; }
-
-  // Support Team methods (stubs)
-  async createSupportTeam(team: InsertSupportTeam): Promise<SupportTeam> { throw new Error("Method not implemented"); }
-  async getSupportTeam(id: string): Promise<SupportTeam | undefined> { return undefined; }
-  async getSupportTeamsByOrganization(organizationId: string): Promise<SupportTeam[]> { return []; }
-  async updateSupportTeam(id: string, updates: Partial<SupportTeam>): Promise<SupportTeam | undefined> { return undefined; }
-  
-  async createSupportTeamMember(member: InsertSupportTeamMember): Promise<SupportTeamMember> { throw new Error("Method not implemented"); }
-  async getSupportTeamMember(id: string): Promise<SupportTeamMember | undefined> { return undefined; }
-  async getSupportTeamMembersByTeam(teamId: string): Promise<SupportTeamMember[]> { return []; }
-  async updateSupportTeamMember(id: string, updates: Partial<SupportTeamMember>): Promise<SupportTeamMember | undefined> { return undefined; }
-  
-  async createSupportTeamInjury(injury: InsertSupportTeamInjury): Promise<SupportTeamInjury> { throw new Error("Method not implemented"); }
-  async getSupportTeamInjury(id: string): Promise<SupportTeamInjury | undefined> { return undefined; }
-  async getSupportTeamInjuriesByTeam(teamId: string): Promise<SupportTeamInjury[]> { return []; }
-  async updateSupportTeamInjury(id: string, updates: Partial<SupportTeamInjury>): Promise<SupportTeamInjury | undefined> { return undefined; }
-  
-  async createSupportTeamAiConsultation(consultation: InsertSupportTeamAiConsultation): Promise<SupportTeamAiConsultation> { throw new Error("Method not implemented"); }
-  async getSupportTeamAiConsultation(id: string): Promise<SupportTeamAiConsultation | undefined> { return undefined; }
-  async getSupportTeamAiConsultationsByTeam(teamId: string): Promise<SupportTeamAiConsultation[]> { return []; }
-  async updateSupportTeamAiConsultation(id: string, updates: Partial<SupportTeamAiConsultation>): Promise<SupportTeamAiConsultation | undefined> { return undefined; }
 }
 
 export class MemStorage implements IStorage {
