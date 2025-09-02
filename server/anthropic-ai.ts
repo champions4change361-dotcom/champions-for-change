@@ -242,9 +242,13 @@ Otherwise, respond conversationally to help gather the needed information.`;
 
   } catch (error) {
     console.error('Anthropic AI error:', error);
-    res.status(500).json({
-      error: 'AI service temporarily unavailable',
-      response: 'I apologize, but I\'m having trouble processing your request right now. Please try again in a moment.'
+    res.json({
+      response: 'I apologize, but I\'m having trouble processing your request right now. Please try again in a moment.',
+      tournament_created: false,
+      tournament: null,
+      conversation_state: null,
+      ai_provider: 'anthropic',
+      error: error.message
     });
   }
 }
