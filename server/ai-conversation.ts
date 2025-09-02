@@ -895,7 +895,12 @@ function detectOngoingTournamentConversation(conversation_history: any[]): any {
           content.includes('what would you like to call this tournament') ||
           content.includes('let\'s plan your perfect running event') ||
           content.includes('what an amazing initiative') ||
-          content.includes('charity runs are such a beautiful way')) {
+          content.includes('charity runs are such a beautiful way') ||
+          content.includes('great choice on 5k charity run') ||
+          content.includes('great choice on basketball') ||
+          content.includes('5k charity run') ||
+          content.includes('breast cancer awareness') ||
+          content.includes('where will the tournament take place')) {
         // This looks like an ongoing tournament conversation, extract details from the conversation
         return {
           type: 'tournament_creation',
@@ -918,17 +923,74 @@ function extractDetailsFromConversationHistory(conversation_history: any[]): any
     if (message.content) {
       const content = message.content.toLowerCase();
       
-      // Extract sport mentions
+      // Extract sport mentions (enhanced for charity runs)
       if (content.includes('golf')) details.sport = 'Golf';
       if (content.includes('basketball')) details.sport = 'Basketball';
       if (content.includes('soccer')) details.sport = 'Soccer';
       if (content.includes('track')) details.sport = 'Track and Field';
-      if (content.includes('5k') || content.includes('run') || content.includes('charity run')) details.sport = 'Running';
+      if (content.includes('5k charity run') || content.includes('breast cancer') || content.includes('charity run')) {
+        details.sport = '5K Charity Run';
+        details.donationsEnabled = true;
+        if (content.includes('breast cancer')) {
+          details.donationDescription = 'Support breast cancer awareness and Champions for Change educational programs';
+          details.description = 'Breast Cancer Awareness Run supporting education and community health initiatives';
+        }
+      } else if (content.includes('5k') || content.includes('run')) {
+        details.sport = 'Running';
+      }
       
-      // Extract dates
+      // Extract participant count (enhanced)
+      const participantMatch = content.match(/(\d+)\s*participants?/i);
+      if (participantMatch) {
+        details.maxParticipants = parseInt(participantMatch[1]);
+        if (details.sport && (details.sport.includes('Run') || details.sport.includes('Walk'))) {
+          details.teams = []; // Individual participants
+          details.teamSize = 1;
+        }
+      }
+      
+      // Extract location (enhanced patterns)
+      const locationPatterns = [
+        /(?:start|begin|from)\s+(?:at\s+)?(.*?)\s+(?:and\s+end|to|end)/i,
+        /(?:starts at|begins at)\s+(.*?)(?:\s+on|\s+and|\s*$)/i,
+        /(?:at|location)\s+(.*?)(?:\s+in|\s+on|\s*$)/i
+      ];
+      
+      for (const pattern of locationPatterns) {
+        const match = message.content.match(pattern);
+        if (match && match[1]) {
+          details.location = match[1].trim();
+          break;
+        }
+      }
+      
+      // Extract name from direct mentions
+      if (content.includes('corpus christi cares 5k')) {
+        details.name = 'Corpus Christi Cares 5K';
+      }
+      
+      // Extract registration fee
+      const feeMatch = content.match(/\$(\d+)\s*(?:registration|fee)/i);
+      if (feeMatch) {
+        details.entryFee = feeMatch[1];
+      }
+      
+      // Extract dates (enhanced)
       const dateMatch = content.match(/(\d{1,2}\/\d{1,2}\/\d{4})/);
       if (dateMatch) {
         details.tournamentDate = new Date(dateMatch[1]);
+      }
+      
+      // Extract October timing
+      if (content.includes('october') && content.includes('2025')) {
+        const currentYear = new Date().getFullYear();
+        const october = new Date(currentYear, 9, 1); // October is month 9
+        // Find second Saturday in October
+        while (october.getDay() !== 6) { // 6 = Saturday
+          october.setDate(october.getDate() + 1);
+        }
+        october.setDate(october.getDate() + 7); // Second Saturday
+        details.tournamentDate = october;
       }
       
       // Extract tournament type
@@ -936,9 +998,9 @@ function extractDetailsFromConversationHistory(conversation_history: any[]): any
       if (content.includes('double elimination')) details.tournamentType = 'double';
       if (content.includes('round robin')) details.tournamentType = 'round-robin';
       
-      // Extract team count
+      // Extract team count (for team sports)
       const teamMatch = content.match(/(\d+)\s*teams?/);
-      if (teamMatch) {
+      if (teamMatch && !details.sport?.includes('Run')) {
         const count = parseInt(teamMatch[1]);
         details.maxParticipants = count;
         const teams = [];

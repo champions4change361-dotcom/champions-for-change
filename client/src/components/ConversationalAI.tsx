@@ -17,7 +17,11 @@ import {
   Calendar,
   DollarSign,
   Heart,
-  Target
+  Target,
+  Paperclip,
+  Copy,
+  Check,
+  Download
 } from "lucide-react";
 
 interface ConversationalMessage {
@@ -52,8 +56,10 @@ export function ConversationalAI({ domain = 'education', className = '' }: Conve
   
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -62,6 +68,52 @@ export function ConversationalAI({ domain = 'education', className = '' }: Conve
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  const copyToClipboard = async (text: string, messageId: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedMessageId(messageId);
+      setTimeout(() => setCopiedMessageId(null), 2000);
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+    }
+  };
+
+  const copyConversation = async () => {
+    const conversationText = messages.map(msg => 
+      `${msg.role === 'user' ? 'User' : 'AI'}: ${msg.content}`
+    ).join('\n\n');
+    
+    try {
+      await navigator.clipboard.writeText(conversationText);
+      setCopiedMessageId('conversation');
+      setTimeout(() => setCopiedMessageId(null), 2000);
+    } catch (err) {
+      console.error('Failed to copy conversation: ', err);
+    }
+  };
+
+  const handleFileAttachment = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // For now, just read text files and add content to input
+    if (file.type.startsWith('text/')) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const content = e.target?.result as string;
+        setInputMessage(prev => prev + (prev ? '\n\n' : '') + `[Attached file: ${file.name}]\n${content}`);
+      };
+      reader.readAsText(file);
+    } else {
+      setInputMessage(prev => prev + (prev ? '\n\n' : '') + `[Attached file: ${file.name}]`);
+    }
+    
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   const handleSendMessage = async (messageText?: string) => {
     const text = messageText || inputMessage.trim();
@@ -191,7 +243,7 @@ export function ConversationalAI({ domain = 'education', className = '' }: Conve
   };
 
   const MessageBubble = ({ message }: { message: ConversationalMessage }) => (
-    <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} mb-4`}>
+    <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} mb-4 group`}>
       <div className={`flex items-start space-x-2 max-w-[80%] ${message.role === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
         <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
           message.role === 'user' 
@@ -205,29 +257,46 @@ export function ConversationalAI({ domain = 'education', className = '' }: Conve
           )}
         </div>
         
-        <div className={`rounded-2xl px-4 py-3 ${
-          message.role === 'user'
-            ? 'bg-blue-600 text-white'
-            : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
-        }`}>
-          <div className="whitespace-pre-wrap text-sm leading-relaxed">
-            {message.content}
+        <div className="relative">
+          <div className={`rounded-2xl px-4 py-3 ${
+            message.role === 'user'
+              ? 'bg-blue-600 text-white'
+              : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
+          }`}>
+            <div className="whitespace-pre-wrap text-sm leading-relaxed">
+              {message.content}
+            </div>
+            
+            {message.suggestions && message.suggestions.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-3">
+                {message.suggestions.map((suggestion, idx) => (
+                  <Badge
+                    key={idx}
+                    variant="secondary"
+                    className="cursor-pointer hover:bg-green-500 hover:text-white transition-colors text-xs"
+                    onClick={() => handleSendMessage(suggestion)}
+                  >
+                    {suggestion}
+                  </Badge>
+                ))}
+              </div>
+            )}
           </div>
           
-          {message.suggestions && message.suggestions.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-3">
-              {message.suggestions.map((suggestion, idx) => (
-                <Badge
-                  key={idx}
-                  variant="secondary"
-                  className="cursor-pointer hover:bg-green-500 hover:text-white transition-colors text-xs"
-                  onClick={() => handleSendMessage(suggestion)}
-                >
-                  {suggestion}
-                </Badge>
-              ))}
-            </div>
-          )}
+          {/* Copy button for each message */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className={`absolute -top-2 ${message.role === 'user' ? '-left-10' : '-right-10'} opacity-0 group-hover:opacity-100 transition-opacity p-1 h-7 w-7 hover:bg-gray-200 dark:hover:bg-gray-700`}
+            onClick={() => copyToClipboard(message.content, message.id)}
+            data-testid={`copy-message-${message.id}`}
+          >
+            {copiedMessageId === message.id ? (
+              <Check className="w-3 h-3 text-green-600" />
+            ) : (
+              <Copy className="w-3 h-3 text-gray-500" />
+            )}
+          </Button>
         </div>
       </div>
     </div>
@@ -236,18 +305,38 @@ export function ConversationalAI({ domain = 'education', className = '' }: Conve
   return (
     <Card className={`h-[600px] flex flex-col ${className}`}>
       <CardHeader className="pb-3">
-        <CardTitle className="flex items-center space-x-2 text-lg">
-          <div className="bg-gradient-to-br from-green-500 to-emerald-600 p-2 rounded-lg">
-            <MessageSquare className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <span className="text-green-700 dark:text-green-400">AI Assistant</span>
-            <div className="flex items-center space-x-1 mt-1">
-              <Sparkles className="w-3 h-3 text-yellow-500" />
-              <span className="text-xs text-gray-500">Champions for Change Platform</span>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center space-x-2 text-lg">
+            <div className="bg-gradient-to-br from-green-500 to-emerald-600 p-2 rounded-lg">
+              <MessageSquare className="w-5 h-5 text-white" />
             </div>
+            <div>
+              <span className="text-green-700 dark:text-green-400">AI Assistant</span>
+              <div className="flex items-center space-x-1 mt-1">
+                <Sparkles className="w-3 h-3 text-yellow-500" />
+                <span className="text-xs text-gray-500">Champions for Change Platform</span>
+              </div>
+            </div>
+          </CardTitle>
+          
+          {/* Header Controls */}
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={copyConversation}
+              className="h-8 px-2 hover:bg-green-50 dark:hover:bg-green-900/20"
+              data-testid="button-copy-conversation"
+              title="Copy entire conversation"
+            >
+              {copiedMessageId === 'conversation' ? (
+                <Check className="w-4 h-4 text-green-600" />
+              ) : (
+                <Download className="w-4 h-4 text-gray-500" />
+              )}
+            </Button>
           </div>
-        </CardTitle>
+        </div>
       </CardHeader>
       
       <CardContent className="flex flex-col flex-1 p-0">
@@ -279,16 +368,37 @@ export function ConversationalAI({ domain = 'education', className = '' }: Conve
         
         <div className="border-t p-4">
           <div className="flex space-x-2">
-            <Input
-              ref={inputRef}
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Ask me anything about tournaments, budgets, health monitoring, or district management..."
-              className="flex-1 focus:ring-green-500 focus:border-green-500"
-              disabled={isLoading}
-              data-testid="input-ai-message"
-            />
+            <div className="relative flex-1">
+              <Input
+                ref={inputRef}
+                value={inputMessage}
+                onChange={(e) => setInputMessage(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Ask me anything about tournaments, budgets, health monitoring, or district management..."
+                className="flex-1 focus:ring-green-500 focus:border-green-500 pr-10"
+                disabled={isLoading}
+                data-testid="input-ai-message"
+              />
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                onChange={handleFileAttachment}
+                className="hidden"
+                accept=".txt,.md,.json,.csv"
+              />
+              {/* Attachment button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 h-7 w-7 hover:bg-gray-100 dark:hover:bg-gray-700"
+                data-testid="button-attach-file"
+                title="Attach file (txt, md, json, csv)"
+              >
+                <Paperclip className="w-4 h-4 text-gray-500" />
+              </Button>
+            </div>
             <Button 
               onClick={() => handleSendMessage()}
               disabled={!inputMessage.trim() || isLoading}
