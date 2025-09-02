@@ -4004,38 +4004,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // AI conversation route - using Anthropic Claude
-  const { handleAnthropicAI } = await import('./anthropic-ai');
-  app.post('/api/ai-conversation', handleAnthropicAI);
+  // AI conversation routes - DISABLED for production
+  // TODO: Re-enable when AI system is ready for release
+  app.post('/api/ai-conversation', (req, res) => {
+    res.json({
+      response: 'AI assistant is currently under development. Please use the regular tournament creation tools.',
+      tournament_created: false,
+      conversation_state: null
+    });
+  });
   
-  // Keystone consultation endpoint (forwards to AI conversation)
-  app.post('/api/keystone-consult', async (req, res) => {
-    try {
-      // Transform keystone request to AI conversation format
-      const { user_input, consultation_type, tier, subscription_level } = req.body;
-      
-      const aiRequest = {
-        message: user_input || '',
-        conversation_history: [],
-        domain: 'tournament_creation',
-        user_context: {
-          consultation_type: consultation_type || tier,
-          subscription_level: subscription_level || 'free'
-        }
-      };
-      
-      // Forward to AI conversation handler
-      const mockReq = { ...req, body: aiRequest };
-      await handleAnthropicAI(mockReq, res);
-      
-    } catch (error) {
-      console.error('Keystone consult error:', error);
-      res.status(500).json({
-        success: false,
-        error: 'Keystone consultation service unavailable',
-        response: "I'm having trouble processing that request. Could you try rephrasing it?"
-      });
-    }
+  app.post('/api/keystone-consult', (req, res) => {
+    res.json({
+      success: false,
+      response: 'AI consultation is currently under development. Please use the standard tournament creation process.'
+    });
   });
 
   // Session management routes

@@ -21,9 +21,10 @@ import DonationSuccess from './pages/DonationSuccess';
 import CreateTournament from './pages/CreateTournament';
 import Tournament from './pages/tournament';
 import Contacts from './pages/Contacts';
-import AIConsultation from './pages/AIConsultation';
-import AIChat from './pages/AIChat';
-import AIDemo from './pages/AIDemo';
+// AI features temporarily disabled for production
+// import AIConsultation from './pages/AIConsultation';
+// import AIChat from './pages/AIChat';
+// import AIDemo from './pages/AIDemo';
 import Settings from './pages/Settings';
 import LiveMatches from './pages/LiveMatches';
 import Championships from './pages/Championships';
@@ -136,9 +137,10 @@ function AuthenticatedRoutes() {
         <Route path="/tournament/:id" component={Tournament} />
         <Route path="/tournaments/:tournamentId/register" component={TournamentRegistration} />
         <Route path="/contacts" component={Contacts} />
-        <Route path="/ai-consultation" component={AIConsultation} />
-        <Route path="/ai-chat" component={AIChat} />
-        <Route path="/ai-demo" component={AIDemo} />
+        {/* AI features temporarily disabled for production */}
+        {/* <Route path="/ai-consultation" component={AIConsultation} /> */}
+        {/* <Route path="/ai-chat" component={AIChat} /> */}
+        {/* <Route path="/ai-demo" component={AIDemo} /> */}
         <Route path="/settings" component={Settings} />
         <Route path="/live-matches" component={LiveMatches} />
         <Route path="/championships" component={Championships} />
