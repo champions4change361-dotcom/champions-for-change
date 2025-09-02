@@ -3568,15 +3568,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Enhanced Historical AI Status - Direct Mock Data
+  // AI features temporarily disabled for production
   app.get('/api/fantasy/ai-status', (req, res) => {
-    console.log('📊 Historical AI Status Request - Direct Mock Data');
+    console.log('📊 Fantasy AI Status Request - Disabled for Production');
     
-    // Direct response with enhanced training data
     res.json({
-      success: true,
-      status: 'enhanced',
-      message: 'Historical AI Training System (2020-2024)',
+      success: false,
+      status: 'disabled',
+      message: 'AI features are under development and temporarily disabled.',
       historicalData: {
         totalPlayers: 547,
         totalGames: 2875,
@@ -3614,119 +3613,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/fantasy/ask-question", async (req, res) => {
-    try {
-      const { question } = req.body;
-      
-      if (!question) {
-        return res.status(400).json({ error: "Question is required" });
-      }
-
-      console.log('Fantasy AI Question:', question);
-      
-      // Use Yahoo Sports API to get real data for AI analysis
-      const { YahooSportsAPI } = await import('./yahooSportsAPI');
-      const yahooAPI = new YahooSportsAPI();
-      
-      // Get the user's session to check for Yahoo authentication
-      const session = req.session as any;
-      const hasYahooToken = !!session?.yahooAccessToken;
-      
-      let response;
-      
-      // Use Yahoo API to generate intelligent responses based on real data
-      try {
-        if (hasYahooToken) {
-          // Authenticated user - can access personalized Yahoo Fantasy data
-          response = await yahooAPI.generateIntelligentResponse(question, session);
-        } else {
-          // Use public Yahoo Sports data for analysis
-          response = await yahooAPI.answerFantasyQuestion(question);
-        }
-      } catch (apiError) {
-        console.error('Yahoo API error, falling back to enhanced analysis:', apiError);
-        
-        // Fallback to enhanced generic analysis when API fails
-        const lowerQuestion = question.toLowerCase();
-        
-        if (lowerQuestion.includes('running back') || lowerQuestion.includes('rb') || lowerQuestion.includes('carries')) {
-          response = {
-            answer: `🏈 **RB ANALYSIS REQUEST**: I need live Yahoo Sports data to provide specific player insights. Connect your Yahoo account for personalized recommendations based on your league data.`,
-            analysis: `Without Yahoo authentication, I can't access current player usage rates, matchup data, or injury reports. Connect to unlock detailed RB analysis.`,
-            supportingData: [
-              { metric: 'Data Needed', value: 'Yahoo Fantasy Sports API' },
-              { metric: 'Analysis Type', value: 'Usage rates, carry share, matchups' },
-              { metric: 'Recommendation', value: 'Connect Yahoo account above' }
-            ],
-            confidence: 60
-          };
-        } else if (lowerQuestion.includes('wide receiver') || lowerQuestion.includes('wr') || lowerQuestion.includes('matchup')) {
-          response = {
-            answer: `🎯 **WR MATCHUP ANALYSIS**: Real-time target share data and defensive rankings require Yahoo Sports API access. Connect your account for detailed WR insights.`,
-            analysis: `WR analysis needs current target trends, red zone usage, and opponent defensive stats from Yahoo's live data feeds.`,
-            supportingData: [
-              { metric: 'Data Source', value: 'Yahoo Sports API Required' },
-              { metric: 'Analysis Focus', value: 'Target share, red zone usage, matchups' },
-              { metric: 'Sports Covered', value: 'NFL, NBA, MLB, NHL' }
-            ],
-            confidence: 65
-          };
-        } else if (lowerQuestion.includes('basketball') || lowerQuestion.includes('nba') || lowerQuestion.includes('points') || lowerQuestion.includes('rebounds')) {
-          response = {
-            answer: `🏀 **NBA FANTASY ANALYSIS**: Basketball insights require live Yahoo NBA data including usage rates, pace factors, and injury reports.`,
-            analysis: `NBA analysis covers player efficiency, pace-adjusted stats, matchup advantages, and real-time injury impacts across all teams.`,
-            supportingData: [
-              { metric: 'Sport', value: 'NBA Basketball' },
-              { metric: 'Key Metrics', value: 'Usage %, Pace, Efficiency' },
-              { metric: 'Data Source', value: 'Yahoo Sports NBA API' }
-            ],
-            confidence: 70
-          };
-        } else if (lowerQuestion.includes('baseball') || lowerQuestion.includes('mlb') || lowerQuestion.includes('pitcher') || lowerQuestion.includes('hitter')) {
-          response = {
-            answer: `⚾ **MLB FANTASY INSIGHTS**: Baseball analysis requires Yahoo's pitcher vs. hitter matchup data, weather conditions, and ballpark factors.`,
-            analysis: `MLB insights include platoon splits, ballpark effects, weather impacts, and detailed pitcher-hitter historical matchups.`,
-            supportingData: [
-              { metric: 'Sport', value: 'MLB Baseball' },
-              { metric: 'Analysis Type', value: 'Matchups, Weather, Ballparks' },
-              { metric: 'Data Requirements', value: 'Yahoo MLB API Access' }
-            ],
-            confidence: 75
-          };
-        } else if (lowerQuestion.includes('hockey') || lowerQuestion.includes('nhl') || lowerQuestion.includes('goals') || lowerQuestion.includes('assists')) {
-          response = {
-            answer: `🏒 **NHL FANTASY ANALYSIS**: Hockey insights need Yahoo's line combination data, power play units, and goalie matchup information.`,
-            analysis: `NHL analysis covers line combinations, power play opportunities, goalie starts, and team pace factors for comprehensive insights.`,
-            supportingData: [
-              { metric: 'Sport', value: 'NHL Hockey' },
-              { metric: 'Key Factors', value: 'Lines, PP units, Goalies' },
-              { metric: 'Data Source', value: 'Yahoo NHL API' }
-            ],
-            confidence: 72
-          };
-        } else {
-          response = {
-            answer: `🤖 **MULTI-SPORT AI READY**: I can analyze NFL, NBA, MLB, and NHL fantasy questions using live Yahoo Sports data once connected.`,
-            analysis: `The AI supports comprehensive analysis across all major sports with real-time data integration when Yahoo authentication is available.`,
-            supportingData: [
-              { metric: 'Sports Supported', value: 'NFL, NBA, MLB, NHL' },
-              { metric: 'Data Source', value: 'Yahoo Sports API (all leagues)' },
-              { metric: 'Analysis Types', value: 'Players, Matchups, Trends, Injuries' }
-            ],
-            confidence: 80
-          };
-        }
-      }
-      
-      res.json({
-        success: true,
-        question,
-        ...response,
-        timestamp: new Date().toISOString()
-      });
-    } catch (error) {
-      console.error('Fantasy question error:', error);
-      res.status(500).json({ error: "Failed to answer question" });
-    }
+    console.log('Fantasy AI Question Request - Disabled for Production');
+    
+    res.json({
+      success: false,
+      answer: "AI coaching features are currently under development.",
+      message: "Fantasy AI analysis is temporarily disabled while we enhance the system.",
+      error: "AI_DISABLED"
+    });
   });
 
   app.get("/api/fantasy/injury-reports", async (req, res) => {

@@ -33,17 +33,16 @@ export default function FantasyCoaching() {
   const [playerAnalysis, setPlayerAnalysis] = useState<any>(null);
   const [selectedInjurySport, setSelectedInjurySport] = useState('NFL');
 
-  // Fantasy AI Question Mutation
+  // AI features temporarily disabled
   const askQuestionMutation = useMutation({
     mutationFn: async (question: string) => {
-      const response = await apiRequest('/api/fantasy/ask-question', 'POST', { question });
-      return response;
+      return { error: "AI_DISABLED", message: "AI features are under development" };
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: "Failed to get AI response. Please try again.",
-        variant: "destructive",
+        title: "Feature Unavailable",
+        description: "AI features are currently under development.",
+        variant: "default",
       });
     }
   });
@@ -398,7 +397,8 @@ export default function FantasyCoaching() {
               <Users className="w-4 h-4 mb-1 text-green-600" />
               <span className="font-bold text-green-800">Search</span>
             </TabsTrigger>
-            <TabsTrigger value="ai-coach" data-testid="tab-ai-coach" className="flex flex-col items-center justify-center text-xs px-1 py-2 min-h-[3rem]">
+            {/* AI features temporarily disabled for production */}
+            {/* <TabsTrigger value="ai-coach" data-testid="tab-ai-coach" className="flex flex-col items-center justify-center text-xs px-1 py-2 min-h-[3rem]">
               <Brain className="w-4 h-4 mb-1" />
               <span>AI</span>
             </TabsTrigger>
@@ -460,10 +460,10 @@ export default function FantasyCoaching() {
                       setSelectedPosition(position);
                       setSelectedPlayer(playerName);
                       
-                      // Switch to AI coach tab to show analysis
-                      setActiveTab('ai-coach');
+                      // Switch to analytics tab since AI is disabled
+                      setActiveTab('r-analytics');
                       
-                      // Trigger enhanced analysis and switch to AI tab
+                      // Trigger enhanced analysis
                       analyzePlayerMutation.mutate({
                         sport: selectedSport,
                         position: position,
@@ -483,8 +483,8 @@ export default function FantasyCoaching() {
             </Card>
           </TabsContent>
 
-          {/* AI Coach Tab - Real Sports Intelligence */}
-          <TabsContent value="ai-coach" className="space-y-6" data-testid="ai-coach-content">
+          {/* AI features temporarily disabled for production */}
+          {/* <TabsContent value="ai-coach" className="space-y-6" data-testid="ai-coach-content">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -674,11 +674,12 @@ export default function FantasyCoaching() {
               </CardContent>
             </Card>
           </TabsContent>
+          */}
 
           {/* Historical AI Training Tab */}
-          <TabsContent value="historical-ai" className="space-y-4" data-testid="historical-ai-content">
+          {/* <TabsContent value="historical-ai" className="space-y-4" data-testid="historical-ai-content">
             <HistoricalAIStatus />
-          </TabsContent>
+          </TabsContent> */}
 
           {/* R Analytics Tab - Professional Grade Fantasy Intelligence */}
           <TabsContent value="r-analytics" className="space-y-6" data-testid="r-analytics-content">
@@ -700,7 +701,7 @@ export default function FantasyCoaching() {
                     <BarChart3 className="h-4 w-4 text-amber-600" />
                     <AlertDescription className="text-amber-900">
                       <strong>NFL & MLB Supported:</strong> R Analytics is available for NFL and MLB. 
-                      For {selectedSport?.toUpperCase() || 'other sports'}, use the main AI Coach tab which provides analysis across all sports.
+                      For {selectedSport?.toUpperCase() || 'other sports'}, use the player search tab for basic analysis.
                     </AlertDescription>
                   </Alert>
                 ) : selectedSport === 'nfl' && (!selectedPosition || !['QB', 'RB', 'WR', 'TE'].includes(selectedPosition)) ? (
@@ -1211,23 +1212,22 @@ export default function FantasyCoaching() {
                   Real-Time Game Insights
                 </CardTitle>
                 <CardDescription>
-                  AI-powered analysis of live player performances and trends
+                  Real-time analysis of live player performances and trends
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <Alert>
                   <Brain className="h-4 w-4" />
                   <AlertDescription>
-                    Select a live game from the Live Scoring tab to see real-time player analysis, 
+                    Select a live game from the Live Scoring tab to see real-time player statistics, 
                     including insights like "Player X has 3 carries to the left for 45 yards - 
-                    the pre-game analysis is holding perfectly!"
+                    tracking performance vs projections!"
                   </AlertDescription>
                 </Alert>
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
-      </div>
       </div>
     </FantasyAgeGate>
   );
