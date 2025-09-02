@@ -125,15 +125,15 @@ export default function Home() {
             </div>
           </Link>
 
-          {/* AI Coach */}
-          <Link href="/ai-consultation">
-            <div data-testid="card-ai-consultation" className="lg:col-span-1 bg-slate-800 border border-purple-500/30 rounded-xl p-6 hover:border-purple-400/50 transition-all cursor-pointer group">
+          {/* Tournament Analytics */}
+          <Link href="/settings">
+            <div data-testid="card-analytics" className="lg:col-span-1 bg-slate-800 border border-purple-500/30 rounded-xl p-6 hover:border-purple-400/50 transition-all cursor-pointer group">
               <div className="text-center">
                 <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-500/30 transition-colors">
                   <Star className="h-6 w-6 text-purple-400" />
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2">AI Coach</h3>
-                <p className="text-sm text-slate-400">Tournament strategy</p>
+                <h3 className="text-lg font-bold text-white mb-2">Analytics</h3>
+                <p className="text-sm text-slate-400">Tournament insights</p>
               </div>
             </div>
           </Link>

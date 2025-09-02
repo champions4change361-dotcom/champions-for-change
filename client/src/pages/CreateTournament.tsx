@@ -5,165 +5,33 @@ import { useAuth } from "@/hooks/useAuth";
 import EnhancedTournamentWizard from '@/components/enhanced-tournament-wizard';
 // Removed old AI consultation component - using integrated chat AI instead
 
-interface Message {
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: Date;
-}
+// AI conversation features temporarily disabled for production
 
-function ConversationalAI() {
-  const { user } = useAuth();
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-
-  const sendMessage = async () => {
-    if (!input.trim() || isLoading) return;
-    
-    const userMessage: Message = {
-      role: 'user',
-      content: input.trim(),
-      timestamp: new Date()
-    };
-    
-    setMessages(prev => [...prev, userMessage]);
-    setInput('');
-    setIsLoading(true);
-    
-    try {
-      const response = await fetch('/api/ai-conversation', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: userMessage.content,
-          conversation_history: messages.map(m => ({
-            role: m.role,
-            content: m.content,
-            timestamp: m.timestamp
-          })),
-          domain: 'tournament_creation',
-          user_context: {
-            subscription_level: user?.subscriptionPlan || 'free'
-          }
-        })
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        const assistantMessage: Message = {
-          role: 'assistant',
-          content: data.response,
-          timestamp: new Date()
-        };
-        setMessages(prev => [...prev, assistantMessage]);
-      } else {
-        throw new Error(data.error || 'Failed to get response');
-      }
-    } catch (error) {
-      console.error('AI conversation error:', error);
-      const errorMessage: Message = {
-        role: 'assistant',
-        content: "I'm having trouble right now. Could you try asking your question again?",
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, errorMessage]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  };
-
+function TournamentCreationPlaceholder() {
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="text-center mb-8">
-        <div className="inline-flex items-center space-x-2 bg-blue-500/10 text-blue-400 px-4 py-2 rounded-full text-sm font-medium mb-4">
-          <Bot className="h-4 w-4" />
-          <span>AI Tournament Assistant</span>
-        </div>
-        <h1 className="text-4xl font-bold text-white mb-4">Tournament Expert AI</h1>
-        <p className="text-xl text-slate-300">
-          Ask me anything about creating tournaments, managing competitions, or building your athletic program!
-        </p>
+    <div className="max-w-4xl mx-auto text-center py-16">
+      <div className="inline-flex items-center space-x-2 bg-yellow-500/10 text-yellow-400 px-4 py-2 rounded-full text-sm font-medium mb-4">
+        <Settings className="h-4 w-4" />
+        <span>Under Development</span>
       </div>
-
-      {/* Chat Messages */}
-      <div className="bg-slate-800 border border-slate-600 rounded-2xl p-6 mb-6 h-96 overflow-y-auto">
-        {messages.length === 0 ? (
-          <div className="text-center text-slate-400 mt-20">
-            <MessageCircle className="h-16 w-16 mx-auto mb-4 opacity-50" />
-            <h3 className="text-xl font-semibold mb-2">Start a conversation</h3>
-            <p className="text-sm">Ask me about tournaments, sports management, or any athletic program needs!</p>
-            <div className="mt-6 space-y-2 text-sm">
-              <p className="bg-slate-700 px-4 py-2 rounded-lg">💡 "I need a 26 team double elimination tournament"</p>
-              <p className="bg-slate-700 px-4 py-2 rounded-lg">💡 "How do I set up a basketball bracket?"</p>
-              <p className="bg-slate-700 px-4 py-2 rounded-lg">💡 "Create a swimming meet with timing events"</p>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {messages.map((message, index) => (
-              <div
-                key={index}
-                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div
-                  className={`max-w-[80%] p-4 rounded-2xl ${
-                    message.role === 'user'
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-slate-700 text-slate-100'
-                  }`}
-                >
-                  <div className="whitespace-pre-wrap">{message.content}</div>
-                  <div className="text-xs opacity-70 mt-2">
-                    {message.timestamp.toLocaleTimeString()}
-                  </div>
-                </div>
-              </div>
-            ))}
-            {isLoading && (
-              <div className="flex justify-start">
-                <div className="bg-slate-700 text-slate-100 p-4 rounded-2xl">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                    <span className="text-sm text-slate-400 ml-2">AI is thinking...</span>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Input - Mobile optimized */}
-      <div className="bg-slate-800 border border-slate-600 rounded-2xl p-3 sm:p-4">
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-          <textarea
-            data-testid="input-ai-message"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Ask me about tournaments, sports, or athletic programs..."
-            className="flex-1 bg-slate-700 border border-slate-600 rounded-lg p-3 text-white placeholder-slate-400 focus:border-blue-400 focus:outline-none resize-none text-sm sm:text-base"
-            rows={2}
-            disabled={isLoading}
-          />
-          <button
-            data-testid="button-send-message"
-            onClick={sendMessage}
-            disabled={!input.trim() || isLoading}
-            className="bg-blue-500 hover:bg-blue-600 disabled:bg-slate-600 disabled:cursor-not-allowed text-white p-3 rounded-lg transition-colors flex items-center justify-center min-w-[50px] self-end sm:self-stretch"
-          >
-            <Send className="h-5 w-5" />
-          </button>
+      <h1 className="text-4xl font-bold text-white mb-4">Enhanced Tournament Creation</h1>
+      <p className="text-xl text-slate-300 mb-8">
+        Advanced tournament creation tools are being developed to make setup even easier.
+      </p>
+      <div className="bg-slate-800 border border-slate-600 rounded-2xl p-8">
+        <h3 className="text-xl font-semibold text-white mb-4">Coming Soon</h3>
+        <ul className="text-slate-400 space-y-2 text-left max-w-md mx-auto">
+          <li>• Guided tournament setup wizard</li>
+          <li>• Smart bracket generation</li>
+          <li>• Team management tools</li>
+          <li>• Automated scheduling</li>
+        </ul>
+        <div className="mt-8">
+          <Link href="/create">
+            <button className="bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-semibold px-6 py-3 rounded-lg transition-colors">
+              Use Standard Tournament Creator
+            </button>
+          </Link>
         </div>
       </div>
     </div>
@@ -297,7 +165,7 @@ export default function CreateTournament() {
                   </div>
                   <div>
                     <h1 className="text-xl font-bold text-white">Champions Arena</h1>
-                    <p className="text-xs text-yellow-400">AI Tournament Assistant</p>
+                    <p className="text-xs text-yellow-400">Tournament Creator</p>
                   </div>
                 </Link>
               </div>
@@ -316,8 +184,7 @@ export default function CreateTournament() {
         </header>
         
         <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Integrated Conversational AI */}
-          <ConversationalAI />
+          <TournamentCreationPlaceholder />
         </main>
       </div>
     );
