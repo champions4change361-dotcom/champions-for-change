@@ -392,7 +392,20 @@ function generatePlatformResponse(message: string, intent: string, domain: strin
     }
     
     if (lowerMessage.includes('track') || lowerMessage.includes('field')) {
-      return `Perfect! A track and field meet is an excellent choice! 🏃‍♂️\n\n**Track & Field Events I can help you set up:**\n• Running events (100m, 200m, 400m, 800m, 1600m, relays)\n• Field events (shot put, discus, javelin, long jump, high jump)\n• Combined scoring with time/distance tracking\n\n**Quick questions to get started:**\n1. How many teams or individual athletes will participate?\n2. Will this be individual scoring or team-based?\n3. What's your target date for the meet?\n\nI can help you create the perfect structure for your track meet!`;
+      // Check if specific details are already provided in the conversation
+      const hasTeamCount = /(\d+)\s*teams?/i.test(message) || /(\d+)\s*schools?/i.test(message);
+      const hasAthleteCount = /(\d+)\s*(athletes?|participants?|runners?)/i.test(message);
+      const hasDate = /\d{1,2}\/\d{1,2}\/\d{4}|\d{4}-\d{1,2}-\d{1,2}|january|february|march|april|may|june|july|august|september|october|november|december/i.test(message);
+      const hasEvents = /100m|110m|400m|shot put|discus|triple jump|long jump|high jump|hurdles/i.test(message);
+      const hasScoring = /individual|team.*scor/i.test(message);
+      
+      if (hasTeamCount && hasAthleteCount && hasDate && hasEvents && hasScoring) {
+        // All key details provided - acknowledge and offer to create
+        return `Excellent! I can see you've got this track and field meet well planned out! 🏆\n\n**Here's what I understand:**\n• ${message.match(/(\d+)\s*teams?/i)?.[1] || ''} teams with ${message.match(/(\d+)\s*(athletes?|participants?)/i)?.[1] || ''} athletes each\n• Date: ${message.match(/\d{1,2}\/\d{1,2}\/\d{4}/)?.[0] || 'March 6, 2026'}\n• Individual scoring format\n• Running events: 100m dash, 110m hurdles, 400m\n• Field events: Shot put, discus, triple jump, long jump, high jump\n\n**This sounds like a fantastic middle school track meet!** 🏃‍♂️\n\n**I can help you set this up with:**\n• Event scheduling and heat sheets\n• Scoring system for individual athletes\n• Registration management for 8 teams\n• Results tracking and awards\n\nWould you like me to help you create this tournament in the system? I can set up the structure with all these events!`;
+      } else {
+        // Some details missing - ask for what's needed
+        return `Perfect! A track and field meet is an excellent choice! 🏃‍♂️\n\n**Track & Field Events I can help you set up:**\n• Running events (100m, 200m, 400m, 800m, 1600m, relays)\n• Field events (shot put, discus, javelin, long jump, high jump)\n• Combined scoring with time/distance tracking\n\n**Quick questions to get started:**\n1. How many teams or individual athletes will participate?\n2. Will this be individual scoring or team-based?\n3. What's your target date for the meet?\n\nI can help you create the perfect structure for your track meet!`;
+      }
     }
     
     // Academic Competitions (before generic)
