@@ -525,7 +525,7 @@ function extractTournamentDetailsFromMessage(message: string, context: any): any
     details.tournamentType = 'single';
   }
   
-  // Extract sport (enhanced with more variations)
+  // Extract sport (enhanced with more variations including charity runs)
   const sportMap = {
     'basketball': 'Basketball',
     'basketabll': 'Basketball', // Handle typo
@@ -539,7 +539,16 @@ function extractTournamentDetailsFromMessage(message: string, context: any): any
     'baseball': 'Baseball',
     'softball': 'Softball',
     'wrestling': 'Wrestling',
-    'swimming': 'Swimming'
+    'swimming': 'Swimming',
+    '5k': '5K Charity Run',
+    '10k': '10K Community Run',
+    'charity run': '5K Charity Run',
+    'fun run': 'Fun Run (Color Run/Theme Run)',
+    'run': '5K Charity Run',
+    'charity walk': 'Charity Walk/Walk-a-thon',
+    'walk-a-thon': 'Charity Walk/Walk-a-thon',
+    'memorial run': 'Memorial/Awareness Run',
+    'awareness run': 'Memorial/Awareness Run'
   };
   
   for (const [key, value] of Object.entries(sportMap)) {
@@ -549,22 +558,72 @@ function extractTournamentDetailsFromMessage(message: string, context: any): any
     }
   }
   
-  // Extract team count
-  const teamMatch = message.match(/(\d+)\s*(team|participant|player|division)/i);
-  if (teamMatch) {
-    const count = parseInt(teamMatch[1]);
-    if (count > 0 && count < 1000) { // Reasonable range
+  // Extract participant count (enhanced for running events)
+  const participantMatch = message.match(/(?:max|maximum|up to|limit|capacity).*?(\d+)\s*(?:participant|runner|people|person)/i) ||
+                          message.match(/(\d+)\s*(?:participant|runner|people|person)/i) ||
+                          message.match(/(\d+)\s*(?:team|division)/i);
+  if (participantMatch) {
+    const count = parseInt(participantMatch[1]);
+    if (count > 0 && count < 10000) { // Reasonable range for running events
       details.maxParticipants = count;
       
-      // Generate teams if not specified
-      const teams = [];
-      for (let i = 1; i <= count; i++) {
-        teams.push(`Team ${i}`);
+      // For individual events like runs, don't generate teams
+      if (details.sport && (details.sport.includes('Run') || details.sport.includes('Walk'))) {
+        details.teams = []; // Individual participants, not teams
+        details.teamSize = 1;
+      } else {
+        // Generate teams if not specified for team sports
+        const teams = [];
+        for (let i = 1; i <= count; i++) {
+          teams.push(`Team ${i}`);
+        }
+        details.teams = teams;
       }
-      details.teams = teams;
     }
   }
   
+  // Extract charity cause and description
+  if (lowerMessage.includes('breast cancer')) {
+    details.description = 'Breast Cancer Awareness Run supporting education and community health initiatives';
+    details.donationsEnabled = true;
+    details.donationDescription = 'Support breast cancer awareness and Champions for Change educational programs';
+  }
+  if (lowerMessage.includes('charity') || lowerMessage.includes('awareness')) {
+    details.donationsEnabled = true;
+  }
+
+  // Extract location information
+  const locationPatterns = [
+    /(?:start|begin|from)\s+(?:at\s+)?(.*?)\s+(?:and\s+end|to|end)/i,
+    /(?:in|at|on)\s+(.*?)(?:\s+and|\s*\.|\s*$)/i,
+    /location.*?:\s*([^.]+)/i
+  ];
+  
+  for (const pattern of locationPatterns) {
+    const match = message.match(pattern);
+    if (match && match[1]) {
+      details.location = match[1].trim();
+      break;
+    }
+  }
+
+  // Extract specific timing information
+  if (lowerMessage.includes('8am') || lowerMessage.includes('8:00')) {
+    details.startTime = '8:00 AM';
+  }
+  if (lowerMessage.includes('saturday') || lowerMessage.includes('weekend')) {
+    details.preferredDayOfWeek = 'Saturday';
+  }
+  if (lowerMessage.includes('october')) {
+    const currentYear = new Date().getFullYear();
+    // Find first Saturday in October
+    const october = new Date(currentYear, 9, 1); // October is month 9
+    while (october.getDay() !== 6) { // 6 = Saturday
+      october.setDate(october.getDate() + 1);
+    }
+    details.tournamentDate = october.toISOString();
+  }
+
   // Extract tournament name (look for quoted names or specific patterns)
   const namePatterns = [
     /(?:called?|name[d]?|title[d]?)\s+["']([^"']+)["']/i,
@@ -580,17 +639,19 @@ function extractTournamentDetailsFromMessage(message: string, context: any): any
     }
   }
   
-  // Extract location
-  const locationPatterns = [
-    /(?:at|location|venue|held at|taking place at)\s+([^.!?\n]+)(?:on|\.|!|\?|$)/i,
-    /will be at\s+([^.!?\n]+)/i
-  ];
-  
-  for (const pattern of locationPatterns) {
-    const match = message.match(pattern);
-    if (match && match[1]) {
-      details.location = match[1].trim();
-      break;
+  // Additional location patterns (combine with earlier patterns)
+  if (!details.location) {
+    const additionalLocationPatterns = [
+      /(?:at|location|venue|held at|taking place at)\s+([^.!?\n]+)(?:on|\.|!|\?|$)/i,
+      /will be at\s+([^.!?\n]+)/i
+    ];
+    
+    for (const pattern of additionalLocationPatterns) {
+      const match = message.match(pattern);
+      if (match && match[1]) {
+        details.location = match[1].trim();
+        break;
+      }
     }
   }
   
@@ -682,9 +743,24 @@ function extractTournamentDetailsFromMessage(message: string, context: any): any
   }
   
   // Set defaults for missing essential fields
-  if (!details.tournamentType) details.tournamentType = 'single';
+  if (!details.tournamentType) {
+    // For running events, use leaderboard format instead of brackets
+    if (details.sport && (details.sport.includes('Run') || details.sport.includes('Walk'))) {
+      details.competitionFormat = 'leaderboard';
+      details.tournamentType = 'single'; // Still need this for backend compatibility
+    } else {
+      details.tournamentType = 'single';
+    }
+  }
   if (!details.sport) details.sport = context.sport || 'Basketball';
-  if (!details.teamSize) details.teamSize = 5;
+  if (!details.teamSize) {
+    // For running events, set team size to 1 (individual participants)
+    if (details.sport && (details.sport.includes('Run') || details.sport.includes('Walk'))) {
+      details.teamSize = 1;
+    } else {
+      details.teamSize = 5;
+    }
+  }
   if (!details.entryFee) details.entryFee = "0";
   if (!details.isPublic) details.isPublic = true;
   
@@ -694,6 +770,8 @@ function extractTournamentDetailsFromMessage(message: string, context: any): any
     if (lowerMessage.includes('championship')) name = `${details.sport} Championship`;
     if (lowerMessage.includes('league')) name = `${details.sport} League`;
     if (lowerMessage.includes('classic')) name = `${details.sport} Classic`;
+    if (lowerMessage.includes('breast cancer')) name = `Breast Cancer Awareness 5K Run`;
+    if (lowerMessage.includes('charity') && lowerMessage.includes('5k')) name = `5K Charity Run`;
     
     // Add date to name to make it unique
     const today = new Date();
