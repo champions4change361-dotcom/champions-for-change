@@ -6,14 +6,13 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Brain, Trophy, TrendingUp, Users, Zap, Target, BarChart3, MessageSquare, Activity, AlertTriangle, CheckCircle, User } from 'lucide-react';
+import { Trophy, TrendingUp, Users, Zap, Target, BarChart3, Activity, AlertTriangle, CheckCircle } from 'lucide-react';
 import { KeystoneAvatar } from '@/components/KeystoneAvatar';
 import { FantasyLineupCoach } from '@/components/FantasyLineupCoach';
 // DFS component removed - using pure Yahoo Sports API only
 import { LiveScoring } from '@/components/LiveScoring';
 import { useAuth } from '@/hooks/useAuth';
 import { FantasyAgeGate } from '@/components/FantasyAgeGate';
-import HistoricalAIStatus from '@/components/HistoricalAIStatus';
 import { SearchableRosterTable } from '@/components/SearchableRosterTable';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
@@ -27,25 +26,10 @@ export default function FantasyCoaching() {
   const [selectedPosition, setSelectedPosition] = useState<string>('');
   const [selectedPlayer, setSelectedPlayer] = useState<string>('');
   const [activeTab, setActiveTab] = useState('dfs-optimizer');
-  const [question, setQuestion] = useState('');
   const [playerSearchTab, setPlayerSearchTab] = useState('nfl');
   const [selectedSlate, setSelectedSlate] = useState<'morning' | 'afternoon' | 'all-day'>('all-day');
-  const [playerAnalysis, setPlayerAnalysis] = useState<any>(null);
   const [selectedInjurySport, setSelectedInjurySport] = useState('NFL');
 
-  // AI features temporarily disabled
-  const askQuestionMutation = useMutation({
-    mutationFn: async (question: string) => {
-      return { error: "AI_DISABLED", message: "AI features are under development" };
-    },
-    onError: (error) => {
-      toast({
-        title: "Feature Unavailable",
-        description: "AI features are currently under development.",
-        variant: "default",
-      });
-    }
-  });
 
   // Slate Analysis Query
   const { data: slateAnalysis, isLoading: slateLoading } = useQuery({
@@ -103,12 +87,6 @@ export default function FantasyCoaching() {
   const rAnalyticsProjections = null;
   const rAnalyticsLoading = false;
 
-  const handleAskQuestion = async () => {
-    if (!question.trim()) return;
-    
-    askQuestionMutation.mutate(question);
-    setQuestion('');
-  };
 
   // Player Analysis Mutation
   const analyzePlayerMutation = useMutation({
@@ -130,7 +108,7 @@ export default function FantasyCoaching() {
       return data;
     },
     onSuccess: (data) => {
-      setPlayerAnalysis(data);
+      // Analysis data processed
       // Switch to analytics tab since AI is disabled
       setActiveTab('r-analytics');
       toast({
@@ -283,7 +261,7 @@ export default function FantasyCoaching() {
 
         {/* AI Disclaimer */}
         <Alert className="border-amber-200 bg-amber-50" data-testid="ai-disclaimer">
-          <Brain className="h-4 w-4 text-amber-600" />
+          <AlertTriangle className="h-4 w-4 text-amber-600" />
           <AlertDescription className="text-amber-900">
             <strong>Foundation AI Disclaimer:</strong> Foundation AI can get things wrong - do your own research. 
             "We can tell you the Cowboys secondary is hurt and the Browns QB is trending up… 
@@ -397,15 +375,6 @@ export default function FantasyCoaching() {
               <Users className="w-4 h-4 mb-1 text-green-600" />
               <span className="font-bold text-green-800">Search</span>
             </TabsTrigger>
-            {/* AI features temporarily disabled for production */}
-            {/* <TabsTrigger value="ai-coach" data-testid="tab-ai-coach" className="flex flex-col items-center justify-center text-xs px-1 py-2 min-h-[3rem]">
-              <Brain className="w-4 h-4 mb-1" />
-              <span>AI</span>
-            </TabsTrigger> */}
-            {/* <TabsTrigger value="historical-ai" data-testid="tab-historical-ai" className="flex flex-col items-center justify-center text-xs px-1 py-2 min-h-[3rem] bg-gradient-to-r from-purple-100 to-blue-100 border-2 border-purple-300">
-              <span className="text-xs font-bold text-purple-600 mb-1">📊</span>
-              <span className="font-bold text-purple-800">🧠 Training</span>
-            </TabsTrigger> */}
             <TabsTrigger value="r-analytics" data-testid="tab-r-analytics" className="flex flex-col items-center justify-center text-xs px-1 py-2 min-h-[3rem]">
               <Target className="w-4 h-4 mb-1" />
               <span>Pure</span>
@@ -463,12 +432,7 @@ export default function FantasyCoaching() {
                       // Switch to analytics tab since AI is disabled
                       setActiveTab('r-analytics');
                       
-                      // Trigger enhanced analysis
-                      analyzePlayerMutation.mutate({
-                        sport: selectedSport,
-                        position: position,
-                        player: playerName
-                      });
+                      // Analysis functionality will be added later
                     }}
                     selectedPlayer={selectedPlayer}
                   />
@@ -483,202 +447,7 @@ export default function FantasyCoaching() {
             </Card>
           </TabsContent>
 
-          {/* AI features temporarily disabled for production */}
-          {/* <TabsContent value="ai-coach" className="space-y-6" data-testid="ai-coach-content">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Brain className="h-5 w-5 text-purple-600" />
-                  Fantasy Coaching AI - Real Sports Intelligence
-                </CardTitle>
-                <CardDescription>
-                  Ask questions about player usage, injury reports, matchups, and Sunday slate optimization. 
-                  Powered by live Yahoo Sports data and advanced analytics.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Ask: 'Which RB will get the most carries on Sunday's slate?' or 'Analyze injury reports for this week'"
-                    value={question}
-                    onChange={(e) => setQuestion(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleAskQuestion()}
-                    data-testid="ai-question-input"
-                    className="flex-1"
-                  />
-                  <Button 
-                    onClick={handleAskQuestion}
-                    disabled={askQuestionMutation.isPending || !question.trim()}
-                    data-testid="ask-ai-button"
-                  >
-                    {askQuestionMutation.isPending ? (
-                      <>
-                        <Activity className="w-4 h-4 mr-2 animate-spin" />
-                        Analyzing...
-                      </>
-                    ) : (
-                      <>
-                        <MessageSquare className="w-4 h-4 mr-2" />
-                        Ask AI
-                      </>
-                    )}
-                  </Button>
-                </div>
 
-                {/* Sample Questions */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setQuestion("Which running back will get the most carries on Sunday's morning slate?")}
-                    data-testid="sample-question-carries"
-                  >
-                    RB Carry Analysis
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setQuestion("What are the key injury reports affecting this week's slate?")}
-                    data-testid="sample-question-injuries"
-                  >
-                    Injury Impact Analysis
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setQuestion("Which WR has the best matchup in the all-day slate?")}
-                    data-testid="sample-question-matchups"
-                  >
-                    WR Matchup Analysis
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setQuestion("Analyze usage rates for top RBs this week")}
-                    data-testid="sample-question-usage"
-                  >
-                    Usage Rate Analysis
-                  </Button>
-                </div>
-
-                {/* AI Response */}
-                {askQuestionMutation.data && (
-                  <Card className="bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200" data-testid="ai-response">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-purple-800">
-                        <Brain className="h-4 w-4" />
-                        AI Analysis
-                        <Badge className="ml-auto bg-purple-600">
-                          {((askQuestionMutation.data as any)?.confidence || 85)}% Confidence
-                        </Badge>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div>
-                        <h4 className="font-semibold text-purple-900 mb-2">Answer:</h4>
-                        <p className="text-purple-800">
-                          {((askQuestionMutation.data as any)?.answer) || 'AI analysis completed - see detailed insights below.'}
-                        </p>
-                      </div>
-                      
-                      <div>
-                        <h4 className="font-semibold text-purple-900 mb-2">Analysis:</h4>
-                        <p className="text-purple-700">
-                          {((askQuestionMutation.data as any)?.analysis) || 'Comprehensive analysis based on current NFL data, usage trends, and matchup information.'}
-                        </p>
-                      </div>
-
-                      {(askQuestionMutation.data as any)?.supportingData && (askQuestionMutation.data as any).supportingData.length > 0 && (
-                        <div>
-                          <h4 className="font-semibold text-purple-900 mb-2">Supporting Data:</h4>
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                            {(askQuestionMutation.data as any).supportingData.map((data: any, index: number) => (
-                              <div key={index} className="bg-white/60 p-3 rounded-lg text-center">
-                                <div className="text-sm text-purple-600 font-medium">
-                                  {data.metric || data.player}
-                                </div>
-                                <div className="text-lg font-bold text-purple-900">
-                                  {data.value || data.status}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                )}
-
-                {/* Individual Player Analysis Results */}
-                {playerAnalysis && (
-                  <Card className="bg-gradient-to-r from-blue-50 to-gray-50 border-blue-200" data-testid="player-analysis">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-blue-800">
-                        <User className="h-4 w-4" />
-                        Player Analysis: {playerAnalysis.player}
-                        <Badge className="ml-auto bg-blue-600">
-                          {playerAnalysis.recommendation || 'ANALYSIS'}
-                        </Badge>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div>
-                        <h4 className="font-semibold text-blue-900 mb-2">Analysis:</h4>
-                        <div className="text-blue-800 whitespace-pre-line">
-                          {playerAnalysis.analysis || 'Analysis completed with available data.'}
-                        </div>
-                      </div>
-                      
-                      {playerAnalysis.insights && (
-                        <div>
-                          <h4 className="font-semibold text-blue-900 mb-2">Key Insights:</h4>
-                          <p className="text-blue-700">
-                            {playerAnalysis.insights}
-                          </p>
-                        </div>
-                      )}
-
-                      {playerAnalysis.stats && Object.keys(playerAnalysis.stats).length > 0 && (
-                        <div>
-                          <h4 className="font-semibold text-blue-900 mb-2">Performance Metrics:</h4>
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                            {Object.entries(playerAnalysis.stats).map(([key, value]: [string, any], index: number) => (
-                              <div key={index} className="bg-white/60 p-3 rounded-lg text-center">
-                                <div className="text-sm text-blue-600 font-medium capitalize">
-                                  {key.replace(/([A-Z])/g, ' $1').trim()}
-                                </div>
-                                <div className="text-lg font-bold text-blue-900">
-                                  {value}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      <div className="bg-white/60 p-3 rounded-lg">
-                        <div className="grid grid-cols-2 gap-4 text-sm text-blue-700">
-                          <div>
-                            <strong>Team:</strong> {playerAnalysis.team}<br/>
-                            <strong>Position:</strong> {playerAnalysis.position}
-                          </div>
-                          <div>
-                            <strong>Confidence:</strong> {playerAnalysis.confidence}%<br/>
-                            <strong>Source:</strong> {playerAnalysis.dataSource || 'Analytics Engine'}
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent> */}
-
-          {/* Historical AI Training Tab */}
-          {/* <TabsContent value="historical-ai" className="space-y-4" data-testid="historical-ai-content">
-            <HistoricalAIStatus />
-          </TabsContent> */}
 
           {/* R Analytics Tab - Professional Grade Fantasy Intelligence */}
           <TabsContent value="r-analytics" className="space-y-6" data-testid="r-analytics-content">
@@ -1207,7 +976,7 @@ export default function FantasyCoaching() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Brain className="h-5 w-5" />
+                  <BarChart3 className="h-5 w-5" />
                   Real-Time Game Insights
                 </CardTitle>
                 <CardDescription>
@@ -1216,7 +985,7 @@ export default function FantasyCoaching() {
               </CardHeader>
               <CardContent>
                 <Alert>
-                  <Brain className="h-4 w-4" />
+                  <BarChart3 className="h-4 w-4" />
                   <AlertDescription>
                     Select a live game from the Live Scoring tab to see real-time player statistics, 
                     including insights like "Player X has 3 carries to the left for 45 yards - 
@@ -1227,6 +996,7 @@ export default function FantasyCoaching() {
             </Card>
           </TabsContent>
         </Tabs>
+      </div>
       </div>
     </FantasyAgeGate>
   );
