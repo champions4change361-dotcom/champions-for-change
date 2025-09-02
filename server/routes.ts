@@ -5005,6 +5005,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // AI Training Routes (Hidden Behind Development Flag)
+  if (process.env.NODE_ENV === 'development' && process.env.ENABLE_AI_TRAINING === 'true') {
+    const { AITrainingSystem } = await import('./ai-training');
+    
+    // Admin-only AI training endpoints
+    app.get("/api/admin/ai-training/status", async (req, res) => {
+      res.json({
+        enabled: AITrainingSystem.isTrainingEnabled(),
+        analytics: AITrainingSystem.getTrainingAnalytics()
+      });
+    });
+
+    app.post("/api/admin/ai-training/simulate", async (req, res) => {
+      const { scenario } = req.body;
+      if (!['tournament', 'fantasy', 'coaching'].includes(scenario)) {
+        return res.status(400).json({ error: "Invalid scenario" });
+      }
+      
+      try {
+        const result = await AITrainingSystem.simulateTraining(scenario);
+        res.json({ result });
+      } catch (error) {
+        console.error('Training simulation error:', error);
+        res.status(500).json({ error: "Training simulation failed" });
+      }
+    });
+
+    app.post("/api/admin/ai-training/collect", async (req, res) => {
+      const { input, context, metadata } = req.body;
+      
+      try {
+        const trainingId = await AITrainingSystem.collectTrainingData(input, context, metadata);
+        const response = await AITrainingSystem.generateTrainingResponse(input, context);
+        
+        res.json({
+          trainingId,
+          response: response?.response || "Training response not available",
+          confidence: response?.confidence || 0
+        });
+      } catch (error) {
+        console.error('Training collection error:', error);
+        res.status(500).json({ error: "Training data collection failed" });
+      }
+    });
+
+    app.post("/api/admin/ai-training/feedback", async (req, res) => {
+      const { trainingId, feedback, notes } = req.body;
+      
+      const success = AITrainingSystem.recordFeedback(trainingId, feedback, notes);
+      res.json({ success });
+    });
+
+    app.get("/api/admin/ai-training/export", async (req, res) => {
+      const data = AITrainingSystem.exportTrainingData();
+      res.json({ data, count: data.length });
+    });
+
+    app.delete("/api/admin/ai-training/clear", async (req, res) => {
+      const success = AITrainingSystem.clearTrainingData();
+      res.json({ success });
+    });
+
+    console.log('🎓 AI Training System endpoints enabled (development mode)');
+  }
+
   // Create and return server
   const server = createServer(app);
   return server;

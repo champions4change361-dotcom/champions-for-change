@@ -673,8 +673,7 @@ export default function FantasyCoaching() {
                 )}
               </CardContent>
             </Card>
-          </TabsContent>
-          */}
+          </TabsContent> */
 
           {/* Historical AI Training Tab */}
           {/* <TabsContent value="historical-ai" className="space-y-4" data-testid="historical-ai-content">
