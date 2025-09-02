@@ -215,6 +215,7 @@ function analyzeIntent(message: string): string {
     // Athletic - Individual Sports  
     'track', 'track and field', 'swimming', 'swim', 'diving', 'cross country', 'tennis', 'golf', 'wrestling', 'gymnastics', 
     'archery', 'bowling', 'martial arts', 'karate', 'taekwondo', 'judo', 'mma', 'cycling', 'fencing',
+    'running', 'run', '5k', '5k run', '10k', 'marathon', 'half marathon', 'race', 'fun run', 'charity run',
     
     // Athletic - Winter Sports
     'skiing', 'snowboarding', 'ice hockey', 'figure skating', 'curling',
@@ -297,7 +298,8 @@ function extractContextFromMessage(message: string): any {
     'water polo': ['water polo', 'polo'],
     
     // Individual Sports  
-    'track & field': ['track', 'track and field', 'track meet', 'field day', 'athletics', 'athletics meet', 'running', 'field events'],
+    'track & field': ['track', 'track and field', 'track meet', 'field day', 'athletics', 'athletics meet', 'field events'],
+    'running': ['run', '5k', '5k run', '10k', '10k run', 'marathon', 'half marathon', 'fun run', 'charity run', 'race', 'running event'],
     'swimming & diving': ['swimming', 'swim', 'swim meet', 'swimming meet', 'diving', 'pool', 'aquatic'],
     'cross country': ['cross country', 'xc', 'distance running'],
     'tennis (boys)': ['tennis boys', 'boys tennis', 'male tennis'],
@@ -406,6 +408,15 @@ function generatePlatformResponse(message: string, intent: string, domain: strin
         // Some details missing - ask for what's needed
         return `Perfect! A track and field meet is an excellent choice! 🏃‍♂️\n\n**Track & Field Events I can help you set up:**\n• Running events (100m, 200m, 400m, 800m, 1600m, relays)\n• Field events (shot put, discus, javelin, long jump, high jump)\n• Combined scoring with time/distance tracking\n\n**Quick questions to get started:**\n1. How many teams or individual athletes will participate?\n2. Will this be individual scoring or team-based?\n3. What's your target date for the meet?\n\nI can help you create the perfect structure for your track meet!`;
       }
+    }
+    
+    // Running Events (5K, 10K, marathons, fun runs)
+    if (lowerMessage.includes('run') || lowerMessage.includes('5k') || lowerMessage.includes('10k') || 
+        lowerMessage.includes('marathon') || lowerMessage.includes('race') || lowerMessage.includes('charity run') || 
+        lowerMessage.includes('fun run')) {
+      const isCharity = lowerMessage.includes('charity') || lowerMessage.includes('fundrais') || lowerMessage.includes('cancer') || lowerMessage.includes('awareness');
+      
+      return `What an amazing initiative! ${isCharity ? 'Charity runs are such a beautiful way to bring communities together for a great cause! 💕' : 'Running events are fantastic for bringing communities together! 🏃‍♂️'}\n\n**I can help you organize a professional running event with:**\n• Timing chip integration and results tracking\n• Multiple distance options (5K, 10K, fun run, kids dash)\n• Age group divisions and awards\n• Registration management with online signup\n• Safety coordination and course marshaling\n• ${isCharity ? 'Donation collection and fundraising tools' : 'Participant management and communications'}\n\n**Let's plan your perfect running event:**\n1. What distance(s) are you thinking? (5K, 10K, both?)\n2. How many participants are you hoping to welcome?\n3. ${isCharity ? 'What cause will this support?' : 'Is this a competitive race or more of a fun community event?'}\n4. Do you have a target date and location in mind?\n\n${isCharity ? 'Together we can create an event that makes a real difference! 🌟' : 'Let\'s create a running event your community will love! 🏃‍♀️'}`;
     }
     
     // Academic Competitions (before generic)
