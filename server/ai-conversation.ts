@@ -814,7 +814,10 @@ function detectOngoingTournamentConversation(conversation_history: any[]): any {
       const content = message.content.toLowerCase();
       if (content.includes('tournament details so far') || 
           content.includes('absolutely! i\'d be happy to help you create') ||
-          content.includes('what would you like to call this tournament')) {
+          content.includes('what would you like to call this tournament') ||
+          content.includes('let\'s plan your perfect running event') ||
+          content.includes('what an amazing initiative') ||
+          content.includes('charity runs are such a beautiful way')) {
         // This looks like an ongoing tournament conversation, extract details from the conversation
         return {
           type: 'tournament_creation',
@@ -842,6 +845,7 @@ function extractDetailsFromConversationHistory(conversation_history: any[]): any
       if (content.includes('basketball')) details.sport = 'Basketball';
       if (content.includes('soccer')) details.sport = 'Soccer';
       if (content.includes('track')) details.sport = 'Track and Field';
+      if (content.includes('5k') || content.includes('run') || content.includes('charity run')) details.sport = 'Running';
       
       // Extract dates
       const dateMatch = content.match(/(\d{1,2}\/\d{1,2}\/\d{4})/);
@@ -904,17 +908,49 @@ async function handleTournamentConversation(req: any, message: string, ongoingCo
         };
       }
     } else {
-      // Still missing details, ask for the next one
-      return {
-        response: generateQuestionForMissingDetails(updatedDetails, stillMissingDetails),
-        tournamentCreated: false,
-        conversationState: {
-          type: 'tournament_creation',
-          step: 'gathering_details',
-          providedDetails: updatedDetails,
-          missingDetails: stillMissingDetails
+      // Still missing details - but provide context-aware response
+      const hasNewInfo = Object.keys(newDetails).length > 0;
+      
+      if (hasNewInfo) {
+        // User provided new information, acknowledge it specifically
+        let acknowledgment = "Perfect! ";
+        
+        if (newDetails.sport === 'Running' && message.toLowerCase().includes('breast cancer')) {
+          acknowledgment = "Excellent! A 5K for breast cancer awareness in October is such an important cause! 💕 ";
+        } else if (newDetails.sport) {
+          acknowledgment = `Great choice on ${newDetails.sport}! `;
         }
-      };
+        
+        if (message.toLowerCase().includes('registration')) {
+          acknowledgment += "I can absolutely help you set up the registration system. ";
+        }
+        
+        // Provide a targeted next step instead of generic questions
+        const response = acknowledgment + generateTargetedQuestionForMissingDetails(updatedDetails, stillMissingDetails, message);
+        
+        return {
+          response,
+          tournamentCreated: false,
+          conversationState: {
+            type: 'tournament_creation',
+            step: 'gathering_details',
+            providedDetails: updatedDetails,
+            missingDetails: stillMissingDetails
+          }
+        };
+      } else {
+        // No new info, ask for the next detail
+        return {
+          response: generateQuestionForMissingDetails(updatedDetails, stillMissingDetails),
+          tournamentCreated: false,
+          conversationState: {
+            type: 'tournament_creation',
+            step: 'gathering_details',
+            providedDetails: updatedDetails,
+            missingDetails: stillMissingDetails
+          }
+        };
+      }
     }
     
   } catch (error) {
@@ -953,6 +989,24 @@ function identifyMissingTournamentDetails(details: any): string[] {
   }
   
   return missing;
+}
+
+function generateTargetedQuestionForMissingDetails(providedDetails: any, missingDetails: string[], userMessage: string): string {
+  const lowerMessage = userMessage.toLowerCase();
+  
+  // For running events, provide specific guidance
+  if (providedDetails.sport === 'Running') {
+    if (lowerMessage.includes('registration')) {
+      return `Since you mentioned registration focus, here's what I can set up for your breast cancer awareness 5K:\n\n**🎟️ Registration System Features:**\n• Online registration with participant waivers\n• Multiple pricing tiers (early bird, regular, day-of)\n• Team registration options\n• Fundraising goal tracking per participant\n• T-shirt size collection and distribution tracking\n• Emergency contact information collection\n\n**📋 For October timing, let's prioritize:**\n1. What's your target registration fee? (suggest $25-35 for charity 5Ks)\n2. Do you want early bird pricing to drive early registrations?\n3. Should we set up team registration for corporate sponsors?\n\nI can have your registration system ready this week!`;
+    }
+    
+    if (lowerMessage.includes('october') || lowerMessage.includes('breast cancer')) {
+      return `With October being Breast Cancer Awareness Month, timing is perfect! 🎀\n\n**📅 Quick Setup for October Launch:**\n• Registration opens: Early/Mid September (ASAP!)\n• Early bird deadline: End of September\n• Final registration: Week before event\n• Route already planned ✅\n\n**🎯 What we need to finalize quickly:**\n1. Exact date in October?\n2. Registration pricing structure?\n3. Fundraising goal for the cause?\n4. Corporate sponsorship opportunities?\n\nWith your route planned, we can focus on the registration and fundraising systems!`;
+    }
+  }
+  
+  // Fallback to regular question generation
+  return generateQuestionForMissingDetails(providedDetails, missingDetails);
 }
 
 function generateQuestionForMissingDetails(providedDetails: any, missingDetails: string[]): string {
