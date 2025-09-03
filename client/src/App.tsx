@@ -116,6 +116,7 @@ import SmartSignup from './pages/SmartSignup';
 import { StaffOnboarding } from './components/StaffOnboarding';
 import TournamentRegistration from './pages/TournamentRegistration';
 import DailyFantasyLineup from './pages/DailyFantasyLineup';
+import SnakeDraftCreator from './pages/SnakeDraftCreator';
 
 function AuthenticatedRoutes() {
   const { isFeatureEnabled, isFantasyDomain, config } = useDomain();
@@ -194,6 +195,11 @@ function AuthenticatedRoutes() {
         {/* Daily Fantasy Lineup Builder */}
         {isFeatureEnabled('fantasyLeagues') && (
           <Route path="/fantasy/league/:leagueId/lineup" component={DailyFantasyLineup} />
+        )}
+        
+        {/* Fantasy League Creators */}
+        {isFeatureEnabled('fantasyLeagues') && (
+          <Route path="/fantasy/create/snake_draft" component={SnakeDraftCreator} />
         )}
         
         {/* Coaches Lounge Landing for fantasy domains */}
