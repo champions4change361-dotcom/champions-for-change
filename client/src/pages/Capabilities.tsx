@@ -262,24 +262,6 @@ export default function Capabilities() {
               </CardContent>
             </Card>
 
-            {/* AI Integration */}
-            <Card className="bg-slate-800 border-slate-700">
-              <CardHeader>
-                <div className="w-10 h-10 bg-cyan-500/20 rounded-lg flex items-center justify-center mb-3">
-                  <Brain className="h-5 w-5 text-cyan-400" />
-                </div>
-                <CardTitle className="text-cyan-400">AI Integration</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-sm text-slate-300">
-                  <li>• AI assistant on all forms</li>
-                  <li>• Predictive analytics</li>
-                  <li>• Automated recommendations</li>
-                  <li>• Natural language queries</li>
-                  <li>• Smart data entry</li>
-                </ul>
-              </CardContent>
-            </Card>
           </div>
         </div>
 

@@ -39,7 +39,6 @@ type FormData = z.infer<typeof formSchema>;
 interface EnhancedTournamentWizardProps {
   onClose?: () => void;
   onTournamentCreated?: (tournament: any) => void;
-  aiRecommendations?: any;
   userType?: 'district' | 'enterprise' | 'free' | 'general';
 }
 
@@ -61,8 +60,7 @@ const stepDescriptions = {
 
 export default function EnhancedTournamentWizard({ 
   onClose, 
-  onTournamentCreated, 
-  aiRecommendations,
+  onTournamentCreated,
   userType = 'general'
 }: EnhancedTournamentWizardProps) {
   const { toast } = useToast();
@@ -221,48 +219,6 @@ export default function EnhancedTournamentWizard({
     },
   });
 
-  // Apply AI recommendations when component mounts
-  useEffect(() => {
-    if (aiRecommendations && sports.length > 0) {
-      const { name, sport, format, age_group, gender_division, teamSize } = aiRecommendations;
-      
-      if (sport) {
-        const matchingSport = sports.find(s => 
-          s.sportName === sport || 
-          s.sportName.toLowerCase().includes(sport.toLowerCase()) ||
-          sport.toLowerCase().includes(s.sportName.toLowerCase())
-        );
-        if (matchingSport) {
-          form.setValue("sport", matchingSport.sportName);
-        }
-      }
-      
-      if (format) {
-        form.setValue("competitionFormat", format);
-        if (format === "bracket") form.setValue("tournamentType", "single");
-        else if (format === "leaderboard") form.setValue("tournamentType", "round-robin");
-      }
-      
-      if (age_group && age_group !== "All Ages") form.setValue("ageGroup", age_group);
-      if (gender_division) form.setValue("genderDivision", gender_division);
-      if (teamSize) {
-        // Clamp to valid range and use the provided value directly
-        const clampedSize = Math.max(2, Math.min(128, teamSize));
-        form.setValue("teamSize", clampedSize);
-      }
-      
-      // Use provided name or auto-generate tournament name
-      if (name) {
-        form.setValue("name", name);
-      } else {
-        const sportName = sport || "Championship";
-        const agePart = age_group && age_group !== "All Ages" ? `${age_group} ` : "";
-        const genderPart = gender_division && gender_division !== "Mixed" ? `${gender_division} ` : "";
-        const autoName = `${agePart}${genderPart}${sportName} Tournament`;
-        form.setValue("name", autoName);
-      }
-    }
-  }, [aiRecommendations, sports, form]);
 
   // Auto-save functionality
   useEffect(() => {

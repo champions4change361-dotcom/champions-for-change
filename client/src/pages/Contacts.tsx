@@ -701,7 +701,7 @@ export default function Contacts() {
                     <ul className="mt-2 ml-4 space-y-1">
                       <li>• <strong>Tax Benefits:</strong> 100% business expense deduction + CSR benefits</li>
                       <li>• <strong>More Sports:</strong> 65+ sports vs Jersey Watch's 15</li>
-                      <li>• <strong>AI Features:</strong> Tournament generation and consultation</li>
+                      <li>• <strong>Advanced Features:</strong> Tournament management and reporting</li>
                       <li>• <strong>Educational Mission:</strong> Revenue funds student trips in Corpus Christi, TX</li>
                       <li>• <strong>Better Pricing:</strong> Foundation $79, Champion $199, Enterprise $499</li>
                     </ul>

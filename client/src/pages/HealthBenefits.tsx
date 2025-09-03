@@ -228,24 +228,6 @@ export default function HealthBenefits() {
           </h2>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <Card data-testid="card-ai-monitoring">
-              <CardHeader>
-                <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-full w-fit mb-4">
-                  <Brain className="h-8 w-8 text-blue-600 dark:text-blue-400" />
-                </div>
-                <CardTitle>AI-Powered Health Analytics</CardTitle>
-                <CardDescription>Smart predictive health monitoring</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
-                  <li>• Concussion risk prediction algorithms</li>
-                  <li>• Impact load analysis and warnings</li>
-                  <li>• Fatigue pattern recognition</li>
-                  <li>• Recovery time optimization</li>
-                  <li>• Performance trend analysis</li>
-                </ul>
-              </CardContent>
-            </Card>
 
             <Card data-testid="card-real-time-alerts">
               <CardHeader>

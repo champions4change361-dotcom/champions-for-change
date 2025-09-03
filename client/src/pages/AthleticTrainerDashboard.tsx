@@ -49,12 +49,12 @@ export default function AthleticTrainerDashboard() {
   const [selectedAthlete, setSelectedAthlete] = useState(null);
   const [showAddAthlete, setShowAddAthlete] = useState(false);
   const [showMessageComposer, setShowMessageComposer] = useState(false);
-  const [showAIConsultant, setShowAIConsultant] = useState(false);
+  const [showConsultant, setShowConsultant] = useState(false);
   const [showCheerInjuryAssessment, setShowCheerInjuryAssessment] = useState(false);
   const [showOrgChartBuilder, setShowOrgChartBuilder] = useState(false);
   const [showVideoAnalysis, setShowVideoAnalysis] = useState(false);
   const [showSocialHub, setShowSocialHub] = useState(false);
-  const [aiConsultation, setAiConsultation] = useState({
+  const [consultation, setConsultation] = useState({
     athleteName: '',
     sport: '',
     injuryLocation: '',
@@ -150,7 +150,7 @@ export default function AthleticTrainerDashboard() {
           </div>
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
             <Button 
-              onClick={() => setShowAIConsultant(true)}
+              onClick={() => setShowConsultant(true)}
               className="bg-purple-600 hover:bg-purple-700 text-sm"
               size="sm"
               data-testid="button-ai-consultant"
@@ -1287,8 +1287,8 @@ export default function AthleticTrainerDashboard() {
           </TabsContent>
         </Tabs>
 
-        {/* AI Injury Consultation Modal */}
-        {showAIConsultant && (
+        {/* Injury Consultation Modal */}
+        {showConsultant && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[9998]">
             <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
               <div className="p-6 border-b border-gray-200">
@@ -1304,7 +1304,7 @@ export default function AthleticTrainerDashboard() {
                   </div>
                   <Button 
                     variant="ghost" 
-                    onClick={() => setShowAIConsultant(false)}
+                    onClick={() => setShowConsultant(false)}
                     data-testid="button-close-ai-consultant"
                   >
                     ×
@@ -1321,8 +1321,8 @@ export default function AthleticTrainerDashboard() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Athlete Name</label>
                       <Input
-                        value={aiConsultation.athleteName}
-                        onChange={(e) => setAiConsultation(prev => ({ ...prev, athleteName: e.target.value }))}
+                        value={consultation.athleteName}
+                        onChange={(e) => setConsultation(prev => ({ ...prev, athleteName: e.target.value }))}
                         placeholder="Enter athlete's name"
                         data-testid="input-athlete-name"
                       />
@@ -1331,8 +1331,8 @@ export default function AthleticTrainerDashboard() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Sport/Activity</label>
                       <select
-                        value={aiConsultation.sport || ''}
-                        onChange={(e) => setAiConsultation(prev => ({ ...prev, sport: e.target.value }))}
+                        value={consultation.sport || ''}
+                        onChange={(e) => setConsultation(prev => ({ ...prev, sport: e.target.value }))}
                         className="w-full p-3 border-2 border-gray-300 rounded-md focus:border-blue-500 focus:outline-none bg-white"
                         data-testid="select-sport-consultation"
                       >
@@ -1356,8 +1356,8 @@ export default function AthleticTrainerDashboard() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Injury Location</label>
                       <select
-                        value={aiConsultation.injuryLocation || ''}
-                        onChange={(e) => setAiConsultation(prev => ({ ...prev, injuryLocation: e.target.value }))}
+                        value={consultation.injuryLocation || ''}
+                        onChange={(e) => setConsultation(prev => ({ ...prev, injuryLocation: e.target.value }))}
                         className="w-full p-3 border-2 border-gray-300 rounded-md focus:border-blue-500 focus:outline-none bg-white"
                         data-testid="select-injury-location"
                       >
@@ -1380,8 +1380,8 @@ export default function AthleticTrainerDashboard() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Pain Level (1-10)</label>
                       <select
-                        value={aiConsultation.painLevel || ''}
-                        onChange={(e) => setAiConsultation(prev => ({ ...prev, painLevel: e.target.value }))}
+                        value={consultation.painLevel || ''}
+                        onChange={(e) => setConsultation(prev => ({ ...prev, painLevel: e.target.value }))}
                         className="w-full p-3 border-2 border-gray-300 rounded-md focus:border-blue-500 focus:outline-none bg-white"
                         data-testid="select-pain-level"
                       >
@@ -1406,8 +1406,8 @@ export default function AthleticTrainerDashboard() {
                           <label className="block text-xs text-gray-600 mb-1">Date</label>
                           <Input
                             type="date"
-                            value={aiConsultation.injuryDate || ''}
-                            onChange={(e) => setAiConsultation(prev => ({ ...prev, injuryDate: e.target.value }))}
+                            value={consultation.injuryDate || ''}
+                            onChange={(e) => setConsultation(prev => ({ ...prev, injuryDate: e.target.value }))}
                             className="w-full border-2 border-gray-300 focus:border-blue-500"
                             data-testid="input-injury-date"
                           />
@@ -1416,8 +1416,8 @@ export default function AthleticTrainerDashboard() {
                           <label className="block text-xs text-gray-600 mb-1">Time</label>
                           <Input
                             type="time"
-                            value={aiConsultation.injuryTime || ''}
-                            onChange={(e) => setAiConsultation(prev => ({ ...prev, injuryTime: e.target.value }))}
+                            value={consultation.injuryTime || ''}
+                            onChange={(e) => setConsultation(prev => ({ ...prev, injuryTime: e.target.value }))}
                             className="w-full border-2 border-gray-300 focus:border-blue-500"
                             data-testid="input-injury-time"
                           />
@@ -1428,8 +1428,8 @@ export default function AthleticTrainerDashboard() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Onset Pattern</label>
                       <select
-                        value={aiConsultation.onset || ''}
-                        onChange={(e) => setAiConsultation(prev => ({ ...prev, onset: e.target.value }))}
+                        value={consultation.onset || ''}
+                        onChange={(e) => setConsultation(prev => ({ ...prev, onset: e.target.value }))}
                         className="w-full p-3 border-2 border-gray-300 rounded-md focus:border-blue-500 focus:outline-none bg-white"
                         data-testid="select-onset"
                       >
@@ -1443,8 +1443,8 @@ export default function AthleticTrainerDashboard() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Mechanism of Injury</label>
                       <select
-                        value={aiConsultation.mechanism || ''}
-                        onChange={(e) => setAiConsultation(prev => ({ ...prev, mechanism: e.target.value }))}
+                        value={consultation.mechanism || ''}
+                        onChange={(e) => setConsultation(prev => ({ ...prev, mechanism: e.target.value }))}
                         className="w-full p-3 border-2 border-gray-300 rounded-md focus:border-blue-500 focus:outline-none bg-white"
                         data-testid="select-mechanism"
                       >
@@ -1460,8 +1460,8 @@ export default function AthleticTrainerDashboard() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Current Activity Level</label>
                       <select
-                        value={aiConsultation.currentActivity || ''}
-                        onChange={(e) => setAiConsultation(prev => ({ ...prev, currentActivity: e.target.value }))}
+                        value={consultation.currentActivity || ''}
+                        onChange={(e) => setConsultation(prev => ({ ...prev, currentActivity: e.target.value }))}
                         className="w-full p-3 border-2 border-gray-300 rounded-md focus:border-blue-500 focus:outline-none bg-white"
                         data-testid="select-activity-level"
                       >
@@ -1476,8 +1476,8 @@ export default function AthleticTrainerDashboard() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Symptoms</label>
                       <Textarea
-                        value={aiConsultation.symptoms}
-                        onChange={(e) => setAiConsultation(prev => ({ ...prev, symptoms: e.target.value }))}
+                        value={consultation.symptoms}
+                        onChange={(e) => setConsultation(prev => ({ ...prev, symptoms: e.target.value }))}
                         placeholder="Describe symptoms: pain during throwing, stiffness, weakness, swelling, etc."
                         className="min-h-[80px]"
                         data-testid="textarea-symptoms"
@@ -1487,8 +1487,8 @@ export default function AthleticTrainerDashboard() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Previous Injuries</label>
                       <Textarea
-                        value={aiConsultation.previousInjuries}
-                        onChange={(e) => setAiConsultation(prev => ({ ...prev, previousInjuries: e.target.value }))}
+                        value={consultation.previousInjuries}
+                        onChange={(e) => setConsultation(prev => ({ ...prev, previousInjuries: e.target.value }))}
                         placeholder="Any previous injuries to this area or related areas"
                         className="min-h-[60px]"
                         data-testid="textarea-previous-injuries"
@@ -1498,13 +1498,13 @@ export default function AthleticTrainerDashboard() {
                 </div>
 
                 {/* AI Recommendations */}
-                {aiConsultation.injuryLocation && aiConsultation.sport && (
+                {consultation.injuryLocation && consultation.sport && (
                   <div className="border-t pt-6">
                     <h3 className="font-semibold text-lg text-gray-900 mb-4">AI-Powered Assessment & Recommendations</h3>
                     
                     {/* Comprehensive Injury-Specific AI Recommendations */}
-                    {((aiConsultation.injuryLocation === 'shoulder' || aiConsultation.injuryLocation === 'elbow') && 
-                     ['baseball', 'softball', 'tennis', 'volleyball', 'track_throwing', 'football'].includes(aiConsultation.sport)) && (
+                    {((consultation.injuryLocation === 'shoulder' || consultation.injuryLocation === 'elbow') && 
+                     ['baseball', 'softball', 'tennis', 'volleyball', 'track_throwing', 'football'].includes(consultation.sport)) && (
                       <div className="space-y-4">
                         <div className="bg-purple-50 p-4 rounded-lg">
                           <div className="flex items-start space-x-3">
@@ -1512,7 +1512,7 @@ export default function AthleticTrainerDashboard() {
                             <div>
                               <h4 className="font-medium text-purple-900">Throwing Athlete Assessment</h4>
                               <p className="text-sm text-purple-700 mt-1">
-                                Based on current research for {aiConsultation.injuryLocation} injuries in {aiConsultation.sport} athletes.
+                                Based on current research for {consultation.injuryLocation} injuries in {consultation.sport} athletes.
                               </p>
                             </div>
                           </div>
@@ -1527,7 +1527,7 @@ export default function AthleticTrainerDashboard() {
                               </CardTitle>
                             </CardHeader>
                             <CardContent className="pt-0 text-sm space-y-2">
-                              {aiConsultation.injuryLocation === 'shoulder' ? (
+                              {consultation.injuryLocation === 'shoulder' ? (
                                 <>
                                   <p>• Perform Athletic Shoulder Test (AST)</p>
                                   <p>• Check passive/active range of motion</p>
@@ -1555,7 +1555,7 @@ export default function AthleticTrainerDashboard() {
                               </CardTitle>
                             </CardHeader>
                             <CardContent className="pt-0 text-sm space-y-2">
-                              {aiConsultation.injuryLocation === 'shoulder' ? (
+                              {consultation.injuryLocation === 'shoulder' ? (
                                 <>
                                   <p>• Begin with pain-free range of motion</p>
                                   <p>• Progress to rotator cuff strengthening</p>
@@ -1611,7 +1611,7 @@ export default function AthleticTrainerDashboard() {
                     )}
 
                     {/* ACL Injury Assessment - 96% AI Diagnostic Accuracy */}
-                    {aiConsultation.injuryLocation === 'knee' && aiConsultation.mechanism === 'non_contact' && (
+                    {consultation.injuryLocation === 'knee' && consultation.mechanism === 'non_contact' && (
                       <div className="space-y-4">
                         <div className="bg-red-50 p-4 rounded-lg border-l-4 border-red-500">
                           <div className="flex items-start space-x-3">
@@ -1619,7 +1619,7 @@ export default function AthleticTrainerDashboard() {
                             <div>
                               <h4 className="font-medium text-red-900">High ACL Injury Risk - Non-Contact Mechanism</h4>
                               <p className="text-sm text-red-700 mt-1">
-                                AI models show 96% accuracy in ACL tear detection. Non-contact mechanism in {aiConsultation.sport} significantly increases ACL injury probability.
+                                Research shows 96% accuracy in ACL tear detection patterns. Non-contact mechanism in {consultation.sport} significantly increases ACL injury probability.
                               </p>
                             </div>
                           </div>
@@ -1680,7 +1680,7 @@ export default function AthleticTrainerDashboard() {
                     )}
 
                     {/* Ankle Injury Assessment - AI Biomechanical Analysis */}
-                    {aiConsultation.injuryLocation === 'ankle' && (
+                    {consultation.injuryLocation === 'ankle' && (
                       <div className="space-y-4">
                         <div className="bg-blue-50 p-4 rounded-lg">
                           <div className="flex items-start space-x-3">
@@ -1733,8 +1733,8 @@ export default function AthleticTrainerDashboard() {
                     )}
 
                     {/* Concussion Management - 95% AI Prediction Accuracy */}
-                    {aiConsultation.injuryLocation === 'neck' || aiConsultation.symptoms.toLowerCase().includes('head') || 
-                     aiConsultation.symptoms.toLowerCase().includes('concussion') && (
+                    {consultation.injuryLocation === 'neck' || consultation.symptoms.toLowerCase().includes('head') || 
+                     consultation.symptoms.toLowerCase().includes('concussion') && (
                       <div className="space-y-4">
                         <div className="bg-red-50 p-4 rounded-lg border-l-4 border-red-500">
                           <div className="flex items-start space-x-3">
@@ -1803,8 +1803,8 @@ export default function AthleticTrainerDashboard() {
                     )}
 
                     {/* Hamstring Injury - AI Prediction Models */}
-                    {(aiConsultation.injuryLocation === 'hip' && aiConsultation.symptoms.toLowerCase().includes('hamstring')) ||
-                     (aiConsultation.mechanism === 'overuse' && ['track_throwing', 'football', 'basketball'].includes(aiConsultation.sport)) && (
+                    {(consultation.injuryLocation === 'hip' && consultation.symptoms.toLowerCase().includes('hamstring')) ||
+                     (consultation.mechanism === 'overuse' && ['track_throwing', 'football', 'basketball'].includes(consultation.sport)) && (
                       <div className="space-y-4">
                         <div className="bg-yellow-50 p-4 rounded-lg">
                           <div className="flex items-start space-x-3">
@@ -1857,7 +1857,7 @@ export default function AthleticTrainerDashboard() {
                     )}
 
                     {/* Back/Spine Injury Assessment */}
-                    {aiConsultation.injuryLocation === 'lower_back' && (
+                    {consultation.injuryLocation === 'lower_back' && (
                       <div className="space-y-4">
                         <div className="bg-indigo-50 p-4 rounded-lg">
                           <div className="flex items-start space-x-3">
@@ -1926,7 +1926,7 @@ export default function AthleticTrainerDashboard() {
                     )}
 
                     {/* Hip Injury Assessment */}
-                    {aiConsultation.injuryLocation === 'hip' && !aiConsultation.symptoms.toLowerCase().includes('hamstring') && (
+                    {consultation.injuryLocation === 'hip' && !consultation.symptoms.toLowerCase().includes('hamstring') && (
                       <div className="space-y-4">
                         <div className="bg-teal-50 p-4 rounded-lg">
                           <div className="flex items-start space-x-3">
@@ -1979,7 +1979,7 @@ export default function AthleticTrainerDashboard() {
                     )}
 
                     {/* Cheerleading-Specific Injury Assessment */}
-                    {aiConsultation.sport === 'cheerleading' && (
+                    {consultation.sport === 'cheerleading' && (
                       <div className="space-y-4">
                         <div className="bg-purple-50 p-4 rounded-lg border-l-4 border-purple-500">
                           <div className="flex items-start space-x-3">
@@ -1987,10 +1987,10 @@ export default function AthleticTrainerDashboard() {
                             <div>
                               <h4 className="font-medium text-purple-900">Cheerleading Injury Protocol</h4>
                               <p className="text-sm text-purple-700 mt-1">
-                                Evidence-based assessment for {aiConsultation.injuryLocation} injuries in cheerleading athletes. 
-                                {aiConsultation.injuryLocation === 'ankle' && 'Ankle injuries represent 44.9% of all cheerleading injuries.'}
-                                {aiConsultation.injuryLocation === 'neck' && '96% of concussions in cheerleading occur during stunting.'}
-                                {aiConsultation.injuryLocation === 'wrist' && 'Wrist injuries common in tumbling and landing activities.'}
+                                Evidence-based assessment for {consultation.injuryLocation} injuries in cheerleading athletes. 
+                                {consultation.injuryLocation === 'ankle' && 'Ankle injuries represent 44.9% of all cheerleading injuries.'}
+                                {consultation.injuryLocation === 'neck' && '96% of concussions in cheerleading occur during stunting.'}
+                                {consultation.injuryLocation === 'wrist' && 'Wrist injuries common in tumbling and landing activities.'}
                               </p>
                             </div>
                           </div>
@@ -2005,7 +2005,7 @@ export default function AthleticTrainerDashboard() {
                               </CardTitle>
                             </CardHeader>
                             <CardContent className="pt-0 text-sm space-y-2">
-                              {aiConsultation.injuryLocation === 'ankle' && (
+                              {consultation.injuryLocation === 'ankle' && (
                                 <>
                                   <p>• Most common cheerleading injury (44.9%)</p>
                                   <p>• Assess landing mechanics from jumps/tumbling</p>
@@ -2014,7 +2014,7 @@ export default function AthleticTrainerDashboard() {
                                   <p>• Ottawa Ankle Rules for fracture screening</p>
                                 </>
                               )}
-                              {aiConsultation.injuryLocation === 'neck' && (
+                              {consultation.injuryLocation === 'neck' && (
                                 <>
                                   <p>• 96% of cheer concussions occur during stunts</p>
                                   <p>• Assess stunt partner collision history</p>
@@ -2023,7 +2023,7 @@ export default function AthleticTrainerDashboard() {
                                   <p>• Check for delayed symptom presentation</p>
                                 </>
                               )}
-                              {aiConsultation.injuryLocation === 'wrist' && (
+                              {consultation.injuryLocation === 'wrist' && (
                                 <>
                                   <p>• Common in tumbling and floor routines</p>
                                   <p>• Assess weight-bearing tolerance</p>
@@ -2032,7 +2032,7 @@ export default function AthleticTrainerDashboard() {
                                   <p>• Scaphoid fracture screening</p>
                                 </>
                               )}
-                              {aiConsultation.injuryLocation === 'shoulder' && (
+                              {consultation.injuryLocation === 'shoulder' && (
                                 <>
                                   <p>• Often from tumbling or stunt positioning</p>
                                   <p>• Assess overhead motion capability</p>
@@ -2041,7 +2041,7 @@ export default function AthleticTrainerDashboard() {
                                   <p>• Test for labral tear signs</p>
                                 </>
                               )}
-                              {aiConsultation.injuryLocation === 'knee' && (
+                              {consultation.injuryLocation === 'knee' && (
                                 <>
                                   <p>• Landing injuries from jumps/dismounts</p>
                                   <p>• ACL risk higher in cheerleading</p>
@@ -2050,7 +2050,7 @@ export default function AthleticTrainerDashboard() {
                                   <p>• Evaluate jump landing mechanics</p>
                                 </>
                               )}
-                              {aiConsultation.injuryLocation === 'lower_back' && (
+                              {consultation.injuryLocation === 'lower_back' && (
                                 <>
                                   <p>• Hyperextension from tumbling/stunts</p>
                                   <p>• Check for spondylolisthesis risk</p>
@@ -2117,7 +2117,7 @@ export default function AthleticTrainerDashboard() {
                     )}
 
                     {/* Dance Team Injury Assessment */}
-                    {aiConsultation.sport === 'dance_team' && (
+                    {consultation.sport === 'dance_team' && (
                       <div className="space-y-4">
                         <div className="bg-pink-50 p-4 rounded-lg border-l-4 border-pink-500">
                           <div className="flex items-start space-x-3">
@@ -2170,17 +2170,17 @@ export default function AthleticTrainerDashboard() {
                     )}
 
                     {/* Color Guard/Marching Band Assessment */}
-                    {(aiConsultation.sport === 'color_guard' || aiConsultation.sport === 'marching_band') && (
+                    {(consultation.sport === 'color_guard' || consultation.sport === 'marching_band') && (
                       <div className="space-y-4">
                         <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
                           <div className="flex items-start space-x-3">
                             <Heart className="h-5 w-5 text-blue-600 mt-1" />
                             <div>
                               <h4 className="font-medium text-blue-900">
-                                {aiConsultation.sport === 'color_guard' ? 'Color Guard' : 'Marching Band'} Injury Protocol
+                                {consultation.sport === 'color_guard' ? 'Color Guard' : 'Marching Band'} Injury Protocol
                               </h4>
                               <p className="text-sm text-blue-700 mt-1">
-                                Assessment protocols for {aiConsultation.sport === 'color_guard' ? 'flag/rifle/saber work' : 'instrument-related and marching injuries'}.
+                                Assessment protocols for {consultation.sport === 'color_guard' ? 'flag/rifle/saber work' : 'instrument-related and marching injuries'}.
                               </p>
                             </div>
                           </div>
@@ -2195,7 +2195,7 @@ export default function AthleticTrainerDashboard() {
                               </CardTitle>
                             </CardHeader>
                             <CardContent className="pt-0 text-sm space-y-2">
-                              {aiConsultation.sport === 'color_guard' ? (
+                              {consultation.sport === 'color_guard' ? (
                                 <>
                                   <p>• Shoulder and rotator cuff evaluation</p>
                                   <p>• Wrist and forearm strength testing</p>
@@ -2236,19 +2236,19 @@ export default function AthleticTrainerDashboard() {
                     )}
 
                     {/* General Evidence-Based Recommendations */}
-                    {!['knee', 'ankle', 'neck', 'hip', 'lower_back'].includes(aiConsultation.injuryLocation) && 
-                     !['cheerleading', 'dance_team', 'color_guard', 'marching_band'].includes(aiConsultation.sport) && (
+                    {!['knee', 'ankle', 'neck', 'hip', 'lower_back'].includes(consultation.injuryLocation) && 
+                     !['cheerleading', 'dance_team', 'color_guard', 'marching_band'].includes(consultation.sport) && (
                       <div className="bg-gray-50 p-4 rounded-lg">
                         <div className="flex items-start space-x-3">
                           <Brain className="h-5 w-5 text-gray-600 mt-1" />
                           <div>
-                            <h4 className="font-medium text-gray-900">Evidence-Based {aiConsultation.injuryLocation.charAt(0).toUpperCase() + aiConsultation.injuryLocation.slice(1)} Assessment</h4>
+                            <h4 className="font-medium text-gray-900">Evidence-Based {consultation.injuryLocation.charAt(0).toUpperCase() + consultation.injuryLocation.slice(1)} Assessment</h4>
                             <p className="text-sm text-gray-700 mt-2">
-                              For {aiConsultation.injuryLocation} injuries in {aiConsultation.sport} athletes:
+                              For {consultation.injuryLocation} injuries in {consultation.sport} athletes:
                             </p>
                             <ul className="text-sm text-gray-700 mt-2 space-y-1">
                               <li>• Comprehensive injury assessment using validated clinical tests</li>
-                              <li>• Evidence-based rehabilitation protocols specific to {aiConsultation.sport}</li>
+                              <li>• Evidence-based rehabilitation protocols specific to {consultation.sport}</li>
                               <li>• AI-monitored progress tracking and outcome measures</li>
                               <li>• Sport-specific return-to-play criteria</li>
                               <li>• Physician consultation for persistent or severe symptoms</li>
@@ -2264,7 +2264,7 @@ export default function AthleticTrainerDashboard() {
                 <div className="flex justify-between pt-4">
                   <Button 
                     variant="outline"
-                    onClick={() => setAiConsultation({
+                    onClick={() => setConsultation({
                       athleteName: '',
                       sport: '',
                       injuryLocation: '',

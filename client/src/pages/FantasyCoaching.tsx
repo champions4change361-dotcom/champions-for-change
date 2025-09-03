@@ -853,7 +853,7 @@ export default function FantasyCoaching() {
                   Your Lineup Analysis
                 </CardTitle>
                 <CardDescription>
-                  AI-powered coaching for your fantasy lineup with player-specific insights
+                  Professional coaching for your fantasy lineup with player-specific insights
                 </CardDescription>
               </CardHeader>
               <CardContent>

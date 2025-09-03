@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'wouter';
-import { ArrowLeft, Zap, Users, Trophy, Settings, Sparkles, LogOut, Brain, FileText, MessageCircle, Send, Bot } from 'lucide-react';
+import { ArrowLeft, Zap, Users, Trophy, Settings, Sparkles, LogOut, FileText, MessageCircle, Send } from 'lucide-react';
 import { useAuth } from "@/hooks/useAuth";
 import EnhancedTournamentWizard from '@/components/enhanced-tournament-wizard';
 // Removed old AI consultation component - using integrated chat AI instead
@@ -40,60 +40,7 @@ function TournamentCreationPlaceholder() {
 
 export default function CreateTournament() {
   const { user } = useAuth();
-  const [creationMode, setCreationMode] = useState<'menu' | 'wizard' | 'ai'>('menu');
-  const [aiRecommendations, setAiRecommendations] = useState<any>(null);
-
-  // Check for URL parameters from AI consultant
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const fromAI = urlParams.get('fromAI');
-    const consultationComplete = urlParams.get('consultationComplete');
-    
-    // New flow: Check if coming from AI consultation with sessionStorage
-    if (fromAI === 'true' && consultationComplete === 'true') {
-      const storedRecommendations = sessionStorage.getItem('aiRecommendations');
-      if (storedRecommendations) {
-        const recommendations = JSON.parse(storedRecommendations);
-        setAiRecommendations(recommendations);
-        setCreationMode('wizard');
-        // Clear the stored recommendations
-        sessionStorage.removeItem('aiRecommendations');
-        return;
-      }
-    }
-    
-    // Legacy flow: URL parameters from AI consultant
-    const fromConsultant = urlParams.get('fromConsultant');
-    if (fromConsultant === 'true') {
-      const name = urlParams.get('name');
-      const sport = urlParams.get('sport');
-      const participants = urlParams.get('participants');
-      const goals = urlParams.get('goals');
-      const budget = urlParams.get('budget');
-      const features = urlParams.get('features');
-      const complexity = urlParams.get('complexity');
-      
-      // Set AI recommendations based on URL parameters
-      setAiRecommendations({
-        name,
-        sport,
-        participantCount: participants,
-        goals,
-        budget,
-        features: features ? JSON.parse(features) : null,
-        complexity,
-        fromConsultant: true
-      });
-      
-      // Go directly to wizard mode
-      setCreationMode('wizard');
-    }
-  }, []);
-
-  const handleAiRecommendations = (recommendations: any) => {
-    setAiRecommendations(recommendations);
-    setCreationMode('wizard');
-  };
+  const [creationMode, setCreationMode] = useState<'menu' | 'wizard'>('menu');
 
   const handleTournamentCreated = (tournament: any) => {
     // Tournament created successfully
@@ -144,7 +91,6 @@ export default function CreateTournament() {
           <EnhancedTournamentWizard
             onClose={() => setCreationMode('menu')}
             onTournamentCreated={handleTournamentCreated}
-            aiRecommendations={aiRecommendations}
             userType={getUserType()}
           />
         </main>
@@ -152,43 +98,6 @@ export default function CreateTournament() {
     );
   }
 
-  if (creationMode === 'ai') {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
-        <header className="relative border-b border-yellow-500/20 bg-slate-900/80 backdrop-blur-sm">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              <div className="flex items-center space-x-3">
-                <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
-                  <div className="bg-gradient-to-br from-yellow-400 to-yellow-600 p-2 rounded-lg shadow-lg">
-                    <Trophy className="h-6 w-6 text-slate-900" />
-                  </div>
-                  <div>
-                    <h1 className="text-xl font-bold text-white">Champions Arena</h1>
-                    <p className="text-xs text-yellow-400">Tournament Creator</p>
-                  </div>
-                </Link>
-              </div>
-              
-              <div className="flex items-center space-x-4">
-                <button
-                  onClick={() => setCreationMode('menu')}
-                  className="flex items-center text-slate-300 hover:text-yellow-400 transition-colors"
-                >
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back to Options
-                </button>
-              </div>
-            </div>
-          </div>
-        </header>
-        
-        <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <TournamentCreationPlaceholder />
-        </main>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
@@ -241,36 +150,11 @@ export default function CreateTournament() {
         </div>
 
         {/* Tournament Creation Options - Mobile optimized */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* AI Tournament Consultation */}
-          <div 
-            onClick={() => setCreationMode('ai')}
-            className="bg-slate-800 border border-purple-500/30 rounded-2xl p-8 hover:border-purple-400/50 transition-all cursor-pointer group"
-          >
-            <div className="text-center">
-              <div className="w-16 h-16 bg-purple-500/20 rounded-xl flex items-center justify-center mx-auto mb-6 group-hover:bg-purple-500/30 transition-colors">
-                <Brain className="h-8 w-8 text-purple-400" />
-              </div>
-              <h3 className="text-2xl font-bold text-white mb-4">AI Tournament Consultation</h3>
-              <p className="text-slate-400 mb-6">
-                Get personalized tournament recommendations from our 3-tier AI system. 
-                Perfect for getting sport-specific guidance and optimal tournament structures.
-              </p>
-              <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4 mb-6">
-                <p className="text-purple-400 text-sm font-medium">
-                  "I want to create a middle school basketball tournament for 16 teams"
-                </p>
-              </div>
-              <button className="w-full bg-purple-500 hover:bg-purple-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors">
-                Get AI Recommendations
-              </button>
-            </div>
-          </div>
-
+        <div className="flex justify-center mb-8">
           {/* 5-Step Tournament Wizard */}
           <div 
             onClick={() => setCreationMode('wizard')}
-            className="bg-slate-800 border border-blue-500/30 rounded-2xl p-8 hover:border-blue-400/50 transition-all cursor-pointer group"
+            className="bg-slate-800 border border-blue-500/30 rounded-2xl p-8 hover:border-blue-400/50 transition-all cursor-pointer group max-w-md w-full"
           >
             <div className="text-center">
               <div className="w-16 h-16 bg-blue-500/20 rounded-xl flex items-center justify-center mx-auto mb-6 group-hover:bg-blue-500/30 transition-colors">
@@ -291,7 +175,7 @@ export default function CreateTournament() {
                 </div>
               </div>
               <button className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors">
-                Start 5-Step Creator
+                Create Tournament
               </button>
             </div>
           </div>

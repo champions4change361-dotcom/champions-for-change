@@ -735,36 +735,6 @@ export default function OrganizationRegistration() {
             </Card>
           </div>
 
-          {/* AI Assistant Feature Highlight */}
-          <div className="mt-12">
-            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6 max-w-4xl mx-auto">
-              <div className="flex items-center justify-center gap-2 mb-3">
-                <Target className="h-5 w-5 text-blue-600" />
-                <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100">AI-Powered Platform Intelligence</h3>
-                <Target className="h-5 w-5 text-blue-600" />
-              </div>
-              <div className="grid md:grid-cols-3 gap-6 text-sm">
-                <div className="text-center">
-                  <h4 className="font-semibold mb-2 text-blue-900 dark:text-blue-100">Smart Data Entry</h4>
-                  <p className="text-blue-800 dark:text-blue-200">
-                    AI assistants on budget pages, tournament builders, and all forms provide intelligent suggestions and error prevention.
-                  </p>
-                </div>
-                <div className="text-center">
-                  <h4 className="font-semibold mb-2 text-blue-900 dark:text-blue-100">Platform Understanding</h4>
-                  <p className="text-blue-800 dark:text-blue-200">
-                    Our AI understands all platform capabilities - from budget allocation to organizational charts to health monitoring.
-                  </p>
-                </div>
-                <div className="text-center">
-                  <h4 className="font-semibold mb-2 text-blue-900 dark:text-blue-100">Contextual Help</h4>
-                  <p className="text-blue-800 dark:text-blue-200">
-                    Get specific guidance based on your organization type, whether you're managing districts, nonprofits, or tournaments.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
 
           {/* Pricing Guarantee */}
           <div className="mt-8 text-center">

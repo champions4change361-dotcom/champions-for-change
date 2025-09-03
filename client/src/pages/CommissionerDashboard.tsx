@@ -464,7 +464,7 @@ export default function CommissionerDashboard() {
               <Alert>
                 <Brain className="h-4 w-4" />
                 <AlertDescription>
-                  <strong>PPR Leagues</strong> use community-verified player data and AI coaching insights. 
+                  <strong>PPR Leagues</strong> use community-verified player data with detailed insights. 
                   <strong> Knockout Pools</strong> use ESPN API for automatic scoring.
                 </AlertDescription>
               </Alert>
@@ -500,7 +500,7 @@ export default function CommissionerDashboard() {
                 Player Data Management
               </CardTitle>
               <CardDescription>
-                Add and verify player data for AI coaching insights
+                Add and verify player data for enhanced coaching insights
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -508,7 +508,7 @@ export default function CommissionerDashboard() {
                 <Brain className="h-4 w-4" />
                 <AlertDescription>
                   Player data entry coming soon! This will allow commissioners to input detailed 
-                  player statistics and tendencies for enhanced AI coaching insights like 
+                  player statistics and tendencies for enhanced coaching insights like 
                   "Player X runs left 75% of the time in red zone situations."
                 </AlertDescription>
               </Alert>
