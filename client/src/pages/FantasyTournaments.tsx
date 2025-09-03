@@ -202,26 +202,80 @@ export default function FantasyTournaments() {
         
         {/* Create Tournament Buttons */}
         <div className="pt-6 space-y-4">
-          <h3 className="text-xl font-semibold text-center mb-4">Create Your League</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto">
-            {fantasyStatus?.stats.supported_formats.map((format) => {
-              const formatConfig = getFormatConfig(format);
-              return (
-                <div key={format} className="text-center">
-                  <Button 
-                    size="lg" 
-                    className={`w-full ${formatConfig.color} text-white px-6 py-4 text-base font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200`}
-                    onClick={() => handleFormatSelection(format)}
-                    data-testid={`create-${format}-tournament`}
-                  >
-                    {formatConfig.icon} {formatConfig.title}
-                  </Button>
-                  <p className="text-sm text-muted-foreground mt-2 px-2">
-                    {formatConfig.description}
-                  </p>
-                </div>
-              );
-            })}
+          <h3 className="text-lg font-semibold text-center mb-4">Create Your League</h3>
+          <div className="max-w-2xl mx-auto">
+            {/* Top Row: Daily Fantasy, NFL Knockout, Snake Draft */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+              <div className="text-center">
+                <Button 
+                  size="sm"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 text-sm font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                  onClick={() => handleFormatSelection('daily_fantasy')}
+                  data-testid="create-daily_fantasy-tournament"
+                >
+                  💰 Daily Fantasy
+                </Button>
+                <p className="text-xs text-muted-foreground mt-1 px-1">
+                  Salary cap contests
+                </p>
+              </div>
+              <div className="text-center">
+                <Button 
+                  size="sm"
+                  className="w-full bg-green-600 hover:bg-green-700 text-white px-3 py-2 text-sm font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                  onClick={() => handleFormatSelection('survivor')}
+                  data-testid="create-survivor-tournament"
+                >
+                  🏈 NFL Knockout
+                </Button>
+                <p className="text-xs text-muted-foreground mt-1 px-1">
+                  Last person standing
+                </p>
+              </div>
+              <div className="text-center">
+                <Button 
+                  size="sm"
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 text-sm font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                  onClick={() => handleFormatSelection('snake_draft')}
+                  data-testid="create-snake_draft-tournament"
+                >
+                  🐍 Snake Draft
+                </Button>
+                <p className="text-xs text-muted-foreground mt-1 px-1">
+                  Season-long draft
+                </p>
+              </div>
+            </div>
+            
+            {/* Bottom Row: Head-to-Head, Best Ball */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-md mx-auto">
+              <div className="text-center">
+                <Button 
+                  size="sm"
+                  className="w-full bg-red-600 hover:bg-red-700 text-white px-3 py-2 text-sm font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                  onClick={() => handleFormatSelection('head_to_head')}
+                  data-testid="create-head_to_head-tournament"
+                >
+                  ⚔️ Head-to-Head
+                </Button>
+                <p className="text-xs text-muted-foreground mt-1 px-1">
+                  1v1 matchups
+                </p>
+              </div>
+              <div className="text-center">
+                <Button 
+                  size="sm"
+                  className="w-full bg-orange-600 hover:bg-orange-700 text-white px-3 py-2 text-sm font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                  onClick={() => handleFormatSelection('best_ball')}
+                  data-testid="create-best_ball-tournament"
+                >
+                  ⭐ Best Ball
+                </Button>
+                <p className="text-xs text-muted-foreground mt-1 px-1">
+                  Auto-optimal lineups
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
