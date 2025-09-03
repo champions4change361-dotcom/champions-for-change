@@ -203,13 +203,13 @@ export default function FantasyTournaments() {
         {/* Create Tournament Buttons */}
         <div className="pt-6 space-y-4">
           <h3 className="text-lg font-semibold text-center mb-4">Create Your League</h3>
-          <div className="max-w-2xl mx-auto">
+          <div className="max-w-xl mx-auto">
             {/* Top Row: Daily Fantasy, NFL Knockout, Snake Draft */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+            <div className="grid grid-cols-3 gap-2 mb-3">
               <div className="text-center">
                 <Button 
                   size="sm"
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 text-sm font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white px-2 py-2 text-xs font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
                   onClick={() => handleFormatSelection('daily_fantasy')}
                   data-testid="create-daily_fantasy-tournament"
                 >
@@ -222,7 +222,7 @@ export default function FantasyTournaments() {
               <div className="text-center">
                 <Button 
                   size="sm"
-                  className="w-full bg-green-600 hover:bg-green-700 text-white px-3 py-2 text-sm font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                  className="w-full bg-green-600 hover:bg-green-700 text-white px-2 py-2 text-xs font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
                   onClick={() => handleFormatSelection('survivor')}
                   data-testid="create-survivor-tournament"
                 >
@@ -235,7 +235,7 @@ export default function FantasyTournaments() {
               <div className="text-center">
                 <Button 
                   size="sm"
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 text-sm font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-white px-2 py-2 text-xs font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
                   onClick={() => handleFormatSelection('snake_draft')}
                   data-testid="create-snake_draft-tournament"
                 >
@@ -247,12 +247,12 @@ export default function FantasyTournaments() {
               </div>
             </div>
             
-            {/* Bottom Row: Head-to-Head, Best Ball */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-md mx-auto">
+            {/* Bottom Row: Head-to-Head, Best Ball (centered) */}
+            <div className="grid grid-cols-2 gap-2 max-w-sm mx-auto">
               <div className="text-center">
                 <Button 
                   size="sm"
-                  className="w-full bg-red-600 hover:bg-red-700 text-white px-3 py-2 text-sm font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                  className="w-full bg-red-600 hover:bg-red-700 text-white px-2 py-2 text-xs font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
                   onClick={() => handleFormatSelection('head_to_head')}
                   data-testid="create-head_to_head-tournament"
                 >
@@ -265,7 +265,7 @@ export default function FantasyTournaments() {
               <div className="text-center">
                 <Button 
                   size="sm"
-                  className="w-full bg-orange-600 hover:bg-orange-700 text-white px-3 py-2 text-sm font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                  className="w-full bg-orange-600 hover:bg-orange-700 text-white px-2 py-2 text-xs font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
                   onClick={() => handleFormatSelection('best_ball')}
                   data-testid="create-best_ball-tournament"
                 >
