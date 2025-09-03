@@ -26,7 +26,7 @@ import { generateRandomNames } from "@/utils/name-generator";
 
 const formSchema = insertTournamentSchema.extend({
   teamSize: z.number().min(2).max(128), // Support up to 128 teams for large tournaments
-  tournamentType: z.enum(["single", "double", "pool-play", "round-robin", "swiss-system"]).default("single"),
+  tournamentType: z.enum(["single", "double", "double-stage", "pool-play", "round-robin", "swiss-system"]).default("single"),
   competitionFormat: z.enum(["bracket", "leaderboard", "series", "bracket-to-series", "multi-stage"]).default("bracket"),
   ageGroup: z.string().optional(),
   genderDivision: z.string().optional(),
@@ -316,6 +316,21 @@ export default function EnhancedTournamentWizard({
         tournamentDate: data.tournamentDate ? (data.tournamentDate instanceof Date ? data.tournamentDate.toISOString().slice(0, 16) : String(data.tournamentDate)) : null, // Ensure string format
         scoringMethod: selectedSport?.scoringMethod || "wins",
         isGuestCreated: !user, // Mark as guest-created for tournaments created without login
+        // Configure double-stage tournaments to use multi-stage format
+        competitionFormat: data.tournamentType === 'double-stage' ? 'multi-stage' : (data.competitionFormat || 'bracket'),
+        totalStages: data.tournamentType === 'double-stage' ? 2 : 1,
+        stageConfiguration: data.tournamentType === 'double-stage' ? {
+          stage1: {
+            name: 'Group Stage',
+            format: 'round-robin',
+            description: 'Teams compete in groups to advance to knockout stage'
+          },
+          stage2: {
+            name: 'Knockout Stage', 
+            format: 'single-elimination',
+            description: 'Top teams from each group compete in elimination bracket'
+          }
+        } : null
       };
       
       const response = await apiRequest("/api/tournaments", "POST", transformedData);
@@ -668,6 +683,7 @@ export default function EnhancedTournamentWizard({
                   <option value="">Select tournament type</option>
                   <option value="single">Single Elimination</option>
                   <option value="double">Double Elimination (Second Chance Bracket)</option>
+                  <option value="double-stage">Double Stage (Group + Bracket)</option>
                   <option value="round-robin">Round Robin</option>
                 </select>
               </div>
