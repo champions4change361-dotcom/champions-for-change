@@ -11,6 +11,7 @@ import { KeystoneAvatar } from '@/components/KeystoneAvatar';
 import { FantasyLineupCoach } from '@/components/FantasyLineupCoach';
 // DFS component removed - using pure Yahoo Sports API only
 import { LiveScoring } from '@/components/LiveScoring';
+import { FantasyPlayerCardTest } from '@/components/FantasyPlayerCardTest';
 import { useAuth } from '@/hooks/useAuth';
 import { FantasyAgeGate } from '@/components/FantasyAgeGate';
 import { SearchableRosterTable } from '@/components/SearchableRosterTable';
@@ -365,8 +366,12 @@ export default function FantasyCoaching() {
         </Card>
 
         {/* Main Content Tabs */}
-        <Tabs defaultValue="player-search" className="w-full" data-testid="coaching-tabs">
+        <Tabs defaultValue="player-cards" className="w-full" data-testid="coaching-tabs">
           <TabsList className="grid w-full grid-cols-4 sm:grid-cols-8 gap-1 h-auto p-1">
+            <TabsTrigger value="player-cards" data-testid="tab-player-cards" className="flex flex-col items-center justify-center text-xs px-1 py-2 min-h-[3rem] bg-gradient-to-r from-purple-100 to-pink-100 border-2 border-purple-300">
+              <Trophy className="w-4 h-4 mb-1 text-purple-600" />
+              <span className="font-bold text-purple-800">Cards</span>
+            </TabsTrigger>
             <TabsTrigger value="dfs-optimizer" data-testid="tab-dfs-optimizer" className="flex flex-col items-center justify-center text-xs px-1 py-2 min-h-[3rem] bg-gradient-to-r from-yellow-100 to-orange-100 border-2 border-yellow-300">
               <Trophy className="w-4 h-4 mb-1 text-yellow-600" />
               <span className="font-bold text-yellow-800">Optimizer</span>
@@ -396,6 +401,11 @@ export default function FantasyCoaching() {
               <span>Live</span>
             </TabsTrigger>
           </TabsList>
+
+          {/* DraftKings-Style Player Cards Test Tab */}
+          <TabsContent value="player-cards" className="space-y-6" data-testid="player-cards-content">
+            <FantasyPlayerCardTest />
+          </TabsContent>
 
           {/* DFS Lineup Optimizer Tab - PRIMARY FEATURE */}
           <TabsContent value="dfs-optimizer" className="space-y-6" data-testid="dfs-optimizer-content">
