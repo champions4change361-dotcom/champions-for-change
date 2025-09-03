@@ -789,16 +789,17 @@ export default function EnhancedTournamentWizard({
 
           {currentStep === 'events' && (
             <div className="space-y-6">
-              {form.watch("sport") && getEventsForSport(form.watch("sport")).length > 0 ? (
+              {form.watch("sport") ? (
+                getEventsForSport(form.watch("sport") || "").length > 0 ? (
                 <div className="space-y-6">
                   <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                     <h4 className="font-medium text-blue-900 mb-3 flex items-center gap-2">
                       <Target className="h-4 w-4" />
-                      {form.watch("sport")} Events ({selectedEvents.length} of {getEventsForSport(form.watch("sport")).length} selected)
+                      {form.watch("sport")} Events ({selectedEvents.length} of {getEventsForSport(form.watch("sport") || "").length} selected)
                     </h4>
                     
                     <div className="space-y-2 max-h-48 overflow-y-auto">
-                      {getEventsForSport(form.watch("sport")).map((event, index) => {
+                      {getEventsForSport(form.watch("sport") || "").map((event, index) => {
                         const isSelected = selectedEvents.some(e => e.eventName === event.eventName);
                         return (
                           <div key={index} className={`flex items-center justify-between p-2 rounded border ${
@@ -840,7 +841,7 @@ export default function EnhancedTournamentWizard({
                       <div className="flex gap-2">
                         <button
                           type="button"
-                          onClick={() => setSelectedEvents(getEventsForSport(form.watch("sport")))}
+                          onClick={() => setSelectedEvents(getEventsForSport(form.watch("sport") || ""))}
                           className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
                         >
                           Select All
@@ -927,6 +928,19 @@ export default function EnhancedTournamentWizard({
                   )}
                 </div>
               ) : (
+                // For sports without specific events defined, show simple confirmation
+                <div className="space-y-6">
+                  <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <h4 className="font-medium text-green-900 mb-3 flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4" />
+                      {form.watch("sport") || "Tournament"} Ready
+                    </h4>
+                    <p className="text-sm text-green-700">
+                      {form.watch("sport") || "This sport"} tournaments use a single competition format. You can proceed to configure tournament settings.
+                    </p>
+                  </div>
+                </div>
+              )) : (
                 <div className="text-center py-8">
                   <Target className="h-12 w-12 text-gray-400 mx-auto mb-3" />
                   <p className="text-gray-600">Please select a sport first to configure events</p>
