@@ -74,6 +74,10 @@ export default function EnhancedTournamentWizard({
   const [createdTournament, setCreatedTournament] = useState<any>(null);
   const [isDraftSaving, setIsDraftSaving] = useState(false);
   const [autoSaveStatus, setAutoSaveStatus] = useState<'saved' | 'saving' | 'error' | null>(null);
+  
+  // Stage format configuration
+  const [stage1Format, setStage1Format] = useState<string>('round-robin');
+  const [stage2Format, setStage2Format] = useState<string>('single-elimination');
 
   // Cascading dropdown state
   const [selectedCategory, setSelectedCategory] = useState<string>('');
@@ -306,6 +310,43 @@ export default function EnhancedTournamentWizard({
   const competitionFormat = form.watch("competitionFormat");
   const teamSize = form.watch("teamSize");
 
+  // Helper functions for stage configuration
+  const getStage1Name = (format: string) => {
+    switch (format) {
+      case 'round-robin': return 'Round Robin Stage';
+      case 'pool-play': return 'Pool Play Stage';
+      case 'swiss-system': return 'Swiss System Stage';
+      default: return 'Group Stage';
+    }
+  };
+
+  const getStage1Description = (format: string) => {
+    switch (format) {
+      case 'round-robin': return 'Every team plays every other team to determine rankings';
+      case 'pool-play': return 'Teams compete in groups with top performers advancing';
+      case 'swiss-system': return 'Teams are paired based on performance for balanced competition';
+      default: return 'Teams compete in groups to advance to next stage';
+    }
+  };
+
+  const getStage2Name = (format: string) => {
+    switch (format) {
+      case 'single-elimination': return 'Single Elimination';
+      case 'double-elimination': return 'Double Elimination';
+      case 'best-of-series': return 'Championship Series';
+      default: return 'Knockout Stage';
+    }
+  };
+
+  const getStage2Description = (format: string) => {
+    switch (format) {
+      case 'single-elimination': return 'One loss eliminates teams from tournament';
+      case 'double-elimination': return 'Teams get a second chance in losers bracket';
+      case 'best-of-series': return 'Championship determined by best-of series matches';
+      default: return 'Top teams compete for tournament championship';
+    }
+  };
+
   const createTournamentMutation = useMutation({
     mutationFn: async (data: FormData & { teams: TeamData[] }) => {
       // Transform data to match database schema
@@ -321,14 +362,14 @@ export default function EnhancedTournamentWizard({
         totalStages: data.tournamentType === 'double-stage' ? 2 : 1,
         stageConfiguration: data.tournamentType === 'double-stage' ? {
           stage1: {
-            name: 'Group Stage',
-            format: 'round-robin',
-            description: 'Teams compete in groups to advance to knockout stage'
+            name: getStage1Name(stage1Format),
+            format: stage1Format,
+            description: getStage1Description(stage1Format)
           },
           stage2: {
-            name: 'Knockout Stage', 
-            format: 'single-elimination',
-            description: 'Top teams from each group compete in elimination bracket'
+            name: getStage2Name(stage2Format), 
+            format: stage2Format,
+            description: getStage2Description(stage2Format)
           }
         } : null
       };
@@ -687,6 +728,61 @@ export default function EnhancedTournamentWizard({
                   <option value="round-robin">Round Robin</option>
                 </select>
               </div>
+
+              {/* Stage Format Configuration for Multi-Stage Tournaments */}
+              {(form.watch("tournamentType") === "double-stage" || form.watch("competitionFormat") === "multi-stage") && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-4">
+                  <div className="flex items-center text-sm text-blue-700 mb-3">
+                    <Settings className="h-4 w-4 mr-2" />
+                    <span className="font-medium">Configure Tournament Stages</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="stage1Format" className="block text-sm font-medium text-gray-700 mb-2">
+                        Stage 1: Group Play Format
+                      </Label>
+                      <select 
+                        value={stage1Format}
+                        onChange={(e) => setStage1Format(e.target.value)}
+                        className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      >
+                        <option value="round-robin">Round Robin (everyone plays everyone)</option>
+                        <option value="pool-play">Pool Play (groups, then advance)</option>
+                        <option value="swiss-system">Swiss System (smart pairing)</option>
+                      </select>
+                      <p className="text-xs text-gray-500 mt-1">How teams compete in the first stage</p>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="stage2Format" className="block text-sm font-medium text-gray-700 mb-2">
+                        Stage 2: Elimination Format
+                      </Label>
+                      <select 
+                        value={stage2Format}
+                        onChange={(e) => setStage2Format(e.target.value)}
+                        className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      >
+                        <option value="single-elimination">Single Elimination (lose and out)</option>
+                        <option value="double-elimination">Double Elimination (second chance)</option>
+                        <option value="best-of-series">Best-of Series (championship rounds)</option>
+                      </select>
+                      <p className="text-xs text-gray-500 mt-1">How top teams from Stage 1 compete</p>
+                    </div>
+                  </div>
+
+                  <div className="bg-white border border-gray-200 rounded p-3">
+                    <div className="flex items-center text-sm text-gray-700">
+                      <Trophy className="h-4 w-4 mr-2 text-orange-500" />
+                      <span className="font-medium">Tournament Flow:</span>
+                    </div>
+                    <p className="text-sm text-gray-600 mt-1">
+                      <span className="font-medium">Stage 1:</span> {stage1Format.replace('-', ' ')} → 
+                      <span className="font-medium"> Stage 2:</span> {stage2Format.replace('-', ' ')}
+                    </p>
+                  </div>
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
