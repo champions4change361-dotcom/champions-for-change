@@ -115,6 +115,7 @@ import SignupSelector from './pages/SignupSelector';
 import SmartSignup from './pages/SmartSignup';
 import { StaffOnboarding } from './components/StaffOnboarding';
 import TournamentRegistration from './pages/TournamentRegistration';
+import DailyFantasyLineup from './pages/DailyFantasyLineup';
 
 function AuthenticatedRoutes() {
   const { isFeatureEnabled, isFantasyDomain, config } = useDomain();
@@ -188,6 +189,11 @@ function AuthenticatedRoutes() {
         {/* Show Fantasy Tournaments only for fantasy and pro domains */}
         {isFeatureEnabled('fantasyLeagues') && (
           <Route path="/fantasy-tournaments" component={FantasyTournaments} />
+        )}
+        
+        {/* Daily Fantasy Lineup Builder */}
+        {isFeatureEnabled('fantasyLeagues') && (
+          <Route path="/fantasy/league/:leagueId/lineup" component={DailyFantasyLineup} />
         )}
         
         {/* Coaches Lounge Landing for fantasy domains */}

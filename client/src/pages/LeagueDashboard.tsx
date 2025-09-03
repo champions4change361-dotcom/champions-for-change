@@ -242,6 +242,41 @@ export default function LeagueDashboard() {
               </CardContent>
             </Card>
 
+            {/* Daily Fantasy Actions */}
+            <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Trophy className="h-6 w-6 text-blue-600" />
+                  Daily Fantasy Contest
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <p className="text-sm text-gray-700">
+                    Build your daily fantasy lineup with a $50K salary cap. Draft your players and compete against other league members!
+                  </p>
+                  <div className="flex gap-3">
+                    <Button 
+                      onClick={() => setLocation(`/fantasy/league/${leagueId}/lineup`)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                      size="lg"
+                      data-testid="build-lineup-button"
+                    >
+                      <Trophy className="w-4 h-4 mr-2" />
+                      Build Your Lineup
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      className="border-blue-600 text-blue-600 hover:bg-blue-50"
+                    >
+                      <Users className="w-4 h-4 mr-2" />
+                      View Leaderboard
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* NFL Survivor Rules */}
             <Card>
               <CardHeader>
