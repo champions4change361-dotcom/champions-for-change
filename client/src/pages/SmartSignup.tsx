@@ -8,12 +8,13 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { CheckCircle, Trophy, Users, Building, GraduationCap, ArrowLeft, ArrowRight } from 'lucide-react';
+import { CheckCircle, Trophy, Users, Building, GraduationCap, ArrowLeft, ArrowRight, Home } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useDomain } from '@/hooks/useDomain';
 import { useToast } from '@/hooks/use-toast';
 import TrantorCoin from '@/components/TrantorCoin';
+import { Link } from 'wouter';
 
 // Smart signup schema that adapts based on organization type
 const baseSignupSchema = z.object({
@@ -198,7 +199,18 @@ export default function SmartSignup() {
     const selectedOrg = orgTypes.find(org => org.id === selectedOrgType);
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-50 py-8">
-        <Card className="max-w-2xl mx-auto">
+        <div className="max-w-2xl mx-auto p-6">
+          {/* Navigation Bar */}
+          <div className="mb-6">
+            <Link href="/">
+              <Button variant="ghost" className="text-blue-600 hover:text-blue-800" data-testid="back-to-home-success">
+                <Home className="h-4 w-4 mr-2" />
+                Return to Home
+              </Button>
+            </Link>
+          </div>
+          
+          <Card>
           <CardHeader className="text-center">
             <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
             <CardTitle className="text-2xl text-green-700">Welcome to Champions for Change!</CardTitle>
@@ -237,6 +249,7 @@ export default function SmartSignup() {
             </div>
           </CardContent>
         </Card>
+        </div>
       </div>
     );
   }
@@ -244,6 +257,16 @@ export default function SmartSignup() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-50 py-8">
       <div className="max-w-4xl mx-auto p-6">
+        {/* Navigation Bar */}
+        <div className="mb-6">
+          <Link href="/">
+            <Button variant="ghost" className="text-blue-600 hover:text-blue-800" data-testid="back-to-home">
+              <Home className="h-4 w-4 mr-2" />
+              Return to Home
+            </Button>
+          </Link>
+        </div>
+        
         {/* Header with optional coin flip */}
         <div className="mb-8 text-center">
           {fromCoin && (
