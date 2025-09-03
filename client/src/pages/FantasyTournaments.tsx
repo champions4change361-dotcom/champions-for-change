@@ -108,7 +108,7 @@ export default function FantasyTournaments() {
   const getFormatDescription = (format: string) => {
     switch (format) {
       case "survivor": return "Pick one team per week. One wrong pick eliminates you!";
-      case "salary_cap": return "Daily fantasy with salary budget constraints";
+      case "daily_fantasy": return "Daily fantasy with salary budget constraints";
       case "snake_draft": return "Traditional snake draft with season-long scoring";
       case "head_to_head": return "Direct competition against one opponent";
       case "best_ball": return "Draft once, optimal lineup set automatically";
