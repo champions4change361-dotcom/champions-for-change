@@ -117,6 +117,10 @@ import { StaffOnboarding } from './components/StaffOnboarding';
 import TournamentRegistration from './pages/TournamentRegistration';
 import DailyFantasyLineup from './pages/DailyFantasyLineup';
 import SnakeDraftCreator from './pages/SnakeDraftCreator';
+import DailyFantasyCreator from './pages/DailyFantasyCreator';
+import NFLKnockoutCreator from './pages/NFLKnockoutCreator';
+import HeadToHeadCreator from './pages/HeadToHeadCreator';
+import BestBallCreator from './pages/BestBallCreator';
 
 function AuthenticatedRoutes() {
   const { isFeatureEnabled, isFantasyDomain, config } = useDomain();
@@ -200,6 +204,18 @@ function AuthenticatedRoutes() {
         {/* Fantasy League Creators */}
         {isFeatureEnabled('fantasyLeagues') && (
           <Route path="/fantasy/create/snake_draft" component={SnakeDraftCreator} />
+        )}
+        {isFeatureEnabled('fantasyLeagues') && (
+          <Route path="/fantasy/create/daily_fantasy" component={DailyFantasyCreator} />
+        )}
+        {isFeatureEnabled('fantasyLeagues') && (
+          <Route path="/fantasy/create/survivor" component={NFLKnockoutCreator} />
+        )}
+        {isFeatureEnabled('fantasyLeagues') && (
+          <Route path="/fantasy/create/head_to_head" component={HeadToHeadCreator} />
+        )}
+        {isFeatureEnabled('fantasyLeagues') && (
+          <Route path="/fantasy/create/best_ball" component={BestBallCreator} />
         )}
         
         {/* Coaches Lounge Landing for fantasy domains */}
