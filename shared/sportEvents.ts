@@ -375,12 +375,126 @@ export const cheerDanceEvents: SportEventDefinition[] = [
   }
 ];
 
+// GYMNASTICS EVENTS
+export const gymnasticsEvents: SportEventDefinition[] = [
+  // Women's Artistic Gymnastics
+  {
+    eventName: 'Vault (Women)',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Women', 'Girls'],
+    ageGroups: ['Elementary', 'Middle School', 'High School', 'College', 'Adult'],
+    description: 'Women\'s vault apparatus - scored by panel of judges'
+  },
+  {
+    eventName: 'Uneven Bars (Women)',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Women', 'Girls'],
+    ageGroups: ['Elementary', 'Middle School', 'High School', 'College', 'Adult'],
+    description: 'Women\'s uneven bars apparatus - scored by panel of judges'
+  },
+  {
+    eventName: 'Balance Beam (Women)',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Women', 'Girls'],
+    ageGroups: ['Elementary', 'Middle School', 'High School', 'College', 'Adult'],
+    description: 'Women\'s balance beam apparatus - scored by panel of judges'
+  },
+  {
+    eventName: 'Floor Exercise (Women)',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Women', 'Girls'],
+    ageGroups: ['Elementary', 'Middle School', 'High School', 'College', 'Adult'],
+    description: 'Women\'s floor exercise apparatus - scored by panel of judges'
+  },
+  {
+    eventName: 'All-Around (Women)',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Women', 'Girls'],
+    ageGroups: ['Elementary', 'Middle School', 'High School', 'College', 'Adult'],
+    description: 'Women\'s all-around competition (combined scores from all apparatus)'
+  },
+
+  // Men's Artistic Gymnastics
+  {
+    eventName: 'Floor Exercise (Men)',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Men', 'Boys'],
+    ageGroups: ['Elementary', 'Middle School', 'High School', 'College', 'Adult'],
+    description: 'Men\'s floor exercise apparatus - scored by panel of judges'
+  },
+  {
+    eventName: 'Pommel Horse (Men)',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Men', 'Boys'],
+    ageGroups: ['Middle School', 'High School', 'College', 'Adult'],
+    description: 'Men\'s pommel horse apparatus - scored by panel of judges'
+  },
+  {
+    eventName: 'Still Rings (Men)',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Men', 'Boys'],
+    ageGroups: ['Middle School', 'High School', 'College', 'Adult'],
+    description: 'Men\'s still rings apparatus - scored by panel of judges'
+  },
+  {
+    eventName: 'Vault (Men)',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Men', 'Boys'],
+    ageGroups: ['Elementary', 'Middle School', 'High School', 'College', 'Adult'],
+    description: 'Men\'s vault apparatus - scored by panel of judges'
+  },
+  {
+    eventName: 'Parallel Bars (Men)',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Men', 'Boys'],
+    ageGroups: ['Middle School', 'High School', 'College', 'Adult'],
+    description: 'Men\'s parallel bars apparatus - scored by panel of judges'
+  },
+  {
+    eventName: 'High Bar (Men)',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Men', 'Boys'],
+    ageGroups: ['Middle School', 'High School', 'College', 'Adult'],
+    description: 'Men\'s high bar apparatus - scored by panel of judges'
+  },
+  {
+    eventName: 'All-Around (Men)',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Men', 'Boys'],
+    ageGroups: ['Elementary', 'Middle School', 'High School', 'College', 'Adult'],
+    description: 'Men\'s all-around competition (combined scores from all apparatus)'
+  },
+
+  // Mixed/Team Events
+  {
+    eventName: 'Team Competition',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Mixed', 'Men', 'Women', 'Boys', 'Girls'],
+    ageGroups: ['Elementary', 'Middle School', 'High School', 'College', 'Adult'],
+    description: 'Team gymnastics competition - combined team scores'
+  }
+];
+
 // MASTER SPORT EVENT MAPPING
 export const sportEventMap = {
   'Swimming & Diving': swimmingEvents,
   'Track & Field': trackEvents,
   'Basketball': basketballEvents,
   'Cheer/Dance': cheerDanceEvents,
+  'Gymnastics': gymnasticsEvents,
 } as const;
 
 // Helper function to get events for a sport
