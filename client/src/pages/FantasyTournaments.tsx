@@ -116,6 +116,64 @@ export default function FantasyTournaments() {
     }
   };
 
+  const getFormatConfig = (format: string) => {
+    switch(format) {
+      case "survivor": 
+        return {
+          title: "NFL Knockout", 
+          icon: "🏈", 
+          color: "bg-green-600 hover:bg-green-700",
+          description: "Pick one team each week - Last person standing wins!"
+        };
+      case "daily_fantasy": 
+        return {
+          title: "Daily Fantasy", 
+          icon: "💰", 
+          color: "bg-blue-600 hover:bg-blue-700",
+          description: "Build lineups under salary cap - compete daily!"
+        };
+      case "snake_draft": 
+        return {
+          title: "Season Draft", 
+          icon: "🐍", 
+          color: "bg-purple-600 hover:bg-purple-700",
+          description: "Draft players in order - manage all season!"
+        };
+      case "head_to_head": 
+        return {
+          title: "Head-to-Head", 
+          icon: "⚔️", 
+          color: "bg-red-600 hover:bg-red-700",
+          description: "Face off directly against opponents!"
+        };
+      case "best_ball": 
+        return {
+          title: "Best Ball", 
+          icon: "⭐", 
+          color: "bg-orange-600 hover:bg-orange-700",
+          description: "Draft once - best players auto-selected!"
+        };
+      default: 
+        return {
+          title: format.toUpperCase(), 
+          icon: "🏆", 
+          color: "bg-gray-600 hover:bg-gray-700",
+          description: "Professional fantasy sports format"
+        };
+    }
+  };
+
+  const handleFormatSelection = (format: string) => {
+    if (isFantasyAuthenticated) {
+      // Redirect to game creator for specific format
+      setLocation(`/fantasy/create/${format}`);
+    } else {
+      // Store the intended format and show auth
+      sessionStorage.setItem('pendingFantasyFormat', format);
+      setShowFantasyAuth(true);
+    }
+  };
+
   return (
     <FantasyAgeGate platform="Fantasy Sports Platform" requiredAge={21}>
       <div className="container mx-auto p-6 space-y-6">
@@ -142,25 +200,29 @@ export default function FantasyTournaments() {
           </div>
         )}
         
-        {/* Create Tournament Button */}
-        <div className="pt-6">
-          <Button 
-            size="lg" 
-            className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 text-lg font-semibold shadow-lg"
-            onClick={() => {
-              if (isFantasyAuthenticated) {
-                setShowCreateLeague(true);
-              } else {
-                setShowFantasyAuth(true);
-              }
-            }}
-            data-testid="create-knockout-tournament"
-          >
-            🏈 Create Your NFL Knockout Tournament
-          </Button>
-          <p className="text-sm text-muted-foreground mt-2">
-            Start your own survivor pool competition - Perfect for your work group!
-          </p>
+        {/* Create Tournament Buttons */}
+        <div className="pt-6 space-y-4">
+          <h3 className="text-xl font-semibold text-center mb-4">Create Your League</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto">
+            {fantasyStatus?.stats.supported_formats.map((format) => {
+              const formatConfig = getFormatConfig(format);
+              return (
+                <div key={format} className="text-center">
+                  <Button 
+                    size="lg" 
+                    className={`w-full ${formatConfig.color} text-white px-6 py-4 text-base font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200`}
+                    onClick={() => handleFormatSelection(format)}
+                    data-testid={`create-${format}-tournament`}
+                  >
+                    {formatConfig.icon} {formatConfig.title}
+                  </Button>
+                  <p className="text-sm text-muted-foreground mt-2 px-2">
+                    {formatConfig.description}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -252,51 +314,6 @@ export default function FantasyTournaments() {
         </Card>
       )}
 
-      {/* Sport and Format Selection */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
-          <CardHeader>
-            <CardTitle>Select Sport</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <select 
-              value={selectedSport} 
-              onChange={(e) => setSelectedSport(e.target.value)}
-              className="w-full p-4 text-lg bg-white border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 appearance-none cursor-pointer shadow-sm hover:border-gray-300 transition-colors"
-              data-testid="select-sport"
-            >
-              {fantasyStatus?.stats.supported_sports.map((sport) => (
-                <option key={sport} value={sport}>
-                  {getSportIcon(sport)} {sport.toUpperCase().replace(/_/g, " ")}
-                </option>
-              ))}
-            </select>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Select Format</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <select 
-              value={selectedFormat} 
-              onChange={(e) => setSelectedFormat(e.target.value)}
-              className="w-full p-4 text-lg bg-white border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 appearance-none cursor-pointer shadow-sm hover:border-gray-300 transition-colors"
-              data-testid="select-format"
-            >
-              {fantasyStatus?.stats.supported_formats.map((format) => (
-                <option key={format} value={format}>
-                  {format.toUpperCase()}
-                </option>
-              ))}
-            </select>
-            <p className="text-sm text-muted-foreground mt-3 font-medium">
-              {getFormatDescription(selectedFormat)}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
 
       {/* Fantasy Leagues Display */}
       {fantasyLeagues && (
@@ -480,7 +497,16 @@ export default function FantasyTournaments() {
         onOpenChange={setShowFantasyAuth}
         onAuthSuccess={(user) => {
           loginFantasyUser(user);
-          setShowCreateLeague(true); // Open create league modal after auth
+          
+          // Check if there's a pending format selection
+          const pendingFormat = sessionStorage.getItem('pendingFantasyFormat');
+          if (pendingFormat) {
+            sessionStorage.removeItem('pendingFantasyFormat');
+            setLocation(`/fantasy/create/${pendingFormat}`);
+          } else {
+            // Fallback to opening league creation modal
+            setShowCreateLeague(true);
+          }
         }}
       />
 
