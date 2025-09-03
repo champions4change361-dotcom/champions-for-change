@@ -34,7 +34,7 @@ import { useAuth } from "@/hooks/useAuth";
 const tournamentSchema = z.object({
   name: z.string().min(1, "Tournament name is required"),
   sport: z.string().min(1, "Sport is required"),
-  tournamentType: z.enum(["single", "double", "pool-play", "round-robin", "swiss-system"]),
+  tournamentType: z.enum(["single", "double", "pool-play", "round-robin", "swiss-system", "double-stage"]),
   teamSize: z.number().min(1, "Team size must be at least 1").max(50, "Team size cannot exceed 50"),
   maxParticipants: z.number().min(2, "Must allow at least 2 participants").optional(),
   entryFee: z.number().min(0, "Entry fee cannot be negative").optional(),
@@ -153,7 +153,26 @@ export default function TournamentManagerDashboard() {
   });
 
   const onSubmit = (data: TournamentFormData) => {
-    createTournamentMutation.mutate(data);
+    // Configure double-stage tournaments to use multi-stage format
+    const tournamentData = {
+      ...data,
+      competitionFormat: data.tournamentType === 'double-stage' ? 'multi-stage' : 'bracket',
+      totalStages: data.tournamentType === 'double-stage' ? 2 : 1,
+      stageConfiguration: data.tournamentType === 'double-stage' ? {
+        stage1: {
+          name: 'Group Stage',
+          format: 'round-robin',
+          description: 'Teams compete in groups to advance to knockout stage'
+        },
+        stage2: {
+          name: 'Knockout Stage', 
+          format: 'single-elimination',
+          description: 'Top teams from each group compete in elimination bracket'
+        }
+      } : null
+    };
+    
+    createTournamentMutation.mutate(tournamentData);
   };
 
   const getStatusIcon = (status: string) => {
@@ -268,6 +287,7 @@ export default function TournamentManagerDashboard() {
                             <SelectItem value="pool-play">Pool Play</SelectItem>
                             <SelectItem value="round-robin">Round Robin</SelectItem>
                             <SelectItem value="swiss-system">Swiss System</SelectItem>
+                            <SelectItem value="double-stage">Double Stage (Group + Bracket)</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />

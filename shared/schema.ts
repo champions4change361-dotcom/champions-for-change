@@ -1130,7 +1130,7 @@ export const tournaments = pgTable("tournaments", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
   teamSize: integer("team_size").notNull(),
-  tournamentType: text("tournament_type", { enum: ["single", "double", "pool-play", "round-robin", "swiss-system"] }).notNull().default("single"),
+  tournamentType: text("tournament_type", { enum: ["single", "double", "pool-play", "round-robin", "swiss-system", "double-stage"] }).notNull().default("single"),
   competitionFormat: text("competition_format", { enum: ["bracket", "leaderboard", "series", "bracket-to-series", "multi-stage"] }).notNull().default("bracket"),
   status: text("status", { enum: ["draft", "upcoming", "stage-1", "stage-2", "stage-3", "completed"] }).notNull().default("draft"),
   currentStage: integer("current_stage").default(1),

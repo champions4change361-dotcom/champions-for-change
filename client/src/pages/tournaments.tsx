@@ -125,6 +125,7 @@ export default function TournamentsPage() {
       case 'pool-play': return 'Pool Play';
       case 'round-robin': return 'Round Robin';
       case 'swiss-system': return 'Swiss System';
+      case 'double-stage': return 'Double Stage (Group + Bracket)';
       default: return type;
     }
   };
