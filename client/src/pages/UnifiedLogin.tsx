@@ -9,7 +9,7 @@ import TrantorCoin from "@/components/TrantorCoin";
 export default function UnifiedLogin() {
   const [, setLocation] = useLocation();
 
-  const handleOAuthLogin = (provider: string) => {
+  const handleOAuthLogin = () => {
     // Store the return URL for after authentication
     const urlParams = new URLSearchParams(window.location.search);
     const returnUrl = urlParams.get('return') || urlParams.get('redirect') || '/tournaments';
@@ -21,17 +21,8 @@ export default function UnifiedLogin() {
       sessionStorage.setItem('auth_return_url', returnUrl);
     }
     
-    // For mobile compatibility, use a more explicit redirect
-    if (provider === 'google') {
-      window.location.href = '/api/login?provider=google';
-    } else if (provider === 'apple') {
-      window.location.href = '/api/login?provider=apple';
-    } else if (provider === 'microsoft') {
-      window.location.href = '/api/login?provider=microsoft';
-    } else {
-      // Default to main OAuth endpoint
-      window.location.href = '/api/login';
-    }
+    // Use Google OAuth (the only implemented provider)
+    window.location.href = '/api/login';
   };
 
   const handleBackToHome = () => {
@@ -70,11 +61,11 @@ export default function UnifiedLogin() {
           </CardHeader>
           
           <CardContent className="space-y-4">
-            {/* Multiple OAuth Options */}
-            <div className="space-y-3">
+            {/* OAuth Login */}
+            <div className="space-y-4">
               {/* Google Login */}
               <Button 
-                onClick={() => handleOAuthLogin('google')}
+                onClick={handleOAuthLogin}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 text-base flex items-center justify-center"
                 data-testid="button-login-google"
               >
@@ -87,39 +78,25 @@ export default function UnifiedLogin() {
                 Continue with Google
               </Button>
 
-              {/* Apple Login */}
-              <Button 
-                onClick={() => handleOAuthLogin('apple')}
-                className="w-full bg-black hover:bg-gray-800 text-white font-semibold py-3 text-base flex items-center justify-center"
-                data-testid="button-login-apple"
-              >
-                <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.037-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/>
-                </svg>
-                Continue with Apple
-              </Button>
-
-              {/* Microsoft Login */}
-              <Button 
-                onClick={() => handleOAuthLogin('microsoft')}
-                className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 text-base flex items-center justify-center"
-                data-testid="button-login-microsoft"
-              >
-                <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M11.4 24H0V12.6h11.4V24zM24 24H12.6V12.6H24V24zM11.4 11.4H0V0h11.4v11.4zM24 11.4H12.6V0H24v11.4z"/>
-                </svg>
-                Continue with Microsoft
-              </Button>
-
-              {/* Divider */}
+              {/* Email/Password Alternative */}
               <div className="relative my-4">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-slate-600"></div>
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-slate-800 px-2 text-slate-400">Secure Authentication</span>
+                  <span className="bg-slate-800 px-2 text-slate-400">Or use email</span>
                 </div>
               </div>
+
+              <Button 
+                onClick={() => setLocation('/login')}
+                variant="outline"
+                className="w-full border-slate-600 text-slate-300 hover:bg-slate-700 font-semibold py-3 text-base"
+                data-testid="button-login-email"
+              >
+                <LogIn className="mr-2 h-5 w-5" />
+                Sign in with Email
+              </Button>
             </div>
 
             {/* Status Badge */}
