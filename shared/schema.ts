@@ -1160,6 +1160,27 @@ export const tournaments = pgTable("tournaments", {
   description: text("description"),
   isPublic: boolean("is_public").default(true),
   
+  // CALENDAR DISCOVERABILITY FIELDS
+  isPublicCalendarVisible: boolean("is_public_calendar_visible").default(false),
+  calendarApprovalStatus: text("calendar_approval_status", {
+    enum: ["pending", "approved", "rejected", "auto_approved"]
+  }).default("pending"),
+  calendarRegion: varchar("calendar_region"), // "Texas", "California", etc. for regional filtering
+  calendarCity: varchar("calendar_city"), // City for local discovery
+  calendarStateCode: varchar("calendar_state_code", { length: 2 }), // "TX", "CA" for state filtering
+  calendarCoordinates: jsonb("calendar_coordinates").$type<{
+    latitude: number;
+    longitude: number;
+  }>(), // For proximity-based discovery
+  calendarTags: jsonb("calendar_tags").$type<string[]>(), // ["competitive", "youth", "recreational"] for filtering
+  calendarSubmittedAt: timestamp("calendar_submitted_at"),
+  calendarApprovedAt: timestamp("calendar_approved_at"),
+  calendarApprovedBy: varchar("calendar_approved_by").references(() => users.id),
+  calendarRejectionReason: text("calendar_rejection_reason"),
+  calendarFeatured: boolean("calendar_featured").default(false), // Premium placement
+  calendarViewCount: integer("calendar_view_count").default(0), // Analytics
+  calendarClickCount: integer("calendar_click_count").default(0), // Analytics
+  
   // DONATION MODULE FIELDS
   donationsEnabled: boolean("donations_enabled").default(false),
   donationGoal: numeric("donation_goal").default("0"),

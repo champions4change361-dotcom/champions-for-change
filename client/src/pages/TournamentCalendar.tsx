@@ -5,7 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar, ArrowLeft, MapPin, Clock, Users, Trophy, Mail, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLocation } from 'wouter';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
 
 export default function TournamentCalendar() {
   const [, setLocation] = useLocation();
@@ -126,7 +127,33 @@ export default function TournamentCalendar() {
       setIsLoadingLocation(false);
     };
 
-    const detectLocation = async () => {
+    // Track tournament view for analytics
+  const trackViewMutation = useMutation({
+    mutationFn: async (tournamentId: string) => {
+      if (tournamentId.startsWith('static-')) {
+        // Don't track views for static/demo tournaments
+        return;
+      }
+      return apiRequest('POST', `/api/tournaments/${tournamentId}/calendar-view`, {});
+    },
+    onError: (error) => {
+      // Silently handle errors - analytics shouldn't disrupt user experience
+      console.warn('Failed to track tournament view:', error);
+    }
+  });
+
+  // Enhanced contact organizer with view tracking
+  const handleContactOrganizer = (tournament: any) => {
+    // Track the view if it's a live tournament
+    if (tournament.isLive && tournament.id) {
+      trackViewMutation.mutate(tournament.id);
+    }
+    
+    // Open email client
+    window.open(`mailto:${tournament.organizerEmail}?subject=Tournament Coordination - ${tournament.title}`);
+  };
+
+  const detectLocation = async () => {
       // Set a timeout to prevent hanging on mobile
       const locationTimeout = setTimeout(() => {
         console.log('Location detection timed out, showing all tournaments');
@@ -182,8 +209,14 @@ export default function TournamentCalendar() {
     detectLocation();
   }, []);
 
-  // All tournament data - will be filtered by user's region
-  const allTournaments = [
+  // Fetch live tournament data from API
+  const { data: tournamentData = [], isLoading: tournamentsLoading } = useQuery({
+    queryKey: ["/api/tournaments/public"],
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
+
+  // Keep static tournaments for fallback/demo purposes  
+  const staticTournaments = [
     // Texas Coastal Bend tournaments
     {
       id: '1',
@@ -881,9 +914,42 @@ export default function TournamentCalendar() {
     return state ? state.label : stateCode;
   };
 
+  // Transform live tournament data to match calendar format
+  const transformedLiveTournaments = tournamentData.map((tournament: any) => ({
+    id: tournament.id,
+    title: tournament.name,
+    organizer: 'Tournament Manager', // Default since we don't have this field yet
+    organizerEmail: 'contact@platform.com', // Default contact
+    date: tournament.tournamentDate ? new Date(tournament.tournamentDate).toISOString().split('T')[0] : '2025-12-31',
+    time: tournament.tournamentDate ? 
+      `${new Date(tournament.tournamentDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - TBD` : 
+      'TBD',
+    location: tournament.location || 'TBD',
+    region: tournament.calendarRegion || tournament.calendarCity || 'Unknown Region',
+    sport: tournament.sport || 'General',
+    divisions: tournament.genderDivision ? [tournament.genderDivision] : ['Open'],
+    estimatedTeams: tournament.teamSize || 16,
+    status: tournament.calendarApprovalStatus === 'approved' ? 'open' : 'pending',
+    isLive: true, // Flag to indicate this is live data
+    calendarApprovalStatus: tournament.calendarApprovalStatus,
+    calendarTags: tournament.calendarTags || []
+  }));
+
+  // Combine live and static tournaments
+  const allTournaments = [...transformedLiveTournaments, ...staticTournaments];
+
   // Filter tournaments by selected state and sport
   const tournaments = React.useMemo(() => {
-    return allTournaments.filter(tournament => {
+    // Only show approved tournaments from live data
+    const filteredTournaments = allTournaments.filter(tournament => {
+      // For live tournaments, only show approved ones
+      if (tournament.isLive && tournament.calendarApprovalStatus !== 'approved') {
+        return false;
+      }
+      return true;
+    });
+
+    return filteredTournaments.filter(tournament => {
       // Apply state filter
       let passesStateFilter = false;
       
@@ -1077,6 +1143,15 @@ export default function TournamentCalendar() {
 
           {/* Calendar Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Loading State */}
+            {tournamentsLoading && (
+              <div className="lg:col-span-3 text-center py-8">
+                <div className="inline-flex items-center gap-2 text-blue-400">
+                  <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+                  Loading tournament data...
+                </div>
+              </div>
+            )}
             {/* Calendar View */}
             <div className="lg:col-span-2">
               <Card className="bg-slate-800/80 backdrop-blur-sm border-blue-500/20">
@@ -1214,9 +1289,16 @@ export default function TournamentCalendar() {
                       <div key={tournament.id} className="p-4 bg-slate-700/50 rounded-lg border border-slate-600">
                         <div className="flex items-start justify-between mb-2">
                           <h3 className="font-semibold text-white text-sm">{tournament.title}</h3>
-                          <Badge className={`text-xs ${getSportColor(tournament.sport)}`}>
-                            {tournament.sport}
-                          </Badge>
+                          <div className="flex items-center gap-2">
+                            <Badge className={`text-xs ${getSportColor(tournament.sport)}`}>
+                              {tournament.sport}
+                            </Badge>
+                            {tournament.isLive && (
+                              <Badge className="text-xs bg-green-600 text-white">
+                                🔴 LIVE
+                              </Badge>
+                            )}
+                          </div>
                         </div>
                         
                         <div className="space-y-2 text-xs text-slate-300">
@@ -1244,11 +1326,17 @@ export default function TournamentCalendar() {
                           <Button
                             size="sm"
                             className="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs"
-                            onClick={() => window.open(`mailto:${tournament.organizerEmail}?subject=Tournament Coordination - ${tournament.title}`)}
+                            onClick={() => handleContactOrganizer(tournament)}
+                            data-testid={`button-contact-organizer-${tournament.id}`}
                           >
                             <Mail className="h-3 w-3 mr-1" />
                             Contact Organizer
                           </Button>
+                          {tournament.isLive && (
+                            <div className="mt-1 text-xs text-slate-400 text-center">
+                              📊 {tournament.calendarViewCount || 0} views
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))}

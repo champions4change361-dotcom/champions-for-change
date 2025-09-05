@@ -597,6 +597,81 @@ export default function TournamentManagerDashboard() {
                       {tournament.description}
                     </div>
                   )}
+                  
+                  {/* Calendar Visibility Controls */}
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-gray-500" />
+                        <span className="text-sm font-medium text-gray-700">Public Calendar</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {tournament.isPublicCalendarVisible ? (
+                          <>
+                            <Badge 
+                              variant={tournament.calendarApprovalStatus === 'approved' ? 'default' : 
+                                      tournament.calendarApprovalStatus === 'pending' ? 'secondary' : 'destructive'}
+                              className="text-xs"
+                            >
+                              {tournament.calendarApprovalStatus === 'approved' && <CheckCircle className="h-3 w-3 mr-1" />}
+                              {tournament.calendarApprovalStatus === 'pending' && <Clock className="h-3 w-3 mr-1" />}
+                              {tournament.calendarApprovalStatus === 'rejected' && <XCircle className="h-3 w-3 mr-1" />}
+                              {tournament.calendarApprovalStatus || 'pending'}
+                            </Badge>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                // TODO: Add function to toggle calendar visibility
+                                toast({
+                                  title: "Remove from Calendar",
+                                  description: "This tournament will be removed from the public calendar"
+                                });
+                              }}
+                              className="h-8 px-2 text-xs"
+                              data-testid={`button-remove-calendar-${tournament.id}`}
+                            >
+                              Remove
+                            </Button>
+                          </>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              // TODO: Add function to submit to calendar
+                              toast({
+                                title: "Add to Calendar",
+                                description: "This tournament will be submitted for calendar review"
+                              });
+                            }}
+                            className="h-8 px-2 text-xs bg-green-50 hover:bg-green-100 border-green-200 text-green-700"
+                            data-testid={`button-add-calendar-${tournament.id}`}
+                          >
+                            <Plus className="h-3 w-3 mr-1" />
+                            Add to Calendar
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {tournament.isPublicCalendarVisible && (
+                      <div className="mt-2 text-xs text-gray-600">
+                        {tournament.calendarApprovalStatus === 'approved' && (
+                          <span className="text-green-600">✓ Visible on regional calendar • {tournament.calendarViewCount || 0} views</span>
+                        )}
+                        {tournament.calendarApprovalStatus === 'pending' && (
+                          <span className="text-yellow-600">⏳ Under review for calendar approval</span>
+                        )}
+                        {tournament.calendarApprovalStatus === 'rejected' && (
+                          <span className="text-red-600">❌ Not approved: {tournament.calendarRejectionReason || 'Review required'}</span>
+                        )}
+                        {tournament.calendarRegion && (
+                          <span className="ml-2">• Region: {tournament.calendarRegion}</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             ))}

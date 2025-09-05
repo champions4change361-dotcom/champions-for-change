@@ -64,6 +64,212 @@ export function registerTournamentRoutes(app: Express) {
     }
   });
 
+  // Get public tournaments for calendar display (NO AUTH REQUIRED)
+  app.get("/api/tournaments/public", async (req, res) => {
+    try {
+      const storage = await getStorage();
+      
+      // Get tournaments that are marked as calendar visible and approved
+      const allTournaments = await storage.getTournaments();
+      
+      // Filter for public calendar visibility
+      const publicTournaments = allTournaments.filter((tournament: any) => 
+        tournament.isPublicCalendarVisible === true && 
+        tournament.calendarApprovalStatus === 'approved'
+      );
+      
+      // Return only necessary fields for calendar display
+      const calendarTournaments = publicTournaments.map((tournament: any) => ({
+        id: tournament.id,
+        name: tournament.name,
+        sport: tournament.sport,
+        tournamentDate: tournament.tournamentDate,
+        location: tournament.location,
+        calendarRegion: tournament.calendarRegion,
+        calendarCity: tournament.calendarCity,
+        calendarStateCode: tournament.calendarStateCode,
+        calendarTags: tournament.calendarTags,
+        calendarApprovalStatus: tournament.calendarApprovalStatus,
+        ageGroup: tournament.ageGroup,
+        genderDivision: tournament.genderDivision,
+        teamSize: tournament.teamSize,
+        maxParticipants: tournament.maxParticipants,
+        entryFee: tournament.entryFee,
+        description: tournament.description,
+        calendarViewCount: tournament.calendarViewCount,
+        status: tournament.status
+      }));
+      
+      res.json(calendarTournaments);
+    } catch (error) {
+      console.error("Error fetching public tournaments:", error);
+      res.status(500).json({ message: "Failed to fetch public tournaments" });
+    }
+  });
+
+  // Submit tournament for calendar approval
+  app.patch("/api/tournaments/:id/calendar-submit", async (req: any, res) => {
+    try {
+      // Check authentication
+      if (!req.isAuthenticated || !req.isAuthenticated()) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const { id } = req.params;
+      const { calendarRegion, calendarCity, calendarStateCode, calendarTags } = req.body;
+
+      const storage = await getStorage();
+      const tournament = await storage.getTournament(id);
+      
+      if (!tournament) {
+        return res.status(404).json({ message: "Tournament not found" });
+      }
+
+      // Update tournament with calendar submission
+      await storage.updateTournament(id, {
+        isPublicCalendarVisible: true,
+        calendarApprovalStatus: 'pending',
+        calendarSubmittedAt: new Date(),
+        calendarRegion,
+        calendarCity,
+        calendarStateCode,
+        calendarTags: calendarTags || []
+      });
+
+      res.json({ message: "Tournament submitted for calendar approval" });
+    } catch (error) {
+      console.error("Error submitting tournament for calendar:", error);
+      res.status(500).json({ message: "Failed to submit tournament for calendar" });
+    }
+  });
+
+  // Admin: Approve/reject tournament for calendar
+  app.patch("/api/admin/tournaments/:id/calendar-approval", async (req: any, res) => {
+    try {
+      // Check authentication (you may want to add admin role checking here)
+      if (!req.isAuthenticated || !req.isAuthenticated()) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const { id } = req.params;
+      const { status, rejectionReason } = req.body;
+      const userId = req.user?.claims?.sub;
+
+      if (!['approved', 'rejected'].includes(status)) {
+        return res.status(400).json({ message: "Status must be 'approved' or 'rejected'" });
+      }
+
+      const storage = await getStorage();
+      const tournament = await storage.getTournament(id);
+      
+      if (!tournament) {
+        return res.status(404).json({ message: "Tournament not found" });
+      }
+
+      const updateData: any = {
+        calendarApprovalStatus: status,
+        calendarApprovedAt: status === 'approved' ? new Date() : null,
+        calendarApprovedBy: status === 'approved' ? userId : null
+      };
+
+      if (status === 'rejected' && rejectionReason) {
+        updateData.calendarRejectionReason = rejectionReason;
+      }
+
+      await storage.updateTournament(id, updateData);
+
+      res.json({ 
+        message: `Tournament ${status} for calendar display`,
+        tournament: await storage.getTournament(id)
+      });
+    } catch (error) {
+      console.error("Error updating tournament calendar approval:", error);
+      res.status(500).json({ message: "Failed to update tournament approval" });
+    }
+  });
+
+  // Get pending calendar submissions for admin review
+  app.get("/api/admin/tournaments/calendar-pending", async (req: any, res) => {
+    try {
+      // Check authentication (you may want to add admin role checking here)
+      if (!req.isAuthenticated || !req.isAuthenticated()) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const storage = await getStorage();
+      const allTournaments = await storage.getTournaments();
+      
+      // Filter for pending calendar submissions
+      const pendingTournaments = allTournaments.filter((tournament: any) => 
+        tournament.isPublicCalendarVisible === true && 
+        tournament.calendarApprovalStatus === 'pending'
+      );
+
+      res.json(pendingTournaments);
+    } catch (error) {
+      console.error("Error fetching pending calendar submissions:", error);
+      res.status(500).json({ message: "Failed to fetch pending submissions" });
+    }
+  });
+
+  // Track tournament calendar view (for analytics)
+  app.post("/api/tournaments/:id/calendar-view", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const storage = await getStorage();
+      
+      const tournament = await storage.getTournament(id);
+      if (!tournament) {
+        return res.status(404).json({ message: "Tournament not found" });
+      }
+
+      // Increment view count
+      const currentViews = tournament.calendarViewCount || 0;
+      await storage.updateTournament(id, {
+        calendarViewCount: currentViews + 1
+      });
+
+      res.json({ message: "View tracked" });
+    } catch (error) {
+      console.error("Error tracking tournament view:", error);
+      res.status(500).json({ message: "Failed to track view" });
+    }
+  });
+
+  // Get tournament calendar analytics
+  app.get("/api/tournaments/:id/calendar-analytics", async (req: any, res) => {
+    try {
+      // Check authentication
+      if (!req.isAuthenticated || !req.isAuthenticated()) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const { id } = req.params;
+      const storage = await getStorage();
+      
+      const tournament = await storage.getTournament(id);
+      if (!tournament) {
+        return res.status(404).json({ message: "Tournament not found" });
+      }
+
+      // Return analytics data
+      const analytics = {
+        calendarViewCount: tournament.calendarViewCount || 0,
+        calendarClickCount: tournament.calendarClickCount || 0,
+        calendarApprovalStatus: tournament.calendarApprovalStatus,
+        calendarSubmittedAt: tournament.calendarSubmittedAt,
+        calendarApprovedAt: tournament.calendarApprovedAt,
+        calendarRegion: tournament.calendarRegion,
+        calendarTags: tournament.calendarTags || []
+      };
+
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error fetching tournament calendar analytics:", error);
+      res.status(500).json({ message: "Failed to fetch analytics" });
+    }
+  });
+
   // Get a specific tournament by ID
   app.get("/api/tournaments/:id", async (req, res) => {
     try {

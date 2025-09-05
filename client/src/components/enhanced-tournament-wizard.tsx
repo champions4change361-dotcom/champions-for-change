@@ -43,6 +43,12 @@ const formSchema = insertTournamentSchema.extend({
   genderDivision: z.string().optional(),
   entryFee: z.string().optional(), // Convert to string for numeric database field
   tournamentDate: z.string().optional(), // ISO string for date field
+  // Calendar discoverability fields
+  isPublicCalendarVisible: z.boolean().optional(),
+  calendarRegion: z.string().optional(),
+  calendarCity: z.string().optional(),
+  calendarStateCode: z.string().optional(),
+  calendarTags: z.array(z.string()).optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -2044,6 +2050,121 @@ export default function EnhancedTournamentWizard({
 
                 <div className="text-xs text-blue-700 bg-blue-100 p-2 rounded">
                   <strong>Foundation Plan:</strong> 2% platform fee supports student education. You keep 98% of all payments.
+                </div>
+              </div>
+
+              {/* Calendar Discoverability Section */}
+              <div className="space-y-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                <h4 className="font-medium text-green-900 flex items-center gap-2">
+                  <Trophy className="h-4 w-4" />
+                  Tournament Discovery & Visibility
+                </h4>
+                <p className="text-sm text-green-700 mb-4">
+                  Make your tournament discoverable on our public calendar so other teams and athletes in your region can find and participate in your event.
+                </p>
+                
+                <div className="space-y-4">
+                  {/* Main Calendar Visibility Toggle */}
+                  <div className="flex items-start space-x-3">
+                    <Checkbox
+                      id="isPublicCalendarVisible"
+                      checked={form.watch("isPublicCalendarVisible") || false}
+                      onCheckedChange={(checked) => form.setValue("isPublicCalendarVisible", checked as boolean)}
+                      data-testid="checkbox-calendar-visible"
+                    />
+                    <div className="flex-1">
+                      <Label htmlFor="isPublicCalendarVisible" className="text-sm font-medium text-green-800">
+                        Add to Public Tournament Calendar
+                      </Label>
+                      <p className="text-xs text-green-600 mt-1">
+                        Your tournament will appear on our regional calendar for discovery by local teams and athletes
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Additional fields when calendar visibility is enabled */}
+                  {form.watch("isPublicCalendarVisible") && (
+                    <div className="space-y-4 pl-6 border-l-2 border-green-300">
+                      {/* Geographic Information */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Label className="block text-sm font-medium text-green-800 mb-2">
+                            State/Region
+                          </Label>
+                          <Input
+                            placeholder="e.g., Texas, California"
+                            {...form.register("calendarRegion")}
+                            className="w-full"
+                            data-testid="input-calendar-region"
+                          />
+                          <p className="text-xs text-green-600 mt-1">
+                            Help teams find tournaments in their region
+                          </p>
+                        </div>
+                        
+                        <div>
+                          <Label className="block text-sm font-medium text-green-800 mb-2">
+                            City
+                          </Label>
+                          <Input
+                            placeholder="e.g., Austin, Los Angeles"
+                            {...form.register("calendarCity")}
+                            className="w-full"
+                            data-testid="input-calendar-city"
+                          />
+                          <p className="text-xs text-green-600 mt-1">
+                            Local discovery for nearby teams
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Tournament Tags */}
+                      <div>
+                        <Label className="block text-sm font-medium text-green-800 mb-2">
+                          Tournament Tags (Optional)
+                        </Label>
+                        <div className="flex flex-wrap gap-2 mb-2">
+                          {['competitive', 'recreational', 'youth', 'adult', 'beginner-friendly', 'advanced', 'championship'].map((tag) => (
+                            <Button
+                              key={tag}
+                              type="button"
+                              variant={form.watch("calendarTags")?.includes(tag) ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => {
+                                const currentTags = form.watch("calendarTags") || [];
+                                const newTags = currentTags.includes(tag)
+                                  ? currentTags.filter(t => t !== tag)
+                                  : [...currentTags, tag];
+                                form.setValue("calendarTags", newTags);
+                              }}
+                              className="h-8 px-3 text-xs"
+                              data-testid={`tag-${tag}`}
+                            >
+                              {tag}
+                            </Button>
+                          ))}
+                        </div>
+                        <p className="text-xs text-green-600">
+                          Help teams find tournaments that match their skill level and style
+                        </p>
+                      </div>
+
+                      {/* Benefits and Information */}
+                      <div className="bg-white p-3 rounded border border-green-200">
+                        <h5 className="font-medium text-green-800 mb-2">📈 Benefits of Public Calendar Listing:</h5>
+                        <ul className="text-xs text-green-700 space-y-1">
+                          <li>• Increased tournament participation and registration</li>
+                          <li>• Discover other tournaments in your area to avoid scheduling conflicts</li>
+                          <li>• Build your local sports community and network</li>
+                          <li>• Free promotion to our growing user base</li>
+                        </ul>
+                      </div>
+                      
+                      <div className="text-xs text-green-600 bg-green-100 p-2 rounded">
+                        <strong>🛡️ Moderation:</strong> Public tournaments are reviewed to ensure quality. Verified organizations are auto-approved.
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
