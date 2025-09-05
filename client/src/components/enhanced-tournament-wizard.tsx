@@ -23,11 +23,23 @@ import { type TeamData } from "@/utils/csv-utils";
 import AddressAutocomplete from "@/components/AddressAutocomplete";
 import { getEventsForSport, type SportEventDefinition } from "@shared/sportEvents";
 import { generateRandomNames } from "@/utils/name-generator";
+import { ComprehensiveTournamentFormatSelector, SportSpecificConfig, allTournamentFormats, type TournamentFormatConfig } from "./comprehensive-tournament-formats";
 
 const formSchema = insertTournamentSchema.extend({
   teamSize: z.number().min(2).max(128), // Support up to 128 teams for large tournaments
-  tournamentType: z.enum(["single", "double", "double-stage", "pool-play", "round-robin", "swiss-system"]).default("single"),
-  competitionFormat: z.enum(["bracket", "leaderboard", "series", "bracket-to-series", "multi-stage"]).default("bracket"),
+  tournamentType: z.enum([
+    "single", "double", "double-stage", "pool-play", "round-robin", "swiss-system",
+    "match-play", "stroke-play", "scramble", "best-ball", "alternate-shot", "modified-stableford",
+    "playoff-bracket", "conference-championship", "dual-meet", "triangular-meet", "weight-class-bracket",
+    "multi-event-scoring", "preliminary-finals", "heat-management", "skills-competition", "draw-management",
+    "group-stage-knockout", "home-away-series"
+  ]).default("single"),
+  competitionFormat: z.enum([
+    "bracket", "leaderboard", "series", "bracket-to-series", "multi-stage",
+    "round-robin-pools", "elimination-pools", "consolation-bracket", "team-vs-individual",
+    "portfolio-review", "oral-competition", "written-test", "judged-performance", 
+    "timed-competition", "scoring-average", "advancement-ladder", "rating-system"
+  ]).default("bracket"),
   ageGroup: z.string().optional(),
   genderDivision: z.string().optional(),
   entryFee: z.string().optional(), // Convert to string for numeric database field
@@ -72,6 +84,10 @@ export default function EnhancedTournamentWizard({
   const [createdTournament, setCreatedTournament] = useState<any>(null);
   const [isDraftSaving, setIsDraftSaving] = useState(false);
   const [autoSaveStatus, setAutoSaveStatus] = useState<'saved' | 'saving' | 'error' | null>(null);
+  
+  // COMPREHENSIVE TOURNAMENT FORMAT STATE
+  const [selectedTournamentFormat, setSelectedTournamentFormat] = useState<TournamentFormatConfig | null>(null);
+  const [sportSpecificConfig, setSportSpecificConfig] = useState<Record<string, any>>({});
   
   // Stage format configuration
   const [stage1Format, setStage1Format] = useState<string>('round-robin');
@@ -568,105 +584,172 @@ export default function EnhancedTournamentWizard({
         <CardContent className="pt-6">
           {currentStep === 'sport' && (
             <div className="space-y-6">
-              {/* Step 1: Category Selection */}
-              <div>
-                <Label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
-                  Competition Category *
-                </Label>
-                <select 
-                  value={selectedCategory}
-                  onChange={(e) => handleCategoryChange(e.target.value)}
-                  className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  data-testid="select-category"
-                >
-                  <option value="">Select broader category</option>
-                  {Object.entries(sportCategories).map(([key, category]) => (
-                    <option key={key} value={key}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
-                <p className="text-xs text-gray-500 mt-1">
-                  Choose from Athletic, Academic, or Fine Arts competitions
-                </p>
-              </div>
-
-              {/* Step 2: Subcategory Selection */}
-              {selectedCategory && (
-                <div>
-                  <Label htmlFor="subcategory" className="block text-sm font-medium text-gray-700 mb-2">
-                    Specific Area *
-                  </Label>
-                  <select 
-                    value={selectedSubcategory}
-                    onChange={(e) => handleSubcategoryChange(e.target.value)}
-                    className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    data-testid="select-subcategory"
-                  >
-                    <option value="">Select specific area</option>
-                    {Object.entries(sportCategories[selectedCategory as keyof typeof sportCategories].subcategories).map(([key, subcategory]) => (
-                      <option key={key} value={key}>
-                        {subcategory.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              {/* Step 3: Sport Selection */}
-              {selectedCategory && selectedSubcategory && (
-                <div>
-                  <Label htmlFor="sport" className="block text-sm font-medium text-gray-700 mb-2">
-                    Specific Competition *
-                  </Label>
-                  <select 
-                    onChange={(e) => handleSportChange(e.target.value)} 
-                    value={form.watch("sport") || ""}
-                    className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    data-testid="select-sport"
-                  >
-                    <option value="">Choose specific competition</option>
-                    {getAvailableSports().map((sport: string, index: number) => (
-                      <option key={index} value={sport}>
-                        {sport}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              {/* Help text showing selection path */}
-              {selectedCategory && selectedSubcategory && form.watch("sport") && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                  <div className="flex items-center text-sm text-green-700">
-                    <CheckCircle className="h-4 w-4 mr-2" />
-                    <span className="font-medium">Selection Complete:</span>
+              {/* COMPREHENSIVE SPORT & FORMAT SELECTION */}
+              {!selectedTournamentFormat ? (
+                <div className="space-y-6">
+                  {/* Step 1: Category Selection */}
+                  <div>
+                    <Label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
+                      Competition Category *
+                    </Label>
+                    <select 
+                      value={selectedCategory}
+                      onChange={(e) => handleCategoryChange(e.target.value)}
+                      className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      data-testid="select-category"
+                    >
+                      <option value="">Select broader category</option>
+                      {Object.entries(sportCategories).map(([key, category]) => (
+                        <option key={key} value={key}>
+                          {category.name}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Choose from Athletic, Academic, or Fine Arts competitions
+                    </p>
                   </div>
-                  <p className="text-sm text-green-600 mt-1">
-                    {(sportCategories as any)[selectedCategory].name} → {" "}
-                    {(sportCategories as any)[selectedCategory].subcategories[selectedSubcategory].name} → {" "}
-                    {form.watch("sport")}
-                  </p>
+
+                  {/* Step 2: Subcategory Selection */}
+                  {selectedCategory && (
+                    <div>
+                      <Label htmlFor="subcategory" className="block text-sm font-medium text-gray-700 mb-2">
+                        Specific Area *
+                      </Label>
+                      <select 
+                        value={selectedSubcategory}
+                        onChange={(e) => handleSubcategoryChange(e.target.value)}
+                        className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        data-testid="select-subcategory"
+                      >
+                        <option value="">Select specific area</option>
+                        {Object.entries(sportCategories[selectedCategory as keyof typeof sportCategories].subcategories).map(([key, subcategory]) => (
+                          <option key={key} value={key}>
+                            {subcategory.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {/* Step 3: Sport Selection */}
+                  {selectedCategory && selectedSubcategory && (
+                    <div>
+                      <Label htmlFor="sport" className="block text-sm font-medium text-gray-700 mb-2">
+                        Specific Competition *
+                      </Label>
+                      <select 
+                        onChange={(e) => handleSportChange(e.target.value)} 
+                        value={form.watch("sport") || ""}
+                        className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        data-testid="select-sport"
+                      >
+                        <option value="">Choose specific competition</option>
+                        {getAvailableSports().map((sport: string, index: number) => (
+                          <option key={index} value={sport}>
+                            {sport}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {/* Help text showing selection path */}
+                  {selectedCategory && selectedSubcategory && form.watch("sport") && (
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                      <div className="flex items-center text-sm text-green-700">
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        <span className="font-medium">Selection Complete:</span>
+                      </div>
+                      <p className="text-sm text-green-600 mt-1">
+                        {(sportCategories as any)[selectedCategory].name} → {" "}
+                        {(sportCategories as any)[selectedCategory].subcategories[selectedSubcategory].name} → {" "}
+                        {form.watch("sport")}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* COMPREHENSIVE TOURNAMENT FORMAT SELECTOR */}
+                  {form.watch("sport") && (
+                    <div className="mt-6">
+                      <ComprehensiveTournamentFormatSelector
+                        sport={form.watch("sport")}
+                        onFormatSelect={(format) => {
+                          setSelectedTournamentFormat(format);
+                          form.setValue("tournamentType", format.tournamentType as any);
+                          form.setValue("competitionFormat", format.competitionFormat as any);
+                        }}
+                        selectedFormat={selectedTournamentFormat?.format}
+                      />
+                    </div>
+                  )}
+
+                  {/* SPORT-SPECIFIC CONFIGURATION */}
+                  {selectedTournamentFormat && (
+                    <div className="mt-6">
+                      <SportSpecificConfig
+                        format={selectedTournamentFormat}
+                        onConfigChange={(config) => setSportSpecificConfig(config)}
+                        currentConfig={sportSpecificConfig}
+                      />
+                    </div>
+                  )}
+                </div>
+              ) : (
+                // Show comprehensive format selector if format is already selected
+                <div className="space-y-6">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-center text-sm text-blue-700 mb-3">
+                      <Trophy className="h-4 w-4 mr-2" />
+                      <span className="font-medium">Selected Tournament Format</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-gray-900">{selectedTournamentFormat.sport}</p>
+                        <p className="text-sm text-gray-600">{selectedTournamentFormat.description}</p>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedTournamentFormat(null);
+                          setSportSpecificConfig({});
+                        }}
+                        data-testid="button-change-format"
+                      >
+                        Change Format
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* SPORT-SPECIFIC CONFIGURATION */}
+                  <SportSpecificConfig
+                    format={selectedTournamentFormat}
+                    onConfigChange={(config) => setSportSpecificConfig(config)}
+                    currentConfig={sportSpecificConfig}
+                  />
                 </div>
               )}
 
-
-              <div>
-                <Label htmlFor="competitionFormat" className="block text-sm font-medium text-gray-700 mb-2">
-                  Competition Format *
-                </Label>
-                <select 
-                  value={form.watch("competitionFormat")} 
-                  onChange={(e) => form.setValue("competitionFormat", e.target.value as any)}
-                  className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="">Choose format</option>
-                  <option value="bracket">Bracket Tournament</option>
-                  <option value="leaderboard">Leaderboard Competition</option>
-                  <option value="series">Best-of Series</option>
-                  <option value="bracket-to-series">Bracket + Championship Series</option>
-                </select>
-              </div>
+              {/* TRADITIONAL SETTINGS (if no comprehensive format selected) */}
+              {!selectedTournamentFormat && form.watch("sport") && (
+                <div className="space-y-6">
+                  <div>
+                    <Label htmlFor="competitionFormat" className="block text-sm font-medium text-gray-700 mb-2">
+                      Competition Format *
+                    </Label>
+                    <select 
+                      value={form.watch("competitionFormat")} 
+                      onChange={(e) => form.setValue("competitionFormat", e.target.value as any)}
+                      className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="">Choose format</option>
+                      <option value="bracket">Bracket Tournament</option>
+                      <option value="leaderboard">Leaderboard Competition</option>
+                      <option value="series">Best-of Series</option>
+                      <option value="bracket-to-series">Bracket + Championship Series</option>
+                    </select>
+                  </div>
 
               <div>
                 <Label htmlFor="tournamentType" className="block text-sm font-medium text-gray-700 mb-2">
@@ -784,6 +867,8 @@ export default function EnhancedTournamentWizard({
                   </select>
                 </div>
               </div>
+                </div>
+              )}
             </div>
           )}
 

@@ -488,13 +488,655 @@ export const gymnasticsEvents: SportEventDefinition[] = [
   }
 ];
 
-// MASTER SPORT EVENT MAPPING
+// GOLF EVENTS
+export const golfEvents: SportEventDefinition[] = [
+  {
+    eventName: 'Individual Stroke Play',
+    eventType: 'scored',
+    scoringUnit: 'strokes',
+    genderDivisions: ['Boys', 'Girls', 'Men', 'Women'],
+    ageGroups: ['High School', 'College', 'Adult']
+  },
+  {
+    eventName: 'Individual Match Play',
+    eventType: 'scored',
+    scoringUnit: 'holes',
+    genderDivisions: ['Boys', 'Girls', 'Men', 'Women'],
+    ageGroups: ['High School', 'College', 'Adult']
+  },
+  {
+    eventName: 'Team Scramble',
+    eventType: 'scored',
+    scoringUnit: 'strokes',
+    genderDivisions: ['Mixed', 'Men', 'Women'],
+    ageGroups: ['High School', 'College', 'Adult'],
+    maxParticipants: 4
+  },
+  {
+    eventName: 'Best Ball',
+    eventType: 'scored',
+    scoringUnit: 'strokes',
+    genderDivisions: ['Mixed', 'Men', 'Women'],
+    ageGroups: ['High School', 'College', 'Adult'],
+    maxParticipants: 4
+  },
+  {
+    eventName: 'Alternate Shot',
+    eventType: 'scored',
+    scoringUnit: 'strokes',
+    genderDivisions: ['Mixed', 'Men', 'Women'],
+    ageGroups: ['High School', 'College', 'Adult'],
+    maxParticipants: 2
+  }
+];
+
+// FOOTBALL EVENTS
+export const footballEvents: SportEventDefinition[] = [
+  {
+    eventName: 'Regular Season Game',
+    eventType: 'team_game',
+    scoringUnit: 'points',
+    genderDivisions: ['Boys', 'Men'],
+    ageGroups: ['High School', 'College', 'Adult']
+  },
+  {
+    eventName: 'Playoff Game',
+    eventType: 'team_game',
+    scoringUnit: 'points',
+    genderDivisions: ['Boys', 'Men'],
+    ageGroups: ['High School', 'College', 'Adult']
+  },
+  {
+    eventName: '7v7 Tournament',
+    eventType: 'team_game',
+    scoringUnit: 'points',
+    genderDivisions: ['Boys', 'Men'],
+    ageGroups: ['High School', 'College', 'Adult'],
+    maxParticipants: 7
+  }
+];
+
+// SOCCER EVENTS
+export const soccerEvents: SportEventDefinition[] = [
+  {
+    eventName: 'Tournament Match',
+    eventType: 'team_game',
+    scoringUnit: 'goals',
+    genderDivisions: ['Boys', 'Girls', 'Men', 'Women', 'Co-Ed'],
+    ageGroups: ['Elementary', 'Middle School', 'High School', 'College', 'Adult']
+  },
+  {
+    eventName: 'Penalty Shootout',
+    eventType: 'scored',
+    scoringUnit: 'goals',
+    genderDivisions: ['Boys', 'Girls', 'Men', 'Women'],
+    ageGroups: ['Middle School', 'High School', 'College', 'Adult']
+  }
+];
+
+// VOLLEYBALL EVENTS
+export const volleyballEvents: SportEventDefinition[] = [
+  {
+    eventName: 'Tournament Match',
+    eventType: 'team_game',
+    scoringUnit: 'points',
+    genderDivisions: ['Boys', 'Girls', 'Men', 'Women', 'Co-Ed'],
+    ageGroups: ['Middle School', 'High School', 'College', 'Adult']
+  },
+  {
+    eventName: 'Beach Volleyball',
+    eventType: 'team_game',
+    scoringUnit: 'points',
+    genderDivisions: ['Boys', 'Girls', 'Men', 'Women', 'Mixed'],
+    ageGroups: ['High School', 'College', 'Adult'],
+    maxParticipants: 2
+  }
+];
+
+// BASEBALL/SOFTBALL EVENTS
+export const baseballEvents: SportEventDefinition[] = [
+  {
+    eventName: 'Tournament Game',
+    eventType: 'team_game',
+    scoringUnit: 'runs',
+    genderDivisions: ['Boys', 'Men'],
+    ageGroups: ['Elementary', 'Middle School', 'High School', 'College', 'Adult']
+  },
+  {
+    eventName: 'Home Run Derby',
+    eventType: 'points',
+    scoringUnit: 'home runs',
+    genderDivisions: ['Boys', 'Men'],
+    ageGroups: ['High School', 'College', 'Adult']
+  }
+];
+
+export const softballEvents: SportEventDefinition[] = [
+  {
+    eventName: 'Tournament Game',
+    eventType: 'team_game',
+    scoringUnit: 'runs',
+    genderDivisions: ['Girls', 'Women', 'Co-Ed'],
+    ageGroups: ['Elementary', 'Middle School', 'High School', 'College', 'Adult']
+  }
+];
+
+// TENNIS EVENTS
+export const tennisEvents: SportEventDefinition[] = [
+  {
+    eventName: 'Singles Match',
+    eventType: 'team_game',
+    scoringUnit: 'sets',
+    genderDivisions: ['Boys', 'Girls', 'Men', 'Women'],
+    ageGroups: ['Middle School', 'High School', 'College', 'Adult']
+  },
+  {
+    eventName: 'Doubles Match',
+    eventType: 'team_game',
+    scoringUnit: 'sets',
+    genderDivisions: ['Boys', 'Girls', 'Men', 'Women', 'Mixed'],
+    ageGroups: ['Middle School', 'High School', 'College', 'Adult'],
+    maxParticipants: 2
+  }
+];
+
+// WRESTLING EVENTS
+export const wrestlingEvents: SportEventDefinition[] = [
+  {
+    eventName: '106 lbs',
+    eventType: 'team_game',
+    scoringUnit: 'points',
+    genderDivisions: ['Boys', 'Men'],
+    ageGroups: ['High School', 'College']
+  },
+  {
+    eventName: '113 lbs',
+    eventType: 'team_game',
+    scoringUnit: 'points',
+    genderDivisions: ['Boys', 'Men'],
+    ageGroups: ['High School', 'College']
+  },
+  {
+    eventName: '120 lbs',
+    eventType: 'team_game',
+    scoringUnit: 'points',
+    genderDivisions: ['Boys', 'Men'],
+    ageGroups: ['High School', 'College']
+  },
+  {
+    eventName: '126 lbs',
+    eventType: 'team_game',
+    scoringUnit: 'points',
+    genderDivisions: ['Boys', 'Men'],
+    ageGroups: ['High School', 'College']
+  },
+  {
+    eventName: '132 lbs',
+    eventType: 'team_game',
+    scoringUnit: 'points',
+    genderDivisions: ['Boys', 'Men'],
+    ageGroups: ['High School', 'College']
+  },
+  {
+    eventName: '138 lbs',
+    eventType: 'team_game',
+    scoringUnit: 'points',
+    genderDivisions: ['Boys', 'Men'],
+    ageGroups: ['High School', 'College']
+  },
+  {
+    eventName: '145 lbs',
+    eventType: 'team_game',
+    scoringUnit: 'points',
+    genderDivisions: ['Boys', 'Men'],
+    ageGroups: ['High School', 'College']
+  },
+  {
+    eventName: '152 lbs',
+    eventType: 'team_game',
+    scoringUnit: 'points',
+    genderDivisions: ['Boys', 'Men'],
+    ageGroups: ['High School', 'College']
+  },
+  {
+    eventName: '160 lbs',
+    eventType: 'team_game',
+    scoringUnit: 'points',
+    genderDivisions: ['Boys', 'Men'],
+    ageGroups: ['High School', 'College']
+  },
+  {
+    eventName: '170 lbs',
+    eventType: 'team_game',
+    scoringUnit: 'points',
+    genderDivisions: ['Boys', 'Men'],
+    ageGroups: ['High School', 'College']
+  },
+  {
+    eventName: '182 lbs',
+    eventType: 'team_game',
+    scoringUnit: 'points',
+    genderDivisions: ['Boys', 'Men'],
+    ageGroups: ['High School', 'College']
+  },
+  {
+    eventName: '195 lbs',
+    eventType: 'team_game',
+    scoringUnit: 'points',
+    genderDivisions: ['Boys', 'Men'],
+    ageGroups: ['High School', 'College']
+  },
+  {
+    eventName: '220 lbs',
+    eventType: 'team_game',
+    scoringUnit: 'points',
+    genderDivisions: ['Boys', 'Men'],
+    ageGroups: ['High School', 'College']
+  },
+  {
+    eventName: '285 lbs',
+    eventType: 'team_game',
+    scoringUnit: 'points',
+    genderDivisions: ['Boys', 'Men'],
+    ageGroups: ['High School', 'College']
+  }
+];
+
+// CROSS COUNTRY EVENTS
+export const crossCountryEvents: SportEventDefinition[] = [
+  {
+    eventName: '5K Race',
+    eventType: 'timed',
+    scoringUnit: 'minutes',
+    genderDivisions: ['Boys', 'Girls', 'Men', 'Women'],
+    ageGroups: ['High School', 'College', 'Adult']
+  },
+  {
+    eventName: '8K Race',
+    eventType: 'timed',
+    scoringUnit: 'minutes',
+    genderDivisions: ['Men'],
+    ageGroups: ['College', 'Adult']
+  },
+  {
+    eventName: '6K Race',
+    eventType: 'timed',
+    scoringUnit: 'minutes',
+    genderDivisions: ['Women'],
+    ageGroups: ['College', 'Adult']
+  }
+];
+
+// ACADEMIC COMPETITION EVENTS
+export const academicEvents: SportEventDefinition[] = [
+  // UIL Academic Events
+  {
+    eventName: 'Mathematics',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['Elementary', 'Middle School', 'High School']
+  },
+  {
+    eventName: 'Number Sense',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['Elementary', 'Middle School', 'High School']
+  },
+  {
+    eventName: 'Calculator Applications',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['Elementary', 'Middle School', 'High School']
+  },
+  {
+    eventName: 'Science',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['Elementary', 'Middle School', 'High School']
+  },
+  {
+    eventName: 'Computer Science',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['High School']
+  },
+  {
+    eventName: 'Computer Applications',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['Elementary', 'Middle School', 'High School']
+  },
+  {
+    eventName: 'Accounting',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['High School']
+  },
+  {
+    eventName: 'Current Issues & Events',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['High School']
+  },
+  {
+    eventName: 'Literary Criticism',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['High School']
+  },
+  {
+    eventName: 'Social Studies',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['Elementary', 'Middle School', 'High School']
+  },
+  {
+    eventName: 'Spelling & Vocabulary',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['Elementary', 'Middle School', 'High School']
+  },
+  {
+    eventName: 'Ready Writing',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['Elementary', 'Middle School', 'High School']
+  }
+];
+
+// SPEECH & DEBATE EVENTS
+export const speechDebateEvents: SportEventDefinition[] = [
+  {
+    eventName: 'Cross Examination Debate',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['High School', 'College'],
+    maxParticipants: 2
+  },
+  {
+    eventName: 'Lincoln-Douglas Debate',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['High School', 'College']
+  },
+  {
+    eventName: 'Informative Speaking',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['High School', 'College']
+  },
+  {
+    eventName: 'Persuasive Speaking',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['High School', 'College']
+  },
+  {
+    eventName: 'Poetry Interpretation',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['High School', 'College']
+  },
+  {
+    eventName: 'Prose Interpretation',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['High School', 'College']
+  },
+  {
+    eventName: 'Extemporaneous Speaking',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['High School', 'College']
+  },
+  {
+    eventName: 'Original Oratory',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['High School', 'College']
+  },
+  {
+    eventName: 'Impromptu Speaking',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['Elementary', 'Middle School', 'High School', 'College']
+  },
+  {
+    eventName: 'Oral Reading',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['Elementary', 'Middle School']
+  }
+];
+
+// MUSIC COMPETITION EVENTS
+export const musicEvents: SportEventDefinition[] = [
+  {
+    eventName: 'Concert Band',
+    eventType: 'scored',
+    scoringUnit: 'rating',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['Middle School', 'High School', 'College']
+  },
+  {
+    eventName: 'Marching Band',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['High School', 'College']
+  },
+  {
+    eventName: 'Jazz Band',
+    eventType: 'scored',
+    scoringUnit: 'rating',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['High School', 'College']
+  },
+  {
+    eventName: 'Orchestra',
+    eventType: 'scored',
+    scoringUnit: 'rating',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['Middle School', 'High School', 'College']
+  },
+  {
+    eventName: 'Choir',
+    eventType: 'scored',
+    scoringUnit: 'rating',
+    genderDivisions: ['Mixed', 'Boys', 'Girls'],
+    ageGroups: ['Middle School', 'High School', 'College']
+  },
+  {
+    eventName: 'Solo & Ensemble',
+    eventType: 'scored',
+    scoringUnit: 'rating',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['Middle School', 'High School', 'College']
+  },
+  {
+    eventName: 'All-State Auditions',
+    eventType: 'scored',
+    scoringUnit: 'ranking',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['High School']
+  }
+];
+
+// VISUAL ARTS EVENTS
+export const visualArtsEvents: SportEventDefinition[] = [
+  {
+    eventName: 'Art Competition',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['Elementary', 'Middle School', 'High School', 'College']
+  },
+  {
+    eventName: 'Photography',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['Middle School', 'High School', 'College']
+  },
+  {
+    eventName: 'Digital Art',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['Middle School', 'High School', 'College']
+  },
+  {
+    eventName: 'Painting',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['Elementary', 'Middle School', 'High School', 'College']
+  },
+  {
+    eventName: 'Drawing',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['Elementary', 'Middle School', 'High School', 'College']
+  },
+  {
+    eventName: 'Sculpture',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['Middle School', 'High School', 'College']
+  }
+];
+
+// THEATER EVENTS
+export const theaterEvents: SportEventDefinition[] = [
+  {
+    eventName: 'One Act Play',
+    eventType: 'scored',
+    scoringUnit: 'rating',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['Elementary', 'Middle School', 'High School', 'College']
+  },
+  {
+    eventName: 'Musical Theater',
+    eventType: 'scored',
+    scoringUnit: 'rating',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['Middle School', 'High School', 'College']
+  },
+  {
+    eventName: 'Technical Theater',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['High School', 'College']
+  },
+  {
+    eventName: 'Improvisation',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['High School', 'College']
+  }
+];
+
+// STEM COMPETITION EVENTS
+export const stemEvents: SportEventDefinition[] = [
+  {
+    eventName: 'Science Olympiad',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['Middle School', 'High School']
+  },
+  {
+    eventName: 'Math Olympiad',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['Elementary', 'Middle School', 'High School']
+  },
+  {
+    eventName: 'Robotics Competition',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['Middle School', 'High School', 'College']
+  },
+  {
+    eventName: 'Programming Competition',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['High School', 'College']
+  },
+  {
+    eventName: 'Engineering Challenge',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['Middle School', 'High School', 'College']
+  },
+  {
+    eventName: 'Quiz Bowl',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['Middle School', 'High School', 'College']
+  },
+  {
+    eventName: 'Academic Decathlon',
+    eventType: 'scored',
+    scoringUnit: 'points',
+    genderDivisions: ['Mixed'],
+    ageGroups: ['High School']
+  }
+];
+
+// MASTER SPORT EVENT MAPPING - COMPREHENSIVE
 export const sportEventMap = {
   'Swimming & Diving': swimmingEvents,
   'Track & Field': trackEvents,
   'Basketball': basketballEvents,
   'Cheer/Dance': cheerDanceEvents,
   'Gymnastics': gymnasticsEvents,
+  'Golf': golfEvents,
+  'Football': footballEvents,
+  'Soccer': soccerEvents,
+  'Volleyball': volleyballEvents,
+  'Baseball': baseballEvents,
+  'Softball': softballEvents,
+  'Tennis': tennisEvents,
+  'Wrestling': wrestlingEvents,
+  'Cross Country': crossCountryEvents,
+  'Academic': academicEvents,
+  'Speech & Debate': speechDebateEvents,
+  'Music': musicEvents,
+  'Visual Arts': visualArtsEvents,
+  'Theater': theaterEvents,
+  'STEM': stemEvents,
 } as const;
 
 // Helper function to get events for a sport
