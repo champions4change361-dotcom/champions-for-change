@@ -546,11 +546,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Send welcome email with verification link
       try {
+        // Detect domain from request headers
+        const host = req.get('Host') || req.get('Origin') || '';
         await emailService.sendWelcomeEmail(
           email, 
           firstName, 
           organizationType || 'Tournament Organizer',
-          organizationName
+          organizationName,
+          host
         );
         console.log(`📧 Welcome email sent to ${email}`);
       } catch (emailError) {

@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { CheckCircle, Trophy, Users, Building, GraduationCap, ArrowLeft, ArrowRight, Home, Mail } from 'lucide-react';
+import { CheckCircle, Trophy, Users, Building, GraduationCap, ArrowLeft, ArrowRight, Home, Mail, Globe } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useDomain } from '@/hooks/useDomain';
@@ -373,25 +373,33 @@ export default function SmartSignup() {
                   <li>Check your email for login instructions</li>
                   <li>Access your tournament dashboard</li>
                   <li>Start organizing professional tournaments</li>
-                  <li>Support educational opportunities for students</li>
+                  <li>Build your tournament platform</li>
                 </ul>
               </AlertDescription>
             </Alert>
             
             <div className="p-4 rounded-lg bg-green-50">
               <h4 className="font-semibold mb-2 text-green-900">Ready to Get Started?</h4>
-              <div className="space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
                 <Button 
                   onClick={() => window.location.href = '/tournaments'}
-                  className="w-full bg-green-600 hover:bg-green-700"
+                  className="bg-green-600 hover:bg-green-700"
                 >
                   <Trophy className="h-4 w-4 mr-2" />
                   Create Your First Tournament
                 </Button>
-                <p className="text-green-800 text-sm text-center">
-                  💡 <strong>Need help?</strong> Contact us at champions4change361@gmail.com or 361-300-1552
-                </p>
+                <Button 
+                  onClick={() => window.location.href = '/website-builder'}
+                  variant="outline"
+                  className="border-green-600 text-green-600 hover:bg-green-50"
+                >
+                  <Globe className="h-4 w-4 mr-2" />
+                  Build Your Website
+                </Button>
               </div>
+              <p className="text-green-800 text-sm text-center">
+                💡 <strong>Need help?</strong> Contact us at champions4change361@gmail.com or 361-300-1552
+              </p>
             </div>
           </CardContent>
         </Card>

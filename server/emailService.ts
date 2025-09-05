@@ -48,8 +48,8 @@ class EmailService {
     }
   }
 
-  async sendWelcomeEmail(userEmail: string, firstName: string, role: string, organizationName: string) {
-    const emailContent = this.generateWelcomeEmail(firstName, role, organizationName);
+  async sendWelcomeEmail(userEmail: string, firstName: string, role: string, organizationName: string, domain?: string) {
+    const emailContent = this.generateWelcomeEmail(firstName, role, organizationName, domain);
     
     try {
       if (!this.transporter) {
@@ -60,8 +60,8 @@ class EmailService {
         return { success: true, method: 'console' };
       }
 
-      // Use a verified sender address for SendGrid
-      const fromAddress = process.env.SENDGRID_FROM_EMAIL || '"Champions for Change Athletics" <athletics@championsforchange.org>';
+      // Use domain-aware sender address
+      const fromAddress = this.getDomainFromAddress(domain);
       
       const info = await this.transporter.sendMail({
         from: fromAddress,
@@ -89,11 +89,97 @@ class EmailService {
     }
   }
 
-  private generateWelcomeEmail(firstName: string, role: string, organizationName: string) {
+  private generateWelcomeEmail(firstName: string, role: string, organizationName: string, domain?: string) {
+    const isChampions = domain?.includes('championsforchange') || false;
+    const isTrantor = domain?.includes('trantortournaments') || !isChampions;
+    
+    if (isChampions) {
+      return this.generateChampionsWelcomeEmail(firstName, role, organizationName);
+    } else {
+      return this.generateTrantorWelcomeEmail(firstName, role, organizationName);
+    }
+  }
+
+  private generateTrantorWelcomeEmail(firstName: string, role: string, organizationName: string) {
     const roleDisplay = this.formatRoleDisplay(role);
     
     return {
-      subject: `Welcome to Champions for Change Athletics - ${roleDisplay} Access`,
+      subject: `Welcome to Trantor Tournaments - Tournament Management Platform`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #f97316, #ea580c); color: white; padding: 30px 20px; text-align: center; }
+            .content { padding: 30px 20px; }
+            .role-badge { background: #f97316; color: white; padding: 8px 16px; border-radius: 6px; display: inline-block; margin: 10px 0; }
+            .features { background: #fff7ed; padding: 20px; border-radius: 8px; margin: 20px 0; }
+            .features ul { margin: 0; padding-left: 20px; }
+            .features li { margin: 8px 0; }
+            .cta-button { background: #f97316; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 20px 0; }
+            .footer { background: #f1f5f9; padding: 20px; text-align: center; color: #64748b; font-size: 14px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>🏆 Welcome to Trantor Tournaments</h1>
+              <p>Professional Tournament Management Platform</p>
+            </div>
+            
+            <div class="content">
+              <h2>Hello ${firstName}!</h2>
+              
+              <p>Your account has been successfully created on the Trantor Tournaments platform.</p>
+              
+              <div class="role-badge">${roleDisplay}</div>
+              <p><strong>Organization:</strong> ${organizationName}</p>
+              
+              <div class="features">
+                <h3>🎯 Platform Capabilities:</h3>
+                <ul>
+                  <li>Professional tournament creation and management</li>
+                  <li>Custom website building with your branding</li>
+                  <li>Advanced registration and payment processing</li>
+                  <li>Real-time scheduling and bracket management</li>
+                  <li>White-label tournament coordination tools</li>
+                  <li>Enterprise-grade analytics and reporting</li>
+                </ul>
+              </div>
+              
+              <p><strong>Ready to Get Started?</strong></p>
+              <ol>
+                <li>Access your tournament dashboard</li>
+                <li>Create your first tournament or customize your website</li>
+                <li>Explore professional coordination features</li>
+                <li>Launch your tournament management platform</li>
+              </ol>
+              
+              <a href="#" class="cta-button">Access Your Platform</a>
+              
+              <p><strong>Need Support?</strong><br>
+              Contact us at champions4change361@gmail.com or 361-300-1552</p>
+            </div>
+            
+            <div class="footer">
+              <p>Trantor Tournaments<br>
+              Professional Tournament Coordination Intelligence System<br>
+              Supporting Tournament Organizers Worldwide</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `
+    };
+  }
+
+  private generateChampionsWelcomeEmail(firstName: string, role: string, organizationName: string) {
+    const roleDisplay = this.formatRoleDisplay(role);
+    
+    return {
+      subject: `Welcome to Champions for Change Tournaments`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -115,34 +201,40 @@ class EmailService {
           <div class="container">
             <div class="header">
               <h1>🏆 Welcome to Champions for Change</h1>
-              <p>District Athletics Management Platform</p>
+              <p>Educational Tournament Opportunities</p>
             </div>
             
             <div class="content">
               <h2>Hello ${firstName}!</h2>
               
-              <p>Your account has been successfully created in the Champions for Change athletics management platform.</p>
+              <p>Your account has been successfully created for Champions for Change tournaments.</p>
               
               <div class="role-badge">${roleDisplay}</div>
               <p><strong>Organization:</strong> ${organizationName}</p>
               
               <div class="features">
-                <h3>Your Role Capabilities:</h3>
-                ${this.getRoleFeatures(role)}
+                <h3>🎓 Tournament Opportunities:</h3>
+                <ul>
+                  <li>Educational tournaments supporting student growth</li>
+                  <li>Community-focused competitive events</li>
+                  <li>Scholarship and funding opportunities</li>
+                  <li>Local Corpus Christi area tournaments</li>
+                  <li>Mission-driven athletic competitions</li>
+                </ul>
               </div>
               
               <p><strong>Next Steps:</strong></p>
               <ol>
-                <li>Visit the Champions for Change Athletics platform</li>
-                <li>Use your email address to log in</li>
-                <li>Access your role-specific dashboard</li>
-                <li>Begin managing your athletic programs</li>
+                <li>Explore upcoming tournament opportunities</li>
+                <li>Register for local educational competitions</li>
+                <li>Connect with our nonprofit mission</li>
+                <li>Support student athletic development</li>
               </ol>
               
-              <a href="#" class="cta-button">Access Your Dashboard</a>
+              <a href="#" class="cta-button">View Tournaments</a>
               
-              <p><strong>Need Help?</strong><br>
-              Contact our support team or your district administrator for assistance.</p>
+              <p><strong>Questions?</strong><br>
+              Contact us at champions4change361@gmail.com or 361-300-1552</p>
             </div>
             
             <div class="footer">
@@ -155,6 +247,14 @@ class EmailService {
         </html>
       `
     };
+  }
+
+  private getDomainFromAddress(domain?: string): string {
+    if (domain?.includes('championsforchange')) {
+      return process.env.SENDGRID_FROM_EMAIL || '"Champions for Change" <champions4change361@gmail.com>';
+    } else {
+      return process.env.SENDGRID_FROM_EMAIL || '"Trantor Tournaments" <champions4change361@gmail.com>';
+    }
   }
 
   // Generic send method for custom emails
