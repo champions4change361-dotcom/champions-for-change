@@ -4075,6 +4075,98 @@ export const organizerMetrics = pgTable("organizer_metrics", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// White-label client configurations
+export const clientConfigurations = pgTable("client_configurations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id),
+  domain: varchar("domain").unique().notNull(), // championsforchange.net
+  clientName: varchar("client_name").notNull(), // Champions for Change
+  
+  // Branding Configuration
+  branding: jsonb("branding").$type<{
+    primaryColor: string;
+    secondaryColor: string;
+    accentColor: string;
+    backgroundColor: string;
+    textColor: string;
+    logoUrl?: string;
+    faviconUrl?: string;
+    theme: 'light' | 'dark' | 'auto';
+  }>().default({
+    primaryColor: '#059669', // emerald-600
+    secondaryColor: '#10b981', // emerald-500  
+    accentColor: '#f59e0b', // amber-500
+    backgroundColor: '#ffffff',
+    textColor: '#1f2937',
+    theme: 'light'
+  }),
+  
+  // Landing Page Content
+  heroContent: jsonb("hero_content").$type<{
+    mainHeading: string;
+    subheading: string;
+    ctaText: string;
+    ctaUrl: string;
+    backgroundImageUrl?: string;
+    showMissionBanner: boolean;
+    missionText: string;
+  }>().default({
+    mainHeading: 'Welcome to Our Platform',
+    subheading: 'Professional tournament management made simple',
+    ctaText: 'Get Started',
+    ctaUrl: '/pricing',
+    showMissionBanner: true,
+    missionText: 'Built to support educational opportunities'
+  }),
+  
+  // Contact Information
+  contactInfo: jsonb("contact_info").$type<{
+    email: string;
+    phone?: string;
+    address?: string;
+    supportEmail?: string;
+  }>().default({
+    email: 'info@example.com'
+  }),
+  
+  // Features Configuration
+  features: jsonb("features").$type<{
+    showDonationButton: boolean;
+    enableTournamentOrganizers: boolean;
+    showHealthBenefits: boolean;
+    enableAcademicPrograms: boolean;
+    showTestimonials: boolean;
+  }>().default({
+    showDonationButton: true,
+    enableTournamentOrganizers: true,
+    showHealthBenefits: true,
+    enableAcademicPrograms: true,
+    showTestimonials: true
+  }),
+  
+  // SEO Configuration
+  seoConfig: jsonb("seo_config").$type<{
+    metaTitle: string;
+    metaDescription: string;
+    keywords: string[];
+    ogTitle?: string;
+    ogDescription?: string;
+    ogImageUrl?: string;
+  }>().default({
+    metaTitle: 'Tournament Management Platform',
+    metaDescription: 'Professional tournament management solutions',
+    keywords: ['tournaments', 'sports', 'management']
+  }),
+  
+  // Custom CSS
+  customStyles: text("custom_styles"), // CSS overrides
+  
+  // Status and Settings
+  isActive: boolean("is_active").default(true),
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Type exports for Jersey Watch-style analytics
 export type OrganizerPageView = typeof organizerPageViews.$inferSelect;
 export type InsertOrganizerPageView = typeof organizerPageViews.$inferInsert;
@@ -4082,3 +4174,11 @@ export type OrganizerContact = typeof organizerContacts.$inferSelect;
 export type InsertOrganizerContact = typeof organizerContacts.$inferInsert;
 export type OrganizerMetric = typeof organizerMetrics.$inferSelect;
 export type InsertOrganizerMetric = typeof organizerMetrics.$inferInsert;
+
+// Client configuration types
+export type ClientConfiguration = typeof clientConfigurations.$inferSelect;
+export type InsertClientConfiguration = typeof clientConfigurations.$inferInsert;
+
+// Insert schema for client configurations
+export const insertClientConfigurationSchema = createInsertSchema(clientConfigurations);
+export type InsertClientConfigurationType = z.infer<typeof insertClientConfigurationSchema>;

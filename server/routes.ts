@@ -5426,6 +5426,125 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.log('🎓 AI Training System endpoints enabled (development mode)');
   }
 
+  // Client configuration management API routes
+  app.post("/api/client-config", isAuthenticated, async (req, res) => {
+    try {
+      const storage = getStorage();
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const config = await storage.createClientConfiguration({
+        ...req.body,
+        userId
+      });
+      res.json(config);
+    } catch (error) {
+      console.error("Create client config error:", error);
+      res.status(500).json({ error: "Failed to create client configuration" });
+    }
+  });
+
+  app.get("/api/client-config/:id", isAuthenticated, async (req, res) => {
+    try {
+      const storage = getStorage();
+      const config = await storage.getClientConfiguration(req.params.id);
+      if (!config) {
+        return res.status(404).json({ error: "Client configuration not found" });
+      }
+      res.json(config);
+    } catch (error) {
+      console.error("Get client config error:", error);
+      res.status(500).json({ error: "Failed to retrieve client configuration" });
+    }
+  });
+
+  app.get("/api/client-config/domain/:domain", async (req, res) => {
+    try {
+      const storage = getStorage();
+      const config = await storage.getClientConfigurationByDomain(req.params.domain);
+      if (!config) {
+        return res.status(404).json({ error: "Client configuration not found for domain" });
+      }
+      res.json(config);
+    } catch (error) {
+      console.error("Get client config by domain error:", error);
+      res.status(500).json({ error: "Failed to retrieve client configuration" });
+    }
+  });
+
+  app.get("/api/my-client-config", isAuthenticated, async (req, res) => {
+    try {
+      const storage = getStorage();
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const config = await storage.getClientConfigurationByUserId(userId);
+      if (!config) {
+        return res.status(404).json({ error: "No client configuration found for user" });
+      }
+      res.json(config);
+    } catch (error) {
+      console.error("Get user client config error:", error);
+      res.status(500).json({ error: "Failed to retrieve client configuration" });
+    }
+  });
+
+  app.patch("/api/client-config/:id", isAuthenticated, async (req, res) => {
+    try {
+      const storage = getStorage();
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      // Verify ownership
+      const existingConfig = await storage.getClientConfiguration(req.params.id);
+      if (!existingConfig || existingConfig.userId !== userId) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+
+      const updatedConfig = await storage.updateClientConfiguration(req.params.id, req.body);
+      if (!updatedConfig) {
+        return res.status(404).json({ error: "Client configuration not found" });
+      }
+      res.json(updatedConfig);
+    } catch (error) {
+      console.error("Update client config error:", error);
+      res.status(500).json({ error: "Failed to update client configuration" });
+    }
+  });
+
+  app.delete("/api/client-config/:id", isAuthenticated, async (req, res) => {
+    try {
+      const storage = getStorage();
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      // Verify ownership
+      const existingConfig = await storage.getClientConfiguration(req.params.id);
+      if (!existingConfig || existingConfig.userId !== userId) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+
+      const success = await storage.deleteClientConfiguration(req.params.id);
+      if (!success) {
+        return res.status(404).json({ error: "Client configuration not found" });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Delete client config error:", error);
+      res.status(500).json({ error: "Failed to delete client configuration" });
+    }
+  });
+
+  console.log('🎨 White-label client configuration management enabled');
+
   // Create and return server
   const server = createServer(app);
   return server;

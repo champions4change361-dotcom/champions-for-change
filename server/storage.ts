@@ -11,7 +11,8 @@ import {
   type TaxExemptionDocument, type InsertTaxExemptionDocument, type NonprofitSubscription, type InsertNonprofitSubscription, type NonprofitInvoice, type InsertNonprofitInvoice,
   type SupportTeam, type InsertSupportTeam, type SupportTeamMember, type InsertSupportTeamMember, type SupportTeamInjury, type InsertSupportTeamInjury, type SupportTeamAiConsultation, type InsertSupportTeamAiConsultation,
   type TournamentSubscription, type InsertTournamentSubscription,
-  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog, taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices, supportTeams, supportTeamMembers, supportTeamInjuries, supportTeamAiConsultations, jerseyTeamMembers, jerseyTeamPayments, tournamentSubscriptions
+  type ClientConfiguration, type InsertClientConfiguration,
+  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog, taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices, supportTeams, supportTeamMembers, supportTeamInjuries, supportTeamAiConsultations, jerseyTeamMembers, jerseyTeamPayments, tournamentSubscriptions, clientConfigurations
 } from "@shared/schema";
 
 type SportCategory = typeof sportCategories.$inferSelect;
@@ -62,6 +63,14 @@ export interface IStorage {
   getWhitelabelConfigByDomain(domain: string): Promise<WhitelabelConfig | undefined>;
   getWhitelabelConfigByUserId(userId: string): Promise<WhitelabelConfig | undefined>;
   updateWhitelabelConfig(id: string, updates: Partial<WhitelabelConfig>): Promise<WhitelabelConfig | undefined>;
+
+  // Client configuration methods
+  createClientConfiguration(config: InsertClientConfiguration): Promise<ClientConfiguration>;
+  getClientConfiguration(id: string): Promise<ClientConfiguration | undefined>;
+  getClientConfigurationByDomain(domain: string): Promise<ClientConfiguration | undefined>;
+  getClientConfigurationByUserId(userId: string): Promise<ClientConfiguration | undefined>;
+  updateClientConfiguration(id: string, updates: Partial<ClientConfiguration>): Promise<ClientConfiguration | undefined>;
+  deleteClientConfiguration(id: string): Promise<boolean>;
 
   // Page management methods
   createPage(page: InsertPage): Promise<Page>;
@@ -503,6 +512,71 @@ export class DbStorage implements IStorage {
     } catch (error) {
       console.error("Database error:", error);
       return undefined;
+    }
+  }
+
+  // Client configuration methods
+  async createClientConfiguration(config: InsertClientConfiguration): Promise<ClientConfiguration> {
+    try {
+      const result = await this.db.insert(clientConfigurations).values(config).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to create client configuration");
+    }
+  }
+
+  async getClientConfiguration(id: string): Promise<ClientConfiguration | undefined> {
+    try {
+      const result = await this.db.select().from(clientConfigurations).where(eq(clientConfigurations.id, id));
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async getClientConfigurationByDomain(domain: string): Promise<ClientConfiguration | undefined> {
+    try {
+      const result = await this.db.select().from(clientConfigurations).where(eq(clientConfigurations.domain, domain));
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async getClientConfigurationByUserId(userId: string): Promise<ClientConfiguration | undefined> {
+    try {
+      const result = await this.db.select().from(clientConfigurations).where(eq(clientConfigurations.userId, userId));
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async updateClientConfiguration(id: string, updates: Partial<ClientConfiguration>): Promise<ClientConfiguration | undefined> {
+    try {
+      const result = await this.db
+        .update(clientConfigurations)
+        .set({ ...updates, lastUpdated: new Date() })
+        .where(eq(clientConfigurations.id, id))
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async deleteClientConfiguration(id: string): Promise<boolean> {
+    try {
+      const result = await this.db.delete(clientConfigurations).where(eq(clientConfigurations.id, id));
+      return result.rowCount > 0;
+    } catch (error) {
+      console.error("Database error:", error);
+      return false;
     }
   }
 
@@ -1831,6 +1905,76 @@ export class MemStorage implements IStorage {
     };
     this.whitelabelConfigs.set(id, updatedConfig);
     return updatedConfig;
+  }
+
+  // Client configuration methods (in-memory storage)
+  async createClientConfiguration(config: InsertClientConfiguration): Promise<ClientConfiguration> {
+    const id = randomUUID();
+    const now = new Date();
+    const clientConfig: ClientConfiguration = {
+      ...config,
+      id,
+      isActive: config.isActive !== undefined ? config.isActive : true,
+      lastUpdated: now,
+      createdAt: now,
+    };
+    // Store in whitelabel configs map for now (could be separate map in future)
+    (this as any).clientConfigs = (this as any).clientConfigs || new Map();
+    (this as any).clientConfigs.set(id, clientConfig);
+    return clientConfig;
+  }
+
+  async getClientConfiguration(id: string): Promise<ClientConfiguration | undefined> {
+    const configs = (this as any).clientConfigs || new Map();
+    return configs.get(id);
+  }
+
+  async getClientConfigurationByDomain(domain: string): Promise<ClientConfiguration | undefined> {
+    const configs = (this as any).clientConfigs || new Map();
+    for (const config of configs.values()) {
+      if (config.domain === domain) {
+        return config;
+      }
+    }
+    return undefined;
+  }
+
+  async getClientConfigurationByUserId(userId: string): Promise<ClientConfiguration | undefined> {
+    const configs = (this as any).clientConfigs || new Map();
+    for (const config of configs.values()) {
+      if (config.userId === userId) {
+        return config;
+      }
+    }
+    return undefined;
+  }
+
+  async updateClientConfiguration(id: string, updates: Partial<ClientConfiguration>): Promise<ClientConfiguration | undefined> {
+    const configs = (this as any).clientConfigs || new Map();
+    const config = configs.get(id);
+    if (!config) return undefined;
+    
+    const updatedConfig: ClientConfiguration = {
+      ...config,
+      ...updates,
+      lastUpdated: new Date(),
+    };
+    configs.set(id, updatedConfig);
+    return updatedConfig;
+  }
+
+  async deleteClientConfiguration(id: string): Promise<boolean> {
+    const configs = (this as any).clientConfigs || new Map();
+    return configs.delete(id);
+  }
+
+  async getWhitelabelConfigByUserId(userId: string): Promise<WhitelabelConfig | undefined> {
+    for (const config of this.whitelabelConfigs.values()) {
+      if (config.userId === userId) {
+        return config;
+      }
+    }
+    return undefined;
   }
 
   async getTournaments(): Promise<Tournament[]> {
