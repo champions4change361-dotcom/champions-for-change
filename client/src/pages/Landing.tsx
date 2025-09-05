@@ -12,7 +12,7 @@ import { SignupSection } from "@/components/SignupSection";
 
 import Footer from "@/components/Footer";
 import RegistrationAssistant from "@/components/RegistrationAssistant";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -21,7 +21,79 @@ export default function Landing() {
   const [, setLocation] = useLocation();
   const [isRegistrationAssistantOpen, setIsRegistrationAssistantOpen] = useState(false);
   const [tournamentEmail, setTournamentEmail] = useState('');
+  const [selectedRegion, setSelectedRegion] = useState<string>('all');
   const { toast } = useToast();
+
+  // Location detection
+  const { data: userLocation, isLoading: locationLoading } = useQuery({
+    queryKey: ['/api/location'],
+    staleTime: 1000 * 60 * 30, // Cache for 30 minutes
+    retry: 1
+  });
+
+  // Regional tournament data
+  const regionalTournaments = {
+    'Texas': {
+      fishing: [
+        { name: 'CCA Texas STAR Tournament', date: 'May 26 - Sept 1, 2025', prize: '$2M+ in prizes', type: 'LIVE' },
+        { name: 'Sharkathon', date: 'October-November 2025', prize: 'Conservation focused', type: 'FEATURED' }
+      ],
+      golf: [
+        { name: 'Texas Open Championship', date: 'April 2026', prize: '$25,000 prizes', type: 'FEATURED' },
+        { name: 'Hill Country Golf Classic', date: 'March 2026', prize: 'Amateur/Pro divisions', type: 'POPULAR' }
+      ],
+      basketball: [
+        { name: 'Champions for Change Youth Tournament', date: '12U-14U divisions', prize: 'Supporting education', type: 'LIVE' },
+        { name: 'Texas High School Regional', date: 'December 2025', prize: 'State qualification', type: 'FEATURED' }
+      ]
+    },
+    'California': {
+      fishing: [
+        { name: 'California Bass Federation Championship', date: 'June 2026', prize: '$50,000 prizes', type: 'FEATURED' },
+        { name: 'Pacific Coast Salmon Derby', date: 'August 2025', prize: 'Ocean fishing', type: 'POPULAR' }
+      ],
+      golf: [
+        { name: 'Pebble Beach Amateur Championship', date: 'September 2025', prize: 'Prestigious venue', type: 'FEATURED' },
+        { name: 'San Diego County Open', date: 'October 2025', prize: '$15,000 prizes', type: 'POPULAR' }
+      ],
+      basketball: [
+        { name: 'West Coast Youth Championships', date: 'January 2026', prize: 'All age divisions', type: 'FEATURED' },
+        { name: 'California AAU Regional', date: 'March 2026', prize: 'National qualifiers', type: 'LIVE' }
+      ]
+    },
+    'Florida': {
+      fishing: [
+        { name: 'Florida Keys Tournament Series', date: 'Year-round', prize: 'Tropical fishing', type: 'FEATURED' },
+        { name: 'Everglades Bass Classic', date: 'February 2026', prize: '$30,000 prizes', type: 'POPULAR' }
+      ],
+      golf: [
+        { name: 'Florida State Amateur', date: 'July 2026', prize: 'State championship', type: 'FEATURED' },
+        { name: 'Miami-Dade Open', date: 'November 2025', prize: '$20,000 prizes', type: 'POPULAR' }
+      ]
+    },
+    'International': {
+      fishing: [
+        { name: 'European Bass Championships', date: 'Summer 2026', prize: '€100,000 prizes', type: 'FEATURED' },
+        { name: 'World Fly Fishing Championships', date: 'September 2026', prize: 'Global competition', type: 'FEATURED' }
+      ],
+      golf: [
+        { name: 'British Amateur Championship', date: 'June 2026', prize: 'Historic tournament', type: 'FEATURED' },
+        { name: 'Canadian Open Amateur', date: 'August 2026', prize: 'International field', type: 'POPULAR' }
+      ]
+    }
+  };
+
+  // Determine user's region
+  const getUserRegion = () => {
+    if (!userLocation) return 'Texas'; // Default fallback
+    if (userLocation.country !== 'United States') return 'International';
+    if (userLocation.region === 'California') return 'California';
+    if (userLocation.region === 'Florida') return 'Florida';
+    if (userLocation.region === 'Texas') return 'Texas';
+    return 'Texas'; // Default for other US states
+  };
+
+  const currentRegion = selectedRegion === 'all' ? getUserRegion() : selectedRegion;
 
   const tournamentSubscriptionMutation = useMutation({
     mutationFn: async (email: string) => {
@@ -414,10 +486,78 @@ export default function Landing() {
         {/* Featured Tournaments - Traffic Driver */}
         <div className="bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 rounded-2xl border border-yellow-500/30 py-12 mb-12">
           <div className="text-center px-8 mb-8">
-            <h2 className="text-4xl font-bold text-white mb-4">🏆 Featured Tournaments</h2>
-            <p className="text-slate-300 text-lg max-w-3xl mx-auto mb-6">
-              Discover major tournaments in your area. Get notified about upcoming events across all sports.
-            </p>
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <h2 className="text-4xl font-bold text-white">🏆 Featured Tournaments</h2>
+              {locationLoading && (
+                <div className="flex items-center gap-2 text-yellow-400 text-sm">
+                  <div className="w-4 h-4 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin"></div>
+                  <span>Finding tournaments near you...</span>
+                </div>
+              )}
+            </div>
+            <div className="flex flex-col items-center mb-6">
+              <p className="text-slate-300 text-lg max-w-3xl mx-auto mb-4">
+                {userLocation ? (
+                  <>Tournaments near <span className="text-yellow-400 font-semibold">{userLocation.city}, {userLocation.region}</span> and beyond</>
+                ) : (
+                  <>Discover major tournaments in your area. Get notified about upcoming events across all sports.</>
+                )}
+              </p>
+              
+              {/* Region selector */}
+              <div className="flex flex-wrap gap-2 justify-center">
+                <button 
+                  onClick={() => setSelectedRegion('all')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    selectedRegion === 'all' 
+                      ? 'bg-yellow-500 text-slate-900' 
+                      : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                  }`}
+                >
+                  📍 Near Me
+                </button>
+                <button 
+                  onClick={() => setSelectedRegion('Texas')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    selectedRegion === 'Texas' 
+                      ? 'bg-yellow-500 text-slate-900' 
+                      : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                  }`}
+                >
+                  🤠 Texas
+                </button>
+                <button 
+                  onClick={() => setSelectedRegion('California')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    selectedRegion === 'California' 
+                      ? 'bg-yellow-500 text-slate-900' 
+                      : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                  }`}
+                >
+                  🌊 California  
+                </button>
+                <button 
+                  onClick={() => setSelectedRegion('Florida')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    selectedRegion === 'Florida' 
+                      ? 'bg-yellow-500 text-slate-900' 
+                      : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                  }`}
+                >
+                  🏖️ Florida
+                </button>
+                <button 
+                  onClick={() => setSelectedRegion('International')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    selectedRegion === 'International' 
+                      ? 'bg-yellow-500 text-slate-900' 
+                      : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                  }`}
+                >
+                  🌍 International
+                </button>
+              </div>
+            </div>
             
             {/* Email Signup for Tournament Notifications */}
             <div className="bg-slate-900/50 border border-yellow-500/30 rounded-xl p-6 max-w-2xl mx-auto mb-8">
@@ -446,7 +586,7 @@ export default function Landing() {
             </div>
           </div>
 
-          {/* Multi-Sport Tournament Grid */}
+          {/* Dynamic Multi-Sport Tournament Grid */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 px-8">
             
             {/* Fishing Tournaments */}
@@ -457,19 +597,32 @@ export default function Landing() {
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-white">Fishing Tournaments</h3>
-                  <div className="text-sm text-teal-400 font-semibold">LIVE</div>
+                  <div className="text-sm text-teal-400 font-semibold">POPULAR</div>
                 </div>
               </div>
-              <div className="space-y-2 text-sm">
-                <div className="text-white font-semibold">CCA Texas STAR Tournament</div>
-                <div className="text-slate-300">May 26 - Sept 1, 2025</div>
-                <div className="text-yellow-400">$2M+ in prizes</div>
-              </div>
-              <div className="mt-3 pt-3 border-t border-slate-700">
-                <div className="text-white font-semibold">Sharkathon</div>
-                <div className="text-slate-300">October-November 2025</div>
-                <div className="text-emerald-400">Conservation focused</div>
-              </div>
+              {regionalTournaments[currentRegion]?.fishing?.map((tournament, idx) => (
+                <div key={idx} className={`space-y-2 text-sm ${idx > 0 ? 'mt-3 pt-3 border-t border-slate-700' : ''}`}>
+                  <div className="text-white font-semibold">{tournament.name}</div>
+                  <div className="text-slate-300">{tournament.date}</div>
+                  <div className="flex items-center gap-2">
+                    <div className="text-yellow-400">{tournament.prize}</div>
+                    {tournament.type && (
+                      <span className={`px-2 py-1 text-xs font-bold rounded ${
+                        tournament.type === 'LIVE' ? 'bg-red-500/20 text-red-400' :
+                        tournament.type === 'FEATURED' ? 'bg-blue-500/20 text-blue-400' :
+                        'bg-green-500/20 text-green-400'
+                      }`}>
+                        {tournament.type}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )) || (
+                <div className="space-y-2 text-sm">
+                  <div className="text-white font-semibold">No fishing tournaments found</div>
+                  <div className="text-slate-400">Check back soon for updates</div>
+                </div>
+              )}
             </div>
 
             {/* Basketball Tournaments */}
@@ -480,19 +633,32 @@ export default function Landing() {
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-white">Basketball Tournaments</h3>
-                  <div className="text-sm text-orange-400 font-semibold">POPULAR</div>
+                  <div className="text-sm text-orange-400 font-semibold">FEATURED</div>
                 </div>
               </div>
-              <div className="space-y-2 text-sm">
-                <div className="text-white font-semibold">Regional Youth Championships</div>
-                <div className="text-slate-300">12U-14U divisions</div>
-                <div className="text-yellow-400">Supporting education</div>
-              </div>
-              <div className="mt-3 pt-3 border-t border-slate-700">
-                <div className="text-white font-semibold">Winter League Finals</div>
-                <div className="text-slate-300">December 2025</div>
-                <div className="text-emerald-400">All skill levels</div>
-              </div>
+              {regionalTournaments[currentRegion]?.basketball?.map((tournament, idx) => (
+                <div key={idx} className={`space-y-2 text-sm ${idx > 0 ? 'mt-3 pt-3 border-t border-slate-700' : ''}`}>
+                  <div className="text-white font-semibold">{tournament.name}</div>
+                  <div className="text-slate-300">{tournament.date}</div>
+                  <div className="flex items-center gap-2">
+                    <div className="text-yellow-400">{tournament.prize}</div>
+                    {tournament.type && (
+                      <span className={`px-2 py-1 text-xs font-bold rounded ${
+                        tournament.type === 'LIVE' ? 'bg-red-500/20 text-red-400' :
+                        tournament.type === 'FEATURED' ? 'bg-blue-500/20 text-blue-400' :
+                        'bg-green-500/20 text-green-400'
+                      }`}>
+                        {tournament.type}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )) || (
+                <div className="space-y-2 text-sm">
+                  <div className="text-white font-semibold">No basketball tournaments found</div>
+                  <div className="text-slate-400">Check back soon for updates</div>
+                </div>
+              )}
             </div>
 
             {/* Golf Tournaments */}
@@ -503,88 +669,32 @@ export default function Landing() {
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-white">Golf Tournaments</h3>
-                  <div className="text-sm text-green-400 font-semibold">FEATURED</div>
+                  <div className="text-sm text-green-400 font-semibold">PREMIUM</div>
                 </div>
               </div>
-              <div className="space-y-2 text-sm">
-                <div className="text-white font-semibold">Coastal Championship</div>
-                <div className="text-slate-300">October 2025</div>
-                <div className="text-yellow-400">$5,000 prizes</div>
-              </div>
-              <div className="mt-3 pt-3 border-t border-slate-700">
-                <div className="text-white font-semibold">Golf & Fishing Combo</div>
-                <div className="text-slate-300">Weekend tournaments</div>
-                <div className="text-emerald-400">Dual sport</div>
-              </div>
-            </div>
-
-            {/* Soccer Tournaments */}
-            <div className="bg-slate-900/50 border border-blue-500/30 rounded-xl p-6 hover:border-blue-400/50 transition-all">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mr-3">
-                  ⚽
+              {regionalTournaments[currentRegion]?.golf?.map((tournament, idx) => (
+                <div key={idx} className={`space-y-2 text-sm ${idx > 0 ? 'mt-3 pt-3 border-t border-slate-700' : ''}`}>
+                  <div className="text-white font-semibold">{tournament.name}</div>
+                  <div className="text-slate-300">{tournament.date}</div>
+                  <div className="flex items-center gap-2">
+                    <div className="text-yellow-400">{tournament.prize}</div>
+                    {tournament.type && (
+                      <span className={`px-2 py-1 text-xs font-bold rounded ${
+                        tournament.type === 'LIVE' ? 'bg-red-500/20 text-red-400' :
+                        tournament.type === 'FEATURED' ? 'bg-blue-500/20 text-blue-400' :
+                        'bg-green-500/20 text-green-400'
+                      }`}>
+                        {tournament.type}
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-lg font-bold text-white">Soccer Tournaments</h3>
-                  <div className="text-sm text-blue-400 font-semibold">YOUTH</div>
+              )) || (
+                <div className="space-y-2 text-sm">
+                  <div className="text-white font-semibold">No golf tournaments found</div>
+                  <div className="text-slate-400">Check back soon for updates</div>
                 </div>
-              </div>
-              <div className="space-y-2 text-sm">
-                <div className="text-white font-semibold">Fall Cup Championships</div>
-                <div className="text-slate-300">U10-U16 divisions</div>
-                <div className="text-yellow-400">Community focused</div>
-              </div>
-              <div className="mt-3 pt-3 border-t border-slate-700">
-                <div className="text-white font-semibold">Indoor Winter League</div>
-                <div className="text-slate-300">January-March 2026</div>
-                <div className="text-emerald-400">All weather play</div>
-              </div>
-            </div>
-
-            {/* Baseball Tournaments */}
-            <div className="bg-slate-900/50 border border-red-500/30 rounded-xl p-6 hover:border-red-400/50 transition-all">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-red-500/20 rounded-lg flex items-center justify-center mr-3">
-                  ⚾
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-white">Baseball Tournaments</h3>
-                  <div className="text-sm text-red-400 font-semibold">SPRING</div>
-                </div>
-              </div>
-              <div className="space-y-2 text-sm">
-                <div className="text-white font-semibold">Spring Training Classic</div>
-                <div className="text-slate-300">March 2026</div>
-                <div className="text-yellow-400">High school divisions</div>
-              </div>
-              <div className="mt-3 pt-3 border-t border-slate-700">
-                <div className="text-white font-semibold">Summer All-Star Week</div>
-                <div className="text-slate-300">June 2026</div>
-                <div className="text-emerald-400">Elite competition</div>
-              </div>
-            </div>
-
-            {/* Multi-Sport Events */}
-            <div className="bg-slate-900/50 border border-purple-500/30 rounded-xl p-6 hover:border-purple-400/50 transition-all">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mr-3">
-                  🏆
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-white">Multi-Sport Events</h3>
-                  <div className="text-sm text-purple-400 font-semibold">VARIETY</div>
-                </div>
-              </div>
-              <div className="space-y-2 text-sm">
-                <div className="text-white font-semibold">Athletic Olympics</div>
-                <div className="text-slate-300">Track & Field events</div>
-                <div className="text-yellow-400">All ages welcome</div>
-              </div>
-              <div className="mt-3 pt-3 border-t border-slate-700">
-                <div className="text-white font-semibold">Combo Championships</div>
-                <div className="text-slate-300">Mixed sport weekend</div>
-                <div className="text-emerald-400">Something for everyone</div>
-              </div>
+              )}
             </div>
 
           </div>

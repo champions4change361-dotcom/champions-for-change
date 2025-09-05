@@ -47,6 +47,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Support team routes for cheerleading, dance teams, marching band, color guard
   app.use('/api', supportTeamRoutes);
 
+  // Location detection endpoint
+  app.get('/api/location', async (req, res) => {
+    try {
+      const clientIP = req.ip || req.connection.remoteAddress || req.headers['x-forwarded-for'] as string || '127.0.0.1';
+      
+      // For development, return default location
+      if (clientIP === '127.0.0.1' || clientIP === '::1' || clientIP.includes('127.0.0.1')) {
+        return res.json({
+          country: 'United States',
+          region: 'Texas', 
+          city: 'Corpus Christi',
+          latitude: 27.8006,
+          longitude: -97.3964,
+          source: 'default'
+        });
+      }
+
+      // Use free IP geolocation service
+      const response = await fetch(`http://ip-api.com/json/${clientIP}`);
+      const data = await response.json();
+      
+      if (data.status === 'success') {
+        res.json({
+          country: data.country,
+          region: data.regionName,
+          city: data.city,
+          latitude: data.lat,
+          longitude: data.lon,
+          source: 'ip'
+        });
+      } else {
+        // Fallback to default location
+        res.json({
+          country: 'United States',
+          region: 'Texas',
+          city: 'Corpus Christi', 
+          latitude: 27.8006,
+          longitude: -97.3964,
+          source: 'fallback'
+        });
+      }
+    } catch (error) {
+      console.error('Location detection error:', error);
+      res.json({
+        country: 'United States',
+        region: 'Texas',
+        city: 'Corpus Christi',
+        latitude: 27.8006,
+        longitude: -97.3964,
+        source: 'error'
+      });
+    }
+  });
+
   // Tournament notification subscriptions
   app.post('/api/tournament-subscriptions', async (req, res) => {
     try {
