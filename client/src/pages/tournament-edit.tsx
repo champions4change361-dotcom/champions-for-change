@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Settings, Save, Plus, X, Users, Trophy, Clock, Target, UserCheck, UserX, Edit2, Trash2, AlertTriangle } from 'lucide-react';
 import { Link } from 'wouter';
@@ -26,6 +27,11 @@ interface Tournament {
   ageGroup?: string;
   genderDivision?: string;
   description?: string;
+  // Golf-specific cut options
+  enableCut?: boolean;
+  cutPosition?: number;
+  cutAfterRound?: number;
+  cutType?: 'professional' | 'percentage';
   createdAt: string;
   updatedAt: string;
 }
@@ -42,7 +48,12 @@ export default function TournamentEditPage() {
     ageGroup: '',
     genderDivision: '',
     description: '',
-    teamSize: 8
+    teamSize: 8,
+    // Golf cut options
+    enableCut: false,
+    cutPosition: 70,
+    cutAfterRound: 2,
+    cutType: 'professional' as 'professional' | 'percentage'
   });
   const [teams, setTeams] = useState<{ teamName: string; isScratched?: boolean }[]>([]);
   const [participants, setParticipants] = useState<{ id: string; name: string; team?: string; isScratched?: boolean }[]>([]);
@@ -68,7 +79,12 @@ export default function TournamentEditPage() {
         ageGroup: tournament.ageGroup || '',
         genderDivision: tournament.genderDivision || '',
         description: tournament.description || '',
-        teamSize: tournament.teamSize
+        teamSize: tournament.teamSize,
+        // Golf cut options
+        enableCut: tournament.enableCut || false,
+        cutPosition: tournament.cutPosition || 70,
+        cutAfterRound: tournament.cutAfterRound || 2,
+        cutType: tournament.cutType || 'professional'
       });
       setTeams(tournament.teams || []);
       setParticipants(tournament.participants || []);
@@ -430,6 +446,109 @@ export default function TournamentEditPage() {
                    tournament.status}
                 </Badge>
               </div>
+
+              {/* Golf Cut Configuration */}
+              {formData.sport.toLowerCase().includes('golf') && (
+                <div className="space-y-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <input
+                      type="checkbox"
+                      id="enableCut"
+                      checked={formData.enableCut}
+                      onChange={(e) => setFormData({ ...formData, enableCut: e.target.checked })}
+                      className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                    />
+                    <Label htmlFor="enableCut" className="text-sm font-medium text-green-800">
+                      Enable Cut (Eliminate players after specified round)
+                    </Label>
+                  </div>
+                  
+                  {formData.enableCut && (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                      <div>
+                        <Label htmlFor="cutAfterRound" className="block text-sm font-medium text-gray-700 mb-2">
+                          Cut After Round
+                        </Label>
+                        <Select 
+                          value={formData.cutAfterRound.toString()} 
+                          onValueChange={(value) => setFormData({ ...formData, cutAfterRound: parseInt(value) })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="1">After Round 1</SelectItem>
+                            <SelectItem value="2">After Round 2 (Standard)</SelectItem>
+                            <SelectItem value="3">After Round 3</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="cutType" className="block text-sm font-medium text-gray-700 mb-2">
+                          Cut Type
+                        </Label>
+                        <Select 
+                          value={formData.cutType} 
+                          onValueChange={(value) => setFormData({ ...formData, cutType: value as 'professional' | 'percentage' })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="professional">Professional Style</SelectItem>
+                            <SelectItem value="percentage">Percentage Based</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="cutPosition" className="block text-sm font-medium text-gray-700 mb-2">
+                          {formData.cutType === 'percentage' ? 'Top Percentage' : 'Cut Position'}
+                        </Label>
+                        <Select 
+                          value={formData.cutPosition.toString()} 
+                          onValueChange={(value) => setFormData({ ...formData, cutPosition: parseInt(value) })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {formData.cutType === 'percentage' ? (
+                              <>
+                                <SelectItem value="25">Top 25%</SelectItem>
+                                <SelectItem value="33">Top 33%</SelectItem>
+                                <SelectItem value="50">Top 50%</SelectItem>
+                                <SelectItem value="66">Top 66%</SelectItem>
+                                <SelectItem value="75">Top 75%</SelectItem>
+                              </>
+                            ) : (
+                              <>
+                                <SelectItem value="50">Top 50 + ties (Masters)</SelectItem>
+                                <SelectItem value="65">Top 65 + ties</SelectItem>
+                                <SelectItem value="70">Top 70 + ties (Standard)</SelectItem>
+                                <SelectItem value="80">Top 80 + ties</SelectItem>
+                                <SelectItem value="100">Top 100 + ties</SelectItem>
+                              </>
+                            )}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="bg-yellow-50 p-3 rounded border border-yellow-200">
+                    <h4 className="text-sm font-semibold text-yellow-800 mb-1">Cut Rules</h4>
+                    <ul className="text-xs text-yellow-700 space-y-1">
+                      <li>• Players who miss the cut are eliminated and don't play remaining rounds</li>
+                      <li>• Cut is determined by lowest scores (best performance)</li>
+                      <li>• "Plus ties" means all players tied at cut score also advance</li>
+                      <li>• Can be changed until the cut round is completed</li>
+                      <li>• Professional tournaments typically use cuts, amateur often skip them</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
 
               {/* Delete Tournament Section */}
               <div className="pt-6 border-t border-gray-200">
