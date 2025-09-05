@@ -21,6 +21,38 @@ export default function TournamentCalendar() {
   const [selectedState, setSelectedState] = useState<string>('');
   const [selectedSport, setSelectedSport] = useState<string>('all');
 
+  // Fetch live tournament data from API
+  const { data: tournamentData = [], isLoading: tournamentsLoading } = useQuery({
+    queryKey: ["/api/tournaments/public"],
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
+
+  // Track tournament view for analytics
+  const trackViewMutation = useMutation({
+    mutationFn: async (tournamentId: string) => {
+      if (tournamentId.startsWith('static-')) {
+        // Don't track views for static/demo tournaments
+        return;
+      }
+      return apiRequest('POST', `/api/tournaments/${tournamentId}/calendar-view`, {});
+    },
+    onError: (error) => {
+      // Silently handle errors - analytics shouldn't disrupt user experience
+      console.warn('Failed to track tournament view:', error);
+    }
+  });
+
+  // Enhanced contact organizer with view tracking
+  const handleContactOrganizer = (tournament: any) => {
+    // Track the view if it's a live tournament
+    if (tournament.isLive && tournament.id) {
+      trackViewMutation.mutate(tournament.id);
+    }
+    
+    // Open email client
+    window.open(`mailto:${tournament.organizerEmail}?subject=Tournament Coordination - ${tournament.title}`);
+  };
+
   // US States, territories, and DC
   const usStates = [
     { value: 'AL', label: 'Alabama' },
@@ -127,31 +159,7 @@ export default function TournamentCalendar() {
       setIsLoadingLocation(false);
     };
 
-    // Track tournament view for analytics
-  const trackViewMutation = useMutation({
-    mutationFn: async (tournamentId: string) => {
-      if (tournamentId.startsWith('static-')) {
-        // Don't track views for static/demo tournaments
-        return;
-      }
-      return apiRequest('POST', `/api/tournaments/${tournamentId}/calendar-view`, {});
-    },
-    onError: (error) => {
-      // Silently handle errors - analytics shouldn't disrupt user experience
-      console.warn('Failed to track tournament view:', error);
-    }
-  });
-
-  // Enhanced contact organizer with view tracking
-  const handleContactOrganizer = (tournament: any) => {
-    // Track the view if it's a live tournament
-    if (tournament.isLive && tournament.id) {
-      trackViewMutation.mutate(tournament.id);
-    }
-    
-    // Open email client
-    window.open(`mailto:${tournament.organizerEmail}?subject=Tournament Coordination - ${tournament.title}`);
-  };
+    // These functions were moved to component top level to avoid hook rule violations
 
   const detectLocation = async () => {
       // Set a timeout to prevent hanging on mobile
@@ -209,17 +217,11 @@ export default function TournamentCalendar() {
     detectLocation();
   }, []);
 
-  // Fetch live tournament data from API
-  const { data: tournamentData = [], isLoading: tournamentsLoading } = useQuery({
-    queryKey: ["/api/tournaments/public"],
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-  });
-
   // Keep static tournaments for fallback/demo purposes  
   const staticTournaments = [
     // Texas Coastal Bend tournaments
     {
-      id: '1',
+      id: 'static-1',
       title: 'Youth Basketball Championship',
       organizer: 'Community Church',
       organizerEmail: 'tournaments@communitychurch.org',
@@ -230,7 +232,10 @@ export default function TournamentCalendar() {
       sport: 'Basketball',
       divisions: ['Middle School Boys', 'Middle School Girls'],
       estimatedTeams: 16,
-      status: 'open'
+      status: 'open',
+      isLive: false,
+      calendarApprovalStatus: 'approved',
+      calendarViewCount: 0
     },
     {
       id: '2',
@@ -915,7 +920,7 @@ export default function TournamentCalendar() {
   };
 
   // Transform live tournament data to match calendar format
-  const transformedLiveTournaments = tournamentData.map((tournament: any) => ({
+  const transformedLiveTournaments = (tournamentData as any[]).map((tournament: any) => ({
     id: tournament.id,
     title: tournament.name,
     organizer: 'Tournament Manager', // Default since we don't have this field yet
@@ -932,11 +937,20 @@ export default function TournamentCalendar() {
     status: tournament.calendarApprovalStatus === 'approved' ? 'open' : 'pending',
     isLive: true, // Flag to indicate this is live data
     calendarApprovalStatus: tournament.calendarApprovalStatus,
-    calendarTags: tournament.calendarTags || []
+    calendarTags: tournament.calendarTags || [],
+    calendarViewCount: tournament.calendarViewCount || 0
+  }));
+
+  // Add missing properties to static tournaments for consistency
+  const processedStaticTournaments = staticTournaments.map(tournament => ({
+    ...tournament,
+    isLive: false,
+    calendarApprovalStatus: 'approved' as const,
+    calendarViewCount: 0
   }));
 
   // Combine live and static tournaments
-  const allTournaments = [...transformedLiveTournaments, ...staticTournaments];
+  const allTournaments = [...transformedLiveTournaments, ...processedStaticTournaments];
 
   // Filter tournaments by selected state and sport
   const tournaments = React.useMemo(() => {
