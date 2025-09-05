@@ -81,6 +81,7 @@ export default function EnhancedTournamentWizard({
   const [currentStep, setCurrentStep] = useState<WizardStep>('sport');
   const [selectedEvents, setSelectedEvents] = useState<SportEventDefinition[]>([]);
   const [eventRecorders, setEventRecorders] = useState<Record<string, string>>({});
+  const [selectedSkillLevel, setSelectedSkillLevel] = useState<string>('');
   const [createdTournament, setCreatedTournament] = useState<any>(null);
   const [isDraftSaving, setIsDraftSaving] = useState(false);
   const [autoSaveStatus, setAutoSaveStatus] = useState<'saved' | 'saving' | 'error' | null>(null);
@@ -107,7 +108,8 @@ export default function EnhancedTournamentWizard({
           sports: [
             'Basketball (Boys)', 'Basketball (Girls)', 'Football', 'Soccer (Boys)', 'Soccer (Girls)',
             'Volleyball (Boys)', 'Volleyball (Girls)', 'Baseball', 'Softball', 'Hockey',
-            'Rugby', 'Ultimate Frisbee', 'Water Polo', 'Field Hockey'
+            'Rugby', 'Ultimate Frisbee', 'Water Polo', 'Field Hockey', 'Lacrosse (Boys)', 
+            'Lacrosse (Girls)', 'Team Handball', 'Flag Football', 'Futsal'
           ]
         },
         individual_sports: {
@@ -115,12 +117,34 @@ export default function EnhancedTournamentWizard({
           sports: [
             'Track & Field', 'Swimming & Diving', 'Cross Country', 'Tennis (Boys)',
             'Tennis (Girls)', 'Golf (Boys)', 'Golf (Girls)', 'Wrestling', 'Gymnastics',
-            'Archery', 'Bowling', 'Martial Arts', 'Cycling', 'Fencing'
+            'Archery', 'Bowling', 'Martial Arts', 'Cycling', 'Fencing', 'Badminton',
+            'Table Tennis', 'Squash', 'Racquetball', 'Rock Climbing', 'Triathlon'
           ]
         },
         winter_sports: {
           name: 'Winter Sports',
-          sports: ['Skiing', 'Snowboarding', 'Ice Hockey', 'Figure Skating', 'Curling']
+          sports: [
+            'Alpine Skiing', 'Nordic Skiing', 'Snowboarding', 'Ice Hockey', 'Figure Skating', 
+            'Curling', 'Speed Skating', 'Biathlon', 'Ski Jumping', 'Cross Country Skiing',
+            'Ice Dancing', 'Bobsled', 'Luge', 'Skeleton'
+          ]
+        },
+        emerging_sports: {
+          name: 'Emerging Sports',
+          sports: [
+            'Esports', 'Drone Racing', 'Parkour', 'Surfing', 'Skateboarding', 'Sport Climbing',
+            'Breakdancing', 'Mixed Martial Arts', 'Obstacle Course Racing', 'Spikeball',
+            'Cornhole', 'Disc Golf', 'Pickleball', 'Axe Throwing', 'Stand-Up Paddleboard'
+          ]
+        },
+        adaptive_sports: {
+          name: 'Adaptive & Inclusive Sports',
+          sports: [
+            'Wheelchair Basketball', 'Wheelchair Racing', 'Sitting Volleyball', 'Goalball',
+            'Boccia', 'Powerlifting (Adaptive)', 'Swimming (Adaptive)', 'Archery (Adaptive)',
+            'Table Tennis (Adaptive)', 'Unified Sports', 'Special Olympics Events',
+            'Blind Soccer', 'Wheelchair Tennis', 'Para Athletics', 'Sledge Hockey'
+          ]
         }
       }
     },
@@ -208,9 +232,489 @@ export default function EnhancedTournamentWizard({
     form.setValue("sport", "");
   };
 
+  // Get smart age group options based on selected sport
+  const getAgeGroupsForSport = (sport: string): string[] => {
+    if (!sport) return ['Elementary', 'Middle School', 'High School', 'College', 'Adult', 'Masters', 'Senior'];
+    
+    // Emerging sports often exclude elementary
+    if (['Esports', 'Drone Racing', 'Mixed Martial Arts', 'Axe Throwing'].includes(sport)) {
+      return ['High School', 'College', 'Adult', 'Masters'];
+    }
+    
+    // Winter sports typically need more facilities
+    if (sport.includes('Skiing') || sport.includes('Snowboard') || sport.includes('Ice') || sport.includes('Curling')) {
+      return ['Middle School', 'High School', 'College', 'Adult', 'Masters'];
+    }
+    
+    // Adaptive sports
+    if (sport.includes('Wheelchair') || sport.includes('Adaptive') || sport.includes('Special Olympics')) {
+      return ['Elementary', 'Middle School', 'High School', 'College', 'Adult', 'Masters', 'Senior', 'All Ages'];
+    }
+    
+    // Academic competitions
+    if (['Academic', 'STEM', 'Speech & Debate', 'Music', 'Visual Arts', 'Theater'].some(cat => sport.includes(cat))) {
+      return ['Elementary', 'Middle School', 'High School', 'College'];
+    }
+    
+    // Most traditional sports
+    return ['Elementary', 'Middle School', 'High School', 'College', 'Adult', 'Masters'];
+  };
+
+  // Get smart gender division options based on selected sport
+  const getGenderDivisionsForSport = (sport: string): string[] => {
+    if (!sport) return ['Boys', 'Girls', 'Men', 'Women', 'Mixed', 'Co-Ed'];
+    
+    // Sports that are typically separated by gender
+    if (['Football', 'Wrestling', 'Baseball'].includes(sport)) {
+      return ['Boys', 'Men'];
+    }
+    
+    if (['Softball', 'Field Hockey'].includes(sport)) {
+      return ['Girls', 'Women'];
+    }
+    
+    // Sports that commonly have mixed divisions
+    if (['Ultimate Frisbee', 'Badminton', 'Table Tennis', 'Archery', 'Bowling'].includes(sport)) {
+      return ['Boys', 'Girls', 'Men', 'Women', 'Mixed', 'Co-Ed'];
+    }
+    
+    // Adaptive sports emphasize inclusion
+    if (sport.includes('Wheelchair') || sport.includes('Adaptive') || sport.includes('Special Olympics')) {
+      return ['Mixed', 'Co-Ed', 'Men', 'Women', 'Boys', 'Girls', 'Open Division'];
+    }
+    
+    // Academic competitions are typically mixed
+    if (['Academic', 'STEM', 'Speech & Debate', 'Music', 'Visual Arts', 'Theater'].some(cat => sport.includes(cat))) {
+      return ['Mixed', 'Co-Ed', 'Boys', 'Girls'];
+    }
+    
+    // Emerging sports often prioritize inclusion
+    if (['Esports', 'Drone Racing', 'Parkour', 'Sport Climbing'].includes(sport)) {
+      return ['Mixed', 'Co-Ed', 'Men', 'Women', 'Open Division'];
+    }
+    
+    // Default for most sports
+    return ['Boys', 'Girls', 'Men', 'Women', 'Mixed', 'Co-Ed'];
+  };
+
+  // Get venue requirements based on selected sport
+  const getVenueRequirementsForSport = (sport: string) => {
+    if (!sport) return null;
+    
+    const requirements = {
+      facilities: [] as string[],
+      equipment: [] as string[],
+      safety: [] as string[],
+      accessibility: [] as string[],
+      special: [] as string[]
+    };
+
+    // Swimming & Diving
+    if (sport.includes('Swimming') || sport.includes('Diving')) {
+      requirements.facilities = ['Pool (25m or 50m)', 'Starting blocks', 'Timing system', 'Diving boards/platforms'];
+      requirements.equipment = ['Lane ropes', 'Pool deck space', 'Electronic timing', 'Scoreboard'];
+      requirements.safety = ['Lifeguards', 'First aid station', 'Emergency equipment'];
+      requirements.accessibility = ['Pool lift', 'Accessible restrooms', 'Wheelchair ramps'];
+    }
+    
+    // Track & Field
+    else if (sport.includes('Track') || sport.includes('Field')) {
+      requirements.facilities = ['Running track (400m)', 'Field event areas', 'Throwing sectors', 'Jumping pits'];
+      requirements.equipment = ['Hurdles', 'Starting blocks', 'Field event implements', 'Measuring equipment'];
+      requirements.safety = ['First aid station', 'Throwing cage protection', 'Medical personnel'];
+      requirements.accessibility = ['Track accessibility', 'Spectator seating', 'Accessible restrooms'];
+    }
+    
+    // Winter Sports
+    else if (sport.includes('Skiing') || sport.includes('Ice') || sport.includes('Snowboard')) {
+      requirements.facilities = ['Ice rink/slopes', 'Climate-controlled facility', 'Equipment storage'];
+      requirements.equipment = ['Ice maintenance', 'Safety barriers', 'Timing systems'];
+      requirements.safety = ['Emergency medical', 'Safety personnel', 'Weather monitoring'];
+      requirements.special = ['Cold weather protocols', 'Specialized insurance'];
+    }
+    
+    // Basketball/Volleyball (Indoor courts)
+    else if (sport.includes('Basketball') || sport.includes('Volleyball')) {
+      requirements.facilities = ['Gymnasium', 'Basketball/volleyball courts', 'Spectator seating'];
+      requirements.equipment = ['Hoops/nets', 'Scoreboards', 'Sound system'];
+      requirements.safety = ['First aid station', 'Emergency exits', 'Medical personnel'];
+      requirements.accessibility = ['Wheelchair accessible', 'ADA compliant restrooms'];
+    }
+    
+    // Football/Soccer (Large fields)
+    else if (sport.includes('Football') || sport.includes('Soccer')) {
+      requirements.facilities = ['Full-size field', 'Goal posts', 'Spectator seating', 'Locker rooms'];
+      requirements.equipment = ['Field markers', 'Scoreboards', 'Sound system', 'First down markers'];
+      requirements.safety = ['Medical tent', 'Emergency vehicle access', 'Security personnel'];
+      requirements.accessibility = ['Accessible seating', 'Parking', 'Restroom facilities'];
+    }
+    
+    // Academic/STEM
+    else if (sport.includes('Academic') || sport.includes('STEM') || sport.includes('Speech')) {
+      requirements.facilities = ['Classrooms/testing rooms', 'Audio/visual equipment', 'Quiet environment'];
+      requirements.equipment = ['Tables/desks', 'Projection systems', 'Microphones', 'Timers'];
+      requirements.safety = ['Fire safety', 'Emergency procedures', 'Building security'];
+      requirements.accessibility = ['ADA compliant', 'Assistive technology', 'Accessible seating'];
+    }
+    
+    // Emerging/Esports
+    else if (sport.includes('Esports') || sport.includes('Drone')) {
+      requirements.facilities = ['Technology lab', 'High-speed internet', 'Climate control'];
+      requirements.equipment = ['Gaming stations', 'Network infrastructure', 'Streaming equipment'];
+      requirements.safety = ['Electrical safety', 'Cybersecurity measures'];
+      requirements.special = ['Technology support', 'Backup power systems'];
+    }
+    
+    // Adaptive Sports
+    else if (sport.includes('Wheelchair') || sport.includes('Adaptive')) {
+      requirements.facilities = ['Fully accessible venue', 'Equipment storage', 'Adaptive facilities'];
+      requirements.equipment = ['Adaptive sports equipment', 'Accessible scoreboards'];
+      requirements.safety = ['Medical support familiar with disabilities', 'Emergency procedures'];
+      requirements.accessibility = ['Full ADA compliance', 'Accessible parking', 'Support areas'];
+      requirements.special = ['Specialized medical staff', 'Equipment technicians'];
+    }
+
+    return requirements;
+  };
+
+  // Get equipment requirements based on sport and selected events
+  const getEquipmentRequirements = (sport: string, events: SportEventDefinition[] = []): Array<{category: string, items: Array<{name: string, required: boolean, description?: string}>}> => {
+    if (!sport) return [];
+    
+    const equipmentCategories = [];
+
+    // Swimming & Diving Equipment
+    if (sport.includes('Swimming') || sport.includes('Diving')) {
+      equipmentCategories.push({
+        category: 'Pool Equipment',
+        items: [
+          { name: 'Electronic Timing System', required: true, description: 'For accurate race timing' },
+          { name: 'Starting Blocks', required: true, description: 'Regulation starting platforms' },
+          { name: 'Lane Ropes & Lines', required: true, description: 'Pool lane separation' },
+          { name: 'Pace Clocks', required: false, description: 'For warm-up timing' },
+          { name: 'Backstroke Flags', required: true, description: 'Safety markers for backstroke' }
+        ]
+      });
+      
+      if (events.some(e => e.eventName.includes('Diving'))) {
+        equipmentCategories.push({
+          category: 'Diving Equipment',
+          items: [
+            { name: 'Diving Boards', required: true, description: '1m and 3m springboards' },
+            { name: 'Platform (if applicable)', required: false, description: '5m, 7.5m, 10m platforms' },
+            { name: 'Diving Judges Sheets', required: true, description: 'For scoring dives' },
+            { name: 'Timing/Scoring System', required: true, description: 'Electronic diving scores' }
+          ]
+        });
+      }
+    }
+    
+    // Track & Field Equipment  
+    else if (sport.includes('Track') || sport.includes('Field')) {
+      equipmentCategories.push({
+        category: 'Track Equipment',
+        items: [
+          { name: 'Starting Blocks', required: true, description: 'For sprint events' },
+          { name: 'Hurdles', required: false, description: 'Adjustable height hurdles' },
+          { name: 'Batons', required: false, description: 'For relay events' },
+          { name: 'Electronic Timing', required: true, description: 'Professional timing system' }
+        ]
+      });
+      
+      equipmentCategories.push({
+        category: 'Field Event Equipment',
+        items: [
+          { name: 'Shot Put', required: false, description: 'Various weights available' },
+          { name: 'Discus', required: false, description: 'Different weights for divisions' },
+          { name: 'Javelin', required: false, description: 'Regulation javelins' },
+          { name: 'High Jump Standards', required: false, description: 'Adjustable uprights and bar' },
+          { name: 'Pole Vault Equipment', required: false, description: 'Poles, standards, and pit' },
+          { name: 'Measuring Tape', required: true, description: 'For field event measurements' }
+        ]
+      });
+    }
+    
+    // Wrestling Equipment
+    else if (sport.includes('Wrestling')) {
+      equipmentCategories.push({
+        category: 'Wrestling Equipment',
+        items: [
+          { name: 'Wrestling Mats', required: true, description: 'Regulation size mats' },
+          { name: 'Scoreboard/Timer', required: true, description: 'Match timing and scoring' },
+          { name: 'Scales', required: true, description: 'For weight verification' },
+          { name: 'Referee Equipment', required: true, description: 'Whistles, cards, etc.' },
+          { name: 'Medical Kit', required: true, description: 'First aid for injuries' }
+        ]
+      });
+    }
+    
+    // Basketball Equipment
+    else if (sport.includes('Basketball')) {
+      equipmentCategories.push({
+        category: 'Court Equipment',
+        items: [
+          { name: 'Basketball Hoops', required: true, description: 'Regulation height hoops' },
+          { name: 'Game Basketballs', required: true, description: 'Official size basketballs' },
+          { name: 'Scoreboard', required: true, description: 'Electronic scoreboard with timer' },
+          { name: 'Referee Equipment', required: true, description: 'Whistles, uniforms' },
+          { name: 'Score Table Setup', required: true, description: 'Scorer, timer equipment' }
+        ]
+      });
+    }
+    
+    // Academic/STEM Equipment
+    else if (sport.includes('Academic') || sport.includes('STEM')) {
+      equipmentCategories.push({
+        category: 'Testing Equipment',
+        items: [
+          { name: 'Answer Sheets', required: true, description: 'Bubble sheets or forms' },
+          { name: 'Timers', required: true, description: 'Multiple timing devices' },
+          { name: 'Calculators (if allowed)', required: false, description: 'Approved calculator models' },
+          { name: 'Reference Materials', required: false, description: 'Permitted books/charts' },
+          { name: 'Proctoring Supplies', required: true, description: 'Monitoring equipment' }
+        ]
+      });
+      
+      if (sport.includes('STEM') || sport.includes('Science')) {
+        equipmentCategories.push({
+          category: 'Lab Equipment',
+          items: [
+            { name: 'Laboratory Supplies', required: false, description: 'Chemicals, glassware' },
+            { name: 'Safety Equipment', required: true, description: 'Goggles, gloves, etc.' },
+            { name: 'Measuring Instruments', required: false, description: 'Rulers, scales, meters' },
+            { name: 'Technology Access', required: false, description: 'Computers, internet if needed' }
+          ]
+        });
+      }
+    }
+    
+    // Esports Equipment
+    else if (sport.includes('Esports') || sport.includes('Gaming')) {
+      equipmentCategories.push({
+        category: 'Gaming Setup',
+        items: [
+          { name: 'Gaming PCs/Consoles', required: true, description: 'High-performance systems' },
+          { name: 'Gaming Monitors', required: true, description: 'Low-latency displays' },
+          { name: 'Gaming Peripherals', required: true, description: 'Keyboards, mice, controllers' },
+          { name: 'Headsets', required: true, description: 'Communication equipment' },
+          { name: 'Network Equipment', required: true, description: 'Stable internet connection' }
+        ]
+      });
+      
+      equipmentCategories.push({
+        category: 'Tournament Infrastructure',
+        items: [
+          { name: 'Streaming Equipment', required: false, description: 'Cameras, capture cards' },
+          { name: 'Backup Systems', required: true, description: 'Redundant hardware' },
+          { name: 'Tournament Software', required: true, description: 'Bracket management' },
+          { name: 'Moderation Tools', required: true, description: 'Admin and referee tools' }
+        ]
+      });
+    }
+    
+    // Golf Equipment
+    else if (sport.includes('Golf')) {
+      equipmentCategories.push({
+        category: 'Course Equipment',
+        items: [
+          { name: 'Scorecards', required: true, description: 'Official tournament scorecards' },
+          { name: 'Tee Markers', required: true, description: 'Course tee designations' },
+          { name: 'Flagsticks', required: true, description: 'Hole markers' },
+          { name: 'Leaderboards', required: false, description: 'Live scoring displays' },
+          { name: 'Golf Carts (if allowed)', required: false, description: 'Transportation' }
+        ]
+      });
+    }
+
+    // Default equipment for most sports
+    if (equipmentCategories.length === 0) {
+      equipmentCategories.push({
+        category: 'Basic Tournament Equipment',
+        items: [
+          { name: 'Scoreboards/Displays', required: true, description: 'For keeping score' },
+          { name: 'Timing Equipment', required: false, description: 'Stopwatches, timers' },
+          { name: 'First Aid Kit', required: true, description: 'Safety and medical supplies' },
+          { name: 'Official Equipment', required: true, description: 'Sport-specific balls, implements' },
+          { name: 'Referee/Judge Supplies', required: true, description: 'Whistles, cards, forms' }
+        ]
+      });
+    }
+
+    return equipmentCategories;
+  };
+
+  // Get skill levels based on selected sport
+  const getSkillLevelsForSport = (sport: string): Array<{value: string, label: string, description?: string}> => {
+    if (!sport) return [];
+    
+    // Academic/STEM competitions often have grade-based divisions
+    if (sport.includes('Academic') || sport.includes('STEM') || sport.includes('Speech')) {
+      return [
+        { value: 'novice', label: 'Novice', description: 'First-time competitors' },
+        { value: 'jv', label: 'Junior Varsity', description: 'Developing competitors' },
+        { value: 'varsity', label: 'Varsity', description: 'Advanced competitors' },
+        { value: 'open', label: 'Open Division', description: 'All skill levels welcome' }
+      ];
+    }
+    
+    // Martial Arts often have belt-based divisions
+    if (sport.includes('Karate') || sport.includes('Judo') || sport.includes('Taekwondo')) {
+      return [
+        { value: 'white-yellow', label: 'White-Yellow Belt', description: 'Beginner ranks' },
+        { value: 'orange-green', label: 'Orange-Green Belt', description: 'Intermediate ranks' },
+        { value: 'blue-brown', label: 'Blue-Brown Belt', description: 'Advanced ranks' },
+        { value: 'black', label: 'Black Belt', description: 'Expert level' }
+      ];
+    }
+    
+    // Wrestling uses experience levels
+    if (sport.includes('Wrestling')) {
+      return [
+        { value: 'rookie', label: 'Rookie', description: 'First year wrestlers' },
+        { value: 'sophomore', label: 'Sophomore', description: 'Second year wrestlers' },
+        { value: 'junior', label: 'Junior', description: 'Third year wrestlers' },
+        { value: 'senior', label: 'Senior', description: 'Fourth+ year wrestlers' },
+        { value: 'open', label: 'Open', description: 'All experience levels' }
+      ];
+    }
+    
+    // Swimming often uses time standards
+    if (sport.includes('Swimming') || sport.includes('Diving')) {
+      return [
+        { value: 'b-time', label: 'B Time Standard', description: 'Recreational level' },
+        { value: 'bb-time', label: 'BB Time Standard', description: 'Competitive level' },
+        { value: 'a-time', label: 'A Time Standard', description: 'Advanced competitive' },
+        { value: 'aa-time', label: 'AA Time Standard', description: 'Elite level' },
+        { value: 'open', label: 'Open Entry', description: 'No time standard required' }
+      ];
+    }
+    
+    // Track & Field uses performance standards
+    if (sport.includes('Track') || sport.includes('Field')) {
+      return [
+        { value: 'recreational', label: 'Recreational', description: 'Fun runs and basic competition' },
+        { value: 'competitive', label: 'Competitive', description: 'League-level competition' },
+        { value: 'elite', label: 'Elite', description: 'State/regional qualifiers' },
+        { value: 'open', label: 'Open', description: 'All performance levels' }
+      ];
+    }
+    
+    // Esports often uses rank-based divisions
+    if (sport.includes('Esports') || sport.includes('Gaming')) {
+      return [
+        { value: 'bronze-silver', label: 'Bronze-Silver', description: 'Beginner ranks' },
+        { value: 'gold-platinum', label: 'Gold-Platinum', description: 'Intermediate ranks' },
+        { value: 'diamond-master', label: 'Diamond-Master', description: 'Advanced ranks' },
+        { value: 'grandmaster', label: 'Grandmaster+', description: 'Elite level' },
+        { value: 'open', label: 'Open Division', description: 'All skill levels' }
+      ];
+    }
+    
+    // Golf uses handicap-based divisions
+    if (sport.includes('Golf')) {
+      return [
+        { value: 'high-handicap', label: 'High Handicap (18+)', description: 'Recreational golfers' },
+        { value: 'mid-handicap', label: 'Mid Handicap (10-17)', description: 'Average golfers' },
+        { value: 'low-handicap', label: 'Low Handicap (0-9)', description: 'Skilled golfers' },
+        { value: 'scratch', label: 'Scratch/Pro', description: 'Expert level' },
+        { value: 'open', label: 'Open Flight', description: 'All handicaps' }
+      ];
+    }
+    
+    // Adaptive sports emphasize classification-based divisions
+    if (sport.includes('Wheelchair') || sport.includes('Adaptive') || sport.includes('Special Olympics')) {
+      return [
+        { value: 'unified', label: 'Unified Division', description: 'Athletes with and without disabilities' },
+        { value: 'traditional', label: 'Traditional Division', description: 'Athletes with similar abilities' },
+        { value: 'developmental', label: 'Developmental', description: 'Skills development focus' },
+        { value: 'competitive', label: 'Competitive', description: 'Advanced skill competition' }
+      ];
+    }
+    
+    // Default skill levels for most sports
+    return [
+      { value: 'beginner', label: 'Beginner', description: 'New to the sport' },
+      { value: 'intermediate', label: 'Intermediate', description: 'Some experience' },
+      { value: 'advanced', label: 'Advanced', description: 'Skilled competitors' },
+      { value: 'elite', label: 'Elite', description: 'High-level competition' },
+      { value: 'open', label: 'Open Division', description: 'All skill levels welcome' }
+    ];
+  };
+
+  // Get seasonal sport recommendations based on current date
+  const getSeasonalRecommendations = () => {
+    const now = new Date();
+    const month = now.getMonth(); // 0 = January, 11 = December
+    const currentSeason = 
+      month >= 2 && month <= 4 ? 'spring' :  // March-May
+      month >= 5 && month <= 7 ? 'summer' :  // June-August  
+      month >= 8 && month <= 10 ? 'fall' :   // September-November
+      'winter';                              // December-February
+
+    const seasonalSports = {
+      spring: {
+        season: 'Spring',
+        primarySports: [
+          'Track & Field', 'Baseball', 'Softball', 'Soccer (Boys)', 'Soccer (Girls)',
+          'Tennis', 'Golf', 'Lacrosse', 'Ultimate Frisbee'
+        ],
+        academicEvents: [
+          'Academic', 'STEM Olympiad', 'Science Fair', 'Spring Speech & Debate'
+        ],
+        description: 'Perfect season for outdoor sports and spring academic competitions'
+      },
+      summer: {
+        season: 'Summer',
+        primarySports: [
+          'Swimming & Diving', 'Water Polo', 'Beach Volleyball', 'Tennis',
+          'Golf', 'Cycling', 'Triathlon', 'Surfing'
+        ],
+        academicEvents: [
+          'Summer STEM Camps', 'Robotics', 'Programming Competitions', 'Music Festivals'
+        ],
+        description: 'Ideal for water sports and outdoor summer activities'
+      },
+      fall: {
+        season: 'Fall',
+        primarySports: [
+          'Football', 'Volleyball', 'Cross Country', 'Soccer', 'Field Hockey',
+          'Wrestling (early season)', 'Basketball (early season)'
+        ],
+        academicEvents: [
+          'Academic Decathlon', 'Fall Speech & Debate', 'Mathematics Competitions', 'Debate Tournaments'
+        ],
+        description: 'Traditional fall sports season and academic competition start'
+      },
+      winter: {
+        season: 'Winter',
+        primarySports: [
+          'Basketball', 'Wrestling', 'Swimming & Diving', 'Ice Hockey',
+          'Skiing & Snowboarding', 'Figure Skating', 'Indoor Track & Field'
+        ],
+        academicEvents: [
+          'Academic Bowl', 'Science Olympiad', 'Winter Speech & Debate', 'Math Bowl'
+        ],
+        description: 'Indoor sports season and peak academic competition time'
+      }
+    };
+
+    return seasonalSports[currentSeason];
+  };
+
+  // Check if a sport is in season
+  const isSportInSeason = (sport: string): boolean => {
+    const seasonal = getSeasonalRecommendations();
+    return seasonal.primarySports.some(s => sport.includes(s.split(' ')[0])) ||
+           seasonal.academicEvents.some(s => sport.includes(s.split(' ')[0]));
+  };
+
   // Auto-populate events when sport is selected
   const handleSportChange = (sport: string) => {
     form.setValue("sport", sport);
+    
+    // Reset age group and gender division when sport changes
+    form.setValue("ageGroup", "");
+    form.setValue("genderDivision", "");
     
     // Auto-populate events for multi-event sports
     const availableEvents = getEventsForSport(sport);
@@ -587,6 +1091,51 @@ export default function EnhancedTournamentWizard({
               {/* COMPREHENSIVE SPORT & FORMAT SELECTION */}
               {!selectedTournamentFormat ? (
                 <div className="space-y-6">
+                  {/* Seasonal Recommendations Section */}
+                  <div className="mb-6 p-4 bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg">
+                    <h4 className="font-medium text-green-900 mb-3 flex items-center gap-2">
+                      🌟 {getSeasonalRecommendations().season} Season Recommendations
+                    </h4>
+                    <p className="text-sm text-green-700 mb-3">
+                      {getSeasonalRecommendations().description}
+                    </p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <h5 className="font-medium text-green-800 mb-2">🏃 Popular Sports</h5>
+                        <div className="text-sm text-green-700 space-y-1">
+                          {getSeasonalRecommendations().primarySports.slice(0, 4).map((sport, index) => (
+                            <div key={index} className="flex items-center gap-2">
+                              <span className="text-green-500">•</span>
+                              {sport}
+                            </div>
+                          ))}
+                          {getSeasonalRecommendations().primarySports.length > 4 && (
+                            <div className="text-xs text-green-600 mt-1">
+                              +{getSeasonalRecommendations().primarySports.length - 4} more sports
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <h5 className="font-medium text-green-800 mb-2">🎓 Academic Events</h5>
+                        <div className="text-sm text-green-700 space-y-1">
+                          {getSeasonalRecommendations().academicEvents.map((event, index) => (
+                            <div key={index} className="flex items-center gap-2">
+                              <span className="text-green-500">•</span>
+                              {event}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-3 text-xs text-green-600 bg-green-100 p-2 rounded">
+                      💡 <strong>Tip:</strong> Sports marked with ⭐ are currently in season and may have higher participation rates.
+                    </div>
+                  </div>
+
                   {/* Step 1: Category Selection */}
                   <div>
                     <Label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
@@ -647,7 +1196,8 @@ export default function EnhancedTournamentWizard({
                         <option value="">Choose specific competition</option>
                         {getAvailableSports().map((sport: string, index: number) => (
                           <option key={index} value={sport}>
-                            {sport}
+                            {isSportInSeason(sport) ? '⭐ ' : ''}{sport}
+                            {isSportInSeason(sport) ? ' (In Season)' : ''}
                           </option>
                         ))}
                       </select>
@@ -823,53 +1373,154 @@ export default function EnhancedTournamentWizard({
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-4">
+              {/* Smart Age Group, Gender Division, and Skill Level Dropdowns */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="ageGroup" className="block text-sm font-medium text-gray-700 mb-2">
-                    Age Group
+                    Age Group {form.watch("sport") && <span className="text-green-600">✓ Smart filtered for {form.watch("sport")}</span>}
                   </Label>
                   <select
                     value={form.watch("ageGroup") || ""}
                     onChange={(e) => {
-                      console.log("Age group selected:", e.target.value);
                       form.setValue("ageGroup", e.target.value);
                     }}
-                    className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    disabled={!form.watch("sport")}
+                    className={`w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${!form.watch("sport") ? 'opacity-50 cursor-not-allowed' : ''}`}
                     data-testid="select-age-group"
                   >
-                    <option value="">Select age group</option>
-                    <option value="Elementary">Elementary (K-5)</option>
-                    <option value="Middle School">Middle School (6-8)</option>
-                    <option value="High School">High School (9-12)</option>
-                    <option value="Adult">Adult (18+)</option>
+                    <option value="">{form.watch("sport") ? "Select age group" : "Select a sport first"}</option>
+                    {getAgeGroupsForSport(form.watch("sport") || "").map((ageGroup) => (
+                      <option key={ageGroup} value={ageGroup}>
+                        {ageGroup} {ageGroup === 'All Ages' ? '(Any age welcome)' : 
+                         ageGroup === 'Elementary' ? '(K-5)' :
+                         ageGroup === 'Middle School' ? '(6-8)' :
+                         ageGroup === 'High School' ? '(9-12)' :
+                         ageGroup === 'College' ? '(18-22)' :
+                         ageGroup === 'Adult' ? '(18+)' :
+                         ageGroup === 'Masters' ? '(50+)' :
+                         ageGroup === 'Senior' ? '(65+)' : ''}
+                      </option>
+                    ))}
                   </select>
+                  {!form.watch("sport") && (
+                    <p className="text-xs text-gray-500 mt-1">Age groups will be filtered based on your sport selection</p>
+                  )}
                 </div>
 
                 <div>
                   <Label htmlFor="genderDivision" className="block text-sm font-medium text-gray-700 mb-2">
-                    Gender Division
+                    Gender Division {form.watch("sport") && <span className="text-green-600">✓ Smart filtered for {form.watch("sport")}</span>}
                   </Label>
                   <select
                     value={form.watch("genderDivision") || ""}
                     onChange={(e) => {
-                      console.log("Gender division selected:", e.target.value);
                       form.setValue("genderDivision", e.target.value);
                     }}
-                    className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    disabled={!form.watch("sport")}
+                    className={`w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${!form.watch("sport") ? 'opacity-50 cursor-not-allowed' : ''}`}
                     data-testid="select-gender-division"
                   >
-                    <option value="">Select division</option>
-                    <option value="Men">Men's (18+)</option>
-                    <option value="Women">Women's (18+)</option>
-                    <option value="Boys">Boys' (Youth)</option>
-                    <option value="Girls">Girls' (Youth)</option>
-                    <option value="Mixed">Mixed/Open</option>
-                    <option value="Co-Ed">Co-Ed</option>
-                    <option value="Masters">Masters (50+)</option>
-                    <option value="Senior">Senior (65+)</option>
+                    <option value="">{form.watch("sport") ? "Select division" : "Select a sport first"}</option>
+                    {getGenderDivisionsForSport(form.watch("sport") || "").map((division) => (
+                      <option key={division} value={division}>
+                        {division} {division === 'Mixed' ? '(All genders welcome)' :
+                         division === 'Co-Ed' ? '(Mixed teams)' :
+                         division === 'Open Division' ? '(Inclusive competition)' :
+                         division === 'Boys' ? "(Youth male)" :
+                         division === 'Girls' ? "(Youth female)" :
+                         division === 'Men' ? "(Adult male)" :
+                         division === 'Women' ? "(Adult female)" : ''}
+                      </option>
+                    ))}
                   </select>
+                  {!form.watch("sport") && (
+                    <p className="text-xs text-gray-500 mt-1">Divisions will be filtered based on your sport selection</p>
+                  )}
+                </div>
+
+                {/* Skill Level Dropdown */}
+                <div>
+                  <Label htmlFor="skillLevel" className="block text-sm font-medium text-gray-700 mb-2">
+                    Skill Level {form.watch("sport") && <span className="text-green-600">✓ Smart filtered for {form.watch("sport")}</span>}
+                  </Label>
+                  <select
+                    value={selectedSkillLevel}
+                    onChange={(e) => {
+                      setSelectedSkillLevel(e.target.value);
+                      form.setValue("skillLevel", e.target.value);
+                    }}
+                    disabled={!form.watch("sport")}
+                    className={`w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${!form.watch("sport") ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    data-testid="select-skill-level"
+                  >
+                    <option value="">{form.watch("sport") ? "Select skill level" : "Select a sport first"}</option>
+                    {getSkillLevelsForSport(form.watch("sport") || "").map((level) => (
+                      <option key={level.value} value={level.value}>
+                        {level.label} {level.description && `(${level.description})`}
+                      </option>
+                    ))}
+                  </select>
+                  {!form.watch("sport") ? (
+                    <p className="text-xs text-gray-500 mt-1">Skill levels will be filtered based on your sport selection</p>
+                  ) : (
+                    <p className="text-xs text-gray-500 mt-1">Choose appropriate skill level for your tournament</p>
+                  )}
                 </div>
               </div>
+
+              {/* Enhanced Skill Level Information */}
+              {selectedSkillLevel && (
+                <div className="p-3 bg-purple-50 border border-purple-200 rounded-lg">
+                  <h5 className="font-medium text-purple-900 mb-2 flex items-center gap-2">
+                    🎯 Skill Level Guidelines
+                  </h5>
+                  <div className="text-sm text-purple-700">
+                    {(() => {
+                      const selectedLevelInfo = getSkillLevelsForSport(form.watch("sport") || "").find(level => level.value === selectedSkillLevel);
+                      return selectedLevelInfo ? (
+                        <p>
+                          <strong>{selectedLevelInfo.label}:</strong> {selectedLevelInfo.description}
+                        </p>
+                      ) : null;
+                    })()}
+                    
+                    {/* Sport-specific guidance */}
+                    {form.watch("sport")?.includes('Swimming') && selectedSkillLevel.includes('time') && (
+                      <p className="mt-2"><strong>Note:</strong> Participants should have achieved or be close to the time standard for fair competition.</p>
+                    )}
+                    {form.watch("sport")?.includes('Wrestling') && selectedSkillLevel !== 'open' && (
+                      <p className="mt-2"><strong>Note:</strong> Experience level helps ensure safe and competitive matches.</p>
+                    )}
+                    {form.watch("sport")?.includes('Esports') && selectedSkillLevel !== 'open' && (
+                      <p className="mt-2"><strong>Note:</strong> Rank verification may be required for competitive integrity.</p>
+                    )}
+                    {selectedSkillLevel === 'open' && (
+                      <p className="mt-2"><strong>Open Division:</strong> Perfect for inclusive tournaments where skill mixing is encouraged.</p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Smart Recommendations Based on Sport */}
+              {form.watch("sport") && (
+                <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <h5 className="font-medium text-blue-900 mb-2">🎯 Smart Recommendations for {form.watch("sport")}</h5>
+                  <div className="text-sm text-blue-700 space-y-1">
+                    {form.watch("sport")?.includes('Adaptive') && (
+                      <p>• <strong>Inclusive Focus:</strong> Consider "All Ages" and "Open Division" for maximum accessibility</p>
+                    )}
+                    {form.watch("sport")?.includes('Academic') && (
+                      <p>• <strong>School-Based:</strong> Academic competitions typically follow school grade levels</p>
+                    )}
+                    {['Esports', 'Drone Racing'].includes(form.watch("sport") || '') && (
+                      <p>• <strong>Technology Skills:</strong> These sports work well with High School and College age groups</p>
+                    )}
+                    {form.watch("sport")?.includes('Winter') && (
+                      <p>• <strong>Facility Requirements:</strong> Winter sports may have limited venue availability</p>
+                    )}
+                  </div>
+                </div>
+              )}
                 </div>
               )}
             </div>
@@ -1090,6 +1741,158 @@ export default function EnhancedTournamentWizard({
                   </p>
                 </div>
               </div>
+
+              {/* Smart Venue Requirements Section */}
+              {form.watch("sport") && getVenueRequirementsForSport(form.watch("sport") || '') && (
+                <div className="space-y-4 p-4 bg-orange-50 rounded-lg border border-orange-200">
+                  <h4 className="font-medium text-orange-900 flex items-center gap-2">
+                    🏟️ Venue Requirements for {form.watch("sport")}
+                  </h4>
+                  <p className="text-sm text-orange-700 mb-4">
+                    Based on your sport selection, here are the recommended venue requirements to ensure a successful tournament:
+                  </p>
+                  
+                  {(() => {
+                    const requirements = getVenueRequirementsForSport(form.watch("sport") || '');
+                    if (!requirements) return null;
+                    
+                    return (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Facilities */}
+                        {requirements.facilities.length > 0 && (
+                          <div className="bg-white p-3 rounded border border-orange-200">
+                            <h5 className="font-medium text-orange-800 mb-2 flex items-center gap-1">
+                              🏢 Essential Facilities
+                            </h5>
+                            <ul className="text-sm text-orange-700 space-y-1">
+                              {requirements.facilities.map((facility, index) => (
+                                <li key={index} className="flex items-start gap-2">
+                                  <span className="text-orange-500 mt-0.5">•</span>
+                                  {facility}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        
+                        {/* Equipment */}
+                        {requirements.equipment.length > 0 && (
+                          <div className="bg-white p-3 rounded border border-orange-200">
+                            <h5 className="font-medium text-orange-800 mb-2 flex items-center gap-1">
+                              ⚙️ Required Equipment
+                            </h5>
+                            <ul className="text-sm text-orange-700 space-y-1">
+                              {requirements.equipment.map((equipment, index) => (
+                                <li key={index} className="flex items-start gap-2">
+                                  <span className="text-orange-500 mt-0.5">•</span>
+                                  {equipment}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        
+                        {/* Safety */}
+                        {requirements.safety.length > 0 && (
+                          <div className="bg-white p-3 rounded border border-orange-200">
+                            <h5 className="font-medium text-orange-800 mb-2 flex items-center gap-1">
+                              🛡️ Safety Requirements
+                            </h5>
+                            <ul className="text-sm text-orange-700 space-y-1">
+                              {requirements.safety.map((safety, index) => (
+                                <li key={index} className="flex items-start gap-2">
+                                  <span className="text-orange-500 mt-0.5">•</span>
+                                  {safety}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        
+                        {/* Accessibility */}
+                        {requirements.accessibility.length > 0 && (
+                          <div className="bg-white p-3 rounded border border-orange-200">
+                            <h5 className="font-medium text-orange-800 mb-2 flex items-center gap-1">
+                              ♿ Accessibility Features
+                            </h5>
+                            <ul className="text-sm text-orange-700 space-y-1">
+                              {requirements.accessibility.map((access, index) => (
+                                <li key={index} className="flex items-start gap-2">
+                                  <span className="text-orange-500 mt-0.5">•</span>
+                                  {access}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        
+                        {/* Special Requirements */}
+                        {requirements.special.length > 0 && (
+                          <div className="bg-white p-3 rounded border border-orange-200 md:col-span-2">
+                            <h5 className="font-medium text-orange-800 mb-2 flex items-center gap-1">
+                              ⭐ Special Considerations
+                            </h5>
+                            <ul className="text-sm text-orange-700 space-y-1">
+                              {requirements.special.map((special, index) => (
+                                <li key={index} className="flex items-start gap-2">
+                                  <span className="text-orange-500 mt-0.5">•</span>
+                                  {special}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+                  
+                  <div className="text-xs text-orange-600 bg-orange-100 p-2 rounded">
+                    <strong>💡 Pro Tip:</strong> Share this checklist with your venue coordinator to ensure all requirements are met before tournament day.
+                  </div>
+                </div>
+              )}
+
+              {/* Smart Equipment Requirements Section */}
+              {form.watch("sport") && getEquipmentRequirements(form.watch("sport") || '', selectedEvents).length > 0 && (
+                <div className="space-y-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <h4 className="font-medium text-blue-900 flex items-center gap-2">
+                    ⚙️ Equipment Requirements for {form.watch("sport")}
+                  </h4>
+                  <p className="text-sm text-blue-700 mb-4">
+                    Essential and recommended equipment for your tournament. Required items are marked with ⭐.
+                  </p>
+                  
+                  {getEquipmentRequirements(form.watch("sport") || '', selectedEvents).map((category, categoryIndex) => (
+                    <div key={categoryIndex} className="bg-white p-3 rounded border border-blue-200">
+                      <h5 className="font-medium text-blue-800 mb-3 flex items-center gap-2">
+                        📦 {category.category}
+                      </h5>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        {category.items.map((item, itemIndex) => (
+                          <div key={itemIndex} className="flex items-start gap-2 p-2 border border-gray-100 rounded">
+                            <span className={`text-sm mt-0.5 ${item.required ? 'text-red-500' : 'text-blue-500'}`}>
+                              {item.required ? '⭐' : '💙'}
+                            </span>
+                            <div className="flex-1">
+                              <span className={`text-sm font-medium ${item.required ? 'text-red-800' : 'text-blue-800'}`}>
+                                {item.name}
+                              </span>
+                              {item.description && (
+                                <p className="text-xs text-gray-600 mt-1">{item.description}</p>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                  
+                  <div className="text-xs text-blue-600 bg-blue-100 p-2 rounded">
+                    <strong>📋 Equipment Checklist:</strong> Use this list to coordinate with your venue and ensure all necessary equipment is available on tournament day.
+                  </div>
+                </div>
+              )}
 
               {/* Registration Fee & Payment Settings */}
               <div className="space-y-4 p-4 bg-blue-50 rounded-lg border border-blue-200">

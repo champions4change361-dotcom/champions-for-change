@@ -116,33 +116,248 @@ export default function SportEventsSelector({
     );
   }
 
-  // Quick selection presets for swimming
-  const quickSelections = sportId === 'swimming-diving' ? [
-    {
-      label: "Sprint Events",
-      events: events.filter((e: SportEvent) => 
-        e.eventName.includes('50m') || e.eventName.includes('100m')
-      ).map((e: SportEvent) => e.id)
-    },
-    {
-      label: "Distance Events", 
-      events: events.filter((e: SportEvent) => 
-        e.eventName.includes('400m') || e.eventName.includes('800m') || e.eventName.includes('1500m')
-      ).map((e: SportEvent) => e.id)
-    },
-    {
-      label: "Individual Medley",
-      events: events.filter((e: SportEvent) => 
-        e.eventName.includes('Individual Medley')
-      ).map((e: SportEvent) => e.id)
-    },
-    {
-      label: "Relay Events",
-      events: events.filter((e: SportEvent) => 
-        e.eventName.includes('Relay')
-      ).map((e: SportEvent) => e.id)
+  // Enhanced quick selection presets for all sports
+  const getQuickSelectionsForSport = (sportName: string): Array<{label: string, events: string[], description?: string}> => {
+    const sportLower = sportName.toLowerCase();
+    
+    // Swimming & Diving presets
+    if (sportLower.includes('swimming') || sportLower.includes('diving')) {
+      return [
+        {
+          label: "Sprint Events",
+          events: events.filter((e: SportEvent) => 
+            e.eventName.includes('50m') || e.eventName.includes('100m')
+          ).map((e: SportEvent) => e.id),
+          description: "Short, high-intensity races"
+        },
+        {
+          label: "Distance Events", 
+          events: events.filter((e: SportEvent) => 
+            e.eventName.includes('400m') || e.eventName.includes('800m') || e.eventName.includes('1500m')
+          ).map((e: SportEvent) => e.id),
+          description: "Endurance races"
+        },
+        {
+          label: "Individual Medley",
+          events: events.filter((e: SportEvent) => 
+            e.eventName.includes('Individual Medley')
+          ).map((e: SportEvent) => e.id),
+          description: "All four strokes combined"
+        },
+        {
+          label: "Relay Events",
+          events: events.filter((e: SportEvent) => 
+            e.eventName.includes('Relay')
+          ).map((e: SportEvent) => e.id),
+          description: "Team races"
+        },
+        {
+          label: "Diving Only",
+          events: events.filter((e: SportEvent) => 
+            e.eventName.includes('Diving')
+          ).map((e: SportEvent) => e.id),
+          description: "Platform and springboard diving"
+        }
+      ];
     }
-  ] : [];
+    
+    // Track & Field presets
+    if (sportLower.includes('track') || sportLower.includes('field')) {
+      return [
+        {
+          label: "Sprint Events",
+          events: events.filter((e: SportEvent) => 
+            e.eventName.includes('100m') || e.eventName.includes('200m') || e.eventName.includes('400m')
+          ).map((e: SportEvent) => e.id),
+          description: "Short distance running"
+        },
+        {
+          label: "Distance Running",
+          events: events.filter((e: SportEvent) => 
+            e.eventName.includes('800m') || e.eventName.includes('1500m') || e.eventName.includes('3000m') || e.eventName.includes('5000m')
+          ).map((e: SportEvent) => e.id),
+          description: "Middle and long distance"
+        },
+        {
+          label: "Hurdle Events",
+          events: events.filter((e: SportEvent) => 
+            e.eventName.includes('Hurdles')
+          ).map((e: SportEvent) => e.id),
+          description: "Hurdle racing events"
+        },
+        {
+          label: "Jumping Events",
+          events: events.filter((e: SportEvent) => 
+            e.eventName.includes('Jump') || e.eventName.includes('Vault')
+          ).map((e: SportEvent) => e.id),
+          description: "Field jumping competitions"
+        },
+        {
+          label: "Throwing Events",
+          events: events.filter((e: SportEvent) => 
+            e.eventName.includes('Shot') || e.eventName.includes('Discus') || e.eventName.includes('Javelin') || e.eventName.includes('Hammer')
+          ).map((e: SportEvent) => e.id),
+          description: "Field throwing competitions"
+        },
+        {
+          label: "Relay Events",
+          events: events.filter((e: SportEvent) => 
+            e.eventName.includes('Relay')
+          ).map((e: SportEvent) => e.id),
+          description: "Team running events"
+        }
+      ];
+    }
+    
+    // Wrestling presets
+    if (sportLower.includes('wrestling')) {
+      return [
+        {
+          label: "Lower Weights",
+          events: events.filter((e: SportEvent) => {
+            const weight = parseInt(e.eventName.split(' ')[0]);
+            return weight <= 132;
+          }).map((e: SportEvent) => e.id),
+          description: "106-132 lbs weight classes"
+        },
+        {
+          label: "Middle Weights",
+          events: events.filter((e: SportEvent) => {
+            const weight = parseInt(e.eventName.split(' ')[0]);
+            return weight > 132 && weight <= 170;
+          }).map((e: SportEvent) => e.id),
+          description: "138-170 lbs weight classes"
+        },
+        {
+          label: "Upper Weights",
+          events: events.filter((e: SportEvent) => {
+            const weight = parseInt(e.eventName.split(' ')[0]);
+            return weight > 170;
+          }).map((e: SportEvent) => e.id),
+          description: "182-285 lbs weight classes"
+        }
+      ];
+    }
+    
+    // Gymnastics presets
+    if (sportLower.includes('gymnastics')) {
+      return [
+        {
+          label: "Women's Events",
+          events: events.filter((e: SportEvent) => 
+            e.eventName.includes('Women') || e.eventName.includes('Uneven') || e.eventName.includes('Beam')
+          ).map((e: SportEvent) => e.id),
+          description: "Women's artistic gymnastics"
+        },
+        {
+          label: "Men's Events",
+          events: events.filter((e: SportEvent) => 
+            e.eventName.includes('Men') || e.eventName.includes('Pommel') || e.eventName.includes('Rings') || e.eventName.includes('Parallel')
+          ).map((e: SportEvent) => e.id),
+          description: "Men's artistic gymnastics"
+        },
+        {
+          label: "All-Around",
+          events: events.filter((e: SportEvent) => 
+            e.eventName.includes('All-Around')
+          ).map((e: SportEvent) => e.id),
+          description: "Combined apparatus competition"
+        }
+      ];
+    }
+    
+    // Golf presets
+    if (sportLower.includes('golf')) {
+      return [
+        {
+          label: "Individual Play",
+          events: events.filter((e: SportEvent) => 
+            e.eventName.includes('Individual')
+          ).map((e: SportEvent) => e.id),
+          description: "Solo competition formats"
+        },
+        {
+          label: "Team Formats",
+          events: events.filter((e: SportEvent) => 
+            e.eventName.includes('Scramble') || e.eventName.includes('Best Ball') || e.eventName.includes('Alternate')
+          ).map((e: SportEvent) => e.id),
+          description: "Team-based golf formats"
+        }
+      ];
+    }
+    
+    // Basketball presets
+    if (sportLower.includes('basketball')) {
+      return [
+        {
+          label: "Game Competition",
+          events: events.filter((e: SportEvent) => 
+            e.eventName.includes('Tournament')
+          ).map((e: SportEvent) => e.id),
+          description: "Full game competitions"
+        },
+        {
+          label: "Skills Contests",
+          events: events.filter((e: SportEvent) => 
+            e.eventName.includes('Contest')
+          ).map((e: SportEvent) => e.id),
+          description: "Individual skill competitions"
+        }
+      ];
+    }
+    
+    // Academic/STEM presets
+    if (sportLower.includes('academic') || sportLower.includes('stem')) {
+      return [
+        {
+          label: "STEM Events",
+          events: events.filter((e: SportEvent) => 
+            e.eventName.includes('Science') || e.eventName.includes('Math') || e.eventName.includes('Engineering') || e.eventName.includes('Programming')
+          ).map((e: SportEvent) => e.id),
+          description: "Science, Technology, Engineering, Math"
+        },
+        {
+          label: "Competition Events",
+          events: events.filter((e: SportEvent) => 
+            e.eventName.includes('Olympiad') || e.eventName.includes('Competition') || e.eventName.includes('Challenge')
+          ).map((e: SportEvent) => e.id),
+          description: "Competitive academic contests"
+        }
+      ];
+    }
+    
+    // Speech & Debate presets
+    if (sportLower.includes('speech') || sportLower.includes('debate')) {
+      return [
+        {
+          label: "Debate Events",
+          events: events.filter((e: SportEvent) => 
+            e.eventName.includes('Debate')
+          ).map((e: SportEvent) => e.id),
+          description: "Argumentative competitions"
+        },
+        {
+          label: "Speaking Events",
+          events: events.filter((e: SportEvent) => 
+            e.eventName.includes('Speaking') || e.eventName.includes('Oratory')
+          ).map((e: SportEvent) => e.id),
+          description: "Public speaking competitions"
+        },
+        {
+          label: "Interpretation",
+          events: events.filter((e: SportEvent) => 
+            e.eventName.includes('Interpretation')
+          ).map((e: SportEvent) => e.id),
+          description: "Performance interpretation events"
+        }
+      ];
+    }
+    
+    // Default return empty if no specific presets
+    return [];
+  };
+
+  const quickSelections = getQuickSelectionsForSport(sportName);
 
   return (
     <Card>
@@ -157,28 +372,41 @@ export default function SportEventsSelector({
           </Badge>
         </CardTitle>
         
-        {/* Quick selection buttons */}
+        {/* Enhanced Quick selection buttons with descriptions */}
         {quickSelections.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleSelectAll}
-              className="text-xs"
-            >
-              {selectAllMode ? "Deselect All" : "Select All"}
-            </Button>
-            {quickSelections.map((preset, index) => (
+          <div className="space-y-3 mt-3">
+            <div className="flex items-center gap-2">
               <Button
-                key={index}
                 variant="outline"
                 size="sm"
-                onClick={() => handleQuickSelect(preset.events)}
+                onClick={handleSelectAll}
                 className="text-xs"
               >
-                {preset.label}
+                {selectAllMode ? "Deselect All" : "Select All"}
               </Button>
-            ))}
+              <span className="text-xs text-gray-500">Quick selections for {sportName}:</span>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+              {quickSelections.map((preset, index) => (
+                <div key={index} className="relative group">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleQuickSelect(preset.events)}
+                    className="w-full text-xs p-3 h-auto flex flex-col items-start gap-1 hover:bg-blue-50 hover:border-blue-200"
+                  >
+                    <span className="font-medium">{preset.label}</span>
+                    {preset.description && (
+                      <span className="text-xs text-gray-500 text-left">{preset.description}</span>
+                    )}
+                    <span className="text-xs text-blue-600">
+                      {preset.events.length} event{preset.events.length !== 1 ? 's' : ''}
+                    </span>
+                  </Button>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </CardHeader>
