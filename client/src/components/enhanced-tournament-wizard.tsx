@@ -1293,10 +1293,10 @@ export default function EnhancedTournamentWizard({
                       className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       <option value="">Choose format</option>
-                      <option value="bracket">Bracket Tournament</option>
-                      <option value="leaderboard">Leaderboard Competition</option>
-                      <option value="series">Best-of Series</option>
-                      <option value="bracket-to-series">Bracket + Championship Series</option>
+                      <option value="bracket">🏆 Bracket Tournament (Teams compete head-to-head, winners advance)</option>
+                      <option value="leaderboard">📊 Leaderboard Competition (Individual scores, ranked by total points)</option>
+                      <option value="series">🎯 Best-of Series (Multiple games between same teams)</option>
+                      <option value="bracket-to-series">🏅 Bracket + Championship Series (Bracket leads to final series)</option>
                     </select>
                   </div>
 
@@ -1310,10 +1310,10 @@ export default function EnhancedTournamentWizard({
                   className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="">Select tournament type</option>
-                  <option value="single">Single Elimination</option>
-                  <option value="double">Double Elimination (Second Chance Bracket)</option>
-                  <option value="double-stage">Double Stage (Group + Bracket)</option>
-                  <option value="round-robin">Round Robin</option>
+                  <option value="single">⚡ Single Elimination (Lose once, you're out - fastest format)</option>
+                  <option value="double">🔄 Double Elimination (Get a second chance in losers bracket)</option>
+                  <option value="double-stage">🏟️ Double Stage (Groups first, then elimination bracket)</option>
+                  <option value="round-robin">🔄 Round Robin (Everyone plays everyone - most fair)</option>
                 </select>
               </div>
 
@@ -1906,6 +1906,74 @@ export default function EnhancedTournamentWizard({
                   
                   <div className="text-xs text-blue-600 bg-blue-100 p-2 rounded">
                     <strong>📋 Equipment Checklist:</strong> Use this list to coordinate with your venue and ensure all necessary equipment is available on tournament day.
+                  </div>
+                </div>
+              )}
+
+              {/* Golf-Specific Cut Configuration */}
+              {form.watch("sport")?.includes('Golf') && (
+                <div className="space-y-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                  <h4 className="font-medium text-green-900 flex items-center gap-2">
+                    ⛳ Golf Tournament Cut Configuration
+                  </h4>
+                  <p className="text-sm text-green-700 mb-4">
+                    Configure if and when to make a cut to reduce the field size for final rounds.
+                  </p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Cut After Round
+                      </label>
+                      <select
+                        className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        data-testid="select-cut-round"
+                      >
+                        <option value="">No Cut (All players finish)</option>
+                        <option value="1">After Round 1 (36-hole tournament)</option>
+                        <option value="2">After Round 2 (Traditional 72-hole cut)</option>
+                        <option value="3">After Round 3 (4-round tournament)</option>
+                      </select>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Most professional tournaments cut after round 2
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Cut to Top Players
+                      </label>
+                      <select
+                        className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        data-testid="select-cut-number"
+                      >
+                        <option value="70">Top 70 and ties (PGA Tour standard)</option>
+                        <option value="60">Top 60 and ties</option>
+                        <option value="50">Top 50 and ties</option>
+                        <option value="40">Top 40 and ties</option>
+                        <option value="30">Top 30 and ties</option>
+                        <option value="20">Top 20 and ties</option>
+                        <option value="16">Top 16 and ties</option>
+                        <option value="custom">Custom number</option>
+                      </select>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Players tied at cut line all advance
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-white p-3 rounded border border-green-200">
+                    <h5 className="font-medium text-green-800 mb-2">Cut Rules & Guidelines</h5>
+                    <div className="text-sm text-green-700 space-y-1">
+                      <p>• <strong>Ties:</strong> All players tied at the cut line advance to subsequent rounds</p>
+                      <p>• <strong>Minimum:</strong> At least 20 players advance even if more are needed due to ties</p>
+                      <p>• <strong>Weather:</strong> Cut numbers may be adjusted if rounds are shortened due to weather</p>
+                      <p>• <strong>Scoring:</strong> Cut is typically made based on total strokes, lowest scores advance</p>
+                    </div>
+                  </div>
+                  
+                  <div className="text-xs text-green-600 bg-green-100 p-2 rounded">
+                    <strong>💡 Tip:</strong> Most amateur tournaments don't use cuts to ensure all players get full tournament experience. Professional tournaments typically cut after round 2 to top 70 players.
                   </div>
                 </div>
               )}
