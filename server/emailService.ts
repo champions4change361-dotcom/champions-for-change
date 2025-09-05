@@ -314,6 +314,72 @@ class EmailService {
     const roleFeatures = features[role] || ['General platform access'];
     return '<ul>' + roleFeatures.map(feature => `<li>${feature}</li>`).join('') + '</ul>';
   }
+
+  async sendTournamentWelcomeEmail(options: { email: string; sports: string[]; frequency: string }) {
+    const { email, sports, frequency } = options;
+    const sportsList = sports.length > 0 ? sports.join(', ') : 'All Sports';
+
+    const subject = '🎯 Tournament Notifications Activated!';
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f8f9fa; padding: 20px;">
+        <div style="background: white; border-radius: 10px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #1a202c; margin: 0;">🏆 Champions for Change</h1>
+            <p style="color: #718096; margin: 5px 0 0 0;">Tournament Platform</p>
+          </div>
+          
+          <div style="background: #f7fafc; border-left: 4px solid #38b2ac; padding: 20px; margin-bottom: 25px;">
+            <h2 style="color: #2d3748; margin: 0 0 10px 0;">🎯 You're All Set!</h2>
+            <p style="color: #4a5568; margin: 0; line-height: 1.6;">
+              Welcome to the tournament community! You'll now receive notifications about exciting tournaments in your area.
+            </p>
+          </div>
+          
+          <div style="margin-bottom: 25px;">
+            <h3 style="color: #2d3748; margin-bottom: 15px;">📧 Your Subscription Details:</h3>
+            <ul style="color: #4a5568; padding-left: 20px; line-height: 1.8;">
+              <li><strong>Sports Interest:</strong> ${sportsList}</li>
+              <li><strong>Frequency:</strong> ${frequency.charAt(0).toUpperCase() + frequency.slice(1)} updates</li>
+              <li><strong>Email:</strong> ${email}</li>
+            </ul>
+          </div>
+          
+          <div style="text-align: center; color: #718096; font-size: 12px;">
+            <p style="margin: 0;">Champions for Change • Tournament Platform</p>
+          </div>
+        </div>
+      </div>
+    `;
+
+    try {
+      if (!this.transporter) {
+        console.log('📧 TOURNAMENT SUBSCRIPTION EMAIL (would be sent to:', email, ')');
+        console.log('Subject:', subject);
+        console.log('Sports:', sportsList, '| Frequency:', frequency);
+        return { success: true, method: 'console' };
+      }
+
+      const fromAddress = process.env.SENDGRID_FROM_EMAIL || '"Champions for Change" <Champions4change361@gmail.com>';
+      
+      const info = await this.transporter.sendMail({
+        from: fromAddress,
+        to: email,
+        subject,
+        html,
+      });
+
+      if (process.env.SENDGRID_API_KEY) {
+        console.log(`📧 Tournament subscription email sent to ${email} via SendGrid:`, info.messageId);
+      } else {
+        console.log(`📧 Tournament subscription email sent to ${email}`);
+      }
+      
+      return { success: true, method: 'email', messageId: info.messageId };
+    } catch (error) {
+      console.error('Failed to send tournament welcome email:', error);
+      return { success: false, error: error.message };
+    }
+  }
 }
 
 export const emailService = new EmailService();

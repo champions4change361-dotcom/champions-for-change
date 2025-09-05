@@ -10,7 +10,8 @@ import {
   type Donor, type InsertDonor, type Donation, type InsertDonation, type RegistrationRequest, type InsertRegistrationRequest,
   type TaxExemptionDocument, type InsertTaxExemptionDocument, type NonprofitSubscription, type InsertNonprofitSubscription, type NonprofitInvoice, type InsertNonprofitInvoice,
   type SupportTeam, type InsertSupportTeam, type SupportTeamMember, type InsertSupportTeamMember, type SupportTeamInjury, type InsertSupportTeamInjury, type SupportTeamAiConsultation, type InsertSupportTeamAiConsultation,
-  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog, taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices, supportTeams, supportTeamMembers, supportTeamInjuries, supportTeamAiConsultations, jerseyTeamMembers, jerseyTeamPayments
+  type TournamentSubscription, type InsertTournamentSubscription,
+  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog, taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices, supportTeams, supportTeamMembers, supportTeamInjuries, supportTeamAiConsultations, jerseyTeamMembers, jerseyTeamPayments, tournamentSubscriptions
 } from "@shared/schema";
 
 type SportCategory = typeof sportCategories.$inferSelect;
@@ -160,6 +161,10 @@ export interface IStorage {
   createDonation(donation: InsertDonation): Promise<Donation>;
   updateDonation(id: string, updates: Partial<Donation>): Promise<Donation>;
   deleteDonation(id: string): Promise<void>;
+  
+  // Tournament subscription operations
+  createTournamentSubscription(subscription: InsertTournamentSubscription): Promise<TournamentSubscription>;
+  getTournamentSubscriptions(): Promise<TournamentSubscription[]>;
   
   // Email campaign operations
   getEmailCampaigns(userId: string): Promise<EmailCampaign[]>;
@@ -1434,6 +1439,9 @@ export class DbStorage implements IStorage {
   async createDonation(donation: InsertDonation): Promise<Donation> { throw new Error("Method not implemented"); }
   async updateDonation(id: string, updates: Partial<Donation>): Promise<Donation> { throw new Error("Method not implemented"); }
   async deleteDonation(id: string): Promise<void> { throw new Error("Method not implemented"); }
+  
+  async createTournamentSubscription(subscription: InsertTournamentSubscription): Promise<TournamentSubscription> { throw new Error("Method not implemented"); }
+  async getTournamentSubscriptions(): Promise<TournamentSubscription[]> { return []; }
   
   async getEmailCampaigns(userId: string): Promise<EmailCampaign[]> { return []; }
   async getEmailCampaign(id: string): Promise<EmailCampaign | undefined> { return undefined; }

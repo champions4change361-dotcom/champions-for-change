@@ -682,6 +682,32 @@ export type InsertAthleticVenue = z.infer<typeof insertAthleticVenueSchema>;
 export type SchoolAsset = typeof schoolAssets.$inferSelect;
 export type InsertSchoolAsset = z.infer<typeof insertSchoolAssetSchema>;
 
+// Tournament notification subscriptions
+export const tournamentSubscriptions = pgTable("tournament_subscriptions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  email: varchar("email").notNull(),
+  sports: jsonb("sports").$type<string[]>().default([]), // Array of sports they're interested in
+  location: varchar("location"), // City/region for local tournaments
+  frequency: text("frequency", {
+    enum: ["immediate", "daily", "weekly"]
+  }).default("weekly"),
+  isActive: boolean("is_active").default(true),
+  subscribedAt: timestamp("subscribed_at").defaultNow(),
+  lastNotified: timestamp("last_notified"),
+  unsubscribeToken: varchar("unsubscribe_token").unique().default(sql`gen_random_uuid()`),
+  source: varchar("source").default("landing_page"), // Where they subscribed from
+});
+
+// Tournament subscription schema and types
+export const insertTournamentSubscriptionSchema = createInsertSchema(tournamentSubscriptions).omit({
+  id: true,
+  subscribedAt: true,
+  unsubscribeToken: true,
+});
+
+export type TournamentSubscription = typeof tournamentSubscriptions.$inferSelect;
+export type InsertTournamentSubscription = z.infer<typeof insertTournamentSubscriptionSchema>;
+
 // Email campaigns for marketing
 export const emailCampaigns = pgTable("email_campaigns", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),

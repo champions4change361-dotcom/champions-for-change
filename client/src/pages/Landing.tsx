@@ -12,11 +12,51 @@ import { SignupSection } from "@/components/SignupSection";
 
 import Footer from "@/components/Footer";
 import RegistrationAssistant from "@/components/RegistrationAssistant";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 
 export default function Landing() {
   const [, setLocation] = useLocation();
   const [isRegistrationAssistantOpen, setIsRegistrationAssistantOpen] = useState(false);
+  const [tournamentEmail, setTournamentEmail] = useState('');
+  const { toast } = useToast();
+
+  const tournamentSubscriptionMutation = useMutation({
+    mutationFn: async (email: string) => {
+      return apiRequest('/api/tournament-subscriptions', {
+        method: 'POST',
+        body: JSON.stringify({
+          email,
+          sports: [],
+          frequency: 'weekly'
+        })
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Successfully subscribed!",
+        description: "You'll receive tournament notifications via email.",
+      });
+      setTournamentEmail('');
+    },
+    onError: (error) => {
+      console.error('Subscription error:', error);
+      toast({
+        title: "Subscription failed",
+        description: "Please try again or contact support.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const handleTournamentSubscription = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!tournamentEmail.trim()) return;
+    
+    tournamentSubscriptionMutation.mutate(tournamentEmail);
+  };
 
   // Clear any persistent session data when landing page loads
   React.useEffect(() => {
@@ -232,38 +272,14 @@ export default function Landing() {
                   </div>
                   
                   <div className="flex flex-col gap-3 w-full max-w-lg">
-                    <div className="flex gap-3">
-                      <Button 
-                        size="lg" 
-                        className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-4 py-3 text-base flex-1"
-                        onClick={() => setLocation("/pricing")}
-                        data-testid="button-get-started"
-                      >
-                        <span className="hidden md:inline">Start Supporting</span>
-                        <span className="md:hidden">Get Started</span>
-                      </Button>
-                      <Button 
-                        size="lg" 
-                        className="bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-3 text-base flex-1"
-                        onClick={() => setLocation("/donate")}
-                        data-testid="button-donate-hero"
-                      >
-                        <Heart className="mr-1 h-4 w-4" />
-                        <span className="hidden md:inline">Fund Students</span>
-                        <span className="md:hidden">Donate</span>
-                      </Button>
-                    </div>
                     <Button 
                       size="lg" 
-                      variant="outline"
-                      className="border-red-500/50 text-red-400 hover:bg-red-500/10 hover:border-red-400 px-4 py-3 text-base w-full"
-                      onClick={() => {
-                        const impactSection = document.getElementById('impact-mission');
-                        impactSection?.scrollIntoView({ behavior: 'smooth' });
-                      }}
-                      data-testid="button-learn-more"
+                      className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-4 py-3 text-base w-full"
+                      onClick={() => setLocation("/pricing")}
+                      data-testid="button-get-started"
                     >
-                      Learn More About Our Impact
+                      <Trophy className="mr-2 h-5 w-5" />
+                      Start Your Platform
                     </Button>
                   </div>
                 </div>
@@ -395,30 +411,208 @@ export default function Landing() {
           </div>
         </div>
 
-        {/* Impact Stats Arena */}
-        <div className="bg-gradient-to-r from-emerald-600 via-emerald-500 to-emerald-600 rounded-2xl text-white py-12 mb-12">
-          <div className="text-center px-8">
-            <h2 className="text-4xl font-bold mb-8">Making a Real Difference</h2>
-            <div className="grid md:grid-cols-4 gap-6">
-              <div className="bg-emerald-700/30 rounded-xl p-6">
-                <div className="text-4xl font-bold mb-2 text-yellow-400">$2,600+</div>
-                <div className="text-emerald-100">Per student trip cost</div>
+        {/* Featured Tournaments - Traffic Driver */}
+        <div className="bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 rounded-2xl border border-yellow-500/30 py-12 mb-12">
+          <div className="text-center px-8 mb-8">
+            <h2 className="text-4xl font-bold text-white mb-4">🏆 Featured Tournaments</h2>
+            <p className="text-slate-300 text-lg max-w-3xl mx-auto mb-6">
+              Discover major tournaments in your area. Get notified about upcoming events across all sports.
+            </p>
+            
+            {/* Email Signup for Tournament Notifications */}
+            <div className="bg-slate-900/50 border border-yellow-500/30 rounded-xl p-6 max-w-2xl mx-auto mb-8">
+              <h3 className="text-xl font-bold text-white mb-3">📧 Tournament Notifications</h3>
+              <p className="text-slate-300 mb-4">Get notified about tournaments in your area - all sports, all skill levels</p>
+              <form onSubmit={handleTournamentSubscription} className="flex flex-col sm:flex-row gap-3">
+                <input 
+                  type="email" 
+                  placeholder="Enter your email for tournament alerts" 
+                  className="flex-1 px-4 py-3 rounded-lg bg-slate-800 border border-slate-600 text-white placeholder-slate-400 focus:outline-none focus:border-yellow-500"
+                  data-testid="input-tournament-email"
+                  value={tournamentEmail}
+                  onChange={(e) => setTournamentEmail(e.target.value)}
+                  required
+                />
+                <Button 
+                  type="submit"
+                  className="bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-bold px-6 py-3"
+                  data-testid="button-subscribe-tournaments"
+                  disabled={tournamentSubscriptionMutation.isPending}
+                >
+                  {tournamentSubscriptionMutation.isPending ? 'Subscribing...' : 'Get Alerts'}
+                </Button>
+              </form>
+              <p className="text-xs text-slate-400 mt-2">Free • Unsubscribe anytime • No spam</p>
+            </div>
+          </div>
+
+          {/* Multi-Sport Tournament Grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 px-8">
+            
+            {/* Fishing Tournaments */}
+            <div className="bg-slate-900/50 border border-teal-500/30 rounded-xl p-6 hover:border-teal-400/50 transition-all">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-teal-500/20 rounded-lg flex items-center justify-center mr-3">
+                  🎣
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">Fishing Tournaments</h3>
+                  <div className="text-sm text-teal-400 font-semibold">LIVE</div>
+                </div>
               </div>
-              <div className="bg-emerald-700/30 rounded-xl p-6">
-                <div className="text-4xl font-bold mb-2 text-yellow-400">100%</div>
-                <div className="text-emerald-100">Profit goes to education</div>
+              <div className="space-y-2 text-sm">
+                <div className="text-white font-semibold">CCA Texas STAR Tournament</div>
+                <div className="text-slate-300">May 26 - Sept 1, 2025</div>
+                <div className="text-yellow-400">$2M+ in prizes</div>
               </div>
-              <div className="bg-emerald-700/30 rounded-xl p-6">
-                <div className="text-4xl font-bold mb-2 text-yellow-400">65+</div>
-                <div className="text-emerald-100">Sports supported</div>
-              </div>
-              <div className="bg-emerald-700/30 rounded-xl p-6">
-                <div className="text-4xl font-bold mb-2 text-yellow-400">5-∞</div>
-                <div className="text-emerald-100">Students funded annually</div>
+              <div className="mt-3 pt-3 border-t border-slate-700">
+                <div className="text-white font-semibold">Sharkathon</div>
+                <div className="text-slate-300">October-November 2025</div>
+                <div className="text-emerald-400">Conservation focused</div>
               </div>
             </div>
-            <div className="mt-8 text-emerald-200 text-lg">
-              With just 10 Champion subscribers, we can fund one complete student trip per year
+
+            {/* Basketball Tournaments */}
+            <div className="bg-slate-900/50 border border-orange-500/30 rounded-xl p-6 hover:border-orange-400/50 transition-all">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-orange-500/20 rounded-lg flex items-center justify-center mr-3">
+                  🏀
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">Basketball Tournaments</h3>
+                  <div className="text-sm text-orange-400 font-semibold">POPULAR</div>
+                </div>
+              </div>
+              <div className="space-y-2 text-sm">
+                <div className="text-white font-semibold">Regional Youth Championships</div>
+                <div className="text-slate-300">12U-14U divisions</div>
+                <div className="text-yellow-400">Supporting education</div>
+              </div>
+              <div className="mt-3 pt-3 border-t border-slate-700">
+                <div className="text-white font-semibold">Winter League Finals</div>
+                <div className="text-slate-300">December 2025</div>
+                <div className="text-emerald-400">All skill levels</div>
+              </div>
+            </div>
+
+            {/* Golf Tournaments */}
+            <div className="bg-slate-900/50 border border-green-500/30 rounded-xl p-6 hover:border-green-400/50 transition-all">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center mr-3">
+                  ⛳
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">Golf Tournaments</h3>
+                  <div className="text-sm text-green-400 font-semibold">FEATURED</div>
+                </div>
+              </div>
+              <div className="space-y-2 text-sm">
+                <div className="text-white font-semibold">Coastal Championship</div>
+                <div className="text-slate-300">October 2025</div>
+                <div className="text-yellow-400">$5,000 prizes</div>
+              </div>
+              <div className="mt-3 pt-3 border-t border-slate-700">
+                <div className="text-white font-semibold">Golf & Fishing Combo</div>
+                <div className="text-slate-300">Weekend tournaments</div>
+                <div className="text-emerald-400">Dual sport</div>
+              </div>
+            </div>
+
+            {/* Soccer Tournaments */}
+            <div className="bg-slate-900/50 border border-blue-500/30 rounded-xl p-6 hover:border-blue-400/50 transition-all">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mr-3">
+                  ⚽
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">Soccer Tournaments</h3>
+                  <div className="text-sm text-blue-400 font-semibold">YOUTH</div>
+                </div>
+              </div>
+              <div className="space-y-2 text-sm">
+                <div className="text-white font-semibold">Fall Cup Championships</div>
+                <div className="text-slate-300">U10-U16 divisions</div>
+                <div className="text-yellow-400">Community focused</div>
+              </div>
+              <div className="mt-3 pt-3 border-t border-slate-700">
+                <div className="text-white font-semibold">Indoor Winter League</div>
+                <div className="text-slate-300">January-March 2026</div>
+                <div className="text-emerald-400">All weather play</div>
+              </div>
+            </div>
+
+            {/* Baseball Tournaments */}
+            <div className="bg-slate-900/50 border border-red-500/30 rounded-xl p-6 hover:border-red-400/50 transition-all">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-red-500/20 rounded-lg flex items-center justify-center mr-3">
+                  ⚾
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">Baseball Tournaments</h3>
+                  <div className="text-sm text-red-400 font-semibold">SPRING</div>
+                </div>
+              </div>
+              <div className="space-y-2 text-sm">
+                <div className="text-white font-semibold">Spring Training Classic</div>
+                <div className="text-slate-300">March 2026</div>
+                <div className="text-yellow-400">High school divisions</div>
+              </div>
+              <div className="mt-3 pt-3 border-t border-slate-700">
+                <div className="text-white font-semibold">Summer All-Star Week</div>
+                <div className="text-slate-300">June 2026</div>
+                <div className="text-emerald-400">Elite competition</div>
+              </div>
+            </div>
+
+            {/* Multi-Sport Events */}
+            <div className="bg-slate-900/50 border border-purple-500/30 rounded-xl p-6 hover:border-purple-400/50 transition-all">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mr-3">
+                  🏆
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">Multi-Sport Events</h3>
+                  <div className="text-sm text-purple-400 font-semibold">VARIETY</div>
+                </div>
+              </div>
+              <div className="space-y-2 text-sm">
+                <div className="text-white font-semibold">Athletic Olympics</div>
+                <div className="text-slate-300">Track & Field events</div>
+                <div className="text-yellow-400">All ages welcome</div>
+              </div>
+              <div className="mt-3 pt-3 border-t border-slate-700">
+                <div className="text-white font-semibold">Combo Championships</div>
+                <div className="text-slate-300">Mixed sport weekend</div>
+                <div className="text-emerald-400">Something for everyone</div>
+              </div>
+            </div>
+
+          </div>
+
+          <div className="text-center mt-8">
+            <Button 
+              className="bg-gradient-to-r from-yellow-600 to-yellow-500 text-slate-900 font-bold px-8 py-3 text-lg hover:from-yellow-500 hover:to-yellow-400 transition-all shadow-lg"
+              onClick={() => setLocation('/tournament-calendar')}
+              data-testid="button-view-all-tournaments"
+            >
+              View All Tournaments →
+            </Button>
+          </div>
+        </div>
+
+        {/* Impact Stats Arena - Simplified */}
+        <div className="bg-gradient-to-r from-emerald-600 via-emerald-500 to-emerald-600 rounded-2xl text-white py-8 mb-12">
+          <div className="text-center px-8">
+            <h2 className="text-3xl font-bold mb-6">Making a Real Difference</h2>
+            <div className="grid md:grid-cols-2 gap-8">
+              <div className="bg-emerald-700/30 rounded-xl p-6">
+                <div className="text-3xl font-bold mb-2 text-yellow-400">65+ Sports</div>
+                <div className="text-emerald-100">Tournament types supported</div>
+              </div>
+              <div className="bg-emerald-700/30 rounded-xl p-6">
+                <div className="text-3xl font-bold mb-2 text-yellow-400">100% Mission</div>
+                <div className="text-emerald-100">Profit funds student education</div>
+              </div>
             </div>
           </div>
         </div>

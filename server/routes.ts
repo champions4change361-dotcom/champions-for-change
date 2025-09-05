@@ -11,6 +11,7 @@ import NBADepthChartParser from './nba-depth-chart-parser';
 import { stripe } from "./nonprofitStripeConfig";
 import { registerDomainRoutes } from "./domainRoutes";
 import { registerTournamentRoutes } from "./routes/tournamentRoutes";
+import { tournamentSubscriptions, insertTournamentSubscriptionSchema, type InsertTournamentSubscription } from "@shared/schema";
 
 console.log('🏫 District athletics management platform initialized');
 console.log('💚 Champions for Change nonprofit mission active');
@@ -45,6 +46,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Support team routes for cheerleading, dance teams, marching band, color guard
   app.use('/api', supportTeamRoutes);
+
+  // Tournament notification subscriptions
+  app.post('/api/tournament-subscriptions', async (req, res) => {
+    try {
+      const storage = getStorage();
+      const validatedData = insertTournamentSubscriptionSchema.parse(req.body);
+      
+      // Create the subscription - simple implementation for now
+      const subscription = {
+        id: Math.random().toString(),
+        email: validatedData.email,
+        sports: validatedData.sports || [],
+        frequency: validatedData.frequency || 'weekly',
+        isActive: true,
+        subscribedAt: new Date(),
+        source: 'landing_page'
+      };
+      
+      // Send welcome email
+      if (process.env.SENDGRID_API_KEY) {
+        try {
+          await emailService.sendTournamentWelcomeEmail({
+            email: validatedData.email,
+            sports: validatedData.sports || ['All Sports'],
+            frequency: validatedData.frequency || 'weekly'
+          });
+        } catch (emailError) {
+          console.error('Failed to send welcome email:', emailError);
+          // Don't fail the subscription if email fails
+        }
+      }
+      
+      res.status(201).json({
+        success: true,
+        message: 'Successfully subscribed to tournament notifications!',
+        subscription: {
+          id: subscription.id,
+          email: subscription.email,
+          frequency: subscription.frequency
+        }
+      });
+    } catch (error) {
+      console.error('Tournament subscription error:', error);
+      res.status(400).json({
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to create subscription'
+      });
+    }
+  });
 
   // Smart Signup API endpoint for streamlined registration
   app.post('/api/registration/smart-signup', async (req, res) => {
