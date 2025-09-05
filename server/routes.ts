@@ -515,14 +515,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Hash password
-      const bcrypt = require('bcrypt');
+      const bcrypt = await import('bcrypt');
       const passwordHash = await bcrypt.hash(password, 12);
 
       // Generate email verification token
-      const crypto = require('crypto');
+      const crypto = await import('crypto');
       const emailVerificationToken = crypto.randomBytes(32).toString('hex');
 
-      // Create user with email authentication
+      // Create user with email authentication  
       const newUser = {
         id: crypto.randomUUID(),
         email: email.toLowerCase(),
