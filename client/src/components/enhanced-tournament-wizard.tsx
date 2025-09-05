@@ -859,11 +859,14 @@ export default function EnhancedTournamentWizard({
                     data-testid="select-gender-division"
                   >
                     <option value="">Select division</option>
-                    <option value="Men">Men's</option>
-                    <option value="Women">Women's</option>
-                    <option value="Boys">Boys'</option>
-                    <option value="Girls">Girls'</option>
+                    <option value="Men">Men's (18+)</option>
+                    <option value="Women">Women's (18+)</option>
+                    <option value="Boys">Boys' (Youth)</option>
+                    <option value="Girls">Girls' (Youth)</option>
                     <option value="Mixed">Mixed/Open</option>
+                    <option value="Co-Ed">Co-Ed</option>
+                    <option value="Masters">Masters (50+)</option>
+                    <option value="Senior">Senior (65+)</option>
                   </select>
                 </div>
               </div>

@@ -524,7 +524,77 @@ export const SportSpecificConfig: React.FC<SportSpecificConfigProps> = ({
       </CardHeader>
       
       <CardContent className="space-y-6">
+        {/* SPECIAL HANDLING FOR GOLF CUT OPTIONS */}
+        {format.sport === 'Golf' && format.specificOptions?.cutOptions && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+            <div className="flex items-center text-sm text-green-700 mb-3">
+              <Target className="h-4 w-4 mr-2" />
+              <span className="font-medium">Golf Tournament Cut System</span>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <Label className="text-sm font-medium text-green-800">Tournament Cut Format</Label>
+                <Select 
+                  value={currentConfig.cutOptions || 'no-cut'} 
+                  onValueChange={(value) => handleConfigUpdate('cutOptions', value)}
+                >
+                  <SelectTrigger data-testid="config-select-cut-options" className="bg-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="no-cut">No Cut - All players finish</SelectItem>
+                    <SelectItem value="36-hole-cut">36-Hole Cut - Cut after 2 rounds</SelectItem>
+                    <SelectItem value="54-hole-cut">54-Hole Cut - Cut after 3 rounds</SelectItem>
+                    <SelectItem value="top-and-ties">Top Players + Ties</SelectItem>
+                    <SelectItem value="percentage-cut">Percentage Cut (e.g., top 50%)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-green-600 mt-1">
+                  Choose when to eliminate players from the tournament
+                </p>
+              </div>
+              
+              {currentConfig.cutOptions && currentConfig.cutOptions !== 'no-cut' && (
+                <div className="bg-white border border-green-200 rounded p-3">
+                  <Label className="text-xs font-medium text-green-700">Cut Configuration</Label>
+                  <div className="grid grid-cols-2 gap-3 mt-2">
+                    <div>
+                      <Label className="text-xs">Players Making Cut</Label>
+                      <Input 
+                        type="number" 
+                        placeholder="e.g., 70" 
+                        className="h-8 text-sm"
+                        value={currentConfig.cutPlayerCount || ''}
+                        onChange={(e) => handleConfigUpdate('cutPlayerCount', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs">Cut Score</Label>
+                      <Select 
+                        value={currentConfig.cutScoreType || 'stroke-based'} 
+                        onValueChange={(value) => handleConfigUpdate('cutScoreType', value)}
+                      >
+                        <SelectTrigger className="h-8 text-sm">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="stroke-based">Stroke-based</SelectItem>
+                          <SelectItem value="plus-ties">Plus ties</SelectItem>
+                          <SelectItem value="within-strokes">Within X strokes</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {Object.entries(format.specificOptions).map(([key, options]) => {
+          // Skip cutOptions as we handle it specially above
+          if (key === 'cutOptions') return null;
+          
           if (Array.isArray(options)) {
             return (
               <div key={key} className="space-y-2">
