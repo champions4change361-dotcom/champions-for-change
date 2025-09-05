@@ -2,7 +2,7 @@ import nodemailer from 'nodemailer';
 
 // Email service for sending notifications to newly registered users
 class EmailService {
-  private transporter: nodemailer.Transporter;
+  private transporter: nodemailer.Transporter | null = null;
 
   constructor() {
     // For development, use ethereal email (fake SMTP service)
@@ -85,7 +85,7 @@ class EmailService {
       };
     } catch (error) {
       console.error('Failed to send welcome email:', error);
-      return { success: false, error: error.message };
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
 
@@ -291,7 +291,7 @@ class EmailService {
       };
     } catch (error) {
       console.error('Failed to send email:', error);
-      return { success: false, error: error.message };
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
 
@@ -477,7 +477,7 @@ class EmailService {
       return { success: true, method: 'email', messageId: info.messageId };
     } catch (error) {
       console.error('Failed to send tournament welcome email:', error);
-      return { success: false, error: error.message };
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
 }

@@ -536,7 +536,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         organizationType,
         phone: phone || null,
         accountStatus: 'email_unverified',
-        subscriptionPlan: organizationType === 'participant' ? 'foundation' : 'tournament-organizer',
+        subscriptionPlan: organizationType === 'participant' ? 'foundation' : 'professional',
         subscriptionStatus: 'trialing',
         userRole: 'tournament_manager',
       };
@@ -901,7 +901,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         firstName: firstName,
         lastName: lastName,
         profileImageUrl: null,
-        subscriptionPlan: plan || 'tournament-organizer',
+        subscriptionPlan: plan || 'professional',
         subscriptionStatus: paymentMethod === 'stripe' ? 'pending' : 'pending_approval',
         complianceRole: 'tournament_manager',
         organizationId: `business-${organizationName.toLowerCase().replace(/\s+/g, '-')}`,
@@ -965,7 +965,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           phone: "555-123-4567",
           organizationName: "Local Sports Club",
           organizationType: "sports_club",
-          subscriptionPlan: "tournament-organizer",
+          subscriptionPlan: "professional",
           paymentMethod: "check",
           pendingCheckAmount: "39",
           accountStatus: "pending_check_payment",
@@ -1366,7 +1366,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           platform: 'Champions for Change',
           user_id: user.id,
           user_role: user.userRole,
-          subscription_tier: user.subscriptionPlan || 'foundation'
+          subscription_tier: user.subscriptionPlan || 'professional'
         }
       });
 

@@ -43,6 +43,7 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   getAllUsers(): Promise<User[]>;
   upsertUser(user: UpsertUser): Promise<User>;
+  updateUser(id: string, updates: Partial<User>): Promise<User | undefined>;
   updateUserStripeInfo(id: string, customerId: string, subscriptionId: string): Promise<User | undefined>;
   
   // Compliance operations
@@ -103,6 +104,11 @@ export interface IStorage {
   getTeamMembers(teamRegistrationId: string): Promise<any[]>;
   updateTeamMember(id: string, updates: any): Promise<any>;
   deleteTeamMember(id: string): Promise<boolean>;
+  
+  // Team payment methods
+  createTeamPayment(payment: any): Promise<any>;
+  getTeamPayments(teamId: string): Promise<any[]>;
+  updateTeamPayment(id: string, updates: any): Promise<any>;
 
   // Organization methods
   createOrganization(organization: InsertOrganization): Promise<Organization>;
@@ -184,7 +190,7 @@ export interface IStorage {
   deleteEmailCampaign(id: string): Promise<void>;
 
   // Tournament methods
-  getTournaments(): Promise<Tournament[]>;
+  getTournaments(userId?: string): Promise<Tournament[]>;
   getTournament(id: string): Promise<Tournament | undefined>;
   getDraftTournaments(userId: string): Promise<Tournament[]>;
   createTournament(tournament: InsertTournament): Promise<Tournament>;
@@ -419,6 +425,20 @@ export class DbStorage implements IStorage {
     } catch (error) {
       console.error("Database error:", error);
       throw new Error("Failed to upsert user");
+    }
+  }
+
+  async updateUser(id: string, updates: Partial<User>): Promise<User | undefined> {
+    try {
+      const result = await this.db
+        .update(users)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(users.id, id))
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
     }
   }
 
@@ -793,6 +813,42 @@ export class DbStorage implements IStorage {
   }
 
   // Team payment methods
+  async createTeamPayment(payment: any): Promise<any> {
+    try {
+      const result = await this.db.insert(jerseyTeamPayments).values(payment).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to create team payment");
+    }
+  }
+
+  async getTeamPayments(teamId: string): Promise<any[]> {
+    try {
+      const result = await this.db
+        .select()
+        .from(jerseyTeamPayments)
+        .where(eq(jerseyTeamPayments.teamRegistrationId, teamId));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async updateTeamPayment(id: string, updates: any): Promise<any> {
+    try {
+      const result = await this.db
+        .update(jerseyTeamPayments)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(jerseyTeamPayments.id, id))
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
   async createTeamPayment(payment: any): Promise<any> {
     try {
       const paymentData = {
@@ -1206,9 +1262,13 @@ export class DbStorage implements IStorage {
     }
   }
 
-  async getTournaments(): Promise<Tournament[]> {
+  async getTournaments(userId?: string): Promise<Tournament[]> {
     try {
-      return await this.db.select().from(tournaments).orderBy(desc(tournaments.createdAt));
+      let query = this.db.select().from(tournaments).orderBy(desc(tournaments.createdAt));
+      if (userId) {
+        query = query.where(eq(tournaments.organizerId, userId));
+      }
+      return await query;
     } catch (error) {
       console.error("Database error:", error);
       throw new Error("Failed to fetch tournaments");
