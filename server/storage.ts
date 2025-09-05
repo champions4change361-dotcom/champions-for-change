@@ -40,6 +40,7 @@ export type ComplianceAuditLog = {
 export interface IStorage {
   // User authentication methods
   getUser(id: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
   getAllUsers(): Promise<User[]>;
   upsertUser(user: UpsertUser): Promise<User>;
   updateUserStripeInfo(id: string, customerId: string, subscriptionId: string): Promise<User | undefined>;
@@ -351,6 +352,16 @@ export class DbStorage implements IStorage {
   async getUser(id: string): Promise<User | undefined> {
     try {
       const result = await this.db.select().from(users).where(eq(users.id, id));
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    try {
+      const result = await this.db.select().from(users).where(eq(users.email, email.toLowerCase()));
       return result[0];
     } catch (error) {
       console.error("Database error:", error);
@@ -1829,6 +1840,15 @@ export class MemStorage implements IStorage {
   // User authentication methods
   async getUser(id: string): Promise<User | undefined> {
     return this.users.get(id);
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    for (const user of this.users.values()) {
+      if (user.email?.toLowerCase() === email.toLowerCase()) {
+        return user;
+      }
+    }
+    return undefined;
   }
 
   async getAllUsers(): Promise<User[]> {

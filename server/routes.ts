@@ -496,6 +496,115 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Email/password signup endpoint
+  app.post('/api/auth/signup', async (req, res) => {
+    try {
+      const { firstName, lastName, email, password, organizationName, organizationType, phone, authProvider = 'email' } = req.body;
+
+      // Validate required fields
+      if (!firstName || !lastName || !email || !password || !organizationName) {
+        return res.status(400).json({ message: 'Missing required fields' });
+      }
+
+      // Check if user already exists
+      const storage = await getStorage();
+      const existingUser = await storage.getUserByEmail(email);
+      
+      if (existingUser) {
+        return res.status(400).json({ message: 'User with this email already exists' });
+      }
+
+      // Hash password
+      const bcrypt = require('bcrypt');
+      const passwordHash = await bcrypt.hash(password, 12);
+
+      // Generate email verification token
+      const crypto = require('crypto');
+      const emailVerificationToken = crypto.randomBytes(32).toString('hex');
+
+      // Create user with email authentication
+      const newUser = {
+        id: crypto.randomUUID(),
+        email: email.toLowerCase(),
+        firstName,
+        lastName,
+        passwordHash,
+        authProvider,
+        emailVerified: false,
+        emailVerificationToken,
+        organizationName,
+        organizationType,
+        phone: phone || null,
+        accountStatus: 'email_unverified',
+        subscriptionPlan: organizationType === 'participant' ? 'foundation' : 'tournament-organizer',
+        subscriptionStatus: 'trialing',
+        userRole: 'tournament_manager',
+      };
+
+      // Save user to database
+      await storage.upsertUser(newUser);
+
+      // Send welcome email with verification link
+      try {
+        await emailService.sendWelcomeEmail(
+          email, 
+          firstName, 
+          organizationType || 'Tournament Organizer',
+          organizationName
+        );
+        console.log(`📧 Welcome email sent to ${email}`);
+      } catch (emailError) {
+        console.error('Failed to send welcome email:', emailError);
+        // Don't fail signup if email fails - user can resend later
+      }
+
+      // Create user session (login automatically after signup)
+      const userSession = {
+        id: newUser.id,
+        email: newUser.email,
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
+        organizationName: newUser.organizationName,
+        organizationType: newUser.organizationType,
+        subscriptionPlan: newUser.subscriptionPlan,
+        subscriptionStatus: newUser.subscriptionStatus,
+        accountStatus: newUser.accountStatus,
+        emailVerified: newUser.emailVerified,
+        authProvider: newUser.authProvider
+      };
+
+      (req as any).session.user = userSession;
+
+      // Save session
+      await new Promise<void>((resolve, reject) => {
+        (req as any).session.save((err: any) => {
+          if (err) {
+            console.error('Session save error during signup:', err);
+            reject(err);
+          } else {
+            resolve();
+          }
+        });
+      });
+
+      console.log(`✅ New user registered: ${email} (${organizationType})`);
+      
+      res.status(201).json({
+        success: true,
+        message: 'Account created successfully! Please check your email to verify your account.',
+        user: userSession,
+        emailSent: true
+      });
+
+    } catch (error) {
+      console.error('Signup error:', error);
+      res.status(500).json({ 
+        message: 'Failed to create account. Please try again.',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+  });
+
   // Basic user authentication endpoint - modified to check passport authentication
   app.get("/api/auth/user", async (req: any, res) => {
     try {

@@ -8,12 +8,13 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { CheckCircle, Trophy, Users, Building, GraduationCap, ArrowLeft, ArrowRight, Home } from 'lucide-react';
+import { CheckCircle, Trophy, Users, Building, GraduationCap, ArrowLeft, ArrowRight, Home, Mail } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useDomain } from '@/hooks/useDomain';
 import { useToast } from '@/hooks/use-toast';
 import TrantorCoin from '@/components/TrantorCoin';
+import EmailSignupForm from '@/components/EmailSignupForm';
 import { Link } from 'wouter';
 
 // Smart signup schema that adapts based on organization type
@@ -46,6 +47,7 @@ export default function SmartSignup() {
   const [selectedOrgType, setSelectedOrgType] = useState<string>('');
   const [selectedSports, setSelectedSports] = useState<string[]>([]);
   const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'check'>('stripe');
+  const [signupMethod, setSignupMethod] = useState<'google' | 'email'>('google');
   const { isSchoolSafe } = useDomain();
   const { toast } = useToast();
 
@@ -195,6 +197,150 @@ export default function SmartSignup() {
     });
   };
 
+  // Step 2: Signup Method Selection (Google or Email)
+  if (step === 2) {
+    const selectedOrg = orgTypes.find(org => org.id === selectedOrgType);
+    
+    if (signupMethod === 'email') {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-50 py-8">
+          <div className="max-w-2xl mx-auto p-6">
+            <div className="mb-6">
+              <Link href="/">
+                <Button variant="ghost" className="text-blue-600 hover:text-blue-800">
+                  <Home className="h-4 w-4 mr-2" />
+                  Return to Home
+                </Button>
+              </Link>
+            </div>
+            
+            <EmailSignupForm
+              preselectedType={selectedOrgType}
+              onSuccess={(data) => {
+                toast({
+                  title: "Account Created!",
+                  description: "Welcome to Champions for Change!",
+                });
+                setStep(3); // Go to success step
+              }}
+              onBackToOptions={() => setSignupMethod('google')}
+            />
+          </div>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-50 py-8">
+        <div className="max-w-2xl mx-auto p-6">
+          <div className="mb-6">
+            <Link href="/">
+              <Button variant="ghost" className="text-blue-600 hover:text-blue-800">
+                <Home className="h-4 w-4 mr-2" />
+                Return to Home
+              </Button>
+            </Link>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-center">Choose Your Signup Method</CardTitle>
+              <CardDescription className="text-center">
+                How would you like to create your {selectedOrg?.name} account?
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              
+              {/* Google Signup Option */}
+              <div className="border rounded-lg p-6 hover:shadow-md transition-shadow">
+                <div className="flex items-start space-x-4">
+                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg className="w-6 h-6" viewBox="0 0 24 24">
+                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold mb-2">Continue with Google</h3>
+                    <p className="text-gray-600 mb-4">
+                      Quick and secure signup using your Google account. No additional passwords to remember.
+                    </p>
+                    <ul className="text-sm text-gray-500 space-y-1 mb-4">
+                      <li>✓ Instant account creation</li>
+                      <li>✓ Single sign-on convenience</li>
+                      <li>✓ Google security protection</li>
+                    </ul>
+                    <Button 
+                      className="w-full bg-blue-600 hover:bg-blue-700"
+                      onClick={() => {
+                        toast({
+                          title: "Starting Google Signup!",
+                          description: selectedOrg?.requiresPayment 
+                            ? "Sign up with Google, then set up payment to access all features."
+                            : "Sign up with Google to start creating tournaments for free!",
+                        });
+                        setTimeout(() => {
+                          window.location.href = '/api/login';
+                        }, 1000);
+                      }}
+                      data-testid="button-google-signup"
+                    >
+                      Sign Up with Google
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Email Signup Option */}
+              <div className="border rounded-lg p-6 hover:shadow-md transition-shadow">
+                <div className="flex items-start space-x-4">
+                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Mail className="w-6 h-6 text-green-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold mb-2">Sign Up with Email</h3>
+                    <p className="text-gray-600 mb-4">
+                      Create an account using your email address and a secure password.
+                    </p>
+                    <ul className="text-sm text-gray-500 space-y-1 mb-4">
+                      <li>✓ Direct email control</li>
+                      <li>✓ Custom password security</li>
+                      <li>✓ Email verification included</li>
+                    </ul>
+                    <Button 
+                      variant="outline" 
+                      className="w-full border-green-600 text-green-600 hover:bg-green-50"
+                      onClick={() => setSignupMethod('email')}
+                      data-testid="button-email-signup"
+                    >
+                      Sign Up with Email
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="text-center">
+                <Button 
+                  variant="ghost" 
+                  onClick={() => setStep(1)}
+                  data-testid="button-back-to-org-selection"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to Organization Selection
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // Step 3: Success page
   if (step === 3) {
     const selectedOrg = orgTypes.find(org => org.id === selectedOrgType);
     return (
@@ -330,8 +476,8 @@ export default function SmartSignup() {
           </Card>
         )}
 
-        {/* Step 2: Registration Form */}
-        {step === 2 && (
+        {/* Old Step 2: Registration Form (now unused - replaced by signup method selection) */}
+        {step === 99 && (
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <Card>
               <CardHeader>

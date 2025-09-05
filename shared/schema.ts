@@ -189,8 +189,19 @@ export const users = pgTable("users", {
   }),
   pendingCheckAmount: varchar("pending_check_amount"),
   accountStatus: text("account_status", {
-    enum: ["active", "pending_check_payment", "suspended", "under_review"]
-  }).default("active"),
+    enum: ["active", "pending_check_payment", "suspended", "under_review", "email_unverified"]
+  }).default("email_unverified"),
+  
+  // PASSWORD AUTHENTICATION
+  passwordHash: varchar("password_hash"), // bcrypt hash for email/password login
+  authProvider: text("auth_provider", {
+    enum: ["google", "email", "replit"]
+  }).default("email"),
+  emailVerified: boolean("email_verified").default(false),
+  emailVerificationToken: varchar("email_verification_token"),
+  passwordResetToken: varchar("password_reset_token"),
+  passwordResetExpires: timestamp("password_reset_expires"),
+  lastLoginAt: timestamp("last_login_at"),
   
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
