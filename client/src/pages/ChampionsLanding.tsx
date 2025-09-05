@@ -55,7 +55,7 @@ export default function ChampionsLanding() {
                 </Badge>
               </div>
 
-              {/* Donation and Get Involved Buttons */}
+              {/* Donation, Login, and Get Involved Buttons */}
               <div className="flex flex-col space-y-2 lg:flex-row lg:space-y-0 lg:space-x-3 lg:ml-auto">
                 <Button 
                   onClick={() => setLocation('/donate')}
@@ -66,8 +66,18 @@ export default function ChampionsLanding() {
                   Donate Now
                 </Button>
                 <Button 
-                  onClick={() => setLocation('/register')}
+                  onClick={() => setLocation('/login-portal')}
                   className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base w-full lg:w-auto border border-emerald-500"
+                  data-testid="button-login-champions"
+                >
+                  <Trophy className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4" />
+                  <span className="lg:hidden">Login</span>
+                  <span className="hidden lg:inline">Login to Platform</span>
+                </Button>
+                <Button 
+                  onClick={() => setLocation('/register')}
+                  variant="outline"
+                  className="border-green-400 text-green-300 hover:bg-green-500/10 hover:border-green-300 px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base font-semibold w-full lg:w-auto"
                   data-testid="button-get-involved-champions"
                 >
                   <Users className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4" />
@@ -105,15 +115,27 @@ export default function ChampionsLanding() {
                   <p className="text-green-200 mb-6">
                     I want to license tournament management technology or learn about white-label platform solutions
                   </p>
-                  <Button 
-                    size="lg"
-                    onClick={() => setLocation('/smart-signup?type=individual')}
-                    className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 text-lg font-semibold w-full border border-green-500 shadow-lg"
-                    data-testid="button-tournament-organizer"
-                  >
-                    <Building className="mr-2 h-5 w-5" />
-                    Platform Solutions
-                  </Button>
+                  <div className="space-y-3">
+                    <Button 
+                      size="lg"
+                      onClick={() => setLocation('/login/organizer')}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 text-lg font-semibold w-full border border-emerald-500 shadow-lg"
+                      data-testid="button-tournament-organizer-login"
+                    >
+                      <Trophy className="mr-2 h-5 w-5" />
+                      Access Tournament Dashboard
+                    </Button>
+                    <Button 
+                      size="lg"
+                      onClick={() => setLocation('/smart-signup?type=individual')}
+                      variant="outline"
+                      className="border-green-400 text-green-300 hover:bg-green-500/10 hover:border-green-300 px-8 py-4 text-lg font-semibold w-full"
+                      data-testid="button-tournament-organizer-signup"
+                    >
+                      <Building className="mr-2 h-5 w-5" />
+                      Get Platform Solutions
+                    </Button>
+                  </div>
                 </div>
               </div>
 
