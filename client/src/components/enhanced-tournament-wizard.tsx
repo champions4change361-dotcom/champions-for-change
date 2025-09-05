@@ -9,7 +9,6 @@ import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -1607,48 +1606,65 @@ export default function EnhancedTournamentWizard({
                         Set up events for coach self-selection, just like your current Google Sheets process. Coaches will log in and claim their preferred events.
                       </p>
                       
-                      <div className="space-y-3">
+                      <div className="space-y-4">
                         {selectedEvents.map((event, index) => (
-                          <div key={index} className="flex items-center gap-3 p-3 bg-white rounded border">
-                            <div className="flex-1">
+                          <div key={index} className="bg-white rounded border border-gray-200 p-4">
+                            {/* Event Info - Full Width on Mobile */}
+                            <div className="mb-3">
                               <div className="font-medium text-gray-900 mb-1">
                                 {event.eventName}
                               </div>
                               <div className="text-xs text-gray-500">
-                                {event.eventType} • {event.scoringUnit} • Max {event.maxAttempts || 3} attempts
+                                {event.eventType} • {event.scoringUnit} • Max {(event as any).maxAttempts || 3} attempts
                               </div>
                             </div>
                             
-                            <div className="flex items-center gap-3">
-                              <Select
-                                value={eventRecorders[event.eventName] || 'open'}
-                                onValueChange={(value) => handleEventRecorderUpdate(event.eventName, value)}
-                              >
-                                <SelectTrigger className="w-48">
-                                  <SelectValue placeholder="Assignment type" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="open">🟢 Open for Self-Selection</SelectItem>
-                                  <SelectItem value="pre-assigned">🔵 Pre-Assign Specific Coach</SelectItem>
-                                  <SelectItem value="manager-only">🔴 Tournament Manager Only</SelectItem>
-                                </SelectContent>
-                              </Select>
+                            {/* Assignment Controls - Stacked on Mobile */}
+                            <div className="space-y-3">
+                              {/* Assignment Type Dropdown - Native HTML */}
+                              <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">
+                                  Assignment Type
+                                </label>
+                                <select
+                                  value={eventRecorders[event.eventName] || 'open'}
+                                  onChange={(e) => handleEventRecorderUpdate(event.eventName, e.target.value)}
+                                  className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                  data-testid={`select-assignment-${index}`}
+                                >
+                                  <option value="open">🟢 Open for Self-Selection</option>
+                                  <option value="pre-assigned">🔵 Pre-Assign Specific Coach</option>
+                                  <option value="manager-only">🔴 Tournament Manager Only</option>
+                                </select>
+                              </div>
                               
+                              {/* Coach Assignment Input - Shows when pre-assigned is selected */}
                               {eventRecorders[event.eventName] === 'pre-assigned' && (
-                                <Input
-                                  placeholder="Coach name/email"
-                                  className="w-48 text-sm"
-                                  // This would store the actual assignment
-                                />
+                                <div>
+                                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                                    Assigned Coach
+                                  </label>
+                                  <input
+                                    type="text"
+                                    placeholder="Enter coach name or email"
+                                    className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                    data-testid={`input-coach-${index}`}
+                                  />
+                                </div>
                               )}
                               
-                              <Badge 
-                                variant="outline" 
-                                className="text-xs bg-green-100 text-green-700 border-green-300"
-                              >
-                                {eventRecorders[event.eventName] === 'open' ? 'Available' : 
-                                 eventRecorders[event.eventName] === 'pre-assigned' ? 'Assigned' : 'Restricted'}
-                              </Badge>
+                              {/* Status Badge */}
+                              <div className="flex items-center justify-between">
+                                <span className="text-xs text-gray-500">Status:</span>
+                                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                  eventRecorders[event.eventName] === 'open' ? 'bg-green-100 text-green-700' :
+                                  eventRecorders[event.eventName] === 'pre-assigned' ? 'bg-blue-100 text-blue-700' :
+                                  'bg-gray-100 text-gray-700'
+                                }`}>
+                                  {eventRecorders[event.eventName] === 'open' ? 'Available' : 
+                                   eventRecorders[event.eventName] === 'pre-assigned' ? 'Assigned' : 'Restricted'}
+                                </span>
+                              </div>
                             </div>
                           </div>
                         ))}
