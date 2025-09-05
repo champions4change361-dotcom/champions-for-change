@@ -60,13 +60,11 @@ export default function EmailSignupForm({ preselectedType, onSuccess, onBackToOp
 
   const signupMutation = useMutation({
     mutationFn: async (data: EmailSignupForm) => {
-      return apiRequest('/api/auth/signup', {
-        method: 'POST',
-        body: JSON.stringify({
-          ...data,
-          authProvider: 'email'
-        }),
+      const response = await apiRequest('/api/auth/signup', 'POST', {
+        ...data,
+        authProvider: 'email'
       });
+      return response.json();
     },
     onSuccess: (data) => {
       setSignupSuccess(true);
