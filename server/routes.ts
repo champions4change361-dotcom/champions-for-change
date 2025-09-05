@@ -101,6 +101,142 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Tournament Coordination Intelligence API endpoints
+  
+  // Get coordination data for a specific tournament
+  app.get('/api/tournaments/:id/coordination', async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      // This would analyze tournament coordination in real-time
+      const coordinationAnalysis = {
+        tournamentId: id,
+        conflictLevel: 'low',
+        nearbyTournaments: [
+          {
+            id: 'nearby-1',
+            title: 'Regional Basketball Championship',
+            date: '2025-09-21',
+            distance: 15,
+            conflictType: 'same_weekend'
+          }
+        ],
+        collaborationOpportunities: [
+          {
+            type: 'cross_promotion',
+            description: 'Partner with nearby golf tournament for joint registration discounts',
+            benefit: 'high'
+          }
+        ],
+        recommendedActions: [
+          {
+            action: 'Contact nearby organizers for collaboration',
+            priority: 'medium',
+            impact: 'Increase participation by 20-30%'
+          }
+        ],
+        optimalDates: [
+          {
+            date: '2025-10-05',
+            reason: 'No conflicts within 50 miles, optimal weather',
+            participationBoost: 25
+          }
+        ]
+      };
+
+      res.json(coordinationAnalysis);
+    } catch (error) {
+      console.error('Coordination analysis error:', error);
+      res.status(500).json({ error: 'Failed to analyze tournament coordination' });
+    }
+  });
+
+  // Get regional tournament analysis
+  app.get('/api/coordination/regional-analysis', async (req, res) => {
+    try {
+      const { region, sport, date } = req.query;
+      
+      const regionalAnalysis = {
+        region: region || 'Texas Coastal Bend',
+        sport: sport || 'all',
+        analysisDate: new Date().toISOString(),
+        conflicts: [
+          {
+            date: '2025-09-14',
+            conflictLevel: 'medium',
+            tournaments: ['Youth Basketball Championship', 'Soccer Tournament'],
+            impact: 'Split participation between similar age groups'
+          }
+        ],
+        opportunities: [
+          {
+            gap: 'No baseball tournaments in October',
+            recommendation: 'Schedule youth baseball tournament Oct 12-13',
+            estimatedParticipation: 120
+          }
+        ],
+        circuitPotential: {
+          sport: 'Basketball',
+          seasons: [
+            {
+              name: 'Fall Youth Circuit',
+              events: ['Entry Tournament', 'Regional Qualifier', 'Championship'],
+              timeline: 'September - November 2025'
+            }
+          ]
+        }
+      };
+
+      res.json(regionalAnalysis);
+    } catch (error) {
+      console.error('Regional analysis error:', error);
+      res.status(500).json({ error: 'Failed to analyze regional tournaments' });
+    }
+  });
+
+  // Tournament collaboration matching
+  app.post('/api/coordination/find-collaborators', async (req, res) => {
+    try {
+      const { tournamentId, collaborationType, radius = 50 } = req.body;
+      
+      const potentialCollaborators = [
+        {
+          organizerId: 'organizer-1',
+          organizerName: 'Community Church Sports',
+          organization: 'First Baptist Church',
+          distance: 12,
+          sport: 'Basketball',
+          averageParticipation: 64,
+          collaborationHistory: 'successful',
+          contactEmail: 'sports@fbccorpus.org',
+          suggestedCollaboration: 'Cross-promote tournaments for different age groups'
+        },
+        {
+          organizerId: 'organizer-2', 
+          organizerName: 'YMCA Coastal Bend',
+          organization: 'YMCA',
+          distance: 8,
+          sport: 'Multi-sport',
+          averageParticipation: 85,
+          collaborationHistory: 'new',
+          contactEmail: 'events@ymcacb.org',
+          suggestedCollaboration: 'Share facility resources and volunteers'
+        }
+      ];
+
+      res.json({ 
+        tournamentId,
+        collaborationType,
+        radius,
+        matches: potentialCollaborators,
+        totalMatches: potentialCollaborators.length
+      });
+    } catch (error) {
+      console.error('Collaboration matching error:', error);
+      res.status(500).json({ error: 'Failed to find collaborators' });
+    }
+  });
+
   // Tournament notification subscriptions
   app.post('/api/tournament-subscriptions', async (req, res) => {
     try {

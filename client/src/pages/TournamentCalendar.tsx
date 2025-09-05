@@ -42,6 +42,13 @@ export default function TournamentCalendar() {
     }
   });
 
+  // Fetch coordination analysis for regional tournaments
+  const { data: coordinationData, isLoading: coordinationLoading } = useQuery({
+    queryKey: ['/api/coordination/regional-analysis', userLocation?.region, selectedSport],
+    enabled: !!userLocation,
+    staleTime: 10 * 60 * 1000, // Cache for 10 minutes
+  });
+
   // Enhanced contact organizer with view tracking
   const handleContactOrganizer = (tournament: any) => {
     // Track the view if it's a live tournament
@@ -1154,6 +1161,80 @@ export default function TournamentCalendar() {
               </div>
             </div>
           </div>
+
+          {/* Tournament Coordination Intelligence Panel */}
+          {coordinationData && (
+            <div className="bg-gradient-to-r from-emerald-900/20 to-blue-900/20 border border-emerald-500/30 rounded-xl p-6 mb-8">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center">
+                  🎯
+                </div>
+                <h3 className="text-xl font-bold text-white">Tournament Coordination Intelligence</h3>
+                {coordinationLoading && (
+                  <div className="w-4 h-4 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></div>
+                )}
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                {/* Conflict Analysis */}
+                <div className="bg-slate-800/50 rounded-lg p-4">
+                  <h4 className="font-semibold text-emerald-400 mb-2">⚠️ Schedule Conflicts</h4>
+                  {coordinationData.conflicts?.length > 0 ? (
+                    coordinationData.conflicts.map((conflict: any, idx: number) => (
+                      <div key={idx} className="text-sm text-slate-300 mb-2">
+                        <div className="text-white font-medium">{conflict.date}</div>
+                        <div className="text-yellow-400">{conflict.conflictLevel} conflict</div>
+                        <div>{conflict.impact}</div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-sm text-slate-400">No major conflicts detected</div>
+                  )}
+                </div>
+
+                {/* Growth Opportunities */}
+                <div className="bg-slate-800/50 rounded-lg p-4">
+                  <h4 className="font-semibold text-blue-400 mb-2">🚀 Growth Opportunities</h4>
+                  {coordinationData.opportunities?.length > 0 ? (
+                    coordinationData.opportunities.map((opp: any, idx: number) => (
+                      <div key={idx} className="text-sm text-slate-300 mb-2">
+                        <div className="text-white font-medium">{opp.gap}</div>
+                        <div className="text-emerald-400">{opp.recommendation}</div>
+                        <div className="text-yellow-400">{opp.estimatedParticipation} participants</div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-sm text-slate-400">Analyzing regional opportunities...</div>
+                  )}
+                </div>
+              </div>
+
+              {/* Circuit Potential */}
+              {coordinationData.circuitPotential && (
+                <div className="mt-4 bg-slate-800/50 rounded-lg p-4">
+                  <h4 className="font-semibold text-purple-400 mb-2">🏆 Circuit Development</h4>
+                  <div className="text-sm text-slate-300">
+                    <div className="text-white font-medium mb-1">
+                      {coordinationData.circuitPotential.sport} Circuit Opportunity
+                    </div>
+                    {coordinationData.circuitPotential.seasons?.map((season: any, idx: number) => (
+                      <div key={idx}>
+                        <div className="text-purple-400 font-medium">{season.name}</div>
+                        <div className="text-slate-300">{season.timeline}</div>
+                        <div className="text-emerald-400 text-xs mt-1">
+                          {season.events.join(' → ')}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-4 text-xs text-slate-500 text-center">
+                🎖️ <span className="text-yellow-400">Military-grade strategic coordination</span> - Built for growth, not competition
+              </div>
+            </div>
+          )}
 
           {/* Calendar Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

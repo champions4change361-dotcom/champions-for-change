@@ -698,6 +698,156 @@ export const tournamentSubscriptions = pgTable("tournament_subscriptions", {
   source: varchar("source").default("landing_page"), // Where they subscribed from
 });
 
+// Tournament Coordination Intelligence System
+export const tournamentCoordinationData = pgTable("tournament_coordination_data", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tournamentId: varchar("tournament_id").notNull().references(() => tournaments.id),
+  
+  // Geographic coordination
+  coordinationRegion: varchar("coordination_region"), // "Texas Coastal Bend", "California Bay Area"
+  coordinationRadius: integer("coordination_radius").default(50), // Miles for coordination analysis
+  nearbyTournaments: jsonb("nearby_tournaments").$type<string[]>().default([]), // Tournament IDs within radius
+  
+  // Conflict detection
+  dateConflictLevel: text("date_conflict_level", {
+    enum: ["none", "low", "medium", "high", "critical"]
+  }).default("none"),
+  conflictingTournaments: jsonb("conflicting_tournaments").$type<{
+    tournamentId: string;
+    conflictType: "same_date" | "same_weekend" | "same_sport_same_date" | "nearby_same_sport";
+    impactLevel: "low" | "medium" | "high";
+    distance?: number; // Miles away
+  }[]>().default([]),
+  
+  // Collaboration opportunities
+  collaborationOpportunities: jsonb("collaboration_opportunities").$type<{
+    tournamentId: string;
+    opportunityType: "feeder_event" | "cross_promotion" | "shared_resources" | "sequential_dates";
+    description: string;
+    potentialBenefit: "low" | "medium" | "high";
+  }[]>().default([]),
+  
+  // Optimal scheduling analysis
+  recommendedDates: jsonb("recommended_dates").$type<{
+    date: string;
+    reason: string;
+    participationBoost: number; // Estimated % increase in participation
+    conflictReduction: number; // Estimated % reduction in conflicts
+  }[]>().default([]),
+  
+  // Regional circuit information
+  circuitData: jsonb("circuit_data").$type<{
+    isPartOfCircuit: boolean;
+    circuitName?: string;
+    circuitPosition?: "entry" | "intermediate" | "championship" | "standalone";
+    feederEvents?: string[]; // Tournament IDs that feed into this one
+    advancementEvents?: string[]; // Tournament IDs this feeds into
+  }>().default({
+    isPartOfCircuit: false
+  }),
+  
+  // Analytics and insights
+  participationForecast: integer("participation_forecast"), // Predicted number of participants
+  marketGapAnalysis: jsonb("market_gap_analysis").$type<{
+    underservedAgeGroups: string[];
+    underservedSports: string[];
+    optimalNewTournamentDates: string[];
+    growthOpportunities: string[];
+  }>(),
+  
+  // Coordination metrics
+  coordinationScore: decimal("coordination_score", { precision: 5, scale: 2 }), // 0-100 score
+  lastAnalysisDate: timestamp("last_analysis_date").defaultNow(),
+  analysisVersion: varchar("analysis_version").default("1.0"), // For tracking algorithm improvements
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Tournament Organizer Network for collaboration
+export const tournamentOrganizerNetwork = pgTable("tournament_organizer_network", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizerId: varchar("organizer_id").notNull().references(() => users.id),
+  
+  // Network profile
+  organizerName: varchar("organizer_name").notNull(),
+  organizerEmail: varchar("organizer_email").notNull(),
+  organization: varchar("organization"),
+  primarySports: jsonb("primary_sports").$type<string[]>().default([]),
+  serviceArea: varchar("service_area"), // Geographic area they serve
+  serviceRadius: integer("service_radius").default(25), // Miles
+  
+  // Collaboration preferences  
+  openToCollaboration: boolean("open_to_collaboration").default(true),
+  collaborationTypes: jsonb("collaboration_types").$type<string[]>().default([]), // ["cross_promotion", "resource_sharing", "joint_events"]
+  resourcesAvailable: jsonb("resources_available").$type<{
+    equipment?: string[];
+    venues?: string[];
+    volunteers?: number;
+    expertise?: string[];
+  }>().default({}),
+  
+  // Network metrics
+  totalTournamentsOrganized: integer("total_tournaments_organized").default(0),
+  averageParticipation: integer("average_participation"),
+  collaborationHistory: jsonb("collaboration_history").$type<{
+    partnerId: string;
+    tournamentId: string;
+    collaborationType: string;
+    outcome: "successful" | "neutral" | "unsuccessful";
+    date: string;
+  }[]>().default([]),
+  
+  // Reputation and trust metrics
+  networkRating: decimal("network_rating", { precision: 3, scale: 2 }).default("0.00"), // 0-5.00
+  collaborationCount: integer("collaboration_count").default(0),
+  lastActiveDate: timestamp("last_active_date").defaultNow(),
+  
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Regional Tournament Circuits for strategic coordination
+export const regionalTournamentCircuits = pgTable("regional_tournament_circuits", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  circuitName: varchar("circuit_name").notNull(), // "Texas Coastal Bend Basketball Circuit"
+  region: varchar("region").notNull(), // "Texas Coastal Bend"
+  primarySport: varchar("primary_sport").notNull(),
+  
+  // Circuit structure
+  seasonStartDate: date("season_start_date"),
+  seasonEndDate: date("season_end_date"),
+  circuitType: text("circuit_type", {
+    enum: ["progression", "championship_series", "league", "tournament_trail"]
+  }).default("progression"),
+  
+  // Tournament pathway
+  entryLevelEvents: jsonb("entry_level_events").$type<string[]>().default([]), // Tournament IDs
+  intermediateEvents: jsonb("intermediate_events").$type<string[]>().default([]),
+  championshipEvents: jsonb("championship_events").$type<string[]>().default([]),
+  
+  // Coordination rules
+  minimumDaysBetweenEvents: integer("minimum_days_between_events").default(7),
+  maximumRadius: integer("maximum_radius").default(100), // Miles
+  participationRequirements: jsonb("participation_requirements").$type<{
+    minimumEvents?: number;
+    qualificationCriteria?: string[];
+    ageRestrictions?: string[];
+  }>().default({}),
+  
+  // Circuit metrics
+  totalParticipants: integer("total_participants").default(0),
+  averageParticipantsPerEvent: integer("average_participants_per_event").default(0),
+  participationGrowth: decimal("participation_growth", { precision: 5, scale: 2 }).default("0.00"), // Percentage
+  
+  // Management
+  circuitCoordinatorId: varchar("circuit_coordinator_id").references(() => users.id),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Tournament subscription schema and types
 export const insertTournamentSubscriptionSchema = createInsertSchema(tournamentSubscriptions).omit({
   id: true,
@@ -3549,6 +3699,18 @@ export type InsertTournament = z.infer<typeof insertTournamentSchema>;
 export type Match = typeof matches.$inferSelect;
 export type InsertMatch = z.infer<typeof insertMatchSchema>;
 export type UpdateMatch = z.infer<typeof updateMatchSchema>;
+
+// Tournament Coordination Intelligence System types
+export type TournamentCoordinationData = typeof tournamentCoordinationData.$inferSelect;
+export type InsertTournamentCoordinationData = typeof tournamentCoordinationData.$inferInsert;
+
+// Tournament Organizer Network types  
+export type TournamentOrganizerNetwork = typeof tournamentOrganizerNetwork.$inferSelect;
+export type InsertTournamentOrganizerNetwork = typeof tournamentOrganizerNetwork.$inferInsert;
+
+// Regional Tournament Circuits types
+export type RegionalTournamentCircuit = typeof regionalTournamentCircuits.$inferSelect;
+export type InsertRegionalTournamentCircuit = typeof regionalTournamentCircuits.$inferInsert;
 
 export type SportOption = typeof sportOptions.$inferSelect;
 export type InsertSportOption = z.infer<typeof insertSportOptionSchema>;
