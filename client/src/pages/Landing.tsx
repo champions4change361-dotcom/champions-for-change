@@ -188,12 +188,12 @@ export default function Landing() {
                     Donate
                   </Button>
                   <Button 
-                    onClick={() => setLocation('/login-portal')}
+                    onClick={() => setLocation('/login')}
                     className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base w-full lg:w-auto"
                     data-testid="button-login"
                   >
                     <span className="lg:hidden">Login</span>
-                    <span className="hidden lg:inline">Login to Platform</span>
+                    <span className="hidden lg:inline">Login to Arena</span>
                   </Button>
                   <Button 
                     onClick={() => setLocation('/smart-signup')}
@@ -353,16 +353,6 @@ export default function Landing() {
                       <Trophy className="mr-2 h-5 w-5" />
                       Start Your Platform
                     </Button>
-                    <Button 
-                      size="lg" 
-                      variant="outline"
-                      className="border-orange-500 text-orange-400 hover:bg-orange-500/10 hover:border-orange-400 px-4 py-3 text-base w-full font-semibold"
-                      onClick={() => setLocation("/login/organizer")}
-                      data-testid="button-organizer-login"
-                    >
-                      <UserCheck className="mr-2 h-5 w-5" />
-                      Tournament Manager Login
-                    </Button>
                   </div>
                 </div>
               </div>
@@ -488,80 +478,6 @@ export default function Landing() {
                     (361) 300-1552
                   </a>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Tournament Organizer Command Center */}
-        <div className="bg-gradient-to-r from-orange-800/20 via-orange-700/20 to-orange-800/20 rounded-2xl border border-orange-500/30 p-8 mb-12">
-          <div className="text-center mb-8">
-            <h3 className="text-3xl font-bold text-white mb-4 flex items-center justify-center">
-              <Trophy className="h-8 w-8 mr-3 text-orange-400" />
-              Tournament Organizers
-            </h3>
-            <p className="text-slate-300 text-lg max-w-3xl mx-auto">
-              Professional tournament management platform built by coaches who understand what you need. 
-              Create tournaments, manage teams, handle registrations, and coordinate with other organizers seamlessly.
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-2 gap-8 mb-8">
-            <div className="bg-slate-700 border border-slate-600 rounded-xl p-6">
-              <h4 className="text-lg font-bold text-white mb-4 flex items-center">
-                <Users className="h-5 w-5 mr-3 text-orange-400" />
-                Existing Tournament Organizers
-              </h4>
-              <p className="text-slate-300 mb-4">
-                Already managing tournaments? Access your dashboard, view your events, and use our Tournament Coordination Intelligence features.
-              </p>
-              <Button 
-                className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3"
-                onClick={() => setLocation("/login/organizer")}
-                data-testid="button-organizer-dashboard-access"
-              >
-                <UserCheck className="mr-2 h-4 w-4" />
-                Access Tournament Dashboard
-              </Button>
-            </div>
-            
-            <div className="bg-slate-700 border border-slate-600 rounded-xl p-6">
-              <h4 className="text-lg font-bold text-white mb-4 flex items-center">
-                <Target className="h-5 w-5 mr-3 text-emerald-400" />
-                New Tournament Organizers
-              </h4>
-              <p className="text-slate-300 mb-4">
-                Ready to start organizing professional tournaments? Set up your organizer account and create your first event.
-              </p>
-              <Button 
-                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3"
-                onClick={() => setLocation("/smart-signup")}
-                data-testid="button-organizer-signup"
-              >
-                <Trophy className="mr-2 h-4 w-4" />
-                Start Organizing Tournaments
-              </Button>
-            </div>
-          </div>
-
-          <div className="bg-slate-800/50 rounded-xl p-6 border border-orange-500/20">
-            <h4 className="text-lg font-bold text-white mb-4 text-center">What Tournament Organizers Get</h4>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 text-center">
-              <div className="text-slate-300">
-                <div className="text-orange-400 font-semibold">Unlimited Events</div>
-                <div className="text-sm">Create as many tournaments as you need</div>
-              </div>
-              <div className="text-slate-300">
-                <div className="text-orange-400 font-semibold">Team Registration</div>
-                <div className="text-sm">Easy team signup and payment processing</div>
-              </div>
-              <div className="text-slate-300">
-                <div className="text-orange-400 font-semibold">Coordination Intelligence</div>
-                <div className="text-sm">Avoid conflicts, find growth opportunities</div>
-              </div>
-              <div className="text-slate-300">
-                <div className="text-orange-400 font-semibold">Professional Tools</div>
-                <div className="text-sm">Everything you need in one platform</div>
               </div>
             </div>
           </div>
