@@ -32,8 +32,8 @@ export default function RegistrationAssistant({ isOpen, setIsOpen }: Registratio
   });
 
   const config = {
-    title: "AI Registration Assistant",
-    subtitle: "I'll help you find the right plan for your program",
+    title: "Plan Selector",
+    subtitle: "Find the perfect plan for your organization",
     primaryColor: 'green',
     steps: {
       1: "Tell me about your program",
@@ -128,7 +128,7 @@ export default function RegistrationAssistant({ isOpen, setIsOpen }: Registratio
           <Brain className="h-6 w-6 mr-2" />
           <div className="text-left">
             <div className="font-semibold">Need Help Choosing?</div>
-            <div className="text-xs opacity-90">AI Registration Assistant</div>
+            <div className="text-xs opacity-90">Plan Selector</div>
           </div>
         </Button>
       </div>
