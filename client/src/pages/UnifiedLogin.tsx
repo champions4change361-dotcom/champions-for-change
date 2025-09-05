@@ -89,7 +89,7 @@ export default function UnifiedLogin() {
               </div>
 
               <Button 
-                onClick={() => setLocation('/login')}
+                onClick={() => setLocation('/legacy-login')}
                 variant="outline"
                 className="w-full border-slate-600 text-slate-300 hover:bg-slate-700 font-semibold py-3 text-base"
                 data-testid="button-login-email"
