@@ -295,6 +295,69 @@ export default function EnhancedTournamentWizard({
     return ['Elementary', 'Middle School', 'High School', 'College', 'Adult', 'Masters'];
   };
 
+  // Get appropriate description for age groups
+  const getAgeGroupDescription = (ageGroup: string): string => {
+    // Handle "U" (Under) age designations
+    if (ageGroup.endsWith('U')) {
+      const age = ageGroup.replace('U', '');
+      return `(Under ${age} years)`;
+    }
+    
+    // Handle swimming-style age ranges
+    if (ageGroup.includes('&')) {
+      return '(Ages 8 and younger)';
+    }
+    if (ageGroup.includes('-')) {
+      return `(Ages ${ageGroup})`;
+    }
+    
+    // Handle grade-based divisions
+    if (ageGroup.includes('Grade')) {
+      return '';
+    }
+    
+    // Handle youth parenthetical ages
+    if (ageGroup.includes('Youth (')) {
+      return '';
+    }
+    
+    // Handle junior divisions
+    if (ageGroup.includes('Junior (')) {
+      return '';
+    }
+    
+    // Handle traditional school divisions
+    if (ageGroup === 'Elementary') return '(K-5)';
+    if (ageGroup === 'Middle School') return '(6-8)';
+    if (ageGroup === 'High School') return '(9-12)';
+    if (ageGroup === 'High School JV') return '(9-11)';
+    if (ageGroup === 'High School Varsity') return '(10-12)';
+    if (ageGroup === 'Freshman') return '(9th grade)';
+    if (ageGroup === 'JV') return '(9-11th grade)';
+    if (ageGroup === 'Varsity') return '(10-12th grade)';
+    if (ageGroup === 'College') return '(18-22)';
+    if (ageGroup === 'Adult') return '(18+)';
+    if (ageGroup === 'Open') return '(All ages)';
+    if (ageGroup === 'All Ages') return '(Any age welcome)';
+    if (ageGroup === 'Youth') return '(Under 18)';
+    if (ageGroup === 'Semi-Pro') return '(Adult competitive)';
+    
+    // Handle Masters/Senior divisions
+    if (ageGroup.includes('Masters')) {
+      if (ageGroup.includes('25+')) return '';
+      if (ageGroup.includes('35+')) return '';
+      return '(35+)';
+    }
+    if (ageGroup.includes('Senior')) {
+      if (ageGroup.includes('50+')) return '';
+      return '(50+)';
+    }
+    if (ageGroup.includes('Super Senior')) return '';
+    if (ageGroup.includes('Veterans')) return '';
+    
+    return '';
+  };
+
   // Get smart gender division options based on selected sport
   const getGenderDivisionsForSport = (sport: string): string[] => {
     if (!sport) return ['Boys', 'Girls', 'Men', 'Women', 'Mixed', 'Co-Ed'];
@@ -1426,14 +1489,7 @@ export default function EnhancedTournamentWizard({
                     <option value="">{form.watch("sport") ? "Select age group" : "Select a sport first"}</option>
                     {getAgeGroupsForSport(form.watch("sport") || "").map((ageGroup) => (
                       <option key={ageGroup} value={ageGroup}>
-                        {ageGroup} {ageGroup === 'All Ages' ? '(Any age welcome)' : 
-                         ageGroup === 'Elementary' ? '(K-5)' :
-                         ageGroup === 'Middle School' ? '(6-8)' :
-                         ageGroup === 'High School' ? '(9-12)' :
-                         ageGroup === 'College' ? '(18-22)' :
-                         ageGroup === 'Adult' ? '(18+)' :
-                         ageGroup === 'Masters' ? '(50+)' :
-                         ageGroup === 'Senior' ? '(65+)' : ''}
+                        {ageGroup} {getAgeGroupDescription(ageGroup)}
                       </option>
                     ))}
                   </select>
