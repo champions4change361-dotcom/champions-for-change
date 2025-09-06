@@ -31,7 +31,7 @@ const getOidcConfig = memoize(
         new URL(process.env.ISSUER_URL ?? "https://replit.com/oidc"),
         process.env.REPL_ID!
       );
-    } catch (error) {
+    } catch (error: any) {
       console.warn('⚠️  OAuth discovery failed:', error.message);
       console.warn('🔄 Continuing with simplified authentication');
       return null;
@@ -169,7 +169,7 @@ export async function setupAuth(app: Express) {
     console.log("Setting up real OAuth with domains:", supportedDomains);
     try {
       oauthSetupSuccess = await setupOAuthStrategies();
-    } catch (error) {
+    } catch (error: any) {
       console.warn('⚠️  OAuth setup failed:', error.message);
       console.warn('🔄 Continuing with simplified authentication');
     }
@@ -324,12 +324,16 @@ export async function setupAuth(app: Express) {
       // If OAuth is configured, use proper logout
       if (process.env.REPL_ID && supportedDomains.includes(req.hostname)) {
         getOidcConfig().then(config => {
-          res.redirect(
-            client.buildEndSessionUrl(config, {
-              client_id: process.env.REPL_ID!,
-              post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
-            }).href
-          );
+          if (config) {
+            res.redirect(
+              client.buildEndSessionUrl(config, {
+                client_id: process.env.REPL_ID!,
+                post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
+              }).href
+            );
+          } else {
+            res.redirect('/');
+          }
         }).catch(() => {
           res.redirect('/');
         });
