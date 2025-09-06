@@ -8,11 +8,9 @@ import { useDomain } from "@/hooks/useDomain";
 import DomainNavigation from "@/components/DomainNavigation";
 import Home from './pages/Home';
 import Landing from './pages/Landing';
-import ChampionsLanding from './pages/ChampionsLanding';
 import EducationHubLanding from './pages/EducationHubLanding';
 import TrantorLanding from './pages/TrantorLanding';
 import LocalTournaments from './pages/LocalTournaments';
-import ChampionsRegistration from './pages/ChampionsRegistration';
 import TournamentCalendar from './pages/TournamentCalendar';
 import DonationFlow from './pages/DonationFlow';
 import PaymentMethods from './pages/PaymentMethods';
@@ -125,7 +123,6 @@ import HeadToHeadCreator from './pages/HeadToHeadCreator';
 import BestBallCreator from './pages/BestBallCreator';
 import FantasyDashboard from './pages/FantasyDashboard';
 import CaptainShowdownCreator from './pages/CaptainShowdownCreator';
-import ParticipantLogin from './pages/ParticipantLogin';
 
 function AuthenticatedRoutes() {
   const { isFeatureEnabled, isFantasyDomain, config } = useDomain();
@@ -262,9 +259,6 @@ function AuthenticatedRoutes() {
 }
 
 function getDomainBackgroundClass(brand: string) {
-  if (brand === 'CHAMPIONS_FOR_CHANGE') {
-    return "min-h-screen bg-gradient-to-br from-green-900 via-green-800 to-emerald-900";
-  }
   if (brand === 'COMPETITIVE_EDUCATION_HUB') {
     return "min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900";
   }
@@ -361,13 +355,7 @@ function AppRouter() {
       <Route path="/nonprofit-resources" component={NonprofitResources} />
       <Route path="/register-organization" component={() => { window.location.href = '/smart-signup?type=business'; return null; }} />
       {/* Unified Login for All Methods */}
-      <Route path="/login">
-        {config?.brand === 'CHAMPIONS_FOR_CHANGE' ? (
-          <ParticipantLogin />
-        ) : (
-          <UnifiedLogin />
-        )}
-      </Route>
+      <Route path="/login" component={UnifiedLogin} />
       {/* Legacy Login Form */}
       <Route path="/legacy-login" component={Login} />
       {/* User Type Selection Portal */}
@@ -420,8 +408,8 @@ function AppRouter() {
       {/* Local Tournaments - Champions for Change Events */}
       <Route path="/local-tournaments" component={LocalTournaments} />
       
-      {/* Champions Registration - Team Registration for Local Tournaments */}
-      <Route path="/champions-registration" component={ChampionsRegistration} />
+      {/* Local Tournament Registration - Generic tournament registration */}
+      <Route path="/champions-registration" component={LocalTournaments} />
       
       {/* Tournament Calendar - Regional Calendar */}
       <Route path="/tournament-calendar" component={TournamentCalendar} />
@@ -435,9 +423,7 @@ function AppRouter() {
       {/* Show Domain-Specific Landing page if not authenticated or on guest-access domains */}
       {(!isAuthenticated || allowGuestAccess) && (
         <Route path="/">
-          {config?.brand === 'CHAMPIONS_FOR_CHANGE' ? (
-            <ChampionsLanding />
-          ) : config?.brand === 'COMPETITIVE_EDUCATION_HUB' ? (
+          {config?.brand === 'COMPETITIVE_EDUCATION_HUB' ? (
             <EducationHubLanding />
           ) : config?.brand === 'TRANTOR_TOURNAMENTS' ? (
             <TrantorLanding />
@@ -452,9 +438,7 @@ function AppRouter() {
       {isAuthenticated && <AuthenticatedRoutes />}
       {/* Default fallback - show domain-specific landing */}
       <Route>
-        {config?.brand === 'CHAMPIONS_FOR_CHANGE' ? (
-          <ChampionsLanding />
-        ) : config?.brand === 'COMPETITIVE_EDUCATION_HUB' ? (
+        {config?.brand === 'COMPETITIVE_EDUCATION_HUB' ? (
           <EducationHubLanding />
         ) : config?.brand === 'TRANTOR_TOURNAMENTS' ? (
           <TrantorLanding />

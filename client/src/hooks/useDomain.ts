@@ -28,27 +28,8 @@ export function useDomain() {
     console.log('Domain detection - hostname:', hostname); // Debug logging
     let config: DomainConfig;
 
-    // Champions for Change - Nonprofit Mission Domain
-    if (hostname === 'championsforchange.net' || hostname === 'www.championsforchange.net') {
-      config = {
-        type: 'school',
-        brand: 'CHAMPIONS_FOR_CHANGE',
-        theme: 'nonprofit',
-        allowFantasyPromo: true,
-        allowProPromo: true,
-        allowSchoolPromo: false,
-        primaryColor: 'green',
-        features: {
-          fantasyLeagues: true,   // Fantasy sports for charity
-          ageVerification: false, // Family-friendly
-          crossSelling: true,
-          guestAccess: true,
-          registration: true
-        }
-      };
-    }
     // Competitive Education Hub - School Athletics Domain
-    else if (hostname === 'competitiveeducationhub.com' || hostname === 'www.competitiveeducationhub.com') {
+    if (hostname === 'competitiveeducationhub.com' || hostname === 'www.competitiveeducationhub.com') {
       config = {
         type: 'school',
         brand: 'COMPETITIVE_EDUCATION_HUB',
