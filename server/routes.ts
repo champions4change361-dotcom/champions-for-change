@@ -1,9 +1,11 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { exec } from "child_process";
+import crypto from "crypto";
+import bcrypt from "bcrypt";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { nightlySportsIntelligence } from './nightly-sports-intelligence';
-import { getStorage } from "./storage";
+import { getStorage, storage } from "./storage";
 import { emailService } from "./emailService";
 import supportTeamRoutes from "./supportTeamRoutes";
 import NFLDepthChartParser from './nfl-depth-chart-parser';
@@ -604,6 +606,180 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         message: 'Failed to create account. Please try again.',
         error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+  });
+
+  // Password reset functionality for tournament organizers
+  app.post('/api/auth/forgot-password', async (req, res) => {
+    try {
+      const { email } = req.body;
+
+      if (!email) {
+        return res.status(400).json({ message: 'Email is required' });
+      }
+
+      // Check if user exists
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        // Return success even if user doesn't exist for security
+        return res.json({ 
+          message: 'If an account exists with this email, a password reset link has been sent.' 
+        });
+      }
+
+      // Generate reset token
+      const resetToken = crypto.randomBytes(32).toString('hex');
+      const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+      // Store reset token
+      await storage.createPasswordResetToken({
+        userId: user.id,
+        token: resetToken,
+        expiresAt,
+        used: false
+      });
+
+      // Send reset email
+      try {
+        await emailService.sendPasswordResetEmail(email, resetToken, req.get('host'));
+        console.log(`📧 Password reset email sent to ${email}`);
+      } catch (emailError) {
+        console.error('Failed to send reset email:', emailError);
+        return res.status(500).json({ message: 'Failed to send reset email' });
+      }
+
+      res.json({ 
+        message: 'If an account exists with this email, a password reset link has been sent.' 
+      });
+
+    } catch (error) {
+      console.error('Password reset error:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  app.post('/api/auth/reset-password', async (req, res) => {
+    try {
+      const { token, newPassword } = req.body;
+
+      if (!token || !newPassword) {
+        return res.status(400).json({ message: 'Token and new password are required' });
+      }
+
+      if (newPassword.length < 8) {
+        return res.status(400).json({ message: 'Password must be at least 8 characters long' });
+      }
+
+      // Find and validate reset token
+      const resetToken = await storage.getPasswordResetToken(token);
+      if (!resetToken) {
+        return res.status(400).json({ message: 'Invalid or expired reset token' });
+      }
+
+      if (resetToken.used) {
+        return res.status(400).json({ message: 'Reset token has already been used' });
+      }
+
+      if (new Date() > resetToken.expiresAt) {
+        return res.status(400).json({ message: 'Reset token has expired' });
+      }
+
+      // Hash new password
+      const passwordHash = await bcrypt.hash(newPassword, 12);
+
+      // Update user password
+      await storage.updateUser(resetToken.userId, { passwordHash });
+
+      // Mark token as used
+      await storage.markPasswordResetTokenUsed(resetToken.id);
+
+      console.log(`✅ Password reset successfully for user: ${resetToken.userId}`);
+      
+      res.json({ message: 'Password reset successfully' });
+
+    } catch (error) {
+      console.error('Reset password error:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  // Guest registration endpoint - "Pay & Play" system for tournament participants
+  app.post('/api/guest-registration', async (req, res) => {
+    try {
+      const { 
+        tournamentId, 
+        organizerId, 
+        firstName, 
+        lastName, 
+        email, 
+        phone, 
+        emergencyContact, 
+        emergencyPhone, 
+        ageGroup, 
+        skillLevel 
+      } = req.body;
+
+      // Validate required fields
+      if (!tournamentId || !organizerId || !firstName || !lastName || !email) {
+        return res.status(400).json({ 
+          message: 'Tournament ID, organizer ID, first name, last name, and email are required' 
+        });
+      }
+
+      // Check if guest is already registered for this tournament
+      const existingRegistrations = await storage.getGuestParticipantsByTournament(tournamentId);
+      const alreadyRegistered = existingRegistrations.find(reg => 
+        reg.email.toLowerCase() === email.toLowerCase()
+      );
+
+      if (alreadyRegistered) {
+        return res.status(400).json({ 
+          message: 'This email is already registered for this tournament' 
+        });
+      }
+
+      // Create guest registration
+      const guestParticipant = await storage.createGuestParticipant({
+        tournamentId,
+        organizerId,
+        firstName,
+        lastName,
+        email: email.toLowerCase(),
+        phone: phone || null,
+        emergencyContact: emergencyContact || null,
+        emergencyPhone: emergencyPhone || null,
+        ageGroup: ageGroup || null,
+        skillLevel: skillLevel || 'beginner',
+        registrationStatus: 'pending',
+        paymentStatus: 'pending',
+        hasCreatedAccount: false,
+        linkedUserId: null,
+        accountCreatedAt: null
+      });
+
+      // TODO: Send confirmation email
+      console.log(`✅ Guest participant registered: ${email} for tournament ${tournamentId}`);
+      
+      res.status(201).json({
+        success: true,
+        message: 'Registration successful! Check your email for confirmation.',
+        registrationId: guestParticipant.id,
+        participant: {
+          id: guestParticipant.id,
+          firstName: guestParticipant.firstName,
+          lastName: guestParticipant.lastName,
+          email: guestParticipant.email,
+          registrationStatus: guestParticipant.registrationStatus,
+          paymentStatus: guestParticipant.paymentStatus
+        }
+      });
+
+    } catch (error) {
+      console.error('Guest registration error:', error);
+      res.status(500).json({ 
+        message: 'Registration failed. Please try again.',
+        error: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined
       });
     }
   });

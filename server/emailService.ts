@@ -89,6 +89,47 @@ class EmailService {
     }
   }
 
+  async sendPasswordResetEmail(userEmail: string, resetToken: string, domain?: string) {
+    const emailContent = this.generatePasswordResetEmail(resetToken, domain);
+    
+    try {
+      if (!this.transporter) {
+        // Fallback: Log email content to console
+        console.log('📧 PASSWORD RESET EMAIL (would be sent to:', userEmail, ')');
+        console.log('Subject:', emailContent.subject);
+        console.log('Body:', emailContent.html);
+        return { success: true, method: 'console' };
+      }
+
+      // Use domain-aware sender address
+      const fromAddress = this.getDomainFromAddress(domain);
+      
+      const info = await this.transporter.sendMail({
+        from: fromAddress,
+        to: userEmail,
+        subject: emailContent.subject,
+        html: emailContent.html,
+      });
+
+      // Different logging for production vs test
+      if (process.env.SENDGRID_API_KEY) {
+        console.log(`📧 REAL Password reset email sent to ${userEmail} via SendGrid:`, info.messageId);
+      } else {
+        console.log('📧 Test password reset email sent:', nodemailer.getTestMessageUrl(info));
+      }
+      
+      return { 
+        success: true, 
+        messageId: info.messageId,
+        previewUrl: process.env.SENDGRID_API_KEY ? null : nodemailer.getTestMessageUrl(info),
+        method: process.env.SENDGRID_API_KEY ? 'sendgrid' : 'ethereal'
+      };
+    } catch (error) {
+      console.error('Failed to send password reset email:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  }
+
   private generateWelcomeEmail(firstName: string, role: string, organizationName: string, domain?: string) {
     const isChampions = domain?.includes('championsforchange') || false;
     const isTrantor = domain?.includes('trantortournaments') || !isChampions;
@@ -479,6 +520,105 @@ class EmailService {
       console.error('Failed to send tournament welcome email:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
+  }
+
+  private generatePasswordResetEmail(resetToken: string, domain?: string) {
+    const isChampions = domain?.includes('championsforchange') || false;
+    const baseUrl = domain ? `https://${domain}` : 'https://trantortournaments.org';
+    const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
+    
+    const brandColor = isChampions ? '#10b981' : '#f97316'; // Green for Champions, Orange for Trantor
+    const brandName = isChampions ? 'Champions for Change' : 'Trantor Tournaments';
+    
+    return {
+      subject: `Reset Your ${brandName} Password`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: ${brandColor}; color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0; }
+            .content { padding: 30px 20px; background: #ffffff; border: 1px solid #e5e7eb; }
+            .security-notice { background: #fef3c7; border: 1px solid #f59e0b; padding: 15px; border-radius: 6px; margin: 20px 0; }
+            .reset-button { 
+              background: ${brandColor}; 
+              color: white; 
+              padding: 15px 30px; 
+              text-decoration: none; 
+              border-radius: 6px; 
+              display: inline-block; 
+              margin: 20px 0;
+              text-align: center;
+              font-weight: bold;
+            }
+            .footer { 
+              background: #f9fafb; 
+              padding: 20px; 
+              text-align: center; 
+              color: #6b7280; 
+              font-size: 14px; 
+              border-radius: 0 0 8px 8px;
+              border: 1px solid #e5e7eb;
+              border-top: none;
+            }
+            .expiry-info { background: #f3f4f6; padding: 15px; border-radius: 6px; margin: 15px 0; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1 style="margin: 0; font-size: 28px;">🔐 Password Reset</h1>
+              <p style="margin: 10px 0 0 0; opacity: 0.9;">${brandName}</p>
+            </div>
+            
+            <div class="content">
+              <h2 style="color: #1f2937; margin-top: 0;">Reset Your Password</h2>
+              
+              <p style="color: #4b5563; margin-bottom: 20px;">
+                We received a request to reset your password for your ${brandName} account. 
+                Click the button below to create a new password:
+              </p>
+
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${resetUrl}" class="reset-button" style="color: white; text-decoration: none;">
+                  Reset My Password
+                </a>
+              </div>
+
+              <div class="expiry-info">
+                <p style="margin: 0; font-size: 14px; color: #6b7280;">
+                  ⏰ <strong>This link expires in 1 hour</strong> for your security.
+                </p>
+              </div>
+
+              <div class="security-notice">
+                <p style="margin: 0; font-size: 14px; color: #92400e;">
+                  🛡️ <strong>Security Notice:</strong> If you didn't request this password reset, 
+                  please ignore this email. Your account remains secure.
+                </p>
+              </div>
+
+              <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
+                If the button doesn't work, copy and paste this link into your browser:<br>
+                <span style="word-break: break-all; color: ${brandColor};">${resetUrl}</span>
+              </p>
+            </div>
+            
+            <div class="footer">
+              <p style="margin: 0;">
+                ${isChampions ? '💚 Supporting educational opportunities for underprivileged youth' : '🏆 Professional tournament management made simple'}
+              </p>
+              <p style="margin: 10px 0 0 0;">
+                ${brandName} • Tournament Platform
+              </p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `
+    };
   }
 }
 

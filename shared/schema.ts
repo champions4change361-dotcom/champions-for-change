@@ -4193,3 +4193,134 @@ export type InsertClientConfiguration = typeof clientConfigurations.$inferInsert
 // Insert schema for client configurations
 export const insertClientConfigurationSchema = createInsertSchema(clientConfigurations);
 export type InsertClientConfigurationType = z.infer<typeof insertClientConfigurationSchema>;
+
+// Guest participant registrations - "Pay & Play or Join the Family" system
+export const guestParticipants = pgTable("guest_participants", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tournamentId: varchar("tournament_id").notNull().references(() => tournaments.id),
+  
+  // PARTICIPANT INFORMATION (required for guest registration)
+  participantName: varchar("participant_name").notNull(),
+  participantEmail: varchar("participant_email").notNull(),
+  participantPhone: varchar("participant_phone"),
+  dateOfBirth: date("date_of_birth"),
+  
+  // PARENT/GUARDIAN INFO (for minors)
+  parentName: varchar("parent_name"),
+  parentEmail: varchar("parent_email"),
+  parentPhone: varchar("parent_phone"),
+  emergencyContactName: varchar("emergency_contact_name"),
+  emergencyContactPhone: varchar("emergency_contact_phone"),
+  
+  // REGISTRATION DETAILS
+  registrationType: text("registration_type", {
+    enum: ["individual", "team_member", "group_registration"]
+  }).default("individual"),
+  selectedEvents: jsonb("selected_events").$type<Array<{
+    eventId: string;
+    eventName: string;
+    fee: number;
+  }>>().default([]),
+  
+  // PAYMENT INFORMATION
+  registrationFee: decimal("registration_fee", { precision: 10, scale: 2 }).default("0"),
+  paymentStatus: text("payment_status", {
+    enum: ["unpaid", "paid", "refunded", "partial"]
+  }).default("unpaid"),
+  paymentMethod: text("payment_method", {
+    enum: ["stripe", "cash", "check", "comp"]
+  }),
+  stripePaymentIntentId: varchar("stripe_payment_intent_id"),
+  
+  // STATUS TRACKING
+  registrationStatus: text("registration_status", {
+    enum: ["incomplete", "pending_approval", "approved", "checked_in", "competed", "complete"]
+  }).default("incomplete"),
+  
+  // OPTIONAL ACCOUNT CREATION
+  hasCreatedAccount: boolean("has_created_account").default(false),
+  linkedUserId: varchar("linked_user_id").references(() => users.id), // If they create an account later
+  accountCreatedAt: timestamp("account_created_at"),
+  
+  // TOURNAMENT ORGANIZER RELATIONSHIP
+  organizerId: varchar("organizer_id").notNull().references(() => users.id), // Tournament organizer
+  
+  // WAIVERS & DOCUMENTS
+  waiversSigned: jsonb("waivers_signed").$type<{
+    liability: boolean;
+    photo: boolean;
+    medical: boolean;
+    emergency: boolean;
+  }>().default({
+    liability: false,
+    photo: false,
+    medical: false,
+    emergency: false
+  }),
+  
+  // CUSTOM FORM DATA
+  customFormData: jsonb("custom_form_data"), // Tournament-specific registration fields
+  
+  // COMMUNICATION PREFERENCES
+  emailUpdates: boolean("email_updates").default(true),
+  smsUpdates: boolean("sms_updates").default(false),
+  
+  // METADATA
+  registrationSource: varchar("registration_source").default("direct"), // direct, referral, social
+  notes: text("notes"),
+  organizerNotes: text("organizer_notes"), // Private notes for tournament organizer
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Password reset tokens for tournament organizers
+export const passwordResetTokens = pgTable("password_reset_tokens", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  token: varchar("token").notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  used: boolean("used").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Relations for guest participants
+export const guestParticipantsRelations = relations(guestParticipants, ({ one }) => ({
+  tournament: one(tournaments, {
+    fields: [guestParticipants.tournamentId],
+    references: [tournaments.id],
+  }),
+  organizer: one(users, {
+    fields: [guestParticipants.organizerId],
+    references: [users.id],
+  }),
+  linkedUser: one(users, {
+    fields: [guestParticipants.linkedUserId],
+    references: [users.id],
+  }),
+}));
+
+// Relations for password reset tokens
+export const passwordResetTokensRelations = relations(passwordResetTokens, ({ one }) => ({
+  user: one(users, {
+    fields: [passwordResetTokens.userId],
+    references: [users.id],
+  }),
+}));
+
+// Type exports for guest participant system
+export type GuestParticipant = typeof guestParticipants.$inferSelect;
+export type InsertGuestParticipant = typeof guestParticipants.$inferInsert;
+export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
+export type InsertPasswordResetToken = typeof passwordResetTokens.$inferInsert;
+
+// Insert schemas
+export const insertGuestParticipantSchema = createInsertSchema(guestParticipants).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export const insertPasswordResetTokenSchema = createInsertSchema(passwordResetTokens).omit({
+  id: true,
+  createdAt: true,
+});

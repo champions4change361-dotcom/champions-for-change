@@ -55,6 +55,7 @@ import YourWhy from './pages/YourWhy';
 import CorporateCompetitions from './pages/CorporateCompetitions';
 import AthleteAnalytics from './pages/AthleteAnalytics';
 import CorporateAnalytics from './pages/CorporateAnalytics';
+import GuestRegistrationDemo from './pages/GuestRegistrationDemo';
 
 import FootballHealthMonitoring from './pages/FootballHealthMonitoring';
 import DefensiveHealthMonitoring from './pages/DefensiveHealthMonitoring';
@@ -178,6 +179,7 @@ function AuthenticatedRoutes() {
         <Route path="/scorekeeper-events" component={ScorekeeperEventSelection} />
         <Route path="/events/:eventId/manage" component={EventScorekeeperDashboard} />
         <Route path="/domains" component={DomainManager} />
+        <Route path="/guest-registration-demo" component={GuestRegistrationDemo} />
 
         <Route path="/bulk-registration" component={BulkRegistration} />
         <Route path="/staff-registration" component={StaffRegistration} />

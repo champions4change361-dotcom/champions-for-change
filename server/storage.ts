@@ -12,7 +12,8 @@ import {
   type SupportTeam, type InsertSupportTeam, type SupportTeamMember, type InsertSupportTeamMember, type SupportTeamInjury, type InsertSupportTeamInjury, type SupportTeamAiConsultation, type InsertSupportTeamAiConsultation,
   type TournamentSubscription, type InsertTournamentSubscription,
   type ClientConfiguration, type InsertClientConfiguration,
-  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog, taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices, supportTeams, supportTeamMembers, supportTeamInjuries, supportTeamAiConsultations, jerseyTeamMembers, jerseyTeamPayments, tournamentSubscriptions, clientConfigurations
+  type GuestParticipant, type InsertGuestParticipant, type PasswordResetToken, type InsertPasswordResetToken,
+  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog, taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices, supportTeams, supportTeamMembers, supportTeamInjuries, supportTeamAiConsultations, jerseyTeamMembers, jerseyTeamPayments, tournamentSubscriptions, clientConfigurations, guestParticipants, passwordResetTokens
 } from "@shared/schema";
 
 type SportCategory = typeof sportCategories.$inferSelect;
@@ -109,6 +110,21 @@ export interface IStorage {
   createTeamPayment(payment: any): Promise<any>;
   getTeamPayments(teamId: string): Promise<any[]>;
   updateTeamPayment(id: string, updates: any): Promise<any>;
+
+  // Guest participant methods - "Pay & Play or Join the Family" system
+  createGuestParticipant(participant: InsertGuestParticipant): Promise<GuestParticipant>;
+  getGuestParticipant(id: string): Promise<GuestParticipant | undefined>;
+  getGuestParticipantsByTournament(tournamentId: string): Promise<GuestParticipant[]>;
+  getGuestParticipantsByOrganizer(organizerId: string): Promise<GuestParticipant[]>;
+  updateGuestParticipant(id: string, updates: Partial<GuestParticipant>): Promise<GuestParticipant | undefined>;
+  deleteGuestParticipant(id: string): Promise<boolean>;
+  linkGuestParticipantToUser(participantId: string, userId: string): Promise<GuestParticipant | undefined>;
+
+  // Password reset methods for tournament organizers
+  createPasswordResetToken(token: InsertPasswordResetToken): Promise<PasswordResetToken>;
+  getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined>;
+  markPasswordResetTokenUsed(id: string): Promise<boolean>;
+  cleanupExpiredPasswordResetTokens(): Promise<number>;
 
   // Organization methods
   createOrganization(organization: InsertOrganization): Promise<Organization>;
@@ -1710,6 +1726,132 @@ export class DbStorage implements IStorage {
     } catch (error) {
       console.error("Database error:", error);
       throw new Error("Failed to import contacts");
+    }
+  }
+
+  // Guest participant methods - "Pay & Play or Join the Family" system
+  async createGuestParticipant(participant: InsertGuestParticipant): Promise<GuestParticipant> {
+    try {
+      const result = await this.db.insert(guestParticipants).values(participant).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to create guest participant");
+    }
+  }
+
+  async getGuestParticipant(id: string): Promise<GuestParticipant | undefined> {
+    try {
+      const result = await this.db.select().from(guestParticipants).where(eq(guestParticipants.id, id));
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async getGuestParticipantsByTournament(tournamentId: string): Promise<GuestParticipant[]> {
+    try {
+      return await this.db.select().from(guestParticipants).where(eq(guestParticipants.tournamentId, tournamentId));
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async getGuestParticipantsByOrganizer(organizerId: string): Promise<GuestParticipant[]> {
+    try {
+      return await this.db.select().from(guestParticipants).where(eq(guestParticipants.organizerId, organizerId));
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async updateGuestParticipant(id: string, updates: Partial<GuestParticipant>): Promise<GuestParticipant | undefined> {
+    try {
+      const result = await this.db
+        .update(guestParticipants)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(guestParticipants.id, id))
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async deleteGuestParticipant(id: string): Promise<boolean> {
+    try {
+      await this.db.delete(guestParticipants).where(eq(guestParticipants.id, id));
+      return true;
+    } catch (error) {
+      console.error("Database error:", error);
+      return false;
+    }
+  }
+
+  async linkGuestParticipantToUser(participantId: string, userId: string): Promise<GuestParticipant | undefined> {
+    try {
+      const result = await this.db
+        .update(guestParticipants)
+        .set({ 
+          linkedUserId: userId, 
+          hasCreatedAccount: true, 
+          accountCreatedAt: new Date(),
+          updatedAt: new Date() 
+        })
+        .where(eq(guestParticipants.id, participantId))
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  // Password reset methods for tournament organizers
+  async createPasswordResetToken(token: InsertPasswordResetToken): Promise<PasswordResetToken> {
+    try {
+      const result = await this.db.insert(passwordResetTokens).values(token).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to create password reset token");
+    }
+  }
+
+  async getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined> {
+    try {
+      const result = await this.db.select().from(passwordResetTokens).where(eq(passwordResetTokens.token, token));
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async markPasswordResetTokenUsed(id: string): Promise<boolean> {
+    try {
+      await this.db
+        .update(passwordResetTokens)
+        .set({ used: true })
+        .where(eq(passwordResetTokens.id, id));
+      return true;
+    } catch (error) {
+      console.error("Database error:", error);
+      return false;
+    }
+  }
+
+  async cleanupExpiredPasswordResetTokens(): Promise<number> {
+    try {
+      const result = await this.db.delete(passwordResetTokens).where(sql`expires_at < NOW()`);
+      return result.rowCount || 0;
+    } catch (error) {
+      console.error("Database error:", error);
+      return 0;
     }
   }
 }
@@ -4829,6 +4971,111 @@ export class MemStorage implements IStorage {
     const created = { ...verification, id, verificationDate: new Date() };
     this.ageVerifications.set(id, created);
     return created;
+  }
+
+  // Guest participant methods - "Pay & Play or Join the Family" system (in-memory implementation)
+  private guestParticipants: Map<string, GuestParticipant> = new Map();
+
+  async createGuestParticipant(participant: InsertGuestParticipant): Promise<GuestParticipant> {
+    const id = randomUUID();
+    const now = new Date();
+    const created: GuestParticipant = {
+      ...participant,
+      id,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.guestParticipants.set(id, created);
+    return created;
+  }
+
+  async getGuestParticipant(id: string): Promise<GuestParticipant | undefined> {
+    return this.guestParticipants.get(id);
+  }
+
+  async getGuestParticipantsByTournament(tournamentId: string): Promise<GuestParticipant[]> {
+    return Array.from(this.guestParticipants.values()).filter(p => p.tournamentId === tournamentId);
+  }
+
+  async getGuestParticipantsByOrganizer(organizerId: string): Promise<GuestParticipant[]> {
+    return Array.from(this.guestParticipants.values()).filter(p => p.organizerId === organizerId);
+  }
+
+  async updateGuestParticipant(id: string, updates: Partial<GuestParticipant>): Promise<GuestParticipant | undefined> {
+    const participant = this.guestParticipants.get(id);
+    if (!participant) return undefined;
+    
+    const updated: GuestParticipant = {
+      ...participant,
+      ...updates,
+      updatedAt: new Date(),
+    };
+    this.guestParticipants.set(id, updated);
+    return updated;
+  }
+
+  async deleteGuestParticipant(id: string): Promise<boolean> {
+    return this.guestParticipants.delete(id);
+  }
+
+  async linkGuestParticipantToUser(participantId: string, userId: string): Promise<GuestParticipant | undefined> {
+    const participant = this.guestParticipants.get(participantId);
+    if (!participant) return undefined;
+    
+    const updated: GuestParticipant = {
+      ...participant,
+      linkedUserId: userId,
+      hasCreatedAccount: true,
+      accountCreatedAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.guestParticipants.set(participantId, updated);
+    return updated;
+  }
+
+  // Password reset methods for tournament organizers (in-memory implementation)
+  private passwordResetTokens: Map<string, PasswordResetToken> = new Map();
+
+  async createPasswordResetToken(token: InsertPasswordResetToken): Promise<PasswordResetToken> {
+    const id = randomUUID();
+    const now = new Date();
+    const created: PasswordResetToken = {
+      ...token,
+      id,
+      createdAt: now,
+    };
+    this.passwordResetTokens.set(id, created);
+    return created;
+  }
+
+  async getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined> {
+    return Array.from(this.passwordResetTokens.values()).find(t => t.token === token);
+  }
+
+  async markPasswordResetTokenUsed(id: string): Promise<boolean> {
+    const token = this.passwordResetTokens.get(id);
+    if (!token) return false;
+    
+    const updated: PasswordResetToken = {
+      ...token,
+      used: true,
+    };
+    this.passwordResetTokens.set(id, updated);
+    return true;
+  }
+
+  async cleanupExpiredPasswordResetTokens(): Promise<number> {
+    const now = new Date();
+    let cleaned = 0;
+    
+    for (const [id, token] of this.passwordResetTokens.entries()) {
+      if (token.expiresAt < now) {
+        this.passwordResetTokens.delete(id);
+        cleaned++;
+      }
+    }
+    
+    return cleaned;
   }
 }
 
