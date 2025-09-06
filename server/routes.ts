@@ -103,6 +103,169 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // SUBSCRIPTION MANAGEMENT ROUTES
+  
+  // Get current subscription details
+  app.get('/api/subscription', isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: 'User not found' });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || !user.stripeSubscriptionId) {
+        return res.status(404).json({ message: 'No active subscription found' });
+      }
+
+      // Get subscription details from Stripe
+      const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+      
+      // Create customer portal session
+      let customerPortalUrl;
+      try {
+        const portalSession = await stripe.billingPortal.sessions.create({
+          customer: user.stripeCustomerId,
+          return_url: `${req.protocol}://${req.get('host')}/subscription`,
+        });
+        customerPortalUrl = portalSession.url;
+      } catch (error) {
+        console.error('Customer portal error:', error);
+      }
+
+      res.json({
+        id: subscription.id,
+        status: subscription.status,
+        plan: user.subscriptionPlan,
+        currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
+        cancelAtPeriodEnd: subscription.cancel_at_period_end,
+        amount: subscription.items.data[0]?.price?.unit_amount || 0,
+        interval: subscription.items.data[0]?.price?.recurring?.interval || 'month',
+        nextBillingDate: new Date(subscription.current_period_end * 1000).toISOString(),
+        customerPortalUrl
+      });
+    } catch (error) {
+      console.error('Subscription fetch error:', error);
+      res.status(500).json({ message: 'Failed to fetch subscription details' });
+    }
+  });
+
+  // Cancel subscription at period end
+  app.post('/api/subscription/cancel', isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      const { reason, feedback } = req.body;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User not found' });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || !user.stripeSubscriptionId) {
+        return res.status(404).json({ message: 'No active subscription found' });
+      }
+
+      // Cancel subscription at period end in Stripe
+      const subscription = await stripe.subscriptions.update(user.stripeSubscriptionId, {
+        cancel_at_period_end: true,
+        metadata: {
+          cancellation_reason: reason || 'not_provided',
+          cancellation_feedback: feedback || ''
+        }
+      });
+
+      // Update user status in database
+      await storage.updateUser(userId, {
+        subscriptionStatus: 'canceled'
+      });
+
+      // Log cancellation for analytics
+      console.log(`📊 Subscription canceled - User: ${userId}, Reason: ${reason}, Plan: ${user.subscriptionPlan}`);
+
+      res.json({
+        success: true,
+        message: 'Subscription scheduled for cancellation',
+        cancelationDate: new Date(subscription.current_period_end * 1000).toISOString()
+      });
+    } catch (error) {
+      console.error('Subscription cancellation error:', error);
+      res.status(500).json({ message: 'Failed to cancel subscription' });
+    }
+  });
+
+  // Reactivate canceled subscription
+  app.post('/api/subscription/reactivate', isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User not found' });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || !user.stripeSubscriptionId) {
+        return res.status(404).json({ message: 'No subscription found' });
+      }
+
+      // Reactivate subscription in Stripe
+      const subscription = await stripe.subscriptions.update(user.stripeSubscriptionId, {
+        cancel_at_period_end: false
+      });
+
+      // Update user status in database
+      await storage.updateUser(userId, {
+        subscriptionStatus: 'active'
+      });
+
+      // Log reactivation for analytics
+      console.log(`📊 Subscription reactivated - User: ${userId}, Plan: ${user.subscriptionPlan}`);
+
+      res.json({
+        success: true,
+        message: 'Subscription reactivated successfully'
+      });
+    } catch (error) {
+      console.error('Subscription reactivation error:', error);
+      res.status(500).json({ message: 'Failed to reactivate subscription' });
+    }
+  });
+
+  // Download latest invoice
+  app.get('/api/subscription/invoice', isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User not found' });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || !user.stripeCustomerId) {
+        return res.status(404).json({ message: 'No billing information found' });
+      }
+
+      // Get latest invoice
+      const invoices = await stripe.invoices.list({
+        customer: user.stripeCustomerId,
+        limit: 1
+      });
+
+      if (invoices.data.length === 0) {
+        return res.status(404).json({ message: 'No invoices found' });
+      }
+
+      const invoice = invoices.data[0];
+      if (invoice.invoice_pdf) {
+        res.redirect(invoice.invoice_pdf);
+      } else {
+        res.status(404).json({ message: 'Invoice PDF not available' });
+      }
+    } catch (error) {
+      console.error('Invoice download error:', error);
+      res.status(500).json({ message: 'Failed to download invoice' });
+    }
+  });
+
   // Tournament Coordination Intelligence API endpoints
   
   // Get coordination data for a specific tournament

@@ -73,6 +73,7 @@ import NonprofitResources from './pages/NonprofitResources';
 import OrganizationRegistration from './pages/OrganizationRegistration';
 import RoleHierarchy from './pages/RoleHierarchy';
 import Schools from './pages/Schools';
+import SubscriptionManagement from './pages/SubscriptionManagement';
 import Capabilities from './pages/Capabilities';
 import MillerHomepage from './pages/MillerHomepage';
 import ScorekeeperEventSelection from './pages/ScorekeeperEventSelection';
@@ -151,6 +152,7 @@ function AuthenticatedRoutes() {
         {/* <Route path="/ai-chat" component={AIChat} /> */}
         {/* <Route path="/ai-demo" component={AIDemo} /> */}
         <Route path="/settings" component={Settings} />
+        <Route path="/subscription" component={SubscriptionManagement} />
         <Route path="/live-matches" component={LiveMatches} />
         <Route path="/championships" component={Championships} />
         <Route path="/webpage-builder" component={WebpageBuilder} />
