@@ -123,6 +123,7 @@ import NFLKnockoutCreator from './pages/NFLKnockoutCreator';
 import HeadToHeadCreator from './pages/HeadToHeadCreator';
 import BestBallCreator from './pages/BestBallCreator';
 import FantasyDashboard from './pages/FantasyDashboard';
+import CaptainShowdownCreator from './pages/CaptainShowdownCreator';
 
 function AuthenticatedRoutes() {
   const { isFeatureEnabled, isFantasyDomain, config } = useDomain();
@@ -224,6 +225,9 @@ function AuthenticatedRoutes() {
         )}
         {isFeatureEnabled('fantasyLeagues') && (
           <Route path="/fantasy/create/best_ball" component={BestBallCreator} />
+        )}
+        {isFeatureEnabled('fantasyLeagues') && (
+          <Route path="/fantasy/create/captain_showdown" component={CaptainShowdownCreator} />
         )}
         
         {/* Coaches Lounge Landing for fantasy domains */}

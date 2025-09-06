@@ -13,7 +13,9 @@ import {
   type TournamentSubscription, type InsertTournamentSubscription,
   type ClientConfiguration, type InsertClientConfiguration,
   type GuestParticipant, type InsertGuestParticipant, type PasswordResetToken, type InsertPasswordResetToken,
-  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog, taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices, supportTeams, supportTeamMembers, supportTeamInjuries, supportTeamAiConsultations, jerseyTeamMembers, jerseyTeamPayments, tournamentSubscriptions, clientConfigurations, guestParticipants, passwordResetTokens
+  type ShowdownContest, type InsertShowdownContest, type ShowdownEntry, type InsertShowdownEntry, type ShowdownLeaderboard, type InsertShowdownLeaderboard,
+  type ProfessionalPlayer, type InsertProfessionalPlayer,
+  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog, taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices, supportTeams, supportTeamMembers, supportTeamInjuries, supportTeamAiConsultations, jerseyTeamMembers, jerseyTeamPayments, tournamentSubscriptions, clientConfigurations, guestParticipants, passwordResetTokens, showdownContests, showdownEntries, showdownLeaderboards, professionalPlayers
 } from "@shared/schema";
 
 type SportCategory = typeof sportCategories.$inferSelect;
@@ -353,6 +355,27 @@ export interface IStorage {
   getSupportTeamAiConsultation(id: string): Promise<SupportTeamAiConsultation | undefined>;
   getSupportTeamAiConsultationsByTeam(teamId: string): Promise<SupportTeamAiConsultation[]>;
   updateSupportTeamAiConsultation(id: string, updates: Partial<SupportTeamAiConsultation>): Promise<SupportTeamAiConsultation | undefined>;
+
+  // Fantasy Showdown Contest methods
+  createShowdownContest(contest: InsertShowdownContest): Promise<ShowdownContest>;
+  getShowdownContest(id: string): Promise<ShowdownContest | undefined>;
+  getShowdownContests(): Promise<ShowdownContest[]>;
+  getShowdownContestsByCommissioner(commissionerId: string): Promise<ShowdownContest[]>;
+  updateShowdownContest(id: string, updates: Partial<ShowdownContest>): Promise<ShowdownContest | undefined>;
+
+  // Fantasy Showdown Entry methods
+  createShowdownEntry(entry: InsertShowdownEntry): Promise<ShowdownEntry>;
+  getShowdownEntry(id: string): Promise<ShowdownEntry | undefined>;
+  getShowdownEntriesByContest(contestId: string): Promise<ShowdownEntry[]>;
+  getShowdownEntriesByUser(userId: string): Promise<ShowdownEntry[]>;
+  updateShowdownEntry(id: string, updates: Partial<ShowdownEntry>): Promise<ShowdownEntry | undefined>;
+
+  // Professional Player methods
+  createProfessionalPlayer(player: InsertProfessionalPlayer): Promise<ProfessionalPlayer>;
+  getProfessionalPlayer(id: string): Promise<ProfessionalPlayer | undefined>;
+  getProfessionalPlayersBySport(sport: string): Promise<ProfessionalPlayer[]>;
+  getProfessionalPlayersByTeam(teamAbbreviation: string): Promise<ProfessionalPlayer[]>;
+  updateProfessionalPlayer(id: string, updates: Partial<ProfessionalPlayer>): Promise<ProfessionalPlayer | undefined>;
 }
 
 export class DbStorage implements IStorage {

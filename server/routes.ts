@@ -4512,6 +4512,129 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Showdown Contest routes
+  app.post("/api/fantasy/showdown-contests", async (req, res) => {
+    try {
+      const contestData = req.body;
+      
+      // Basic validation
+      if (!contestData.contestName || !contestData.commissionerId || !contestData.gameDate) {
+        return res.status(400).json({ 
+          error: "Missing required fields: contestName, commissionerId, gameDate" 
+        });
+      }
+
+      // Create the contest (for now, return mock data)
+      const contest = {
+        id: `contest-${Date.now()}`,
+        ...contestData,
+        currentEntries: 0,
+        status: "open",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      res.json({
+        success: true,
+        contest,
+        message: "Showdown contest created successfully"
+      });
+    } catch (error: any) {
+      console.error("Create showdown contest error:", error);
+      res.status(500).json({ 
+        error: "Failed to create showdown contest",
+        details: error.message 
+      });
+    }
+  });
+
+  app.get("/api/fantasy/showdown-contests", async (req, res) => {
+    try {
+      const sampleContests = [
+        {
+          id: "contest-1",
+          contestName: "KC @ LAC Showdown",
+          commissionerId: "user-1",
+          sport: "nfl",
+          gameDate: "2025-01-12T21:25:00Z",
+          team1: "KC",
+          team2: "LAC",
+          gameDescription: "KC @ LAC",
+          maxEntries: 20,
+          currentEntries: 12,
+          entryFee: 0,
+          prizePool: "Bragging Rights",
+          captainMultiplier: "1.5",
+          flexPositions: 5,
+          totalLineupSize: 6,
+          salaryCapEnabled: false,
+          status: "open",
+          lineupLockTime: "2025-01-12T20:55:00Z",
+          contestStartTime: "2025-01-12T21:25:00Z",
+          contestEndTime: "2025-01-13T01:25:00Z",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+      ];
+      
+      res.json({
+        success: true,
+        contests: sampleContests,
+        count: sampleContests.length
+      });
+    } catch (error: any) {
+      console.error("Get showdown contests error:", error);
+      res.status(500).json({ 
+        error: "Failed to get showdown contests",
+        details: error.message 
+      });
+    }
+  });
+
+  app.get("/api/fantasy/showdown/:contestId", async (req, res) => {
+    try {
+      const { contestId } = req.params;
+      
+      // Mock contest details
+      const contest = {
+        id: contestId,
+        contestName: "KC @ LAC Showdown",
+        commissionerId: "user-1",
+        sport: "nfl",
+        gameDate: "2025-01-12T21:25:00Z",
+        team1: "KC",
+        team2: "LAC",
+        gameDescription: "KC @ LAC",
+        maxEntries: 20,
+        currentEntries: 12,
+        entryFee: 0,
+        prizePool: "Bragging Rights",
+        captainMultiplier: "1.5",
+        flexPositions: 5,
+        totalLineupSize: 6,
+        salaryCapEnabled: false,
+        status: "open",
+        lineupLockTime: "2025-01-12T20:55:00Z",
+        contestStartTime: "2025-01-12T21:25:00Z",
+        contestEndTime: "2025-01-13T01:25:00Z",
+        availablePlayers: ["player-1", "player-2", "player-3"],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      
+      res.json({
+        success: true,
+        contest
+      });
+    } catch (error: any) {
+      console.error("Get showdown contest error:", error);
+      res.status(500).json({ 
+        error: "Failed to get showdown contest",
+        details: error.message 
+      });
+    }
+  });
+
   app.get("/api/fantasy/projections/:position", async (req, res) => {
     try {
       const { position } = req.params;

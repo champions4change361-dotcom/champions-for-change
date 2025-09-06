@@ -112,6 +112,7 @@ export default function FantasyTournaments() {
       case "snake_draft": return "Traditional snake draft with season-long scoring";
       case "head_to_head": return "Direct competition against one opponent";
       case "best_ball": return "Draft once, optimal lineup set automatically";
+      case "captain_showdown": return "Single-game contests with 1 Captain + 5 FLEX players";
       default: return "Professional fantasy sports format";
     }
   };
@@ -152,6 +153,13 @@ export default function FantasyTournaments() {
           icon: "⭐", 
           color: "bg-orange-600 hover:bg-orange-700",
           description: "Draft once - best players auto-selected!"
+        };
+      case "captain_showdown": 
+        return {
+          title: "Captain Showdown", 
+          icon: "👑", 
+          color: "bg-yellow-600 hover:bg-yellow-700",
+          description: "Pick 1 Captain + 5 FLEX from single game!"
         };
       default: 
         return {
@@ -247,8 +255,8 @@ export default function FantasyTournaments() {
               </div>
             </div>
             
-            {/* Bottom Row: Head-to-Head, Best Ball (centered) */}
-            <div className="grid grid-cols-2 gap-2 max-w-sm mx-auto">
+            {/* Bottom Row: Head-to-Head, Best Ball, Captain Showdown */}
+            <div className="grid grid-cols-3 gap-2">
               <div className="text-center">
                 <Button 
                   size="sm"
@@ -273,6 +281,19 @@ export default function FantasyTournaments() {
                 </Button>
                 <p className="text-xs text-muted-foreground mt-1 px-1">
                   Auto-optimal lineups
+                </p>
+              </div>
+              <div className="text-center">
+                <Button 
+                  size="sm"
+                  className="w-full bg-yellow-600 hover:bg-yellow-700 text-white px-2 py-2 text-xs font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                  onClick={() => handleFormatSelection('captain_showdown')}
+                  data-testid="create-captain_showdown-tournament"
+                >
+                  👑 Captain Showdown
+                </Button>
+                <p className="text-xs text-muted-foreground mt-1 px-1">
+                  Single-game contests
                 </p>
               </div>
             </div>
