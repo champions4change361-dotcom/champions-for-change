@@ -4533,9 +4533,7 @@ export type InsertShowdownEntry = typeof showdownEntries.$inferInsert;
 export type ShowdownLeaderboard = typeof showdownLeaderboards.$inferSelect;
 export type InsertShowdownLeaderboard = typeof showdownLeaderboards.$inferInsert;
 
-// Enhanced professional player types
-export type ProfessionalPlayer = typeof professionalPlayers.$inferSelect;
-export type InsertProfessionalPlayer = typeof professionalPlayers.$inferInsert;
+// Enhanced professional player types (already defined above)
 
 // Insert schemas for showdown system
 export const insertShowdownContestSchema = createInsertSchema(showdownContests).omit({
