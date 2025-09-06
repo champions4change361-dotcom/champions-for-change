@@ -2643,19 +2643,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           roster = nbaRosters[position] || [];
           break;
 
-        case 'mlb':
-          // Comprehensive MLB rosters - PURE MLB ONLY (no NBA/NFL contamination)
-          console.log(`🔍 MLB Pure Data: Getting ${position} players - MLB sport only`);
-          
-          // Validate MLB position to prevent cross-sport contamination
-          const validMLBPositions = ['P', 'C', '1B', '2B', '3B', 'SS', 'OF'];
-          if (!validMLBPositions.includes(position)) {
-            console.log(`❌ Invalid MLB position: ${position}. Valid positions: ${validMLBPositions.join(', ')}`);
-            roster = [];
-            break;
-          }
-          
-          const mlbRosters: any = {
             'P': [
               // Top Starters
               { id: 'degrom', name: 'Jacob deGrom', team: 'TEX' },
