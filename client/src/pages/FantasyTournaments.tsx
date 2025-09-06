@@ -172,14 +172,17 @@ export default function FantasyTournaments() {
   };
 
   const handleFormatSelection = (format: string) => {
-    if (isFantasyAuthenticated) {
-      // Redirect to game creator for specific format
-      setLocation(`/fantasy/create/${format}`);
-    } else {
-      // Store the intended format and show auth
-      sessionStorage.setItem('pendingFantasyFormat', format);
-      setShowFantasyAuth(true);
-    }
+    // For now, allow direct access to creator pages for testing
+    // TODO: Re-enable authentication check when fantasy auth is fully implemented
+    setLocation(`/fantasy/create/${format}`);
+    
+    // Original auth logic (commented out for testing):
+    // if (isFantasyAuthenticated) {
+    //   setLocation(`/fantasy/create/${format}`);
+    // } else {
+    //   sessionStorage.setItem('pendingFantasyFormat', format);
+    //   setShowFantasyAuth(true);
+    // }
   };
 
   return (
