@@ -286,11 +286,11 @@ export default function FantasyTournaments() {
               <div className="text-center">
                 <Button 
                   size="sm"
-                  className="w-full bg-yellow-600 hover:bg-yellow-700 text-white px-2 py-2 text-xs font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                  className="w-full bg-yellow-600 hover:bg-yellow-700 text-white px-1 py-3 text-xs font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
                   onClick={() => handleFormatSelection('captain_showdown')}
                   data-testid="create-captain_showdown-tournament"
                 >
-                  👑 Captain Showdown
+                  <span className="text-sm">👑</span> Captain
                 </Button>
                 <p className="text-xs text-muted-foreground mt-1 px-1">
                   Single-game contests
