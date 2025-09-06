@@ -241,9 +241,39 @@ export default function EnhancedTournamentWizard({
   const getAgeGroupsForSport = (sport: string): string[] => {
     if (!sport) return ['Elementary', 'Middle School', 'High School', 'College', 'Adult', 'Masters', 'Senior'];
     
-    // Basketball uses age-based divisions (10U through 17U, then Adult)
-    if (sport.includes('Basketball')) {
-      return ['10U', '12U', '14U', '16U', '17U', 'High School JV', 'High School Varsity', 'College', 'Adult', 'Masters (35+)', 'Senior (50+)'];
+    // Sports that use "U" (Under) age designations
+    if (sport.includes('Basketball') || sport.includes('Soccer') || sport.includes('Baseball') || sport.includes('Softball') || sport.includes('Hockey')) {
+      return ['8U', '10U', '12U', '14U', '16U', '18U', 'High School JV', 'High School Varsity', 'College', 'Adult', 'Masters (35+)', 'Senior (50+)'];
+    }
+    
+    // Football uses grade/school-based divisions
+    if (sport.includes('Football')) {
+      return ['Youth (6-8)', 'Youth (9-11)', 'Middle School', 'Freshman', 'JV', 'Varsity', 'College', 'Semi-Pro', 'Adult'];
+    }
+    
+    // Wrestling uses weight classes AND age groups
+    if (sport.includes('Wrestling')) {
+      return ['Youth', 'Middle School', 'High School', 'College', 'Open/Senior', 'Masters (35+)', 'Veterans (50+)'];
+    }
+    
+    // Swimming uses age ranges
+    if (sport.includes('Swimming') || sport.includes('Diving')) {
+      return ['8 & Under', '9-10', '11-12', '13-14', '15-16', '17-18', 'College', 'Open', 'Masters (25+)', 'Senior (50+)'];
+    }
+    
+    // Track & Field uses school/age divisions
+    if (sport.includes('Track') || sport.includes('Field') || sport.includes('Cross Country')) {
+      return ['Youth (Under 12)', 'Youth (12-14)', 'Youth (15-17)', 'High School', 'College', 'Open', 'Masters (35+)', 'Senior (50+)'];
+    }
+    
+    // Golf and Tennis use skill-based and age divisions
+    if (sport.includes('Golf') || sport.includes('Tennis')) {
+      return ['Junior (Under 12)', 'Junior (12-14)', 'Junior (15-18)', 'High School', 'College', 'Open', 'Senior (50+)', 'Super Senior (65+)'];
+    }
+    
+    // Academic competitions use grade levels
+    if (['Academic', 'STEM', 'Speech & Debate', 'Music', 'Visual Arts', 'Theater'].some(cat => sport.includes(cat))) {
+      return ['2nd Grade', '3rd Grade', '4th Grade', '5th Grade', '6th Grade', '7th Grade', '8th Grade', '9th Grade', '10th Grade', '11th Grade', '12th Grade', 'College'];
     }
     
     // Emerging sports often exclude elementary
@@ -256,17 +286,12 @@ export default function EnhancedTournamentWizard({
       return ['Middle School', 'High School', 'College', 'Adult', 'Masters'];
     }
     
-    // Adaptive sports
+    // Adaptive sports emphasize inclusion
     if (sport.includes('Wheelchair') || sport.includes('Adaptive') || sport.includes('Special Olympics')) {
       return ['Elementary', 'Middle School', 'High School', 'College', 'Adult', 'Masters', 'Senior', 'All Ages'];
     }
     
-    // Academic competitions
-    if (['Academic', 'STEM', 'Speech & Debate', 'Music', 'Visual Arts', 'Theater'].some(cat => sport.includes(cat))) {
-      return ['Elementary', 'Middle School', 'High School', 'College'];
-    }
-    
-    // Most traditional sports
+    // Most traditional sports use school-based divisions
     return ['Elementary', 'Middle School', 'High School', 'College', 'Adult', 'Masters'];
   };
 
