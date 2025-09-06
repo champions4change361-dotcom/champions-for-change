@@ -2687,8 +2687,68 @@ export const professionalPlayers = pgTable("professional_players", {
   sport: varchar("sport").notNull(), // nfl, nba, mlb, nhl, esports
   jerseyNumber: integer("jersey_number"),
   salary: integer("salary"), // For salary cap formats
-  currentSeasonStats: jsonb("current_season_stats"),
+  
+  // Enhanced player card data
+  playerImageUrl: varchar("player_image_url"),
+  teamLogoUrl: varchar("team_logo_url"),
+  height: varchar("height"), // e.g., "6'2\""
+  weight: integer("weight"), // in pounds
+  age: integer("age"),
+  experience: integer("experience"), // years in league
+  
+  // Current season totals (like DK player cards)
+  currentSeasonStats: jsonb("current_season_stats").$type<{
+    // NFL Example
+    attempts?: number;
+    yards?: number;
+    yardsPerGame?: number;
+    touchdowns?: number;
+    fantasyPointsPerGame?: number;
+    // NBA Example
+    points?: number;
+    rebounds?: number;
+    assists?: number;
+    minutesPerGame?: number;
+    // Generic stats
+    gamesPlayed?: number;
+    [key: string]: any;
+  }>(),
+  
+  // Recent performance window (last 6 games)
+  recentPerformance: jsonb("recent_performance").$type<{
+    games: Array<{
+      week: number;
+      opponent: string;
+      fantasyPoints: number;
+      salary: number;
+      gameResult: 'W' | 'L';
+      stats: { [key: string]: any };
+    }>;
+    trend: 'up' | 'down' | 'stable';
+  }>(),
+  
+  // News and injury updates
   injuryStatus: varchar("injury_status").default("healthy"),
+  injuryDesignation: varchar("injury_designation"), // Questionable, Doubtful, Out, IR
+  latestNews: jsonb("latest_news").$type<Array<{
+    timestamp: string;
+    headline: string;
+    summary: string;
+    source: string;
+    impact: 'positive' | 'negative' | 'neutral';
+  }>>(),
+  
+  // Matchup data
+  nextOpponent: varchar("next_opponent"),
+  nextGameDate: timestamp("next_game_date"),
+  opponentRank: jsonb("opponent_rank").$type<{
+    vsPosition: number; // Rank against this position (e.g., 2nd vs RBs)
+    passYardsAllowed?: number;
+    rushYardsAllowed?: number;
+    pointsAllowed?: number;
+    fantasyPointsAllowed?: number;
+  }>(),
+  
   byeWeek: integer("bye_week"), // For NFL
   lastUpdated: timestamp("last_updated").defaultNow(),
   isActive: boolean("is_active").default(true),
@@ -2721,6 +2781,102 @@ export const fantasyLineups = pgTable("fantasy_lineups", {
   actualPoints: decimal("actual_points").default("0"),
   lineupStatus: varchar("lineup_status").default("set"), // set, locked, scored
   submissionTimestamp: timestamp("submission_timestamp").defaultNow(),
+});
+
+// Showdown contests - Captain mode like DraftKings
+export const showdownContests = pgTable("showdown_contests", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  contestName: varchar("contest_name").notNull(),
+  commissionerId: varchar("commissioner_id").notNull(),
+  sport: varchar("sport").notNull(), // nfl, nba, mlb, etc.
+  gameDate: timestamp("game_date").notNull(),
+  team1: varchar("team1").notNull(),
+  team2: varchar("team2").notNull(),
+  gameDescription: varchar("game_description"), // "KC @ LAC"
+  
+  // Contest settings
+  maxEntries: integer("max_entries").default(20),
+  currentEntries: integer("current_entries").default(0),
+  entryFee: integer("entry_fee").default(0), // $0 for non-gambling
+  prizePool: varchar("prize_pool").default("Bragging Rights"), // Text description
+  
+  // Captain mode configuration
+  captainMultiplier: decimal("captain_multiplier").default("1.5"), // 1.5x points
+  flexPositions: integer("flex_positions").default(5), // 5 FLEX players
+  totalLineupSize: integer("total_lineup_size").default(6), // 1 Captain + 5 FLEX
+  salaryCapEnabled: boolean("salary_cap_enabled").default(false), // Optional for showdowns
+  salaryCap: integer("salary_cap"), // Optional salary limit
+  
+  // Contest status and timing
+  status: varchar("status").default("open"), // open, locked, live, completed
+  lineupLockTime: timestamp("lineup_lock_time").notNull(), // When lineups lock
+  contestStartTime: timestamp("contest_start_time").notNull(),
+  contestEndTime: timestamp("contest_end_time"),
+  
+  // Available players (filtered by game)
+  availablePlayers: jsonb("available_players").$type<string[]>(), // Player IDs from the game
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Showdown entries - Individual lineups in showdown contests
+export const showdownEntries = pgTable("showdown_entries", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  contestId: varchar("contest_id").references(() => showdownContests.id).notNull(),
+  userId: varchar("user_id").notNull(),
+  entryName: varchar("entry_name"), // Optional entry nickname
+  
+  // Captain mode lineup
+  captainPlayerId: varchar("captain_player_id").references(() => professionalPlayers.id).notNull(),
+  flexPlayers: jsonb("flex_players").$type<string[]>().notNull(), // Array of 5 player IDs
+  
+  // Scoring and performance
+  totalSalary: integer("total_salary").default(0),
+  projectedPoints: decimal("projected_points").default("0"),
+  actualPoints: decimal("actual_points").default("0"),
+  captainPoints: decimal("captain_points").default("0"), // Captain points with multiplier
+  flexPoints: decimal("flex_points").default("0"),
+  
+  // Contest position and stats
+  currentRank: integer("current_rank"),
+  finalRank: integer("final_rank"),
+  entryStatus: varchar("entry_status").default("active"), // active, eliminated, withdrawn
+  
+  submissionTime: timestamp("submission_time").defaultNow(),
+  lastUpdated: timestamp("last_updated").defaultNow(),
+});
+
+// Showdown leaderboards - Real-time rankings
+export const showdownLeaderboards = pgTable("showdown_leaderboards", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  contestId: varchar("contest_id").references(() => showdownContests.id).notNull(),
+  entryId: varchar("entry_id").references(() => showdownEntries.id).notNull(),
+  userId: varchar("user_id").notNull(),
+  
+  // Ranking data
+  currentRank: integer("current_rank").notNull(),
+  previousRank: integer("previous_rank"),
+  totalPoints: decimal("total_points").default("0"),
+  pointsBehindLeader: decimal("points_behind_leader").default("0"),
+  
+  // Performance breakdown
+  captainPerformance: jsonb("captain_performance").$type<{
+    playerId: string;
+    playerName: string;
+    points: number;
+    multipliedPoints: number;
+    stats: { [key: string]: any };
+  }>(),
+  
+  flexPerformance: jsonb("flex_performance").$type<Array<{
+    playerId: string;
+    playerName: string;
+    points: number;
+    stats: { [key: string]: any };
+  }>>(),
+  
+  lastUpdated: timestamp("last_updated").defaultNow(),
 });
 
 // Player performance - real-time scoring integration
@@ -4323,4 +4479,78 @@ export const insertGuestParticipantSchema = createInsertSchema(guestParticipants
 export const insertPasswordResetTokenSchema = createInsertSchema(passwordResetTokens).omit({
   id: true,
   createdAt: true,
+});
+
+// Showdown contest relations
+export const showdownContestsRelations = relations(showdownContests, ({ many, one }) => ({
+  entries: many(showdownEntries),
+  leaderboards: many(showdownLeaderboards),
+  commissioner: one(users, {
+    fields: [showdownContests.commissionerId],
+    references: [users.id],
+  }),
+}));
+
+export const showdownEntriesRelations = relations(showdownEntries, ({ one, many }) => ({
+  contest: one(showdownContests, {
+    fields: [showdownEntries.contestId],
+    references: [showdownContests.id],
+  }),
+  user: one(users, {
+    fields: [showdownEntries.userId],
+    references: [users.id],
+  }),
+  captain: one(professionalPlayers, {
+    fields: [showdownEntries.captainPlayerId],
+    references: [professionalPlayers.id],
+  }),
+  leaderboard: one(showdownLeaderboards, {
+    fields: [showdownEntries.id],
+    references: [showdownLeaderboards.entryId],
+  }),
+}));
+
+export const showdownLeaderboardsRelations = relations(showdownLeaderboards, ({ one }) => ({
+  contest: one(showdownContests, {
+    fields: [showdownLeaderboards.contestId],
+    references: [showdownContests.id],
+  }),
+  entry: one(showdownEntries, {
+    fields: [showdownLeaderboards.entryId],
+    references: [showdownEntries.id],
+  }),
+  user: one(users, {
+    fields: [showdownLeaderboards.userId],
+    references: [users.id],
+  }),
+}));
+
+// Type exports for showdown system
+export type ShowdownContest = typeof showdownContests.$inferSelect;
+export type InsertShowdownContest = typeof showdownContests.$inferInsert;
+export type ShowdownEntry = typeof showdownEntries.$inferSelect;
+export type InsertShowdownEntry = typeof showdownEntries.$inferInsert;
+export type ShowdownLeaderboard = typeof showdownLeaderboards.$inferSelect;
+export type InsertShowdownLeaderboard = typeof showdownLeaderboards.$inferInsert;
+
+// Enhanced professional player types
+export type ProfessionalPlayer = typeof professionalPlayers.$inferSelect;
+export type InsertProfessionalPlayer = typeof professionalPlayers.$inferInsert;
+
+// Insert schemas for showdown system
+export const insertShowdownContestSchema = createInsertSchema(showdownContests).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertShowdownEntrySchema = createInsertSchema(showdownEntries).omit({
+  id: true,
+  submissionTime: true,
+  lastUpdated: true,
+});
+
+export const insertShowdownLeaderboardSchema = createInsertSchema(showdownLeaderboards).omit({
+  id: true,
+  lastUpdated: true,
 });

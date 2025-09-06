@@ -122,6 +122,7 @@ import DailyFantasyCreator from './pages/DailyFantasyCreator';
 import NFLKnockoutCreator from './pages/NFLKnockoutCreator';
 import HeadToHeadCreator from './pages/HeadToHeadCreator';
 import BestBallCreator from './pages/BestBallCreator';
+import FantasyDashboard from './pages/FantasyDashboard';
 
 function AuthenticatedRoutes() {
   const { isFeatureEnabled, isFantasyDomain, config } = useDomain();
@@ -196,6 +197,11 @@ function AuthenticatedRoutes() {
         {/* Show Fantasy Tournaments only for fantasy and pro domains */}
         {isFeatureEnabled('fantasyLeagues') && (
           <Route path="/fantasy-tournaments" component={FantasyTournaments} />
+        )}
+        
+        {/* Fantasy Dashboard */}
+        {isFeatureEnabled('fantasyLeagues') && (
+          <Route path="/fantasy" component={FantasyDashboard} />
         )}
         
         {/* Daily Fantasy Lineup Builder */}
