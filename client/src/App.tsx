@@ -125,6 +125,7 @@ import HeadToHeadCreator from './pages/HeadToHeadCreator';
 import BestBallCreator from './pages/BestBallCreator';
 import FantasyDashboard from './pages/FantasyDashboard';
 import CaptainShowdownCreator from './pages/CaptainShowdownCreator';
+import ParticipantLogin from './pages/ParticipantLogin';
 
 function AuthenticatedRoutes() {
   const { isFeatureEnabled, isFantasyDomain, config } = useDomain();
@@ -360,7 +361,13 @@ function AppRouter() {
       <Route path="/nonprofit-resources" component={NonprofitResources} />
       <Route path="/register-organization" component={() => { window.location.href = '/smart-signup?type=business'; return null; }} />
       {/* Unified Login for All Methods */}
-      <Route path="/login" component={UnifiedLogin} />
+      <Route path="/login">
+        {config?.brand === 'CHAMPIONS_FOR_CHANGE' ? (
+          <ParticipantLogin />
+        ) : (
+          <UnifiedLogin />
+        )}
+      </Route>
       {/* Legacy Login Form */}
       <Route path="/legacy-login" component={Login} />
       {/* User Type Selection Portal */}
