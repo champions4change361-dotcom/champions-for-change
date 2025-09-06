@@ -90,7 +90,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           source: 'fallback'
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Location detection error:', error);
       res.json({
         country: 'United States',
@@ -129,7 +129,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return_url: `${req.protocol}://${req.get('host')}/subscription`,
         });
         customerPortalUrl = portalSession.url;
-      } catch (error) {
+      } catch (error: any) {
         console.error('Customer portal error:', error);
       }
 
@@ -137,14 +137,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         id: subscription.id,
         status: subscription.status,
         plan: user.subscriptionPlan,
-        currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
-        cancelAtPeriodEnd: subscription.cancel_at_period_end,
+        currentPeriodEnd: new Date((subscription as any).current_period_end * 1000).toISOString(),
+        cancelAtPeriodEnd: (subscription as any).cancel_at_period_end,
         amount: subscription.items.data[0]?.price?.unit_amount || 0,
         interval: subscription.items.data[0]?.price?.recurring?.interval || 'month',
-        nextBillingDate: new Date(subscription.current_period_end * 1000).toISOString(),
+        nextBillingDate: new Date((subscription as any).current_period_end * 1000).toISOString(),
         customerPortalUrl
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Subscription fetch error:', error);
       res.status(500).json({ message: 'Failed to fetch subscription details' });
     }
@@ -185,9 +185,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         success: true,
         message: 'Subscription scheduled for cancellation',
-        cancelationDate: new Date(subscription.current_period_end * 1000).toISOString()
+        cancelationDate: new Date((subscription as any).current_period_end * 1000).toISOString()
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Subscription cancellation error:', error);
       res.status(500).json({ message: 'Failed to cancel subscription' });
     }
@@ -224,7 +224,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: true,
         message: 'Subscription reactivated successfully'
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Subscription reactivation error:', error);
       res.status(500).json({ message: 'Failed to reactivate subscription' });
     }
@@ -260,7 +260,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         res.status(404).json({ message: 'Invoice PDF not available' });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Invoice download error:', error);
       res.status(500).json({ message: 'Failed to download invoice' });
     }
@@ -310,7 +310,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       res.json(coordinationAnalysis);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Coordination analysis error:', error);
       res.status(500).json({ error: 'Failed to analyze tournament coordination' });
     }
@@ -353,7 +353,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       res.json(regionalAnalysis);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Regional analysis error:', error);
       res.status(500).json({ error: 'Failed to analyze regional tournaments' });
     }
@@ -396,7 +396,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         matches: potentialCollaborators,
         totalMatches: potentialCollaborators.length
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Collaboration matching error:', error);
       res.status(500).json({ error: 'Failed to find collaborators' });
     }
@@ -442,7 +442,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           frequency: subscription.frequency
         }
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Tournament subscription error:', error);
       res.status(400).json({
         success: false,
@@ -538,7 +538,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         redirectTo: recommendedPlan === 'free-starter' ? '/tournaments' : null
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Smart signup error:', error);
       res.status(500).json({ 
         error: 'Registration failed. Please try again or contact support.' 
@@ -655,7 +655,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         res.status(401).json({ message: 'Invalid credentials' });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login error:', error);
       res.status(500).json({ message: 'Authentication service error' });
     }
@@ -764,7 +764,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         emailSent: true
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Signup error:', error);
       res.status(500).json({ 
         message: 'Failed to create account. Please try again.',
@@ -816,7 +816,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: 'If an account exists with this email, a password reset link has been sent.' 
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Password reset error:', error);
       res.status(500).json({ message: 'Internal server error' });
     }
@@ -861,7 +861,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({ message: 'Password reset successfully' });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Reset password error:', error);
       res.status(500).json({ message: 'Internal server error' });
     }
@@ -938,7 +938,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Guest registration error:', error);
       res.status(500).json({ 
         message: 'Registration failed. Please try again.',
@@ -988,7 +988,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log('❌ No valid user found, returning 401');
       res.status(401).json({ message: "Unauthorized" });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching user:", error);
       res.status(500).json({ error: "Failed to fetch user" });
     }
@@ -1079,7 +1079,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const storage = await getStorage();
       const users = await storage.getAllUsers();
       res.json(users);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching users:", error);
       res.status(500).json({ error: "Failed to fetch users" });
     }
@@ -1135,7 +1135,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json({ success: true, user: fakeUser });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating fake user:", error);
       res.status(500).json({ error: "Failed to create fake user" });
     }
@@ -1196,7 +1196,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log("📤 Sending response:", response);
       res.json(response);
-    } catch (error) {
+    } catch (error: any) {
       console.error("❌ Error creating Jolynn's real account:", error);
       res.status(500).json({ error: "Failed to create Jolynn's account", details: (error as Error).message });
     }
@@ -1281,7 +1281,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "Business registration successful! Check your email for next steps."
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Business registration error:', error);
       res.status(500).json({
         error: "Registration failed",
@@ -1320,7 +1320,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         users: mockPendingUsers
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Error fetching pending users:', error);
       res.status(500).json({
         error: "Failed to fetch pending users",
@@ -1345,7 +1345,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "User account activated successfully"
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Error approving user:', error);
       res.status(500).json({
         error: "Failed to approve user",
@@ -1370,7 +1370,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "User account rejected and notified"
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Error rejecting user:', error);
       res.status(500).json({
         error: "Failed to reject user",
@@ -1418,7 +1418,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         staffRole: staffRole
       });
       
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error generating staff invitation:", error);
       res.status(500).json({ error: "Failed to generate staff invitation" });
     }
@@ -1441,7 +1441,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         error: validation.error
       });
       
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error validating invitation code:", error);
       res.status(500).json({ error: "Failed to validate invitation code" });
     }
@@ -1552,7 +1552,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Donation creation error:', error);
       res.status(500).json({
         error: "Failed to create donation"
@@ -1627,7 +1627,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         nextStep: paymentMethod === 'stripe' ? 'payment' : 'confirmation'
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Registration error:', error);
       res.status(500).json({ 
         error: "Failed to process registration request" 
@@ -1869,7 +1869,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "Successfully joined league!"
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('League join error:', error);
       res.status(500).json({ error: "Failed to join league" });
     }
@@ -1906,7 +1906,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "League created successfully!"
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('League creation error:', error);
       res.status(500).json({ error: "Failed to create league" });
     }
@@ -1939,7 +1939,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "Successfully joined the league!"
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Commissioner league join error:', error);
       res.status(500).json({ error: "Failed to join league", message: "Invalid registration code or league not found" });
     }
@@ -1984,7 +1984,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 opponent,
                 fantasyRelevant: true
               };
-            } catch (error) {
+            } catch (error: any) {
               console.log(`⚠️ Projection failed for ${player.name}, using base data`);
               return {
                 ...player,
@@ -2012,7 +2012,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           supportedSports: ['nfl']
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Fantasy cards error:', error);
       res.status(500).json({ 
         error: 'Failed to load fantasy player cards',
@@ -2157,7 +2157,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             } else {
               console.log(`⚠️ No Yahoo Sports data for MLB ${position}`);
             }
-          } catch (error) {
+          } catch (error: any) {
             console.log(`❌ MLB ${position} Yahoo API error:`, error);
           }
         }
@@ -2205,7 +2205,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             } else {
               console.log(`⚠️ No Yahoo data for NHL ${position}`);
             }
-          } catch (error) {
+          } catch (error: any) {
             console.log(`❌ NHL ${position} Yahoo API error:`, error);
           }
         }
@@ -2223,7 +2223,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         res.status(404).json({ success: false, message: `Sport ${sport} not supported yet` });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('All players fetch error:', error);
       res.status(500).json({ success: false, message: 'Failed to fetch all players data', error: error.message });
     }
@@ -2340,7 +2340,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             roster = await getEnhancedFallbackRoster(sport, position);
           }
         }
-      } catch (error) {
+      } catch (error: any) {
         console.log(`⚠️ Data fetch failed for ${sport} ${position}, using fallback`);
         dataSource = 'fallback';
         roster = await getEnhancedFallbackRoster(sport, position);
@@ -2356,7 +2356,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         count: roster.length
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Roster endpoint error:', error);
       res.status(500).json({ 
         success: false, 
@@ -2534,7 +2534,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   roster = yahooPlayers;
                 }
               }
-            } catch (error) {
+            } catch (error: any) {
               console.log('Using fallback roster data for', position);
             }
           }
@@ -2889,7 +2889,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       return roster;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Enhanced fallback roster error:', error);
       return [];
     }
@@ -2904,7 +2904,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...status,
         timestamp: new Date().toISOString()
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Intelligence status error:', error);
       res.status(500).json({ success: false, message: 'Failed to get system status' });
     }
@@ -2918,7 +2918,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         results,
         timestamp: new Date().toISOString()
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Intelligence data error:', error);
       res.status(500).json({ success: false, message: 'Failed to get latest intelligence' });
     }
@@ -2934,7 +2934,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         results,
         timestamp: new Date().toISOString()
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Manual intelligence run failed:', error);
       res.status(500).json({ success: false, message: 'Manual analysis failed' });
     }
@@ -3075,7 +3075,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(enhancedAnalysis);
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Enhanced analysis error:', error);
       res.status(500).json({ success: false, message: 'Failed to generate enhanced analysis' });
     }
@@ -3200,7 +3200,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // realPlayerData = await yahooSportsAPI.getCurrentNBAPlayerData(player);
         console.log(`Yahoo Sports API integration pending for NBA data`);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.log(`⚠️ Real data unavailable, using enhanced analytics for ${player}`);
     }
     
@@ -3386,7 +3386,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           playerStatus = playerData.status || 'starter';
           console.log(`📊 Depth Chart: ${player} is ${playerStatus} (depth ${depthPosition})`);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.log('⚠️ Could not load depth chart data');
       }
     }
@@ -4304,7 +4304,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         analysis: professionalSlateAnalysis,
         timestamp: new Date().toISOString()
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Professional slate analysis error:', error);
       res.status(500).json({ error: "Failed to analyze slate" });
     }
@@ -4322,7 +4322,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         market: marketData,
         timestamp: new Date().toISOString()
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Market intelligence error:', error);
       res.status(500).json({ error: "Failed to get market intelligence" });
     }
@@ -4340,7 +4340,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         injuries: injuryData,
         timestamp: new Date().toISOString()
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Advanced injury intelligence error:', error);
       res.status(500).json({ error: "Failed to get injury intelligence" });
     }
@@ -4358,7 +4358,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         contrarian: contrarianData,
         timestamp: new Date().toISOString()
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Contrarian plays error:', error);
       res.status(500).json({ error: "Failed to get contrarian plays" });
     }
@@ -4376,7 +4376,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         vegas: vegasData,
         timestamp: new Date().toISOString()
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Vegas lines error:', error);
       res.status(500).json({ error: "Failed to get vegas lines" });
     }
@@ -4588,7 +4588,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Injury reports error:', error);
       res.status(500).json({ success: false, message: 'Failed to load injury reports' });
     }
@@ -4829,7 +4829,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         projections,
         timestamp: new Date().toISOString()
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Player projections error:', error);
       res.status(500).json({ error: "Failed to get projections" });
     }
@@ -4908,7 +4908,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       ];
       
       res.json(mockAssignments);
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Event assignments error:', error);
       res.status(500).json({ error: 'Failed to fetch event assignments' });
     }
@@ -4946,7 +4946,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: `Assignment ${action}ed successfully`,
         assignment: updatedAssignment
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Event assignment action error:', error);
       res.status(500).json({ error: `Failed to ${req.params.action} assignment` });
     }
@@ -4998,7 +4998,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         totalParticipants: mockParticipants.length,
         checkedInCount: mockParticipants.filter(p => p.checkedIn).length
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Event participants error:', error);
       res.status(500).json({ error: 'Failed to fetch event participants' });
     }
@@ -5041,7 +5041,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: 'Participant added successfully',
         participant: newParticipant
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Add participant error:', error);
       res.status(500).json({ error: 'Failed to add participant' });
     }
@@ -5097,7 +5097,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: 'Attempt recorded successfully',
         attempt: recordedAttempt
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Record attempt error:', error);
       res.status(500).json({ error: 'Failed to record attempt' });
     }
@@ -5134,7 +5134,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userRole: (req as any).user?.userRole || 'fan',
         accessType: isTournamentOwner ? 'tournament_owner' : 'role_based'
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Tournament ownership check error:', error);
       res.status(500).json({ error: 'Failed to check tournament ownership' });
     }
@@ -5166,7 +5166,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userRole: (req as any).user?.userRole || 'fan',
         accessType: isTournamentOwner ? 'tournament_owner' : 'role_based'
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Direct tournament ownership check error:', error);
       res.status(500).json({ error: 'Failed to check tournament ownership' });
     }
@@ -5244,7 +5244,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         efficiency: yahooAPI.getEfficiencyStats(),
         timestamp: new Date().toISOString()
       });
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ error: 'Yahoo API status unavailable' });
     }
   });
@@ -5275,7 +5275,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         efficiency,
         note: 'Subsequent calls will show cache hits!'
       });
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ error: 'Demo failed', details: error });
     }
   });
@@ -5356,7 +5356,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: 'Team created successfully'
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Team registration error:', error);
       res.status(500).json({ 
         error: 'Failed to create team registration',
@@ -5398,7 +5398,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Team search error:', error);
       res.status(500).json({ 
         error: 'Failed to search for team',
@@ -5482,7 +5482,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: 'Successfully joined team'
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Team join error:', error);
       res.status(500).json({ 
         error: 'Failed to join team',
@@ -5510,7 +5510,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         totalMembers: members.length
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Get team error:', error);
       res.status(500).json({ 
         error: 'Failed to get team details',
@@ -5572,7 +5572,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         paymentBreakdown
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Get team payment info error:', error);
       res.status(500).json({ 
         error: 'Failed to get team payment information',
@@ -5605,7 +5605,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         payment_intent_id: paymentIntent.id
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Payment intent creation error:', error);
       res.status(500).json({ 
         error: 'Failed to create payment intent',
@@ -5699,7 +5699,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: 'Payment recorded successfully'
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Payment recording error:', error);
       res.status(500).json({ 
         error: 'Failed to record payment',
@@ -5728,7 +5728,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }))
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Get payment history error:', error);
       res.status(500).json({ 
         error: 'Failed to get payment history',
@@ -5848,7 +5848,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Organizer analytics error:', error);
       res.status(500).json({ 
         error: 'Failed to get organizer analytics',
@@ -5887,7 +5887,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({ success: true, message: 'Page view tracked' });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Page view tracking error:', error);
       res.status(500).json({ 
         error: 'Failed to track page view',
@@ -5933,7 +5933,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         contactId: `contact_${Date.now()}`
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Contact collection error:', error);
       res.status(500).json({ 
         error: 'Failed to collect contact information',
@@ -5963,7 +5963,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         const result = await AITrainingSystem.simulateTraining(scenario);
         res.json({ result });
-      } catch (error) {
+      } catch (error: any) {
         console.error('Training simulation error:', error);
         res.status(500).json({ error: "Training simulation failed" });
       }
@@ -5981,7 +5981,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           response: response?.response || "Training response not available",
           confidence: response?.confidence || 0
         });
-      } catch (error) {
+      } catch (error: any) {
         console.error('Training collection error:', error);
         res.status(500).json({ error: "Training data collection failed" });
       }
@@ -6021,7 +6021,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId
       });
       res.json(config);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Create client config error:", error);
       res.status(500).json({ error: "Failed to create client configuration" });
     }
@@ -6035,7 +6035,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Client configuration not found" });
       }
       res.json(config);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Get client config error:", error);
       res.status(500).json({ error: "Failed to retrieve client configuration" });
     }
@@ -6049,7 +6049,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Client configuration not found for domain" });
       }
       res.json(config);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Get client config by domain error:", error);
       res.status(500).json({ error: "Failed to retrieve client configuration" });
     }
@@ -6068,7 +6068,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "No client configuration found for user" });
       }
       res.json(config);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Get user client config error:", error);
       res.status(500).json({ error: "Failed to retrieve client configuration" });
     }
@@ -6093,7 +6093,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Client configuration not found" });
       }
       res.json(updatedConfig);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Update client config error:", error);
       res.status(500).json({ error: "Failed to update client configuration" });
     }
@@ -6118,7 +6118,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Client configuration not found" });
       }
       res.json({ success: true });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Delete client config error:", error);
       res.status(500).json({ error: "Failed to delete client configuration" });
     }
