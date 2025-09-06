@@ -108,7 +108,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get current subscription details
   app.get('/api/subscription', isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = (req.user as any)?.claims?.sub;
       if (!userId) {
         return res.status(401).json({ message: 'User not found' });
       }
@@ -153,7 +153,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Cancel subscription at period end
   app.post('/api/subscription/cancel', isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = (req.user as any)?.claims?.sub;
       const { reason, feedback } = req.body;
       
       if (!userId) {
@@ -196,7 +196,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Reactivate canceled subscription
   app.post('/api/subscription/reactivate', isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = (req.user as any)?.claims?.sub;
       
       if (!userId) {
         return res.status(401).json({ message: 'User not found' });
@@ -233,7 +233,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Download latest invoice
   app.get('/api/subscription/invoice', isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = (req.user as any)?.claims?.sub;
       
       if (!userId) {
         return res.status(401).json({ message: 'User not found' });
@@ -957,13 +957,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Check passport authentication first (most common after login)
       if (req.isAuthenticated && req.isAuthenticated() && req.user?.claims) {
-        console.log('✅ Returning authenticated passport user:', req.user.claims.email);
+        const userClaims = (req.user as any)?.claims;
+        console.log('✅ Returning authenticated passport user:', userClaims?.email);
         return res.json({
-          id: req.user.claims.sub,
-          email: req.user.claims.email,
-          firstName: req.user.claims.first_name,
-          lastName: req.user.claims.last_name,
-          profileImageUrl: req.user.claims.profile_image_url,
+          id: userClaims?.sub,
+          email: userClaims?.email,
+          firstName: userClaims?.first_name,
+          lastName: userClaims?.last_name,
+          profileImageUrl: userClaims?.profile_image_url,
         });
       }
       
@@ -981,7 +982,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           email: req.user.claims.email,
           firstName: req.user.claims.first_name,
           lastName: req.user.claims.last_name,
-          profileImageUrl: req.user.claims.profile_image_url,
+          profileImageUrl: userClaims?.profile_image_url,
         });
       } 
       
@@ -1382,7 +1383,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/generate-staff-invitation", isAuthenticated, async (req: any, res) => {
     try {
       const { staffRole, maxUses = 1, expirationDays = 7 } = req.body;
-      const userId = req.user?.claims?.sub;
+      const userId = (req.user as any)?.claims?.sub;
       
       if (!userId) {
         return res.status(401).json({ error: "Authentication required" });
