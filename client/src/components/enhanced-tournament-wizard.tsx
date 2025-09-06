@@ -25,7 +25,7 @@ import { generateRandomNames } from "@/utils/name-generator";
 import { ComprehensiveTournamentFormatSelector, SportSpecificConfig, allTournamentFormats, type TournamentFormatConfig } from "./comprehensive-tournament-formats";
 
 const formSchema = insertTournamentSchema.extend({
-  teamSize: z.number().min(2).max(128), // Support up to 128 teams for large tournaments
+  teamSize: z.number().min(1).max(128), // Support 1-128 teams for flexibility
   tournamentType: z.enum([
     "single", "double", "double-stage", "pool-play", "round-robin", "swiss-system",
     "match-play", "stroke-play", "scramble", "best-ball", "alternate-shot", "modified-stableford",
@@ -240,6 +240,11 @@ export default function EnhancedTournamentWizard({
   // Get smart age group options based on selected sport
   const getAgeGroupsForSport = (sport: string): string[] => {
     if (!sport) return ['Elementary', 'Middle School', 'High School', 'College', 'Adult', 'Masters', 'Senior'];
+    
+    // Basketball uses age-based divisions (10U through 17U, then Adult)
+    if (sport.includes('Basketball')) {
+      return ['10U', '12U', '14U', '16U', '17U', 'High School JV', 'High School Varsity', 'College', 'Adult', 'Masters (35+)', 'Senior (50+)'];
+    }
     
     // Emerging sports often exclude elementary
     if (['Esports', 'Drone Racing', 'Mixed Martial Arts', 'Axe Throwing'].includes(sport)) {
