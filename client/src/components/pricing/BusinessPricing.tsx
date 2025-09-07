@@ -7,32 +7,14 @@ import { Check, Building, Star } from 'lucide-react';
 export function BusinessPricingSection() {
   const businessTiers = [
     {
-      name: 'Starter',
-      price: 'Free',
-      description: 'Perfect for small offices, one-off hackathons, testing platform',
+      name: 'Annual Tournament',
+      price: '$99',
+      period: '/year',
+      description: 'Perfect for organizations running one tournament annually with year-round web presence',
       features: [
-        'Up to 5 tournaments per year',
-        'Basic bracket management',
-        'Registration fee collection',
-        'Score tracking & leaderboards',
-        'Email notifications',
-        'Mobile access',
-        'Community support'
-      ],
-      cta: 'Start Free',
-      buttonColor: 'bg-blue-600 hover:bg-blue-700',
-      icon: Building,
-      popular: false,
-      bestFor: 'Small teams, one-off events',
-      badge: 'Free'
-    },
-    {
-      name: 'Tournament Organizer',
-      price: '$39',
-      period: '/month',
-      description: 'Perfect for individual tournament organizers who want professional features with payment processing',
-      features: [
-        'Unlimited tournament events',
+        'One tournament per year',
+        'Year-round website hosting',
+        'Full platform access (no restrictions)',
         'Team & athlete registration',
         'Payment processing & fee collection', 
         'Custom donation page setup',
@@ -41,17 +23,42 @@ export function BusinessPricingSection() {
         'Email notifications & communication',
         'Mobile-responsive interface',
         'Basic analytics & reporting',
+        'White-label tournament experience'
+      ],
+      cta: 'Start 14-Day Trial',
+      buttonColor: 'bg-blue-600 hover:bg-blue-700',
+      icon: Building,
+      popular: false,
+      bestFor: 'Annual tournaments, schools, nonprofits',
+      badge: 'Best Value',
+      trialNote: 'Start with 14-day free trial • No charge until trial ends'
+    },
+    {
+      name: 'Multi-Tournament',
+      price: '$39',
+      period: '/month',
+      description: 'Perfect for active tournament organizers running multiple events throughout the year',
+      features: [
+        'Unlimited tournament events',
+        'Full platform access (no restrictions)',
+        'Team & athlete registration',
+        'Payment processing & fee collection', 
+        'Custom donation page setup',
+        'Professional branding & logos',
+        'Score tracking & brackets',
+        'Email notifications & communication',
+        'Mobile-responsive interface',
+        'Advanced analytics & reporting',
         'Community support',
         'White-label tournament experience'
       ],
-      cta: 'Start Organizing',
+      cta: 'Start 14-Day Trial',
       buttonColor: 'bg-orange-600 hover:bg-orange-700',
       icon: Star,
       popular: true,
-      bestFor: 'Individual tournament organizers, coaches, community leaders',
+      bestFor: 'Active organizers, coaches, community leaders',
       badge: 'Most Popular',
-      note: 'Annual option: $399/year (save 2 months)',
-      annualPrice: '$399'
+      trialNote: 'Start with 14-day free trial • No charge until trial ends'
     },
     {
       name: 'Business Enterprise',
@@ -116,16 +123,16 @@ export function BusinessPricingSection() {
             Professional Tournament Management
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-6">
-            Start with 5 free tournaments, then scale with full enterprise features at every tier. 
-            Small businesses get the same capabilities as large corporations - differentiated by volume, not features.
+            Start with a 14-day free trial - full platform access, no restrictions. 
+            Choose the plan that fits your tournament frequency.
           </p>
           <div className="inline-flex items-center gap-2 bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-semibold">
             <Check className="h-4 w-4" />
-            Sales Competition Tournaments: Revenue & Units Sold Tracking
+            No Credit Card Charged During 14-Day Trial Period
           </div>
         </div>
         
-        <div className="grid lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div className="grid lg:grid-cols-2 xl:grid-cols-4 gap-8 max-w-7xl mx-auto">
           {businessTiers.map((tier) => {
             const IconComponent = tier.icon;
             return (
@@ -171,21 +178,27 @@ export function BusinessPricingSection() {
                     size="lg"
                     onClick={() => {
                       console.log(`${tier.name} button clicked - ${tier.cta}`);
-                      // Route to dedicated business registration page
-                      if (tier.name === 'Starter') {
-                        window.location.href = '/smart-signup?type=nonprofit';
-                      } else if (tier.name === 'Tournament Organizer') {
-                        window.location.href = '/business-register?plan=tournament-organizer&price=39';
+                      // Route to trial signup with plan selection
+                      if (tier.name === 'Annual Tournament') {
+                        window.location.href = '/trial-signup?plan=annual&price=99';
+                      } else if (tier.name === 'Multi-Tournament') {
+                        window.location.href = '/trial-signup?plan=monthly&price=39';
                       } else if (tier.name === 'Business Enterprise') {
-                        window.location.href = '/business-register?plan=business-enterprise&price=149';
+                        window.location.href = '/trial-signup?plan=enterprise&price=149';
                       } else if (tier.name === 'Annual Pro') {
-                        window.location.href = '/business-register?plan=annual-pro&price=990';
+                        window.location.href = '/trial-signup?plan=annual-pro&price=990';
                       }
                     }}
                     data-testid={`button-business-${tier.name.toLowerCase()}`}
                   >
                     {tier.cta}
                   </Button>
+                  
+                  {tier.trialNote && (
+                    <p className="text-xs text-gray-500 text-center mt-3">
+                      {tier.trialNote}
+                    </p>
+                  )}
                 </CardContent>
               </Card>
             );
