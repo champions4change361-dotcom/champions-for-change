@@ -1,10 +1,11 @@
 import { useParams, Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, RefreshCw, Settings, Users, Trophy, Menu, X } from "lucide-react";
+import { ArrowLeft, RefreshCw, Settings, Users, Trophy, Menu, X, Code } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import BracketVisualization from "@/components/bracket-visualization";
 import ChallongeStyleBracket from "@/components/ChallongeStyleBracket";
+import EmbedCodeModal from "@/components/EmbedCodeModal";
 import LeaderboardView from "@/components/leaderboard-view";
 import MultiStageTournament from "@/components/multi-stage-tournament";
 import TrackFieldTournament from "@/components/track-field-tournament";
@@ -19,6 +20,7 @@ export default function Tournament() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [embedModalOpen, setEmbedModalOpen] = useState(false);
 
   const { data, isLoading, refetch } = useQuery<TournamentData>({
     queryKey: ["/api/tournaments", id],
@@ -257,6 +259,16 @@ export default function Tournament() {
                 {tournament.status === 'upcoming' ? 'Upcoming' : 
                  tournament.status === 'stage-1' || tournament.status === 'stage-2' || tournament.status === 'stage-3' ? 'In Progress' : 'Completed'}
               </span>
+              {canManageTournament && (
+                <button 
+                  onClick={() => setEmbedModalOpen(true)} 
+                  className="text-gray-500 hover:text-tournament-primary transition-colors p-2"
+                  data-testid="button-embed-code"
+                  title="Get Embed Code"
+                >
+                  <Code className="w-4 h-4" />
+                </button>
+              )}
               <button 
                 onClick={() => refetch()} 
                 className="text-gray-500 hover:text-tournament-primary transition-colors p-2"
@@ -286,6 +298,19 @@ export default function Tournament() {
           )}
         </div>
       </main>
+
+      {/* Embed Code Modal */}
+      <EmbedCodeModal
+        tournament={{
+          id: tournament.id,
+          name: tournament.name,
+          sport: tournament.sport,
+          teamSize: tournament.teamSize,
+          status: tournament.status
+        }}
+        isOpen={embedModalOpen}
+        onClose={() => setEmbedModalOpen(false)}
+      />
     </div>
   );
 }

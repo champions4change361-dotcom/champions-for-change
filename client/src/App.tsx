@@ -18,6 +18,7 @@ import Checkout from './pages/Checkout';
 import DonationSuccess from './pages/DonationSuccess';
 import CreateTournament from './pages/CreateTournament';
 import Tournament from './pages/tournament';
+import EmbedTournament from './pages/EmbedTournament';
 import Contacts from './pages/Contacts';
 // AI features temporarily disabled for production
 // import AIConsultation from './pages/AIConsultation';
@@ -147,6 +148,7 @@ function AuthenticatedRoutes() {
         <Route path="/tournaments/:id/edit" component={TournamentEditPage} />
         <Route path="/create" component={CreateTournament} />
         <Route path="/tournament/:id" component={Tournament} />
+        <Route path="/embed/tournament/:id" component={EmbedTournament} />
         <Route path="/tournaments/:tournamentId/register" component={TournamentRegistration} />
         <Route path="/contacts" component={Contacts} />
         {/* AI features temporarily disabled for production */}
@@ -342,6 +344,8 @@ function AppRouter() {
       <Route path="/smart-signup" component={SmartSignup} />
       <Route path="/signup" component={SignupSelector} />
       <Route path="/tournament/design" component={TournamentDesign} />
+      {/* Embed routes - public access for iframe embedding */}
+      <Route path="/embed/tournament/:id" component={EmbedTournament} />
       <Route path="/register-old" component={() => { window.location.href = '/smart-signup'; return null; }} />
       
       {/* Tournament Creation requires login */}
