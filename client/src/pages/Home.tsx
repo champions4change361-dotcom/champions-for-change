@@ -181,8 +181,21 @@ export default function Home() {
                 <div className="w-12 h-12 bg-gradient-to-br from-emerald-500/20 to-blue-500/20 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:from-emerald-500/30 group-hover:to-blue-500/30 transition-colors">
                   <Layout className="h-6 w-6 text-emerald-400" />
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2">Page Builder</h3>
+                <h3 className="text-lg font-bold text-white mb-2">Modular Builder</h3>
                 <p className="text-sm text-slate-400">Drag & drop modules</p>
+              </div>
+            </div>
+          </Link>
+
+          {/* Tournament Webpage Builder */}
+          <Link href="/webpage-builder">
+            <div data-testid="card-webpage-builder" className="lg:col-span-1 bg-slate-800 border border-cyan-500/30 rounded-xl p-6 hover:border-cyan-400/50 transition-all cursor-pointer group">
+              <div className="text-center">
+                <div className="w-12 h-12 bg-gradient-to-br from-cyan-500/20 to-teal-500/20 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:from-cyan-500/30 group-hover:to-teal-500/30 transition-colors">
+                  <Palette className="h-6 w-6 text-cyan-400" />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">Webpage Builder</h3>
+                <p className="text-sm text-slate-400">Tournament websites</p>
               </div>
             </div>
           </Link>
