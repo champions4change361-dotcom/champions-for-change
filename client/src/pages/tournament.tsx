@@ -4,6 +4,7 @@ import { ArrowLeft, RefreshCw, Settings, Users, Trophy, Menu, X } from "lucide-r
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import BracketVisualization from "@/components/bracket-visualization";
+import ChallongeStyleBracket from "@/components/ChallongeStyleBracket";
 import LeaderboardView from "@/components/leaderboard-view";
 import MultiStageTournament from "@/components/multi-stage-tournament";
 import TrackFieldTournament from "@/components/track-field-tournament";
@@ -274,7 +275,7 @@ export default function Tournament() {
           ) : tournament.competitionFormat === "leaderboard" ? (
             <LeaderboardView tournament={{...tournament, sport: tournament.sport || 'Unknown'}} />
           ) : (
-            <BracketVisualization 
+            <ChallongeStyleBracket 
               tournament={{...tournament, sport: tournament.sport || 'Unknown'}} 
               matches={matches.map(match => ({
                 ...match, 
