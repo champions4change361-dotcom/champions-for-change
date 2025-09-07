@@ -13,10 +13,11 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { 
-  Plus, Edit, Trash2, Eye, Save, Layout, Image, Type, Link, 
+  Plus, Edit, Trash2, Eye, Save, Layout, Image, Type, Link as LinkIcon, 
   ShoppingCart, Users, Calendar, BarChart3, Palette, GripVertical,
-  Heart, Trophy, Info, Phone
+  Heart, Trophy, Info, Phone, Settings
 } from "lucide-react";
+import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
@@ -138,20 +139,33 @@ export default function ModularPageBuilder() {
   const [previewMode, setPreviewMode] = useState(false);
   const [draggedModule, setDraggedModule] = useState<string | null>(null);
   const [editingModule, setEditingModule] = useState<string | null>(null);
+  const [showPageManager, setShowPageManager] = useState(false);
+  const [createNewPage, setCreateNewPage] = useState(false);
+  const [currentPage, setCurrentPage] = useState({
+    id: 'default-page',
+    title: 'Home Page',
+    slug: 'home',
+    description: 'Default tournament home page',
+    isPublished: false
+  });
 
   const form = useForm<PageFormData>({
     resolver: zodResolver(pageSchema),
     defaultValues: {
-      title: "",
-      slug: "",
-      description: "",
-      isPublished: false,
+      title: currentPage.title,
+      slug: currentPage.slug,
+      description: currentPage.description,
+      isPublished: currentPage.isPublished,
       isRegistrationOpen: false
     }
   });
 
-  // For now, use mock data since we're building the UI first
-  const pages = [];
+  // Demo pages for free tier users
+  const pages = [
+    { id: 'home', title: 'Home Page', slug: 'home', description: 'Default tournament home page', isPublished: true, modules: 3 },
+    { id: 'about', title: 'About Us', slug: 'about', description: 'About our organization', isPublished: false, modules: 1, isPaidFeature: true },
+    { id: 'sponsors', title: 'Sponsors', slug: 'sponsors', description: 'Tournament sponsors', isPublished: false, modules: 1, isPaidFeature: true }
+  ];
 
   const handleAddModule = (moduleType: keyof typeof moduleTypes) => {
     const newModule: PageModule = {
@@ -269,35 +283,113 @@ export default function ModularPageBuilder() {
   }
 
   return (
-    <div className="container mx-auto p-8 max-w-7xl">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold">Modular Page Builder</h1>
-          <p className="text-muted-foreground">Create custom tournament pages with drag-and-drop modules</p>
+    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
+      {/* Header */}
+      <header className="relative border-b border-yellow-500/20 bg-slate-900/80 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-3">
+              <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
+                <div className="bg-gradient-to-br from-yellow-400 to-yellow-600 p-2 rounded-lg shadow-lg">
+                  <Layout className="h-6 w-6 text-slate-900" />
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold text-white">{user?.organizationName ? `${user.organizationName} Arena` : 'Tournament Arena'}</h1>
+                  <p className="text-xs text-yellow-400">Page Builder</p>
+                </div>
+              </Link>
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <Button 
+                onClick={() => setPreviewMode(!previewMode)} 
+                variant="outline"
+                className="text-slate-300 border-slate-600 hover:bg-slate-700"
+                data-testid="button-toggle-preview"
+              >
+                <Eye className="h-4 w-4 mr-2" />
+                {previewMode ? "Edit Mode" : "Preview"}
+              </Button>
+              <Button 
+                type="submit" 
+                form="page-form"
+                className="bg-yellow-600 hover:bg-yellow-500 text-slate-900"
+                data-testid="button-save-page"
+              >
+                <Save className="h-4 w-4 mr-2" />
+                Save Page
+              </Button>
+            </div>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Button 
-            onClick={() => setPreviewMode(!previewMode)} 
-            variant="outline"
-            data-testid="button-toggle-preview"
-          >
-            <Eye className="h-4 w-4 mr-2" />
-            {previewMode ? "Edit Mode" : "Preview"}
-          </Button>
-          <Button type="submit" form="page-form" data-testid="button-save-page">
-            <Save className="h-4 w-4 mr-2" />
-            Save Page
-          </Button>
+      </header>
+
+      {/* Page Management Tabs */}
+      <div className="bg-slate-800/50 border-b border-slate-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex space-x-8 overflow-x-auto py-4">
+            {pages.map((page) => (
+              <div key={page.id} className="flex-shrink-0">
+                <button
+                  onClick={() => setCurrentPage(page)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    currentPage.id === page.id
+                      ? 'bg-yellow-600 text-slate-900'
+                      : 'text-slate-300 hover:text-white hover:bg-slate-700'
+                  }`}
+                  data-testid={`tab-page-${page.slug}`}
+                >
+                  {page.title}
+                  {page.isPaidFeature && (
+                    <Badge className="ml-2 bg-gradient-to-r from-purple-500 to-pink-500 text-xs">
+                      PRO
+                    </Badge>
+                  )}
+                </button>
+              </div>
+            ))}
+            <Button 
+              onClick={() => setCreateNewPage(true)}
+              variant="ghost"
+              className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
+              data-testid="button-create-page"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              New Page
+            </Button>
+          </div>
         </div>
       </div>
+
+      <div className="container mx-auto p-8 max-w-7xl">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-white">
+              {currentPage.title}
+            </h1>
+            <p className="text-slate-300">
+              Will be available at: <span className="text-yellow-400">{user?.organizationName?.toLowerCase() || 'yourdomain'}.com/{currentPage.slug}</span>
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline"
+              className="text-slate-300 border-slate-600 hover:bg-slate-700"
+              data-testid="button-page-settings"
+            >
+              <Settings className="h-4 w-4 mr-2" />
+              Page Settings
+            </Button>
+          </div>
+        </div>
 
       <div className="grid lg:grid-cols-4 gap-8">
         {/* Module Library Sidebar */}
         <div className="lg:col-span-1">
-          <Card>
+          <Card className="bg-slate-800 border-slate-700">
             <CardHeader>
-              <CardTitle className="text-lg">Module Library</CardTitle>
-              <CardDescription>Drag modules to your page</CardDescription>
+              <CardTitle className="text-lg text-white">Module Library</CardTitle>
+              <CardDescription className="text-slate-300">Drag modules to your page</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {Object.entries(moduleTypes).map(([type, info]) => {
@@ -305,20 +397,39 @@ export default function ModularPageBuilder() {
                 return (
                   <div
                     key={type}
-                    className={`p-3 border rounded-lg cursor-pointer hover:shadow-md transition-shadow ${info.color} text-white`}
+                    className={`p-3 border border-slate-600 rounded-lg cursor-pointer hover:shadow-md transition-all hover:border-yellow-500/50 bg-slate-700 hover:bg-slate-600 text-white`}
                     onClick={() => handleAddModule(type as keyof typeof moduleTypes)}
                     data-testid={`add-module-${type}`}
                   >
                     <div className="flex items-center space-x-3">
-                      <IconComponent className="h-5 w-5" />
+                      <div className={`p-1 rounded ${info.color}`}>
+                        <IconComponent className="h-4 w-4" />
+                      </div>
                       <div>
                         <div className="font-medium text-sm">{info.name}</div>
-                        <div className="text-xs opacity-90">{info.description}</div>
+                        <div className="text-xs text-slate-400">{info.description}</div>
                       </div>
                     </div>
                   </div>
                 );
               })}
+              
+              {/* Upgrade Prompt for Free Tier */}
+              <div className="mt-6 p-4 bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/30 rounded-lg">
+                <div className="text-center">
+                  <div className="text-sm font-medium text-white mb-2">Want More?</div>
+                  <div className="text-xs text-slate-300 mb-3">
+                    Upgrade for advanced layouts, custom CSS, and unlimited pages
+                  </div>
+                  <Button 
+                    size="sm" 
+                    className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
+                    data-testid="button-upgrade-prompt"
+                  >
+                    Upgrade Now
+                  </Button>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
