@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 export default function Home() {
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [liveMatches, setLiveMatches] = useState(3);
+  const [liveMatches, setLiveMatches] = useState(0); // Start with 0 instead of hardcoded 3
   const { user } = useAuth();
 
   useEffect(() => {
@@ -15,11 +15,8 @@ export default function Home() {
     return () => clearInterval(timer);
   }, []);
 
-  const activeTournaments = [
-    { name: "Spring Basketball Championship", status: "Quarter Finals", participants: 16, prize: "$2,600" },
-    { name: "Soccer Regional Cup", status: "Semi Finals", participants: 8, prize: "$1,800" },
-    { name: "Tennis Open Series", status: "Group Stage", participants: 32, prize: "$3,200" }
-  ];
+  // For now, show empty array for new users. In future, fetch from API
+  const activeTournaments: any[] = [];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">

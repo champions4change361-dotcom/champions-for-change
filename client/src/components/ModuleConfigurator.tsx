@@ -18,6 +18,7 @@ import DiscountCodeManager from "@/components/DiscountCodeManager";
 interface ModuleConfig {
   id: string;
   type: string;
+  position?: number;
   config: any;
   styling: {
     background?: {
