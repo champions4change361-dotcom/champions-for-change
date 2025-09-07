@@ -4552,3 +4552,217 @@ export const insertShowdownLeaderboardSchema = createInsertSchema(showdownLeader
   id: true,
   lastUpdated: true,
 });
+
+// =============================================================================
+// MERCHANDISE AND WEBSTORE SYSTEM
+// =============================================================================
+
+// Merchandise products table
+export const merchandiseProducts = pgTable("merchandise_products", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").notNull(),
+  tournamentId: varchar("tournament_id"), // Optional - can be tournament-specific or organization-wide
+  name: varchar("name").notNull(),
+  description: text("description"),
+  category: text("category", { 
+    enum: ["apparel", "accessories", "equipment", "digital", "food_beverage", "custom"] 
+  }).notNull(),
+  subCategory: varchar("sub_category"),
+  basePrice: numeric("base_price", { precision: 10, scale: 2 }).notNull(),
+  variants: jsonb("variants").$type<Array<{
+    id: string;
+    name: string;
+    type: "size" | "color" | "style" | "custom";
+    priceAdjustment: number;
+    inventory: number;
+    sku?: string;
+  }>>().default([]),
+  images: jsonb("images").$type<string[]>().default([]),
+  isActive: boolean("is_active").default(true),
+  inventory: integer("inventory").default(0),
+  maxQuantityPerOrder: integer("max_quantity_per_order").default(10),
+  customizationOptions: jsonb("customization_options").$type<{
+    allowNamePersonalization?: boolean;
+    allowNumberPersonalization?: boolean;
+    personalizationFee?: number;
+    customFields?: Array<{
+      fieldName: string;
+      fieldType: "text" | "number" | "select" | "multiselect";
+      required: boolean;
+      options?: string[];
+    }>;
+  }>(),
+  shippingInfo: jsonb("shipping_info").$type<{
+    weight?: number;
+    dimensions?: {
+      length: number;
+      width: number;
+      height: number;
+    };
+    shippingClass?: "standard" | "expedited" | "digital" | "pickup_only";
+  }>(),
+  availabilityWindow: jsonb("availability_window").$type<{
+    startDate?: string;
+    endDate?: string;
+    preOrderOnly?: boolean;
+  }>(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow()
+});
+
+// Merchandise orders table  
+export const merchandiseOrders = pgTable("merchandise_orders", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").notNull(),
+  tournamentId: varchar("tournament_id"),
+  customerId: varchar("customer_id").notNull(),
+  customerInfo: jsonb("customer_info").$type<{
+    name: string;
+    email: string;
+    phone?: string;
+    participantName?: string;
+    teamName?: string;
+  }>().notNull(),
+  items: jsonb("items").$type<Array<{
+    productId: string;
+    productName: string;
+    variantId?: string;
+    variantName?: string;
+    quantity: number;
+    unitPrice: number;
+    totalPrice: number;
+    customization?: {
+      playerName?: string;
+      playerNumber?: string;
+      customFields?: Record<string, string>;
+    };
+  }>>().notNull(),
+  subtotal: numeric("subtotal", { precision: 10, scale: 2 }).notNull(),
+  shippingCost: numeric("shipping_cost", { precision: 10, scale: 2 }).default("0"),
+  taxAmount: numeric("tax_amount", { precision: 10, scale: 2 }).default("0"),
+  totalAmount: numeric("total_amount", { precision: 10, scale: 2 }).notNull(),
+  shippingAddress: jsonb("shipping_address").$type<{
+    street1: string;
+    street2?: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+  }>(),
+  paymentInfo: jsonb("payment_info").$type<{
+    paymentMethod: string;
+    paymentId: string;
+    paymentStatus: "pending" | "completed" | "failed" | "refunded";
+    transactionDate: string;
+  }>().notNull(),
+  fulfillmentStatus: text("fulfillment_status", {
+    enum: ["pending", "processing", "shipped", "delivered", "pickup_ready", "completed", "cancelled"]
+  }).default("pending"),
+  trackingInfo: jsonb("tracking_info").$type<{
+    carrier?: string;
+    trackingNumber?: string;
+    shippedDate?: string;
+    estimatedDelivery?: string;
+  }>(),
+  specialInstructions: text("special_instructions"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow()
+});
+
+// Event tickets table for webstore
+export const eventTickets = pgTable("event_tickets", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").notNull(),
+  tournamentId: varchar("tournament_id"),
+  eventId: varchar("event_id"), // Links to specific tournament events/matches
+  name: varchar("name").notNull(),
+  description: text("description"),
+  ticketType: text("ticket_type", {
+    enum: ["general_admission", "reserved_seating", "vip", "season_pass", "day_pass", "group"]
+  }).notNull(),
+  price: numeric("price", { precision: 10, scale: 2 }).notNull(),
+  maxQuantityPerOrder: integer("max_quantity_per_order").default(10),
+  totalAvailable: integer("total_available"),
+  sold: integer("sold").default(0),
+  salesStartDate: timestamp("sales_start_date"),
+  salesEndDate: timestamp("sales_end_date"),
+  eventDate: timestamp("event_date"),
+  isActive: boolean("is_active").default(true),
+  ticketBenefits: jsonb("ticket_benefits").$type<string[]>().default([]),
+  accessLevel: text("access_level", {
+    enum: ["basic", "premium", "vip", "all_access"]
+  }).default("basic"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow()
+});
+
+// Ticket sales/orders table
+export const ticketOrders = pgTable("ticket_orders", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").notNull(),
+  tournamentId: varchar("tournament_id"),
+  customerId: varchar("customer_id").notNull(),
+  customerInfo: jsonb("customer_info").$type<{
+    name: string;
+    email: string;
+    phone?: string;
+  }>().notNull(),
+  tickets: jsonb("tickets").$type<Array<{
+    ticketId: string;
+    ticketName: string;
+    quantity: number;
+    unitPrice: number;
+    totalPrice: number;
+  }>>().notNull(),
+  totalAmount: numeric("total_amount", { precision: 10, scale: 2 }).notNull(),
+  paymentInfo: jsonb("payment_info").$type<{
+    paymentMethod: string;
+    paymentId: string;
+    paymentStatus: "pending" | "completed" | "failed" | "refunded";
+    transactionDate: string;
+  }>().notNull(),
+  deliveryMethod: text("delivery_method", {
+    enum: ["email", "pickup", "mobile"]
+  }).default("email"),
+  ticketStatus: text("ticket_status", {
+    enum: ["active", "used", "cancelled", "refunded"]
+  }).default("active"),
+  specialInstructions: text("special_instructions"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow()
+});
+
+// Merchandise and ticket type definitions
+export type MerchandiseProduct = typeof merchandiseProducts.$inferSelect;
+export type InsertMerchandiseProduct = typeof merchandiseProducts.$inferInsert;
+export type MerchandiseOrder = typeof merchandiseOrders.$inferSelect;
+export type InsertMerchandiseOrder = typeof merchandiseOrders.$inferInsert;
+export type EventTicket = typeof eventTickets.$inferSelect;
+export type InsertEventTicket = typeof eventTickets.$inferInsert;
+export type TicketOrder = typeof ticketOrders.$inferSelect;
+export type InsertTicketOrder = typeof ticketOrders.$inferInsert;
+
+// Insert schemas for webstore system
+export const insertMerchandiseProductSchema = createInsertSchema(merchandiseProducts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertMerchandiseOrderSchema = createInsertSchema(merchandiseOrders).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertEventTicketSchema = createInsertSchema(eventTickets).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertTicketOrderSchema = createInsertSchema(ticketOrders).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
