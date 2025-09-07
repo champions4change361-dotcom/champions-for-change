@@ -40,23 +40,23 @@ export default function TrantorLanding() {
                 </Badge>
               </div>
 
-              {/* Start Tournament and Pricing Buttons */}
+              {/* Trial and Action Buttons */}
               <div className="flex flex-col space-y-2 lg:flex-row lg:space-y-0 lg:space-x-3 lg:ml-auto">
                 <Button 
-                  onClick={() => setLocation('/login')}
+                  onClick={() => setLocation('/trial-signup?plan=monthly&price=39')}
                   className="bg-yellow-600 hover:bg-yellow-700 text-slate-900 font-semibold px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base w-full lg:w-auto"
-                  data-testid="button-start-tournament-trantor"
+                  data-testid="button-start-trial-trantor"
+                >
+                  <Zap className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4" />
+                  Start 14-Day Free Trial
+                </Button>
+                <Button 
+                  onClick={() => setLocation('/login')}
+                  className="bg-slate-700 hover:bg-slate-600 text-yellow-300 font-semibold px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base w-full lg:w-auto border border-yellow-500 shadow-lg"
+                  data-testid="button-signin-trantor"
                 >
                   <Trophy className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4" />
                   Sign In
-                </Button>
-                <Button 
-                  onClick={() => setLocation('/smart-signup?type=individual')}
-                  className="bg-slate-700 hover:bg-slate-600 text-yellow-300 font-semibold px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base w-full lg:w-auto border border-yellow-500 shadow-lg"
-                  data-testid="button-signup-trantor"
-                >
-                  <CreditCard className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4" />
-                  Sign Up
                 </Button>
                 <Button 
                   onClick={() => setLocation('/tournament-calendar')}
@@ -84,9 +84,29 @@ export default function TrantorLanding() {
               Fantasy Sports &
               <span className="block text-orange-300">Tournament Management</span>
             </h1>
-            <p className="text-xl text-orange-100 max-w-3xl mx-auto mb-8">
+            <p className="text-xl text-orange-100 max-w-3xl mx-auto mb-6">
               Join recreational fantasy leagues (for fun only) with overnight scoring OR create your own traditional tournaments. Complete platform for organizers, businesses, and fantasy enthusiasts.
             </p>
+            <div className="bg-yellow-600/20 border border-yellow-500/50 rounded-xl p-6 mb-8 max-w-2xl mx-auto">
+              <h3 className="text-2xl font-bold text-yellow-300 mb-2">🎯 Start Your 14-Day Free Trial</h3>
+              <p className="text-yellow-100 mb-4">Full platform access • No credit card charged until trial ends</p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Button 
+                  onClick={() => setLocation('/trial-signup?plan=annual&price=99')}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3"
+                  data-testid="button-annual-trial"
+                >
+                  Annual Tournament - $99/year
+                </Button>
+                <Button 
+                  onClick={() => setLocation('/trial-signup?plan=monthly&price=39')}
+                  className="bg-orange-600 hover:bg-orange-700 text-white font-semibold px-6 py-3"
+                  data-testid="button-monthly-trial"
+                >
+                  Multi-Tournament - $39/month
+                </Button>
+              </div>
+            </div>
             <div className="flex flex-col sm:flex-row gap-8 justify-center items-center">
               <TrantorCoin
                 size="lg"
@@ -106,7 +126,7 @@ export default function TrantorLanding() {
               />
               <TrantorCoin
                 size="lg"
-                variant="local"
+                variant="default"
                 topText="Texas Coastal Bend"
                 bottomText="Champions for Change Events"
                 redirectTo="/local-tournaments"
@@ -230,16 +250,63 @@ export default function TrantorLanding() {
       <div className="py-16 bg-orange-800/30">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-white mb-4">Choose Your Plan</h2>
-            <p className="text-orange-200 text-lg">From individual organizers to high-volume tournament companies</p>
+            <h2 className="text-3xl font-bold text-white mb-4">Simple, Transparent Pricing</h2>
+            <p className="text-orange-200 text-lg">Choose your plan based on tournament frequency - Start with 14-day free trial</p>
+            <div className="mt-4 bg-green-600/20 border border-green-500/50 rounded-lg p-4 max-w-md mx-auto">
+              <p className="text-green-300 font-semibold">🛡️ No Hidden Fees • Cancel Anytime • Full Access During Trial</p>
+            </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="bg-orange-900/50 border-orange-600/30">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <Card className="bg-blue-900/50 border-blue-600/30">
               <CardHeader>
-                <CardTitle className="text-2xl text-white">Tournament Organizer</CardTitle>
-                <CardDescription className="text-orange-200">Perfect for individual organizers</CardDescription>
-                <div className="text-3xl font-bold text-orange-400 mt-4">$39<span className="text-lg text-orange-300">/month</span></div>
-                <p className="text-sm text-orange-300">or $399/year (2 months free)</p>
+                <CardTitle className="text-2xl text-white">Annual Tournament</CardTitle>
+                <CardDescription className="text-blue-200">Perfect for organizations running one tournament per year</CardDescription>
+                <div className="text-4xl font-bold text-blue-400 mt-4">$99<span className="text-lg text-blue-300">/year</span></div>
+                <p className="text-sm text-blue-300">Just $8.25/month • Year-round hosting included</p>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center text-blue-200">
+                  <CheckCircle className="h-4 w-4 text-green-400 mr-2" />
+                  One tournament per year
+                </div>
+                <div className="flex items-center text-blue-200">
+                  <CheckCircle className="h-4 w-4 text-green-400 mr-2" />
+                  Year-round website hosting
+                </div>
+                <div className="flex items-center text-blue-200">
+                  <CheckCircle className="h-4 w-4 text-green-400 mr-2" />
+                  Full platform access (no restrictions)
+                </div>
+                <div className="flex items-center text-blue-200">
+                  <CheckCircle className="h-4 w-4 text-green-400 mr-2" />
+                  Payment processing & registration
+                </div>
+                <div className="flex items-center text-blue-200">
+                  <CheckCircle className="h-4 w-4 text-green-400 mr-2" />
+                  Professional branding & white-label
+                </div>
+                <div className="pt-4">
+                  <Button 
+                    onClick={() => setLocation('/trial-signup?plan=annual&price=99')}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+                    data-testid="button-start-annual-trial-2"
+                  >
+                    Start 14-Day Free Trial
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="bg-orange-900/50 border-orange-600/30 ring-2 ring-orange-500">
+              <CardHeader>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle className="text-2xl text-white">Multi-Tournament</CardTitle>
+                    <CardDescription className="text-orange-200">For active tournament organizers</CardDescription>
+                  </div>
+                  <Badge className="bg-orange-600 text-white">Most Popular</Badge>
+                </div>
+                <div className="text-4xl font-bold text-orange-400 mt-4">$39<span className="text-lg text-orange-300">/month</span></div>
+                <p className="text-sm text-orange-300">For organizers running multiple tournaments</p>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex items-center text-orange-200">
@@ -248,70 +315,42 @@ export default function TrantorLanding() {
                 </div>
                 <div className="flex items-center text-orange-200">
                   <CheckCircle className="h-4 w-4 text-green-400 mr-2" />
-                  Payment processing
+                  Full platform access (no restrictions)
                 </div>
                 <div className="flex items-center text-orange-200">
                   <CheckCircle className="h-4 w-4 text-green-400 mr-2" />
-                  Custom branding
+                  Advanced analytics & reporting
                 </div>
                 <div className="flex items-center text-orange-200">
                   <CheckCircle className="h-4 w-4 text-green-400 mr-2" />
-                  Mobile app experience
+                  Priority community support
+                </div>
+                <div className="flex items-center text-orange-200">
+                  <CheckCircle className="h-4 w-4 text-green-400 mr-2" />
+                  White-label tournament experience
+                </div>
+                <div className="pt-4">
+                  <Button 
+                    onClick={() => setLocation('/trial-signup?plan=monthly&price=39')}
+                    className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold"
+                    data-testid="button-start-monthly-trial-2"
+                  >
+                    Start 14-Day Free Trial
+                  </Button>
                 </div>
               </CardContent>
             </Card>
-            <Card className="bg-orange-900/50 border-orange-600/30 ring-2 ring-orange-500">
-              <CardHeader>
-                <CardTitle className="text-2xl text-white">Business Enterprise</CardTitle>
-                <CardDescription className="text-orange-200">White-label platform for businesses</CardDescription>
-                <div className="text-3xl font-bold text-orange-400 mt-4">$149<span className="text-lg text-orange-300">/month</span></div>
-                <p className="text-sm text-orange-300">or $1,499/year</p>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-center text-orange-200">
-                  <CheckCircle className="h-4 w-4 text-green-400 mr-2" />
-                  Everything in Tournament Organizer
-                </div>
-                <div className="flex items-center text-orange-200">
-                  <CheckCircle className="h-4 w-4 text-green-400 mr-2" />
-                  Custom domain included
-                </div>
-                <div className="flex items-center text-orange-200">
-                  <CheckCircle className="h-4 w-4 text-green-400 mr-2" />
-                  Advanced analytics
-                </div>
-                <div className="flex items-center text-orange-200">
-                  <CheckCircle className="h-4 w-4 text-green-400 mr-2" />
-                  Priority support
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="bg-orange-900/50 border-orange-600/30">
-              <CardHeader>
-                <CardTitle className="text-2xl text-white">Annual Pro</CardTitle>
-                <CardDescription className="text-orange-200">High-volume tournament companies</CardDescription>
-                <div className="text-3xl font-bold text-orange-400 mt-4">$990<span className="text-lg text-orange-300">/month</span></div>
-                <p className="text-sm text-orange-300">50+ tournaments/year</p>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-center text-orange-200">
-                  <CheckCircle className="h-4 w-4 text-green-400 mr-2" />
-                  Unlimited capacity
-                </div>
-                <div className="flex items-center text-orange-200">
-                  <CheckCircle className="h-4 w-4 text-green-400 mr-2" />
-                  Dedicated support team
-                </div>
-                <div className="flex items-center text-orange-200">
-                  <CheckCircle className="h-4 w-4 text-green-400 mr-2" />
-                  Custom integrations
-                </div>
-                <div className="flex items-center text-orange-200">
-                  <CheckCircle className="h-4 w-4 text-green-400 mr-2" />
-                  Check payment option
-                </div>
-              </CardContent>
-            </Card>
+          </div>
+          <div className="text-center mt-12">
+            <p className="text-orange-200 mb-4">Need enterprise features for larger organizations?</p>
+            <Button 
+              onClick={() => setLocation('/pricing')}
+              variant="outline"
+              className="border-orange-500 text-orange-300 hover:bg-orange-500/10"
+              data-testid="button-view-enterprise-2"
+            >
+              View Enterprise Plans
+            </Button>
           </div>
         </div>
       </div>
