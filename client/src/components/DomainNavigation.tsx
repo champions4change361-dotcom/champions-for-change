@@ -182,13 +182,6 @@ export default function DomainNavigation() {
                     </Link>
                   )}
 
-                  {/* AI Assistant */}
-                  <Link href="/ai-chat">
-                    <a className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-testid="link-mobile-ai-chat">
-                      <Brain className="w-4 h-4 mr-3" />
-                      AI Assistant
-                    </a>
-                  </Link>
 
                   {/* Fantasy Leagues */}
                   {isFeatureEnabled('fantasyLeagues') && (
@@ -263,13 +256,6 @@ export default function DomainNavigation() {
             </Link>
           )}
 
-          {/* AI Chat - Available for all users */}
-          <Link href="/ai-chat">
-            <a className={`${getNavItemClass("/ai-chat")} flex items-center space-x-1`}>
-              <Brain className="w-4 h-4" />
-              <span>AI Assistant</span>
-            </a>
-          </Link>
 
           {/* Additional navigation for Champions for Change */}
           {config.brand === 'CHAMPIONS_FOR_CHANGE' && (
