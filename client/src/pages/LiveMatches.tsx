@@ -55,15 +55,22 @@ export default function LiveMatches() {
             <span>Live Tournament Action</span>
           </div>
           <h1 className="text-4xl font-bold text-white mb-4">Live Matches</h1>
-          <p className="text-xl text-slate-300">
+          <p className="text-xl text-slate-300 mb-2">
             Track ongoing competitions and real-time scores
           </p>
+          <div className="inline-flex items-center space-x-2 bg-blue-500/10 text-blue-400 px-3 py-1 rounded-full text-sm font-medium">
+            <span>Demo Data - Live matches will appear during tournaments</span>
+          </div>
         </div>
 
         {/* Live Matches Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {liveMatches.map((match) => (
             <div key={match.id} className="bg-slate-800 border border-red-500/30 rounded-xl p-6">
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded">Demo</div>
+                <button className="text-red-400 hover:text-red-300 text-xs">Delete</button>
+              </div>
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-2">
                   <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>

@@ -76,9 +76,12 @@ export default function Championships() {
             <span>Hall of Champions</span>
           </div>
           <h1 className="text-4xl font-bold text-white mb-4">Championship Results</h1>
-          <p className="text-xl text-slate-300">
+          <p className="text-xl text-slate-300 mb-2">
             Celebrating our tournament winners and their achievements
           </p>
+          <div className="inline-flex items-center space-x-2 bg-blue-500/10 text-blue-400 px-3 py-1 rounded-full text-sm font-medium">
+            <span>Demo Data - Real results will appear here</span>
+          </div>
         </div>
 
         {/* Championships Grid */}
@@ -93,6 +96,10 @@ export default function Championships() {
               </div>
               
               <div className="space-y-3">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded">Demo</div>
+                  <button className="text-red-400 hover:text-red-300 text-xs">Delete</button>
+                </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-yellow-400">{championship.winner}</div>
                   <div className="text-sm text-slate-400">Champion</div>
