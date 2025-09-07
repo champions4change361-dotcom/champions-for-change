@@ -1,8 +1,10 @@
 import React from 'react';
 import { Link } from 'wouter';
 import { ArrowLeft, Trophy, Timer, Users, MapPin, LogOut } from 'lucide-react';
+import { useAuth } from "@/hooks/useAuth";
 
 export default function LiveMatches() {
+  const { user } = useAuth();
   const liveMatches = [
     { id: 1, sport: "Basketball", teams: ["Eagles vs Hawks"], venue: "Gym A", time: "2:15 PM", status: "Quarter 3" },
     { id: 2, sport: "Soccer", teams: ["Lions vs Tigers"], venue: "Field 1", time: "3:30 PM", status: "Half Time" },
@@ -21,7 +23,7 @@ export default function LiveMatches() {
                   <Trophy className="h-6 w-6 text-slate-900" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-white">Champions Arena</h1>
+                  <h1 className="text-xl font-bold text-white">{user?.organizationName ? `${user.organizationName} Arena` : 'Tournament Arena'}</h1>
                   <p className="text-xs text-yellow-400">Tournament Central</p>
                 </div>
               </Link>

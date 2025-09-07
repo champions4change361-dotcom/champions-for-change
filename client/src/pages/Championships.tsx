@@ -1,8 +1,10 @@
 import React from 'react';
 import { Link } from 'wouter';
 import { ArrowLeft, Trophy, Award, Calendar, Users, LogOut } from 'lucide-react';
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Championships() {
+  const { user } = useAuth();
   const championships = [
     { 
       id: 1, 
@@ -42,7 +44,7 @@ export default function Championships() {
                   <Trophy className="h-6 w-6 text-slate-900" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-white">Champions Arena</h1>
+                  <h1 className="text-xl font-bold text-white">{user?.organizationName ? `${user.organizationName} Arena` : 'Tournament Arena'}</h1>
                   <p className="text-xs text-yellow-400">Tournament Central</p>
                 </div>
               </Link>

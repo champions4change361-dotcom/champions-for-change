@@ -49,7 +49,7 @@ export default function WebpageBuilder() {
                   <Trophy className="h-6 w-6 text-slate-900" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-white">Champions Arena</h1>
+                  <h1 className="text-xl font-bold text-white">{user?.organizationName ? `${user.organizationName} Arena` : 'Tournament Arena'}</h1>
                   <p className="text-xs text-yellow-400">Tournament Central</p>
                 </div>
               </Link>
@@ -72,7 +72,7 @@ export default function WebpageBuilder() {
           </div>
           <h1 className="text-4xl font-bold text-white mb-4">Tournament Webpage Generator</h1>
           <p className="text-xl text-slate-300">
-            Create a custom tournament webpage with Champions for Change branding
+            Create a custom tournament webpage with your organization's branding
           </p>
         </div>
 
