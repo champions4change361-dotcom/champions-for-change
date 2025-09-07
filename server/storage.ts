@@ -15,7 +15,9 @@ import {
   type GuestParticipant, type InsertGuestParticipant, type PasswordResetToken, type InsertPasswordResetToken,
   type ShowdownContest, type InsertShowdownContest, type ShowdownEntry, type InsertShowdownEntry, type ShowdownLeaderboard, type InsertShowdownLeaderboard,
   type ProfessionalPlayer, type InsertProfessionalPlayer,
-  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog, taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices, supportTeams, supportTeamMembers, supportTeamInjuries, supportTeamAiConsultations, jerseyTeamMembers, jerseyTeamPayments, tournamentSubscriptions, clientConfigurations, guestParticipants, passwordResetTokens, showdownContests, showdownEntries, showdownLeaderboards, professionalPlayers
+  type MerchandiseProduct, type InsertMerchandiseProduct, type MerchandiseOrder, type InsertMerchandiseOrder,
+  type EventTicket, type InsertEventTicket, type TicketOrder, type InsertTicketOrder,
+  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog, taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices, supportTeams, supportTeamMembers, supportTeamInjuries, supportTeamAiConsultations, jerseyTeamMembers, jerseyTeamPayments, tournamentSubscriptions, clientConfigurations, guestParticipants, passwordResetTokens, showdownContests, showdownEntries, showdownLeaderboards, professionalPlayers, merchandiseProducts, merchandiseOrders, eventTickets, ticketOrders
 } from "@shared/schema";
 
 type SportCategory = typeof sportCategories.$inferSelect;
@@ -376,6 +378,58 @@ export interface IStorage {
   getProfessionalPlayersBySport(sport: string): Promise<ProfessionalPlayer[]>;
   getProfessionalPlayersByTeam(teamAbbreviation: string): Promise<ProfessionalPlayer[]>;
   updateProfessionalPlayer(id: string, updates: Partial<ProfessionalPlayer>): Promise<ProfessionalPlayer | undefined>;
+
+  // Merchandise Product methods
+  createMerchandiseProduct(product: InsertMerchandiseProduct): Promise<MerchandiseProduct>;
+  getMerchandiseProduct(id: string): Promise<MerchandiseProduct | undefined>;
+  getMerchandiseProductsByOrganization(organizationId: string): Promise<MerchandiseProduct[]>;
+  getMerchandiseProductsByTournament(tournamentId: string): Promise<MerchandiseProduct[]>;
+  updateMerchandiseProduct(id: string, updates: Partial<MerchandiseProduct>): Promise<MerchandiseProduct | undefined>;
+  deleteMerchandiseProduct(id: string): Promise<boolean>;
+
+  // Merchandise Order methods
+  createMerchandiseOrder(order: InsertMerchandiseOrder): Promise<MerchandiseOrder>;
+  getMerchandiseOrder(id: string): Promise<MerchandiseOrder | undefined>;
+  getMerchandiseOrdersByOrganization(organizationId: string): Promise<MerchandiseOrder[]>;
+  getMerchandiseOrdersByCustomer(customerId: string): Promise<MerchandiseOrder[]>;
+  updateMerchandiseOrder(id: string, updates: Partial<MerchandiseOrder>): Promise<MerchandiseOrder | undefined>;
+  updateOrderFulfillmentStatus(id: string, status: string, trackingInfo?: any): Promise<MerchandiseOrder | undefined>;
+
+  // Event Ticket methods
+  createEventTicket(ticket: InsertEventTicket): Promise<EventTicket>;
+  getEventTicket(id: string): Promise<EventTicket | undefined>;
+  getEventTicketsByOrganization(organizationId: string): Promise<EventTicket[]>;
+  getEventTicketsByTournament(tournamentId: string): Promise<EventTicket[]>;
+  updateEventTicket(id: string, updates: Partial<EventTicket>): Promise<EventTicket | undefined>;
+  deleteEventTicket(id: string): Promise<boolean>;
+
+  // Ticket Order methods
+  createTicketOrder(order: InsertTicketOrder): Promise<TicketOrder>;
+  getTicketOrder(id: string): Promise<TicketOrder | undefined>;
+  getTicketOrdersByOrganization(organizationId: string): Promise<TicketOrder[]>;
+  getTicketOrdersByCustomer(customerId: string): Promise<TicketOrder[]>;
+  updateTicketOrder(id: string, updates: Partial<TicketOrder>): Promise<TicketOrder | undefined>;
+  updateTicketStatus(id: string, status: string): Promise<TicketOrder | undefined>;
+
+  // Inventory management methods
+  updateProductInventory(productId: string, quantity: number, operation: 'add' | 'subtract' | 'set'): Promise<boolean>;
+  updateTicketInventory(ticketId: string, quantity: number): Promise<boolean>;
+  checkProductAvailability(productId: string, variantId?: string, quantity?: number): Promise<boolean>;
+  checkTicketAvailability(ticketId: string, quantity?: number): Promise<boolean>;
+
+  // Revenue calculation methods
+  calculateMerchandiseRevenue(organizationId: string, startDate?: Date, endDate?: Date): Promise<{
+    totalOrders: number;
+    totalRevenue: number;
+    platformFee: number;
+    organizationRevenue: number;
+  }>;
+  calculateTicketRevenue(organizationId: string, startDate?: Date, endDate?: Date): Promise<{
+    totalOrders: number;
+    totalRevenue: number;
+    platformFee: number;
+    organizationRevenue: number;
+  }>;
 }
 
 export class DbStorage implements IStorage {
