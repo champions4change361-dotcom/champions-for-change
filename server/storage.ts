@@ -1931,6 +1931,471 @@ export class DbStorage implements IStorage {
       return 0;
     }
   }
+
+  // =============================================================================
+  // MERCHANDISE PRODUCT STORAGE METHODS
+  // =============================================================================
+
+  async createMerchandiseProduct(product: InsertMerchandiseProduct): Promise<MerchandiseProduct> {
+    try {
+      const result = await this.db.insert(merchandiseProducts).values(product).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to create merchandise product");
+    }
+  }
+
+  async getMerchandiseProduct(id: string): Promise<MerchandiseProduct | undefined> {
+    try {
+      const result = await this.db.select().from(merchandiseProducts).where(eq(merchandiseProducts.id, id));
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async getMerchandiseProductsByOrganization(organizationId: string): Promise<MerchandiseProduct[]> {
+    try {
+      const result = await this.db.select().from(merchandiseProducts)
+        .where(eq(merchandiseProducts.organizationId, organizationId))
+        .orderBy(desc(merchandiseProducts.createdAt));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async getMerchandiseProductsByTournament(tournamentId: string): Promise<MerchandiseProduct[]> {
+    try {
+      const result = await this.db.select().from(merchandiseProducts)
+        .where(eq(merchandiseProducts.tournamentId, tournamentId))
+        .orderBy(desc(merchandiseProducts.createdAt));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async updateMerchandiseProduct(id: string, updates: Partial<MerchandiseProduct>): Promise<MerchandiseProduct | undefined> {
+    try {
+      const result = await this.db
+        .update(merchandiseProducts)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(merchandiseProducts.id, id))
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async deleteMerchandiseProduct(id: string): Promise<boolean> {
+    try {
+      await this.db.delete(merchandiseProducts).where(eq(merchandiseProducts.id, id));
+      return true;
+    } catch (error) {
+      console.error("Database error:", error);
+      return false;
+    }
+  }
+
+  // =============================================================================
+  // MERCHANDISE ORDER STORAGE METHODS
+  // =============================================================================
+
+  async createMerchandiseOrder(order: InsertMerchandiseOrder): Promise<MerchandiseOrder> {
+    try {
+      const result = await this.db.insert(merchandiseOrders).values(order).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to create merchandise order");
+    }
+  }
+
+  async getMerchandiseOrder(id: string): Promise<MerchandiseOrder | undefined> {
+    try {
+      const result = await this.db.select().from(merchandiseOrders).where(eq(merchandiseOrders.id, id));
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async getMerchandiseOrdersByOrganization(organizationId: string): Promise<MerchandiseOrder[]> {
+    try {
+      const result = await this.db.select().from(merchandiseOrders)
+        .where(eq(merchandiseOrders.organizationId, organizationId))
+        .orderBy(desc(merchandiseOrders.createdAt));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async getMerchandiseOrdersByCustomer(customerId: string): Promise<MerchandiseOrder[]> {
+    try {
+      const result = await this.db.select().from(merchandiseOrders)
+        .where(eq(merchandiseOrders.customerId, customerId))
+        .orderBy(desc(merchandiseOrders.createdAt));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async updateMerchandiseOrder(id: string, updates: Partial<MerchandiseOrder>): Promise<MerchandiseOrder | undefined> {
+    try {
+      const result = await this.db
+        .update(merchandiseOrders)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(merchandiseOrders.id, id))
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async updateOrderFulfillmentStatus(id: string, status: string, trackingInfo?: any): Promise<MerchandiseOrder | undefined> {
+    try {
+      const updateData: any = { 
+        fulfillmentStatus: status, 
+        updatedAt: new Date() 
+      };
+      if (trackingInfo) {
+        updateData.trackingInfo = trackingInfo;
+      }
+
+      const result = await this.db
+        .update(merchandiseOrders)
+        .set(updateData)
+        .where(eq(merchandiseOrders.id, id))
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  // =============================================================================
+  // EVENT TICKET STORAGE METHODS
+  // =============================================================================
+
+  async createEventTicket(ticket: InsertEventTicket): Promise<EventTicket> {
+    try {
+      const result = await this.db.insert(eventTickets).values(ticket).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to create event ticket");
+    }
+  }
+
+  async getEventTicket(id: string): Promise<EventTicket | undefined> {
+    try {
+      const result = await this.db.select().from(eventTickets).where(eq(eventTickets.id, id));
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async getEventTicketsByOrganization(organizationId: string): Promise<EventTicket[]> {
+    try {
+      const result = await this.db.select().from(eventTickets)
+        .where(eq(eventTickets.organizationId, organizationId))
+        .orderBy(desc(eventTickets.createdAt));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async getEventTicketsByTournament(tournamentId: string): Promise<EventTicket[]> {
+    try {
+      const result = await this.db.select().from(eventTickets)
+        .where(eq(eventTickets.tournamentId, tournamentId))
+        .orderBy(desc(eventTickets.createdAt));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async updateEventTicket(id: string, updates: Partial<EventTicket>): Promise<EventTicket | undefined> {
+    try {
+      const result = await this.db
+        .update(eventTickets)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(eventTickets.id, id))
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async deleteEventTicket(id: string): Promise<boolean> {
+    try {
+      await this.db.delete(eventTickets).where(eq(eventTickets.id, id));
+      return true;
+    } catch (error) {
+      console.error("Database error:", error);
+      return false;
+    }
+  }
+
+  // =============================================================================
+  // TICKET ORDER STORAGE METHODS
+  // =============================================================================
+
+  async createTicketOrder(order: InsertTicketOrder): Promise<TicketOrder> {
+    try {
+      const result = await this.db.insert(ticketOrders).values(order).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to create ticket order");
+    }
+  }
+
+  async getTicketOrder(id: string): Promise<TicketOrder | undefined> {
+    try {
+      const result = await this.db.select().from(ticketOrders).where(eq(ticketOrders.id, id));
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async getTicketOrdersByOrganization(organizationId: string): Promise<TicketOrder[]> {
+    try {
+      const result = await this.db.select().from(ticketOrders)
+        .where(eq(ticketOrders.organizationId, organizationId))
+        .orderBy(desc(ticketOrders.createdAt));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async getTicketOrdersByCustomer(customerId: string): Promise<TicketOrder[]> {
+    try {
+      const result = await this.db.select().from(ticketOrders)
+        .where(eq(ticketOrders.customerId, customerId))
+        .orderBy(desc(ticketOrders.createdAt));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async updateTicketOrder(id: string, updates: Partial<TicketOrder>): Promise<TicketOrder | undefined> {
+    try {
+      const result = await this.db
+        .update(ticketOrders)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(ticketOrders.id, id))
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async updateTicketStatus(id: string, status: string): Promise<TicketOrder | undefined> {
+    try {
+      const result = await this.db
+        .update(ticketOrders)
+        .set({ ticketStatus: status, updatedAt: new Date() })
+        .where(eq(ticketOrders.id, id))
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  // =============================================================================
+  // INVENTORY MANAGEMENT METHODS
+  // =============================================================================
+
+  async updateProductInventory(productId: string, quantity: number, operation: 'add' | 'subtract' | 'set'): Promise<boolean> {
+    try {
+      const product = await this.getMerchandiseProduct(productId);
+      if (!product) return false;
+
+      let newInventory: number;
+      switch (operation) {
+        case 'add':
+          newInventory = product.inventory + quantity;
+          break;
+        case 'subtract':
+          newInventory = Math.max(0, product.inventory - quantity);
+          break;
+        case 'set':
+          newInventory = quantity;
+          break;
+        default:
+          return false;
+      }
+
+      await this.updateMerchandiseProduct(productId, { inventory: newInventory });
+      return true;
+    } catch (error) {
+      console.error("Database error:", error);
+      return false;
+    }
+  }
+
+  async updateTicketInventory(ticketId: string, quantity: number): Promise<boolean> {
+    try {
+      const ticket = await this.getEventTicket(ticketId);
+      if (!ticket) return false;
+
+      const newSold = ticket.sold + quantity;
+      await this.updateEventTicket(ticketId, { sold: newSold });
+      return true;
+    } catch (error) {
+      console.error("Database error:", error);
+      return false;
+    }
+  }
+
+  async checkProductAvailability(productId: string, variantId?: string, quantity: number = 1): Promise<boolean> {
+    try {
+      const product = await this.getMerchandiseProduct(productId);
+      if (!product || !product.isActive) return false;
+
+      if (variantId && product.variants.length > 0) {
+        const variant = product.variants.find(v => v.id === variantId);
+        return variant ? variant.inventory >= quantity : false;
+      }
+
+      return product.inventory >= quantity;
+    } catch (error) {
+      console.error("Database error:", error);
+      return false;
+    }
+  }
+
+  async checkTicketAvailability(ticketId: string, quantity: number = 1): Promise<boolean> {
+    try {
+      const ticket = await this.getEventTicket(ticketId);
+      if (!ticket || !ticket.isActive) return false;
+
+      if (ticket.totalAvailable) {
+        return (ticket.sold + quantity) <= ticket.totalAvailable;
+      }
+
+      return true; // No limit set
+    } catch (error) {
+      console.error("Database error:", error);
+      return false;
+    }
+  }
+
+  // =============================================================================
+  // REVENUE CALCULATION METHODS
+  // =============================================================================
+
+  async calculateMerchandiseRevenue(organizationId: string, startDate?: Date, endDate?: Date): Promise<{
+    totalOrders: number;
+    totalRevenue: number;
+    platformFee: number;
+    organizationRevenue: number;
+  }> {
+    try {
+      let query = this.db.select().from(merchandiseOrders)
+        .where(eq(merchandiseOrders.organizationId, organizationId));
+
+      if (startDate && endDate) {
+        query = query.where(
+          and(
+            gte(merchandiseOrders.createdAt, startDate),
+            lte(merchandiseOrders.createdAt, endDate)
+          )
+        );
+      }
+
+      const orders = await query;
+      const totalOrders = orders.length;
+      const totalRevenue = orders.reduce((sum, order) => sum + parseFloat(order.totalAmount.toString()), 0);
+      
+      // Platform takes 3% fee
+      const platformFee = totalRevenue * 0.03;
+      const organizationRevenue = totalRevenue - platformFee;
+
+      return {
+        totalOrders,
+        totalRevenue,
+        platformFee,
+        organizationRevenue
+      };
+    } catch (error) {
+      console.error("Database error:", error);
+      return { totalOrders: 0, totalRevenue: 0, platformFee: 0, organizationRevenue: 0 };
+    }
+  }
+
+  async calculateTicketRevenue(organizationId: string, startDate?: Date, endDate?: Date): Promise<{
+    totalOrders: number;
+    totalRevenue: number;
+    platformFee: number;
+    organizationRevenue: number;
+  }> {
+    try {
+      let query = this.db.select().from(ticketOrders)
+        .where(eq(ticketOrders.organizationId, organizationId));
+
+      if (startDate && endDate) {
+        query = query.where(
+          and(
+            gte(ticketOrders.createdAt, startDate),
+            lte(ticketOrders.createdAt, endDate)
+          )
+        );
+      }
+
+      const orders = await query;
+      const totalOrders = orders.length;
+      const totalRevenue = orders.reduce((sum, order) => sum + parseFloat(order.totalAmount.toString()), 0);
+      
+      // Platform takes 3% fee  
+      const platformFee = totalRevenue * 0.03;
+      const organizationRevenue = totalRevenue - platformFee;
+
+      return {
+        totalOrders,
+        totalRevenue,
+        platformFee,
+        organizationRevenue
+      };
+    } catch (error) {
+      console.error("Database error:", error);
+      return { totalOrders: 0, totalRevenue: 0, platformFee: 0, organizationRevenue: 0 };
+    }
+  }
 }
 
 export class MemStorage implements IStorage {
