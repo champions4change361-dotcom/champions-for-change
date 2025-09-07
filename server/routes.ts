@@ -49,6 +49,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Support team routes for cheerleading, dance teams, marching band, color guard
   app.use('/api', supportTeamRoutes);
 
+  // Webstore routes for merchandise and ticket sales
+  const webstoreRoutes = (await import('./webstoreRoutes')).default;
+  app.use('/api/webstore', webstoreRoutes);
+
   // Location detection endpoint
   app.get('/api/location', async (req, res) => {
     try {
