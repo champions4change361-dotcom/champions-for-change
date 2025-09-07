@@ -44,6 +44,8 @@ export function BusinessPricingSection() {
         'Team & athlete registration',
         'Payment processing & fee collection', 
         'Custom donation page setup',
+        'Event ticket sales & management',
+        'Merchandise webstore with custom products',
         'Professional branding & logos',
         'Score tracking & brackets',
         'Email notifications & communication',
@@ -68,6 +70,8 @@ export function BusinessPricingSection() {
       features: [
         'Unlimited tournaments per month',
         'Full enterprise AI tournament assistance',
+        'Advanced webstore with custom merchandise',
+        'Event ticket sales with revenue tracking',
         'Complete analytics & reporting suite',
         'White-label branding & custom domain',
         'Priority email & phone support',
@@ -92,6 +96,9 @@ export function BusinessPricingSection() {
       features: [
         'Everything in Business Enterprise',
         'Unlimited tournament capacity & frequency',
+        'Enterprise webstore with advanced inventory',
+        'Multi-event ticket bundles & packages',
+        'Custom merchandise revenue sharing',
         'Enhanced integration capabilities',
         'Dedicated account manager & priority support',
         'Advanced enterprise reporting & analytics',
