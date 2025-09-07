@@ -90,6 +90,9 @@ import AthleteManagement from './pages/AthleteManagement';
 import HealthCommunication from './pages/HealthCommunication';
 import UnifiedLogin from './pages/UnifiedLogin';
 import EquipmentManagement from './pages/EquipmentManagement';
+import EducationalAthletics from './pages/EducationalAthletics';
+import StudentHealthManagement from './pages/StudentHealthManagement';
+import SchoolDistrictSolutions from './pages/SchoolDistrictSolutions';
 import SmartScheduler from './pages/SmartScheduler';
 import ComplianceManagement from './pages/ComplianceManagement';
 import CoachDashboard from './pages/CoachDashboard';
@@ -364,6 +367,11 @@ function AppRouter() {
       <Route path="/grant-funding" component={GrantFunding} />
       <Route path="/nonprofit-resources" component={NonprofitResources} />
       <Route path="/register-organization" component={() => { window.location.href = '/smart-signup?type=business'; return null; }} />
+      
+      {/* Google Ad Grants Compliant Landing Pages */}
+      <Route path="/educational-athletics" component={EducationalAthletics} />
+      <Route path="/student-health-management" component={StudentHealthManagement} />
+      <Route path="/school-district-solutions" component={SchoolDistrictSolutions} />
       {/* Unified Login for All Methods */}
       <Route path="/login" component={UnifiedLogin} />
       {/* Legacy Login Form */}
