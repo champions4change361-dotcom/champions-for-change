@@ -7,6 +7,7 @@ import React, { useState } from "react";
 import Footer from "@/components/Footer";
 import RegistrationAssistant from "@/components/RegistrationAssistant";
 import TrantorCoin from "@/components/TrantorCoin";
+import LanguageSelector from "@/components/LanguageSelector";
 
 export default function TrantorLanding() {
   const [, setLocation] = useLocation();

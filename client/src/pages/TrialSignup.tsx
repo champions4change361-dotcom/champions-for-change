@@ -17,6 +17,8 @@ import {
   ArrowLeft
 } from 'lucide-react';
 import { Link } from 'wouter';
+import LanguageSelector from '@/components/LanguageSelector';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface PlanDetails {
   name: string;
@@ -29,6 +31,7 @@ interface PlanDetails {
 export default function TrialSignup() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
@@ -48,10 +51,10 @@ export default function TrialSignup() {
 
   const planDetails: Record<string, PlanDetails> = {
     annual: {
-      name: 'Annual Tournament',
+      name: t('plan.annual.name'),
       price: '$99',
-      period: '/year',
-      description: 'Perfect for organizations running one tournament annually',
+      period: t('general.year'),
+      description: t('plan.annual.description'),
       features: [
         'One tournament per year',
         'Year-round website hosting',
@@ -62,10 +65,10 @@ export default function TrialSignup() {
       ]
     },
     monthly: {
-      name: 'Multi-Tournament',
+      name: t('plan.monthly.name'),
       price: '$39',
-      period: '/month',
-      description: 'Perfect for active tournament organizers',
+      period: t('general.month'),
+      description: t('plan.monthly.description'),
       features: [
         'Unlimited tournaments',
         'Full platform access',
@@ -76,10 +79,10 @@ export default function TrialSignup() {
       ]
     },
     enterprise: {
-      name: 'Business Enterprise',
+      name: t('plan.enterprise.name'),
       price: '$149',
-      period: '/month',
-      description: 'Complete enterprise features for businesses',
+      period: t('general.month'),
+      description: t('plan.enterprise.description'),
       features: [
         'Unlimited tournaments',
         'Enterprise AI assistance',
@@ -138,15 +141,18 @@ export default function TrialSignup() {
                 </div>
                 <div>
                   <h1 className="text-xl font-bold text-gray-900">Tournament Arena</h1>
-                  <p className="text-xs text-blue-600">Start Your Free Trial</p>
+                  <p className="text-xs text-blue-600">{t('header.startTrial')}</p>
                 </div>
               </Link>
             </div>
             
-            <Link href="/pricing" className="flex items-center text-gray-600 hover:text-gray-800 transition-colors">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Pricing
-            </Link>
+            <div className="flex items-center space-x-4">
+              <LanguageSelector variant="compact" />
+              <Link href="/pricing" className="flex items-center text-gray-600 hover:text-gray-800 transition-colors">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                {t('button.backToPricing')}
+              </Link>
+            </div>
           </div>
         </div>
       </header>
@@ -157,9 +163,9 @@ export default function TrialSignup() {
           {/* Plan Summary */}
           <div>
             <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">Start Your Free Trial</h1>
+              <h1 className="text-3xl font-bold text-gray-900 mb-4">{t('trial.title')}</h1>
               <p className="text-lg text-gray-600">
-                Get full access to Tournament Arena for 14 days. No charge until your trial ends.
+                {t('trial.subtitle')}
               </p>
             </div>
 
@@ -168,30 +174,30 @@ export default function TrialSignup() {
               <CardHeader>
                 <CardTitle className="flex items-center text-green-800">
                   <Shield className="h-5 w-5 mr-2" />
-                  Your 14-Day Free Trial Includes
+                  {t('trial.benefits.title')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3">
                   <li className="flex items-center text-green-700">
                     <Check className="h-4 w-4 mr-3 text-green-600" />
-                    Full platform access - no restrictions
+                    {t('trial.benefits.access')}
                   </li>
                   <li className="flex items-center text-green-700">
                     <Check className="h-4 w-4 mr-3 text-green-600" />
-                    Create and manage tournaments
+                    {t('trial.benefits.tournaments')}
                   </li>
                   <li className="flex items-center text-green-700">
                     <Check className="h-4 w-4 mr-3 text-green-600" />
-                    Build custom tournament websites
+                    {t('trial.benefits.websites')}
                   </li>
                   <li className="flex items-center text-green-700">
                     <Check className="h-4 w-4 mr-3 text-green-600" />
-                    Payment processing and registration
+                    {t('trial.benefits.payments')}
                   </li>
                   <li className="flex items-center text-green-700">
                     <Check className="h-4 w-4 mr-3 text-green-600" />
-                    Professional branding and white-label
+                    {t('trial.benefits.branding')}
                   </li>
                 </ul>
               </CardContent>
