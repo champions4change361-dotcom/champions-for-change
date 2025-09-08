@@ -82,11 +82,11 @@ export default function TrantorLanding() {
               🏆 Professional Tournament Platform
             </Badge>
             <h1 className="text-4xl lg:text-6xl font-bold text-white mb-6">
-              Fantasy Sports &
-              <span className="block text-orange-300">Tournament Management</span>
+              Tournament & Sports
+              <span className="block text-orange-300">Administration System</span>
             </h1>
             <p className="text-xl text-orange-100 max-w-3xl mx-auto mb-6">
-              Join recreational fantasy leagues (for fun only) with overnight scoring OR create your own traditional tournaments. Complete platform for organizers, businesses, and fantasy enthusiasts.
+              Professional tournament management and sports administration platform. Complete system for schools, organizations, and tournament directors to manage events, participants, scheduling, and operations.
             </p>
             <div className="bg-yellow-600/20 border border-yellow-500/50 rounded-xl p-6 mb-8 max-w-2xl mx-auto">
               <h3 className="text-2xl font-bold text-yellow-300 mb-2">🎯 Start Your 14-Day Free Trial</h3>
@@ -145,14 +145,14 @@ export default function TrantorLanding() {
       <div className="py-16 bg-orange-800/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-white mb-4">Recreational Fantasy & Tournament Management</h2>
+            <h2 className="text-3xl font-bold text-white mb-4">Professional Tournament & Sports Administration</h2>
             <p className="text-orange-200 text-lg">Fun-only fantasy leagues and traditional tournaments (no gambling)</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <Card className="bg-purple-900/50 border-purple-600/30 ring-2 ring-purple-500">
               <CardHeader className="text-center">
                 <Target className="h-12 w-12 text-purple-400 mx-auto mb-4" />
-                <CardTitle className="text-2xl text-white">Recreational Fantasy</CardTitle>
+                <CardTitle className="text-2xl text-white">Tournament Administration</CardTitle>
                 <CardDescription className="text-purple-200">
                   NFL Survivor, Daily Fantasy, Season-Long, Pick'em Leagues - For Fun Only (No Gambling)
                 </CardDescription>
@@ -192,7 +192,7 @@ export default function TrantorLanding() {
             <Card className="bg-purple-900/30 border-purple-600/30">
               <CardHeader>
                 <Target className="h-8 w-8 text-purple-400 mb-2" />
-                <CardTitle className="text-white">Recreational Fantasy</CardTitle>
+                <CardTitle className="text-white">Sports Management</CardTitle>
                 <CardDescription className="text-purple-200">
                   NFL, NBA, MLB fantasy leagues for fun only - Yahoo Sports data integration (no gambling)
                 </CardDescription>
@@ -359,7 +359,7 @@ export default function TrantorLanding() {
       {/* Call to Action */}
       <div className="py-16 bg-gradient-to-r from-orange-600/20 to-red-600/20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold text-white mb-6">Ready for Fantasy Sports & Tournaments?</h2>
+          <h2 className="text-3xl font-bold text-white mb-6">Ready for Professional Tournament Management?</h2>
           <p className="text-orange-200 text-lg mb-8">
             Join fantasy leagues with overnight scoring OR create your own traditional tournaments.
           </p>
