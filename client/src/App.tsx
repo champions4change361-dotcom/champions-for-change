@@ -73,6 +73,7 @@ import HealthDemo from './pages/HealthDemo';
 import DomainManager from './pages/DomainManager';
 import GrantFunding from './pages/GrantFunding';
 import NonprofitResources from './pages/NonprofitResources';
+import MerchandiseStore from './pages/MerchandiseStore';
 import OrganizationRegistration from './pages/OrganizationRegistration';
 import RoleHierarchy from './pages/RoleHierarchy';
 import Schools from './pages/Schools';
@@ -154,6 +155,8 @@ function AuthenticatedRoutes() {
         <Route path="/embed/tournament/:id" component={EmbedTournament} />
         <Route path="/tournaments/:tournamentId/register" component={TournamentRegistration} />
         <Route path="/contacts" component={Contacts} />
+        <Route path="/store" component={MerchandiseStore} />
+        <Route path="/merchandise" component={MerchandiseStore} />
         {/* AI features temporarily disabled for production */}
         {/* <Route path="/ai-consultation" component={AIConsultation} /> */}
         {/* <Route path="/ai-chat" component={AIChat} /> */}
