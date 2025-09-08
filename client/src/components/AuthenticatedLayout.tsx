@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import UserMenu from '@/components/UserMenu';
+import ShoppingCart from '@/components/ShoppingCart';
 import { Link } from 'wouter';
 import { ArrowLeft } from 'lucide-react';
 
@@ -69,7 +70,10 @@ export default function AuthenticatedLayout({
                   </div>
                 )}
               </div>
-              <UserMenu variant="compact" showUserInfo={false} />
+              <div className="flex items-center space-x-2">
+                <ShoppingCart variant="compact" />
+                <UserMenu variant="compact" showUserInfo={false} />
+              </div>
             </div>
           </div>
         </header>
@@ -108,7 +112,10 @@ export default function AuthenticatedLayout({
               )}
             </div>
             
-            <UserMenu />
+            <div className="flex items-center space-x-3">
+              <ShoppingCart />
+              <UserMenu />
+            </div>
           </div>
         </div>
       </header>
