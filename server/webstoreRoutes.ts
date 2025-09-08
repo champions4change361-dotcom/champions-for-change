@@ -44,7 +44,7 @@ const requireTournamentDirectorOrAdmin = (req: any, res: any, next: any) => {
 // Create new merchandise product
 router.post("/products", isAuthenticated, requireTournamentDirectorOrAdmin, async (req, res) => {
   try {
-    const storage = getStorage();
+    const storage = await getStorage();
     const productData = insertMerchandiseProductSchema.parse({
       ...req.body,
       organizationId: req.user.organizationId,
@@ -64,7 +64,7 @@ router.post("/products", isAuthenticated, requireTournamentDirectorOrAdmin, asyn
 // Get all products for organization
 router.get("/products", isAuthenticated, async (req, res) => {
   try {
-    const storage = getStorage();
+    const storage = await getStorage();
     const { tournamentId } = req.query;
 
     let products;
@@ -84,7 +84,7 @@ router.get("/products", isAuthenticated, async (req, res) => {
 // Get single product
 router.get("/products/:id", isAuthenticated, async (req, res) => {
   try {
-    const storage = getStorage();
+    const storage = await getStorage();
     const product = await storage.getMerchandiseProduct(req.params.id);
     
     if (!product) {
@@ -106,7 +106,7 @@ router.get("/products/:id", isAuthenticated, async (req, res) => {
 // Update product
 router.put("/products/:id", isAuthenticated, requireTournamentDirectorOrAdmin, async (req, res) => {
   try {
-    const storage = getStorage();
+    const storage = await getStorage();
     
     // First check if product exists and user has access
     const existingProduct = await storage.getMerchandiseProduct(req.params.id);
@@ -128,7 +128,7 @@ router.put("/products/:id", isAuthenticated, requireTournamentDirectorOrAdmin, a
 // Delete product
 router.delete("/products/:id", isAuthenticated, requireTournamentDirectorOrAdmin, async (req, res) => {
   try {
-    const storage = getStorage();
+    const storage = await getStorage();
     
     // First check if product exists and user has access
     const existingProduct = await storage.getMerchandiseProduct(req.params.id);
@@ -158,7 +158,7 @@ router.delete("/products/:id", isAuthenticated, requireTournamentDirectorOrAdmin
 // Create new event ticket
 router.post("/tickets", isAuthenticated, requireTournamentDirectorOrAdmin, async (req, res) => {
   try {
-    const storage = getStorage();
+    const storage = await getStorage();
     const ticketData = insertEventTicketSchema.parse({
       ...req.body,
       organizationId: req.user.organizationId,
@@ -178,7 +178,7 @@ router.post("/tickets", isAuthenticated, requireTournamentDirectorOrAdmin, async
 // Get all tickets for organization or tournament
 router.get("/tickets", isAuthenticated, async (req, res) => {
   try {
-    const storage = getStorage();
+    const storage = await getStorage();
     const { tournamentId } = req.query;
 
     let tickets;
@@ -198,7 +198,7 @@ router.get("/tickets", isAuthenticated, async (req, res) => {
 // Get single ticket
 router.get("/tickets/:id", isAuthenticated, async (req, res) => {
   try {
-    const storage = getStorage();
+    const storage = await getStorage();
     const ticket = await storage.getEventTicket(req.params.id);
     
     if (!ticket) {
@@ -220,7 +220,7 @@ router.get("/tickets/:id", isAuthenticated, async (req, res) => {
 // Update ticket
 router.put("/tickets/:id", isAuthenticated, requireTournamentDirectorOrAdmin, async (req, res) => {
   try {
-    const storage = getStorage();
+    const storage = await getStorage();
     
     // First check if ticket exists and user has access
     const existingTicket = await storage.getEventTicket(req.params.id);
@@ -242,7 +242,7 @@ router.put("/tickets/:id", isAuthenticated, requireTournamentDirectorOrAdmin, as
 // Delete ticket
 router.delete("/tickets/:id", isAuthenticated, requireTournamentDirectorOrAdmin, async (req, res) => {
   try {
-    const storage = getStorage();
+    const storage = await getStorage();
     
     // First check if ticket exists and user has access
     const existingTicket = await storage.getEventTicket(req.params.id);
@@ -272,7 +272,7 @@ router.delete("/tickets/:id", isAuthenticated, requireTournamentDirectorOrAdmin,
 // Update product inventory
 router.post("/products/:id/inventory", isAuthenticated, requireTournamentDirectorOrAdmin, async (req, res) => {
   try {
-    const storage = getStorage();
+    const storage = await getStorage();
     const { quantity, operation = 'set' } = req.body;
 
     if (typeof quantity !== 'number' || quantity < 0) {
@@ -294,7 +294,7 @@ router.post("/products/:id/inventory", isAuthenticated, requireTournamentDirecto
 // Update ticket inventory  
 router.post("/tickets/:id/inventory", isAuthenticated, requireTournamentDirectorOrAdmin, async (req, res) => {
   try {
-    const storage = getStorage();
+    const storage = await getStorage();
     const { quantity } = req.body;
 
     if (typeof quantity !== 'number' || quantity < 0) {
@@ -316,7 +316,7 @@ router.post("/tickets/:id/inventory", isAuthenticated, requireTournamentDirector
 // Check product availability
 router.get("/products/:id/availability", isAuthenticated, async (req, res) => {
   try {
-    const storage = getStorage();
+    const storage = await getStorage();
     const { variantId, quantity = 1 } = req.query;
 
     const available = await storage.checkProductAvailability(
@@ -335,7 +335,7 @@ router.get("/products/:id/availability", isAuthenticated, async (req, res) => {
 // Check ticket availability
 router.get("/tickets/:id/availability", isAuthenticated, async (req, res) => {
   try {
-    const storage = getStorage();
+    const storage = await getStorage();
     const { quantity = 1 } = req.query;
 
     const available = await storage.checkTicketAvailability(
@@ -357,7 +357,7 @@ router.get("/tickets/:id/availability", isAuthenticated, async (req, res) => {
 // Create merchandise order with payment processing
 router.post("/orders/merchandise", isAuthenticated, async (req, res) => {
   try {
-    const storage = getStorage();
+    const storage = await getStorage();
     
     // Validate order data
     const orderData = insertMerchandiseOrderSchema.parse({
@@ -422,7 +422,7 @@ router.post("/orders/merchandise", isAuthenticated, async (req, res) => {
 // Create ticket order with payment processing
 router.post("/orders/tickets", isAuthenticated, async (req, res) => {
   try {
-    const storage = getStorage();
+    const storage = await getStorage();
     
     // Validate order data
     const orderData = insertTicketOrderSchema.parse({
@@ -483,7 +483,7 @@ router.post("/orders/tickets", isAuthenticated, async (req, res) => {
 // Get merchandise orders
 router.get("/orders/merchandise", isAuthenticated, async (req, res) => {
   try {
-    const storage = getStorage();
+    const storage = await getStorage();
     
     // Tournament directors can see all orders for their organization
     // Regular users can only see their own orders
@@ -506,7 +506,7 @@ router.get("/orders/merchandise", isAuthenticated, async (req, res) => {
 // Get ticket orders
 router.get("/orders/tickets", isAuthenticated, async (req, res) => {
   try {
-    const storage = getStorage();
+    const storage = await getStorage();
     
     // Tournament directors can see all orders for their organization
     // Regular users can only see their own orders
@@ -529,7 +529,7 @@ router.get("/orders/tickets", isAuthenticated, async (req, res) => {
 // Update order fulfillment status (admin only)
 router.put("/orders/merchandise/:id/fulfillment", isAuthenticated, requireTournamentDirectorOrAdmin, async (req, res) => {
   try {
-    const storage = getStorage();
+    const storage = await getStorage();
     const { status, trackingInfo } = req.body;
 
     const updatedOrder = await storage.updateOrderFulfillmentStatus(req.params.id, status, trackingInfo);
@@ -551,7 +551,7 @@ router.put("/orders/merchandise/:id/fulfillment", isAuthenticated, requireTourna
 // Calculate merchandise revenue
 router.get("/revenue/merchandise", isAuthenticated, requireTournamentDirectorOrAdmin, async (req, res) => {
   try {
-    const storage = getStorage();
+    const storage = await getStorage();
     const { startDate, endDate } = req.query;
 
     const revenue = await storage.calculateMerchandiseRevenue(
@@ -570,7 +570,7 @@ router.get("/revenue/merchandise", isAuthenticated, requireTournamentDirectorOrA
 // Calculate ticket revenue
 router.get("/revenue/tickets", isAuthenticated, requireTournamentDirectorOrAdmin, async (req, res) => {
   try {
-    const storage = getStorage();
+    const storage = await getStorage();
     const { startDate, endDate } = req.query;
 
     const revenue = await storage.calculateTicketRevenue(
