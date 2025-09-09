@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import { ArrowLeft, Zap, Users, Trophy, Settings, Sparkles, LogOut, FileText, MessageCircle, Send } from 'lucide-react';
 import { useAuth } from "@/hooks/useAuth";
+import { useTournamentPreview } from "@/hooks/useTournamentPreview";
 import EnhancedTournamentWizard from '@/components/enhanced-tournament-wizard';
+import TournamentPreviewBanner from '@/components/TournamentPreviewBanner';
+import TournamentSmartPrompt from '@/components/TournamentSmartPrompt';
 // Removed old AI consultation component - using integrated chat AI instead
 
 // AI conversation features temporarily disabled for production
@@ -39,12 +42,45 @@ function TournamentCreationPlaceholder() {
 }
 
 export default function CreateTournament() {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const [creationMode, setCreationMode] = useState<'menu' | 'wizard'>('menu');
+  const [, navigate] = useLocation();
+  const { 
+    isPreviewMode, 
+    savePreviewData, 
+    markSectionCompleted,
+    progress
+  } = useTournamentPreview();
+
+  // Mark initial section as completed when user starts tournament creation
+  useEffect(() => {
+    if (isPreviewMode) {
+      markSectionCompleted('tournament-access');
+    }
+  }, [isPreviewMode, markSectionCompleted]);
 
   const handleTournamentCreated = (tournament: any) => {
-    // Tournament created successfully
-    console.log('Tournament created:', tournament);
+    if (isAuthenticated) {
+      // Tournament created successfully for authenticated user
+      console.log('Tournament created:', tournament);
+    } else {
+      // Save tournament data to preview mode
+      savePreviewData({
+        name: tournament.name,
+        sport: tournament.sport,
+        format: tournament.format,
+        teams: tournament.teams,
+        settings: tournament.settings
+      });
+      markSectionCompleted('tournament-completion');
+    }
+  };
+
+  const handleWizardStart = () => {
+    setCreationMode('wizard');
+    if (isPreviewMode) {
+      markSectionCompleted('wizard-start');
+    }
   };
 
   const getUserType = (): 'district' | 'enterprise' | 'free' | 'general' => {
@@ -59,7 +95,11 @@ export default function CreateTournament() {
   if (creationMode === 'wizard') {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
-        <header className="relative border-b border-yellow-500/20 bg-slate-900/80 backdrop-blur-sm">
+        {/* Preview Mode Components */}
+        <TournamentPreviewBanner className={isPreviewMode ? "pt-24 md:pt-32" : ""} />
+        <TournamentSmartPrompt />
+        
+        <header className={`relative border-b border-yellow-500/20 bg-slate-900/80 backdrop-blur-sm ${isPreviewMode ? 'mt-32 md:mt-40' : ''}`}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <div className="flex items-center space-x-3">
@@ -101,8 +141,12 @@ export default function CreateTournament() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
+      {/* Preview Mode Components */}
+      <TournamentPreviewBanner />
+      <TournamentSmartPrompt />
+      
       {/* Header */}
-      <header className="relative border-b border-yellow-500/20 bg-slate-900/80 backdrop-blur-sm">
+      <header className={`relative border-b border-yellow-500/20 bg-slate-900/80 backdrop-blur-sm ${isPreviewMode ? 'mt-32 md:mt-40' : ''}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
@@ -153,7 +197,7 @@ export default function CreateTournament() {
         <div className="flex justify-center mb-8">
           {/* 5-Step Tournament Wizard */}
           <div 
-            onClick={() => setCreationMode('wizard')}
+            onClick={handleWizardStart}
             className="bg-slate-800 border border-blue-500/30 rounded-2xl p-8 hover:border-blue-400/50 transition-all cursor-pointer group max-w-md w-full"
           >
             <div className="text-center">
