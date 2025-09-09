@@ -44,13 +44,28 @@ function TournamentCreationPlaceholder() {
 export default function CreateTournament() {
   const { user, isAuthenticated } = useAuth();
   const [creationMode, setCreationMode] = useState<'menu' | 'wizard'>('menu');
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
   const { 
     isPreviewMode, 
     savePreviewData, 
     markSectionCompleted,
     progress
   } = useTournamentPreview();
+
+  // Check URL parameters to determine if we should go straight to wizard
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const flow = urlParams.get('flow');
+    
+    if (flow === 'registration' || flow === 'bracket') {
+      setCreationMode('wizard');
+      // Save the flow preference to preview data
+      if (isPreviewMode) {
+        savePreviewData({ flow: flow as 'registration' | 'bracket' });
+        markSectionCompleted('onboarding-choice');
+      }
+    }
+  }, [isPreviewMode, savePreviewData, markSectionCompleted]);
 
   // Mark initial section as completed when user starts tournament creation
   useEffect(() => {
