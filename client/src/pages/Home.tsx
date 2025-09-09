@@ -3,6 +3,7 @@ import { Trophy, Zap, Users, Calendar, Settings, Award, Timer, Star, ChevronRigh
 import { Link } from "wouter";
 import MoxyMessage from "../components/MoxyMessage";
 import UserMenu from "@/components/UserMenu";
+import TournamentRecoveryPrompt from "@/components/TournamentRecoveryPrompt";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function Home() {
@@ -20,6 +21,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
+      {/* Tournament Recovery Prompt */}
+      <TournamentRecoveryPrompt />
+      
       {/* Stadium Lighting Header */}
       <div className="relative">
         <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/5 via-transparent to-yellow-400/5"></div>
