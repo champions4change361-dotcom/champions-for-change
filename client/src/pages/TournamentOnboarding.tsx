@@ -118,7 +118,7 @@ export default function TournamentOnboarding() {
               <div className="mx-auto mb-4 p-4 bg-orange-100 rounded-full w-fit">
                 <Trophy className="h-12 w-12 text-orange-600" />
               </div>
-              <CardTitle className="text-2xl text-gray-900">Design Bracket First</CardTitle>
+              <CardTitle className="text-2xl text-gray-900">Create Tournament</CardTitle>
               <CardDescription className="text-lg text-gray-600">
                 Perfect if you know your tournament format and structure
               </CardDescription>
@@ -166,7 +166,7 @@ export default function TournamentOnboarding() {
                 data-testid="start-bracket-flow"
               >
                 <Trophy className="mr-2 h-4 w-4" />
-                Design Bracket First
+                Create Tournament
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </CardContent>
