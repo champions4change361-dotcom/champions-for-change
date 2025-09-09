@@ -41,7 +41,7 @@ export default function TournamentOnboarding() {
             }`}
             onMouseEnter={() => setHoveredCard('registration')}
             onMouseLeave={() => setHoveredCard(null)}
-            onClick={() => setLocation('/create-tournament?flow=registration')}
+            onClick={() => setLocation('/create-registration')}
             data-testid="option-registration-first"
           >
             <CardHeader className="text-center pb-4">
@@ -111,7 +111,7 @@ export default function TournamentOnboarding() {
             }`}
             onMouseEnter={() => setHoveredCard('bracket')}
             onMouseLeave={() => setHoveredCard(null)}
-            onClick={() => setLocation('/create-tournament?flow=bracket')}
+            onClick={() => setLocation('/create-bracket')}
             data-testid="option-bracket-first"
           >
             <CardHeader className="text-center pb-4">

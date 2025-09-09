@@ -65,14 +65,14 @@ export default function CreateTournament() {
         markSectionCompleted('onboarding-choice');
       }
     }
-  }, [isPreviewMode, savePreviewData, markSectionCompleted]);
+  }, []); // Remove dependencies to prevent infinite loop
 
   // Mark initial section as completed when user starts tournament creation
   useEffect(() => {
     if (isPreviewMode) {
       markSectionCompleted('tournament-access');
     }
-  }, [isPreviewMode, markSectionCompleted]);
+  }, []);
 
   const handleTournamentCreated = (tournament: any) => {
     if (isAuthenticated) {

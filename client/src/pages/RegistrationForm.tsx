@@ -14,6 +14,10 @@ import { useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useDomain } from '@/hooks/useDomain';
+import { useAuth } from '@/hooks/useAuth';
+import { useTournamentPreview } from '@/hooks/useTournamentPreview';
+import TournamentPreviewBanner from '@/components/TournamentPreviewBanner';
+import TournamentSmartPrompt from '@/components/TournamentSmartPrompt';
 // Removed fantasy promotions - district registration is educational only
 
 const registrationSchema = z.object({
@@ -50,6 +54,12 @@ export default function RegistrationFormPage() {
   const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'check'>('stripe');
   const { toast } = useToast();
   const { isSchoolDomain } = useDomain();
+  const { isAuthenticated } = useAuth();
+  const { 
+    isPreviewMode, 
+    savePreviewData, 
+    markSectionCompleted 
+  } = useTournamentPreview();
 
   // Get tier from URL params
   useEffect(() => {
@@ -213,6 +223,10 @@ export default function RegistrationFormPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
+      {/* Tournament Preview Banner */}
+      {isPreviewMode && <TournamentPreviewBanner />}
+      {/* Smart Prompts for Preview Mode */}
+      {isPreviewMode && <TournamentSmartPrompt />}
       <div className="max-w-4xl mx-auto">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold mb-2 text-gray-900">Join Champions for Change</h1>

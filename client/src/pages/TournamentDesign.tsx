@@ -8,9 +8,19 @@ import { Textarea } from '@/components/ui/textarea';
 import { Trophy, Calendar, Users, MapPin, DollarSign, CheckCircle, ArrowRight, Palette } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { MissionBranding } from '@/components/MissionBranding';
+import { useAuth } from '@/hooks/useAuth';
+import { useTournamentPreview } from '@/hooks/useTournamentPreview';
+import TournamentPreviewBanner from '@/components/TournamentPreviewBanner';
+import TournamentSmartPrompt from '@/components/TournamentSmartPrompt';
 
 export default function TournamentDesign() {
   const [step, setStep] = useState(1);
+  const { isAuthenticated } = useAuth();
+  const { 
+    isPreviewMode, 
+    savePreviewData, 
+    markSectionCompleted 
+  } = useTournamentPreview();
   const [tournament, setTournament] = useState({
     name: '',
     sport: '',
@@ -115,6 +125,11 @@ export default function TournamentDesign() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 py-12 px-4">
+      {/* Tournament Preview Banner */}
+      {isPreviewMode && <TournamentPreviewBanner />}
+      {/* Smart Prompts for Preview Mode */}
+      {isPreviewMode && <TournamentSmartPrompt />}
+      
       <div className="max-w-4xl mx-auto">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold mb-2 text-gray-900 flex items-center justify-center gap-2">

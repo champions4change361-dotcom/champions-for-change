@@ -367,6 +367,12 @@ function AppRouter() {
       <Route path="/discount-demo" component={DiscountDemo} />
       <Route path="/organizer-analytics" component={OrganizerAnalyticsDemo} />
       <Route path="/tournament-onboarding" component={TournamentOnboarding} />
+      
+      {/* Tournament Creation Routes - Public Access for Preview Mode */}
+      <Route path="/create-tournament" component={CreateTournament} />
+      <Route path="/create-registration" component={RegistrationForm} />
+      <Route path="/create-bracket" component={TournamentDesign} />
+      
       <Route path="/grant-funding" component={GrantFunding} />
       <Route path="/nonprofit-resources" component={NonprofitResources} />
       <Route path="/register-organization" component={() => { window.location.href = '/smart-signup?type=business'; return null; }} />
