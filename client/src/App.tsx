@@ -132,6 +132,8 @@ import HeadToHeadCreator from './pages/HeadToHeadCreator';
 import BestBallCreator from './pages/BestBallCreator';
 import FantasyDashboard from './pages/FantasyDashboard';
 import CaptainShowdownCreator from './pages/CaptainShowdownCreator';
+import TeamListPage from './pages/TeamListPage';
+import TeamCreatePage from './pages/TeamCreatePage';
 
 function AuthenticatedRoutes() {
   const { isFeatureEnabled, isFantasyDomain, config } = useDomain();
@@ -151,6 +153,10 @@ function AuthenticatedRoutes() {
         <Route path="/tournaments/:id" component={TournamentDetailPage} />
         <Route path="/tournaments/:id/edit" component={TournamentEditPage} />
         <Route path="/create" component={CreateTournament} />
+        
+        {/* Team Management - Jersey Watch-style standalone team system */}
+        <Route path="/teams" component={TeamListPage} />
+        <Route path="/teams/create" component={TeamCreatePage} />
         <Route path="/tournament/:id" component={Tournament} />
         <Route path="/embed/tournament/:id" component={EmbedTournament} />
         <Route path="/tournaments/:tournamentId/register" component={TournamentRegistration} />
