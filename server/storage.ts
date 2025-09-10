@@ -17,7 +17,8 @@ import {
   type ProfessionalPlayer, type InsertProfessionalPlayer,
   type MerchandiseProduct, type InsertMerchandiseProduct, type MerchandiseOrder, type InsertMerchandiseOrder,
   type EventTicket, type InsertEventTicket, type TicketOrder, type InsertTicketOrder,
-  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog, taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices, supportTeams, supportTeamMembers, supportTeamInjuries, supportTeamAiConsultations, jerseyTeamMembers, jerseyTeamPayments, tournamentSubscriptions, clientConfigurations, guestParticipants, passwordResetTokens, showdownContests, showdownEntries, showdownLeaderboards, professionalPlayers, merchandiseProducts, merchandiseOrders, eventTickets, ticketOrders
+  type TournamentRegistrationForm, type InsertTournamentRegistrationForm, type RegistrationSubmission, type InsertRegistrationSubmission, type RegistrationAssignmentLog, type InsertRegistrationAssignmentLog,
+  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog, taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices, supportTeams, supportTeamMembers, supportTeamInjuries, supportTeamAiConsultations, jerseyTeamMembers, jerseyTeamPayments, tournamentSubscriptions, clientConfigurations, guestParticipants, passwordResetTokens, showdownContests, showdownEntries, showdownLeaderboards, professionalPlayers, merchandiseProducts, merchandiseOrders, eventTickets, ticketOrders, tournamentRegistrationForms, registrationSubmissions, registrationAssignmentLog
 } from "@shared/schema";
 
 type SportCategory = typeof sportCategories.$inferSelect;
@@ -216,6 +217,44 @@ export interface IStorage {
   createTournament(tournament: InsertTournament): Promise<Tournament>;
   updateTournament(id: string, tournament: Partial<Tournament>): Promise<Tournament | undefined>;
   deleteTournament(id: string): Promise<boolean>;
+  
+  // Tournament Registration Form methods - Smart linking system
+  createTournamentRegistrationForm(form: InsertTournamentRegistrationForm): Promise<TournamentRegistrationForm>;
+  getTournamentRegistrationForm(id: string): Promise<TournamentRegistrationForm | undefined>;
+  getTournamentRegistrationFormsByTournament(tournamentId: string): Promise<TournamentRegistrationForm[]>;
+  getTournamentRegistrationFormsByOrganizer(organizerId: string): Promise<TournamentRegistrationForm[]>;
+  updateTournamentRegistrationForm(id: string, updates: Partial<TournamentRegistrationForm>): Promise<TournamentRegistrationForm | undefined>;
+  deleteTournamentRegistrationForm(id: string): Promise<boolean>;
+  
+  // Registration Submission methods - Smart participant management
+  createRegistrationSubmission(submission: InsertRegistrationSubmission): Promise<RegistrationSubmission>;
+  getRegistrationSubmission(id: string): Promise<RegistrationSubmission | undefined>;
+  getRegistrationSubmissionsByForm(formId: string): Promise<RegistrationSubmission[]>;
+  getRegistrationSubmissionsByTournament(tournamentId: string): Promise<RegistrationSubmission[]>;
+  updateRegistrationSubmission(id: string, updates: Partial<RegistrationSubmission>): Promise<RegistrationSubmission | undefined>;
+  deleteRegistrationSubmission(id: string): Promise<boolean>;
+  
+  // Smart Assignment methods - Automatic participant placement
+  assignSubmissionToTarget(submissionId: string, targetType: 'division' | 'event', targetId: string, reason: string): Promise<RegistrationSubmission | undefined>;
+  getCapacityStatus(tournamentId: string): Promise<{
+    divisions: Array<{ id: string; name: string; current: number; max: number; waitlist: number }>;
+    events: Array<{ id: string; name: string; current: number; max: number; waitlist: number }>;
+  }>;
+  processSubmissionAssignment(submissionId: string): Promise<RegistrationSubmission | undefined>;
+  
+  // Atomic capacity management - Thread-safe capacity operations
+  reserveCapacity(targetType: 'division' | 'event', targetId: string, count?: number): Promise<boolean>;
+  releaseCapacity(targetType: 'division' | 'event', targetId: string, count?: number): Promise<boolean>;
+  checkCapacityAvailable(targetType: 'division' | 'event', targetId: string, requiredCount?: number): Promise<boolean>;
+  
+  // Status transition helpers - Safe state management
+  transitionSubmissionStatus(submissionId: string, newStatus: 'pending' | 'assigned' | 'confirmed' | 'waitlisted' | 'rejected'): Promise<RegistrationSubmission | undefined>;
+  transitionAssignmentStatus(submissionId: string, newStatus: 'pending' | 'assigned' | 'confirmed' | 'waitlisted' | 'rejected'): Promise<RegistrationSubmission | undefined>;
+  
+  // Assignment Log methods - Track smart matching decisions
+  createRegistrationAssignmentLog(log: InsertRegistrationAssignmentLog): Promise<RegistrationAssignmentLog>;
+  getRegistrationAssignmentLogsBySubmission(submissionId: string): Promise<RegistrationAssignmentLog[]>;
+  getRegistrationAssignmentLogsByTournament(tournamentId: string): Promise<RegistrationAssignmentLog[]>;
   
   // Match methods
   getMatchesByTournament(tournamentId: string): Promise<Match[]>;

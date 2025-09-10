@@ -4766,3 +4766,161 @@ export const insertTicketOrderSchema = createInsertSchema(ticketOrders).omit({
   createdAt: true,
   updatedAt: true,
 });
+
+// SMART TOURNAMENT-REGISTRATION LINKING SYSTEM
+// Bridges registration forms to existing tournament divisions and events
+
+// Tournament Registration Forms - Define what data to collect for tournament registration
+export const tournamentRegistrationForms = pgTable("tournament_registration_forms", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tournamentId: varchar("tournament_id").notNull().references(() => tournaments.id),
+  organizerId: varchar("organizer_id").notNull().references(() => users.id),
+  formName: varchar("form_name").notNull(),
+  formDescription: text("form_description"),
+  
+  // Smart targeting configuration
+  targetDivisions: jsonb("target_divisions").$type<string[]>(), // tournamentDivisions.id references
+  targetEvents: jsonb("target_events").$type<string[]>(), // tournamentEvents.id references
+  
+  // Participant criteria for smart matching
+  participantCriteria: jsonb("participant_criteria").$type<{
+    ageRange?: { min: number; max: number };
+    gender?: "men" | "women" | "boys" | "girls" | "mixed" | "co-ed";
+    skillLevel?: "beginner" | "intermediate" | "advanced" | "expert";
+    sport?: string;
+    participantType?: "individual" | "team";
+  }>(),
+  
+  // Form configuration
+  collectsContactInfo: boolean("collects_contact_info").default(true),
+  collectsEmergencyContact: boolean("collects_emergency_contact").default(false),
+  collectsMedicalInfo: boolean("collects_medical_info").default(false),
+  requiresPayment: boolean("requires_payment").default(false),
+  entryFee: numeric("entry_fee").default("0"),
+  
+  // Form status and capacity
+  isActive: boolean("is_active").default(true),
+  registrationDeadline: timestamp("registration_deadline"),
+  maxRegistrations: integer("max_registrations"),
+  currentRegistrations: integer("current_registrations").default(0),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Registration Submissions - Individual participant submissions
+export const registrationSubmissions = pgTable("registration_submissions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  formId: varchar("form_id").notNull().references(() => tournamentRegistrationForms.id),
+  tournamentId: varchar("tournament_id").notNull().references(() => tournaments.id),
+  
+  // Participant information
+  participantName: varchar("participant_name").notNull(),
+  participantType: text("participant_type", { enum: ["individual", "team"] }).notNull(),
+  teamName: varchar("team_name"), // For team registrations
+  teamMembers: jsonb("team_members").$type<Array<{
+    name: string;
+    position?: string;
+    grade?: string;
+  }>>(), // For team registrations
+  
+  // Contact information
+  contactEmail: varchar("contact_email").notNull(),
+  contactPhone: varchar("contact_phone"),
+  emergencyContact: jsonb("emergency_contact").$type<{
+    name: string;
+    phone: string;
+    relationship: string;
+  }>(),
+  
+  // Participant criteria (for smart matching)
+  age: integer("age"),
+  grade: varchar("grade"),
+  gender: text("gender", { enum: ["men", "women", "boys", "girls", "mixed", "co-ed", "other"] }), // Aligned with form criteria
+  skillLevel: text("skill_level", { enum: ["beginner", "intermediate", "advanced", "expert"] }),
+  
+  // Event selections for multi-event tournaments (Track & Field, Swimming, etc.)
+  requestedEventIds: jsonb("requested_event_ids").$type<string[]>(), // Events participant wants to compete in
+  eventPreferences: jsonb("event_preferences").$type<{
+    priority: 'high' | 'medium' | 'low';
+    notes?: string;
+  }[]>(), // Optional preferences for event assignment
+  
+  // Smart assignment results
+  assignedDivisionId: varchar("assigned_division_id").references(() => tournamentDivisions.id),
+  assignedEventIds: jsonb("assigned_event_ids").$type<string[]>(),
+  assignmentStatus: text("assignment_status", {
+    enum: ["pending", "assigned", "confirmed", "waitlisted", "rejected"]
+  }).default("pending"),
+  seedNumber: integer("seed_number"), // Assigned seed in division
+  
+  // Payment and status
+  registrationStatus: text("registration_status", {
+    enum: ["draft", "submitted", "approved", "rejected", "withdrawn"]
+  }).default("draft"),
+  paymentStatus: text("payment_status", {
+    enum: ["unpaid", "pending", "paid", "refunded"]
+  }).default("unpaid"),
+  stripePaymentIntentId: varchar("stripe_payment_intent_id"),
+  
+  // Metadata
+  submittedAt: timestamp("submitted_at"),
+  processedAt: timestamp("processed_at"),
+  processedBy: varchar("processed_by").references(() => users.id),
+  notes: text("notes"), // Admin notes about assignment
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Registration Assignment Log - Track smart matching decisions
+export const registrationAssignmentLog = pgTable("registration_assignment_log", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  submissionId: varchar("submission_id").notNull().references(() => registrationSubmissions.id),
+  tournamentId: varchar("tournament_id").notNull().references(() => tournaments.id),
+  
+  // Assignment decision data
+  matchingCriteria: jsonb("matching_criteria").notNull(), // What criteria were used
+  availableTargets: jsonb("available_targets").notNull(), // What divisions/events were considered
+  selectedTarget: jsonb("selected_target").notNull(), // What was chosen and why
+  
+  // Capacity tracking at time of assignment
+  capacitySnapshot: jsonb("capacity_snapshot").$type<{
+    divisionId?: string;
+    eventId?: string;
+    currentCount: number;
+    maxCapacity: number;
+    waitlistCount: number;
+  }>(),
+  
+  assignmentReason: text("assignment_reason").notNull(), // "Best age/gender match", "Only available slot", etc.
+  wasAutomaticAssignment: boolean("was_automatic_assignment").default(true),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Type exports for smart tournament-registration linking
+export type TournamentRegistrationForm = typeof tournamentRegistrationForms.$inferSelect;
+export type InsertTournamentRegistrationForm = typeof tournamentRegistrationForms.$inferInsert;
+export type RegistrationSubmission = typeof registrationSubmissions.$inferSelect;
+export type InsertRegistrationSubmission = typeof registrationSubmissions.$inferInsert;
+export type RegistrationAssignmentLog = typeof registrationAssignmentLog.$inferSelect;
+export type InsertRegistrationAssignmentLog = typeof registrationAssignmentLog.$inferInsert;
+
+// Insert schemas for registration system
+export const insertTournamentRegistrationFormSchema = createInsertSchema(tournamentRegistrationForms).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertRegistrationSubmissionSchema = createInsertSchema(registrationSubmissions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertRegistrationAssignmentLogSchema = createInsertSchema(registrationAssignmentLog).omit({
+  id: true,
+  createdAt: true,
+});
