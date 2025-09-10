@@ -138,7 +138,7 @@ POST /api/domains/transfer        - Initiate domain transfer
 - Authentic nonprofit purpose vs profit-driven competitors
 
 #### 3. White-Label Integration ✅
-- Seamless integration with tournament platform
+- Smart linking with tournament platform features
 - Automatic nameserver configuration
 - Professional setup out of the box
 

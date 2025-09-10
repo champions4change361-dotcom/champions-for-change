@@ -182,10 +182,10 @@ export default function TournamentOnboarding() {
         <div className="bg-gradient-to-r from-green-600 to-blue-600 text-white p-8 rounded-xl">
           <div className="text-center">
             <Sparkles className="h-8 w-8 mx-auto mb-4" />
-            <h3 className="text-2xl font-bold mb-4">Seamless Integration</h3>
+            <h3 className="text-2xl font-bold mb-4">Smart Linking System</h3>
             <p className="text-lg text-green-100 max-w-3xl mx-auto mb-6">
-              No matter which path you choose, registration and brackets work together automatically. 
-              Teams flow into brackets, brackets set registration limits, and everything updates in real-time.
+              Both paths use our smart linking technology to connect registration data with tournament brackets. 
+              Participants are intelligently assigned to divisions and events, and brackets are generated with skill-based seeding.
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
