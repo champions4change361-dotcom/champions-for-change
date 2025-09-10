@@ -7,128 +7,277 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
-import { Trophy, User, Mail, Phone, Calendar, MapPin, Target, Users, CheckCircle, AlertCircle } from 'lucide-react';
+import { Trophy, User, Mail, Phone, Calendar, MapPin, Target, Users, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { apiRequest } from '@/lib/queryClient';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
-// Registration form schema
+// Smart tournament registration schema matching database schema
 const registrationSchema = z.object({
   participantName: z.string().min(1, 'Participant name is required'),
-  email: z.string().email('Valid email is required'),
-  phone: z.string().optional(),
-  emergencyContact: z.string().optional(),
-  emergencyPhone: z.string().optional(),
-  selectedEvents: z.array(z.string()).min(1, 'At least one event must be selected'),
+  participantType: z.enum(['individual', 'team']).default('individual'),
+  teamName: z.string().optional(),
+  
+  // Contact information (matching database schema)
+  contactEmail: z.string().email('Valid email address is required'),
+  contactPhone: z.string().optional(),
+  emergencyContact: z.object({
+    name: z.string().optional(),
+    phone: z.string().optional(),
+    relationship: z.string().optional()
+  }).optional(),
+  
+  // Participant criteria for smart assignment - fix age field conversion
+  age: z.coerce.number().min(5).max(25),
+  grade: z.string().optional(),
+  gender: z.enum(['boys', 'girls', 'men', 'women', 'mixed', 'co-ed', 'other']),
+  skillLevel: z.enum(['beginner', 'intermediate', 'advanced', 'expert']),
+  
+  // Multi-sport selections - support both divisions and events
+  requestedEventIds: z.array(z.string()).optional().default([]),
+  requestedDivisionIds: z.array(z.string()).optional().default([]),
+  eventPreferences: z.array(z.object({
+    priority: z.enum(['high', 'medium', 'low']),
+    notes: z.string().optional()
+  })).optional(),
 });
 
-type RegistrationFormData = z.infer<typeof registrationSchema>;
+// Refine to ensure at least one selection is made
+const refinedRegistrationSchema = registrationSchema.refine(
+  (data) => (data.requestedEventIds?.length ?? 0) > 0 || (data.requestedDivisionIds?.length ?? 0) > 0,
+  {
+    message: 'At least one event or division must be selected',
+    path: ['requestedEventIds']
+  }
+);
 
-// Mock tournament data for development
-const mockTournament = {
-  id: 'tour-001',
-  name: 'Spring Track & Field Championship',
-  sport: 'Track & Field',
-  date: '2025-09-15T09:00:00.000Z',
-  location: 'Athletic Complex, 123 Stadium Drive',
-  entryFee: '25.00',
-  description: 'Annual spring championship featuring multiple track and field events',
-  registrationDeadline: '2025-09-10T23:59:59.000Z',
-  events: [
-    {
-      eventName: '100m Sprint',
-      eventType: 'Track',
-      scoringUnit: 'seconds',
-      description: '100 meter sprint race',
-      participantLimit: 8,
-      currentParticipants: 3,
-    },
-    {
-      eventName: 'Long Jump',
-      eventType: 'Field',
-      scoringUnit: 'meters',
-      description: 'Long jump competition',
-      participantLimit: 12,
-      currentParticipants: 7,
-    },
-    {
-      eventName: '200m Sprint',
-      eventType: 'Track',
-      scoringUnit: 'seconds',
-      description: '200 meter sprint race',
-      participantLimit: 8,
-      currentParticipants: 2,
-    },
-    {
-      eventName: 'Shot Put',
-      eventType: 'Field',
-      scoringUnit: 'meters',
-      description: 'Shot put throwing competition',
-      participantLimit: 10,
-      currentParticipants: 5,
-    },
-  ],
-};
+type RegistrationFormData = z.infer<typeof refinedRegistrationSchema>;
+
+// Tournament and form data types
+interface TournamentEvent {
+  id: string;
+  eventName: string;
+  eventType: string;
+  description?: string;
+  participantLimit: number;
+  currentParticipants: number;
+  scoringMethod?: string;
+  measurementUnit?: string;
+}
+
+interface TournamentDivision {
+  id: string;
+  divisionName: string;
+  divisionType: string;
+  participantCount: number;
+  maxParticipants: number;
+  divisionConfig: any;
+}
+
+interface Tournament {
+  id: string;
+  name: string;
+  sport: string;
+  tournamentDate: string;
+  location: string;
+  entryFee: string;
+  description?: string;
+  registrationDeadline?: string;
+  status: string;
+  competitionFormat: string;
+}
+
+interface RegistrationForm {
+  id: string;
+  tournamentId: string;
+  formName: string;
+  formDescription?: string;
+  targetDivisions?: string[];
+  targetEvents?: string[];
+  participantCriteria: any;
+  entryFee: string;
+  registrationDeadline?: string;
+  maxRegistrations?: number;
+  currentRegistrations: number;
+}
+
 
 export default function TournamentRegistration() {
   const { tournamentId } = useParams();
   const { toast } = useToast();
-  const [tournament, setTournament] = useState(mockTournament);
-  const [isLoading, setIsLoading] = useState(false);
+  const queryClient = useQueryClient();
   const [isRegistered, setIsRegistered] = useState(false);
+  const [assignmentResult, setAssignmentResult] = useState<any>(null);
+
+  // Fetch tournament data
+  const { data: tournament, isLoading: tournamentLoading, error: tournamentError } = useQuery<Tournament>({
+    queryKey: ['/api/tournaments', tournamentId],
+    enabled: !!tournamentId,
+  });
+
+  // Fetch tournament events if tournament supports events
+  const { data: events = [], isLoading: eventsLoading } = useQuery<TournamentEvent[]>({
+    queryKey: ['/api/tournaments', tournamentId, 'events'],
+    enabled: !!tournamentId && tournament?.competitionFormat !== 'bracket',
+  });
+
+  // Fetch tournament divisions if tournament supports divisions
+  const { data: divisions = [], isLoading: divisionsLoading } = useQuery<TournamentDivision[]>({
+    queryKey: ['/api/tournaments', tournamentId, 'divisions'],  
+    enabled: !!tournamentId && tournament?.competitionFormat === 'bracket',
+  });
+
+  // Fetch registration form for this tournament
+  const { data: registrationForm, isLoading: formLoading } = useQuery<RegistrationForm>({
+    queryKey: ['/api/registration-forms', 'tournament', tournamentId],
+    enabled: !!tournamentId,
+  });
+
+  const isLoading = tournamentLoading || eventsLoading || divisionsLoading || formLoading;
 
   const form = useForm<RegistrationFormData>({
-    resolver: zodResolver(registrationSchema),
+    resolver: zodResolver(refinedRegistrationSchema),
     defaultValues: {
       participantName: '',
-      email: '',
-      phone: '',
-      emergencyContact: '',
-      emergencyPhone: '',
-      selectedEvents: [],
+      participantType: 'individual' as const,
+      teamName: '',
+      contactEmail: '',
+      contactPhone: '',
+      emergencyContact: {
+        name: '',
+        phone: '',
+        relationship: ''
+      },
+      age: 12,
+      grade: '',
+      gender: 'boys' as const,
+      skillLevel: 'intermediate' as const,
+      requestedEventIds: [],
+      requestedDivisionIds: [],
+      eventPreferences: [],
     },
   });
 
-  // Calculate total fee
-  const selectedEventsCount = form.watch('selectedEvents')?.length || 0;
-  const totalFee = selectedEventsCount * parseFloat(tournament.entryFee || '0');
+  // Calculate total fee based on selections
+  const selectedEventsCount = form.watch('requestedEventIds')?.length || 0;
+  const selectedDivisionsCount = form.watch('requestedDivisionIds')?.length || 0;
+  const totalSelections = selectedEventsCount + selectedDivisionsCount;
+  const baseFee = parseFloat(registrationForm?.entryFee || tournament?.entryFee || '0');
+  const totalFee = totalSelections * baseFee;
 
-  const handleEventToggle = (eventName: string, checked: boolean) => {
-    const currentEvents = form.getValues('selectedEvents') || [];
+  const handleEventToggle = (eventId: string, checked: boolean) => {
+    const currentEvents = form.getValues('requestedEventIds') || [];
     
     if (checked) {
-      form.setValue('selectedEvents', [...currentEvents, eventName]);
+      form.setValue('requestedEventIds', [...currentEvents, eventId]);
     } else {
-      form.setValue('selectedEvents', currentEvents.filter(e => e !== eventName));
+      form.setValue('requestedEventIds', currentEvents.filter(e => e !== eventId));
     }
   };
 
-  const onSubmit = async (data: RegistrationFormData) => {
-    setIsLoading(true);
+  const handleDivisionToggle = (divisionId: string, checked: boolean) => {
+    const currentDivisions = form.getValues('requestedDivisionIds') || [];
     
-    try {
-      // Simulate API call for registration
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      toast({
-        title: 'Registration Successful!',
-        description: `You've been registered for ${data.selectedEvents.length} events.`,
+    if (checked) {
+      form.setValue('requestedDivisionIds', [...currentDivisions, divisionId]);
+    } else {
+      form.setValue('requestedDivisionIds', currentDivisions.filter(d => d !== divisionId));
+    }
+  };
+
+  // Registration submission mutation
+  const registrationMutation = useMutation({
+    mutationFn: async (data: RegistrationFormData) => {
+      if (!registrationForm?.id && !tournament?.id) {
+        throw new Error('Tournament or registration form not found');
+      }
+
+      const formId = registrationForm?.id || `form_${tournament?.id}`;
+      const response = await apiRequest('POST', `/api/registration-forms/${formId}/submit`, {
+        formId,
+        tournamentId: tournament?.id,
+        ...data,
+        requestedEventIds: data.requestedEventIds || [],
+        requestedDivisionIds: data.requestedDivisionIds || []
       });
       
-      setIsRegistered(true);
-    } catch (error) {
+      // Fix: apiRequest returns Response, need to parse JSON
+      return await response.json();
+    },
+    onSuccess: (result) => {
+      if (result.success) {
+        toast({
+          title: 'Smart Assignment Complete!',
+          description: `Successfully registered with ${result.submission?.assignmentResult?.success ? 'automatic placement' : 'waitlist placement'}.`,
+        });
+        
+        console.log('🎯 Smart assignment result:', result.submission?.assignmentResult);
+        setAssignmentResult(result.submission?.assignmentResult);
+        setIsRegistered(true);
+        
+        // Invalidate queries to refresh data
+        queryClient.invalidateQueries({ queryKey: ['/api/tournaments'] });
+      } else {
+        throw new Error(result.error || 'Registration failed');
+      }
+    },
+    onError: (error: any) => {
+      console.error('Smart registration failed:', error);
       toast({
         title: 'Registration Failed',
-        description: 'Please try again or contact support.',
+        description: error.message || 'Please try again or contact support.',
         variant: 'destructive',
       });
-    } finally {
-      setIsLoading(false);
     }
+  });
+
+  const onSubmit = (data: RegistrationFormData) => {
+    registrationMutation.mutate(data);
   };
 
+  // Handle loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50 py-8 px-4">
+        <div className="max-w-2xl mx-auto flex items-center justify-center">
+          <Card>
+            <CardContent className="pt-8 text-center">
+              <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-blue-500" />
+              <h2 className="text-xl font-semibold mb-2">Loading Tournament...</h2>
+              <p className="text-gray-600">Fetching tournament details and registration information.</p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // Handle error state
+  if (tournamentError || !tournament) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 py-8 px-4">
+        <div className="max-w-2xl mx-auto">
+          <Card>
+            <CardContent className="pt-8 text-center">
+              <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-red-900 mb-2">Tournament Not Found</h2>
+              <p className="text-red-700 mb-6">
+                The tournament you're looking for doesn't exist or registration is closed.
+              </p>
+              <Button onClick={() => window.location.href = '/tournaments'} data-testid="button-back-tournaments">
+                Browse Tournaments
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // Handle registration success state
   if (isRegistered) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 py-8 px-4">
@@ -140,7 +289,25 @@ export default function TournamentRegistration() {
               <p className="text-green-700 mb-6">
                 You've successfully registered for the tournament. You'll receive a confirmation email shortly.
               </p>
-              <Button onClick={() => window.location.href = '/tournaments'}>
+              
+              {assignmentResult && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 text-left">
+                  <h3 className="font-semibold text-blue-900 mb-2">Assignment Result:</h3>
+                  <div className="space-y-2 text-sm text-blue-800">
+                    {assignmentResult.assignedDivision && (
+                      <p>Division: <span className="font-medium">{assignmentResult.assignedDivision}</span></p>
+                    )}
+                    {assignmentResult.assignedEvents && assignmentResult.assignedEvents.length > 0 && (
+                      <p>Events: <span className="font-medium">{assignmentResult.assignedEvents.join(', ')}</span></p>
+                    )}
+                    {assignmentResult.seedNumber && (
+                      <p>Seed: <span className="font-medium">#{assignmentResult.seedNumber}</span></p>
+                    )}
+                  </div>
+                </div>
+              )}
+              
+              <Button onClick={() => window.location.href = '/tournaments'} data-testid="button-view-tournaments">
                 View All Tournaments
               </Button>
             </CardContent>
@@ -163,7 +330,7 @@ export default function TournamentRegistration() {
                   {tournament.name}
                 </CardTitle>
                 <CardDescription className="text-base">
-                  {tournament.sport} • {new Date(tournament.date).toLocaleDateString()}
+                  {tournament.sport} • {tournament.tournamentDate ? new Date(tournament.tournamentDate).toLocaleDateString() : 'Date TBD'}
                 </CardDescription>
               </div>
               <Badge variant="secondary" className="text-sm">
@@ -176,87 +343,179 @@ export default function TournamentRegistration() {
             <div className="grid md:grid-cols-2 gap-4 text-sm">
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-gray-500" />
-                <span>{new Date(tournament.date).toLocaleDateString()} at {new Date(tournament.date).toLocaleTimeString()}</span>
+                <span>
+                  {tournament.tournamentDate ? (
+                    `${new Date(tournament.tournamentDate).toLocaleDateString()} at ${new Date(tournament.tournamentDate).toLocaleTimeString()}`
+                  ) : 'Date TBD'}
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-gray-500" />
-                <span>{tournament.location}</span>
+                <span>{tournament.location || 'Location TBD'}</span>
               </div>
             </div>
             
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-              <div className="flex items-center gap-2 text-blue-900 font-medium text-sm">
-                <AlertCircle className="h-4 w-4" />
-                Registration Deadline: {new Date(tournament.registrationDeadline).toLocaleDateString()}
+            {(registrationForm?.registrationDeadline || tournament.registrationDeadline) && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <div className="flex items-center gap-2 text-blue-900 font-medium text-sm">
+                  <AlertCircle className="h-4 w-4" />
+                  Registration Deadline: {new Date(registrationForm?.registrationDeadline || tournament.registrationDeadline || '').toLocaleDateString()}
+                </div>
               </div>
-            </div>
+            )}
           </CardContent>
         </Card>
 
         <div className="grid lg:grid-cols-3 gap-6">
-          {/* Event Selection */}
+          {/* Dynamic Selection - Events OR Divisions */}
           <div className="lg:col-span-2 space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Target className="h-5 w-5" />
-                  Select Events
-                </CardTitle>
-                <CardDescription>
-                  Choose which events you want to compete in. You can select multiple events.
-                </CardDescription>
-              </CardHeader>
-              
-              <CardContent className="space-y-4">
-                {tournament.events.map((event, index) => {
-                  const isSelected = form.watch('selectedEvents')?.includes(event.eventName);
-                  const spotsRemaining = event.participantLimit - event.currentParticipants;
-                  const isFull = spotsRemaining <= 0;
-                  
-                  return (
-                    <div key={index} className={`border rounded-lg p-4 ${
-                      isSelected ? 'border-green-200 bg-green-50' : 'border-gray-200'
-                    } ${isFull ? 'opacity-50' : ''}`}>
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-3 flex-1">
-                          <Checkbox
-                            checked={isSelected}
-                            disabled={isFull && !isSelected}
-                            onCheckedChange={(checked) => handleEventToggle(event.eventName, checked as boolean)}
-                          />
-                          <div className="space-y-1">
-                            <h4 className="font-medium">{event.eventName}</h4>
-                            <p className="text-sm text-gray-600">{event.description}</p>
-                            <div className="flex items-center gap-4 text-xs text-gray-500">
-                              <span>Scoring: {event.scoringUnit}</span>
-                              <span>•</span>
-                              <span className={spotsRemaining <= 3 ? 'text-orange-600 font-medium' : ''}>
-                                {spotsRemaining} spots remaining
-                              </span>
+            {/* Events Section (for Track & Field, Swimming, etc.) */}
+            {events && events.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Target className="h-5 w-5" />
+                    Select Events
+                  </CardTitle>
+                  <CardDescription>
+                    Choose which events you want to compete in. You can select multiple events.
+                  </CardDescription>
+                </CardHeader>
+                
+                <CardContent className="space-y-4">
+                  {events.map((event: TournamentEvent) => {
+                    const isSelected = form.watch('requestedEventIds')?.includes(event.id);
+                    const spotsRemaining = event.participantLimit - event.currentParticipants;
+                    const isFull = spotsRemaining <= 0;
+                    
+                    return (
+                      <div key={event.id} className={`border rounded-lg p-4 ${
+                        isSelected ? 'border-green-200 bg-green-50' : 'border-gray-200'
+                      } ${isFull ? 'opacity-50' : ''}`}>
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-3 flex-1">
+                            <Checkbox
+                              checked={isSelected}
+                              disabled={isFull && !isSelected}
+                              onCheckedChange={(checked) => handleEventToggle(event.id, checked as boolean)}
+                              data-testid={`checkbox-event-${event.id}`}
+                            />
+                            <div className="space-y-1">
+                              <h4 className="font-medium">{event.eventName}</h4>
+                              {event.description && (
+                                <p className="text-sm text-gray-600">{event.description}</p>
+                              )}
+                              <div className="flex items-center gap-4 text-xs text-gray-500">
+                                {event.measurementUnit && (
+                                  <>
+                                    <span>Scoring: {event.measurementUnit}</span>
+                                    <span>•</span>
+                                  </>
+                                )}
+                                <span className={spotsRemaining <= 3 ? 'text-orange-600 font-medium' : ''}>
+                                  {spotsRemaining} spots remaining
+                                </span>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                        
-                        <div className="flex flex-col items-end gap-1">
-                          <Badge variant={event.eventType === 'Track' ? 'default' : 'secondary'} className="text-xs">
-                            {event.eventType}
-                          </Badge>
-                          {isFull && (
-                            <Badge variant="destructive" className="text-xs">
-                              Full
+                          
+                          <div className="flex flex-col items-end gap-1">
+                            <Badge variant={event.eventType === 'Track' ? 'default' : 'secondary'} className="text-xs">
+                              {event.eventType}
                             </Badge>
-                          )}
+                            {isFull && (
+                              <Badge variant="destructive" className="text-xs">
+                                Full
+                              </Badge>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Divisions Section (for Basketball, Soccer, etc.) */}
+            {divisions && divisions.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Target className="h-5 w-5" />
+                    Select Division
+                  </CardTitle>
+                  <CardDescription>
+                    Choose which age/skill division you want to compete in.
+                  </CardDescription>
+                </CardHeader>
                 
-                {form.formState.errors.selectedEvents && (
-                  <p className="text-sm text-red-600">{form.formState.errors.selectedEvents.message}</p>
-                )}
-              </CardContent>
-            </Card>
+                <CardContent className="space-y-4">
+                  {divisions.map((division: TournamentDivision) => {
+                    const isSelected = form.watch('requestedDivisionIds')?.includes(division.id);
+                    const spotsRemaining = division.maxParticipants - division.participantCount;
+                    const isFull = spotsRemaining <= 0;
+                    
+                    return (
+                      <div key={division.id} className={`border rounded-lg p-4 ${
+                        isSelected ? 'border-green-200 bg-green-50' : 'border-gray-200'
+                      } ${isFull ? 'opacity-50' : ''}`}>
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-3 flex-1">
+                            <Checkbox
+                              checked={isSelected}
+                              disabled={isFull && !isSelected}
+                              onCheckedChange={(checked) => handleDivisionToggle(division.id, checked as boolean)}
+                              data-testid={`checkbox-division-${division.id}`}
+                            />
+                            <div className="space-y-1">
+                              <h4 className="font-medium">{division.divisionName}</h4>
+                              <div className="flex items-center gap-4 text-xs text-gray-500">
+                                <span>Type: {division.divisionType}</span>
+                                <span>•</span>
+                                <span>Current: {division.participantCount}/{division.maxParticipants}</span>
+                                <span>•</span>
+                                <span className={spotsRemaining <= 3 ? 'text-orange-600 font-medium' : ''}>
+                                  {spotsRemaining} spots remaining
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="flex flex-col items-end gap-1">
+                            <Badge variant="outline" className="text-xs">
+                              {division.divisionType}
+                            </Badge>
+                            {isFull && (
+                              <Badge variant="destructive" className="text-xs">
+                                Full
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </CardContent>
+              </Card>
+            )}
+            
+            {/* No events or divisions available */}
+            {(!events || events.length === 0) && (!divisions || divisions.length === 0) && (
+              <Card>
+                <CardContent className="pt-8 text-center">
+                  <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Registration Options Available</h3>
+                  <p className="text-gray-600">
+                    This tournament doesn't have any available events or divisions for registration at this time.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+            
+            {form.formState.errors.requestedEventIds && (
+              <p className="text-sm text-red-600">{form.formState.errors.requestedEventIds.message}</p>
+            )}
 
             {/* Registration Form */}
             <Card>
@@ -283,46 +542,64 @@ export default function TournamentRegistration() {
                     </div>
                     
                     <div>
-                      <Label htmlFor="email">Email Address *</Label>
+                      <Label htmlFor="contactEmail">Email Address *</Label>
                       <Input
                         type="email"
-                        {...form.register('email')}
+                        {...form.register('contactEmail')}
                         placeholder="participant@email.com"
                         data-testid="input-email"
                       />
-                      {form.formState.errors.email && (
-                        <p className="text-sm text-red-600 mt-1">{form.formState.errors.email.message}</p>
+                      {form.formState.errors.contactEmail && (
+                        <p className="text-sm text-red-600 mt-1">{form.formState.errors.contactEmail.message}</p>
                       )}
                     </div>
                   </div>
                   
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="phone">Phone Number</Label>
+                      <Label htmlFor="contactPhone">Phone Number</Label>
                       <Input
-                        {...form.register('phone')}
+                        {...form.register('contactPhone')}
                         placeholder="(555) 123-4567"
                         data-testid="input-phone"
                       />
                     </div>
                     
                     <div>
-                      <Label htmlFor="emergencyContact">Emergency Contact</Label>
+                      <Label htmlFor="age">Age *</Label>
                       <Input
-                        {...form.register('emergencyContact')}
+                        type="number"
+                        {...form.register('age', { 
+                          valueAsNumber: true,
+                          setValueAs: (value) => value === '' ? undefined : Number(value)
+                        })}
+                        placeholder="12"
+                        data-testid="input-age"
+                      />
+                      {form.formState.errors.age && (
+                        <p className="text-sm text-red-600 mt-1">{form.formState.errors.age.message}</p>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="emergencyContact.name">Emergency Contact Name</Label>
+                      <Input
+                        {...form.register('emergencyContact.name')}
                         placeholder="Emergency contact name"
                         data-testid="input-emergency-contact"
                       />
                     </div>
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="emergencyPhone">Emergency Phone</Label>
-                    <Input
-                      {...form.register('emergencyPhone')}
-                      placeholder="Emergency contact phone"
-                      data-testid="input-emergency-phone"
-                    />
+                    
+                    <div>
+                      <Label htmlFor="emergencyContact.phone">Emergency Phone</Label>
+                      <Input
+                        {...form.register('emergencyContact.phone')}
+                        placeholder="Emergency contact phone"
+                        data-testid="input-emergency-phone"
+                      />
+                    </div>
                   </div>
                 </form>
               </CardContent>
@@ -339,13 +616,13 @@ export default function TournamentRegistration() {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span>Selected Events:</span>
-                    <span className="font-medium">{selectedEventsCount}</span>
+                    <span>Selected Items:</span>
+                    <span className="font-medium">{totalSelections}</span>
                   </div>
                   
                   <div className="flex justify-between text-sm">
-                    <span>Fee per Event:</span>
-                    <span>${tournament.entryFee}</span>
+                    <span>Fee per Item:</span>
+                    <span>${baseFee.toFixed(2)}</span>
                   </div>
                   
                   <Separator />
@@ -356,15 +633,26 @@ export default function TournamentRegistration() {
                   </div>
                 </div>
                 
-                {selectedEventsCount > 0 && (
+                {totalSelections > 0 && (
                   <div className="space-y-2">
-                    <h4 className="font-medium text-sm">Selected Events:</h4>
+                    <h4 className="font-medium text-sm">Selected Items:</h4>
                     <div className="space-y-1">
-                      {form.watch('selectedEvents')?.map((eventName, index) => (
-                        <div key={index} className="text-xs bg-gray-50 rounded px-2 py-1">
-                          {eventName}
-                        </div>
-                      ))}
+                      {form.watch('requestedEventIds')?.map((eventId) => {
+                        const event = events?.find(e => e.id === eventId);
+                        return event ? (
+                          <div key={eventId} className="text-xs bg-blue-50 rounded px-2 py-1">
+                            {event.eventName}
+                          </div>
+                        ) : null;
+                      })}
+                      {form.watch('requestedDivisionIds')?.map((divisionId) => {
+                        const division = divisions?.find(d => d.id === divisionId);
+                        return division ? (
+                          <div key={divisionId} className="text-xs bg-green-50 rounded px-2 py-1">
+                            {division.divisionName}
+                          </div>
+                        ) : null;
+                      })}
                     </div>
                   </div>
                 )}
@@ -372,13 +660,13 @@ export default function TournamentRegistration() {
                 <Button
                   type="submit"
                   onClick={form.handleSubmit(onSubmit)}
-                  disabled={isLoading || selectedEventsCount === 0}
+                  disabled={registrationMutation.isPending || totalSelections === 0}
                   className="w-full"
                   data-testid="button-register"
                 >
-                  {isLoading ? (
+                  {registrationMutation.isPending ? (
                     <>
-                      <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2" />
+                      <Loader2 className="animate-spin h-4 w-4 mr-2" />
                       Processing...
                     </>
                   ) : (
