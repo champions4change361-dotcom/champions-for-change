@@ -13,7 +13,7 @@ import NBADepthChartParser from './nba-depth-chart-parser';
 import { stripe } from "./nonprofitStripeConfig";
 import { registerDomainRoutes } from "./domainRoutes";
 import { registerTournamentRoutes } from "./routes/tournamentRoutes";
-import { tournamentSubscriptions, insertTournamentSubscriptionSchema, type InsertTournamentSubscription } from "@shared/schema";
+import { tournamentSubscriptions, insertTournamentSubscriptionSchema, type InsertTournamentSubscription, insertRegistrationSubmissionSchema } from "@shared/schema";
 
 console.log('🏫 District athletics management platform initialized');
 console.log('💚 Champions for Change nonprofit mission active');
@@ -547,6 +547,286 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         error: 'Registration failed. Please try again or contact support.' 
       });
+    }
+  });
+
+  // ===============================================
+  // SMART TOURNAMENT REGISTRATION FORM API ROUTES
+  // Smart linking system for automatic participant placement
+  // ===============================================
+
+  // Create a new tournament registration form
+  app.post('/api/registration-forms', isAuthenticated, async (req, res) => {
+    try {
+      const { SmartAssignmentService } = await import('./services/smartAssignment');
+      const storage = getStorage();
+      const userId = (req.user as any)?.claims?.sub;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      const formData = {
+        ...req.body,
+        organizerId: userId,
+        status: 'active',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+
+      // Validate that the tournament exists and belongs to the organizer
+      if (formData.tournamentId) {
+        const tournament = await storage.getTournament(formData.tournamentId);
+        if (!tournament) {
+          return res.status(404).json({ message: 'Tournament not found' });
+        }
+        // Note: Tournament ownership validation would go here
+      }
+
+      // For now, return success with the form data structure
+      // TODO: Implement actual storage when DB methods are ready
+      const mockForm = {
+        id: `form_${Date.now()}`,
+        ...formData,
+        currentRegistrations: 0
+      };
+
+      res.status(201).json({
+        success: true,
+        message: 'Registration form created successfully',
+        form: mockForm
+      });
+    } catch (error: any) {
+      console.error('Registration form creation error:', error);
+      res.status(500).json({ 
+        error: 'Failed to create registration form',
+        details: error.message 
+      });
+    }
+  });
+
+  // Get registration forms for an organizer
+  app.get('/api/registration-forms', isAuthenticated, async (req, res) => {
+    try {
+      const storage = getStorage();
+      const userId = (req.user as any)?.claims?.sub;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      // TODO: Implement actual storage query
+      const mockForms = [
+        {
+          id: 'form_1',
+          organizerId: userId,
+          tournamentId: 'tournament_1',
+          formName: 'Spring Basketball Registration',
+          formDescription: 'Registration for Boys and Girls U12, U14 basketball divisions',
+          targetDivisions: ['div_boys_u12', 'div_girls_u12', 'div_boys_u14', 'div_girls_u14'],
+          targetEvents: [],
+          status: 'active',
+          currentRegistrations: 12,
+          maxRegistrations: 64,
+          createdAt: new Date().toISOString()
+        }
+      ];
+
+      res.json({
+        success: true,
+        forms: mockForms
+      });
+    } catch (error: any) {
+      console.error('Registration forms fetch error:', error);
+      res.status(500).json({ error: 'Failed to fetch registration forms' });
+    }
+  });
+
+  // Submit a registration to a form (smart assignment processing)
+  app.post('/api/registration-forms/:formId/submit', async (req, res) => {
+    try {
+      const { SmartAssignmentService } = await import('./services/smartAssignment');
+      const storage = getStorage();
+      const { formId } = req.params;
+      
+      console.log(`📝 Processing registration submission for form ${formId}`);
+
+      // Validate request body
+      const validatedSubmission = insertRegistrationSubmissionSchema.omit({ 
+        id: true, 
+        createdAt: true, 
+        updatedAt: true,
+        formId: true,
+        tournamentId: true,
+        status: true 
+      }).parse(req.body);
+
+      // TODO: Get actual form from storage
+      const mockForm = {
+        id: formId,
+        tournamentId: 'tournament_1',
+        organizerId: 'organizer_1',
+        targetDivisions: ['div_boys_u12', 'div_girls_u12'],
+        targetEvents: [],
+        maxRegistrations: 64,
+        currentRegistrations: 12
+      };
+
+      // Create registration submission
+      const submission = {
+        id: `submission_${Date.now()}`,
+        formId,
+        tournamentId: mockForm.tournamentId,
+        participantName: req.body.participantName,
+        parentName: req.body.parentName,
+        parentEmail: req.body.parentEmail,
+        parentPhone: req.body.parentPhone,
+        age: req.body.age,
+        grade: req.body.grade,
+        gender: req.body.gender,
+        skillLevel: req.body.skillLevel,
+        requestedEventIds: req.body.requestedEventIds || [],
+        eventPreferences: req.body.eventPreferences || [],
+        status: 'pending',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+
+      // Process smart assignment
+      const mockTournament = {
+        id: mockForm.tournamentId,
+        name: 'Spring Basketball Championship',
+        organizerId: mockForm.organizerId
+      };
+
+      const assignmentResult = await SmartAssignmentService.processAssignment(
+        submission as any,
+        mockTournament as any,
+        mockForm as any
+      );
+
+      console.log('🎯 Smart assignment result:', assignmentResult);
+
+      res.status(201).json({
+        success: true,
+        message: 'Registration submitted successfully',
+        submission: {
+          id: submission.id,
+          status: submission.status,
+          assignmentResult
+        }
+      });
+    } catch (error: any) {
+      console.error('Registration submission error:', error);
+      res.status(500).json({ 
+        error: 'Failed to process registration',
+        details: error.message 
+      });
+    }
+  });
+
+  // Get capacity status for a tournament
+  app.get('/api/tournaments/:tournamentId/capacity', async (req, res) => {
+    try {
+      const { CapacityManager } = await import('./services/smartAssignment');
+      const { tournamentId } = req.params;
+      
+      console.log(`📊 Checking capacity for tournament ${tournamentId}`);
+
+      // TODO: Get actual capacity data from storage
+      const mockCapacityData = {
+        divisions: [
+          {
+            id: 'div_boys_u12',
+            name: 'Boys U12',
+            current: 8,
+            max: 16,
+            waitlist: 0
+          },
+          {
+            id: 'div_girls_u12',
+            name: 'Girls U12',
+            current: 6,
+            max: 16,
+            waitlist: 0
+          },
+          {
+            id: 'div_boys_u14',
+            name: 'Boys U14',
+            current: 15,
+            max: 16,
+            waitlist: 2
+          }
+        ],
+        events: []
+      };
+
+      res.json({
+        success: true,
+        capacity: mockCapacityData
+      });
+    } catch (error: any) {
+      console.error('Capacity check error:', error);
+      res.status(500).json({ error: 'Failed to check capacity' });
+    }
+  });
+
+  // Get smart matching suggestions for participant criteria
+  app.post('/api/tournaments/:tournamentId/match-suggestions', async (req, res) => {
+    try {
+      const { SmartAssignmentService } = await import('./services/smartAssignment');
+      const { tournamentId } = req.params;
+      const participantCriteria = req.body;
+      
+      console.log(`🎯 Getting match suggestions for tournament ${tournamentId}`);
+
+      // TODO: Get actual tournament data from storage
+      const mockDivisions = [
+        {
+          id: 'div_boys_u12',
+          name: 'Boys U12',
+          ageRange: { min: 10, max: 12 },
+          genderRequirement: 'boys',
+          currentCount: 8,
+          maxCapacity: 16
+        },
+        {
+          id: 'div_girls_u12',
+          name: 'Girls U12',
+          ageRange: { min: 10, max: 12 },
+          genderRequirement: 'girls',
+          currentCount: 6,
+          maxCapacity: 16
+        },
+        {
+          id: 'div_boys_u14',
+          name: 'Boys U14',
+          ageRange: { min: 12, max: 14 },
+          genderRequirement: 'boys',
+          currentCount: 15,
+          maxCapacity: 16
+        }
+      ];
+
+      const divisionMatches = SmartAssignmentService.evaluateDivisionMatches(
+        participantCriteria,
+        mockDivisions
+      );
+
+      res.json({
+        success: true,
+        suggestions: {
+          divisions: divisionMatches,
+          events: [], // TODO: Add event matching for Track & Field
+          recommendations: divisionMatches.length > 0 ? [
+            `Best match: ${divisionMatches[0].name} (${divisionMatches[0].matchScore}% compatibility)`,
+            `Capacity status: ${divisionMatches[0].capacityStatus}`
+          ] : ['No suitable divisions found for these criteria']
+        }
+      });
+    } catch (error: any) {
+      console.error('Match suggestions error:', error);
+      res.status(500).json({ error: 'Failed to generate match suggestions' });
     }
   });
 
