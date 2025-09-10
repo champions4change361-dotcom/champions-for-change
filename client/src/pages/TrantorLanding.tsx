@@ -60,6 +60,14 @@ export default function TrantorLanding() {
                   Sign In
                 </Button>
                 <Button 
+                  onClick={() => setLocation('/donate')}
+                  className="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base w-full lg:w-auto border border-red-400 shadow-lg"
+                  data-testid="button-donate-here"
+                >
+                  <Heart className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4" />
+                  Donate Here
+                </Button>
+                <Button 
                   onClick={() => setLocation('/tournament-calendar')}
                   className="bg-blue-700 hover:bg-blue-600 text-blue-200 font-semibold px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base w-full lg:w-auto border border-blue-400 shadow-lg"
                   data-testid="button-see-tournaments"
