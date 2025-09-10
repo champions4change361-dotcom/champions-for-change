@@ -208,7 +208,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get teams for current user (coach)
   app.get('/api/teams', isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?.claims?.sub;
       if (!userId) {
         return res.status(401).json({ error: 'User not authenticated' });
       }
@@ -225,7 +225,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create new team
   app.post('/api/teams', isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?.claims?.sub;
       if (!userId) {
         return res.status(401).json({ error: 'User not authenticated' });
       }
