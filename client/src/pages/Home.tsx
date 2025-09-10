@@ -121,7 +121,7 @@ export default function Home() {
                   <Users className="h-8 w-8 text-blue-300" />
                 </div>
                 <h3 className="text-xl font-bold text-white mb-2">Team Management</h3>
-                <p className="text-sm text-blue-200 mb-3">Jersey Watch-style team registration</p>
+                <p className="text-sm text-blue-200 mb-3">Professional team registration system</p>
                 <div className="text-xs text-blue-300 bg-blue-800/50 rounded-lg px-3 py-1 inline-block">
                   Register once • Join multiple tournaments • $35-65/month
                 </div>
