@@ -3483,6 +3483,14 @@ export type InsertTeamPlayer = z.infer<typeof insertTeamPlayerSchema>;
 export type Team = typeof teams.$inferSelect;
 export type TeamPlayer = typeof teamPlayers.$inferSelect;
 
+// Dedicated schema for subscription updates - only allows Stripe subscription ID
+// Status and tier should be derived from Stripe or set via webhooks only
+export const updateTeamSubscriptionSchema = z.object({
+  stripeSubscriptionId: z.string().min(1, "Stripe subscription ID required")
+});
+
+export type UpdateTeamSubscription = z.infer<typeof updateTeamSubscriptionSchema>;
+
 // Team documents and consent forms with file management
 export const teamDocuments = pgTable("team_documents", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),

@@ -13,7 +13,7 @@ import NBADepthChartParser from './nba-depth-chart-parser';
 import { stripe } from "./nonprofitStripeConfig";
 import { registerDomainRoutes } from "./domainRoutes";
 import { registerTournamentRoutes } from "./routes/tournamentRoutes";
-import { tournamentSubscriptions, insertTournamentSubscriptionSchema, type InsertTournamentSubscription, insertRegistrationSubmissionSchema, insertTeamSchema, insertTeamPlayerSchema, type InsertTeam, type InsertTeamPlayer, type Team, type TeamPlayer } from "@shared/schema";
+import { tournamentSubscriptions, insertTournamentSubscriptionSchema, type InsertTournamentSubscription, insertRegistrationSubmissionSchema, insertTeamSchema, insertTeamPlayerSchema, type InsertTeam, type InsertTeamPlayer, type Team, type TeamPlayer, updateTeamSubscriptionSchema } from "@shared/schema";
 
 console.log('🏫 District athletics management platform initialized');
 console.log('💚 Champions for Change nonprofit mission active');
@@ -269,9 +269,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: 'Team not found' });
       }
 
-      // Verify ownership - only the coach can access their team
+      // Verify ownership - return 404 to prevent team enumeration
       if (team.coachId !== userId) {
-        return res.status(403).json({ error: 'Access denied - not your team' });
+        return res.status(404).json({ error: 'Team not found' });
       }
 
       res.json(team);
@@ -300,7 +300,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       if (existingTeam.coachId !== userId) {
-        return res.status(403).json({ error: 'Access denied - not your team' });
+        return res.status(404).json({ error: 'Team not found' });
       }
 
       // Validate update data (exclude coachId to prevent ownership changes)
@@ -345,7 +345,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       if (team.coachId !== userId) {
-        return res.status(403).json({ error: 'Access denied - not your team' });
+        return res.status(404).json({ error: 'Team not found' });
       }
 
       const players = await storage.getTeamPlayersByTeam(id);
@@ -375,7 +375,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       if (team.coachId !== userId) {
-        return res.status(403).json({ error: 'Access denied - not your team' });
+        return res.status(404).json({ error: 'Team not found' });
       }
 
       // Validate player data with Zod schema
@@ -418,27 +418,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       if (team.coachId !== userId) {
-        return res.status(403).json({ error: 'Access denied - not your team' });
+        return res.status(404).json({ error: 'Team not found' });
       }
 
-      const { subscriptionStatus, subscriptionTier, stripeSubscriptionId } = req.body;
-
-      // Basic validation for subscription data
-      const validStatuses = ['free', 'active', 'past_due', 'canceled', 'unpaid'];
-      const validTiers = ['basic', 'premium', 'enterprise'];
-
-      if (subscriptionStatus && !validStatuses.includes(subscriptionStatus)) {
-        return res.status(400).json({ error: 'Invalid subscription status' });
+      // Only accept Stripe subscription ID - status/tier derived from Stripe
+      const validationResult = updateTeamSubscriptionSchema.safeParse(req.body);
+      
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          error: 'Invalid subscription data', 
+          details: validationResult.error.errors 
+        });
       }
 
-      if (subscriptionTier && !validTiers.includes(subscriptionTier)) {
-        return res.status(400).json({ error: 'Invalid subscription tier' });
-      }
-
+      // TODO: In production, fetch subscription details from Stripe API here
+      // and derive the correct status/tier before updating
+      // For now, only update the Stripe subscription ID
       const updatedTeam = await storage.updateTeamSubscription(id, {
-        subscriptionStatus,
-        subscriptionTier,
-        stripeSubscriptionId
+        stripeSubscriptionId: validationResult.data.stripeSubscriptionId,
+        // Status and tier should be set via Stripe webhooks, not client requests
       });
 
       if (!updatedTeam) {
