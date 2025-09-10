@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Users, Zap, Globe, CreditCard, Star, Target, Building, CheckCircle, BarChart3, Clock, Smartphone, Calendar } from "lucide-react";
+import { Trophy, Users, Zap, Globe, CreditCard, Star, Target, Building, CheckCircle, BarChart3, Clock, Smartphone, Calendar, GraduationCap, Heart } from "lucide-react";
 import { useLocation } from "wouter";
 import React, { useState } from "react";
 import Footer from "@/components/Footer";
@@ -72,6 +72,43 @@ export default function TrantorLanding() {
           </div>
         </div>
       </header>
+
+      {/* Educational Mission Banner */}
+      <div className="relative py-12 bg-gradient-to-r from-green-600/90 via-blue-600/90 to-purple-600/90 backdrop-blur-sm">
+        <div className="absolute inset-0 bg-black/20"></div>
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="flex items-center justify-center mb-4">
+            <GraduationCap className="h-8 w-8 text-yellow-300 mr-3" />
+            <Badge className="bg-yellow-500 text-slate-900 px-4 py-2 text-base font-bold">
+              🎓 Educational Impact Mission
+            </Badge>
+            <Heart className="h-8 w-8 text-red-300 ml-3" />
+          </div>
+          <h2 className="text-2xl lg:text-4xl font-bold text-white mb-4">
+            Supporting Student Education Through Tournament Management
+          </h2>
+          <p className="text-lg lg:text-xl text-green-100 max-w-4xl mx-auto mb-6 leading-relaxed">
+            <strong>Champions for Change is dedicated to funding educational opportunities and student travel experiences</strong> for underprivileged student competitors. Every tournament managed on our platform directly supports these vital educational experiences.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+              <div className="text-2xl font-bold text-yellow-300 mb-2">100%</div>
+              <p className="text-white text-sm">Platform revenue supports student education</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+              <div className="text-2xl font-bold text-green-300 mb-2">$2,600+</div>
+              <p className="text-white text-sm">Cost per student for educational travel trips</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+              <div className="text-2xl font-bold text-blue-300 mb-2">Every Event</div>
+              <p className="text-white text-sm">Directly funds student opportunities</p>
+            </div>
+          </div>
+          <p className="text-green-200 text-sm mt-6 italic">
+            Built by coaches who understand both tournament needs and student funding challenges
+          </p>
+        </div>
+      </div>
 
       {/* Tournament Management Hero */}
       <div className="relative py-16 lg:py-24">
