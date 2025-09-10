@@ -29,19 +29,6 @@ interface PlanDetails {
 export default function TrialSignup() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
-  // Temporary fix: use fallback translation until LanguageProvider is properly set up
-  const t = (key: string) => {
-    // Simple fallback translations
-    const translations: Record<string, string> = {
-      'plan.annual.name': 'Annual Plan',
-      'general.year': 'year', 
-      'plan.annual.description': 'Complete annual tournament solution',
-      'plan.monthly.name': 'Monthly Plan',
-      'general.month': 'month',
-      'plan.monthly.description': 'Flexible monthly tournament management'
-    };
-    return translations[key] || key;
-  };
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
@@ -61,10 +48,10 @@ export default function TrialSignup() {
 
   const planDetails: Record<string, PlanDetails> = {
     annual: {
-      name: t('plan.annual.name'),
+      name: 'Annual Plan',
       price: '$99',
-      period: t('general.year'),
-      description: t('plan.annual.description'),
+      period: 'year',
+      description: 'Complete annual tournament solution',
       features: [
         'One tournament per year',
         'Year-round website hosting',
@@ -75,10 +62,10 @@ export default function TrialSignup() {
       ]
     },
     monthly: {
-      name: t('plan.monthly.name'),
+      name: 'Monthly Plan',
       price: '$39',
-      period: t('general.month'),
-      description: t('plan.monthly.description'),
+      period: 'month',
+      description: 'Flexible monthly tournament management',
       features: [
         'Unlimited tournaments',
         'Full platform access',
@@ -89,10 +76,10 @@ export default function TrialSignup() {
       ]
     },
     enterprise: {
-      name: t('plan.enterprise.name'),
+      name: 'Enterprise Plan',
       price: '$149',
-      period: t('general.month'),
-      description: t('plan.enterprise.description'),
+      period: 'month',
+      description: 'Complete athletics management solution',
       features: [
         'Unlimited tournaments',
         'Enterprise AI assistance',
