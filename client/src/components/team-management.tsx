@@ -169,7 +169,7 @@ export default function TeamManagement({
     }
   };
 
-  const generateRandomNames = () => {
+  const generateTeamNames = () => {
     const animalNames = [
       'Eagles', 'Tigers', 'Lions', 'Panthers', 'Bears', 'Wolves', 'Hawks', 'Falcons',
       'Dragons', 'Phoenix', 'Sharks', 'Dolphins', 'Thunderbolts', 'Lightning', 'Storm', 'Blazers'
