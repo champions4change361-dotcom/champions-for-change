@@ -41,6 +41,7 @@ const formSchema = insertTournamentSchema.extend({
   ]).default("bracket"),
   ageGroup: z.string().optional(),
   genderDivision: z.string().optional(),
+  skillLevel: z.string().optional(), // Add skillLevel field
   entryFee: z.string().optional(), // Convert to string for numeric database field
   tournamentDate: z.string().optional(), // ISO string for date field
   // Calendar discoverability fields
@@ -928,7 +929,7 @@ export default function EnhancedTournamentWizard({
         ...data,
         teams: data.teams,
         entryFee: data.entryFee ? String(data.entryFee) : "0", // Convert to string for numeric field
-        tournamentDate: data.tournamentDate ? (data.tournamentDate instanceof Date ? data.tournamentDate.toISOString().slice(0, 16) : String(data.tournamentDate)) : null, // Ensure string format
+        tournamentDate: data.tournamentDate ? (typeof data.tournamentDate === 'string' ? data.tournamentDate : String(data.tournamentDate)) : null, // Ensure string format
         scoringMethod: selectedSport?.scoringMethod || "wins",
         isGuestCreated: !user, // Mark as guest-created for tournaments created without login
         // Configure double-stage tournaments to use multi-stage format
@@ -989,7 +990,7 @@ export default function EnhancedTournamentWizard({
         teams: data.teams,
         status: 'draft',
         entryFee: data.entryFee ? String(data.entryFee) : "0", // Convert to string for numeric field
-        tournamentDate: data.tournamentDate ? (data.tournamentDate instanceof Date ? data.tournamentDate.toISOString().slice(0, 16) : String(data.tournamentDate)) : null, // Ensure string format
+        tournamentDate: data.tournamentDate ? (typeof data.tournamentDate === 'string' ? data.tournamentDate : String(data.tournamentDate)) : null, // Ensure string format
         scoringMethod: selectedSport?.scoringMethod || "wins",
         isGuestCreated: !user,
       };
@@ -1321,13 +1322,13 @@ export default function EnhancedTournamentWizard({
                   {form.watch("sport") && (
                     <div className="mt-6">
                       <ComprehensiveTournamentFormatSelector
-                        sport={form.watch("sport")}
+                        sport={form.watch("sport") || ""}
                         onFormatSelect={(format) => {
                           setSelectedTournamentFormat(format);
                           form.setValue("tournamentType", format.tournamentType as any);
                           form.setValue("competitionFormat", format.competitionFormat as any);
                         }}
-                        selectedFormat={selectedTournamentFormat?.format}
+                        selectedFormat={selectedTournamentFormat?.format || undefined}
                       />
                     </div>
                   )}
@@ -1532,7 +1533,7 @@ export default function EnhancedTournamentWizard({
                 {/* Skill Level Dropdown */}
                 <div>
                   <Label htmlFor="skillLevel" className="block text-sm font-medium text-gray-700 mb-2">
-                    Skill Level {form.watch("sport") && <span className="text-green-600">✓ Smart filtered for {form.watch("sport")}</span>}
+                    Skill Level {form.watch("sport") && <span className="text-green-600">✓ Smart filtered for {form.watch("sport") || ""}</span>}
                   </Label>
                   <select
                     value={selectedSkillLevel}
