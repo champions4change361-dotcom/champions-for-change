@@ -50,9 +50,175 @@ export interface AdvancementRules {
   tiebreakers: ('head_to_head' | 'point_differential' | 'points_for' | 'coin_flip')[];
 }
 
+// Smart registration participant data for seeding
+export interface SmartParticipant {
+  id: string;
+  participantName: string;
+  skillLevel: 'beginner' | 'intermediate' | 'advanced' | 'expert';
+  age: number;
+  gender: string;
+  assignedDivisionId?: string;
+  assignedEventIds?: string[];
+  seed?: number;
+  assignmentResult?: {
+    success: boolean;
+    divisionAssignments?: Array<{
+      divisionId: string;
+      divisionName: string;
+      seed: number;
+    }>;
+    eventAssignments?: Array<{
+      eventId: string;
+      eventName: string;
+      seed: number;
+    }>;
+  };
+}
+
 export class BracketGenerator {
   
-  // Single Elimination Tournament Generator
+  // Enhanced Single Elimination with Smart Seeding
+  static generateSingleEliminationWithSeeding(participants: SmartParticipant[], tournamentId: string, divisionId?: string): BracketStructure {
+    // Sort participants by skill level and seed for optimal bracket placement
+    const seededParticipants = this.seedParticipants(participants, divisionId);
+    
+    if (seededParticipants.length < 2) {
+      throw new Error('Need at least 2 participants for bracket generation');
+    }
+    
+    // Generate bracket with proper seeding placement
+    return this.generateSeededSingleElimination(seededParticipants, tournamentId);
+  }
+  
+  // Generate single elimination with proper tournament seeding placement
+  static generateSeededSingleElimination(participants: SmartParticipant[], tournamentId: string): BracketStructure {
+    const participantCount = participants.length;
+    const totalRounds = Math.ceil(Math.log2(participantCount));
+    const bracketSize = Math.pow(2, totalRounds); // Next power of 2
+    const byes = bracketSize - participantCount;
+    
+    // Create bracket positions with proper seeding
+    const bracketPositions = this.createSeededBracketPositions(participants, bracketSize);
+    
+    const matches: MatchData[] = [];
+    let matchId = 1;
+    
+    // First round matches (handle byes)
+    const firstRoundMatches = Math.floor(bracketSize / 2);
+    
+    for (let i = 0; i < firstRoundMatches; i++) {
+      const position1 = i * 2;
+      const position2 = i * 2 + 1;
+      
+      const participant1 = bracketPositions[position1];
+      const participant2 = bracketPositions[position2];
+      
+      // Only create match if both positions have participants (no bye)
+      if (participant1 && participant2) {
+        matches.push({
+          id: `match-${matchId++}`,
+          tournamentId,
+          round: 1,
+          position: i + 1,
+          team1: `${participant1.participantName} (Seed ${participant1.seed})`,
+          team2: `${participant2.participantName} (Seed ${participant2.seed})`,
+          team1Score: 0,
+          team2Score: 0,
+          status: 'upcoming'
+        });
+      } else {
+        // Handle bye - advance the participant automatically
+        const advancingParticipant = participant1 || participant2;
+        if (advancingParticipant) {
+          matches.push({
+            id: `match-${matchId++}`,
+            tournamentId,
+            round: 1,
+            position: i + 1,
+            team1: `${advancingParticipant.participantName} (Seed ${advancingParticipant.seed})`,
+            team2: 'BYE',
+            team1Score: 0,
+            team2Score: 0,
+            winner: `${advancingParticipant.participantName} (Seed ${advancingParticipant.seed})`,
+            status: 'completed'
+          });
+        }
+      }
+    }
+    
+    // Generate subsequent rounds
+    for (let round = 2; round <= totalRounds; round++) {
+      const matchesInRound = Math.pow(2, totalRounds - round);
+      
+      for (let pos = 1; pos <= matchesInRound; pos++) {
+        matches.push({
+          id: `match-${matchId++}`,
+          tournamentId,
+          round,
+          position: pos,
+          team1Score: 0,
+          team2Score: 0,
+          status: 'upcoming'
+        });
+      }
+    }
+    
+    return {
+      matches,
+      totalRounds,
+      totalMatches: matches.length,
+      format: 'single-elimination-seeded'
+    };
+  }
+  
+  // Create proper seeded bracket positions (1 vs N, 2 vs N-1, etc.)
+  static createSeededBracketPositions(participants: SmartParticipant[], bracketSize: number): (SmartParticipant | null)[] {
+    const positions: (SmartParticipant | null)[] = new Array(bracketSize).fill(null);
+    
+    // Standard tournament seeding pattern for single elimination
+    const seedingOrder = this.generateSeedingOrder(bracketSize);
+    
+    // Place participants according to seeding order
+    for (let i = 0; i < participants.length && i < seedingOrder.length; i++) {
+      const position = seedingOrder[i] - 1; // Convert to 0-based index
+      positions[position] = participants[i];
+    }
+    
+    return positions;
+  }
+  
+  // Generate standard tournament seeding order for bracket positions
+  static generateSeedingOrder(bracketSize: number): number[] {
+    if (bracketSize === 2) return [1, 2];
+    if (bracketSize === 4) return [1, 4, 2, 3];
+    if (bracketSize === 8) return [1, 8, 4, 5, 2, 7, 3, 6];
+    if (bracketSize === 16) return [1, 16, 8, 9, 4, 13, 5, 12, 2, 15, 7, 10, 3, 14, 6, 11];
+    if (bracketSize === 32) return [1, 32, 16, 17, 8, 25, 9, 24, 4, 29, 13, 20, 5, 28, 12, 21, 2, 31, 15, 18, 7, 26, 10, 23, 3, 30, 14, 19, 6, 27, 11, 22];
+    
+    // For other sizes, generate dynamically
+    return this.generateDynamicSeedingOrder(bracketSize);
+  }
+  
+  // Dynamic seeding order generation for any bracket size
+  static generateDynamicSeedingOrder(size: number): number[] {
+    if (size <= 1) return [1];
+    if (size === 2) return [1, 2];
+    
+    // Recursive generation based on tournament seeding principles
+    const halfSize = size / 2;
+    const firstHalf = this.generateDynamicSeedingOrder(halfSize);
+    const secondHalf = firstHalf.map(seed => size + 1 - seed);
+    
+    const result: number[] = [];
+    for (let i = 0; i < halfSize; i++) {
+      result.push(firstHalf[i]);
+      result.push(secondHalf[i]);
+    }
+    
+    return result;
+  }
+  
+  // Original method maintained for backward compatibility
   static generateSingleElimination(teams: string[], tournamentId: string): BracketStructure {
     const teamCount = teams.length;
     const totalRounds = Math.ceil(Math.log2(teamCount));
@@ -103,6 +269,53 @@ export class BracketGenerator {
       totalMatches: matches.length,
       format: 'single-elimination'
     };
+  }
+  
+  // Smart participant seeding algorithm
+  static seedParticipants(participants: SmartParticipant[], divisionId?: string): SmartParticipant[] {
+    // Filter participants for specific division if provided
+    let filteredParticipants = participants;
+    if (divisionId) {
+      filteredParticipants = participants.filter(p => 
+        p.assignedDivisionId === divisionId || 
+        (p.assignmentResult?.divisionAssignments?.some(d => d.divisionId === divisionId))
+      );
+    }
+    
+    if (filteredParticipants.length === 0) return [];
+    
+    // Calculate skill scores for proper seeding (higher score = stronger = lower seed number)
+    const participantsWithScores = filteredParticipants.map((participant) => {
+      const skillScore = this.calculateSkillScore(participant);
+      return { ...participant, skillScore };
+    });
+    
+    // Sort by skill score descending (highest skill gets seed 1)
+    participantsWithScores.sort((a, b) => b.skillScore - a.skillScore);
+    
+    // Assign sequential seeds (1 = strongest, 2 = second strongest, etc.)
+    return participantsWithScores.map((participant, index) => ({
+      ...participant,
+      seed: participant.seed || (index + 1)
+    }));
+  }
+  
+  // Calculate skill score for seeding (higher score = stronger player)
+  private static calculateSkillScore(participant: SmartParticipant): number {
+    // Skill level weights (expert = strongest, beginner = weakest)
+    const skillLevelScores = {
+      'expert': 1000,
+      'advanced': 750,
+      'intermediate': 500,
+      'beginner': 250
+    };
+    
+    const baseScore = skillLevelScores[participant.skillLevel] || 0;
+    
+    // Age bonus for experience (slight bonus for older participants in same skill level)
+    const ageBonus = participant.age >= 16 ? 25 : 0;
+    
+    return baseScore + ageBonus;
   }
 
   // Double Elimination Tournament Generator  
@@ -270,7 +483,107 @@ export class BracketGenerator {
     };
   }
 
-  // Round Robin Tournament Generator
+  // Round Robin Tournament Generator with Smart Seeding
+  static generateRoundRobinWithSeeding(participants: SmartParticipant[], tournamentId: string, divisionId?: string): BracketStructure {
+    const seededParticipants = this.seedParticipants(participants, divisionId);
+    
+    if (seededParticipants.length < 3) {
+      throw new Error('Need at least 3 participants for round-robin generation');
+    }
+    
+    return this.generateSeededRoundRobin(seededParticipants, tournamentId);
+  }
+  
+  // Generate round-robin with optimal seeding-based scheduling
+  static generateSeededRoundRobin(participants: SmartParticipant[], tournamentId: string): BracketStructure {
+    const matches: MatchData[] = [];
+    let matchId = 1;
+    
+    // Generate matches using round-robin tournament scheduling
+    const schedule = this.generateRoundRobinSchedule(participants);
+    
+    schedule.forEach((round, roundIndex) => {
+      round.forEach((match, matchIndex) => {
+        matches.push({
+          id: `match-${matchId++}`,
+          tournamentId,
+          round: roundIndex + 1,
+          position: matchIndex + 1,
+          team1: `${match.participant1.participantName} (Seed ${match.participant1.seed})`,
+          team2: `${match.participant2.participantName} (Seed ${match.participant2.seed})`,
+          team1Score: 0,
+          team2Score: 0,
+          status: 'upcoming'
+        });
+      });
+    });
+    
+    return {
+      matches,
+      totalRounds: schedule.length,
+      totalMatches: matches.length,
+      format: 'round-robin-seeded'
+    };
+  }
+  
+  // Generate optimal round-robin schedule considering seeding
+  static generateRoundRobinSchedule(participants: SmartParticipant[]): Array<Array<{participant1: SmartParticipant, participant2: SmartParticipant}>> {
+    const n = participants.length;
+    const rounds: Array<Array<{participant1: SmartParticipant, participant2: SmartParticipant}>> = [];
+    
+    // Use round-robin tournament algorithm
+    // If odd number of participants, add a "bye" participant
+    const players = [...participants];
+    if (n % 2 === 1) {
+      players.push({ 
+        id: 'bye', 
+        participantName: 'BYE', 
+        skillLevel: 'beginner', 
+        age: 0, 
+        gender: 'none',
+        seed: 999
+      } as SmartParticipant);
+    }
+    
+    const numRounds = players.length - 1;
+    const matchesPerRound = players.length / 2;
+    
+    for (let round = 0; round < numRounds; round++) {
+      const roundMatches: Array<{participant1: SmartParticipant, participant2: SmartParticipant}> = [];
+      
+      for (let match = 0; match < matchesPerRound; match++) {
+        let home: number, away: number;
+        
+        if (match === 0) {
+          home = 0; // First player stays fixed
+          away = numRounds - round;
+        } else {
+          home = (round + match) % numRounds;
+          away = (numRounds - match + round) % numRounds;
+          
+          // Adjust indices
+          if (home === 0) home = numRounds;
+          if (away === 0) away = numRounds;
+        }
+        
+        const participant1 = players[home];
+        const participant2 = players[away];
+        
+        // Skip bye matches
+        if (participant1.id !== 'bye' && participant2.id !== 'bye') {
+          roundMatches.push({ participant1, participant2 });
+        }
+      }
+      
+      if (roundMatches.length > 0) {
+        rounds.push(roundMatches);
+      }
+    }
+    
+    return rounds;
+  }
+  
+  // Original method maintained for backward compatibility
   static generateRoundRobin(teams: string[], tournamentId: string): BracketStructure {
     const matches: MatchData[] = [];
     let matchId = 1;
@@ -367,7 +680,53 @@ export class BracketGenerator {
     };
   }
 
-  // Generate bracket based on sport type and format
+  // Generate seeded bracket based on participants, format, and sport
+  static generateSeededBracket(
+    participants: SmartParticipant[],
+    tournamentId: string,
+    format: string,
+    sport?: string,
+    divisionId?: string
+  ): BracketStructure {
+    
+    switch (format) {
+      case 'single':
+      case 'single-elimination':
+        return this.generateSingleEliminationWithSeeding(participants, tournamentId, divisionId);
+        
+      case 'double':
+      case 'double-elimination':
+        // TODO: Implement seeded double elimination
+        const seededParticipants = this.seedParticipants(participants, divisionId);
+        const teams = seededParticipants.map(p => `${p.participantName} (Seed ${p.seed})`);
+        return this.generateDoubleElimination(teams, tournamentId);
+        
+      case 'pool-play':
+        // TODO: Implement seeded pool play
+        const poolParticipants = this.seedParticipants(participants, divisionId);
+        const poolTeams = poolParticipants.map(p => `${p.participantName} (Seed ${p.seed})`);
+        return this.generatePoolPlay(poolTeams, tournamentId);
+        
+      case 'round-robin':
+        return this.generateRoundRobinWithSeeding(participants, tournamentId, divisionId);
+        
+      case 'swiss-system':
+        const rounds = Math.ceil(Math.log2(participants.length)) + 1;
+        const swissParticipants = this.seedParticipants(participants, divisionId);
+        const swissTeams = swissParticipants.map(p => `${p.participantName} (Seed ${p.seed})`);
+        return this.generateSwissSystem(swissTeams, tournamentId, rounds);
+        
+      case 'leaderboard':
+        const leaderboardParticipants = this.seedParticipants(participants, divisionId);
+        const leaderboardTeams = leaderboardParticipants.map(p => `${p.participantName} (Seed ${p.seed})`);
+        return this.generateLeaderboard(leaderboardTeams, tournamentId, sport || 'track');
+        
+      default:
+        return this.generateSingleEliminationWithSeeding(participants, tournamentId, divisionId);
+    }
+  }
+  
+  // Generate bracket based on sport type and format (legacy method)
   static generateBracket(
     teams: string[], 
     tournamentId: string, 

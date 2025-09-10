@@ -287,6 +287,91 @@ export function registerTournamentRoutes(app: Express) {
     }
   });
 
+  // Get tournament divisions for basketball-style tournaments
+  app.get("/api/tournaments/:id/divisions", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const tournament = await storage.getTournament(id);
+      
+      if (!tournament) {
+        return res.status(404).json({ message: "Tournament not found" });
+      }
+
+      // For bracket-based tournaments (like basketball), return divisions
+      if (tournament.competitionFormat === 'bracket') {
+        const divisions = await storage.getTournamentDivisionsByTournament(id);
+        res.json(divisions);
+      } else {
+        res.json([]);
+      }
+    } catch (error) {
+      console.error("Error fetching tournament divisions:", error);
+      res.status(500).json({ message: "Error fetching divisions", error: error.message });
+    }
+  });
+
+  // Get tournament events for track & field style tournaments
+  app.get("/api/tournaments/:id/events", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const tournament = await storage.getTournament(id);
+      
+      if (!tournament) {
+        return res.status(404).json({ message: "Tournament not found" });
+      }
+
+      // For event-based tournaments (like track & field), return events
+      if (tournament.competitionFormat === 'event') {
+        const events = await storage.getTournamentEventsByTournament(id);
+        res.json(events);
+      } else {
+        res.json([]);
+      }
+    } catch (error) {
+      console.error("Error fetching tournament events:", error);
+      res.status(500).json({ message: "Error fetching events", error: error.message });
+    }
+  });
+
+  // Get tournament registration submissions for bracket generation
+  app.get("/api/registration-forms/tournament/:id/submissions", async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      // Get all registration forms for this tournament
+      const registrationForms = await storage.getRegistrationFormsByTournament(id);
+      
+      if (registrationForms.length === 0) {
+        return res.json([]);
+      }
+      
+      // Get submissions for all forms of this tournament
+      const allSubmissions = [];
+      for (const form of registrationForms) {
+        const formSubmissions = await storage.getRegistrationSubmissions(form.id);
+        allSubmissions.push(...formSubmissions);
+      }
+      
+      // Transform submissions to SmartParticipant format
+      const participants = allSubmissions.map(submission => ({
+        id: submission.id,
+        participantName: submission.participantName || `${submission.firstName} ${submission.lastName}`,
+        skillLevel: submission.skillLevel || 'beginner',
+        age: submission.age || 0,
+        gender: submission.gender || 'unspecified',
+        assignedDivisionId: submission.assignedDivisionId,
+        assignedEventIds: submission.assignedEventIds,
+        seed: submission.seed,
+        assignmentResult: submission.assignmentResult
+      }));
+      
+      res.json(participants);
+    } catch (error) {
+      console.error("Error fetching tournament registration submissions:", error);
+      res.status(500).json({ message: "Error fetching registration submissions", error: error.message });
+    }
+  });
+
   // Create a new tournament
   app.post("/api/tournaments", async (req: any, res) => {
     try {
