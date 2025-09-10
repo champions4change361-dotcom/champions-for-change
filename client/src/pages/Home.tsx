@@ -113,6 +113,22 @@ export default function Home() {
 
         {/* Arena Command Center */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 mb-8">
+          {/* Team Management - NEW JERSEY WATCH-STYLE SYSTEM */}
+          <Link href="/teams">
+            <div data-testid="card-team-management" className="lg:col-span-2 bg-gradient-to-br from-blue-900 to-blue-800 border border-blue-400/50 rounded-xl p-6 hover:border-blue-300/70 transition-all cursor-pointer group shadow-lg">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-blue-500/30 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-500/40 transition-colors">
+                  <Users className="h-8 w-8 text-blue-300" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">Team Management</h3>
+                <p className="text-sm text-blue-200 mb-3">Jersey Watch-style team registration</p>
+                <div className="text-xs text-blue-300 bg-blue-800/50 rounded-lg px-3 py-1 inline-block">
+                  Register once • Join multiple tournaments • $35-65/month
+                </div>
+              </div>
+            </div>
+          </Link>
+
           {/* Create Tournament */}
           <Link href="/create">
             <div data-testid="card-create-tournament" className="lg:col-span-1 bg-slate-800 border border-emerald-500/30 rounded-xl p-6 hover:border-emerald-400/50 transition-all cursor-pointer group">
