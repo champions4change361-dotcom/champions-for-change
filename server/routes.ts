@@ -42,8 +42,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         type: 'memory'
       };
 
+      let dbStart = Date.now();
       try {
-        const dbStart = Date.now();
         // Try to run a simple query to test database connection
         if (storage && typeof storage.getAllUsers === 'function') {
           await storage.getAllUsers();
@@ -201,6 +201,186 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Support team routes for cheerleading, dance teams, marching band, color guard
   app.use('/api', supportTeamRoutes);
+
+  // STANDALONE TEAM MANAGEMENT ROUTES (Jersey Watch-style)
+  // These are separate from tournament-specific team registrations
+  
+  // Get teams for current user (coach)
+  app.get('/api/teams', isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+
+      // TODO: Implement getTeamsByCoach once storage methods are ready
+      // For now, return empty array
+      res.json([]);
+    } catch (error: any) {
+      console.error('Get teams error:', error);
+      res.status(500).json({ error: 'Failed to fetch teams' });
+    }
+  });
+
+  // Create new team
+  app.post('/api/teams', isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+
+      const { teamName, organizationName, coachName, coachEmail, coachPhone, homeVenue, ageGroup, division } = req.body;
+      
+      if (!teamName || !coachName || !coachEmail) {
+        return res.status(400).json({ error: 'Missing required fields: teamName, coachName, coachEmail' });
+      }
+
+      // TODO: Implement createTeam once storage methods are ready
+      const newTeam = {
+        id: crypto.randomUUID(),
+        teamName,
+        organizationName,
+        coachName, 
+        coachEmail,
+        coachPhone,
+        coachId: userId,
+        homeVenue,
+        ageGroup,
+        division,
+        status: 'active',
+        subscriptionStatus: 'free',
+        subscriptionTier: 'basic',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+
+      res.json(newTeam);
+    } catch (error: any) {
+      console.error('Create team error:', error);
+      res.status(500).json({ error: 'Failed to create team' });
+    }
+  });
+
+  // Get specific team
+  app.get('/api/teams/:id', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user?.id;
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+
+      // TODO: Implement getTeam and verify ownership
+      res.json({ id, message: 'Team details - implementation pending' });
+    } catch (error: any) {
+      console.error('Get team error:', error);
+      res.status(500).json({ error: 'Failed to fetch team' });
+    }
+  });
+
+  // Update team
+  app.patch('/api/teams/:id', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user?.id;
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+
+      // TODO: Implement updateTeam and verify ownership
+      res.json({ id, message: 'Team updated - implementation pending' });
+    } catch (error: any) {
+      console.error('Update team error:', error);
+      res.status(500).json({ error: 'Failed to update team' });
+    }
+  });
+
+  // Get team players/roster
+  app.get('/api/teams/:id/players', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user?.id;
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+
+      // TODO: Implement getTeamPlayersByTeam
+      res.json([]);
+    } catch (error: any) {
+      console.error('Get team players error:', error);
+      res.status(500).json({ error: 'Failed to fetch team players' });
+    }
+  });
+
+  // Add player to team
+  app.post('/api/teams/:id/players', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user?.id;
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+
+      const { playerName, dateOfBirth, jerseyNumber, position, parentGuardianName, parentGuardianEmail } = req.body;
+      
+      if (!playerName || !parentGuardianName || !parentGuardianEmail) {
+        return res.status(400).json({ 
+          error: 'Missing required fields: playerName, parentGuardianName, parentGuardianEmail' 
+        });
+      }
+
+      // TODO: Implement createTeamPlayer
+      const newPlayer = {
+        id: crypto.randomUUID(),
+        teamId: id,
+        playerName,
+        dateOfBirth,
+        jerseyNumber,
+        position,
+        parentGuardianName,
+        parentGuardianEmail,
+        status: 'active',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+
+      res.json(newPlayer);
+    } catch (error: any) {
+      console.error('Add team player error:', error);
+      res.status(500).json({ error: 'Failed to add player' });
+    }
+  });
+
+  // Update team subscription
+  app.patch('/api/teams/:id/subscription', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user?.id;
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+
+      const { subscriptionStatus, subscriptionTier, stripeSubscriptionId } = req.body;
+
+      // TODO: Implement updateTeamSubscription
+      res.json({ 
+        id, 
+        subscriptionStatus, 
+        subscriptionTier, 
+        stripeSubscriptionId,
+        message: 'Subscription updated - implementation pending' 
+      });
+    } catch (error: any) {
+      console.error('Update team subscription error:', error);
+      res.status(500).json({ error: 'Failed to update subscription' });
+    }
+  });
 
   // Webstore routes for merchandise and ticket sales
   const webstoreRoutes = (await import('./webstoreRoutes')).default;

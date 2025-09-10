@@ -4,6 +4,7 @@ import {
   type SportOption, type InsertSportOption, type TournamentStructure, type InsertTournamentStructure,
   type TrackEventRecord as TrackEvent, type InsertTrackEventRecord as InsertTrackEvent, type Page, type InsertPage,
   type TeamRegistration, type InsertTeamRegistration, type Organization, type InsertOrganization,
+  type Team, type InsertTeam, type TeamPlayer, type InsertTeamPlayer,
   type ScorekeeperAssignment, type InsertScorekeeperAssignment, type EventScore, type InsertEventScore,
   type SchoolEventAssignment, type InsertSchoolEventAssignment, type CoachEventAssignment, type InsertCoachEventAssignment,
   type Contact, type InsertContact, type EmailCampaign, type InsertEmailCampaign, type CampaignRecipient, type InsertCampaignRecipient,
@@ -18,7 +19,7 @@ import {
   type MerchandiseProduct, type InsertMerchandiseProduct, type MerchandiseOrder, type InsertMerchandiseOrder,
   type EventTicket, type InsertEventTicket, type TicketOrder, type InsertTicketOrder,
   type TournamentRegistrationForm, type InsertTournamentRegistrationForm, type RegistrationSubmission, type InsertRegistrationSubmission, type RegistrationAssignmentLog, type InsertRegistrationAssignmentLog,
-  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog, taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices, supportTeams, supportTeamMembers, supportTeamInjuries, supportTeamAiConsultations, jerseyTeamMembers, jerseyTeamPayments, tournamentSubscriptions, clientConfigurations, guestParticipants, passwordResetTokens, showdownContests, showdownEntries, showdownLeaderboards, professionalPlayers, merchandiseProducts, merchandiseOrders, eventTickets, ticketOrders, tournamentRegistrationForms, registrationSubmissions, registrationAssignmentLog
+  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, teams, teamPlayers, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog, taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices, supportTeams, supportTeamMembers, supportTeamInjuries, supportTeamAiConsultations, jerseyTeamMembers, jerseyTeamPayments, tournamentSubscriptions, clientConfigurations, guestParticipants, passwordResetTokens, showdownContests, showdownEntries, showdownLeaderboards, professionalPlayers, merchandiseProducts, merchandiseOrders, eventTickets, ticketOrders, tournamentRegistrationForms, registrationSubmissions, registrationAssignmentLog
 } from "@shared/schema";
 
 type SportCategory = typeof sportCategories.$inferSelect;
@@ -28,7 +29,7 @@ type InsertSportDivisionRules = typeof sportDivisionRules.$inferInsert;
 import { randomUUID } from "crypto";
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc, sql, and, gte, lte } from "drizzle-orm";
 import { createCachedStorage } from "./cache";
 import { createMonitoredStorage } from "./monitoring";
 
@@ -117,6 +118,23 @@ export interface IStorage {
   createTeamPayment(payment: any): Promise<any>;
   getTeamPayments(teamId: string): Promise<any[]>;
   updateTeamPayment(id: string, updates: any): Promise<any>;
+
+  // Standalone team management methods (Jersey Watch-style)
+  createTeam(team: InsertTeam): Promise<Team>;
+  getTeam(id: string): Promise<Team | undefined>;
+  getTeamsByCoach(coachId: string): Promise<Team[]>;
+  getTeamsByOrganization(organizationName: string): Promise<Team[]>;
+  updateTeam(id: string, updates: Partial<Team>): Promise<Team | undefined>;
+  deleteTeam(id: string): Promise<boolean>;
+  updateTeamSubscription(id: string, subscriptionData: { subscriptionStatus: string, subscriptionTier: string, stripeSubscriptionId?: string }): Promise<Team | undefined>;
+  
+  // Team player management methods
+  createTeamPlayer(player: InsertTeamPlayer): Promise<TeamPlayer>;
+  getTeamPlayer(id: string): Promise<TeamPlayer | undefined>;
+  getTeamPlayersByTeam(teamId: string): Promise<TeamPlayer[]>;
+  updateTeamPlayer(id: string, updates: Partial<TeamPlayer>): Promise<TeamPlayer | undefined>;
+  deleteTeamPlayer(id: string): Promise<boolean>;
+  bulkCreateTeamPlayers(players: InsertTeamPlayer[]): Promise<TeamPlayer[]>;
 
   // Guest participant methods - "Pay & Play or Join the Family" system
   createGuestParticipant(participant: InsertGuestParticipant): Promise<GuestParticipant>;
@@ -500,6 +518,30 @@ export interface IStorage {
   executeTransaction<T>(
     operation: (tx: any) => Promise<T>
   ): Promise<T>;
+
+  // Cache and monitoring methods (optional - may not be implemented by all storage types)
+  getCacheStats?(): {
+    totalEntries: number;
+    hits: number;
+    misses: number;
+    hitRate: number;
+    totalSize: number;
+    evictions: number;
+  };
+  
+  getMonitoringData?(): {
+    health?: {
+      connectionStatus: string;
+    };
+    performance: {
+      averageResponseTime: number;
+      totalQueries: number;
+      slowQueries: number;
+      errorRate: number;
+      queriesPerMinute: number;
+      healthStatus: string;
+    };
+  };
 }
 
 export class DbStorage implements IStorage {

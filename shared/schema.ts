@@ -3393,6 +3393,16 @@ export const teams = pgTable("teams", {
   status: text("status", { 
     enum: ["active", "inactive", "suspended"] 
   }).default("active"),
+  
+  // Team subscription management
+  subscriptionStatus: text("subscription_status", {
+    enum: ["free", "active", "past_due", "canceled", "unpaid"]
+  }).default("free"),
+  subscriptionTier: text("subscription_tier", {
+    enum: ["basic", "premium", "enterprise"]
+  }).default("basic"),
+  stripeSubscriptionId: varchar("stripe_subscription_id"),
+  
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -3454,6 +3464,24 @@ export const teamPlayers = pgTable("team_players", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
+
+// Schema exports for teams and team players
+export const insertTeamSchema = createInsertSchema(teams).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertTeamPlayerSchema = createInsertSchema(teamPlayers).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertTeam = z.infer<typeof insertTeamSchema>;
+export type InsertTeamPlayer = z.infer<typeof insertTeamPlayerSchema>;
+export type Team = typeof teams.$inferSelect;
+export type TeamPlayer = typeof teamPlayers.$inferSelect;
 
 // Team documents and consent forms with file management
 export const teamDocuments = pgTable("team_documents", {
