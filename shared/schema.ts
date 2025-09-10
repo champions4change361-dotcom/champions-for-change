@@ -1,5 +1,5 @@
 import { sql, relations } from "drizzle-orm";
-import { pgTable, text, varchar, integer, jsonb, timestamp, boolean, numeric, decimal, date, index } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, jsonb, timestamp, boolean, numeric, decimal, date, index, check } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -2071,6 +2071,15 @@ export const matches = pgTable("matches", {
   index("idx_matches_status").on(table.status),
   // Composite index for bracket queries
   index("idx_matches_tournament_round").on(table.tournamentId, table.round),
+  // Data integrity constraints
+  check("check_valid_scores", sql`${table.team1Score} >= 0 AND ${table.team2Score} >= 0`),
+  check("check_valid_position", sql`${table.round} > 0 AND ${table.position} > 0`),
+  check("check_winner_logic", sql`
+    (${table.winner} IS NULL) OR 
+    (${table.winner} = 'team1' AND ${table.team1Score} > ${table.team2Score}) OR 
+    (${table.winner} = 'team2' AND ${table.team2Score} > ${table.team1Score}) OR
+    (${table.winner} = 'tie' AND ${table.team1Score} = ${table.team2Score})
+  `),
 ]);
 
 // Sport-specific division rules
