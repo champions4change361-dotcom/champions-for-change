@@ -119,7 +119,7 @@ export default function TrantorLanding() {
       </header>
 
       {/* Educational Mission Banner */}
-      <div className="relative py-12 bg-gradient-to-r from-green-600/90 via-blue-600/90 to-purple-600/90 backdrop-blur-sm">
+      <div className="relative py-12 mt-8 bg-gradient-to-r from-green-600/90 via-blue-600/90 to-purple-600/90 backdrop-blur-sm">
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="flex items-center justify-center mb-4">
