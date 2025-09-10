@@ -16,7 +16,7 @@ export default function TrantorLanding() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
       {/* Professional Tournament Header */}
-      <header className="relative border-b border-yellow-500/20 bg-slate-900/80 backdrop-blur-sm pt-6">
+      <header className="relative border-b border-yellow-500/20 bg-slate-900/80 backdrop-blur-sm pt-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="lg:flex lg:items-center lg:justify-between lg:h-16">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between w-full py-4 lg:py-0 space-y-4 lg:space-y-0">
