@@ -17,8 +17,6 @@ import {
   ArrowLeft
 } from 'lucide-react';
 import { Link } from 'wouter';
-import LanguageSelector from '@/components/LanguageSelector';
-import { useLanguage } from '@/contexts/LanguageContext';
 
 interface PlanDetails {
   name: string;
@@ -31,7 +29,19 @@ interface PlanDetails {
 export default function TrialSignup() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
-  const { t } = useLanguage();
+  // Temporary fix: use fallback translation until LanguageProvider is properly set up
+  const t = (key: string) => {
+    // Simple fallback translations
+    const translations: Record<string, string> = {
+      'plan.annual.name': 'Annual Plan',
+      'general.year': 'year', 
+      'plan.annual.description': 'Complete annual tournament solution',
+      'plan.monthly.name': 'Monthly Plan',
+      'general.month': 'month',
+      'plan.monthly.description': 'Flexible monthly tournament management'
+    };
+    return translations[key] || key;
+  };
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
@@ -141,16 +151,15 @@ export default function TrialSignup() {
                 </div>
                 <div>
                   <h1 className="text-xl font-bold text-gray-900">Tournament Arena</h1>
-                  <p className="text-xs text-blue-600">{t('header.startTrial')}</p>
+                  <p className="text-xs text-blue-600">Start Your Free Trial</p>
                 </div>
               </Link>
             </div>
             
             <div className="flex items-center space-x-4">
-              <LanguageSelector variant="compact" />
               <Link href="/pricing" className="flex items-center text-gray-600 hover:text-gray-800 transition-colors">
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                {t('button.backToPricing')}
+                Back to Pricing
               </Link>
             </div>
           </div>
@@ -163,9 +172,9 @@ export default function TrialSignup() {
           {/* Plan Summary */}
           <div>
             <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">{t('trial.title')}</h1>
+              <h1 className="text-3xl font-bold text-gray-900 mb-4">Start Your 14-Day Free Trial</h1>
               <p className="text-lg text-gray-600">
-                {t('trial.subtitle')}
+                Full platform access • No credit card charged until trial ends
               </p>
             </div>
 
@@ -174,30 +183,30 @@ export default function TrialSignup() {
               <CardHeader>
                 <CardTitle className="flex items-center text-green-800">
                   <Shield className="h-5 w-5 mr-2" />
-                  {t('trial.benefits.title')}
+                  14-Day Trial Benefits
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3">
                   <li className="flex items-center text-green-700">
                     <Check className="h-4 w-4 mr-3 text-green-600" />
-                    {t('trial.benefits.access')}
+                    Full platform access with no limitations
                   </li>
                   <li className="flex items-center text-green-700">
                     <Check className="h-4 w-4 mr-3 text-green-600" />
-                    {t('trial.benefits.tournaments')}
+                    Unlimited tournament creation and management
                   </li>
                   <li className="flex items-center text-green-700">
                     <Check className="h-4 w-4 mr-3 text-green-600" />
-                    {t('trial.benefits.websites')}
+                    Professional website hosting and branding
                   </li>
                   <li className="flex items-center text-green-700">
                     <Check className="h-4 w-4 mr-3 text-green-600" />
-                    {t('trial.benefits.payments')}
+                    Integrated payment processing
                   </li>
                   <li className="flex items-center text-green-700">
                     <Check className="h-4 w-4 mr-3 text-green-600" />
-                    {t('trial.benefits.branding')}
+                    White-label branding and customization
                   </li>
                 </ul>
               </CardContent>

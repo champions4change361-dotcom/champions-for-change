@@ -44,21 +44,7 @@ export default function TrantorLanding() {
               {/* Trial and Action Buttons */}
               <div className="flex flex-col space-y-2 lg:flex-row lg:space-y-0 lg:space-x-3 lg:ml-auto">
                 <Button 
-                  onClick={(e) => {
-                    e.preventDefault();
-                    // Mobile-friendly navigation - use both approaches
-                    try {
-                      setLocation('/trial-signup?plan=monthly&price=39');
-                      // Fallback for mobile browsers that might have issues with wouter
-                      setTimeout(() => {
-                        if (window.location.pathname !== '/trial-signup') {
-                          window.location.href = '/trial-signup?plan=monthly&price=39';
-                        }
-                      }, 100);
-                    } catch (error) {
-                      window.location.href = '/trial-signup?plan=monthly&price=39';
-                    }
-                  }}
+                  onClick={() => setLocation('/trial-signup?plan=monthly&price=39')}
                   className="bg-yellow-600 hover:bg-yellow-700 text-slate-900 font-semibold px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base w-full lg:w-auto"
                   data-testid="button-start-trial-trantor"
                 >

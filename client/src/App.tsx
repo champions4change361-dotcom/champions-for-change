@@ -168,7 +168,6 @@ function AuthenticatedRoutes() {
         <Route path="/webpage-builder" component={AdvancedPageBuilder} />
         <Route path="/modular-builder" component={EnhancedModularBuilder} />
         <Route path="/page-manager" component={PageManager} />
-        <Route path="/trial-signup" component={TrialSignup} />
         <Route path="/corporate-competitions" component={CorporateCompetitions} />
         <Route path="/athlete-analytics" component={() => <AthleteAnalytics isCoachView={true} />} />
         <Route path="/corporate-analytics" component={() => <CorporateAnalytics isPublic={true} />} />
@@ -334,6 +333,7 @@ function AppRouter() {
       {/* Platform Selection Page */}
       <Route path="/platform-options" component={PlatformOptions} />
       
+      <Route path="/trial-signup" component={TrialSignup} />
       <Route path="/donate" component={DonationFlow} />
       <Route path="/payment-methods" component={PaymentMethods} />
       <Route path="/checkout" component={Checkout} />
