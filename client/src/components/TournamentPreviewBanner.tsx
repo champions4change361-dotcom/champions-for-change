@@ -65,7 +65,7 @@ export default function TournamentPreviewBanner({ className = "" }: TournamentPr
                 data-testid="banner-signup-button"
               >
                 <UserPlus className="h-3 w-3 mr-1" />
-                Sign Up to Save
+                Start Free Trial
               </Button>
               <button
                 onClick={() => setIsMinimized(false)}
@@ -167,12 +167,12 @@ export default function TournamentPreviewBanner({ className = "" }: TournamentPr
                     data-testid="banner-primary-signup"
                   >
                     <UserPlus className="h-4 w-4 mr-2" />
-                    Sign Up Free
+                    Start Free Trial
                   </Button>
                   
                   <Button
-                    variant="outline"
-                    className="w-full border-white/40 text-white hover:bg-white/10 hover:border-white/60"
+                    variant="secondary"
+                    className="w-full bg-white/20 text-white border-white/40 hover:bg-white/30 hover:border-white/60"
                     onClick={() => setLocation('/login')}
                     data-testid="banner-login"
                   >
@@ -189,7 +189,7 @@ export default function TournamentPreviewBanner({ className = "" }: TournamentPr
             <div className="flex items-center space-x-6 text-xs text-blue-100">
               <span className="flex items-center">
                 <Zap className="h-3 w-3 mr-1" />
-                Free to start
+                14-day free trial
               </span>
               <span className="flex items-center">
                 <Trophy className="h-3 w-3 mr-1" />
@@ -197,7 +197,7 @@ export default function TournamentPreviewBanner({ className = "" }: TournamentPr
               </span>
               <span className="flex items-center">
                 <CheckCircle className="h-3 w-3 mr-1" />
-                No credit card required
+                Plans from $39/month
               </span>
             </div>
           </div>
