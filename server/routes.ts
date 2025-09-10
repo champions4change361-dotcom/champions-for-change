@@ -19,14 +19,167 @@ console.log('🏫 District athletics management platform initialized');
 console.log('💚 Champions for Change nonprofit mission active');
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // PRIORITY: Health check endpoints first for fastest response
-  app.get('/api/health', (req, res) => {
-    res.status(200).json({ 
-      status: 'healthy', 
-      service: 'District Athletics Management',
-      timestamp: new Date().toISOString(),
-      environment: process.env.NODE_ENV || 'development'
-    });
+  // PRIORITY: Enhanced health check endpoints with comprehensive metrics
+  app.get('/api/health', async (req, res) => {
+    try {
+      const startTime = Date.now();
+      const storage = await getStorage();
+      
+      // Basic service info
+      const baseHealth = {
+        status: 'healthy',
+        service: 'District Athletics Management - Tournament Platform',
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV || 'development',
+        version: '2.0.0-optimized',
+        uptime: process.uptime()
+      };
+
+      // Test database connectivity
+      let databaseHealth = {
+        status: 'unknown',
+        responseTime: 0,
+        type: 'memory'
+      };
+
+      try {
+        const dbStart = Date.now();
+        // Try to run a simple query to test database connection
+        if (storage && typeof storage.getAllUsers === 'function') {
+          await storage.getAllUsers();
+          databaseHealth = {
+            status: 'connected',
+            responseTime: Date.now() - dbStart,
+            type: 'postgresql'
+          };
+        } else {
+          databaseHealth = {
+            status: 'unknown',
+            responseTime: 0,
+            type: 'memory',
+            error: 'Storage interface not available or getAllUsers method not found'
+          };
+        }
+      } catch (dbError) {
+        databaseHealth = {
+          status: 'error',
+          responseTime: Date.now() - dbStart,
+          type: 'postgresql',
+          error: dbError instanceof Error ? dbError.message : String(dbError)
+        };
+      }
+
+      // Get cache statistics if available
+      let cacheHealth = null;
+      if (storage && typeof storage.getCacheStats === 'function') {
+        try {
+          const cacheStats = storage.getCacheStats();
+          // Ensure hitRate is always a valid number, not null or NaN
+          const hitRate = typeof cacheStats.hitRate === 'number' && !isNaN(cacheStats.hitRate) ? cacheStats.hitRate : 0;
+          cacheHealth = {
+            status: 'active',
+            entries: cacheStats.totalEntries,
+            hitRate: Math.round(hitRate * 100) / 100,
+            hits: cacheStats.hits,
+            misses: cacheStats.misses,
+            evictions: cacheStats.evictions,
+            memorySize: cacheStats.totalSize
+          };
+        } catch (cacheError) {
+          cacheHealth = {
+            status: 'error',
+            error: cacheError instanceof Error ? cacheError.message : String(cacheError)
+          };
+        }
+      }
+
+      // Get performance monitoring data if available
+      let performanceHealth = null;
+      if (storage && typeof storage.getMonitoringData === 'function') {
+        try {
+          const monitoring = storage.getMonitoringData();
+          performanceHealth = {
+            status: monitoring.health?.connectionStatus || 'unknown',
+            averageResponseTime: Math.round(monitoring.performance.averageResponseTime),
+            totalQueries: monitoring.performance.totalQueries,
+            slowQueries: monitoring.performance.slowQueries,
+            errorRate: Math.round(monitoring.performance.errorRate * 1000) / 10, // percentage
+            queriesPerMinute: Math.round(monitoring.performance.queriesPerMinute * 10) / 10,
+            healthStatus: monitoring.performance.healthStatus
+          };
+        } catch (perfError) {
+          performanceHealth = {
+            status: 'error',
+            error: perfError instanceof Error ? perfError.message : String(perfError)
+          };
+        }
+      }
+
+      // System resources
+      const systemHealth = {
+        memory: {
+          used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024), // MB
+          total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024), // MB
+          external: Math.round(process.memoryUsage().external / 1024 / 1024) // MB
+        },
+        cpu: {
+          usage: process.cpuUsage()
+        }
+      };
+
+      // Determine overall health status
+      let overallStatus = 'healthy';
+      if (databaseHealth.status === 'error') {
+        overallStatus = 'critical';
+      } else if (databaseHealth.status === 'unknown') {
+        overallStatus = 'degraded';
+      } else if (performanceHealth && performanceHealth.healthStatus === 'critical') {
+        overallStatus = 'critical';
+      } else if (performanceHealth && performanceHealth.healthStatus === 'degraded') {
+        overallStatus = 'degraded';
+      } else if (cacheHealth && cacheHealth.status === 'error') {
+        overallStatus = 'degraded';
+      }
+
+      const totalResponseTime = Date.now() - startTime;
+
+      const healthResponse = {
+        ...baseHealth,
+        status: overallStatus,
+        responseTime: totalResponseTime,
+        components: {
+          database: databaseHealth,
+          cache: cacheHealth,
+          performance: performanceHealth,
+          system: systemHealth
+        },
+        checks: {
+          database: databaseHealth.status === 'connected',
+          cache: cacheHealth ? cacheHealth.status === 'active' : true,
+          performance: performanceHealth ? performanceHealth.status !== 'error' : true
+        }
+      };
+
+      // Set appropriate HTTP status based on health
+      const httpStatus = overallStatus === 'critical' ? 503 : 
+                        overallStatus === 'degraded' ? 206 : 200;
+
+      res.status(httpStatus).json(healthResponse);
+      
+    } catch (error) {
+      console.error('Health check error:', error);
+      res.status(503).json({
+        status: 'critical',
+        service: 'District Athletics Management',
+        timestamp: new Date().toISOString(),
+        error: error instanceof Error ? error.message : String(error),
+        checks: {
+          database: false,
+          cache: false,
+          performance: false
+        }
+      });
+    }
   });
 
   app.get('/health', (req, res) => {

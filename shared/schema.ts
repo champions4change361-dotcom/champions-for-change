@@ -4934,3 +4934,202 @@ export const insertRegistrationAssignmentLogSchema = createInsertSchema(registra
   id: true,
   createdAt: true,
 });
+
+// =============================================================================
+// ENHANCED VALIDATION SCHEMAS WITH BUSINESS LOGIC
+// Comprehensive validation for production-ready tournament management
+// =============================================================================
+
+// Enhanced Match Validation with Business Rules
+export const createMatchSchema = insertMatchSchema.extend({
+  round: z.number().int().positive().max(100, "Round number cannot exceed 100"),
+  position: z.number().int().positive().max(1000, "Position cannot exceed 1000"),
+  team1Score: z.number().int().min(0, "Scores cannot be negative").max(999, "Score too high").optional(),
+  team2Score: z.number().int().min(0, "Scores cannot be negative").max(999, "Score too high").optional(),
+  team1: z.string().min(1, "Team 1 is required").optional(),
+  team2: z.string().min(1, "Team 2 is required").optional(),
+  status: z.enum(["upcoming", "in-progress", "completed"]),
+  winner: z.enum(["team1", "team2", "tie"]).optional(),
+}).superRefine((data, ctx) => {
+  // 1. Status-based validation for completed matches
+  if (data.status === "completed") {
+    if (data.team1Score === undefined || data.team2Score === undefined) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Completed matches must have scores for both teams",
+        path: ["team1Score", "team2Score"]
+      });
+    }
+    if (!data.winner) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Completed matches must have a winner declared",
+        path: ["winner"]
+      });
+    }
+  }
+  
+  // 2. Forbid winner/scores for non-completed matches
+  if (data.status !== "completed") {
+    if (data.winner) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Only completed matches can have a winner declared",
+        path: ["winner"]
+      });
+    }
+  }
+  
+  // 3. Winner-score consistency validation
+  if (data.winner && data.team1Score !== undefined && data.team2Score !== undefined) {
+    if (data.winner === "team1" && data.team1Score <= data.team2Score) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Team 1 cannot be winner with a lower or equal score",
+        path: ["winner"]
+      });
+    }
+    if (data.winner === "team2" && data.team2Score <= data.team1Score) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Team 2 cannot be winner with a lower or equal score",
+        path: ["winner"]
+      });
+    }
+    if (data.winner === "tie" && data.team1Score !== data.team2Score) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Tie declared but scores are not equal",
+        path: ["winner"]
+      });
+    }
+  }
+  
+  // 4. Team identity validation - teams must be different
+  if (data.team1 && data.team2 && data.team1 === data.team2) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Teams cannot play against themselves",
+      path: ["team1", "team2"]
+    });
+  }
+});
+
+// Enhanced Tournament Validation 
+export const createTournamentSchema = insertTournamentSchema.extend({
+  name: z.string().min(3, "Tournament name must be at least 3 characters").max(100, "Name too long"),
+  teamSize: z.number().int().min(1, "Team size must be at least 1").max(50, "Team size too large"),
+  maxParticipants: z.number().int().min(2, "Need at least 2 participants").max(10000, "Too many participants").optional(),
+  entryFee: z.coerce.number().min(0, "Entry fee cannot be negative").optional(),
+  tournamentDate: z.coerce.date({
+    errorMap: () => ({ message: "Invalid tournament date format" })
+  }).refine((date) => {
+    const now = new Date();
+    return date > now;
+  }, "Tournament date must be in the future").optional(),
+  registrationDeadline: z.coerce.date({
+    errorMap: () => ({ message: "Invalid registration deadline format" })
+  }).optional(),
+}).superRefine((data, ctx) => {
+  // 1. Registration deadline must be in the future
+  if (data.registrationDeadline) {
+    const now = new Date();
+    if (data.registrationDeadline <= now) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Registration deadline must be in the future",
+        path: ["registrationDeadline"]
+      });
+    }
+  }
+  
+  // 2. Registration deadline must be before tournament date
+  if (data.registrationDeadline && data.tournamentDate) {
+    if (data.registrationDeadline >= data.tournamentDate) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Registration deadline must be before tournament date",
+        path: ["registrationDeadline"]
+      });
+    }
+  }
+  
+  // 3. Max participants should be reasonable for team size
+  if (data.maxParticipants && data.teamSize) {
+    if (data.maxParticipants < data.teamSize) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Maximum participants cannot be less than team size",
+        path: ["maxParticipants"]
+      });
+    }
+  }
+});
+
+// Enhanced Sport Option Validation
+export const createSportOptionSchema = insertSportOptionSchema.extend({
+  name: z.string().min(2, "Sport name must be at least 2 characters").max(50, "Sport name too long"),
+  sportCategory: z.string().min(2, "Category must be specified"),
+}).refine((data) => {
+  // Validate sport name doesn't contain special characters
+  const validNamePattern = /^[a-zA-Z0-9\s&'-]+$/;
+  return validNamePattern.test(data.name);
+}, {
+  message: "Sport name contains invalid characters",
+  path: ["name"]
+});
+
+// Enhanced User Registration Validation
+export const createUserSchema = insertUserSchema.extend({
+  email: z.string().email("Invalid email format").max(255, "Email too long"),
+  firstName: z.string().min(1, "First name is required").max(50, "First name too long").optional(),
+  lastName: z.string().min(1, "Last name is required").max(50, "Last name too long").optional(),
+  organizationName: z.string().min(2, "Organization name must be at least 2 characters").max(100, "Organization name too long").optional(),
+  phone: z.string().regex(/^\+?[\d\s\-\(\)\.]+$/, "Invalid phone number format").optional(),
+});
+
+// Enhanced Team Registration Validation  
+export const createTeamRegistrationSchema = z.object({
+  tournamentId: z.string().uuid("Invalid tournament ID"),
+  teamName: z.string().min(2, "Team name must be at least 2 characters").max(100, "Team name too long"),
+  coachName: z.string().min(2, "Coach name required").max(100, "Coach name too long"),
+  coachEmail: z.string().email("Invalid coach email"),
+  coachPhone: z.string().regex(/^\+?[\d\s\-\(\)\.]+$/, "Invalid phone number").optional(),
+  division: z.string().min(1, "Division must be specified").optional(),
+  paymentStatus: z.enum(["pending", "partial", "paid", "overdue"]).default("pending"),
+});
+
+// Contact Validation
+export const createContactSchema = z.object({
+  firstName: z.string().min(1, "First name required").max(50, "First name too long").optional(),
+  lastName: z.string().min(1, "Last name required").max(50, "Last name too long").optional(),
+  email: z.string().email("Invalid email format"),
+  phone: z.string().regex(/^\+?[\d\s\-\(\)\.]+$/, "Invalid phone number").optional(),
+  organization: z.string().max(100, "Organization name too long").optional(),
+  position: z.string().max(100, "Position title too long").optional(),
+  sport: z.string().max(50, "Sport name too long").optional(),
+  notes: z.string().max(1000, "Notes too long").optional(),
+});
+
+// API Response Validation Helpers
+export const paginationSchema = z.object({
+  page: z.coerce.number().int().min(1, "Page must be at least 1").default(1),
+  limit: z.coerce.number().int().min(1, "Limit must be at least 1").max(100, "Limit cannot exceed 100").default(20),
+  sortBy: z.string().max(50, "Sort field too long").optional(),
+  sortOrder: z.enum(["asc", "desc"]).default("desc"),
+});
+
+export const searchSchema = z.object({
+  query: z.string().min(1, "Search query required").max(100, "Query too long"),
+  filters: z.record(z.string()).optional(),
+}).merge(paginationSchema);
+
+// Type exports for enhanced schemas
+export type CreateMatchInput = z.infer<typeof createMatchSchema>;
+export type CreateTournamentInput = z.infer<typeof createTournamentSchema>;
+export type CreateSportOptionInput = z.infer<typeof createSportOptionSchema>;
+export type CreateUserInput = z.infer<typeof createUserSchema>;
+export type CreateTeamRegistrationInput = z.infer<typeof createTeamRegistrationSchema>;
+export type CreateContactInput = z.infer<typeof createContactSchema>;
+export type PaginationInput = z.infer<typeof paginationSchema>;
+export type SearchInput = z.infer<typeof searchSchema>;
