@@ -1797,7 +1797,10 @@ export const sportOptions = pgTable("sport_options", {
   measurementUnit: text("measurement_unit"), // seconds, meters, points, etc.
   hasSubEvents: boolean("has_sub_events").default(false), // Track & Field, Swimming have sub-events
   createdAt: timestamp("created_at").default(sql`now()`),
-});
+}, (table) => [
+  // Index for filtering sports by category
+  index("idx_sport_options_category").on(table.sportCategory),
+]);
 
 // Sport Events Schema (sub-events within sports like Track & Field events)
 export const sportEvents = pgTable("sport_events", {
@@ -1815,7 +1818,12 @@ export const sportEvents = pgTable("sport_events", {
   }),
   sortOrder: integer("sort_order"),
   createdAt: timestamp("created_at").default(sql`now()`),
-});
+}, (table) => [
+  // Index for sport association queries
+  index("idx_sport_events_sport_id").on(table.sportId),
+  // Composite index for sport + event type queries
+  index("idx_events_sport_type").on(table.sportId, table.eventType),
+]);
 
 // Tournament Events Schema (selected events for a tournament)
 export const tournamentEvents = pgTable("tournament_events", {
@@ -1870,25 +1878,12 @@ export const tournamentStructures = pgTable("tournament_structures", {
 export const trackEvents = pgTable("track_events", {
   id: varchar("id").primaryKey(),
   eventName: text("event_name").notNull(),
-  eventCategory: text("event_category"), // Track, Field, Relay, Combined
-  distanceMeters: integer("distance_meters"), // null for field events
-  measurementType: text("measurement_type"), // time, distance, height, points
-  maxAttempts: integer("max_attempts").default(3),
-  usesLanes: boolean("uses_lanes").default(false),
-  usesStagger: boolean("uses_stagger").default(false),
-  usesHurdles: boolean("uses_hurdles").default(false),
-  hurdleHeightMen: numeric("hurdle_height_men"), // in meters
-  hurdleHeightWomen: numeric("hurdle_height_women"), // in meters
-  hurdleCount: integer("hurdle_count").default(0),
-  implementsUsed: jsonb("implements_used"), // Array of required equipment
-  windLegalDistance: integer("wind_legal_distance"), // Distance for wind measurement
-  qualifyingStandards: jsonb("qualifying_standards"), // Performance standards by level
-  equipmentSpecs: jsonb("equipment_specs"), // Equipment specifications
-  scoringMethod: text("scoring_method"), // time_ascending, distance_descending, etc.
+  eventCategory: text("event_category"),
+  measurementType: text("measurement_type"),
+  maxAttempt: integer("max_attempt"), // Match actual database column name
   ribbonPlaces: integer("ribbon_places").default(8),
-  ageRestrictions: jsonb("age_restrictions"), // Minimum age requirements
-  genderSpecific: boolean("gender_specific").default(false), // Male/female only events
-  sortOrder: integer("event_sort_order"),
+  usesStakes: text("uses_stakes"),
+  eventSortOrder: integer("event_sort_order"),
   createdAt: timestamp("created_at").default(sql`now()`),
 });
 
@@ -2070,7 +2065,13 @@ export const matches = pgTable("matches", {
   status: text("status", { enum: ["upcoming", "in-progress", "completed"] }).notNull().default("upcoming"),
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
   updatedAt: timestamp("updated_at").notNull().default(sql`now()`),
-});
+}, (table) => [
+  // High-frequency single-column indexes
+  index("idx_matches_tournament_id").on(table.tournamentId),
+  index("idx_matches_status").on(table.status),
+  // Composite index for bracket queries
+  index("idx_matches_tournament_round").on(table.tournamentId, table.round),
+]);
 
 // Sport-specific division rules
 export const sportDivisionRules = pgTable("sport_division_rules", {
