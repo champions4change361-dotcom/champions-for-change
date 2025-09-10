@@ -1103,6 +1103,185 @@ export class DbStorage implements IStorage {
     }
   }
 
+  // STANDALONE TEAM MANAGEMENT METHODS (Jersey Watch-style)
+  async createTeam(team: InsertTeam): Promise<Team> {
+    try {
+      const teamWithId = {
+        id: randomUUID(),
+        ...team,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      const result = await this.db.insert(teams).values(teamWithId).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to create team");
+    }
+  }
+
+  async getTeam(id: string): Promise<Team | undefined> {
+    try {
+      const result = await this.db.select().from(teams).where(eq(teams.id, id));
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to get team");
+    }
+  }
+
+  async getTeamsByCoach(coachId: string): Promise<Team[]> {
+    try {
+      const result = await this.db.select().from(teams).where(eq(teams.coachId, coachId));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to get teams by coach");
+    }
+  }
+
+  async getTeamsByOrganization(organizationName: string): Promise<Team[]> {
+    try {
+      const result = await this.db.select().from(teams).where(eq(teams.organizationName, organizationName));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to get teams by organization");
+    }
+  }
+
+  async updateTeam(id: string, updates: Partial<Team>): Promise<Team | undefined> {
+    try {
+      // Filter out immutable fields to prevent accidental mutation
+      const { id: _, createdAt: __, ...allowedUpdates } = updates;
+      
+      const result = await this.db
+        .update(teams)
+        .set({ ...allowedUpdates, updatedAt: new Date() })
+        .where(eq(teams.id, id))
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to update team");
+    }
+  }
+
+  async deleteTeam(id: string): Promise<boolean> {
+    try {
+      return await this.db.transaction(async (tx) => {
+        // First delete related team players to handle cascade
+        await tx.delete(teamPlayers).where(eq(teamPlayers.teamId, id));
+        
+        // Then delete the team
+        const result = await tx.delete(teams).where(eq(teams.id, id)).returning();
+        return result.length > 0;
+      });
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to delete team");
+    }
+  }
+
+  async updateTeamSubscription(id: string, subscriptionData: { subscriptionStatus: string, subscriptionTier: string, stripeSubscriptionId?: string }): Promise<Team | undefined> {
+    try {
+      const result = await this.db
+        .update(teams)
+        .set({ 
+          ...subscriptionData, 
+          updatedAt: new Date() 
+        })
+        .where(eq(teams.id, id))
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to update team subscription");
+    }
+  }
+
+  async createTeamPlayer(player: InsertTeamPlayer): Promise<TeamPlayer> {
+    try {
+      const playerWithId = {
+        id: randomUUID(),
+        ...player,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      const result = await this.db.insert(teamPlayers).values(playerWithId).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to create team player");
+    }
+  }
+
+  async getTeamPlayer(id: string): Promise<TeamPlayer | undefined> {
+    try {
+      const result = await this.db.select().from(teamPlayers).where(eq(teamPlayers.id, id));
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to get team player");
+    }
+  }
+
+  async getTeamPlayersByTeam(teamId: string): Promise<TeamPlayer[]> {
+    try {
+      const result = await this.db.select().from(teamPlayers).where(eq(teamPlayers.teamId, teamId));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to get team players");
+    }
+  }
+
+  async updateTeamPlayer(id: string, updates: Partial<TeamPlayer>): Promise<TeamPlayer | undefined> {
+    try {
+      // Filter out immutable fields to prevent accidental mutation
+      const { id: _, teamId: __, createdAt: ___, ...allowedUpdates } = updates;
+      
+      const result = await this.db
+        .update(teamPlayers)
+        .set({ ...allowedUpdates, updatedAt: new Date() })
+        .where(eq(teamPlayers.id, id))
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to update team player");
+    }
+  }
+
+  async deleteTeamPlayer(id: string): Promise<boolean> {
+    try {
+      const result = await this.db.delete(teamPlayers).where(eq(teamPlayers.id, id)).returning();
+      return result.length > 0;
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to delete team player");
+    }
+  }
+
+  async bulkCreateTeamPlayers(players: InsertTeamPlayer[]): Promise<TeamPlayer[]> {
+    try {
+      const playersWithIds = players.map(player => ({
+        id: randomUUID(),
+        ...player,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }));
+      
+      const result = await this.db.insert(teamPlayers).values(playersWithIds).returning();
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to create team players");
+    }
+  }
+
   // Organization methods
   async createOrganization(organization: InsertOrganization): Promise<Organization> {
     try {
@@ -2680,6 +2859,10 @@ export class MemStorage implements IStorage {
   private contacts: Map<string, Contact>;
   private emailCampaigns: Map<string, EmailCampaign>;
   private registrationRequests: Map<string, RegistrationRequest>;
+  
+  // STANDALONE TEAM MANAGEMENT MAPS (Jersey Watch-style)
+  private teams: Map<string, Team>;
+  private teamPlayers: Map<string, TeamPlayer>;
 
   constructor() {
     this.users = new Map();
@@ -2716,6 +2899,10 @@ export class MemStorage implements IStorage {
     this.contacts = new Map();
     this.emailCampaigns = new Map();
     this.registrationRequests = new Map();
+    
+    // STANDALONE TEAM MANAGEMENT INITIALIZATION 
+    this.teams = new Map();
+    this.teamPlayers = new Map();
     
     // Initialize with default tournament structures, sport division rules, track events, tournament integration, competition formats, and KRAKEN!
     this.initializeDefaultStructures();
@@ -5865,6 +6052,109 @@ export class MemStorage implements IStorage {
     }
     
     return cleaned;
+  }
+
+  // STANDALONE TEAM MANAGEMENT METHODS (Jersey Watch-style)
+  async createTeam(team: InsertTeam): Promise<Team> {
+    const teamWithId = {
+      id: randomUUID(),
+      ...team,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    } as Team;
+    
+    this.teams.set(teamWithId.id, teamWithId);
+    return teamWithId;
+  }
+
+  async getTeam(id: string): Promise<Team | undefined> {
+    return this.teams.get(id);
+  }
+
+  async getTeamsByCoach(coachId: string): Promise<Team[]> {
+    return Array.from(this.teams.values()).filter(team => team.coachId === coachId);
+  }
+
+  async getTeamsByOrganization(organizationName: string): Promise<Team[]> {
+    return Array.from(this.teams.values()).filter(team => team.organizationName === organizationName);
+  }
+
+  async updateTeam(id: string, updates: Partial<Team>): Promise<Team | undefined> {
+    const existingTeam = this.teams.get(id);
+    if (!existingTeam) return undefined;
+    
+    // Filter out immutable fields to prevent accidental mutation
+    const { id: _, createdAt: __, ...allowedUpdates } = updates;
+    
+    const updatedTeam = { 
+      ...existingTeam, 
+      ...allowedUpdates, 
+      updatedAt: new Date() 
+    };
+    this.teams.set(id, updatedTeam);
+    return updatedTeam;
+  }
+
+  async deleteTeam(id: string): Promise<boolean> {
+    // First delete related team players to handle cascade
+    const playersToDelete = Array.from(this.teamPlayers.values()).filter(player => player.teamId === id);
+    playersToDelete.forEach(player => this.teamPlayers.delete(player.id));
+    
+    // Then delete the team
+    return this.teams.delete(id);
+  }
+
+  async updateTeamSubscription(id: string, subscriptionData: { subscriptionStatus: string, subscriptionTier: string, stripeSubscriptionId?: string }): Promise<Team | undefined> {
+    return this.updateTeam(id, subscriptionData);
+  }
+
+  async createTeamPlayer(player: InsertTeamPlayer): Promise<TeamPlayer> {
+    const playerWithId = {
+      id: randomUUID(),
+      ...player,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    } as TeamPlayer;
+    
+    this.teamPlayers.set(playerWithId.id, playerWithId);
+    return playerWithId;
+  }
+
+  async getTeamPlayer(id: string): Promise<TeamPlayer | undefined> {
+    return this.teamPlayers.get(id);
+  }
+
+  async getTeamPlayersByTeam(teamId: string): Promise<TeamPlayer[]> {
+    return Array.from(this.teamPlayers.values()).filter(player => player.teamId === teamId);
+  }
+
+  async updateTeamPlayer(id: string, updates: Partial<TeamPlayer>): Promise<TeamPlayer | undefined> {
+    const existingPlayer = this.teamPlayers.get(id);
+    if (!existingPlayer) return undefined;
+    
+    // Filter out immutable fields to prevent accidental mutation
+    const { id: _, teamId: __, createdAt: ___, ...allowedUpdates } = updates;
+    
+    const updatedPlayer = { 
+      ...existingPlayer, 
+      ...allowedUpdates, 
+      updatedAt: new Date() 
+    };
+    this.teamPlayers.set(id, updatedPlayer);
+    return updatedPlayer;
+  }
+
+  async deleteTeamPlayer(id: string): Promise<boolean> {
+    return this.teamPlayers.delete(id);
+  }
+
+  async bulkCreateTeamPlayers(players: InsertTeamPlayer[]): Promise<TeamPlayer[]> {
+    const createdPlayers: TeamPlayer[] = [];
+    for (const player of players) {
+      const createdPlayer = await this.createTeamPlayer(player);
+      createdPlayers.push(createdPlayer);
+    }
+    return createdPlayers;
   }
 
   // Cache stats method for compatibility with cached storage interface
