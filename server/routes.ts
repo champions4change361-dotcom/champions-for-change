@@ -13,7 +13,7 @@ import NBADepthChartParser from './nba-depth-chart-parser';
 import { stripe } from "./nonprofitStripeConfig";
 import { registerDomainRoutes } from "./domainRoutes";
 import { registerTournamentRoutes } from "./routes/tournamentRoutes";
-import { tournamentSubscriptions, insertTournamentSubscriptionSchema, type InsertTournamentSubscription, insertRegistrationSubmissionSchema } from "@shared/schema";
+import { tournamentSubscriptions, insertTournamentSubscriptionSchema, type InsertTournamentSubscription, insertRegistrationSubmissionSchema, insertTeamSchema, insertTeamPlayerSchema, type InsertTeam, type InsertTeamPlayer, type Team, type TeamPlayer } from "@shared/schema";
 
 console.log('🏫 District athletics management platform initialized');
 console.log('💚 Champions for Change nonprofit mission active');
@@ -213,9 +213,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: 'User not authenticated' });
       }
 
-      // TODO: Implement getTeamsByCoach once storage methods are ready
-      // For now, return empty array
-      res.json([]);
+      const storage = await getStorage();
+      const teams = await storage.getTeamsByCoach(userId);
+      res.json(teams);
     } catch (error: any) {
       console.error('Get teams error:', error);
       res.status(500).json({ error: 'Failed to fetch teams' });
@@ -230,32 +230,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: 'User not authenticated' });
       }
 
-      const { teamName, organizationName, coachName, coachEmail, coachPhone, homeVenue, ageGroup, division } = req.body;
-      
-      if (!teamName || !coachName || !coachEmail) {
-        return res.status(400).json({ error: 'Missing required fields: teamName, coachName, coachEmail' });
+      // Validate request body with Zod schema
+      const validationResult = insertTeamSchema.safeParse({
+        ...req.body,
+        coachId: userId // Ensure authenticated user is the coach
+      });
+
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          error: 'Invalid team data', 
+          details: validationResult.error.errors 
+        });
       }
 
-      // TODO: Implement createTeam once storage methods are ready
-      const newTeam = {
-        id: crypto.randomUUID(),
-        teamName,
-        organizationName,
-        coachName, 
-        coachEmail,
-        coachPhone,
-        coachId: userId,
-        homeVenue,
-        ageGroup,
-        division,
-        status: 'active',
-        subscriptionStatus: 'free',
-        subscriptionTier: 'basic',
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
-
-      res.json(newTeam);
+      const storage = await getStorage();
+      const newTeam = await storage.createTeam(validationResult.data);
+      res.status(201).json(newTeam);
     } catch (error: any) {
       console.error('Create team error:', error);
       res.status(500).json({ error: 'Failed to create team' });
@@ -272,8 +262,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: 'User not authenticated' });
       }
 
-      // TODO: Implement getTeam and verify ownership
-      res.json({ id, message: 'Team details - implementation pending' });
+      const storage = await getStorage();
+      const team = await storage.getTeam(id);
+      
+      if (!team) {
+        return res.status(404).json({ error: 'Team not found' });
+      }
+
+      // Verify ownership - only the coach can access their team
+      if (team.coachId !== userId) {
+        return res.status(403).json({ error: 'Access denied - not your team' });
+      }
+
+      res.json(team);
     } catch (error: any) {
       console.error('Get team error:', error);
       res.status(500).json({ error: 'Failed to fetch team' });
@@ -290,8 +291,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: 'User not authenticated' });
       }
 
-      // TODO: Implement updateTeam and verify ownership
-      res.json({ id, message: 'Team updated - implementation pending' });
+      const storage = await getStorage();
+      
+      // First verify the team exists and user owns it
+      const existingTeam = await storage.getTeam(id);
+      if (!existingTeam) {
+        return res.status(404).json({ error: 'Team not found' });
+      }
+      
+      if (existingTeam.coachId !== userId) {
+        return res.status(403).json({ error: 'Access denied - not your team' });
+      }
+
+      // Validate update data (exclude coachId to prevent ownership changes)
+      const { coachId: _, ...updateData } = req.body;
+      const validationResult = insertTeamSchema.partial().safeParse(updateData);
+      
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          error: 'Invalid update data', 
+          details: validationResult.error.errors 
+        });
+      }
+
+      const updatedTeam = await storage.updateTeam(id, validationResult.data);
+      if (!updatedTeam) {
+        return res.status(500).json({ error: 'Failed to update team' });
+      }
+
+      res.json(updatedTeam);
     } catch (error: any) {
       console.error('Update team error:', error);
       res.status(500).json({ error: 'Failed to update team' });
@@ -308,8 +336,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: 'User not authenticated' });
       }
 
-      // TODO: Implement getTeamPlayersByTeam
-      res.json([]);
+      const storage = await getStorage();
+      
+      // First verify the team exists and user owns it
+      const team = await storage.getTeam(id);
+      if (!team) {
+        return res.status(404).json({ error: 'Team not found' });
+      }
+      
+      if (team.coachId !== userId) {
+        return res.status(403).json({ error: 'Access denied - not your team' });
+      }
+
+      const players = await storage.getTeamPlayersByTeam(id);
+      res.json(players);
     } catch (error: any) {
       console.error('Get team players error:', error);
       res.status(500).json({ error: 'Failed to fetch team players' });
@@ -326,30 +366,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: 'User not authenticated' });
       }
 
-      const { playerName, dateOfBirth, jerseyNumber, position, parentGuardianName, parentGuardianEmail } = req.body;
+      const storage = await getStorage();
       
-      if (!playerName || !parentGuardianName || !parentGuardianEmail) {
+      // First verify the team exists and user owns it
+      const team = await storage.getTeam(id);
+      if (!team) {
+        return res.status(404).json({ error: 'Team not found' });
+      }
+      
+      if (team.coachId !== userId) {
+        return res.status(403).json({ error: 'Access denied - not your team' });
+      }
+
+      // Validate player data with Zod schema
+      const validationResult = insertTeamPlayerSchema.safeParse({
+        ...req.body,
+        teamId: id // Ensure player is added to the correct team
+      });
+
+      if (!validationResult.success) {
         return res.status(400).json({ 
-          error: 'Missing required fields: playerName, parentGuardianName, parentGuardianEmail' 
+          error: 'Invalid player data', 
+          details: validationResult.error.errors 
         });
       }
 
-      // TODO: Implement createTeamPlayer
-      const newPlayer = {
-        id: crypto.randomUUID(),
-        teamId: id,
-        playerName,
-        dateOfBirth,
-        jerseyNumber,
-        position,
-        parentGuardianName,
-        parentGuardianEmail,
-        status: 'active',
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
-
-      res.json(newPlayer);
+      const newPlayer = await storage.createTeamPlayer(validationResult.data);
+      res.status(201).json(newPlayer);
     } catch (error: any) {
       console.error('Add team player error:', error);
       res.status(500).json({ error: 'Failed to add player' });
@@ -366,16 +409,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: 'User not authenticated' });
       }
 
+      const storage = await getStorage();
+      
+      // First verify the team exists and user owns it
+      const team = await storage.getTeam(id);
+      if (!team) {
+        return res.status(404).json({ error: 'Team not found' });
+      }
+      
+      if (team.coachId !== userId) {
+        return res.status(403).json({ error: 'Access denied - not your team' });
+      }
+
       const { subscriptionStatus, subscriptionTier, stripeSubscriptionId } = req.body;
 
-      // TODO: Implement updateTeamSubscription
-      res.json({ 
-        id, 
-        subscriptionStatus, 
-        subscriptionTier, 
-        stripeSubscriptionId,
-        message: 'Subscription updated - implementation pending' 
+      // Basic validation for subscription data
+      const validStatuses = ['free', 'active', 'past_due', 'canceled', 'unpaid'];
+      const validTiers = ['basic', 'premium', 'enterprise'];
+
+      if (subscriptionStatus && !validStatuses.includes(subscriptionStatus)) {
+        return res.status(400).json({ error: 'Invalid subscription status' });
+      }
+
+      if (subscriptionTier && !validTiers.includes(subscriptionTier)) {
+        return res.status(400).json({ error: 'Invalid subscription tier' });
+      }
+
+      const updatedTeam = await storage.updateTeamSubscription(id, {
+        subscriptionStatus,
+        subscriptionTier,
+        stripeSubscriptionId
       });
+
+      if (!updatedTeam) {
+        return res.status(500).json({ error: 'Failed to update subscription' });
+      }
+
+      res.json(updatedTeam);
     } catch (error: any) {
       console.error('Update team subscription error:', error);
       res.status(500).json({ error: 'Failed to update subscription' });
