@@ -46,19 +46,16 @@ export default function TrantorLanding() {
                 <Button 
                   onClick={(e) => {
                     e.preventDefault();
-                    console.log('Trial button clicked - navigating to trial signup');
                     // Mobile-friendly navigation - use both approaches
                     try {
                       setLocation('/trial-signup?plan=monthly&price=39');
                       // Fallback for mobile browsers that might have issues with wouter
                       setTimeout(() => {
                         if (window.location.pathname !== '/trial-signup') {
-                          console.log('Fallback navigation for mobile');
                           window.location.href = '/trial-signup?plan=monthly&price=39';
                         }
                       }, 100);
                     } catch (error) {
-                      console.error('Navigation error, using fallback:', error);
                       window.location.href = '/trial-signup?plan=monthly&price=39';
                     }
                   }}
