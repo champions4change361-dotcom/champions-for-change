@@ -44,9 +44,23 @@ export default function TrantorLanding() {
               {/* Trial and Action Buttons */}
               <div className="flex flex-col space-y-2 lg:flex-row lg:space-y-0 lg:space-x-3 lg:ml-auto">
                 <Button 
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.preventDefault();
                     console.log('Trial button clicked - navigating to trial signup');
-                    setLocation('/trial-signup?plan=monthly&price=39');
+                    // Mobile-friendly navigation - use both approaches
+                    try {
+                      setLocation('/trial-signup?plan=monthly&price=39');
+                      // Fallback for mobile browsers that might have issues with wouter
+                      setTimeout(() => {
+                        if (window.location.pathname !== '/trial-signup') {
+                          console.log('Fallback navigation for mobile');
+                          window.location.href = '/trial-signup?plan=monthly&price=39';
+                        }
+                      }, 100);
+                    } catch (error) {
+                      console.error('Navigation error, using fallback:', error);
+                      window.location.href = '/trial-signup?plan=monthly&price=39';
+                    }
                   }}
                   className="bg-yellow-600 hover:bg-yellow-700 text-slate-900 font-semibold px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base w-full lg:w-auto"
                   data-testid="button-start-trial-trantor"
@@ -55,7 +69,20 @@ export default function TrantorLanding() {
                   Start 14-Day Free Trial
                 </Button>
                 <Button 
-                  onClick={() => setLocation('/login')}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    try {
+                      setLocation('/login');
+                      // Mobile fallback
+                      setTimeout(() => {
+                        if (window.location.pathname !== '/login') {
+                          window.location.href = '/login';
+                        }
+                      }, 100);
+                    } catch (error) {
+                      window.location.href = '/login';
+                    }
+                  }}
                   className="bg-slate-700 hover:bg-slate-600 text-yellow-300 font-semibold px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base w-full lg:w-auto border border-yellow-500 shadow-lg"
                   data-testid="button-signin-trantor"
                 >
@@ -63,7 +90,19 @@ export default function TrantorLanding() {
                   Sign In
                 </Button>
                 <Button 
-                  onClick={() => setLocation('/donate')}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    try {
+                      setLocation('/donate');
+                      setTimeout(() => {
+                        if (window.location.pathname !== '/donate') {
+                          window.location.href = '/donate';
+                        }
+                      }, 100);
+                    } catch (error) {
+                      window.location.href = '/donate';
+                    }
+                  }}
                   className="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base w-full lg:w-auto border border-red-400 shadow-lg"
                   data-testid="button-donate-here"
                 >
@@ -71,7 +110,19 @@ export default function TrantorLanding() {
                   Donate Here
                 </Button>
                 <Button 
-                  onClick={() => setLocation('/tournament-calendar')}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    try {
+                      setLocation('/tournament-calendar');
+                      setTimeout(() => {
+                        if (window.location.pathname !== '/tournament-calendar') {
+                          window.location.href = '/tournament-calendar';
+                        }
+                      }, 100);
+                    } catch (error) {
+                      window.location.href = '/tournament-calendar';
+                    }
+                  }}
                   className="bg-blue-700 hover:bg-blue-600 text-blue-200 font-semibold px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base w-full lg:w-auto border border-blue-400 shadow-lg"
                   data-testid="button-see-tournaments"
                 >
