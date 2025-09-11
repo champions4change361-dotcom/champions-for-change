@@ -3435,6 +3435,10 @@ export const teamPlayers = pgTable("team_players", {
   medications: text("medications"),
   physicianName: varchar("physician_name"),
   physicianPhone: varchar("physician_phone"),
+  homeAddress: text("home_address"),
+  medicalClearanceDoc: varchar("medical_clearance_doc"),
+  birthCertificateDoc: varchar("birth_certificate_doc"),
+  physicalFormDoc: varchar("physical_form_doc"),
   status: text("status", { 
     enum: ["active", "inactive", "injured", "suspended"] 
   }).default("active"),

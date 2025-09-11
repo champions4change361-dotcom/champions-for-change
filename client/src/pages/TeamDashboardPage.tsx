@@ -1,18 +1,29 @@
 import { useState, useEffect } from 'react';
 import { useParams, useLocation } from 'wouter';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ArrowLeft, Users, Settings, User, Crown } from 'lucide-react';
-import type { Team } from '@shared/schema';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { ArrowLeft, Users, Settings, User, Crown, Plus, Upload } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useToast } from '@/hooks/use-toast';
+import type { Team, TeamPlayer, InsertTeamPlayer } from '@shared/schema';
+import { insertTeamPlayerSchema } from '@shared/schema';
 
 export default function TeamDashboardPage() {
   const { id } = useParams();
   const [location, navigate] = useLocation();
+  const [isAddPlayerOpen, setIsAddPlayerOpen] = useState(false);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   
   // Derive activeTab from URL path
   const getActiveTabFromPath = (path: string): string => {
@@ -42,6 +53,54 @@ export default function TeamDashboardPage() {
   const { data: team, isLoading, error } = useQuery<Team>({
     queryKey: ['/api/teams', id],
     enabled: !!id,
+  });
+
+  // Fetch team players
+  const { data: players = [] } = useQuery<TeamPlayer[]>({
+    queryKey: ['/api/teams', id, 'players'],
+    enabled: !!id,
+  });
+
+  // Add player form
+  const addPlayerForm = useForm<InsertTeamPlayer>({
+    resolver: zodResolver(insertTeamPlayerSchema),
+    defaultValues: {
+      teamId: id || '',
+      playerName: '',
+      jerseyNumber: '',
+      position: '',
+      parentGuardianName: '',
+      parentGuardianEmail: '',
+      parentGuardianPhone: '',
+      homeAddress: '',
+      status: 'active' as const,
+    },
+  });
+
+  // Add player mutation
+  const addPlayerMutation = useMutation({
+    mutationFn: async (playerData: InsertTeamPlayer) => {
+      const response = await fetch(`/api/teams/${id}/players`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(playerData),
+      });
+      if (!response.ok) throw new Error('Failed to add player');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/teams', id, 'players'] });
+      toast({ title: "Player Added", description: "Player has been successfully added to the roster!" });
+      setIsAddPlayerOpen(false);
+      addPlayerForm.reset();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error Adding Player", 
+        description: error.message || "Failed to add player. Please try again.",
+        variant: "destructive"
+      });
+    },
   });
 
   const getSubscriptionBadgeVariant = (status: string | null) => {
@@ -255,25 +314,170 @@ export default function TeamDashboardPage() {
           {/* Roster Tab */}
           <TabsContent value="roster">
             <Card className="bg-slate-800/50 border-slate-700">
-              <CardHeader>
-                <CardTitle className="text-slate-100">Team Roster</CardTitle>
-                <CardDescription className="text-slate-300">
-                  Manage your team's players and roster
-                </CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <div>
+                  <CardTitle className="text-slate-100">Team Roster</CardTitle>
+                  <CardDescription className="text-slate-300">
+                    Manage your team's players and roster ({players.length} players)
+                  </CardDescription>
+                </div>
+                <Dialog open={isAddPlayerOpen} onOpenChange={setIsAddPlayerOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="bg-blue-600 hover:bg-blue-700 text-white" data-testid="button-add-player">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Player
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="bg-slate-800 border-slate-700 max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle className="text-slate-100">Add New Player</DialogTitle>
+                      <DialogDescription className="text-slate-300">
+                        Add a new player to your team roster with all required information.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <Form {...addPlayerForm}>
+                      <form onSubmit={addPlayerForm.handleSubmit((data) => addPlayerMutation.mutate(data))} className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField
+                            control={addPlayerForm.control}
+                            name="playerName"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-slate-100">Player Name *</FormLabel>
+                                <FormControl>
+                                  <Input {...field} className="bg-slate-700 border-slate-600 text-slate-100" data-testid="input-player-name" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={addPlayerForm.control}
+                            name="jerseyNumber"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-slate-100">Jersey Number</FormLabel>
+                                <FormControl>
+                                  <Input {...field} className="bg-slate-700 border-slate-600 text-slate-100" data-testid="input-jersey-number" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        <FormField
+                          control={addPlayerForm.control}
+                          name="position"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-slate-100">Position</FormLabel>
+                              <FormControl>
+                                <Input {...field} className="bg-slate-700 border-slate-600 text-slate-100" data-testid="input-position" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <div className="space-y-4">
+                          <h4 className="text-sm font-medium text-slate-100">Parent/Guardian Contact</h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField
+                              control={addPlayerForm.control}
+                              name="parentGuardianName"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-slate-100">Parent/Guardian Name</FormLabel>
+                                  <FormControl>
+                                    <Input {...field} className="bg-slate-700 border-slate-600 text-slate-100" data-testid="input-parent-name" />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={addPlayerForm.control}
+                              name="parentGuardianPhone"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-slate-100">Parent Phone</FormLabel>
+                                  <FormControl>
+                                    <Input {...field} className="bg-slate-700 border-slate-600 text-slate-100" data-testid="input-parent-phone" />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                          <FormField
+                            control={addPlayerForm.control}
+                            name="parentGuardianEmail"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-slate-100">Parent Email Address</FormLabel>
+                                <FormControl>
+                                  <Input {...field} type="email" className="bg-slate-700 border-slate-600 text-slate-100" data-testid="input-parent-email" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={addPlayerForm.control}
+                            name="homeAddress"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-slate-100">Home Address</FormLabel>
+                                <FormControl>
+                                  <Textarea {...field} className="bg-slate-700 border-slate-600 text-slate-100" data-testid="input-home-address" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        <div className="flex justify-end space-x-2 pt-4">
+                          <Button type="button" variant="outline" onClick={() => setIsAddPlayerOpen(false)} className="border-slate-600 text-slate-100 hover:bg-slate-700">
+                            Cancel
+                          </Button>
+                          <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white" disabled={addPlayerMutation.isPending} data-testid="button-save-player">
+                            {addPlayerMutation.isPending ? 'Adding...' : 'Add Player'}
+                          </Button>
+                        </div>
+                      </form>
+                    </Form>
+                  </DialogContent>
+                </Dialog>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8">
-                  <Users className="w-12 h-12 mx-auto text-slate-400 mb-4" />
-                  <h3 className="text-lg font-medium text-slate-100 mb-2">
-                    Roster Management Coming Soon
-                  </h3>
-                  <p className="text-slate-300 mb-4">
-                    Add and manage your team's players, track eligibility, and organize your roster.
-                  </p>
-                  <Button variant="outline" data-testid="button-add-player" className="border-slate-600 text-slate-100 hover:bg-slate-700">
-                    Add First Player
-                  </Button>
-                </div>
+                {players.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Users className="w-12 h-12 mx-auto text-slate-400 mb-4" />
+                    <h3 className="text-lg font-medium text-slate-100 mb-2">No Players Yet</h3>
+                    <p className="text-slate-300 mb-4">Add your first player to start building your roster.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {players.map((player) => (
+                      <div key={player.id} className="bg-slate-700/50 border border-slate-600 rounded-lg p-4" data-testid={`player-card-${player.id}`}>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-4">
+                            <div className="bg-blue-600 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold">
+                              {player.jerseyNumber || '#'}
+                            </div>
+                            <div>
+                              <h4 className="text-slate-100 font-medium">{player.playerName}</h4>
+                              <p className="text-slate-300 text-sm">{player.position || 'Position not set'}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-slate-300 text-sm">{player.parentGuardianName}</p>
+                            <p className="text-slate-400 text-xs">{player.parentGuardianPhone}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
