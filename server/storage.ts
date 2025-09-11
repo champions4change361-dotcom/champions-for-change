@@ -1113,14 +1113,7 @@ export class DbStorage implements IStorage {
         updatedAt: new Date()
       };
       
-      console.log("🔍 DEBUG: Creating team with data:", { id: teamWithId.id, teamName: teamWithId.teamName });
-      
       const result = await this.db.insert(teams).values(teamWithId).returning();
-      
-      console.log("🔍 DEBUG: Database returned result:", result);
-      console.log("🔍 DEBUG: First result:", result[0]);
-      console.log("🔍 DEBUG: Result ID:", result[0]?.id);
-      
       return result[0];
     } catch (error) {
       console.error("Database error:", error);

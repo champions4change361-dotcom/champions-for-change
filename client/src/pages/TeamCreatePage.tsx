@@ -54,10 +54,15 @@ export default function TeamCreatePage() {
   });
 
   const createTeamMutation = useMutation({
-    mutationFn: async (data: CreateTeamFormData): Promise<Team> => {
-      return apiRequest(`/api/teams`, 'POST', data) as unknown as Promise<Team>;
+    mutationFn: async (data: CreateTeamFormData) => {
+      const response = await apiRequest(`/api/teams`, 'POST', data);
+      console.log("🔍 Frontend: API response:", response);
+      return response;
     },
     onSuccess: (newTeam) => {
+      console.log("🔍 Frontend: onSuccess received:", newTeam);
+      console.log("🔍 Frontend: Team ID:", newTeam.id);
+      
       queryClient.invalidateQueries({ queryKey: ['/api/teams'] });
       toast({
         title: "Team Created",
