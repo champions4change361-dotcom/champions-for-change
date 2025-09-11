@@ -413,29 +413,32 @@ export function createCachedStorage(storage: IStorage, cacheTtl?: number): IStor
   
   return new Proxy(cachedStorage, {
     get(target, prop, receiver) {
-      // If method exists on CachedStorage, use it
-      if (prop in target && typeof (target as any)[prop] === 'function') {
+      // Convert prop to string for consistent checks
+      const propStr = String(prop);
+      
+      // If method exists on CachedStorage instance, use it (cached methods get priority)
+      if (propStr in target && typeof (target as any)[propStr] === 'function') {
         return Reflect.get(target, prop, receiver);
       }
       
       // If it's a property that exists on CachedStorage but not a function, return it
-      if (prop in target) {
+      if (propStr in target) {
         return Reflect.get(target, prop, receiver);
       }
       
-      // Otherwise delegate to wrapped storage with proper context binding
-      const storageMethod = (target as any).storage[prop];
-      if (typeof storageMethod === 'function') {
-        return function(...args: any[]) {
-          return storageMethod.apply((target as any).storage, args);
-        };
+      // Check if the method exists on the wrapped storage
+      const wrappedStorage = (target as any).storage;
+      if (wrappedStorage && propStr in wrappedStorage) {
+        const storageMethod = wrappedStorage[propStr];
+        if (typeof storageMethod === 'function') {
+          // Return bound function to maintain proper context
+          return storageMethod.bind(wrappedStorage);
+        }
+        // Return non-function properties directly
+        return storageMethod;
       }
       
-      // Return property from storage if it exists
-      if (prop in (target as any).storage) {
-        return (target as any).storage[prop];
-      }
-      
+      // Fallback to default behavior
       return Reflect.get(target, prop, receiver);
     }
   });

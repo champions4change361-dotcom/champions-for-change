@@ -222,6 +222,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const storage = await getStorage();
+      
+      
       // Create team with placeholder coachId - will be updated after authentication
       const teamData = {
         ...validationResult.data,
@@ -848,7 +850,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Tournament notification subscriptions
   app.post('/api/tournament-subscriptions', async (req, res) => {
     try {
-      const storage = getStorage();
+      const storage = await getStorage();
       const validatedData = insertTournamentSubscriptionSchema.parse(req.body);
       
       // Create the subscription - simple implementation for now
@@ -923,7 +925,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Store registration data
-      const storage = getStorage();
+      const storage = await getStorage();
       const registrationData = {
         firstName,
         lastName,
@@ -998,7 +1000,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/registration-forms', isAuthenticated, async (req, res) => {
     try {
       const { SmartAssignmentService } = await import('./services/smartAssignment');
-      const storage = getStorage();
+      const storage = await getStorage();
       const userId = (req.user as any)?.claims?.sub;
       
       if (!userId) {
@@ -1047,7 +1049,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get registration forms for an organizer
   app.get('/api/registration-forms', isAuthenticated, async (req, res) => {
     try {
-      const storage = getStorage();
+      const storage = await getStorage();
       const userId = (req.user as any)?.claims?.sub;
       
       if (!userId) {
@@ -1085,7 +1087,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/registration-forms/:formId/submit', async (req, res) => {
     try {
       const { SmartAssignmentService } = await import('./services/smartAssignment');
-      const storage = getStorage();
+      const storage = await getStorage();
       const { formId } = req.params;
       
       console.log(`📝 Processing registration submission for form ${formId}`);
@@ -2401,7 +2403,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/stripe/create-connect-account", isAuthenticated, async (req, res) => {
     try {
       const user = req.user;
-      const storage = getStorage();
+      const storage = await getStorage();
       
       // Check if user already has a Connect account
       if (user.stripeConnectAccountId) {
@@ -5590,7 +5592,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get available event assignments for a user
   app.get('/api/event-assignments/:tournamentId?/:userId?', isAuthenticated, async (req, res) => {
     try {
-      const storage = getStorage();
+      const storage = await getStorage();
       const { tournamentId, userId } = req.params;
       const currentUserId = (req as any).user?.claims?.sub || userId;
       
@@ -5640,7 +5642,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update event assignment (claim, accept, decline)
   app.post('/api/event-assignments/:assignmentId/:action', isAuthenticated, async (req, res) => {
     try {
-      const storage = getStorage();
+      const storage = await getStorage();
       const { assignmentId, action } = req.params;
       const { notes } = req.body;
       const userId = (req as any).user?.claims?.sub;
@@ -5678,7 +5680,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get events for a specific tournament event (for event management dashboard)
   app.get('/api/events/:tournamentEventId/participants', isAuthenticated, async (req, res) => {
     try {
-      const storage = getStorage();
+      const storage = await getStorage();
       const { tournamentEventId } = req.params;
       const userId = (req as any).user?.claims?.sub;
       
@@ -5730,7 +5732,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Add walk-up participant to event (on-the-fly registration)
   app.post('/api/events/:tournamentEventId/participants', isAuthenticated, async (req, res) => {
     try {
-      const storage = getStorage();
+      const storage = await getStorage();
       const { tournamentEventId } = req.params;
       const { schoolName, athleteName } = req.body;
       const userId = (req as any).user?.claims?.sub;
@@ -5773,7 +5775,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Record attempt for participant
   app.post('/api/events/:tournamentEventId/attempts', isAuthenticated, async (req, res) => {
     try {
-      const storage = getStorage();
+      const storage = await getStorage();
       const { tournamentEventId } = req.params;
       const { participantId, attemptNumber, measurement, isValid } = req.body;
       const userId = (req as any).user?.claims?.sub;
@@ -5829,7 +5831,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Check tournament ownership for event access control (legacy endpoint)
   app.get('/api/events/:tournamentEventId/tournament-owner', isAuthenticated, async (req, res) => {
     try {
-      const storage = getStorage();
+      const storage = await getStorage();
       const { tournamentEventId } = req.params;
       const userId = (req as any).user?.claims?.sub;
       
@@ -5866,7 +5868,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Check tournament ownership for direct tournament management access
   app.get('/api/events/tournament/:tournamentId/tournament-owner', isAuthenticated, async (req, res) => {
     try {
-      const storage = getStorage();
+      const storage = await getStorage();
       const { tournamentId } = req.params;
       const userId = (req as any).user?.claims?.sub;
       
@@ -6029,7 +6031,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate unique 8-character team code
       const teamCode = Math.random().toString(36).substring(2, 10).toUpperCase();
       
-      const storage = getStorage();
+      const storage = await getStorage();
       
       // Create team registration
       const teamRegistration = await storage.createTeamRegistration({
@@ -6097,7 +6099,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Team code is required' });
       }
 
-      const storage = getStorage();
+      const storage = await getStorage();
       const team = await storage.getTeamByCode(code.toUpperCase());
       
       if (!team) {
@@ -6153,7 +6155,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const storage = getStorage();
+      const storage = await getStorage();
       
       // Find the team
       const team = await storage.getTeamByCode(teamCode.toUpperCase());
@@ -6218,7 +6220,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/teams/:teamId', async (req, res) => {
     try {
       const { teamId } = req.params;
-      const storage = getStorage();
+      const storage = await getStorage();
       
       const team = await storage.getTeamRegistration(teamId);
       if (!team) {
@@ -6248,7 +6250,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/team-payments/:teamId', async (req, res) => {
     try {
       const { teamId } = req.params;
-      const storage = getStorage();
+      const storage = await getStorage();
       
       const team = await storage.getTeamRegistration(teamId);
       if (!team) {
@@ -6354,7 +6356,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const storage = getStorage();
+      const storage = await getStorage();
       
       // Verify payment intent with Stripe
       const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
@@ -6435,7 +6437,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/team-payments/:teamId/history', async (req, res) => {
     try {
       const { teamId } = req.params;
-      const storage = getStorage();
+      const storage = await getStorage();
       
       const payments = await storage.getTeamPayments(teamId);
       
@@ -6467,7 +6469,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { organizerId } = req.params;
       const { days = 365 } = req.query;
-      const storage = getStorage();
+      const storage = await getStorage();
 
       // Generate mock data for demonstration - in production this would come from real tracking
       const generatePageViewData = (daysBack: number) => {
@@ -6596,7 +6598,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         referrer
       } = req.body;
 
-      const storage = getStorage();
+      const storage = await getStorage();
 
       // In production, you would save this to the database
       // For now, we'll just acknowledge the tracking request
@@ -6639,7 +6641,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         zipCode
       } = req.body;
 
-      const storage = getStorage();
+      const storage = await getStorage();
 
       // In production, you would save this to the organizerContacts table
       console.log('Contact collected:', {
@@ -6733,7 +6735,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Client configuration management API routes
   app.post("/api/client-config", isAuthenticated, async (req, res) => {
     try {
-      const storage = getStorage();
+      const storage = await getStorage();
       const userId = req.user?.id;
       if (!userId) {
         return res.status(401).json({ error: "Authentication required" });
@@ -6752,7 +6754,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/client-config/:id", isAuthenticated, async (req, res) => {
     try {
-      const storage = getStorage();
+      const storage = await getStorage();
       const config = await storage.getClientConfiguration(req.params.id);
       if (!config) {
         return res.status(404).json({ error: "Client configuration not found" });
@@ -6766,7 +6768,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/client-config/domain/:domain", async (req, res) => {
     try {
-      const storage = getStorage();
+      const storage = await getStorage();
       const config = await storage.getClientConfigurationByDomain(req.params.domain);
       if (!config) {
         return res.status(404).json({ error: "Client configuration not found for domain" });
@@ -6780,7 +6782,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/my-client-config", isAuthenticated, async (req, res) => {
     try {
-      const storage = getStorage();
+      const storage = await getStorage();
       const userId = req.user?.id;
       if (!userId) {
         return res.status(401).json({ error: "Authentication required" });
@@ -6799,7 +6801,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/client-config/:id", isAuthenticated, async (req, res) => {
     try {
-      const storage = getStorage();
+      const storage = await getStorage();
       const userId = req.user?.id;
       if (!userId) {
         return res.status(401).json({ error: "Authentication required" });
@@ -6824,7 +6826,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/client-config/:id", isAuthenticated, async (req, res) => {
     try {
-      const storage = getStorage();
+      const storage = await getStorage();
       const userId = req.user?.id;
       if (!userId) {
         return res.status(401).json({ error: "Authentication required" });

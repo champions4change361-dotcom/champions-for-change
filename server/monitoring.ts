@@ -363,26 +363,38 @@ export function createMonitoredStorage(storage: any): any {
   // Create proxy to wrap all methods with monitoring
   return new Proxy(monitoredStorage, {
     get(target, prop, receiver) {
+      // Convert prop to string for consistent checks
+      const propStr = String(prop);
+      
       // If it's a monitoring method (exists on MonitoredStorage), return it directly
-      if (prop in target && typeof (target as any)[prop] === 'function') {
+      if (propStr in target && typeof (target as any)[propStr] === 'function') {
         return Reflect.get(target, prop, receiver);
       }
       
       // If it's a property that exists on MonitoredStorage but not a function, return it
-      if (prop in target) {
+      if (propStr in target) {
         return Reflect.get(target, prop, receiver);
       }
       
-      // If it's a storage method, wrap it with monitoring
-      if (prop in target.storage && typeof target.storage[prop] === 'function') {
-        return target.wrapMethod(prop as string);
+      // Check if the method exists on the wrapped storage
+      const wrappedStorage = target.storage;
+      if (wrappedStorage) {
+        try {
+          // Try to access the property directly (works with proxies)
+          const storageMethod = wrappedStorage[propStr];
+          if (typeof storageMethod === 'function') {
+            // Wrap the method with monitoring
+            return target.wrapMethod(propStr);
+          } else if (storageMethod !== undefined) {
+            // Return non-function properties directly
+            return storageMethod;
+          }
+        } catch (error) {
+          // If accessing the property fails, continue to fallback
+        }
       }
       
-      // Return property from storage if it exists
-      if (prop in target.storage) {
-        return target.storage[prop];
-      }
-      
+      // Fallback to default behavior
       return Reflect.get(target, prop, receiver);
     }
   });
