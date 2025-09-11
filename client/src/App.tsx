@@ -135,6 +135,7 @@ import CaptainShowdownCreator from './pages/CaptainShowdownCreator';
 import TeamListPage from './pages/TeamListPage';
 import TeamCreatePage from './pages/TeamCreatePage';
 import TeamDashboardPage from './pages/TeamDashboardPage';
+import TeamSignupPage from './pages/TeamSignupPage';
 
 function AuthenticatedRoutes() {
   const { isFeatureEnabled, isFantasyDomain, config } = useDomain();
@@ -344,6 +345,7 @@ function AppRouter() {
       <Route path="/platform-options" component={PlatformOptions} />
       
       <Route path="/trial-signup" component={TrialSignup} />
+      <Route path="/team-signup" component={TeamSignupPage} />
       <Route path="/donate" component={DonationFlow} />
       <Route path="/payment-methods" component={PaymentMethods} />
       <Route path="/checkout" component={Checkout} />
