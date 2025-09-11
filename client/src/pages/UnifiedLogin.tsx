@@ -8,14 +8,26 @@ import TrantorCoin from "@/components/TrantorCoin";
 
 export default function UnifiedLogin() {
   const [, setLocation] = useLocation();
+  
+  // Check if this is a team signup completion flow
+  const urlParams = new URLSearchParams(window.location.search);
+  const action = urlParams.get('action');
+  const isTeamSignup = action === 'complete-team-signup';
 
   const handleOAuthLogin = () => {
     // Store the return URL for after authentication
     const urlParams = new URLSearchParams(window.location.search);
     const returnUrl = urlParams.get('return') || urlParams.get('redirect') || '/tournaments';
+    const action = urlParams.get('action');
+    const teamId = urlParams.get('team');
     
-    // Handle Champions registration redirect
-    if (urlParams.get('redirect') === 'champions-registration') {
+    // Handle team signup completion flow
+    if (action === 'complete-team-signup' && teamId) {
+      sessionStorage.setItem('auth_return_url', `/teams/${teamId}`);
+      sessionStorage.setItem('pending_team_link', teamId);
+    }
+    // Handle Champions registration redirect  
+    else if (urlParams.get('redirect') === 'champions-registration') {
       sessionStorage.setItem('auth_return_url', '/champions-registration');
     } else {
       sessionStorage.setItem('auth_return_url', returnUrl);
@@ -52,10 +64,10 @@ export default function UnifiedLogin() {
             </div>
             <div>
               <CardTitle className="text-2xl font-bold text-white">
-                Welcome Back
+                {isTeamSignup ? 'Complete Team Setup' : 'Welcome Back'}
               </CardTitle>
               <CardDescription className="text-slate-300">
-                Sign in to access your tournaments
+                {isTeamSignup ? 'Sign in to access your team dashboard' : 'Sign in to access your tournaments'}
               </CardDescription>
             </div>
           </CardHeader>
