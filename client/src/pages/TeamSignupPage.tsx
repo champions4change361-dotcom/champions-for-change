@@ -95,8 +95,10 @@ export default function TeamSignupPage() {
         coachPhone: data.coachPhone,
         sport: data.sport,
         teamSize: data.teamSize,
-        subscriptionTier: data.subscriptionTier,
-        subscriptionStatus: 'trialing', // Start with free trial
+        subscriptionTier: data.subscriptionTier === 'starter' ? 'basic' : 
+                         data.subscriptionTier === 'growing' ? 'premium' : 
+                         data.subscriptionTier === 'elite' ? 'enterprise' : 'premium', // Map to schema values
+        subscriptionStatus: 'free', // Start with free status
       });
       return response.json();
     },
