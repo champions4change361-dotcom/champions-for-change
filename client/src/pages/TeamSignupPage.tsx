@@ -87,20 +87,18 @@ export default function TeamSignupPage() {
 
   const createTeamMutation = useMutation({
     mutationFn: async (data: TeamSignupForm) => {
-      return apiRequest('/api/teams', {
-        method: 'POST',
-        body: JSON.stringify({
-          teamName: data.teamName,
-          organizationName: data.organizationName,
-          coachName: data.coachName,
-          coachEmail: data.coachEmail,
-          coachPhone: data.coachPhone,
-          sport: data.sport,
-          teamSize: data.teamSize,
-          subscriptionTier: data.subscriptionTier,
-          subscriptionStatus: 'trialing', // Start with free trial
-        }),
+      const response = await apiRequest('/api/teams', 'POST', {
+        teamName: data.teamName,
+        organizationName: data.organizationName,
+        coachName: data.coachName,
+        coachEmail: data.coachEmail,
+        coachPhone: data.coachPhone,
+        sport: data.sport,
+        teamSize: data.teamSize,
+        subscriptionTier: data.subscriptionTier,
+        subscriptionStatus: 'trialing', // Start with free trial
       });
+      return response.json();
     },
     onSuccess: (team) => {
       toast({
