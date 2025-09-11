@@ -107,10 +107,20 @@ export default function TeamSignupPage() {
     onSuccess: (team) => {
       toast({
         title: "Team created successfully!",
-        description: "Your 14-day free trial has started. Please complete signup to access your dashboard.",
+        description: "Your 14-day free trial has started. Please sign in to access your dashboard.",
       });
-      // For now, redirect to home page - later we'll add proper auth flow
-      setLocation('/');
+      
+      // Store team information for linking after authentication
+      localStorage.setItem('pending_team_signup', JSON.stringify({
+        teamId: team.id,
+        teamName: team.teamName,
+        subscriptionTier: team.subscriptionTier,
+        createdAt: new Date().toISOString()
+      }));
+      
+      // Redirect to login with team signup context
+      setLocation('/unified-login?action=complete-team-signup&team=' + team.id);
+      
       // Invalidate teams cache
       queryClient.invalidateQueries({ queryKey: ['/api/teams'] });
     },
