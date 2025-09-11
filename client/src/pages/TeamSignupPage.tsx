@@ -243,7 +243,7 @@ export default function TeamSignupPage() {
                             <Input 
                               {...field} 
                               placeholder="Eagles, Warriors, etc."
-                              className="bg-slate-700/50 border-slate-600 text-white"
+                              className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 focus:text-white"
                               data-testid="input-team-name"
                             />
                           </FormControl>
@@ -262,7 +262,7 @@ export default function TeamSignupPage() {
                             <Input 
                               {...field} 
                               placeholder="Lincoln High School, YMCA, etc."
-                              className="bg-slate-700/50 border-slate-600 text-white"
+                              className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 focus:text-white"
                               data-testid="input-organization-name"
                             />
                           </FormControl>
@@ -282,7 +282,7 @@ export default function TeamSignupPage() {
                               <Input 
                                 {...field} 
                                 placeholder="John Smith"
-                                className="bg-slate-700/50 border-slate-600 text-white"
+                                className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 focus:text-white"
                                 data-testid="input-coach-name"
                               />
                             </FormControl>
@@ -302,7 +302,7 @@ export default function TeamSignupPage() {
                                 {...field} 
                                 type="email"
                                 placeholder="coach@email.com"
-                                className="bg-slate-700/50 border-slate-600 text-white"
+                                className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 focus:text-white"
                                 data-testid="input-coach-email"
                               />
                             </FormControl>
@@ -322,7 +322,7 @@ export default function TeamSignupPage() {
                             <Input 
                               {...field} 
                               placeholder="(555) 123-4567"
-                              className="bg-slate-700/50 border-slate-600 text-white"
+                              className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 focus:text-white"
                               data-testid="input-coach-phone"
                             />
                           </FormControl>
@@ -340,8 +340,8 @@ export default function TeamSignupPage() {
                             <FormLabel className="text-slate-200">Sport *</FormLabel>
                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                               <FormControl>
-                                <SelectTrigger className="bg-slate-700/50 border-slate-600 text-white" data-testid="select-sport">
-                                  <SelectValue placeholder="Select sport" />
+                                <SelectTrigger className="bg-slate-700/50 border-slate-600 text-white focus:text-white" data-testid="select-sport">
+                                  <SelectValue placeholder="Select sport" className="text-white" />
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
@@ -373,8 +373,8 @@ export default function TeamSignupPage() {
                             <FormLabel className="text-slate-200">Team Size *</FormLabel>
                             <Select onValueChange={(value) => field.onChange(Number(value))} defaultValue={field.value?.toString()}>
                               <FormControl>
-                                <SelectTrigger className="bg-slate-700/50 border-slate-600 text-white" data-testid="select-team-size">
-                                  <SelectValue placeholder="How many players?" />
+                                <SelectTrigger className="bg-slate-700/50 border-slate-600 text-white focus:text-white" data-testid="select-team-size">
+                                  <SelectValue placeholder="How many players?" className="text-white" />
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
