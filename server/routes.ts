@@ -224,10 +224,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const storage = await getStorage();
       
       
-      // Create team with placeholder coachId - will be updated after authentication
+      // Create team without coachId for signup - will be linked after authentication
       const teamData = {
         ...validationResult.data,
-        coachId: 'pending-signup' // Temporary ID until user authenticates
+        coachId: null // Allow null until user authenticates
       };
       
       const newTeam = await storage.createTeam(teamData);

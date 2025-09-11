@@ -43,7 +43,8 @@ export default function TeamSignupPage() {
       features: ["Up to 20 players", "400 communications/month", "Basic roster management", "Tournament registration"],
       color: "green",
       maxPlayers: 20,
-      communications: 400
+      communications: 400,
+      popular: false
     },
     growing: {
       name: "Growing Team", 
@@ -64,7 +65,8 @@ export default function TeamSignupPage() {
       features: ["Unlimited players & teams", "16,000 communications/month", "Full organization management", "Multi-team coordination"],
       color: "purple",
       maxPlayers: "unlimited",
-      communications: 16000
+      communications: 16000,
+      popular: false
     }
   };
 
@@ -260,6 +262,7 @@ export default function TeamSignupPage() {
                           <FormControl>
                             <Input 
                               {...field} 
+                              value={field.value || ''}
                               placeholder="Lincoln High School, YMCA, etc."
                               className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 focus:text-white"
                               data-testid="input-organization-name"
@@ -320,6 +323,7 @@ export default function TeamSignupPage() {
                           <FormControl>
                             <Input 
                               {...field} 
+                              value={field.value || ''}
                               placeholder="(555) 123-4567"
                               className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 focus:text-white"
                               data-testid="input-coach-phone"
