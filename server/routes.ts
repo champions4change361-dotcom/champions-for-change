@@ -205,6 +205,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // STANDALONE TEAM MANAGEMENT ROUTES (Jersey Watch-style)
   // These are separate from tournament-specific team registrations
   
+  // Team signup endpoint (no authentication required)
+  app.post('/api/teams/signup', async (req, res) => {
+    try {
+      // Validate request body with Zod schema (but allow missing coachId for signup)
+      const signupSchema = insertTeamSchema.omit({ coachId: true });
+      const validationResult = signupSchema.safeParse(req.body);
+
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          error: 'Invalid team data', 
+          details: validationResult.error.errors 
+        });
+      }
+
+      const storage = await getStorage();
+      // Create team with placeholder coachId - will be updated after authentication
+      const teamData = {
+        ...validationResult.data,
+        coachId: 'pending-signup' // Temporary ID until user authenticates
+      };
+      
+      const newTeam = await storage.createTeam(teamData);
+      
+      // Return success with team info for redirect
+      res.status(201).json({
+        id: newTeam.id,
+        teamName: newTeam.teamName,
+        subscriptionTier: newTeam.subscriptionTier,
+        message: 'Team created successfully! Please complete signup to access your dashboard.'
+      });
+    } catch (error: any) {
+      console.error('Team signup error:', error);
+      res.status(500).json({ error: 'Failed to create team during signup' });
+    }
+  });
+  
   // Get teams for current user (coach)
   app.get('/api/teams', isAuthenticated, async (req, res) => {
     try {

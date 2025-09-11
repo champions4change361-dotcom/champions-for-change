@@ -87,7 +87,7 @@ export default function TeamSignupPage() {
 
   const createTeamMutation = useMutation({
     mutationFn: async (data: TeamSignupForm) => {
-      const response = await apiRequest('/api/teams', 'POST', {
+      const response = await apiRequest('/api/teams/signup', 'POST', {
         teamName: data.teamName,
         organizationName: data.organizationName,
         coachName: data.coachName,
@@ -103,10 +103,10 @@ export default function TeamSignupPage() {
     onSuccess: (team) => {
       toast({
         title: "Team created successfully!",
-        description: "Your 14-day free trial has started. Welcome to team management!",
+        description: "Your 14-day free trial has started. Please complete signup to access your dashboard.",
       });
-      // Redirect to team dashboard
-      setLocation(`/teams/${team.id}`);
+      // For now, redirect to home page - later we'll add proper auth flow
+      setLocation('/');
       // Invalidate teams cache
       queryClient.invalidateQueries({ queryKey: ['/api/teams'] });
     },
