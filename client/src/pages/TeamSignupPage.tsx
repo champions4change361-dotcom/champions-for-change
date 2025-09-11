@@ -4,7 +4,6 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Trophy, Users, MessageSquare, Calendar, CheckCircle, ArrowLeft } from "lucide-react";
 import { useLocation } from "wouter";
@@ -338,28 +337,28 @@ export default function TeamSignupPage() {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel className="text-slate-200">Sport *</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger className="bg-slate-700/50 border-slate-600 text-white focus:text-white" data-testid="select-sport">
-                                  <SelectValue placeholder="Select sport" className="text-white" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="basketball">Basketball</SelectItem>
-                                <SelectItem value="football">Football</SelectItem>
-                                <SelectItem value="soccer">Soccer</SelectItem>
-                                <SelectItem value="volleyball">Volleyball</SelectItem>
-                                <SelectItem value="baseball">Baseball</SelectItem>
-                                <SelectItem value="softball">Softball</SelectItem>
-                                <SelectItem value="track">Track & Field</SelectItem>
-                                <SelectItem value="swimming">Swimming</SelectItem>
-                                <SelectItem value="tennis">Tennis</SelectItem>
-                                <SelectItem value="golf">Golf</SelectItem>
-                                <SelectItem value="wrestling">Wrestling</SelectItem>
-                                <SelectItem value="cross_country">Cross Country</SelectItem>
-                                <SelectItem value="other">Other</SelectItem>
-                              </SelectContent>
-                            </Select>
+                            <FormControl>
+                              <select 
+                                {...field}
+                                className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                data-testid="select-sport"
+                              >
+                                <option value="" className="bg-slate-700 text-white">Select sport</option>
+                                <option value="basketball" className="bg-slate-700 text-white">Basketball</option>
+                                <option value="football" className="bg-slate-700 text-white">Football</option>
+                                <option value="soccer" className="bg-slate-700 text-white">Soccer</option>
+                                <option value="volleyball" className="bg-slate-700 text-white">Volleyball</option>
+                                <option value="baseball" className="bg-slate-700 text-white">Baseball</option>
+                                <option value="softball" className="bg-slate-700 text-white">Softball</option>
+                                <option value="track" className="bg-slate-700 text-white">Track & Field</option>
+                                <option value="swimming" className="bg-slate-700 text-white">Swimming</option>
+                                <option value="tennis" className="bg-slate-700 text-white">Tennis</option>
+                                <option value="golf" className="bg-slate-700 text-white">Golf</option>
+                                <option value="wrestling" className="bg-slate-700 text-white">Wrestling</option>
+                                <option value="cross_country" className="bg-slate-700 text-white">Cross Country</option>
+                                <option value="other" className="bg-slate-700 text-white">Other</option>
+                              </select>
+                            </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -371,23 +370,25 @@ export default function TeamSignupPage() {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel className="text-slate-200">Team Size *</FormLabel>
-                            <Select onValueChange={(value) => field.onChange(Number(value))} defaultValue={field.value?.toString()}>
-                              <FormControl>
-                                <SelectTrigger className="bg-slate-700/50 border-slate-600 text-white focus:text-white" data-testid="select-team-size">
-                                  <SelectValue placeholder="How many players?" className="text-white" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="10">10 or fewer</SelectItem>
-                                <SelectItem value="15">11-15 players</SelectItem>
-                                <SelectItem value="20">16-20 players</SelectItem>
-                                <SelectItem value="25">21-25 players</SelectItem>
-                                <SelectItem value="30">26-30 players</SelectItem>
-                                <SelectItem value="35">31-35 players</SelectItem>
-                                <SelectItem value="50">36-50 players</SelectItem>
-                                <SelectItem value="100">50+ players</SelectItem>
-                              </SelectContent>
-                            </Select>
+                            <FormControl>
+                              <select 
+                                {...field}
+                                value={field.value?.toString() || ""}
+                                onChange={(e) => field.onChange(Number(e.target.value))}
+                                className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-md text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                data-testid="select-team-size"
+                              >
+                                <option value="" className="bg-slate-700 text-white">How many players?</option>
+                                <option value="10" className="bg-slate-700 text-white">10 or fewer</option>
+                                <option value="15" className="bg-slate-700 text-white">11-15 players</option>
+                                <option value="20" className="bg-slate-700 text-white">16-20 players</option>
+                                <option value="25" className="bg-slate-700 text-white">21-25 players</option>
+                                <option value="30" className="bg-slate-700 text-white">26-30 players</option>
+                                <option value="35" className="bg-slate-700 text-white">31-35 players</option>
+                                <option value="50" className="bg-slate-700 text-white">36-50 players</option>
+                                <option value="100" className="bg-slate-700 text-white">50+ players</option>
+                              </select>
+                            </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
