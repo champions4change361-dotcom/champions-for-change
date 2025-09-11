@@ -96,9 +96,9 @@ export default function TeamDashboardPage() {
     },
     onError: (error: any) => {
       toast({
-        title: "Error Adding Player", 
-        description: error.message || "Failed to add player. Please try again.",
-        variant: "destructive"
+        title: "Unable to Add Player", 
+        description: error.message || "Please try again or check your connection.",
+        className: "bg-slate-800 border-slate-600 text-slate-100"
       });
     },
   });
@@ -549,9 +549,9 @@ export default function TeamDashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <Button 
-                    variant="destructive" 
+                    variant="outline" 
                     data-testid="button-delete-team"
-                    className="w-full bg-red-600 hover:bg-red-700"
+                    className="w-full bg-slate-700 hover:bg-slate-600 border-slate-500 text-slate-100"
                   >
                     Delete Team
                   </Button>
