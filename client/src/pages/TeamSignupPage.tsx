@@ -244,6 +244,7 @@ export default function TeamSignupPage() {
       </div>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {step === 1 && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           
           {/* Plan Summary */}
@@ -513,6 +514,64 @@ export default function TeamSignupPage() {
           </div>
 
         </div>
+        )}
+
+        {/* Step 2: Authentication */}
+        {step === 2 && (
+          <div className="max-w-md mx-auto">
+            <div className="mb-6 text-center">
+              <h1 className="text-3xl font-bold text-white mb-2">Create Account</h1>
+              <p className="text-slate-300">Choose how you'd like to sign up</p>
+            </div>
+
+            <Card className="bg-slate-800/80 backdrop-blur-sm border-yellow-500/20">
+              <CardContent className="p-6 space-y-4">
+                {/* Google OAuth Button */}
+                <Button 
+                  onClick={() => window.location.href = '/api/login'}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 text-base flex items-center justify-center"
+                  data-testid="button-google-signup"
+                >
+                  <Globe className="mr-2 h-5 w-5" />
+                  Continue with Google
+                </Button>
+
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t border-slate-600" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-slate-800 px-2 text-slate-400">Or</span>
+                  </div>
+                </div>
+
+                {/* Email Signup Button */}
+                <Button 
+                  onClick={() => setAuthMethod('email')}
+                  variant="outline" 
+                  className="w-full border-slate-600 text-slate-300 hover:text-white hover:border-slate-500"
+                  data-testid="button-email-signup"
+                >
+                  <Mail className="mr-2 h-4 w-4" />
+                  Sign up with Email
+                </Button>
+
+                <div className="text-center pt-2">
+                  <Button 
+                    onClick={() => setStep(1)}
+                    variant="ghost" 
+                    className="text-slate-400 hover:text-white"
+                    data-testid="button-back-to-step1"
+                  >
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Back to Team Info
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
       </div>
     </div>
   );
