@@ -61,7 +61,7 @@ export default function TeamDashboardPage() {
     enabled: !!id,
   });
 
-  // Add player form
+  // Add player form with proper null handling
   const addPlayerForm = useForm<InsertTeamPlayer>({
     resolver: zodResolver(insertTeamPlayerSchema),
     defaultValues: {
@@ -328,7 +328,7 @@ export default function TeamDashboardPage() {
                       Add Player
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="bg-slate-800 border-slate-700 max-w-2xl">
+                  <DialogContent className="bg-slate-800 border-slate-700 max-w-2xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle className="text-slate-100">Add New Player</DialogTitle>
                       <DialogDescription className="text-slate-300">
@@ -358,7 +358,7 @@ export default function TeamDashboardPage() {
                               <FormItem>
                                 <FormLabel className="text-slate-100">Jersey Number</FormLabel>
                                 <FormControl>
-                                  <Input {...field} className="bg-slate-700 border-slate-600 text-slate-100" data-testid="input-jersey-number" />
+                                  <Input {...field} value={field.value || ''} className="bg-slate-700 border-slate-600 text-slate-100" data-testid="input-jersey-number" />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -372,7 +372,7 @@ export default function TeamDashboardPage() {
                             <FormItem>
                               <FormLabel className="text-slate-100">Position</FormLabel>
                               <FormControl>
-                                <Input {...field} className="bg-slate-700 border-slate-600 text-slate-100" data-testid="input-position" />
+                                <Input {...field} value={field.value || ''} className="bg-slate-700 border-slate-600 text-slate-100" data-testid="input-position" />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -388,7 +388,7 @@ export default function TeamDashboardPage() {
                                 <FormItem>
                                   <FormLabel className="text-slate-100">Parent/Guardian Name</FormLabel>
                                   <FormControl>
-                                    <Input {...field} className="bg-slate-700 border-slate-600 text-slate-100" data-testid="input-parent-name" />
+                                    <Input {...field} value={field.value || ''} className="bg-slate-700 border-slate-600 text-slate-100" data-testid="input-parent-name" />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -401,7 +401,7 @@ export default function TeamDashboardPage() {
                                 <FormItem>
                                   <FormLabel className="text-slate-100">Parent Phone</FormLabel>
                                   <FormControl>
-                                    <Input {...field} className="bg-slate-700 border-slate-600 text-slate-100" data-testid="input-parent-phone" />
+                                    <Input {...field} value={field.value || ''} className="bg-slate-700 border-slate-600 text-slate-100" data-testid="input-parent-phone" />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -415,7 +415,7 @@ export default function TeamDashboardPage() {
                               <FormItem>
                                 <FormLabel className="text-slate-100">Parent Email Address</FormLabel>
                                 <FormControl>
-                                  <Input {...field} type="email" className="bg-slate-700 border-slate-600 text-slate-100" data-testid="input-parent-email" />
+                                  <Input {...field} value={field.value || ''} type="email" className="bg-slate-700 border-slate-600 text-slate-100" data-testid="input-parent-email" />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -428,7 +428,7 @@ export default function TeamDashboardPage() {
                               <FormItem>
                                 <FormLabel className="text-slate-100">Home Address</FormLabel>
                                 <FormControl>
-                                  <Textarea {...field} className="bg-slate-700 border-slate-600 text-slate-100" data-testid="input-home-address" />
+                                  <Textarea {...field} value={field.value || ''} className="bg-slate-700 border-slate-600 text-slate-100" data-testid="input-home-address" />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>

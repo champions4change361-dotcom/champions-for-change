@@ -481,6 +481,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user?.id;
       
       if (!userId) {
+        console.log('🚨 Players API Debug - No userId found:', { 
+          user: req.user, 
+          userKeys: req.user ? Object.keys(req.user) : 'no user',
+          session: req.session ? 'session exists' : 'no session'
+        });
         return res.status(401).json({ error: 'User not authenticated' });
       }
 
