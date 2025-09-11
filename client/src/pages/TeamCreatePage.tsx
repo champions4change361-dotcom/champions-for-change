@@ -331,21 +331,16 @@ export default function TeamCreatePage() {
                       <FormItem>
                         <FormLabel>Division</FormLabel>
                         <FormControl>
-                          <select
-                            data-testid="select-division"
-                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                          <Input 
+                            data-testid="input-division"
+                            placeholder="e.g., Division A, Recreational, JV, etc."
                             {...field}
-                            value={field.value || ''}
-                          >
-                            <option value="">Select division</option>
-                            <option value="A">Division A</option>
-                            <option value="B">Division B</option>
-                            <option value="C">Division C</option>
-                            <option value="Recreational">Recreational</option>
-                            <option value="Competitive">Competitive</option>
-                            <option value="Elite">Elite</option>
-                          </select>
+                            value={field.value || ''} 
+                          />
                         </FormControl>
+                        <FormDescription>
+                          Enter your league or division name (varies by sport/region)
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
