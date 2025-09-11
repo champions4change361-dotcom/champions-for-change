@@ -57,25 +57,31 @@ export default function TeamListPage() {
 
   if (error) {
     return (
-      <div className="container mx-auto py-8 px-4">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">Error Loading Teams</h2>
-          <p className="text-gray-600 mb-4">We couldn't load your teams. Please try again.</p>
-          <Button onClick={() => window.location.reload()}>
-            Retry
-          </Button>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+        <div className="container mx-auto py-8 px-4">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-blue-400 mb-4">Error Loading Teams</h2>
+            <p className="text-slate-300 mb-4">We couldn't load your teams. Please try again.</p>
+            <Button 
+              onClick={() => window.location.reload()}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              Retry
+            </Button>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      <div className="container mx-auto py-8 px-4">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">My Teams</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <h1 className="text-3xl font-bold text-white">My Teams</h1>
+          <p className="text-slate-300 mt-1">
             Manage your teams year-round and join multiple tournaments
           </p>
         </div>
@@ -90,13 +96,13 @@ export default function TeamListPage() {
       {/* Search Bar */}
       <div className="mb-6">
         <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
           <Input
             data-testid="input-search"
             placeholder="Search teams..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            className="pl-10 bg-slate-800 border-slate-600 text-white placeholder:text-slate-400"
           />
         </div>
       </div>
@@ -124,9 +130,9 @@ export default function TeamListPage() {
       {/* Empty State */}
       {!isLoading && teams.length === 0 && (
         <div className="text-center py-16">
-          <Users className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">No Teams Yet</h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
+          <Users className="mx-auto h-16 w-16 text-slate-400 mb-4" />
+          <h2 className="text-2xl font-bold text-white mb-2">No Teams Yet</h2>
+          <p className="text-slate-300 mb-6">
             Create your first team to start managing rosters and joining tournaments.
           </p>
           <Link href="/teams/create">
@@ -150,11 +156,11 @@ export default function TeamListPage() {
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+                    <CardTitle className="text-lg font-semibold text-white mb-1">
                       {team.teamName}
                     </CardTitle>
                     {team.organizationName && (
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <p className="text-sm text-slate-300">
                         {team.organizationName}
                       </p>
                     )}
@@ -182,7 +188,7 @@ export default function TeamListPage() {
               </CardHeader>
               
               <CardContent className="pt-0">
-                <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                <div className="space-y-2 text-sm text-slate-300">
                   <div className="flex items-center gap-2">
                     <Users className="h-4 w-4" />
                     <span>Coach: {team.coachName}</span>
@@ -233,9 +239,9 @@ export default function TeamListPage() {
       {/* No Search Results */}
       {!isLoading && teams.length > 0 && filteredTeams.length === 0 && (
         <div className="text-center py-16">
-          <Search className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">No teams found</h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
+          <Search className="mx-auto h-16 w-16 text-slate-400 mb-4" />
+          <h2 className="text-2xl font-bold text-white mb-2">No teams found</h2>
+          <p className="text-slate-300 mb-6">
             Try adjusting your search terms or create a new team.
           </p>
           <Button 
@@ -247,6 +253,7 @@ export default function TeamListPage() {
           </Button>
         </div>
       )}
+      </div>
     </div>
   );
 }
