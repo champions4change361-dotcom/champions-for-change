@@ -17,13 +17,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { ArrowLeft, Save, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -237,24 +230,25 @@ export default function TeamCreatePage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Age Group</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value || undefined}>
-                          <FormControl>
-                            <SelectTrigger data-testid="select-age-group">
-                              <SelectValue placeholder="Select age group" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="U8">Under 8 (U8)</SelectItem>
-                            <SelectItem value="U10">Under 10 (U10)</SelectItem>
-                            <SelectItem value="U12">Under 12 (U12)</SelectItem>
-                            <SelectItem value="U14">Under 14 (U14)</SelectItem>
-                            <SelectItem value="U16">Under 16 (U16)</SelectItem>
-                            <SelectItem value="U18">Under 18 (U18)</SelectItem>
-                            <SelectItem value="JV">Junior Varsity</SelectItem>
-                            <SelectItem value="Varsity">Varsity</SelectItem>
-                            <SelectItem value="Adult">Adult</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <FormControl>
+                          <select
+                            data-testid="select-age-group"
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            {...field}
+                            value={field.value || ''}
+                          >
+                            <option value="">Select age group</option>
+                            <option value="U8">Under 8 (U8)</option>
+                            <option value="U10">Under 10 (U10)</option>
+                            <option value="U12">Under 12 (U12)</option>
+                            <option value="U14">Under 14 (U14)</option>
+                            <option value="U16">Under 16 (U16)</option>
+                            <option value="U18">Under 18 (U18)</option>
+                            <option value="JV">Junior Varsity</option>
+                            <option value="Varsity">Varsity</option>
+                            <option value="Adult">Adult</option>
+                          </select>
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -266,21 +260,22 @@ export default function TeamCreatePage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Division</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value || undefined}>
-                          <FormControl>
-                            <SelectTrigger data-testid="select-division">
-                              <SelectValue placeholder="Select division" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="A">Division A</SelectItem>
-                            <SelectItem value="B">Division B</SelectItem>
-                            <SelectItem value="C">Division C</SelectItem>
-                            <SelectItem value="Recreational">Recreational</SelectItem>
-                            <SelectItem value="Competitive">Competitive</SelectItem>
-                            <SelectItem value="Elite">Elite</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <FormControl>
+                          <select
+                            data-testid="select-division"
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            {...field}
+                            value={field.value || ''}
+                          >
+                            <option value="">Select division</option>
+                            <option value="A">Division A</option>
+                            <option value="B">Division B</option>
+                            <option value="C">Division C</option>
+                            <option value="Recreational">Recreational</option>
+                            <option value="Competitive">Competitive</option>
+                            <option value="Elite">Elite</option>
+                          </select>
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
