@@ -3403,6 +3403,11 @@ export const teams = pgTable("teams", {
   }).default("basic"),
   stripeSubscriptionId: varchar("stripe_subscription_id"),
   
+  // Secure team linking system (fixes IDOR vulnerability)
+  linkTokenHash: varchar("link_token_hash"), // Hashed secure token for linking
+  linkTokenExpiresAt: timestamp("link_token_expires_at"), // Token expiration (24 hours)
+  linkTokenUsed: boolean("link_token_used").default(false), // Single-use token flag
+  
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

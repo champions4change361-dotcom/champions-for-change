@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Switch, Route, Router } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useDomain } from "@/hooks/useDomain";
+import { useTeamLinking } from "@/hooks/useTeamLinking";
 import DomainNavigation from "@/components/DomainNavigation";
 import Home from './pages/Home';
 import Landing from './pages/Landing';
@@ -311,6 +312,9 @@ function App() {
 function AppRouter() {
   const { isAuthenticated, isLoading } = useAuth();
   const { config, isSchoolDomain } = useDomain();
+  
+  // Handle team linking after authentication
+  useTeamLinking();
   
   // For school domains, allow guest access to view tournaments
   const allowGuestAccess = isSchoolDomain();

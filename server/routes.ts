@@ -223,20 +223,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const storage = await getStorage();
       
+      // SECURITY: Generate secure link token to prevent IDOR attacks
+      const linkToken = crypto.randomBytes(32).toString('hex'); // 64-char hex string
+      const linkTokenHash = await bcrypt.hash(linkToken, 12); // Secure hash with high salt rounds
+      const linkTokenExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours from now
       
       // Create team without coachId for signup - will be linked after authentication
       const teamData = {
         ...validationResult.data,
-        coachId: null // Allow null until user authenticates
+        coachId: null, // Allow null until user authenticates
+        linkTokenHash: linkTokenHash,
+        linkTokenExpiresAt: linkTokenExpiresAt,
+        linkTokenUsed: false
       };
       
       const newTeam = await storage.createTeam(teamData);
       
-      // Return success with team info for redirect
+      // Return success with team info and secure token for linking
       res.status(201).json({
         id: newTeam.id,
         teamName: newTeam.teamName,
         subscriptionTier: newTeam.subscriptionTier,
+        linkToken: linkToken, // Plain token for frontend storage - NEVER store this in database
         message: 'Team created successfully! Please complete signup to access your dashboard.'
       });
     } catch (error: any) {
@@ -245,6 +253,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // SECURE: Link authenticated user to a team using token verification (IDOR protection)
+  app.post('/api/teams/:teamId/link', isAuthenticated, async (req, res) => {
+    try {
+      const { teamId } = req.params;
+      const { linkToken } = req.body;
+      const userId = req.user?.claims?.sub;
+      const userEmail = req.user?.claims?.email;
+      
+      // Security: Comprehensive input validation
+      if (!userId) {
+        console.warn('🚨 SECURITY: Team linking attempt without authenticated user');
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+
+      if (!linkToken || typeof linkToken !== 'string' || linkToken.length < 32) {
+        console.warn('🚨 SECURITY: Team linking attempt with invalid/missing token', { 
+          teamId, userId, hasToken: !!linkToken, tokenLength: linkToken?.length 
+        });
+        return res.status(400).json({ error: 'Valid link token is required' });
+      }
+
+      if (!userEmail) {
+        console.warn('🚨 SECURITY: Team linking attempt without user email', { teamId, userId });
+        return res.status(400).json({ error: 'User email is required for verification' });
+      }
+
+      const storage = await getStorage();
+      
+      // Get the team to verify it exists and has security fields
+      const team = await storage.getTeam(teamId);
+      if (!team) {
+        console.warn('🚨 SECURITY: Team linking attempt for non-existent team', { teamId, userId });
+        return res.status(404).json({ error: 'Team not found' });
+      }
+      
+      // Security: Check if team already has a coach assigned
+      if (team.coachId) {
+        console.warn('🚨 SECURITY: Team linking attempt for team with existing coach', { 
+          teamId, userId, existingCoachId: team.coachId 
+        });
+        return res.status(409).json({ error: 'Team already has a coach assigned' });
+      }
+
+      // Security: Verify link token exists and hasn't been used
+      if (!team.linkTokenHash || team.linkTokenUsed) {
+        console.warn('🚨 SECURITY: Team linking attempt with missing or used token', { 
+          teamId, userId, hasTokenHash: !!team.linkTokenHash, tokenUsed: team.linkTokenUsed 
+        });
+        return res.status(400).json({ error: 'Invalid or expired link token' });
+      }
+
+      // Security: Check token expiration  
+      if (!team.linkTokenExpiresAt || new Date() > team.linkTokenExpiresAt) {
+        console.warn('🚨 SECURITY: Team linking attempt with expired token', { 
+          teamId, userId, expiresAt: team.linkTokenExpiresAt 
+        });
+        return res.status(400).json({ error: 'Link token has expired' });
+      }
+
+      // Security: Verify token matches (constant-time comparison via bcrypt)
+      const tokenMatches = await bcrypt.compare(linkToken, team.linkTokenHash);
+      if (!tokenMatches) {
+        console.warn('🚨 SECURITY: Team linking attempt with invalid token', { 
+          teamId, userId, userEmail 
+        });
+        return res.status(403).json({ error: 'Invalid link token' });
+      }
+
+      // Security: Strict email matching - must match exactly
+      if (team.coachEmail !== userEmail) {
+        console.warn('🚨 SECURITY: Team linking attempt with email mismatch', { 
+          teamId, userId, userEmail, teamEmail: team.coachEmail 
+        });
+        return res.status(403).json({ 
+          error: 'Email mismatch - this team was registered with a different email address' 
+        });
+      }
+
+      // Security: All checks passed - link the user and mark token as used
+      const updatedTeam = await storage.updateTeam(teamId, { 
+        coachId: userId,
+        linkTokenUsed: true // Mark token as used to prevent reuse
+      });
+
+      console.log('✅ SECURITY: Team successfully linked', { 
+        teamId, userId, userEmail, teamName: team.teamName 
+      });
+      
+      res.json({ 
+        success: true, 
+        team: updatedTeam,
+        message: 'Team successfully linked to your account' 
+      });
+      
+    } catch (error: any) {
+      console.error('🚨 SECURITY: Team linking error', { error: error.message, teamId: req.params.teamId, userId: req.user?.claims?.sub });
+      res.status(500).json({ error: 'Failed to link team to user account' });
+    }
+  });
+
   // Get teams for current user (coach)
   app.get('/api/teams', isAuthenticated, async (req, res) => {
     try {

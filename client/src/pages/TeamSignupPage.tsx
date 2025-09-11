@@ -110,12 +110,22 @@ export default function TeamSignupPage() {
         description: "Your 14-day free trial has started. Please sign in to access your dashboard.",
       });
       
+      // SECURITY: Store secure linkToken for team linking verification
+      if (team.linkToken) {
+        localStorage.setItem('team_link_token', team.linkToken);
+        sessionStorage.setItem('pending_team_link', team.id);
+        console.log('🔒 SECURITY: Secure link token stored for team verification');
+      } else {
+        console.error('🚨 SECURITY: No linkToken received from server - team linking may fail');
+      }
+      
       // Store team information for linking after authentication
       localStorage.setItem('pending_team_signup', JSON.stringify({
         teamId: team.id,
         teamName: team.teamName,
         subscriptionTier: team.subscriptionTier,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        hasSecureToken: !!team.linkToken // Track if token was properly received
       }));
       
       // Redirect to login with team signup context
