@@ -3390,6 +3390,11 @@ export const teams = pgTable("teams", {
   homeVenue: varchar("home_venue"),
   ageGroup: varchar("age_group"), // U12, U14, JV, Varsity, etc.
   division: varchar("division"), // A, B, Recreational, etc.
+  
+  // Critical fields for billing and team management
+  sport: varchar("sport").notNull(), // basketball, football, soccer, volleyball, baseball, etc.
+  teamSize: integer("team_size").notNull(), // Number of players for billing calculations
+  
   status: text("status", { 
     enum: ["active", "inactive", "suspended"] 
   }).default("active"),

@@ -41,6 +41,8 @@ export default function TeamCreatePage() {
       coachEmail: "",
       coachPhone: "",
       homeVenue: "",
+      sport: "",
+      teamSize: undefined,
       ageGroup: "",
       division: "",
       teamColor: "",
@@ -223,6 +225,74 @@ export default function TeamCreatePage() {
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                   Team Details
                 </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <FormField
+                    control={form.control}
+                    name="sport"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Sport *</FormLabel>
+                        <FormControl>
+                          <select
+                            data-testid="select-sport"
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            {...field}
+                          >
+                            <option value="">Select sport</option>
+                            <option value="basketball">Basketball</option>
+                            <option value="football">Football</option>
+                            <option value="soccer">Soccer</option>
+                            <option value="volleyball">Volleyball</option>
+                            <option value="baseball">Baseball</option>
+                            <option value="softball">Softball</option>
+                            <option value="track">Track & Field</option>
+                            <option value="swimming">Swimming</option>
+                            <option value="tennis">Tennis</option>
+                            <option value="golf">Golf</option>
+                            <option value="wrestling">Wrestling</option>
+                            <option value="cross_country">Cross Country</option>
+                            <option value="other">Other</option>
+                          </select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="teamSize"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Team Size *</FormLabel>
+                        <FormControl>
+                          <select
+                            data-testid="select-team-size"
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            {...field}
+                            value={field.value?.toString() || ""}
+                            onChange={(e) => field.onChange(Number(e.target.value))}
+                          >
+                            <option value="">How many players?</option>
+                            <option value="10">10 or fewer</option>
+                            <option value="15">11-15 players</option>
+                            <option value="20">16-20 players</option>
+                            <option value="25">21-25 players</option>
+                            <option value="30">26-30 players</option>
+                            <option value="35">31-35 players</option>
+                            <option value="50">36-50 players</option>
+                            <option value="100">50+ players</option>
+                          </select>
+                        </FormControl>
+                        <FormDescription>
+                          Number of players for billing calculations
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   <FormField
                     control={form.control}
