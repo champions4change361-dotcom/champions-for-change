@@ -190,6 +190,87 @@ export default function TrantorLanding() {
                 </Button>
               </div>
             </div>
+
+            {/* Team Management Section - NEW */}
+            <div className="bg-blue-600/20 border border-blue-500/50 rounded-xl p-6 mb-8 max-w-4xl mx-auto mt-12">
+              <div className="text-center mb-6">
+                <h3 className="text-2xl font-bold text-blue-300 mb-2">🏆 Team Management & Communication</h3>
+                <p className="text-blue-100 mb-1">For Coaches & Team Managers - No Tournament Experience Required</p>
+                <p className="text-sm text-blue-200">Manage your team year-round, join any tournament • First month FREE, second month only $19</p>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl mx-auto">
+                {/* Starter Team */}
+                <div className="bg-green-900/30 border border-green-500/40 rounded-lg p-5 text-center">
+                  <h4 className="text-lg font-bold text-green-300 mb-2">Starter Team</h4>
+                  <div className="text-2xl font-bold text-green-400 mb-1">$23<span className="text-sm text-green-300">/month</span></div>
+                  <p className="text-xs text-green-200 mb-3">Paid annually ($276/year)</p>
+                  <ul className="text-sm text-green-100 space-y-1 mb-4">
+                    <li>• Up to 20 players</li>
+                    <li>• 400 communications/month</li>
+                    <li>• Basic roster management</li>
+                    <li>• Tournament registration</li>
+                  </ul>
+                  <Button 
+                    onClick={() => setLocation('/team-signup?plan=starter&price=23')}
+                    className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2"
+                    data-testid="button-starter-team"
+                  >
+                    Start Team Trial
+                  </Button>
+                </div>
+
+                {/* Growing Team */}
+                <div className="bg-blue-900/40 border-2 border-blue-400/60 rounded-lg p-5 text-center relative">
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                    <Badge className="bg-blue-500 text-white px-3 py-1">Most Popular</Badge>
+                  </div>
+                  <h4 className="text-lg font-bold text-blue-300 mb-2 mt-2">Growing Team</h4>
+                  <div className="text-2xl font-bold text-blue-400 mb-1">$39<span className="text-sm text-blue-300">/month</span></div>
+                  <p className="text-xs text-blue-200 mb-3">Paid annually ($468/year)</p>
+                  <ul className="text-sm text-blue-100 space-y-1 mb-4">
+                    <li>• Up to 35 players</li>
+                    <li>• 4,000 communications/month</li>
+                    <li>• Advanced scheduling</li>
+                    <li>• Parent portal access</li>
+                  </ul>
+                  <Button 
+                    onClick={() => setLocation('/team-signup?plan=growing&price=39')}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2"
+                    data-testid="button-growing-team"
+                  >
+                    Start Team Trial
+                  </Button>
+                </div>
+
+                {/* Elite Program */}
+                <div className="bg-purple-900/30 border border-purple-500/40 rounded-lg p-5 text-center">
+                  <h4 className="text-lg font-bold text-purple-300 mb-2">Elite Program</h4>
+                  <div className="text-2xl font-bold text-purple-400 mb-1">$63<span className="text-sm text-purple-300">/month</span></div>
+                  <p className="text-xs text-purple-200 mb-3">Annual only ($756/year)</p>
+                  <ul className="text-sm text-purple-100 space-y-1 mb-4">
+                    <li>• Unlimited players & teams</li>
+                    <li>• 16,000 communications/month</li>
+                    <li>• Full organization management</li>
+                    <li>• Multi-team coordination</li>
+                  </ul>
+                  <Button 
+                    onClick={() => setLocation('/team-signup?plan=elite&price=63')}
+                    className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2"
+                    data-testid="button-elite-program"
+                  >
+                    Start Team Trial
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="text-center mt-6">
+                <p className="text-sm text-blue-200">
+                  💡 <strong>20% less than competitors</strong> • Communication limits scale with team size • Cancel anytime
+                </p>
+              </div>
+            </div>
+
             <div className="flex flex-col sm:flex-row gap-8 justify-center items-center">
               <TrantorCoin
                 size="lg"
