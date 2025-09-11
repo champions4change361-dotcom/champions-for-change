@@ -256,7 +256,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/teams/:id', isAuthenticated, async (req, res) => {
     try {
       const { id } = req.params;
-      const userId = req.user?.id;
+      const userId = req.user?.claims?.sub;
       
       if (!userId) {
         return res.status(401).json({ error: 'User not authenticated' });
@@ -285,7 +285,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch('/api/teams/:id', isAuthenticated, async (req, res) => {
     try {
       const { id } = req.params;
-      const userId = req.user?.id;
+      const userId = req.user?.claims?.sub;
       
       if (!userId) {
         return res.status(401).json({ error: 'User not authenticated' });

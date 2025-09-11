@@ -414,14 +414,26 @@ export function createCachedStorage(storage: IStorage, cacheTtl?: number): IStor
   return new Proxy(cachedStorage, {
     get(target, prop, receiver) {
       // If method exists on CachedStorage, use it
+      if (prop in target && typeof (target as any)[prop] === 'function') {
+        return Reflect.get(target, prop, receiver);
+      }
+      
+      // If it's a property that exists on CachedStorage but not a function, return it
       if (prop in target) {
         return Reflect.get(target, prop, receiver);
       }
       
-      // Otherwise delegate to wrapped storage
+      // Otherwise delegate to wrapped storage with proper context binding
       const storageMethod = (target as any).storage[prop];
       if (typeof storageMethod === 'function') {
-        return storageMethod.bind((target as any).storage);
+        return function(...args: any[]) {
+          return storageMethod.apply((target as any).storage, args);
+        };
+      }
+      
+      // Return property from storage if it exists
+      if (prop in (target as any).storage) {
+        return (target as any).storage[prop];
       }
       
       return Reflect.get(target, prop, receiver);
