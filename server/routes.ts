@@ -213,6 +213,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validationResult = signupSchema.safeParse(req.body);
 
       if (!validationResult.success) {
+        console.error('Team signup validation error:', validationResult.error.errors);
+        console.error('Received data:', req.body);
         return res.status(400).json({ 
           error: 'Invalid team data', 
           details: validationResult.error.errors 
