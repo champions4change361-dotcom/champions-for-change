@@ -509,6 +509,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Generate presigned URL for document uploads
+  app.post('/api/upload/presigned-url', isAuthenticated, async (req, res) => {
+    try {
+      const { fileType } = req.body;
+      const userId = req.user?.claims?.sub || req.user?.id;
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+
+      // Generate a unique filename
+      const timestamp = Date.now();
+      const randomId = crypto.randomUUID().substring(0, 8);
+      const filename = `${fileType}-${userId}-${timestamp}-${randomId}`;
+      
+      // For now, return a mock presigned URL structure that matches what ObjectUploader expects
+      const mockPresignedUrl = `https://mock-storage.example.com/${filename}`;
+      
+      res.json({
+        method: 'PUT',
+        url: mockPresignedUrl
+      });
+    } catch (error) {
+      console.error('Error generating presigned URL:', error);
+      res.status(500).json({ error: 'Failed to generate upload URL' });
+    }
+  });
+
   // Add player to team
   app.post('/api/teams/:id/players', isAuthenticated, async (req, res) => {
     try {

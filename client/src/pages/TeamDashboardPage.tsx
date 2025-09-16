@@ -17,6 +17,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useToast } from '@/hooks/use-toast';
 import type { Team, TeamPlayer, InsertTeamPlayer } from '@shared/schema';
 import { insertTeamPlayerSchema } from '@shared/schema';
+import { ObjectUploader } from '../../components/ObjectUploader';
 
 export default function TeamDashboardPage() {
   const { id } = useParams();
@@ -73,6 +74,9 @@ export default function TeamDashboardPage() {
       parentGuardianEmail: '',
       parentGuardianPhone: '',
       homeAddress: '',
+      medicalClearanceDoc: '',
+      birthCertificateDoc: '',
+      physicalFormDoc: '',
       status: 'active' as const,
     },
   });
@@ -434,6 +438,133 @@ export default function TeamDashboardPage() {
                               </FormItem>
                             )}
                           />
+
+                          {/* Document Upload Section */}
+                          <div className="col-span-1 md:col-span-2 space-y-4 pt-6 border-t border-slate-600">
+                            <h3 className="text-lg font-semibold text-slate-100 mb-4">Required Documents</h3>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                              {/* Medical Clearance */}
+                              <FormField
+                                control={addPlayerForm.control}
+                                name="medicalClearanceDoc"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-slate-100">Medical Clearance</FormLabel>
+                                    <FormControl>
+                                      <div className="space-y-2">
+                                        <ObjectUploader
+                                          maxNumberOfFiles={1}
+                                          maxFileSize={10485760}
+                                          onGetUploadParameters={async () => {
+                                            const response = await fetch('/api/upload/presigned-url', {
+                                              method: 'POST',
+                                              headers: { 'Content-Type': 'application/json' },
+                                              body: JSON.stringify({ fileType: 'medical-clearance' })
+                                            });
+                                            return response.json();
+                                          }}
+                                          onComplete={(result: any) => {
+                                            if (result.successful && result.successful.length > 0) {
+                                              field.onChange(result.successful[0].uploadURL || result.successful[0].url);
+                                            }
+                                          }}
+                                          buttonClassName="w-full bg-slate-700 hover:bg-slate-600 border-slate-500 text-slate-100"
+                                        >
+                                          <Upload className="w-4 h-4 mr-2" />
+                                          {field.value ? 'Replace Medical Form' : 'Upload Medical Form'}
+                                        </ObjectUploader>
+                                        {field.value && (
+                                          <p className="text-xs text-green-400">✅ Medical clearance uploaded</p>
+                                        )}
+                                      </div>
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              {/* Birth Certificate */}
+                              <FormField
+                                control={addPlayerForm.control}
+                                name="birthCertificateDoc"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-slate-100">Birth Certificate</FormLabel>
+                                    <FormControl>
+                                      <div className="space-y-2">
+                                        <ObjectUploader
+                                          maxNumberOfFiles={1}
+                                          maxFileSize={10485760}
+                                          onGetUploadParameters={async () => {
+                                            const response = await fetch('/api/upload/presigned-url', {
+                                              method: 'POST',
+                                              headers: { 'Content-Type': 'application/json' },
+                                              body: JSON.stringify({ fileType: 'birth-certificate' })
+                                            });
+                                            return response.json();
+                                          }}
+                                          onComplete={(result: any) => {
+                                            if (result.successful && result.successful.length > 0) {
+                                              field.onChange(result.successful[0].uploadURL || result.successful[0].url);
+                                            }
+                                          }}
+                                          buttonClassName="w-full bg-slate-700 hover:bg-slate-600 border-slate-500 text-slate-100"
+                                        >
+                                          <Upload className="w-4 h-4 mr-2" />
+                                          {field.value ? 'Replace Birth Certificate' : 'Upload Birth Certificate'}
+                                        </ObjectUploader>
+                                        {field.value && (
+                                          <p className="text-xs text-green-400">✅ Birth certificate uploaded</p>
+                                        )}
+                                      </div>
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              {/* Physical Form */}
+                              <FormField
+                                control={addPlayerForm.control}
+                                name="physicalFormDoc"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-slate-100">Physical Form</FormLabel>
+                                    <FormControl>
+                                      <div className="space-y-2">
+                                        <ObjectUploader
+                                          maxNumberOfFiles={1}
+                                          maxFileSize={10485760}
+                                          onGetUploadParameters={async () => {
+                                            const response = await fetch('/api/upload/presigned-url', {
+                                              method: 'POST',
+                                              headers: { 'Content-Type': 'application/json' },
+                                              body: JSON.stringify({ fileType: 'physical-form' })
+                                            });
+                                            return response.json();
+                                          }}
+                                          onComplete={(result: any) => {
+                                            if (result.successful && result.successful.length > 0) {
+                                              field.onChange(result.successful[0].uploadURL || result.successful[0].url);
+                                            }
+                                          }}
+                                          buttonClassName="w-full bg-slate-700 hover:bg-slate-600 border-slate-500 text-slate-100"
+                                        >
+                                          <Upload className="w-4 h-4 mr-2" />
+                                          {field.value ? 'Replace Physical Form' : 'Upload Physical Form'}
+                                        </ObjectUploader>
+                                        {field.value && (
+                                          <p className="text-xs text-green-400">✅ Physical form uploaded</p>
+                                        )}
+                                      </div>
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          </div>
                         </div>
                         <div className="flex justify-end space-x-2 pt-4">
                           <Button type="button" variant="outline" onClick={() => setIsAddPlayerOpen(false)} className="border-slate-600 text-slate-100 hover:bg-slate-700">
