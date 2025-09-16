@@ -540,7 +540,7 @@ export default function TeamDashboardPage() {
               </Card>
 
               {/* Danger Zone */}
-              <Card className="bg-red-900/20 border-red-700/50">
+              <Card className="bg-slate-800/50 border-slate-600">
                 <CardHeader>
                   <CardTitle className="text-red-400">Danger Zone</CardTitle>
                   <CardDescription className="text-slate-300">
