@@ -204,7 +204,7 @@ export async function setupAuth(app: Express) {
         prompt: "login consent",
         scope: ["openid", "email", "profile", "offline_access"],
         // Ensure proper mobile redirect
-        successReturnToOrRedirect: "/tournaments",
+        successReturnToOrRedirect: "/teams",
         failureRedirect: "/login?error=auth_failed",
       })(req, res, next);
     }
@@ -311,7 +311,7 @@ export async function setupAuth(app: Express) {
     }
     
     passport.authenticate(strategyName, {
-      successRedirect: "/tournament-empire?auth=success",
+      successRedirect: "/teams",
       failureRedirect: "/login?error=callback_failed",
     })(req, res, next);
   });
