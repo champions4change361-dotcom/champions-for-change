@@ -1954,15 +1954,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/admin/create-fake-user", checkAuth, async (req: any, res) => {
     try {
       const storage = await getStorage();
-      const { firstName, lastName, email, role, subscriptionPlan, organizationName, userType } = req.body;
+      const { firstName, lastName, email, userRole, complianceRole, subscriptionPlan, organizationName, userType, organizationType, medicalDataAccess } = req.body;
       
-      console.log('Create user request data:', { firstName, lastName, email, role, subscriptionPlan, organizationName, userType });
+      console.log('Create user request data:', { firstName, lastName, email, userRole, complianceRole, subscriptionPlan, organizationName, userType, organizationType, medicalDataAccess });
       
       const missingFields = [];
       if (!firstName) missingFields.push('firstName');
       if (!lastName) missingFields.push('lastName');
       if (!email) missingFields.push('email');
-      if (!role) missingFields.push('role');
+      if (!userRole) missingFields.push('userRole');
       if (!subscriptionPlan) missingFields.push('subscriptionPlan');
       
       if (missingFields.length > 0) {
@@ -1979,9 +1979,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         profileImageUrl: null,
         subscriptionPlan,
         subscriptionStatus: 'active',
-        complianceRole: role,
+        userRole: userRole,
+        complianceRole: complianceRole || userRole, // Default to userRole if complianceRole not provided
+        organizationType: organizationType || 'district',
         organizationId: organizationName.toLowerCase().replace(/\s+/g, '-'),
         organizationName,
+        medicalDataAccess: Boolean(medicalDataAccess),
         isWhitelabelClient: false,
         whitelabelDomain: null
       });
