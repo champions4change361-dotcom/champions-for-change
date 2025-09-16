@@ -3436,6 +3436,7 @@ export const teamPlayers = pgTable("team_players", {
   physicianName: varchar("physician_name"),
   physicianPhone: varchar("physician_phone"),
   homeAddress: text("home_address"),
+  profilePicture: varchar("profile_picture"),
   medicalClearanceDoc: varchar("medical_clearance_doc"),
   birthCertificateDoc: varchar("birth_certificate_doc"),
   physicalFormDoc: varchar("physical_form_doc"),

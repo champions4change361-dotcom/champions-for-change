@@ -74,6 +74,7 @@ export default function TeamDashboardPage() {
       parentGuardianEmail: '',
       parentGuardianPhone: '',
       homeAddress: '',
+      profilePicture: '',
       medicalClearanceDoc: '',
       birthCertificateDoc: '',
       physicalFormDoc: '',
@@ -441,6 +442,50 @@ export default function TeamDashboardPage() {
 
                           {/* Document Upload Section */}
                           <div className="col-span-1 md:col-span-2 space-y-4 pt-6 border-t border-slate-600">
+                            {/* Profile Picture */}
+                            <div className="mb-6">
+                              <h3 className="text-lg font-semibold text-slate-100 mb-4">Player Photo</h3>
+                              <FormField
+                                control={addPlayerForm.control}
+                                name="profilePicture"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-slate-100">Profile Picture</FormLabel>
+                                    <FormControl>
+                                      <div className="space-y-2">
+                                        <ObjectUploader
+                                          maxNumberOfFiles={1}
+                                          maxFileSize={5242880}
+                                          onGetUploadParameters={async () => {
+                                            const response = await fetch('/api/upload/presigned-url', {
+                                              method: 'POST',
+                                              headers: { 'Content-Type': 'application/json' },
+                                              body: JSON.stringify({ fileType: 'profile-picture' })
+                                            });
+                                            return response.json();
+                                          }}
+                                          onComplete={(result) => {
+                                            const successful = result.successful[0];
+                                            if (successful) {
+                                              field.onChange(successful.uploadURL || successful.url);
+                                            }
+                                          }}
+                                          buttonClassName="w-full bg-blue-600 hover:bg-blue-500 border-blue-500 text-white"
+                                        >
+                                          <Upload className="w-4 h-4 mr-2" />
+                                          {field.value ? 'Replace Photo' : 'Upload Player Photo'}
+                                        </ObjectUploader>
+                                        {field.value && (
+                                          <p className="text-xs text-green-400">✅ Player photo uploaded</p>
+                                        )}
+                                      </div>
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+
                             <h3 className="text-lg font-semibold text-slate-100 mb-4">Required Documents</h3>
                             
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -592,9 +637,25 @@ export default function TeamDashboardPage() {
                       <div key={player.id} className="bg-slate-700/50 border border-slate-600 rounded-lg p-4" data-testid={`player-card-${player.id}`}>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-4">
-                            <div className="bg-blue-600 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold">
-                              {player.jerseyNumber || '#'}
-                            </div>
+                            {player.profilePicture ? (
+                              <div className="relative">
+                                <img
+                                  src={player.profilePicture}
+                                  alt={`${player.playerName} profile`}
+                                  className="w-12 h-12 rounded-full object-cover border-2 border-blue-500"
+                                  data-testid={`player-photo-${player.id}`}
+                                />
+                                {player.jerseyNumber && (
+                                  <div className="absolute -bottom-1 -right-1 bg-blue-600 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold">
+                                    {player.jerseyNumber}
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <div className="bg-blue-600 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold">
+                                {player.jerseyNumber || player.playerName?.charAt(0)?.toUpperCase() || '#'}
+                              </div>
+                            )}
                             <div>
                               <h4 className="text-slate-100 font-medium">{player.playerName}</h4>
                               <p className="text-slate-300 text-sm">{player.position || 'Position not set'}</p>
