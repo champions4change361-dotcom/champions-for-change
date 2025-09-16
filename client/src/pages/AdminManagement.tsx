@@ -16,10 +16,13 @@ interface FakeUser {
   firstName: string;
   lastName: string;
   email: string;
-  role: string;
+  userRole: string;
+  complianceRole: string;
   subscriptionPlan: string;
   organizationName: string;
-  userType: 'district' | 'organizer' | 'business';
+  userType: 'district' | 'organizer' | 'business' | 'general';
+  organizationType: 'business' | 'nonprofit' | 'sports_club' | 'district' | 'school' | 'club';
+  medicalDataAccess: boolean;
 }
 
 export default function AdminManagement() {
@@ -30,27 +33,78 @@ export default function AdminManagement() {
     firstName: '',
     lastName: '',
     email: '',
-    role: '',
+    userRole: '',
+    complianceRole: '',
     subscriptionPlan: '',
     organizationName: '',
-    userType: 'district'
+    userType: 'district',
+    organizationType: 'district',
+    medicalDataAccess: false
   });
+
+  // Helper function to get defaults for a userType
+  const getDefaultsForUserType = (userType: string) => {
+    const roleOptions = getRoleOptions(userType);
+    const complianceRoleOptions = getComplianceRoleOptions(userType);
+    const subscriptionOptions = getSubscriptionOptions(userType);
+    
+    let orgType: FakeUser['organizationType'] = 'district';
+    switch (userType) {
+      case 'district':
+        orgType = 'district';
+        break;
+      case 'organizer':
+        orgType = 'sports_club';
+        break;
+      case 'business':
+        orgType = 'business';
+        break;
+      case 'general':
+        orgType = 'individual';
+        break;
+    }
+    
+    return {
+      userRole: roleOptions[0]?.value || '',
+      complianceRole: complianceRoleOptions[0]?.value || '',
+      subscriptionPlan: subscriptionOptions[0]?.value || '',
+      organizationType: orgType
+    };
+  };
 
   // Initialize role and subscription when userType changes
   useEffect(() => {
     const roleOptions = getRoleOptions(newUser.userType);
+    const complianceRoleOptions = getComplianceRoleOptions(newUser.userType);
     const subscriptionOptions = getSubscriptionOptions(newUser.userType);
     
     // Only set defaults if current values are invalid for the new userType
-    const isRoleValid = roleOptions.some(option => option.value === newUser.role);
+    const isUserRoleValid = roleOptions.some(option => option.value === newUser.userRole);
+    const isComplianceRoleValid = complianceRoleOptions.some(option => option.value === newUser.complianceRole);
     const isSubscriptionValid = subscriptionOptions.some(option => option.value === newUser.subscriptionPlan);
     
-    if (!isRoleValid && roleOptions.length > 0) {
-      setNewUser(prev => ({ ...prev, role: roleOptions[0].value }));
+    let updates: Partial<FakeUser> = {};
+    
+    if (!isUserRoleValid && roleOptions.length > 0) {
+      updates.userRole = roleOptions[0].value;
+    }
+    
+    if (!isComplianceRoleValid && complianceRoleOptions.length > 0) {
+      updates.complianceRole = complianceRoleOptions[0].value;
     }
     
     if (!isSubscriptionValid && subscriptionOptions.length > 0) {
-      setNewUser(prev => ({ ...prev, subscriptionPlan: subscriptionOptions[0].value }));
+      updates.subscriptionPlan = subscriptionOptions[0].value;
+    }
+    
+    // Set organization type based on user type
+    const defaults = getDefaultsForUserType(newUser.userType);
+    if (newUser.organizationType !== defaults.organizationType) {
+      updates.organizationType = defaults.organizationType;
+    }
+    
+    if (Object.keys(updates).length > 0) {
+      setNewUser(prev => ({ ...prev, ...updates }));
     }
   }, [newUser.userType]);
 
@@ -82,14 +136,18 @@ export default function AdminManagement() {
         description: "Fake user created successfully",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      const defaults = getDefaultsForUserType('district');
       setNewUser({
         firstName: '',
         lastName: '',
         email: '',
-        role: 'scorekeeper',
-        subscriptionPlan: 'foundation',
+        userRole: defaults.userRole,
+        complianceRole: defaults.complianceRole,
+        subscriptionPlan: defaults.subscriptionPlan,
         organizationName: '',
-        userType: 'district'
+        userType: 'district',
+        organizationType: defaults.organizationType,
+        medicalDataAccess: false
       });
     },
     onError: (error: Error) => {
@@ -111,25 +169,71 @@ export default function AdminManagement() {
       case 'district':
         return [
           { value: 'district_athletic_director', label: 'District Athletic Director' },
-          { value: 'district_head_athletic_trainer', label: 'District Head Athletic Trainer' },
+          { value: 'district_athletic_coordinator', label: 'District Athletic Coordinator' },
+          { value: 'district_athletic_trainer', label: 'District Athletic Trainer' },
+          { value: 'district_aquatic_coordinator', label: 'District Aquatic Coordinator' },
           { value: 'school_athletic_director', label: 'School Athletic Director' },
+          { value: 'school_athletic_coordinator', label: 'School Athletic Coordinator' },
           { value: 'school_athletic_trainer', label: 'School Athletic Trainer' },
-          { value: 'school_principal', label: 'School Principal' },
+          { value: 'school_aquatic_coordinator', label: 'School Aquatic Coordinator' },
           { value: 'head_coach', label: 'Head Coach' },
           { value: 'assistant_coach', label: 'Assistant Coach' },
         ];
       case 'organizer':
         return [
-          { value: 'scorekeeper', label: 'Tournament Organizer' },
-          { value: 'head_coach', label: 'Event Coordinator' },
+          { value: 'tournament_manager', label: 'Tournament Manager' },
+          { value: 'assistant_tournament_manager', label: 'Assistant Tournament Manager' },
+          { value: 'scorekeeper', label: 'Scorekeeper/Judge' },
+          { value: 'head_coach', label: 'Head Coach' },
+          { value: 'assistant_coach', label: 'Assistant Coach' },
         ];
       case 'business':
         return [
-          { value: 'scorekeeper', label: 'Business Manager' },
-          { value: 'head_coach', label: 'Operations Director' },
+          { value: 'tournament_manager', label: 'Event Manager' },
+          { value: 'scorekeeper', label: 'Operations Manager' },
+          { value: 'head_coach', label: 'Team Lead' },
         ];
       default:
-        return [{ value: 'scorekeeper', label: 'General User' }];
+        return [
+          { value: 'fan', label: 'General User/Fan' },
+          { value: 'athlete', label: 'Athlete' },
+          { value: 'scorekeeper', label: 'Scorekeeper' }
+        ];
+    }
+  };
+
+  // Separate function for compliance roles (HIPAA/FERPA specific)
+  const getComplianceRoleOptions = (userType: string) => {
+    switch (userType) {
+      case 'district':
+        return [
+          { value: 'district_athletic_director', label: 'District Athletic Director' },
+          { value: 'district_athletic_coordinator', label: 'District Athletic Coordinator' },
+          { value: 'district_athletic_trainer', label: 'District Athletic Trainer' },
+          { value: 'district_aquatic_coordinator', label: 'District Aquatic Coordinator' },
+          { value: 'school_athletic_director', label: 'School Athletic Director' },
+          { value: 'school_athletic_coordinator', label: 'School Athletic Coordinator' },
+          { value: 'school_athletic_trainer', label: 'School Athletic Trainer' },
+          { value: 'school_aquatic_coordinator', label: 'School Aquatic Coordinator' },
+          { value: 'head_coach', label: 'Head Coach' },
+          { value: 'assistant_coach', label: 'Assistant Coach' },
+          { value: 'athletic_training_student', label: 'Athletic Training Student' },
+        ];
+      case 'organizer':
+        return [
+          { value: 'tournament_manager', label: 'Tournament Manager' },
+          { value: 'assistant_tournament_manager', label: 'Assistant Tournament Manager' },
+          { value: 'scorekeeper', label: 'Scorekeeper/Judge' },
+        ];
+      case 'business':
+        return [
+          { value: 'tournament_manager', label: 'Event Manager' },
+          { value: 'scorekeeper', label: 'Operations Manager' },
+        ];
+      default:
+        return [
+          { value: 'scorekeeper', label: 'Scorekeeper' }
+        ];
     }
   };
 
@@ -139,19 +243,28 @@ export default function AdminManagement() {
         return [
           { value: 'district_enterprise', label: 'District Enterprise ($4,500/year)' },
           { value: 'enterprise', label: 'Enterprise' },
+          { value: 'professional', label: 'Professional' },
         ];
       case 'organizer':
         return [
-          { value: 'tournament_organizer', label: 'Tournament Organizer ($39/month)' },
-          { value: 'tournament_organizer_annual', label: 'Tournament Organizer Annual ($399/year)' },
+          { value: 'tournament-organizer', label: 'Tournament Organizer ($39/month)' },
+          { value: 'annual-pro', label: 'Annual Pro ($399/year)' },
+          { value: 'professional', label: 'Professional' },
+          { value: 'champion', label: 'Champion' },
         ];
       case 'business':
         return [
-          { value: 'enterprise', label: 'Business Enterprise ($149/month)' },
+          { value: 'business-enterprise', label: 'Business Enterprise ($149/month)' },
+          { value: 'enterprise', label: 'Enterprise' },
           { value: 'professional', label: 'Professional' },
+          { value: 'champion', label: 'Champion' },
         ];
       default:
-        return [{ value: 'foundation', label: 'Foundation' }];
+        return [
+          { value: 'foundation', label: 'Foundation (Free)' },
+          { value: 'starter', label: 'Starter' },
+          { value: 'professional', label: 'Professional' },
+        ];
     }
   };
 
@@ -318,14 +431,15 @@ export default function AdminManagement() {
                           id="userType"
                           value={newUser.userType}
                           onChange={(e) => {
-                            const value = e.target.value as 'district' | 'organizer' | 'business';
-                            const roleOptions = getRoleOptions(value);
-                            const subscriptionOptions = getSubscriptionOptions(value);
+                            const value = e.target.value as 'district' | 'organizer' | 'business' | 'general';
+                            const defaults = getDefaultsForUserType(value);
                             setNewUser({ 
                               ...newUser, 
                               userType: value, 
-                              role: roleOptions[0]?.value || '', 
-                              subscriptionPlan: subscriptionOptions[0]?.value || '' 
+                              userRole: defaults.userRole, 
+                              complianceRole: defaults.complianceRole,
+                              subscriptionPlan: defaults.subscriptionPlan,
+                              organizationType: defaults.organizationType
                             });
                           }}
                           className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
@@ -334,27 +448,67 @@ export default function AdminManagement() {
                           <option value="district">District Platform</option>
                           <option value="organizer">Tournament Organizer</option>
                           <option value="business">Business Enterprise</option>
+                          <option value="general">General User</option>
                         </select>
                       </div>
 
                       <div>
-                        <Label htmlFor="role">Role</Label>
+                        <Label htmlFor="userRole">User Role</Label>
                         <select
-                          id="role"
-                          value={newUser.role}
+                          id="userRole"
+                          value={newUser.userRole}
                           onChange={(e) => {
-                            setNewUser(prev => ({ ...prev, role: e.target.value }));
+                            setNewUser(prev => ({ ...prev, userRole: e.target.value }));
                           }}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-                          data-testid="select-role"
+                          data-testid="select-userrole"
                         >
-                          <option value="">Select role</option>
+                          <option value="">Select user role</option>
                           {getRoleOptions(newUser.userType).map((option) => (
                             <option key={option.value} value={option.value}>
                               {option.label}
                             </option>
                           ))}
                         </select>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="complianceRole">Compliance Role</Label>
+                        <select
+                          id="complianceRole"
+                          value={newUser.complianceRole}
+                          onChange={(e) => {
+                            setNewUser(prev => ({ ...prev, complianceRole: e.target.value }));
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                          data-testid="select-compliancerole"
+                        >
+                          <option value="">Select compliance role</option>
+                          {getComplianceRoleOptions(newUser.userType).map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                        <p className="text-xs text-gray-500 mt-1">
+                          For HIPAA/FERPA compliance tracking
+                        </p>
+                      </div>
+
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id="medicalDataAccess"
+                          checked={newUser.medicalDataAccess}
+                          onChange={(e) => {
+                            setNewUser(prev => ({ ...prev, medicalDataAccess: e.target.checked }));
+                          }}
+                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                          data-testid="checkbox-medical-access"
+                        />
+                        <Label htmlFor="medicalDataAccess" className="text-sm">
+                          Medical Data Access (HIPAA)
+                        </Label>
                       </div>
 
                       <div>
