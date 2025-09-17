@@ -356,8 +356,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get teams for current user (coach)
   app.get('/api/teams', isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      // Support both OAuth and session authentication
+      const userId = req.user?.claims?.sub || req.session?.user?.id || req.user?.id;
       if (!userId) {
+        console.log('Teams API - Auth debug:', {
+          user: req.user,
+          sessionUser: req.session?.user,
+          hasSession: !!req.session,
+          isAuthenticated: req.isAuthenticated?.()
+        });
         return res.status(401).json({ error: 'User not authenticated' });
       }
 
@@ -373,7 +380,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create new team
   app.post('/api/teams', isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      // Support both OAuth and session authentication
+      const userId = req.user?.claims?.sub || req.session?.user?.id || req.user?.id;
       if (!userId) {
         return res.status(401).json({ error: 'User not authenticated' });
       }
@@ -404,7 +412,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/teams/:id', isAuthenticated, async (req, res) => {
     try {
       const { id } = req.params;
-      const userId = req.user?.claims?.sub;
+      // Support both OAuth and session authentication
+      const userId = req.user?.claims?.sub || req.session?.user?.id || req.user?.id;
       
       if (!userId) {
         return res.status(401).json({ error: 'User not authenticated' });
@@ -433,7 +442,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch('/api/teams/:id', isAuthenticated, async (req, res) => {
     try {
       const { id } = req.params;
-      const userId = req.user?.claims?.sub;
+      // Support both OAuth and session authentication
+      const userId = req.user?.claims?.sub || req.session?.user?.id || req.user?.id;
       
       if (!userId) {
         return res.status(401).json({ error: 'User not authenticated' });
@@ -478,7 +488,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/teams/:id/players', isAuthenticated, async (req, res) => {
     try {
       const { id } = req.params;
-      const userId = req.user?.id;
+      // Support both OAuth and session authentication
+      const userId = req.user?.claims?.sub || req.session?.user?.id || req.user?.id;
       
       if (!userId) {
         console.log('🚨 Players API Debug - No userId found:', { 

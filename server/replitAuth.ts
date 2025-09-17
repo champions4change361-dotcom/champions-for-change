@@ -345,10 +345,18 @@ export async function setupAuth(app: Express) {
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
-  console.log(`Auth check - isAuthenticated: ${req.isAuthenticated()}, user: ${req.user ? 'exists' : 'none'}, cookies: ${req.cookies.user_authenticated || 'none'}`);
+  console.log(`Auth check - isAuthenticated: ${req.isAuthenticated()}, user: ${req.user ? 'exists' : 'none'}, session user: ${req.session?.user ? 'exists' : 'none'}, cookies: ${req.cookies.user_authenticated || 'none'}`);
   
-  // Check if user is authenticated via session or has auth cookie
+  // Check if user is authenticated via OAuth
   if (req.isAuthenticated()) {
+    return next();
+  }
+  
+  // Check if user is authenticated via session (form login)
+  if (req.session?.user) {
+    console.log('Using session-based authentication');
+    // Make session user available in req.user for consistency
+    req.user = req.session.user;
     return next();
   }
   
