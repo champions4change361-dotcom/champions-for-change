@@ -13,7 +13,7 @@ import NBADepthChartParser from './nba-depth-chart-parser';
 import { stripe } from "./nonprofitStripeConfig";
 import { registerDomainRoutes } from "./domainRoutes";
 import { registerTournamentRoutes } from "./routes/tournamentRoutes";
-import { tournamentSubscriptions, insertTournamentSubscriptionSchema, type InsertTournamentSubscription, insertRegistrationSubmissionSchema, insertTeamSchema, insertTeamPlayerSchema, type InsertTeam, type InsertTeamPlayer, type Team, type TeamPlayer, updateTeamSubscriptionSchema } from "@shared/schema";
+import { tournamentSubscriptions, insertTournamentSubscriptionSchema, type InsertTournamentSubscription, insertRegistrationSubmissionSchema, insertTeamSchema, insertTeamPlayerSchema, insertMedicalHistorySchema, type InsertTeam, type InsertTeamPlayer, type InsertMedicalHistory, type Team, type TeamPlayer, type MedicalHistory, updateTeamSubscriptionSchema } from "@shared/schema";
 
 console.log('🏫 District athletics management platform initialized');
 console.log('💚 Champions for Change nonprofit mission active');
@@ -639,6 +639,238 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error('Update team player error:', error);
       res.status(500).json({ error: 'Failed to update player' });
+    }
+  });
+
+  // Medical history endpoints for player registration
+  
+  // Get medical history for a player
+  app.get('/api/players/:playerId/medical-history', isAuthenticated, async (req, res) => {
+    try {
+      const { playerId } = req.params;
+      const userId = req.user?.claims?.sub || req.user?.id;
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+
+      const storage = await getStorage();
+      
+      // First verify the player exists and user has permission to access it
+      const player = await storage.getTeamPlayer(playerId);
+      if (!player) {
+        return res.status(404).json({ error: 'Player not found' });
+      }
+      
+      // Verify team ownership
+      const team = await storage.getTeam(player.teamId);
+      if (!team || team.coachId !== userId) {
+        return res.status(403).json({ error: 'Unauthorized to access this player\'s medical history' });
+      }
+
+      const medicalHistory = await storage.getMedicalHistoryByPlayer(playerId);
+      
+      if (!medicalHistory) {
+        return res.status(404).json({ error: 'Medical history not found' });
+      }
+
+      // Log access to medical history for HIPAA compliance
+      await storage.createComplianceAuditLog({
+        userId: userId,
+        actionType: 'data_access',
+        resourceType: 'health_data',
+        resourceId: medicalHistory.id,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+        complianceNotes: `Accessed medical history for player ${playerId}`
+      });
+
+      res.json(medicalHistory);
+    } catch (error: any) {
+      console.error('Get medical history error:', error);
+      res.status(500).json({ error: 'Failed to get medical history' });
+    }
+  });
+
+  // Create medical history for a player
+  app.post('/api/players/:playerId/medical-history', isAuthenticated, async (req, res) => {
+    try {
+      const { playerId } = req.params;
+      const userId = req.user?.claims?.sub || req.user?.id;
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+
+      const storage = await getStorage();
+      
+      // First verify the player exists and user has permission
+      const player = await storage.getTeamPlayer(playerId);
+      if (!player) {
+        return res.status(404).json({ error: 'Player not found' });
+      }
+      
+      // Verify team ownership
+      const team = await storage.getTeam(player.teamId);
+      if (!team || team.coachId !== userId) {
+        return res.status(403).json({ error: 'Unauthorized to create medical history for this player' });
+      }
+
+      // Check if medical history already exists
+      const existingHistory = await storage.getMedicalHistoryByPlayer(playerId);
+      if (existingHistory) {
+        return res.status(409).json({ error: 'Medical history already exists for this player' });
+      }
+
+      // Validate medical history data
+      const validationResult = insertMedicalHistorySchema.safeParse({
+        ...req.body,
+        playerId: playerId
+      });
+
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          error: 'Invalid medical history data', 
+          details: validationResult.error.errors 
+        });
+      }
+
+      const medicalHistory = await storage.createMedicalHistory(validationResult.data);
+      
+      // Log creation of medical history for HIPAA compliance
+      await storage.createComplianceAuditLog({
+        userId: userId,
+        actionType: 'data_modification',
+        resourceType: 'health_data',
+        resourceId: medicalHistory.id,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+        complianceNotes: `Created medical history for player ${playerId}`
+      });
+      
+      res.status(201).json(medicalHistory);
+    } catch (error: any) {
+      console.error('Create medical history error:', error);
+      res.status(500).json({ error: 'Failed to create medical history' });
+    }
+  });
+
+  // Update medical history for a player
+  app.put('/api/players/:playerId/medical-history', isAuthenticated, async (req, res) => {
+    try {
+      const { playerId } = req.params;
+      const userId = req.user?.claims?.sub || req.user?.id;
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+
+      const storage = await getStorage();
+      
+      // First verify the player exists and user has permission
+      const player = await storage.getTeamPlayer(playerId);
+      if (!player) {
+        return res.status(404).json({ error: 'Player not found' });
+      }
+      
+      // Verify team ownership
+      const team = await storage.getTeam(player.teamId);
+      if (!team || team.coachId !== userId) {
+        return res.status(403).json({ error: 'Unauthorized to update medical history for this player' });
+      }
+
+      // Get existing medical history
+      const existingHistory = await storage.getMedicalHistoryByPlayer(playerId);
+      if (!existingHistory) {
+        return res.status(404).json({ error: 'Medical history not found' });
+      }
+
+      // Validate update data - use partial schema for updates
+      const updateSchema = insertMedicalHistorySchema.omit({ playerId: true }).partial();
+      const validationResult = updateSchema.safeParse(req.body);
+
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          error: 'Invalid medical history data', 
+          details: validationResult.error.errors 
+        });
+      }
+
+      const updatedHistory = await storage.updateMedicalHistory(existingHistory.id, validationResult.data);
+      
+      if (!updatedHistory) {
+        return res.status(500).json({ error: 'Failed to update medical history' });
+      }
+
+      // Log update of medical history for HIPAA compliance
+      await storage.createComplianceAuditLog({
+        userId: userId,
+        actionType: 'data_modification',
+        resourceType: 'health_data',
+        resourceId: existingHistory.id,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+        complianceNotes: `Updated medical history for player ${playerId}`
+      });
+
+      res.json(updatedHistory);
+    } catch (error: any) {
+      console.error('Update medical history error:', error);
+      res.status(500).json({ error: 'Failed to update medical history' });
+    }
+  });
+
+  // Delete medical history for a player
+  app.delete('/api/players/:playerId/medical-history', isAuthenticated, async (req, res) => {
+    try {
+      const { playerId } = req.params;
+      const userId = req.user?.claims?.sub || req.user?.id;
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+
+      const storage = await getStorage();
+      
+      // First verify the player exists and user has permission
+      const player = await storage.getTeamPlayer(playerId);
+      if (!player) {
+        return res.status(404).json({ error: 'Player not found' });
+      }
+      
+      // Verify team ownership
+      const team = await storage.getTeam(player.teamId);
+      if (!team || team.coachId !== userId) {
+        return res.status(403).json({ error: 'Unauthorized to delete medical history for this player' });
+      }
+
+      // Get existing medical history
+      const existingHistory = await storage.getMedicalHistoryByPlayer(playerId);
+      if (!existingHistory) {
+        return res.status(404).json({ error: 'Medical history not found' });
+      }
+
+      const deleted = await storage.deleteMedicalHistory(existingHistory.id);
+      
+      if (deleted) {
+        // Log deletion of medical history for HIPAA compliance
+        await storage.createComplianceAuditLog({
+          userId: userId,
+          actionType: 'data_modification',
+          resourceType: 'health_data',
+          resourceId: existingHistory.id,
+          ipAddress: req.ip,
+          userAgent: req.get('User-Agent'),
+          complianceNotes: `Deleted medical history for player ${playerId}`
+        });
+        
+        res.status(204).send(); // No content, successful deletion
+      } else {
+        res.status(500).json({ error: 'Failed to delete medical history' });
+      }
+    } catch (error: any) {
+      console.error('Delete medical history error:', error);
+      res.status(500).json({ error: 'Failed to delete medical history' });
     }
   });
 

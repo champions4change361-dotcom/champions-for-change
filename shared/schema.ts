@@ -3483,7 +3483,7 @@ export const teamPlayers = pgTable("team_players", {
 // Medical History Form - Comprehensive 21-question participation physical evaluation
 export const medicalHistory = pgTable("medical_history", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  playerId: varchar("player_id").notNull().references(() => teamPlayers.id, { onDelete: "cascade" }),
+  playerId: varchar("player_id").notNull().unique().references(() => teamPlayers.id, { onDelete: "cascade" }),
   
   // Basic demographic info (auto-populated from registration)
   studentName: varchar("student_name").notNull(),

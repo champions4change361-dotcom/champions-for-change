@@ -5,6 +5,7 @@ import {
   type TrackEventRecord as TrackEvent, type InsertTrackEventRecord as InsertTrackEvent, type Page, type InsertPage,
   type TeamRegistration, type InsertTeamRegistration, type Organization, type InsertOrganization,
   type Team, type InsertTeam, type TeamPlayer, type InsertTeamPlayer,
+  type MedicalHistory, type InsertMedicalHistory,
   type ScorekeeperAssignment, type InsertScorekeeperAssignment, type EventScore, type InsertEventScore,
   type SchoolEventAssignment, type InsertSchoolEventAssignment, type CoachEventAssignment, type InsertCoachEventAssignment,
   type Contact, type InsertContact, type EmailCampaign, type InsertEmailCampaign, type CampaignRecipient, type InsertCampaignRecipient,
@@ -19,7 +20,7 @@ import {
   type MerchandiseProduct, type InsertMerchandiseProduct, type MerchandiseOrder, type InsertMerchandiseOrder,
   type EventTicket, type InsertEventTicket, type TicketOrder, type InsertTicketOrder,
   type TournamentRegistrationForm, type InsertTournamentRegistrationForm, type RegistrationSubmission, type InsertRegistrationSubmission, type RegistrationAssignmentLog, type InsertRegistrationAssignmentLog,
-  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, teams, teamPlayers, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog, taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices, supportTeams, supportTeamMembers, supportTeamInjuries, supportTeamAiConsultations, jerseyTeamMembers, jerseyTeamPayments, tournamentSubscriptions, clientConfigurations, guestParticipants, passwordResetTokens, showdownContests, showdownEntries, showdownLeaderboards, professionalPlayers, merchandiseProducts, merchandiseOrders, eventTickets, ticketOrders, tournamentRegistrationForms, registrationSubmissions, registrationAssignmentLog
+  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, teams, teamPlayers, medicalHistory, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog, taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices, supportTeams, supportTeamMembers, supportTeamInjuries, supportTeamAiConsultations, jerseyTeamMembers, jerseyTeamPayments, tournamentSubscriptions, clientConfigurations, guestParticipants, passwordResetTokens, showdownContests, showdownEntries, showdownLeaderboards, professionalPlayers, merchandiseProducts, merchandiseOrders, eventTickets, ticketOrders, tournamentRegistrationForms, registrationSubmissions, registrationAssignmentLog
 } from "@shared/schema";
 
 type SportCategory = typeof sportCategories.$inferSelect;
@@ -135,6 +136,13 @@ export interface IStorage {
   updateTeamPlayer(id: string, updates: Partial<TeamPlayer>): Promise<TeamPlayer | undefined>;
   deleteTeamPlayer(id: string): Promise<boolean>;
   bulkCreateTeamPlayers(players: InsertTeamPlayer[]): Promise<TeamPlayer[]>;
+
+  // Medical history management methods
+  createMedicalHistory(medicalHistory: InsertMedicalHistory): Promise<MedicalHistory>;
+  getMedicalHistory(id: string): Promise<MedicalHistory | undefined>;
+  getMedicalHistoryByPlayer(playerId: string): Promise<MedicalHistory | undefined>;
+  updateMedicalHistory(id: string, updates: Partial<MedicalHistory>): Promise<MedicalHistory | undefined>;
+  deleteMedicalHistory(id: string): Promise<boolean>;
 
   // Guest participant methods - "Pay & Play or Join the Family" system
   createGuestParticipant(participant: InsertGuestParticipant): Promise<GuestParticipant>;
@@ -1277,6 +1285,75 @@ export class DbStorage implements IStorage {
     } catch (error) {
       console.error("Database error:", error);
       throw new Error("Failed to create team players");
+    }
+  }
+
+  // Medical history methods
+  async createMedicalHistory(medicalHistoryData: InsertMedicalHistory): Promise<MedicalHistory> {
+    try {
+      const medicalHistoryWithId = {
+        id: randomUUID(),
+        ...medicalHistoryData,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      const result = await this.db.insert(medicalHistory).values([medicalHistoryWithId]).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to create medical history");
+    }
+  }
+
+  async getMedicalHistory(id: string): Promise<MedicalHistory | undefined> {
+    try {
+      const result = await this.db.select().from(medicalHistory).where(eq(medicalHistory.id, id));
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async getMedicalHistoryByPlayer(playerId: string): Promise<MedicalHistory | undefined> {
+    try {
+      const result = await this.db.select().from(medicalHistory).where(eq(medicalHistory.playerId, playerId));
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async updateMedicalHistory(id: string, updates: Partial<MedicalHistory>): Promise<MedicalHistory | undefined> {
+    try {
+      // Filter out immutable fields to prevent accidental mutation
+      const { id: _, createdAt, ...allowedUpdates } = updates;
+      const updatedData = {
+        ...allowedUpdates,
+        updatedAt: new Date()
+      };
+      
+      const result = await this.db.update(medicalHistory)
+        .set(updatedData)
+        .where(eq(medicalHistory.id, id))
+        .returning();
+        
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async deleteMedicalHistory(id: string): Promise<boolean> {
+    try {
+      const result = await this.db.delete(medicalHistory).where(eq(medicalHistory.id, id)).returning();
+      return result.length > 0;
+    } catch (error) {
+      console.error("Database error:", error);
+      return false;
     }
   }
 
@@ -2861,6 +2938,7 @@ export class MemStorage implements IStorage {
   // STANDALONE TEAM MANAGEMENT MAPS (Jersey Watch-style)
   private teams: Map<string, Team>;
   private teamPlayers: Map<string, TeamPlayer>;
+  private medicalHistories: Map<string, MedicalHistory>;
 
   constructor() {
     this.users = new Map();
@@ -2901,6 +2979,7 @@ export class MemStorage implements IStorage {
     // STANDALONE TEAM MANAGEMENT INITIALIZATION 
     this.teams = new Map();
     this.teamPlayers = new Map();
+    this.medicalHistories = new Map();
     
     // Initialize with default tournament structures, sport division rules, track events, tournament integration, competition formats, and KRAKEN!
     this.initializeDefaultStructures();
@@ -6153,6 +6232,47 @@ export class MemStorage implements IStorage {
       createdPlayers.push(createdPlayer);
     }
     return createdPlayers;
+  }
+
+  // Medical history methods
+  async createMedicalHistory(medicalHistoryData: InsertMedicalHistory): Promise<MedicalHistory> {
+    const medicalHistoryWithId = {
+      id: randomUUID(),
+      ...medicalHistoryData,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    } as MedicalHistory;
+    
+    this.medicalHistories.set(medicalHistoryWithId.id, medicalHistoryWithId);
+    return medicalHistoryWithId;
+  }
+
+  async getMedicalHistory(id: string): Promise<MedicalHistory | undefined> {
+    return this.medicalHistories.get(id);
+  }
+
+  async getMedicalHistoryByPlayer(playerId: string): Promise<MedicalHistory | undefined> {
+    return Array.from(this.medicalHistories.values()).find(history => history.playerId === playerId);
+  }
+
+  async updateMedicalHistory(id: string, updates: Partial<MedicalHistory>): Promise<MedicalHistory | undefined> {
+    const existingHistory = this.medicalHistories.get(id);
+    if (!existingHistory) return undefined;
+    
+    const updatedHistory = {
+      ...existingHistory,
+      ...updates,
+      id: existingHistory.id, // Preserve original ID
+      createdAt: existingHistory.createdAt, // Preserve creation date
+      updatedAt: new Date()
+    };
+    
+    this.medicalHistories.set(id, updatedHistory);
+    return updatedHistory;
+  }
+
+  async deleteMedicalHistory(id: string): Promise<boolean> {
+    return this.medicalHistories.delete(id);
   }
 
   // Cache stats method for compatibility with cached storage interface
