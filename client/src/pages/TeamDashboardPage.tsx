@@ -630,9 +630,9 @@ export default function TeamDashboardPage() {
                                             return response.json();
                                           }}
                                           onComplete={(result) => {
-                                            const successful = result.successful[0];
+                                            const successful = result.successful?.[0];
                                             if (successful) {
-                                              field.onChange(successful.uploadURL || successful.url);
+                                              field.onChange(successful.uploadURL);
                                             }
                                           }}
                                           buttonClassName="w-full bg-blue-600 hover:bg-blue-500 border-blue-500 text-white"
@@ -923,9 +923,9 @@ export default function TeamDashboardPage() {
                                             return response.json();
                                           }}
                                           onComplete={(result) => {
-                                            const successful = result.successful[0];
+                                            const successful = result.successful?.[0];
                                             if (successful) {
-                                              field.onChange(successful.uploadURL || successful.url);
+                                              field.onChange(successful.uploadURL);
                                             }
                                           }}
                                           buttonClassName="w-full bg-blue-600 hover:bg-blue-500 border-blue-500 text-white"
