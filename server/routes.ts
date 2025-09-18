@@ -590,6 +590,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update player in team
+  app.put('/api/teams/:teamId/players/:playerId', isAuthenticated, async (req, res) => {
+    try {
+      const { teamId, playerId } = req.params;
+      const userId = req.user?.claims?.sub || req.user?.id;
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+
+      const storage = await getStorage();
+      
+      // First verify the team exists and user owns it
+      const team = await storage.getTeam(teamId);
+      if (!team) {
+        return res.status(404).json({ error: 'Team not found' });
+      }
+      
+      if (team.coachId !== userId) {
+        return res.status(404).json({ error: 'Team not found' });
+      }
+
+      // Verify the player exists and belongs to this team
+      const existingPlayer = await storage.getTeamPlayer(playerId);
+      if (!existingPlayer || existingPlayer.teamId !== teamId) {
+        return res.status(404).json({ error: 'Player not found' });
+      }
+
+      // Validate update data - use a partial schema for updates
+      const updateSchema = insertTeamPlayerSchema.omit({ teamId: true }).partial();
+      const validationResult = updateSchema.safeParse(req.body);
+
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          error: 'Invalid player data', 
+          details: validationResult.error.errors 
+        });
+      }
+
+      const updatedPlayer = await storage.updateTeamPlayer(playerId, validationResult.data);
+      
+      if (!updatedPlayer) {
+        return res.status(500).json({ error: 'Failed to update player' });
+      }
+
+      res.json(updatedPlayer);
+    } catch (error: any) {
+      console.error('Update team player error:', error);
+      res.status(500).json({ error: 'Failed to update player' });
+    }
+  });
+
   // Update team subscription
   app.patch('/api/teams/:id/subscription', isAuthenticated, async (req, res) => {
     try {

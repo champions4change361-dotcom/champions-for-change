@@ -23,6 +23,8 @@ export default function TeamDashboardPage() {
   const { id } = useParams();
   const [location, navigate] = useLocation();
   const [isAddPlayerOpen, setIsAddPlayerOpen] = useState(false);
+  const [isEditPlayerOpen, setIsEditPlayerOpen] = useState(false);
+  const [editingPlayer, setEditingPlayer] = useState<TeamPlayer | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
@@ -107,6 +109,71 @@ export default function TeamDashboardPage() {
       });
     },
   });
+
+  // Edit player form
+  const editPlayerForm = useForm<Partial<TeamPlayer>>({
+    resolver: zodResolver(insertTeamPlayerSchema.omit({ teamId: true }).partial()),
+    defaultValues: {
+      playerName: '',
+      jerseyNumber: '',
+      position: '',
+      parentGuardianName: '',
+      parentGuardianEmail: '',
+      parentGuardianPhone: '',
+      homeAddress: '',
+      profilePicture: '',
+      medicalClearanceDoc: '',
+      birthCertificateDoc: '',
+      physicalFormDoc: '',
+    },
+  });
+
+  // Update player mutation
+  const updatePlayerMutation = useMutation({
+    mutationFn: async (updates: Partial<TeamPlayer>) => {
+      if (!editingPlayer) throw new Error('No player selected for editing');
+      const response = await fetch(`/api/teams/${id}/players/${editingPlayer.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+      if (!response.ok) throw new Error('Failed to update player');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/teams', id, 'players'] });
+      toast({ title: "Player Updated", description: "Player information has been successfully updated!" });
+      setIsEditPlayerOpen(false);
+      setEditingPlayer(null);
+      editPlayerForm.reset();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Unable to Update Player", 
+        description: error.message || "Please try again or check your connection.",
+        className: "bg-slate-800 border-slate-600 text-slate-100"
+      });
+    },
+  });
+
+  // Handle opening edit player dialog
+  const handleEditPlayer = (player: TeamPlayer) => {
+    setEditingPlayer(player);
+    editPlayerForm.reset({
+      playerName: player.playerName || '',
+      jerseyNumber: player.jerseyNumber || '',
+      position: player.position || '',
+      parentGuardianName: player.parentGuardianName || '',
+      parentGuardianEmail: player.parentGuardianEmail || '',
+      parentGuardianPhone: player.parentGuardianPhone || '',
+      homeAddress: player.homeAddress || '',
+      profilePicture: player.profilePicture || '',
+      medicalClearanceDoc: player.medicalClearanceDoc || '',
+      birthCertificateDoc: player.birthCertificateDoc || '',
+      physicalFormDoc: player.physicalFormDoc || '',
+    });
+    setIsEditPlayerOpen(true);
+  };
 
   const getSubscriptionBadgeVariant = (status: string | null) => {
     switch (status) {
@@ -623,6 +690,299 @@ export default function TeamDashboardPage() {
                     </Form>
                   </DialogContent>
                 </Dialog>
+
+                {/* Edit Player Dialog */}
+                <Dialog open={isEditPlayerOpen} onOpenChange={setIsEditPlayerOpen}>
+                  <DialogContent className="bg-slate-800 border-slate-700 max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle className="text-slate-100">Edit Player</DialogTitle>
+                      <DialogDescription className="text-slate-300">
+                        Update player information and documents.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <Form {...editPlayerForm}>
+                      <form onSubmit={editPlayerForm.handleSubmit((data) => updatePlayerMutation.mutate(data))} className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField
+                            control={editPlayerForm.control}
+                            name="playerName"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-slate-100">Player Name *</FormLabel>
+                                <FormControl>
+                                  <Input {...field} value={field.value || ''} className="bg-slate-700 border-slate-600 text-slate-100" data-testid="input-edit-player-name" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={editPlayerForm.control}
+                            name="jerseyNumber"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-slate-100">Jersey Number</FormLabel>
+                                <FormControl>
+                                  <Input {...field} value={field.value || ''} className="bg-slate-700 border-slate-600 text-slate-100" data-testid="input-edit-jersey-number" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        <FormField
+                          control={editPlayerForm.control}
+                          name="position"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-slate-100">Position</FormLabel>
+                              <FormControl>
+                                <Input {...field} value={field.value || ''} className="bg-slate-700 border-slate-600 text-slate-100" data-testid="input-edit-position" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <div className="space-y-4">
+                          <h4 className="text-sm font-medium text-slate-100">Parent/Guardian Contact</h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField
+                              control={editPlayerForm.control}
+                              name="parentGuardianName"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-slate-100">Parent/Guardian Name</FormLabel>
+                                  <FormControl>
+                                    <Input {...field} value={field.value || ''} className="bg-slate-700 border-slate-600 text-slate-100" data-testid="input-edit-parent-name" />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={editPlayerForm.control}
+                              name="parentGuardianPhone"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel className="text-slate-100">Parent Phone</FormLabel>
+                                  <FormControl>
+                                    <Input {...field} value={field.value || ''} className="bg-slate-700 border-slate-600 text-slate-100" data-testid="input-edit-parent-phone" />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                          <FormField
+                            control={editPlayerForm.control}
+                            name="parentGuardianEmail"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-slate-100">Parent Email Address</FormLabel>
+                                <FormControl>
+                                  <Input {...field} value={field.value || ''} type="email" className="bg-slate-700 border-slate-600 text-slate-100" data-testid="input-edit-parent-email" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={editPlayerForm.control}
+                            name="homeAddress"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-slate-100">Home Address</FormLabel>
+                                <FormControl>
+                                  <Textarea {...field} value={field.value || ''} className="bg-slate-700 border-slate-600 text-slate-100" data-testid="input-edit-home-address" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          {/* Document Upload Section */}
+                          <div className="col-span-1 md:col-span-2 space-y-4 pt-6 border-t border-slate-600">
+                            {/* Profile Picture */}
+                            <div className="mb-6">
+                              <h3 className="text-lg font-semibold text-slate-100 mb-4">Player Photo</h3>
+                              <FormField
+                                control={editPlayerForm.control}
+                                name="profilePicture"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-slate-100">Profile Picture</FormLabel>
+                                    <FormControl>
+                                      <div className="space-y-2">
+                                        <ObjectUploader
+                                          maxNumberOfFiles={1}
+                                          maxFileSize={5242880}
+                                          onGetUploadParameters={async () => {
+                                            const response = await fetch('/api/upload/presigned-url', {
+                                              method: 'POST',
+                                              headers: { 'Content-Type': 'application/json' },
+                                              body: JSON.stringify({ fileType: 'profile-picture' })
+                                            });
+                                            return response.json();
+                                          }}
+                                          onComplete={(result) => {
+                                            const successful = result.successful[0];
+                                            if (successful) {
+                                              field.onChange(successful.uploadURL || successful.url);
+                                            }
+                                          }}
+                                          buttonClassName="w-full bg-blue-600 hover:bg-blue-500 border-blue-500 text-white"
+                                        >
+                                          <Upload className="w-4 h-4 mr-2" />
+                                          {field.value ? 'Replace Photo' : 'Upload Player Photo'}
+                                        </ObjectUploader>
+                                        {field.value && (
+                                          <p className="text-xs text-green-400">✅ Player photo uploaded</p>
+                                        )}
+                                      </div>
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+
+                            <h3 className="text-lg font-semibold text-slate-100 mb-4">Required Documents</h3>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                              {/* Medical Clearance */}
+                              <FormField
+                                control={editPlayerForm.control}
+                                name="medicalClearanceDoc"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-slate-100">Medical Clearance</FormLabel>
+                                    <FormControl>
+                                      <div className="space-y-2">
+                                        <ObjectUploader
+                                          maxNumberOfFiles={1}
+                                          maxFileSize={10485760}
+                                          onGetUploadParameters={async () => {
+                                            const response = await fetch('/api/upload/presigned-url', {
+                                              method: 'POST',
+                                              headers: { 'Content-Type': 'application/json' },
+                                              body: JSON.stringify({ fileType: 'medical-clearance' })
+                                            });
+                                            return response.json();
+                                          }}
+                                          onComplete={(result: any) => {
+                                            if (result.successful && result.successful.length > 0) {
+                                              field.onChange(result.successful[0].uploadURL || result.successful[0].url);
+                                            }
+                                          }}
+                                          buttonClassName="w-full bg-slate-700 hover:bg-slate-600 border-slate-500 text-slate-100"
+                                        >
+                                          <Upload className="w-4 h-4 mr-2" />
+                                          {field.value ? 'Replace Medical Form' : 'Upload Medical Form'}
+                                        </ObjectUploader>
+                                        {field.value && (
+                                          <p className="text-xs text-green-400">✅ Medical clearance uploaded</p>
+                                        )}
+                                      </div>
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              {/* Birth Certificate */}
+                              <FormField
+                                control={editPlayerForm.control}
+                                name="birthCertificateDoc"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-slate-100">Birth Certificate</FormLabel>
+                                    <FormControl>
+                                      <div className="space-y-2">
+                                        <ObjectUploader
+                                          maxNumberOfFiles={1}
+                                          maxFileSize={10485760}
+                                          onGetUploadParameters={async () => {
+                                            const response = await fetch('/api/upload/presigned-url', {
+                                              method: 'POST',
+                                              headers: { 'Content-Type': 'application/json' },
+                                              body: JSON.stringify({ fileType: 'birth-certificate' })
+                                            });
+                                            return response.json();
+                                          }}
+                                          onComplete={(result: any) => {
+                                            if (result.successful && result.successful.length > 0) {
+                                              field.onChange(result.successful[0].uploadURL || result.successful[0].url);
+                                            }
+                                          }}
+                                          buttonClassName="w-full bg-slate-700 hover:bg-slate-600 border-slate-500 text-slate-100"
+                                        >
+                                          <Upload className="w-4 h-4 mr-2" />
+                                          {field.value ? 'Replace Birth Certificate' : 'Upload Birth Certificate'}
+                                        </ObjectUploader>
+                                        {field.value && (
+                                          <p className="text-xs text-green-400">✅ Birth certificate uploaded</p>
+                                        )}
+                                      </div>
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              {/* Physical Form */}
+                              <FormField
+                                control={editPlayerForm.control}
+                                name="physicalFormDoc"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-slate-100">Physical Form</FormLabel>
+                                    <FormControl>
+                                      <div className="space-y-2">
+                                        <ObjectUploader
+                                          maxNumberOfFiles={1}
+                                          maxFileSize={10485760}
+                                          onGetUploadParameters={async () => {
+                                            const response = await fetch('/api/upload/presigned-url', {
+                                              method: 'POST',
+                                              headers: { 'Content-Type': 'application/json' },
+                                              body: JSON.stringify({ fileType: 'physical-form' })
+                                            });
+                                            return response.json();
+                                          }}
+                                          onComplete={(result: any) => {
+                                            if (result.successful && result.successful.length > 0) {
+                                              field.onChange(result.successful[0].uploadURL || result.successful[0].url);
+                                            }
+                                          }}
+                                          buttonClassName="w-full bg-slate-700 hover:bg-slate-600 border-slate-500 text-slate-100"
+                                        >
+                                          <Upload className="w-4 h-4 mr-2" />
+                                          {field.value ? 'Replace Physical Form' : 'Upload Physical Form'}
+                                        </ObjectUploader>
+                                        {field.value && (
+                                          <p className="text-xs text-green-400">✅ Physical form uploaded</p>
+                                        )}
+                                      </div>
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex justify-end space-x-2 pt-4">
+                          <Button type="button" variant="outline" onClick={() => setIsEditPlayerOpen(false)} className="border-slate-600 text-slate-100 hover:bg-slate-700">
+                            Cancel
+                          </Button>
+                          <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white" disabled={updatePlayerMutation.isPending} data-testid="button-update-player">
+                            {updatePlayerMutation.isPending ? 'Updating...' : 'Update Player'}
+                          </Button>
+                        </div>
+                      </form>
+                    </Form>
+                  </DialogContent>
+                </Dialog>
               </CardHeader>
               <CardContent>
                 {players.length === 0 ? (
@@ -634,7 +994,12 @@ export default function TeamDashboardPage() {
                 ) : (
                   <div className="space-y-4">
                     {players.map((player) => (
-                      <div key={player.id} className="bg-slate-700/50 border border-slate-600 rounded-lg p-4" data-testid={`player-card-${player.id}`}>
+                      <div 
+                        key={player.id} 
+                        className="bg-slate-700/50 border border-slate-600 rounded-lg p-4 cursor-pointer hover:bg-slate-700/70 transition-colors" 
+                        data-testid={`player-card-${player.id}`}
+                        onClick={() => handleEditPlayer(player)}
+                      >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-4">
                             {player.profilePicture ? (
