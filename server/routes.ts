@@ -530,17 +530,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: 'User not authenticated' });
       }
 
-      // Generate a unique filename
-      const timestamp = Date.now();
-      const randomId = crypto.randomUUID().substring(0, 8);
-      const filename = `${fileType}-${userId}-${timestamp}-${randomId}`;
+      // Use the actual object storage service
+      const { ObjectStorageService } = await import('./objectStorage');
+      const objectStorageService = new ObjectStorageService();
       
-      // For now, return a mock presigned URL structure that matches what ObjectUploader expects
-      const mockPresignedUrl = `https://mock-storage.example.com/${filename}`;
+      // Get presigned upload URL from object storage
+      const uploadUrl = await objectStorageService.getObjectEntityUploadURL();
       
       res.json({
         method: 'PUT',
-        url: mockPresignedUrl
+        url: uploadUrl
       });
     } catch (error) {
       console.error('Error generating presigned URL:', error);
