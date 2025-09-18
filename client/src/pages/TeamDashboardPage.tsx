@@ -83,7 +83,7 @@ export default function TeamDashboardPage() {
   // Team management mutations
   const updateTeamMutation = useMutation({
     mutationFn: async (updates: z.infer<typeof updateTeamSchema>) => {
-      return apiRequest('PATCH', `/api/teams/${id}`, updates);
+      return apiRequest(`/api/teams/${id}`, 'PATCH', updates);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/teams', id] });
@@ -105,7 +105,7 @@ export default function TeamDashboardPage() {
 
   const deleteTeamMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest('DELETE', `/api/teams/${id}`);
+      return apiRequest(`/api/teams/${id}`, 'DELETE');
     },
     onSuccess: () => {
       // Invalidate both the current team and teams list cache
