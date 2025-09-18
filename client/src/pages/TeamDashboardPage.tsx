@@ -1060,7 +1060,15 @@ export default function TeamDashboardPage() {
                         Status: <span className="text-green-300">{formatSubscriptionStatus(team.subscriptionStatus)}</span>
                       </p>
                     </div>
-                    <Button variant="outline" data-testid="button-upgrade-plan" className="border-slate-500 bg-slate-800/50 text-slate-50 hover:bg-slate-700 hover:text-white hover:border-slate-400">
+                    <Button 
+                      variant="outline" 
+                      data-testid="button-upgrade-plan" 
+                      className="border-slate-500 bg-slate-800/50 text-slate-50 hover:bg-slate-700 hover:text-white hover:border-slate-400"
+                      onClick={() => {
+                        // For now, show a placeholder action - could redirect to subscription page
+                        alert('Upgrade plan functionality coming soon!');
+                      }}
+                    >
                       Upgrade Plan
                     </Button>
                   </div>
@@ -1090,7 +1098,15 @@ export default function TeamDashboardPage() {
                       {team.teamColor || 'Not specified'}
                     </p>
                   </div>
-                  <Button variant="outline" data-testid="button-edit-settings" className="border-slate-500 bg-slate-800/50 text-slate-50 hover:bg-slate-700 hover:text-white hover:border-slate-400">
+                  <Button 
+                    variant="outline" 
+                    data-testid="button-edit-settings" 
+                    className="border-slate-500 bg-slate-800/50 text-slate-50 hover:bg-slate-700 hover:text-white hover:border-slate-400"
+                    onClick={() => {
+                      // For now, show a placeholder action - could open edit dialog
+                      alert('Edit settings functionality coming soon!');
+                    }}
+                  >
                     Edit Settings
                   </Button>
                 </CardContent>
@@ -1109,6 +1125,12 @@ export default function TeamDashboardPage() {
                     variant="outline" 
                     data-testid="button-delete-team"
                     className="w-full bg-slate-700 hover:bg-slate-600 border-slate-500 text-slate-100"
+                    onClick={() => {
+                      // Show confirmation dialog for dangerous action
+                      if (window.confirm('Are you sure you want to delete this team? This action cannot be undone.')) {
+                        alert('Delete team functionality coming soon!');
+                      }
+                    }}
                   >
                     Delete Team
                   </Button>
