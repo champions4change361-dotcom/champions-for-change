@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useParams, useLocation } from 'wouter';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -17,6 +19,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useToast } from '@/hooks/use-toast';
 import type { Team, TeamPlayer, InsertTeamPlayer } from '@shared/schema';
 import { insertTeamPlayerSchema } from '@shared/schema';
+import { z } from 'zod';
 import { ObjectUploader } from '../../components/ObjectUploader';
 
 export default function TeamDashboardPage() {
@@ -25,8 +28,21 @@ export default function TeamDashboardPage() {
   const [isAddPlayerOpen, setIsAddPlayerOpen] = useState(false);
   const [isEditPlayerOpen, setIsEditPlayerOpen] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState<TeamPlayer | null>(null);
+  const [isEditTeamOpen, setIsEditTeamOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Create update schema for team editing
+  const updateTeamSchema = z.object({
+    teamName: z.string().min(1, "Team name is required"),
+    teamColor: z.string().optional(),
+    status: z.enum(["active", "inactive", "suspended"]).optional(),
+    ageGroup: z.string().optional(),
+    division: z.string().optional(),
+    homeVenue: z.string().optional(),
+    organizationName: z.string().optional(),
+    coachPhone: z.string().optional(),
+  });
   
   // Derive activeTab from URL path
   const getActiveTabFromPath = (path: string): string => {
@@ -63,6 +79,83 @@ export default function TeamDashboardPage() {
     queryKey: ['/api/teams', id, 'players'],
     enabled: !!id,
   });
+
+  // Team management mutations
+  const updateTeamMutation = useMutation({
+    mutationFn: async (updates: z.infer<typeof updateTeamSchema>) => {
+      return apiRequest('PATCH', `/api/teams/${id}`, updates);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/teams', id] });
+      queryClient.invalidateQueries({ queryKey: ['/api/teams'] });
+      setIsEditTeamOpen(false);
+      toast({
+        title: "Success",
+        description: "Team information updated successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update team",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteTeamMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest('DELETE', `/api/teams/${id}`);
+    },
+    onSuccess: () => {
+      // Invalidate both the current team and teams list cache
+      queryClient.invalidateQueries({ queryKey: ['/api/teams', id] });
+      queryClient.invalidateQueries({ queryKey: ['/api/teams'] });
+      toast({
+        title: "Success",
+        description: "Team deleted successfully",
+      });
+      navigate('/teams');
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete team",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Team editing form
+  const editTeamForm = useForm<z.infer<typeof updateTeamSchema>>({
+    resolver: zodResolver(updateTeamSchema),
+    defaultValues: {
+      teamName: team?.teamName || '',
+      teamColor: team?.teamColor || '',
+      status: team?.status || 'active',
+      ageGroup: team?.ageGroup || '',
+      division: team?.division || '',
+      homeVenue: team?.homeVenue || '',
+      organizationName: team?.organizationName || '',
+      coachPhone: team?.coachPhone || '',
+    },
+  });
+
+  // Update form values when team data changes
+  useEffect(() => {
+    if (team) {
+      editTeamForm.reset({
+        teamName: team.teamName || '',
+        teamColor: team.teamColor || '',
+        status: team.status || 'active',
+        ageGroup: team.ageGroup || '',
+        division: team.division || '',
+        homeVenue: team.homeVenue || '',
+        organizationName: team.organizationName || '',
+        coachPhone: team.coachPhone || '',
+      });
+    }
+  }, [team, editTeamForm]);
 
   // Add player form with proper null handling
   const addPlayerForm = useForm<InsertTeamPlayer>({
@@ -337,7 +430,12 @@ export default function TeamDashboardPage() {
                       </p>
                     </div>
                   </div>
-                  <Button variant="outline" data-testid="button-edit-profile" className="border-slate-500 bg-slate-800/50 text-slate-50 hover:bg-slate-700 hover:text-white hover:border-slate-400">
+                  <Button 
+                    variant="outline" 
+                    data-testid="button-edit-profile" 
+                    className="border-slate-500 bg-slate-800/50 text-slate-50 hover:bg-slate-700 hover:text-white hover:border-slate-400"
+                    onClick={() => setIsEditTeamOpen(true)}
+                  >
                     Edit Team Information
                   </Button>
                 </CardContent>
@@ -1065,8 +1163,12 @@ export default function TeamDashboardPage() {
                       data-testid="button-upgrade-plan" 
                       className="border-slate-500 bg-slate-800/50 text-slate-50 hover:bg-slate-700 hover:text-white hover:border-slate-400"
                       onClick={() => {
-                        // For now, show a placeholder action - could redirect to subscription page
-                        alert('Upgrade plan functionality coming soon!');
+                        // For subscription upgrades, show a coming soon message for now
+                        // In the future, this would redirect to Stripe checkout
+                        toast({
+                          title: "Upgrade Plan",
+                          description: "Subscription upgrades will be available soon. Contact support for premium features.",
+                        });
                       }}
                     >
                       Upgrade Plan
@@ -1103,8 +1205,7 @@ export default function TeamDashboardPage() {
                     data-testid="button-edit-settings" 
                     className="border-slate-500 bg-slate-800/50 text-slate-50 hover:bg-slate-700 hover:text-white hover:border-slate-400"
                     onClick={() => {
-                      // For now, show a placeholder action - could open edit dialog
-                      alert('Edit settings functionality coming soon!');
+                      setIsEditTeamOpen(true);
                     }}
                   >
                     Edit Settings
@@ -1128,7 +1229,7 @@ export default function TeamDashboardPage() {
                     onClick={() => {
                       // Show confirmation dialog for dangerous action
                       if (window.confirm('Are you sure you want to delete this team? This action cannot be undone.')) {
-                        alert('Delete team functionality coming soon!');
+                        deleteTeamMutation.mutate();
                       }
                     }}
                   >
@@ -1142,6 +1243,117 @@ export default function TeamDashboardPage() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Edit Team Dialog */}
+        <Dialog open={isEditTeamOpen} onOpenChange={setIsEditTeamOpen}>
+          <DialogContent className="sm:max-w-[500px] bg-slate-900 border-slate-700">
+            <DialogHeader>
+              <DialogTitle className="text-slate-100">Edit Team Settings</DialogTitle>
+              <DialogDescription className="text-slate-300">
+                Update your team's information and settings.
+              </DialogDescription>
+            </DialogHeader>
+            <Form {...editTeamForm}>
+              <form onSubmit={editTeamForm.handleSubmit(data => updateTeamMutation.mutate(data))} className="space-y-4">
+                <FormField
+                  control={editTeamForm.control}
+                  name="teamName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-slate-200">Team Name</FormLabel>
+                      <FormControl>
+                        <Input {...field} className="bg-slate-800 border-slate-600 text-slate-100" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={editTeamForm.control}
+                  name="teamColor"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-slate-200">Team Color</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="e.g., Blue, Red" className="bg-slate-800 border-slate-600 text-slate-100" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={editTeamForm.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-slate-200">Team Status</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="bg-slate-800 border-slate-600 text-slate-100">
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="bg-slate-800 border-slate-600">
+                          <SelectItem value="active" className="text-slate-100">Active</SelectItem>
+                          <SelectItem value="inactive" className="text-slate-100">Inactive</SelectItem>
+                          <SelectItem value="suspended" className="text-slate-100">Suspended</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={editTeamForm.control}
+                  name="ageGroup"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-slate-200">Age Group</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="e.g., U12, U14, Varsity" className="bg-slate-800 border-slate-600 text-slate-100" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={editTeamForm.control}
+                  name="division"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-slate-200">Division</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="e.g., A, B, Recreational" className="bg-slate-800 border-slate-600 text-slate-100" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={editTeamForm.control}
+                  name="homeVenue"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-slate-200">Home Venue</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Home playing location" className="bg-slate-800 border-slate-600 text-slate-100" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <DialogFooter>
+                  <Button type="button" variant="outline" onClick={() => setIsEditTeamOpen(false)} className="border-slate-600 text-slate-300">
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={updateTeamMutation.isPending} className="bg-blue-600 hover:bg-blue-700">
+                    {updateTeamMutation.isPending ? "Saving..." : "Save Changes"}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
