@@ -3480,7 +3480,173 @@ export const teamPlayers = pgTable("team_players", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Schema exports for teams and team players
+// Medical History Form - Comprehensive 21-question participation physical evaluation
+export const medicalHistory = pgTable("medical_history", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  playerId: varchar("player_id").notNull().references(() => teamPlayers.id, { onDelete: "cascade" }),
+  
+  // Basic demographic info (auto-populated from registration)
+  studentName: varchar("student_name").notNull(),
+  sex: varchar("sex"),
+  age: integer("age"),
+  dateOfBirth: date("date_of_birth"),
+  address: text("address"),
+  phone: varchar("phone"),
+  grade: varchar("grade"),
+  school: varchar("school"),
+  personalPhysician: varchar("personal_physician"),
+  physicianPhone: varchar("physician_phone"),
+  emergencyContactName: varchar("emergency_contact_name"),
+  emergencyContactRelationship: varchar("emergency_contact_relationship"),
+  emergencyContactPhoneHome: varchar("emergency_contact_phone_home"),
+  emergencyContactPhoneWork: varchar("emergency_contact_phone_work"),
+  
+  // Medical History Questions (Yes/No with explanations)
+  // Q1: Recent medical illness or injury
+  q1_recent_illness: boolean("q1_recent_illness"),
+  q1_explanation: text("q1_explanation"),
+  
+  // Q2: Hospitalizations and surgeries
+  q2_hospitalized: boolean("q2_hospitalized"),
+  q2_surgery: boolean("q2_surgery"),
+  q2_explanation: text("q2_explanation"),
+  
+  // Q3: Heart-related questions (multiple sub-questions)
+  q3_heart_testing: boolean("q3_heart_testing"),
+  q3_passed_out_exercise: boolean("q3_passed_out_exercise"),
+  q3_chest_pain_exercise: boolean("q3_chest_pain_exercise"),
+  q3_tired_quickly: boolean("q3_tired_quickly"),
+  q3_racing_heart: boolean("q3_racing_heart"),
+  q3_high_bp_cholesterol: boolean("q3_high_bp_cholesterol"),
+  q3_heart_murmur: boolean("q3_heart_murmur"),
+  q3_family_heart_death: boolean("q3_family_heart_death"),
+  q3_family_heart_disease: boolean("q3_family_heart_disease"),
+  q3_viral_infection: boolean("q3_viral_infection"),
+  q3_physician_restricted: boolean("q3_physician_restricted"),
+  q3_explanation: text("q3_explanation"),
+  
+  // Q4: Head injuries and concussions
+  q4_head_injury: boolean("q4_head_injury"),
+  q4_unconscious: boolean("q4_unconscious"),
+  q4_concussion_count: integer("q4_concussion_count"),
+  q4_last_concussion_date: varchar("q4_last_concussion_date"),
+  q4_explanation: text("q4_explanation"),
+  
+  // Q5: Neurological questions
+  q5_seizure: boolean("q5_seizure"),
+  q5_headaches: boolean("q5_headaches"),
+  q5_numbness: boolean("q5_numbness"),
+  q5_stinger_burner: boolean("q5_stinger_burner"),
+  q5_explanation: text("q5_explanation"),
+  
+  // Q6: Missing paired organs
+  q6_missing_organs: boolean("q6_missing_organs"),
+  q6_explanation: text("q6_explanation"),
+  
+  // Q7: Under doctor's care
+  q7_doctors_care: boolean("q7_doctors_care"),
+  q7_explanation: text("q7_explanation"),
+  
+  // Q8: Current medications
+  q8_medications: boolean("q8_medications"),
+  q8_explanation: text("q8_explanation"),
+  
+  // Q9: Allergies
+  q9_allergies: boolean("q9_allergies"),
+  q9_explanation: text("q9_explanation"),
+  
+  // Q10: Exercise-related dizziness
+  q10_dizzy_exercise: boolean("q10_dizzy_exercise"),
+  q10_explanation: text("q10_explanation"),
+  
+  // Q11: Skin problems
+  q11_skin_problems: boolean("q11_skin_problems"),
+  q11_explanation: text("q11_explanation"),
+  
+  // Q12: Heat illness
+  q12_heat_illness: boolean("q12_heat_illness"),
+  q12_explanation: text("q12_explanation"),
+  
+  // Q13: Vision problems
+  q13_vision_problems: boolean("q13_vision_problems"),
+  q13_explanation: text("q13_explanation"),
+  
+  // Q14: Breathing and asthma
+  q14_short_breath: boolean("q14_short_breath"),
+  q14_asthma: boolean("q14_asthma"),
+  q14_seasonal_allergies: boolean("q14_seasonal_allergies"),
+  q14_explanation: text("q14_explanation"),
+  
+  // Q15: Protective equipment
+  q15_protective_equipment: boolean("q15_protective_equipment"),
+  q15_explanation: text("q15_explanation"),
+  
+  // Q16: Injuries and pain
+  q16_sprain_strain: boolean("q16_sprain_strain"),
+  q16_broken_bones: boolean("q16_broken_bones"),
+  q16_joint_problems: boolean("q16_joint_problems"),
+  q16_body_parts: jsonb("q16_body_parts").$type<{
+    head?: boolean;
+    neck?: boolean;
+    back?: boolean;
+    chest?: boolean;
+    shoulder?: boolean;
+    upperArm?: boolean;
+    elbow?: boolean;
+    forearm?: boolean;
+    wrist?: boolean;
+    hand?: boolean;
+    finger?: boolean;
+    hip?: boolean;
+    thigh?: boolean;
+    knee?: boolean;
+    shinCalf?: boolean;
+    ankle?: boolean;
+    foot?: boolean;
+  }>(),
+  q16_explanation: text("q16_explanation"),
+  
+  // Q17: Weight concerns
+  q17_weight_concerns: boolean("q17_weight_concerns"),
+  q17_explanation: text("q17_explanation"),
+  
+  // Q18: Stress
+  q18_stressed: boolean("q18_stressed"),
+  q18_explanation: text("q18_explanation"),
+  
+  // Q19: Sickle cell
+  q19_sickle_cell: boolean("q19_sickle_cell"),
+  q19_explanation: text("q19_explanation"),
+  
+  // Female-specific questions
+  q20_first_menstrual_period: varchar("q20_first_menstrual_period"),
+  q20_most_recent_period: varchar("q20_most_recent_period"),
+  q20_cycle_length: varchar("q20_cycle_length"),
+  q20_periods_last_year: integer("q20_periods_last_year"),
+  q20_longest_time_between: varchar("q20_longest_time_between"),
+  
+  // Male-specific questions
+  q21_missing_testicle: boolean("q21_missing_testicle"),
+  q21_testicular_swelling: boolean("q21_testicular_swelling"),
+  q21_explanation: text("q21_explanation"),
+  
+  // ECG screening option
+  ecg_screening_requested: boolean("ecg_screening_requested").default(false),
+  
+  // Digital signatures
+  studentSignature: varchar("student_signature"),
+  parentSignature: varchar("parent_signature").notNull(),
+  signatureDate: date("signature_date").notNull(),
+  
+  // Form completion status
+  isComplete: boolean("is_complete").default(false),
+  completedAt: timestamp("completed_at"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Schema exports for teams, team players, and medical history
 export const insertTeamSchema = createInsertSchema(teams).omit({
   id: true,
   createdAt: true,
@@ -3493,10 +3659,18 @@ export const insertTeamPlayerSchema = createInsertSchema(teamPlayers).omit({
   updatedAt: true,
 });
 
+export const insertMedicalHistorySchema = createInsertSchema(medicalHistory).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export type InsertTeam = z.infer<typeof insertTeamSchema>;
 export type InsertTeamPlayer = z.infer<typeof insertTeamPlayerSchema>;
+export type InsertMedicalHistory = z.infer<typeof insertMedicalHistorySchema>;
 export type Team = typeof teams.$inferSelect;
 export type TeamPlayer = typeof teamPlayers.$inferSelect;
+export type MedicalHistory = typeof medicalHistory.$inferSelect;
 
 // Dedicated schema for subscription updates - only allows Stripe subscription ID
 // Status and tier should be derived from Stripe or set via webhooks only
