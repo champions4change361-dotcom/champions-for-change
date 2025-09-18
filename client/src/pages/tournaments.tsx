@@ -140,16 +140,17 @@ export default function TournamentsPage() {
 
   if (showCreateWizard) {
     return (
-      <div className="container mx-auto p-6">
-        <div className="mb-6">
-          <Button 
-            variant="outline" 
-            onClick={() => setShowCreateWizard(false)}
-            className="mb-4"
-          >
-            ← Back to Tournaments
-          </Button>
-        </div>
+      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
+        <div className="container mx-auto p-6">
+          <div className="mb-6">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowCreateWizard(false)}
+              className="mb-4"
+            >
+              ← Back to Tournaments
+            </Button>
+          </div>
         
         <FeatureLimitGate
           feature="tournaments"
@@ -165,6 +166,7 @@ export default function TournamentsPage() {
             }}
           />
         </FeatureLimitGate>
+        </div>
       </div>
     );
   }
@@ -172,7 +174,8 @@ export default function TournamentsPage() {
   // Authentication check
   if (!isAuthenticated) {
     return (
-      <div className="container mx-auto p-6 space-y-6" data-testid="tournaments-page-guest">
+      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
+        <div className="container mx-auto p-6 space-y-6" data-testid="tournaments-page-guest">
         <Card>
           <CardContent className="text-center py-12">
             <Lock className="h-16 w-16 text-gray-300 mx-auto mb-4" />
@@ -207,13 +210,15 @@ export default function TournamentsPage() {
             </div>
           </CardContent>
         </Card>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6" data-testid="tournaments-page">
-      {/* Account Status Alert */}
+    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
+      <div className="container mx-auto p-6 space-y-6" data-testid="tournaments-page">
+        {/* Account Status Alert */}
       {userStatus !== 'active' && (
         <Alert>
           <Zap className="h-4 w-4" />
