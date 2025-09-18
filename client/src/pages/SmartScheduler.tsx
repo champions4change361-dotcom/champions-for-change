@@ -255,14 +255,14 @@ export default function SmartScheduler() {
 
   const getEventTypeBadge = (type: string) => {
     const typeConfig = {
-      practice: { color: 'bg-blue-100 text-blue-800', text: 'Practice' },
-      game: { color: 'bg-green-100 text-green-800', text: 'Game' },
-      banquet: { color: 'bg-purple-100 text-purple-800', text: 'Banquet' },
-      meeting: { color: 'bg-gray-100 text-gray-800', text: 'Meeting' },
-      tournament: { color: 'bg-yellow-100 text-yellow-800', text: 'Tournament' },
-      fundraiser: { color: 'bg-pink-100 text-pink-800', text: 'Fundraiser' },
-      awards: { color: 'bg-orange-100 text-orange-800', text: 'Awards' },
-      community: { color: 'bg-indigo-100 text-indigo-800', text: 'Community' }
+      practice: { color: 'bg-blue-900/50 text-blue-300 border border-blue-600/50', text: 'Practice' },
+      game: { color: 'bg-green-900/50 text-green-300 border border-green-600/50', text: 'Game' },
+      banquet: { color: 'bg-purple-900/50 text-purple-300 border border-purple-600/50', text: 'Banquet' },
+      meeting: { color: 'bg-slate-700/50 text-slate-300 border border-slate-600/50', text: 'Meeting' },
+      tournament: { color: 'bg-yellow-900/50 text-yellow-300 border border-yellow-600/50', text: 'Tournament' },
+      fundraiser: { color: 'bg-pink-900/50 text-pink-300 border border-pink-600/50', text: 'Fundraiser' },
+      awards: { color: 'bg-orange-900/50 text-orange-300 border border-orange-600/50', text: 'Awards' },
+      community: { color: 'bg-indigo-900/50 text-indigo-300 border border-indigo-600/50', text: 'Community' }
     };
     
     const config = typeConfig[type as keyof typeof typeConfig];
@@ -290,10 +290,10 @@ export default function SmartScheduler() {
 
   const getConflictSeverityBadge = (severity: string) => {
     const severityConfig = {
-      low: { color: 'bg-yellow-100 text-yellow-800', text: 'Low Priority' },
-      medium: { color: 'bg-orange-100 text-orange-800', text: 'Medium Priority' },
-      high: { color: 'bg-red-100 text-red-800', text: 'High Priority' },
-      critical: { color: 'bg-red-500 text-white', text: 'CRITICAL' }
+      low: { color: 'bg-yellow-900/50 text-yellow-300 border border-yellow-600/50', text: 'Low Priority' },
+      medium: { color: 'bg-orange-900/50 text-orange-300 border border-orange-600/50', text: 'Medium Priority' },
+      high: { color: 'bg-red-900/50 text-red-300 border border-red-600/50', text: 'High Priority' },
+      critical: { color: 'bg-red-600 text-white border border-red-500', text: 'CRITICAL' }
     };
     
     const config = severityConfig[severity as keyof typeof severityConfig];

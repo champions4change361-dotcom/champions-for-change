@@ -216,11 +216,11 @@ export function ProfilePictureUploader({
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'approved': return 'bg-green-100 text-green-800';
-      case 'rejected': return 'bg-red-100 text-red-800';
-      case 'flagged': return 'bg-yellow-100 text-yellow-800';
-      case 'pending': return 'bg-blue-100 text-blue-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'approved': return 'bg-green-900/50 text-green-300 border border-green-600/50';
+      case 'rejected': return 'bg-red-900/50 text-red-300 border border-red-600/50';
+      case 'flagged': return 'bg-yellow-900/50 text-yellow-300 border border-yellow-600/50';
+      case 'pending': return 'bg-blue-900/50 text-blue-300 border border-blue-600/50';
+      default: return 'bg-slate-700/50 text-slate-300 border border-slate-600/50';
     }
   };
 

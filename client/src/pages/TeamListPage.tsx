@@ -47,11 +47,11 @@ export default function TeamListPage() {
 
   const getSubscriptionColor = (status: string) => {
     switch (status) {
-      case 'active': return 'bg-green-100 text-green-800 hover:bg-green-200';
-      case 'past_due': return 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200';
-      case 'canceled': return 'bg-red-100 text-red-800 hover:bg-red-200';
-      case 'unpaid': return 'bg-red-100 text-red-800 hover:bg-red-200';
-      default: return 'bg-gray-100 text-gray-800 hover:bg-gray-200';
+      case 'active': return 'bg-green-900/50 text-green-300 border border-green-600/50 hover:bg-green-900/70';
+      case 'past_due': return 'bg-yellow-900/50 text-yellow-300 border border-yellow-600/50 hover:bg-yellow-900/70';
+      case 'canceled': return 'bg-red-900/50 text-red-300 border border-red-600/50 hover:bg-red-900/70';
+      case 'unpaid': return 'bg-red-900/50 text-red-300 border border-red-600/50 hover:bg-red-900/70';
+      default: return 'bg-slate-700/50 text-slate-300 border border-slate-600/50 hover:bg-slate-700/70';
     }
   };
 
@@ -180,7 +180,7 @@ export default function TeamListPage() {
                      team.subscriptionStatus}
                   </Badge>
                   {team.ageGroup && (
-                    <Badge variant="outline" data-testid={`badge-age-${team.id}`}>
+                    <Badge variant="outline" className="border-slate-400 text-slate-300 hover:bg-slate-700/50" data-testid={`badge-age-${team.id}`}>
                       {team.ageGroup}
                     </Badge>
                   )}

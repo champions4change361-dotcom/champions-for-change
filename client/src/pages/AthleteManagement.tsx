@@ -153,10 +153,10 @@ export default function AthleteManagement() {
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      eligible: { color: 'bg-green-100 text-green-800', icon: CheckCircle, text: 'Eligible' },
-      pending: { color: 'bg-yellow-100 text-yellow-800', icon: Clock, text: 'Pending' },
-      ineligible: { color: 'bg-red-100 text-red-800', icon: XCircle, text: 'Ineligible' },
-      injured: { color: 'bg-orange-100 text-orange-800', icon: AlertTriangle, text: 'Injured' }
+      eligible: { color: 'bg-green-900/50 text-green-300 border border-green-600/50', icon: CheckCircle, text: 'Eligible' },
+      pending: { color: 'bg-yellow-900/50 text-yellow-300 border border-yellow-600/50', icon: Clock, text: 'Pending' },
+      ineligible: { color: 'bg-red-900/50 text-red-300 border border-red-600/50', icon: XCircle, text: 'Ineligible' },
+      injured: { color: 'bg-orange-900/50 text-orange-300 border border-orange-600/50', icon: AlertTriangle, text: 'Injured' }
     };
     
     const config = statusConfig[status as keyof typeof statusConfig];
@@ -172,10 +172,10 @@ export default function AthleteManagement() {
 
   const getHealthBadge = (status: string, injuryRisk: number) => {
     const healthConfig = {
-      good: { color: 'bg-green-100 text-green-800', icon: Heart },
-      caution: { color: 'bg-yellow-100 text-yellow-800', icon: AlertTriangle },
-      restricted: { color: 'bg-red-100 text-red-800', icon: XCircle },
-      cleared: { color: 'bg-blue-100 text-blue-800', icon: CheckCircle }
+      good: { color: 'bg-green-900/50 text-green-300 border border-green-600/50', icon: Heart },
+      caution: { color: 'bg-yellow-900/50 text-yellow-300 border border-yellow-600/50', icon: AlertTriangle },
+      restricted: { color: 'bg-red-900/50 text-red-300 border border-red-600/50', icon: XCircle },
+      cleared: { color: 'bg-blue-900/50 text-blue-300 border border-blue-600/50', icon: CheckCircle }
     };
     
     const config = healthConfig[status as keyof typeof healthConfig];
@@ -187,11 +187,11 @@ export default function AthleteManagement() {
           <IconComponent className="w-3 h-3" />
           <span>{status.charAt(0).toUpperCase() + status.slice(1)}</span>
         </Badge>
-        <span className={`text-xs px-2 py-1 rounded ${
-          injuryRisk < 25 ? 'bg-green-100 text-green-800' :
-          injuryRisk < 50 ? 'bg-yellow-100 text-yellow-800' :
-          injuryRisk < 75 ? 'bg-orange-100 text-orange-800' :
-          'bg-red-100 text-red-800'
+        <span className={`text-xs px-2 py-1 rounded border ${
+          injuryRisk < 25 ? 'bg-green-900/50 text-green-300 border-green-600/50' :
+          injuryRisk < 50 ? 'bg-yellow-900/50 text-yellow-300 border-yellow-600/50' :
+          injuryRisk < 75 ? 'bg-orange-900/50 text-orange-300 border-orange-600/50' :
+          'bg-red-900/50 text-red-300 border-red-600/50'
         }`}>
           {injuryRisk}% Risk
         </span>

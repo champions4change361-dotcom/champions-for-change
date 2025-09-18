@@ -274,11 +274,11 @@ export default function EquipmentManagement() {
 
   const getConditionBadge = (condition: string) => {
     const conditionConfig = {
-      excellent: { color: 'bg-green-100 text-green-800', text: 'Excellent' },
-      good: { color: 'bg-blue-100 text-blue-800', text: 'Good' },
-      fair: { color: 'bg-yellow-100 text-yellow-800', text: 'Fair' },
-      poor: { color: 'bg-orange-100 text-orange-800', text: 'Poor' },
-      needs_replacement: { color: 'bg-red-100 text-red-800', text: 'Needs Replacement' }
+      excellent: { color: 'bg-green-900/50 text-green-300 border border-green-600/50', text: 'Excellent' },
+      good: { color: 'bg-blue-900/50 text-blue-300 border border-blue-600/50', text: 'Good' },
+      fair: { color: 'bg-yellow-900/50 text-yellow-300 border border-yellow-600/50', text: 'Fair' },
+      poor: { color: 'bg-orange-900/50 text-orange-300 border border-orange-600/50', text: 'Poor' },
+      needs_replacement: { color: 'bg-red-900/50 text-red-300 border border-red-600/50', text: 'Needs Replacement' }
     };
     
     const config = conditionConfig[condition as keyof typeof conditionConfig];
@@ -294,13 +294,13 @@ export default function EquipmentManagement() {
     const percentage = (available / total) * 100;
     
     if (percentage >= 80) {
-      return <Badge className="bg-green-100 text-green-800">Available</Badge>;
+      return <Badge className="bg-green-900/50 text-green-300 border border-green-600/50">Available</Badge>;
     } else if (percentage >= 50) {
-      return <Badge className="bg-yellow-100 text-yellow-800">Limited</Badge>;
+      return <Badge className="bg-yellow-900/50 text-yellow-300 border border-yellow-600/50">Limited</Badge>;
     } else if (percentage > 0) {
-      return <Badge className="bg-orange-100 text-orange-800">Low Stock</Badge>;
+      return <Badge className="bg-orange-900/50 text-orange-300 border border-orange-600/50">Low Stock</Badge>;
     } else {
-      return <Badge className="bg-red-100 text-red-800">Out of Stock</Badge>;
+      return <Badge className="bg-red-900/50 text-red-300 border border-red-600/50">Out of Stock</Badge>;
     }
   };
 
