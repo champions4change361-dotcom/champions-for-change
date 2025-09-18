@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Users, Settings, User, Crown, Plus, Upload } from 'lucide-react';
+import { ArrowLeft, Users, Settings, User, Crown, Plus, Upload, Heart, FileCheck } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useToast } from '@/hooks/use-toast';
@@ -21,6 +21,7 @@ import type { Team, TeamPlayer, InsertTeamPlayer } from '@shared/schema';
 import { insertTeamPlayerSchema } from '@shared/schema';
 import { z } from 'zod';
 import { ObjectUploader } from '../../components/ObjectUploader';
+import { MedicalHistoryForm } from '@/components/MedicalHistoryForm';
 
 export default function TeamDashboardPage() {
   const { id } = useParams();
@@ -29,6 +30,8 @@ export default function TeamDashboardPage() {
   const [isEditPlayerOpen, setIsEditPlayerOpen] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState<TeamPlayer | null>(null);
   const [isEditTeamOpen, setIsEditTeamOpen] = useState(false);
+  const [isMedicalHistoryOpen, setIsMedicalHistoryOpen] = useState(false);
+  const [selectedPlayerForMedical, setSelectedPlayerForMedical] = useState<TeamPlayer | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -266,6 +269,12 @@ export default function TeamDashboardPage() {
       physicalFormDoc: player.physicalFormDoc || '',
     });
     setIsEditPlayerOpen(true);
+  };
+
+  // Handle opening medical history dialog
+  const handleMedicalHistory = (player: TeamPlayer) => {
+    setSelectedPlayerForMedical(player);
+    setIsMedicalHistoryOpen(true);
   };
 
   const getSubscriptionBadgeVariant = (status: string | null) => {
@@ -1094,9 +1103,8 @@ export default function TeamDashboardPage() {
                     {players.map((player) => (
                       <div 
                         key={player.id} 
-                        className="bg-slate-700/50 border border-slate-600 rounded-lg p-4 cursor-pointer hover:bg-slate-700/70 transition-colors" 
+                        className="bg-slate-700/50 border border-slate-600 rounded-lg p-4" 
                         data-testid={`player-card-${player.id}`}
-                        onClick={() => handleEditPlayer(player)}
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-4">
@@ -1124,9 +1132,32 @@ export default function TeamDashboardPage() {
                               <p className="text-slate-200 text-sm font-medium">{player.position || 'Position not set'}</p>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <p className="text-slate-200 text-sm font-medium">{player.parentGuardianName}</p>
-                            <p className="text-slate-300 text-xs">{player.parentGuardianPhone}</p>
+                          <div className="flex items-center gap-4">
+                            <div className="text-right">
+                              <p className="text-slate-200 text-sm font-medium">{player.parentGuardianName}</p>
+                              <p className="text-slate-300 text-xs">{player.parentGuardianPhone}</p>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleMedicalHistory(player)}
+                                className="bg-red-600/20 border-red-500 text-red-300 hover:bg-red-600/30 hover:text-red-200"
+                                data-testid={`button-medical-history-${player.id}`}
+                              >
+                                <Heart className="w-4 h-4 mr-1" />
+                                Medical
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleEditPlayer(player)}
+                                className="bg-blue-600/20 border-blue-500 text-blue-300 hover:bg-blue-600/30 hover:text-blue-200"
+                                data-testid={`button-edit-player-${player.id}`}
+                              >
+                                Edit
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -1352,6 +1383,27 @@ export default function TeamDashboardPage() {
                 </DialogFooter>
               </form>
             </Form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Medical History Dialog */}
+        <Dialog open={isMedicalHistoryOpen} onOpenChange={setIsMedicalHistoryOpen}>
+          <DialogContent className="bg-slate-800 border-slate-700 max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-slate-100">
+                <Heart className="h-5 w-5 text-red-500" />
+                Medical History - {selectedPlayerForMedical?.playerName}
+              </DialogTitle>
+              <DialogDescription className="text-slate-300">
+                Complete the participation physical evaluation medical history form. All medical data is HIPAA compliant and encrypted.
+              </DialogDescription>
+            </DialogHeader>
+            {selectedPlayerForMedical && (
+              <MedicalHistoryForm 
+                playerId={selectedPlayerForMedical.id} 
+                onComplete={() => setIsMedicalHistoryOpen(false)}
+              />
+            )}
           </DialogContent>
         </Dialog>
       </div>
