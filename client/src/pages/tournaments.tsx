@@ -598,6 +598,7 @@ export default function TournamentsPage() {
           </CardContent>
         </Card>
       </div>
+      </div>
     </div>
   );
 }
