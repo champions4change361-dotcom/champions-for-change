@@ -643,6 +643,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update team subscription
+  // DELETE team endpoint
+  app.delete('/api/teams/:id', isAuthenticated, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user?.claims?.sub || req.session?.user?.id || req.user?.id;
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+
+      const storage = await getStorage();
+      
+      // First verify the team exists and user has permission
+      const team = await storage.getTeam(id);
+      if (!team) {
+        return res.status(404).json({ error: 'Team not found' });
+      }
+      
+      // Check authorization: team owner or admin
+      if (team.coachId !== userId) {
+        return res.status(403).json({ error: 'Unauthorized to delete this team' });
+      }
+      
+      // Delete the team (storage will handle cascade deletion)
+      const deleted = await storage.deleteTeam(id);
+      
+      if (deleted) {
+        res.status(204).send(); // No content, successful deletion
+      } else {
+        res.status(500).json({ error: 'Failed to delete team' });
+      }
+    } catch (error) {
+      console.error('Error deleting team:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
   app.patch('/api/teams/:id/subscription', isAuthenticated, async (req, res) => {
     try {
       const { id } = req.params;
