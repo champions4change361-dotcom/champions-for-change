@@ -273,7 +273,7 @@ export default function TeamDashboardPage() {
           <div className="flex items-center gap-2">
             <Badge 
               variant={getSubscriptionBadgeVariant(team.subscriptionStatus)}
-              className="flex items-center gap-1"
+              className="flex items-center gap-1 bg-slate-700/80 text-slate-50 border-slate-600 font-medium"
               data-testid={`badge-subscription-${team.subscriptionStatus || 'free'}`}
             >
               {getSubscriptionIcon(team.subscriptionTier)}
@@ -337,7 +337,7 @@ export default function TeamDashboardPage() {
                       </p>
                     </div>
                   </div>
-                  <Button variant="outline" data-testid="button-edit-profile" className="border-slate-600 text-slate-100 hover:bg-slate-700">
+                  <Button variant="outline" data-testid="button-edit-profile" className="border-slate-500 bg-slate-800/50 text-slate-50 hover:bg-slate-700 hover:text-white hover:border-slate-400">
                     Edit Team Information
                   </Button>
                 </CardContent>
