@@ -1060,7 +1060,7 @@ export default function TeamDashboardPage() {
                         Status: <span className="text-green-300">{formatSubscriptionStatus(team.subscriptionStatus)}</span>
                       </p>
                     </div>
-                    <Button variant="outline" data-testid="button-upgrade-plan" className="border-slate-600 text-slate-100 hover:bg-slate-700">
+                    <Button variant="outline" data-testid="button-upgrade-plan" className="border-slate-500 bg-slate-800/50 text-slate-50 hover:bg-slate-700 hover:text-white hover:border-slate-400">
                       Upgrade Plan
                     </Button>
                   </div>
@@ -1090,7 +1090,7 @@ export default function TeamDashboardPage() {
                       {team.teamColor || 'Not specified'}
                     </p>
                   </div>
-                  <Button variant="outline" data-testid="button-edit-settings" className="border-slate-600 text-slate-100 hover:bg-slate-700">
+                  <Button variant="outline" data-testid="button-edit-settings" className="border-slate-500 bg-slate-800/50 text-slate-50 hover:bg-slate-700 hover:text-white hover:border-slate-400">
                     Edit Settings
                   </Button>
                 </CardContent>
