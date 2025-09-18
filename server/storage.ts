@@ -1170,14 +1170,12 @@ export class DbStorage implements IStorage {
 
   async deleteTeam(id: string): Promise<boolean> {
     try {
-      return await this.db.transaction(async (tx) => {
-        // First delete related team players to handle cascade
-        await tx.delete(teamPlayers).where(eq(teamPlayers.teamId, id));
-        
-        // Then delete the team
-        const result = await tx.delete(teams).where(eq(teams.id, id)).returning();
-        return result.length > 0;
-      });
+      // First delete related team players to handle cascade
+      await this.db.delete(teamPlayers).where(eq(teamPlayers.teamId, id));
+      
+      // Then delete the team
+      const result = await this.db.delete(teams).where(eq(teams.id, id)).returning();
+      return result.length > 0;
     } catch (error) {
       console.error("Database error:", error);
       throw new Error("Failed to delete team");
