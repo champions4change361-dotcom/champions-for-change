@@ -313,26 +313,26 @@ export default function TeamDashboardPage() {
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium text-slate-300">Team Name</label>
-                      <p className="text-sm text-slate-100" data-testid="text-profile-team-name">
+                      <label className="text-sm font-semibold text-slate-200">Team Name</label>
+                      <p className="text-sm text-slate-50 font-medium" data-testid="text-profile-team-name">
                         {team.teamName}
                       </p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-slate-300">Organization</label>
-                      <p className="text-sm text-slate-100" data-testid="text-profile-organization">
+                      <label className="text-sm font-semibold text-slate-200">Organization</label>
+                      <p className="text-sm text-slate-50 font-medium" data-testid="text-profile-organization">
                         {team.organizationName || 'Not specified'}
                       </p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-slate-300">Age Group</label>
-                      <p className="text-sm text-slate-100" data-testid="text-profile-age-group">
+                      <label className="text-sm font-semibold text-slate-200">Age Group</label>
+                      <p className="text-sm text-slate-50 font-medium" data-testid="text-profile-age-group">
                         {team.ageGroup || 'Not specified'}
                       </p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-slate-300">Division</label>
-                      <p className="text-sm text-slate-100" data-testid="text-profile-division">
+                      <label className="text-sm font-semibold text-slate-200">Division</label>
+                      <p className="text-sm text-slate-50 font-medium" data-testid="text-profile-division">
                         {team.division || 'Not specified'}
                       </p>
                     </div>
@@ -354,26 +354,26 @@ export default function TeamDashboardPage() {
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium text-slate-300">Coach Name</label>
-                      <p className="text-sm text-slate-100" data-testid="text-coach-name">
+                      <label className="text-sm font-semibold text-slate-200">Coach Name</label>
+                      <p className="text-sm text-slate-50 font-medium" data-testid="text-coach-name">
                         {team.coachName}
                       </p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-slate-300">Email</label>
-                      <p className="text-sm text-slate-100" data-testid="text-coach-email">
+                      <label className="text-sm font-semibold text-slate-200">Email</label>
+                      <p className="text-sm text-slate-50 font-medium" data-testid="text-coach-email">
                         {team.coachEmail}
                       </p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-slate-300">Phone</label>
-                      <p className="text-sm text-slate-100" data-testid="text-coach-phone">
+                      <label className="text-sm font-semibold text-slate-200">Phone</label>
+                      <p className="text-sm text-slate-50 font-medium" data-testid="text-coach-phone">
                         {team.coachPhone || 'Not provided'}
                       </p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-slate-300">Home Venue</label>
-                      <p className="text-sm text-slate-100" data-testid="text-home-venue">
+                      <label className="text-sm font-semibold text-slate-200">Home Venue</label>
+                      <p className="text-sm text-slate-50 font-medium" data-testid="text-home-venue">
                         {team.homeVenue || 'Not specified'}
                       </p>
                     </div>
@@ -1022,13 +1022,13 @@ export default function TeamDashboardPage() {
                               </div>
                             )}
                             <div>
-                              <h4 className="text-slate-100 font-medium">{player.playerName}</h4>
-                              <p className="text-slate-300 text-sm">{player.position || 'Position not set'}</p>
+                              <h4 className="text-slate-50 font-medium">{player.playerName}</h4>
+                              <p className="text-slate-200 text-sm font-medium">{player.position || 'Position not set'}</p>
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className="text-slate-300 text-sm">{player.parentGuardianName}</p>
-                            <p className="text-slate-400 text-xs">{player.parentGuardianPhone}</p>
+                            <p className="text-slate-200 text-sm font-medium">{player.parentGuardianName}</p>
+                            <p className="text-slate-300 text-xs">{player.parentGuardianPhone}</p>
                           </div>
                         </div>
                       </div>
@@ -1053,11 +1053,11 @@ export default function TeamDashboardPage() {
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between p-4 border border-slate-600 rounded-lg bg-slate-700/50">
                     <div>
-                      <p className="font-medium text-slate-100">
-                        Current Plan: {formatTier(team.subscriptionTier || 'basic')}
+                      <p className="font-semibold text-slate-50 text-lg">
+                        Current Plan: <span className="text-blue-300">{formatTier(team.subscriptionTier || 'basic')}</span>
                       </p>
-                      <p className="text-sm text-slate-300">
-                        Status: {formatSubscriptionStatus(team.subscriptionStatus)}
+                      <p className="text-sm text-slate-200 font-medium">
+                        Status: <span className="text-green-300">{formatSubscriptionStatus(team.subscriptionStatus)}</span>
                       </p>
                     </div>
                     <Button variant="outline" data-testid="button-upgrade-plan" className="border-slate-600 text-slate-100 hover:bg-slate-700">
@@ -1077,16 +1077,16 @@ export default function TeamDashboardPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-300">Team Status</label>
-                    <p className="text-sm text-slate-300">
-                      Currently: <Badge variant="outline" data-testid="badge-team-status" className="border-slate-600 text-slate-100">
+                    <label className="text-sm font-medium text-slate-200">Team Status</label>
+                    <p className="text-sm text-slate-100 font-medium">
+                      Currently: <Badge variant="outline" data-testid="badge-team-status" className="border-green-500 text-green-200 bg-green-900/30">
                         {team.status || 'active'}
                       </Badge>
                     </p>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-300">Team Color</label>
-                    <p className="text-sm text-slate-300" data-testid="text-team-color">
+                    <label className="text-sm font-medium text-slate-200">Team Color</label>
+                    <p className="text-sm text-slate-100 font-medium" data-testid="text-team-color">
                       {team.teamColor || 'Not specified'}
                     </p>
                   </div>
