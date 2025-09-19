@@ -28,6 +28,7 @@ export default function TeamDashboardPage() {
   const [location, navigate] = useLocation();
   const [isAddPlayerOpen, setIsAddPlayerOpen] = useState(false);
   const [registrationStep, setRegistrationStep] = useState(1); // 1: Demographics, 2: Medical History, 3: Finalize
+  const [editStep, setEditStep] = useState(1); // For edit dialog multi-step wizard
   const [addressSuggestions, setAddressSuggestions] = useState<any[]>([]);
   const [isLoadingAddress, setIsLoadingAddress] = useState(false);
   const [addressSearchQuery, setAddressSearchQuery] = useState('');
@@ -260,6 +261,7 @@ export default function TeamDashboardPage() {
   // Handle opening edit player dialog
   const handleEditPlayer = (player: TeamPlayer) => {
     setEditingPlayer(player);
+    setEditStep(1); // Reset to first step when opening
     editPlayerForm.reset({
       playerName: player.playerName || '',
       jerseyNumber: player.jerseyNumber || '',
@@ -941,51 +943,333 @@ export default function TeamDashboardPage() {
                             <Alert className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700 mb-4">
                               <Heart className="h-4 w-4 text-blue-600" />
                               <AlertDescription>
-                                Please answer the following medical history questions for UIL participation physical evaluation.
+                                UIL Participation Physical Evaluation - Please answer Yes or No to each question.
                               </AlertDescription>
                             </Alert>
                             
-                            {/* Sample medical questions - Add all 21 questions here */}
-                            <div className="space-y-4">
-                              <div className="flex items-center space-x-2">
-                                <input type="checkbox" className="w-4 h-4" />
-                                <label className="text-slate-100">Has the student had any recent illness or injury?</label>
+                            {/* All 21 PPE Medical History Questions with Yes/No */}
+                            <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+                              {/* Question 1 */}
+                              <div className="border-b border-slate-700 pb-3">
+                                <p className="text-slate-100 mb-2 font-medium">1. Has the student had a medical illness or injury since the last exam?</p>
+                                <div className="flex gap-4">
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q1" value="yes" className="w-4 h-4" />
+                                    <span className="text-slate-100">Yes</span>
+                                  </label>
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q1" value="no" className="w-4 h-4" />
+                                    <span className="text-slate-100">No</span>
+                                  </label>
+                                </div>
                               </div>
-                              <div className="flex items-center space-x-2">
-                                <input type="checkbox" className="w-4 h-4" />
-                                <label className="text-slate-100">Has the student been hospitalized or had surgery?</label>
+
+                              {/* Question 2 */}
+                              <div className="border-b border-slate-700 pb-3">
+                                <p className="text-slate-100 mb-2 font-medium">2. Has the student been hospitalized or had surgery?</p>
+                                <div className="flex gap-4">
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q2" value="yes" className="w-4 h-4" />
+                                    <span className="text-slate-100">Yes</span>
+                                  </label>
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q2" value="no" className="w-4 h-4" />
+                                    <span className="text-slate-100">No</span>
+                                  </label>
+                                </div>
                               </div>
-                              <div className="flex items-center space-x-2">
-                                <input type="checkbox" className="w-4 h-4" />
-                                <label className="text-slate-100">Has the student had any heart problems or chest pain during exercise?</label>
+
+                              {/* Question 3 - Heart */}
+                              <div className="border-b border-slate-700 pb-3">
+                                <p className="text-slate-100 mb-2 font-medium">3. Has the student ever passed out, nearly passed out, or had chest pain during exercise?</p>
+                                <div className="flex gap-4">
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q3" value="yes" className="w-4 h-4" />
+                                    <span className="text-slate-100">Yes</span>
+                                  </label>
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q3" value="no" className="w-4 h-4" />
+                                    <span className="text-slate-100">No</span>
+                                  </label>
+                                </div>
                               </div>
-                              <div className="flex items-center space-x-2">
-                                <input type="checkbox" className="w-4 h-4" />
-                                <label className="text-slate-100">Does the student have any allergies to medications?</label>
+
+                              {/* Question 4 - Head Injury */}
+                              <div className="border-b border-slate-700 pb-3">
+                                <p className="text-slate-100 mb-2 font-medium">4. Has the student had a head injury or concussion?</p>
+                                <div className="flex gap-4">
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q4" value="yes" className="w-4 h-4" />
+                                    <span className="text-slate-100">Yes</span>
+                                  </label>
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q4" value="no" className="w-4 h-4" />
+                                    <span className="text-slate-100">No</span>
+                                  </label>
+                                </div>
                               </div>
-                              <div className="flex items-center space-x-2">
-                                <input type="checkbox" className="w-4 h-4" />
-                                <label className="text-slate-100">Has the student had a concussion or head injury?</label>
+
+                              {/* Question 5 - Neurological */}
+                              <div className="border-b border-slate-700 pb-3">
+                                <p className="text-slate-100 mb-2 font-medium">5. Has the student had a seizure, numbness, or tingling in arms/legs?</p>
+                                <div className="flex gap-4">
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q5" value="yes" className="w-4 h-4" />
+                                    <span className="text-slate-100">Yes</span>
+                                  </label>
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q5" value="no" className="w-4 h-4" />
+                                    <span className="text-slate-100">No</span>
+                                  </label>
+                                </div>
                               </div>
-                              <div className="flex items-center space-x-2">
-                                <input type="checkbox" className="w-4 h-4" />
-                                <label className="text-slate-100">Does the student have asthma or breathing problems?</label>
+
+                              {/* Question 6 - Organs */}
+                              <div className="border-b border-slate-700 pb-3">
+                                <p className="text-slate-100 mb-2 font-medium">6. Is the student missing any organs (kidney, testicle, spleen, etc.)?</p>
+                                <div className="flex gap-4">
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q6" value="yes" className="w-4 h-4" />
+                                    <span className="text-slate-100">Yes</span>
+                                  </label>
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q6" value="no" className="w-4 h-4" />
+                                    <span className="text-slate-100">No</span>
+                                  </label>
+                                </div>
                               </div>
-                              <div className="flex items-center space-x-2">
-                                <input type="checkbox" className="w-4 h-4" />
-                                <label className="text-slate-100">Is the student currently taking any medications?</label>
+
+                              {/* Question 7 - Medical Care */}
+                              <div className="border-b border-slate-700 pb-3">
+                                <p className="text-slate-100 mb-2 font-medium">7. Is the student under a doctor's care for any condition?</p>
+                                <div className="flex gap-4">
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q7" value="yes" className="w-4 h-4" />
+                                    <span className="text-slate-100">Yes</span>
+                                  </label>
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q7" value="no" className="w-4 h-4" />
+                                    <span className="text-slate-100">No</span>
+                                  </label>
+                                </div>
                               </div>
-                              <div className="flex items-center space-x-2">
-                                <input type="checkbox" className="w-4 h-4" />
-                                <label className="text-slate-100">Has the student had heat-related illness during exercise?</label>
+
+                              {/* Question 8 - Medications */}
+                              <div className="border-b border-slate-700 pb-3">
+                                <p className="text-slate-100 mb-2 font-medium">8. Is the student currently taking any prescription medications?</p>
+                                <div className="flex gap-4">
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q8" value="yes" className="w-4 h-4" />
+                                    <span className="text-slate-100">Yes</span>
+                                  </label>
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q8" value="no" className="w-4 h-4" />
+                                    <span className="text-slate-100">No</span>
+                                  </label>
+                                </div>
                               </div>
-                              <div className="flex items-center space-x-2">
-                                <input type="checkbox" className="w-4 h-4" />
-                                <label className="text-slate-100">Does the student have any vision problems?</label>
+
+                              {/* Question 9 - Allergies */}
+                              <div className="border-b border-slate-700 pb-3">
+                                <p className="text-slate-100 mb-2 font-medium">9. Does the student have any allergies (medications, food, insects)?</p>
+                                <div className="flex gap-4">
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q9" value="yes" className="w-4 h-4" />
+                                    <span className="text-slate-100">Yes</span>
+                                  </label>
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q9" value="no" className="w-4 h-4" />
+                                    <span className="text-slate-100">No</span>
+                                  </label>
+                                </div>
                               </div>
-                              <div className="flex items-center space-x-2">
-                                <input type="checkbox" className="w-4 h-4" />
-                                <label className="text-slate-100">Has the student had any broken bones or joint problems?</label>
+
+                              {/* Question 10 - Dizziness */}
+                              <div className="border-b border-slate-700 pb-3">
+                                <p className="text-slate-100 mb-2 font-medium">10. Has the student ever become dizzy during or after exercise?</p>
+                                <div className="flex gap-4">
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q10" value="yes" className="w-4 h-4" />
+                                    <span className="text-slate-100">Yes</span>
+                                  </label>
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q10" value="no" className="w-4 h-4" />
+                                    <span className="text-slate-100">No</span>
+                                  </label>
+                                </div>
+                              </div>
+
+                              {/* Question 11 - Skin */}
+                              <div className="border-b border-slate-700 pb-3">
+                                <p className="text-slate-100 mb-2 font-medium">11. Does the student have any skin problems (itching, rashes, MRSA)?</p>
+                                <div className="flex gap-4">
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q11" value="yes" className="w-4 h-4" />
+                                    <span className="text-slate-100">Yes</span>
+                                  </label>
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q11" value="no" className="w-4 h-4" />
+                                    <span className="text-slate-100">No</span>
+                                  </label>
+                                </div>
+                              </div>
+
+                              {/* Question 12 - Heat Illness */}
+                              <div className="border-b border-slate-700 pb-3">
+                                <p className="text-slate-100 mb-2 font-medium">12. Has the student had problems with heat or cold illness?</p>
+                                <div className="flex gap-4">
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q12" value="yes" className="w-4 h-4" />
+                                    <span className="text-slate-100">Yes</span>
+                                  </label>
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q12" value="no" className="w-4 h-4" />
+                                    <span className="text-slate-100">No</span>
+                                  </label>
+                                </div>
+                              </div>
+
+                              {/* Question 13 - Vision */}
+                              <div className="border-b border-slate-700 pb-3">
+                                <p className="text-slate-100 mb-2 font-medium">13. Does the student have vision problems or wear glasses/contacts?</p>
+                                <div className="flex gap-4">
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q13" value="yes" className="w-4 h-4" />
+                                    <span className="text-slate-100">Yes</span>
+                                  </label>
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q13" value="no" className="w-4 h-4" />
+                                    <span className="text-slate-100">No</span>
+                                  </label>
+                                </div>
+                              </div>
+
+                              {/* Question 14 - Breathing */}
+                              <div className="border-b border-slate-700 pb-3">
+                                <p className="text-slate-100 mb-2 font-medium">14. Does the student have asthma or use an inhaler?</p>
+                                <div className="flex gap-4">
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q14" value="yes" className="w-4 h-4" />
+                                    <span className="text-slate-100">Yes</span>
+                                  </label>
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q14" value="no" className="w-4 h-4" />
+                                    <span className="text-slate-100">No</span>
+                                  </label>
+                                </div>
+                              </div>
+
+                              {/* Question 15 - Equipment */}
+                              <div className="border-b border-slate-700 pb-3">
+                                <p className="text-slate-100 mb-2 font-medium">15. Does the student use any special equipment or protective devices?</p>
+                                <div className="flex gap-4">
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q15" value="yes" className="w-4 h-4" />
+                                    <span className="text-slate-100">Yes</span>
+                                  </label>
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q15" value="no" className="w-4 h-4" />
+                                    <span className="text-slate-100">No</span>
+                                  </label>
+                                </div>
+                              </div>
+
+                              {/* Question 16 - Injuries */}
+                              <div className="border-b border-slate-700 pb-3">
+                                <p className="text-slate-100 mb-2 font-medium">16. Has the student had any sprains, fractures, or bone/joint problems?</p>
+                                <div className="flex gap-4">
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q16" value="yes" className="w-4 h-4" />
+                                    <span className="text-slate-100">Yes</span>
+                                  </label>
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q16" value="no" className="w-4 h-4" />
+                                    <span className="text-slate-100">No</span>
+                                  </label>
+                                </div>
+                              </div>
+
+                              {/* Question 17 - Weight */}
+                              <div className="border-b border-slate-700 pb-3">
+                                <p className="text-slate-100 mb-2 font-medium">17. Does the student have concerns about weight or eating habits?</p>
+                                <div className="flex gap-4">
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q17" value="yes" className="w-4 h-4" />
+                                    <span className="text-slate-100">Yes</span>
+                                  </label>
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q17" value="no" className="w-4 h-4" />
+                                    <span className="text-slate-100">No</span>
+                                  </label>
+                                </div>
+                              </div>
+
+                              {/* Question 18 - Mental Health */}
+                              <div className="border-b border-slate-700 pb-3">
+                                <p className="text-slate-100 mb-2 font-medium">18. Does the student feel stressed, anxious, or depressed?</p>
+                                <div className="flex gap-4">
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q18" value="yes" className="w-4 h-4" />
+                                    <span className="text-slate-100">Yes</span>
+                                  </label>
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q18" value="no" className="w-4 h-4" />
+                                    <span className="text-slate-100">No</span>
+                                  </label>
+                                </div>
+                              </div>
+
+                              {/* Question 19 - Sickle Cell */}
+                              <div className="border-b border-slate-700 pb-3">
+                                <p className="text-slate-100 mb-2 font-medium">19. Does the student have sickle cell trait or disease?</p>
+                                <div className="flex gap-4">
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q19" value="yes" className="w-4 h-4" />
+                                    <span className="text-slate-100">Yes</span>
+                                  </label>
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q19" value="no" className="w-4 h-4" />
+                                    <span className="text-slate-100">No</span>
+                                  </label>
+                                </div>
+                              </div>
+
+                              {/* Question 20 - Female Only */}
+                              <div className="border-b border-slate-700 pb-3">
+                                <p className="text-slate-100 mb-2 font-medium">20. (Females only) Have you had irregular menstrual periods?</p>
+                                <div className="flex gap-4">
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q20" value="yes" className="w-4 h-4" />
+                                    <span className="text-slate-100">Yes</span>
+                                  </label>
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q20" value="no" className="w-4 h-4" />
+                                    <span className="text-slate-100">No</span>
+                                  </label>
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q20" value="na" className="w-4 h-4" />
+                                    <span className="text-slate-100">N/A</span>
+                                  </label>
+                                </div>
+                              </div>
+
+                              {/* Question 21 - Male Only */}
+                              <div className="pb-3">
+                                <p className="text-slate-100 mb-2 font-medium">21. (Males only) Do you have any testicular swelling or pain?</p>
+                                <div className="flex gap-4">
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q21" value="yes" className="w-4 h-4" />
+                                    <span className="text-slate-100">Yes</span>
+                                  </label>
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q21" value="no" className="w-4 h-4" />
+                                    <span className="text-slate-100">No</span>
+                                  </label>
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="q21" value="na" className="w-4 h-4" />
+                                    <span className="text-slate-100">N/A</span>
+                                  </label>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -1070,18 +1354,50 @@ export default function TeamDashboardPage() {
                   </DialogContent>
                 </Dialog>
 
-                {/* Edit Player Dialog */}
+                {/* Edit Player Dialog - Multi-Step Wizard */}
                 <Dialog open={isEditPlayerOpen} onOpenChange={setIsEditPlayerOpen}>
-                  <DialogContent className="bg-slate-800 border-slate-700 max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <DialogContent className="bg-slate-800 border-slate-700 max-w-3xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
-                      <DialogTitle className="text-slate-100">Edit Player</DialogTitle>
+                      <DialogTitle className="text-slate-100">Edit Player Information</DialogTitle>
                       <DialogDescription className="text-slate-300">
-                        Update player information and documents.
+                        Update player information, medical history, and documents.
                       </DialogDescription>
                     </DialogHeader>
+                    
+                    {/* Progress Indicator */}
+                    <div className="mb-6">
+                      <div className="flex items-center justify-center">
+                        <div className={`flex items-center justify-center w-10 h-10 rounded-full ${editStep >= 1 ? 'bg-blue-600' : 'bg-slate-600'} text-white`}>
+                          {editStep > 1 ? <Check className="w-5 h-5" /> : '1'}
+                        </div>
+                        <div className={`flex-1 h-1 mx-2 ${editStep > 1 ? 'bg-blue-600' : 'bg-slate-600'}`} />
+                        
+                        <div className={`flex items-center justify-center w-10 h-10 rounded-full ${editStep >= 2 ? 'bg-blue-600' : 'bg-slate-600'} text-white`}>
+                          {editStep > 2 ? <Check className="w-5 h-5" /> : '2'}
+                        </div>
+                        <div className={`flex-1 h-1 mx-2 ${editStep > 2 ? 'bg-blue-600' : 'bg-slate-600'}`} />
+                        
+                        <div className={`flex items-center justify-center w-10 h-10 rounded-full ${editStep >= 3 ? 'bg-blue-600' : 'bg-slate-600'} text-white`}>
+                          {editStep > 3 ? <Check className="w-5 h-5" /> : '3'}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="text-center mb-4">
+                      <h3 className="text-lg font-semibold text-slate-100">
+                        {editStep === 1 && 'Step 1: Player Information'}
+                        {editStep === 2 && 'Step 2: Medical History'}
+                        {editStep === 3 && 'Step 3: Documents'}
+                      </h3>
+                    </div>
+                    
                     <Form {...editPlayerForm}>
                       <form onSubmit={editPlayerForm.handleSubmit((data) => updatePlayerMutation.mutate(data))} className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        
+                        {/* Step 1: Demographics */}
+                        {editStep === 1 && (
+                          <div className="space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <FormField
                             control={editPlayerForm.control}
                             name="playerName"
@@ -1350,13 +1666,86 @@ export default function TeamDashboardPage() {
                             </div>
                           </div>
                         </div>
-                        <div className="flex justify-end space-x-2 pt-4">
-                          <Button type="button" variant="outline" onClick={() => setIsEditPlayerOpen(false)} className="border-slate-600 text-slate-100 hover:bg-slate-700">
-                            Cancel
-                          </Button>
-                          <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white" disabled={updatePlayerMutation.isPending} data-testid="button-update-player">
-                            {updatePlayerMutation.isPending ? 'Updating...' : 'Update Player'}
-                          </Button>
+                          </div>
+                        )}
+                        
+                        {/* Step 2: Medical History - Edit Mode */}
+                        {editStep === 2 && (
+                          <div className="space-y-4">
+                            <Alert className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700 mb-4">
+                              <Heart className="h-4 w-4 text-blue-600" />
+                              <AlertDescription>
+                                Review and update medical history. Click Next if no changes needed.
+                              </AlertDescription>
+                            </Alert>
+                            
+                            <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+                              {/* All 21 medical questions with current answers pre-filled */}
+                              <p className="text-slate-300 text-sm italic">Medical questions with saved answers will be displayed here.</p>
+                              {/* TODO: Add all 21 questions with pre-filled Yes/No answers from database */}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Step 3: Documents - Edit Mode */}
+                        {editStep === 3 && (
+                          <div className="space-y-4">
+                            <Alert className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700 mb-4">
+                              <FileCheck className="h-4 w-4 text-green-600" />
+                              <AlertDescription>
+                                Review and update documents as needed.
+                              </AlertDescription>
+                            </Alert>
+                            
+                            <p className="text-slate-300 text-sm">Upload new documents or keep existing ones.</p>
+                            <p className="text-slate-300 text-sm italic">Document upload section already available in Step 1 will move here.</p>
+                          </div>
+                        )}
+                        
+                        {/* Navigation Buttons */}
+                        <div className="flex justify-between pt-4">
+                          <div>
+                            {editStep > 1 && (
+                              <Button 
+                                type="button" 
+                                variant="outline" 
+                                onClick={() => setEditStep(editStep - 1)} 
+                                className="border-slate-600 text-slate-100 hover:bg-slate-700"
+                              >
+                                <ChevronLeft className="w-4 h-4 mr-2" />
+                                Previous
+                              </Button>
+                            )}
+                          </div>
+                          <div className="flex space-x-2">
+                            <Button 
+                              type="button" 
+                              variant="outline" 
+                              onClick={() => setIsEditPlayerOpen(false)} 
+                              className="border-slate-600 text-slate-100 hover:bg-slate-700"
+                            >
+                              Cancel
+                            </Button>
+                            {editStep < 3 ? (
+                              <Button 
+                                type="button" 
+                                onClick={() => setEditStep(editStep + 1)} 
+                                className="bg-blue-600 hover:bg-blue-700 text-white"
+                              >
+                                Next
+                                <ChevronRight className="w-4 h-4 ml-2" />
+                              </Button>
+                            ) : (
+                              <Button 
+                                type="submit" 
+                                className="bg-green-600 hover:bg-green-700 text-white" 
+                                disabled={updatePlayerMutation.isPending} 
+                                data-testid="button-update-player"
+                              >
+                                {updatePlayerMutation.isPending ? 'Updating...' : 'Save Changes'}
+                              </Button>
+                            )}
+                          </div>
                         </div>
                       </form>
                     </Form>
