@@ -25,8 +25,24 @@ export const users = pgTable("users", {
     enum: ["active", "inactive", "trialing", "past_due", "canceled", "unpaid", "pending", "pending_approval"] 
   }).default("inactive"),
   subscriptionPlan: text("subscription_plan", { 
-    enum: ["free", "foundation", "starter", "professional", "champion", "enterprise", "district_enterprise", "tournament-organizer", "business-enterprise", "annual-pro"] 
-  }).default("foundation"),
+    enum: ["free", "foundation", "starter", "growing", "elite", "professional", "champion", "enterprise", "district_enterprise", "tournament-organizer", "business-enterprise", "annual-pro"] 
+  }).default("starter"),
+  
+  // Hybrid subscription system for base + add-on pricing
+  hybridSubscription: jsonb("hybrid_subscription").$type<{
+    baseType: 'team' | 'organizer' | 'district';
+    teamTier?: 'starter' | 'growing' | 'elite';
+    organizerPlan?: 'annual' | 'monthly';
+    addons: {
+      tournamentPerEvent?: boolean;
+      teamManagement?: 'basic';
+    };
+    pricing: {
+      basePrice: number;
+      recurringAddons: number;
+      perEventCosts: number;
+    };
+  }>(),
   userRole: text("user_role", {
     enum: [
       // District Level
@@ -2117,6 +2133,29 @@ export const upsertUserSchema = createInsertSchema(users).omit({
   updatedAt: true,
 });
 
+// Hybrid subscription schema
+export const hybridSubscriptionSchema = z.object({
+  baseType: z.enum(['team', 'organizer', 'district']),
+  teamTier: z.enum(['starter', 'growing', 'elite']).optional(),
+  organizerPlan: z.enum(['annual', 'monthly']).optional(),
+  addons: z.object({
+    tournamentPerEvent: z.boolean().optional(),
+    teamManagement: z.enum(['basic']).optional(),
+  }),
+  pricing: z.object({
+    basePrice: z.number().min(0),
+    recurringAddons: z.number().min(0),
+    perEventCosts: z.number().min(0),
+  }),
+});
+
+// User with hybrid subscription update schema
+export const updateUserHybridSubscriptionSchema = z.object({
+  hybridSubscription: hybridSubscriptionSchema,
+  subscriptionPlan: z.enum(['starter', 'growing', 'elite', 'tournament-organizer', 'annual-pro']),
+  subscriptionStatus: z.enum(['active', 'inactive', 'trialing', 'past_due', 'canceled', 'unpaid', 'pending', 'pending_approval']).optional(),
+});
+
 // White-label schemas
 export const insertWhitelabelConfigSchema = createInsertSchema(whitelabelConfigs).omit({
   id: true,
@@ -4091,6 +4130,8 @@ export type CoachEventAssignment = typeof coachEventAssignments.$inferSelect;
 export type InsertCoachEventAssignment = typeof coachEventAssignments.$inferInsert;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type UpsertUser = z.infer<typeof upsertUserSchema>;
+export type HybridSubscription = z.infer<typeof hybridSubscriptionSchema>;
+export type UpdateUserHybridSubscription = z.infer<typeof updateUserHybridSubscriptionSchema>;
 
 // White-label types
 export type WhitelabelConfigRecord = typeof whitelabelConfigs.$inferSelect;
