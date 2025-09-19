@@ -196,7 +196,7 @@ export default function TrantorLanding() {
               <div className="text-center mb-6">
                 <h3 className="text-2xl font-bold text-blue-300 mb-2">🏆 Team Management & Communication</h3>
                 <p className="text-blue-100 mb-1">For Coaches & Team Managers - No Tournament Experience Required</p>
-                <p className="text-sm text-blue-200">Manage your team year-round, join any tournament • First month FREE, second month only $19</p>
+                <p className="text-sm text-blue-200">Pricing based on team size & communication needs • Tournament hosting included with optional $50/tournament unlimited add-on</p>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl mx-auto">
@@ -207,9 +207,10 @@ export default function TrantorLanding() {
                   <p className="text-xs text-green-200 mb-3">Paid annually ($276/year)</p>
                   <ul className="text-sm text-green-100 space-y-1 mb-4">
                     <li>• Up to 20 players</li>
+                    <li>• 5 tournaments/month included</li>
                     <li>• 400 communications/month</li>
                     <li>• Basic roster management</li>
-                    <li>• Tournament registration</li>
+                    <li>• +$50/tournament for unlimited hosting</li>
                   </ul>
                   <Button 
                     onClick={() => setLocation('/team-signup?plan=starter&price=23')}
@@ -230,9 +231,10 @@ export default function TrantorLanding() {
                   <p className="text-xs text-blue-200 mb-3">Paid annually ($468/year)</p>
                   <ul className="text-sm text-blue-100 space-y-1 mb-4">
                     <li>• Up to 35 players</li>
+                    <li>• 15 tournaments/month included</li>
                     <li>• 4,000 communications/month</li>
                     <li>• Advanced scheduling</li>
-                    <li>• Parent portal access</li>
+                    <li>• +$50/tournament for unlimited hosting</li>
                   </ul>
                   <Button 
                     onClick={() => setLocation('/team-signup?plan=growing&price=39')}
@@ -250,9 +252,10 @@ export default function TrantorLanding() {
                   <p className="text-xs text-purple-200 mb-3">Annual only ($756/year)</p>
                   <ul className="text-sm text-purple-100 space-y-1 mb-4">
                     <li>• Unlimited players & teams</li>
+                    <li>• 50 tournaments/month included</li>
                     <li>• 16,000 communications/month</li>
                     <li>• Full organization management</li>
-                    <li>• Multi-team coordination</li>
+                    <li>• +$50/tournament for unlimited hosting</li>
                   </ul>
                   <Button 
                     onClick={() => setLocation('/team-signup?plan=elite&price=63')}
