@@ -14,9 +14,12 @@ import {
   Check, 
   Trophy, 
   AlertCircle,
-  ArrowLeft
+  ArrowLeft,
+  Play,
+  Eye
 } from 'lucide-react';
 import { Link } from 'wouter';
+import TrialExperienceFlow from '@/components/TrialExperienceFlow';
 
 interface PlanDetails {
   name: string;
@@ -30,6 +33,7 @@ export default function TrialSignup() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [showTrialFlow, setShowTrialFlow] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -155,6 +159,21 @@ export default function TrialSignup() {
     }
   };
 
+  // Show trial experience flow if requested
+  if (showTrialFlow) {
+    return (
+      <TrialExperienceFlow
+        selectedPlan={planType}
+        onComplete={() => setShowTrialFlow(false)}
+        onStartTrial={() => {
+          setShowTrialFlow(false);
+          // Scroll to the trial form
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Header */}
@@ -226,6 +245,33 @@ export default function TrialSignup() {
                     Module-based or white-label website building
                   </li>
                 </ul>
+              </CardContent>
+            </Card>
+
+            {/* Explore Features Option */}
+            <Card className="mb-8 border-purple-200 bg-purple-50">
+              <CardContent className="p-6">
+                <div className="text-center">
+                  <h3 className="text-lg font-semibold text-purple-900 mb-2">
+                    Want to see what makes us different?
+                  </h3>
+                  <p className="text-purple-700 mb-4">
+                    Explore our competitive advantages vs Challonge, Jersey Watch, and other platforms
+                  </p>
+                  <Button
+                    onClick={() => setShowTrialFlow(true)}
+                    variant="outline"
+                    className="border-purple-300 text-purple-700 hover:bg-purple-100"
+                    size="lg"
+                    data-testid="button-explore-features"
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    Explore Features First
+                  </Button>
+                  <p className="text-xs text-purple-600 mt-2">
+                    Interactive demo • No signup required • 3-minute tour
+                  </p>
+                </div>
               </CardContent>
             </Card>
 
