@@ -38,10 +38,19 @@ export function MedicalHistoryForm({ playerId, onComplete, readonly = false }: M
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch player data for auto-population - using any type to bypass validation issues
-  const { data: player, isLoading: playerLoading, error: playerError } = useQuery({
+  // Fetch player data for auto-population with custom fetch to bypass validation
+  const { data: player, isLoading: playerLoading, error: playerError } = useQuery<any>({
     queryKey: ['/api/players', playerId],
     enabled: !!playerId,
+    queryFn: async () => {
+      const response = await fetch(`/api/players/${playerId}`, {
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to fetch player: ${response.status} ${response.statusText}`);
+      }
+      return await response.json();
+    },
     retry: 3,
     retryDelay: 1000,
     meta: {
