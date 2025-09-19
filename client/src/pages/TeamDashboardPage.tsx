@@ -367,6 +367,7 @@ export default function TeamDashboardPage() {
       setShowAddressSuggestions(true);
     } catch (error) {
       console.error('Address search error:', error);
+      console.log('Address search query was:', query);
       setAddressSuggestions([]);
     } finally {
       setIsLoadingAddress(false);
@@ -2457,13 +2458,50 @@ export default function TeamDashboardPage() {
                               <Button 
                                 type="button" 
                                 onClick={() => {
-                                  // Validate Step 2 medical questions before proceeding
+                                  // Validate and collect Step 2 medical questions before proceeding
                                   if (editStep === 2) {
                                     const answeredQuestions = document.querySelectorAll('input[name^="edit_q"]:checked');
                                     if (answeredQuestions.length < 21) {
                                       alert(`Please answer all 21 medical history questions before proceeding. You have answered ${answeredQuestions.length} out of 21 questions.`);
                                       return;
                                     }
+                                    
+                                    // Collect and store medical data before moving to Step 3
+                                    const medicalData: any = {};
+                                    const questions = [
+                                      { key: 'q1_recent_illness', name: 'edit_q1' },
+                                      { key: 'q2_hospitalized', name: 'edit_q2' },
+                                      { key: 'q3_chest_pain_exercise', name: 'edit_q3' },
+                                      { key: 'q4_head_injury', name: 'edit_q4' },
+                                      { key: 'q5_seizure', name: 'edit_q5' },
+                                      { key: 'q6_missing_organs', name: 'edit_q6' },
+                                      { key: 'q7_doctors_care', name: 'edit_q7' },
+                                      { key: 'q8_medications', name: 'edit_q8' },
+                                      { key: 'q9_allergies', name: 'edit_q9' },
+                                      { key: 'q10_dizzy_exercise', name: 'edit_q10' },
+                                      { key: 'q11_skin_problems', name: 'edit_q11' },
+                                      { key: 'q12_heat_illness', name: 'edit_q12' },
+                                      { key: 'q13_vision_problems', name: 'edit_q13' },
+                                      { key: 'q14_asthma', name: 'edit_q14' },
+                                      { key: 'q15_protective_equipment', name: 'edit_q15' },
+                                      { key: 'q16_sprain_strain', name: 'edit_q16' },
+                                      { key: 'q17_weight_concerns', name: 'edit_q17' },
+                                      { key: 'q18_stressed', name: 'edit_q18' },
+                                      { key: 'q19_sickle_cell', name: 'edit_q19' },
+                                      { key: 'q20_first_menstrual_period', name: 'edit_q20' },
+                                      { key: 'q21_missing_testicle', name: 'edit_q21' }
+                                    ];
+                                    
+                                    questions.forEach(({ key, name }) => {
+                                      const checkedRadio = document.querySelector(`input[name="${name}"]:checked`);
+                                      if (checkedRadio) {
+                                        medicalData[key] = (checkedRadio as HTMLInputElement).value === 'yes';
+                                      }
+                                    });
+                                    
+                                    console.log('EDIT PLAYER: Storing medical data for Step 3:', medicalData);
+                                    // Store medical data for use in Step 3
+                                    (window as any).editPlayerMedicalData = medicalData;
                                   }
                                   setEditStep(editStep + 1);
                                 }} 
@@ -2490,45 +2528,9 @@ export default function TeamDashboardPage() {
                                       )();
                                     });
 
-                                    // Collect updated medical history data from edit form
-                                    const medicalData: any = {};
-                                    const questions = [
-                                      { key: 'q1_recent_illness', name: 'edit_q1' },
-                                      { key: 'q2_hospitalized', name: 'edit_q2' },
-                                      { key: 'q3_chest_pain_exercise', name: 'edit_q3' },
-                                      { key: 'q4_head_injury', name: 'edit_q4' },
-                                      { key: 'q5_seizure', name: 'edit_q5' },
-                                      { key: 'q6_missing_organs', name: 'edit_q6' },
-                                      { key: 'q7_doctors_care', name: 'edit_q7' },
-                                      { key: 'q8_medications', name: 'edit_q8' },
-                                      { key: 'q9_allergies', name: 'edit_q9' },
-                                      { key: 'q10_dizzy_exercise', name: 'edit_q10' },
-                                      { key: 'q11_skin_problems', name: 'edit_q11' },
-                                      { key: 'q12_heat_illness', name: 'edit_q12' },
-                                      { key: 'q13_vision_problems', name: 'edit_q13' },
-                                      { key: 'q14_asthma', name: 'edit_q14' },
-                                      { key: 'q15_protective_equipment', name: 'edit_q15' },
-                                      { key: 'q16_sprain_strain', name: 'edit_q16' },
-                                      { key: 'q17_weight_concerns', name: 'edit_q17' },
-                                      { key: 'q18_stressed', name: 'edit_q18' },
-                                      { key: 'q19_sickle_cell', name: 'edit_q19' },
-                                      { key: 'q20_first_menstrual_period', name: 'edit_q20' },
-                                      { key: 'q21_missing_testicle', name: 'edit_q21' }
-                                    ];
-                                    
-                                    // Collect medical answers
-                                    console.log('Looking for radio buttons in the DOM...');
-                                    questions.forEach(({ key, name }) => {
-                                      const allRadios = document.querySelectorAll(`input[name="${name}"]`);
-                                      const checkedRadio = document.querySelector(`input[name="${name}"]:checked`);
-                                      console.log(`Question ${name}: found ${allRadios.length} radio buttons, ${checkedRadio ? '1 checked' : 'none checked'}`);
-                                      if (checkedRadio) {
-                                        medicalData[key] = (checkedRadio as HTMLInputElement).value === 'yes';
-                                      }
-                                    });
-                                    
-                                    console.log('Collected medical data:', medicalData);
-                                    console.log('Medical data keys length:', Object.keys(medicalData).length);
+                                    // Use the medical data stored during Step 2 -> Step 3 transition
+                                    const medicalData = (window as any).editPlayerMedicalData || {};
+                                    console.log('EDIT PLAYER: Using stored medical data:', medicalData);
                                     
                                     // Save medical history if any answers provided
                                     if (editingPlayer && Object.keys(medicalData).length > 0) {
