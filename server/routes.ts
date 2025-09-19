@@ -438,6 +438,99 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // HYBRID SUBSCRIPTION PRICING CALCULATOR API
+  app.post('/api/pricing/calculate', async (req, res) => {
+    try {
+      const { hybridSubscriptionSchema } = await import('@shared/schema');
+      
+      // Validate request body with Zod schema
+      const validationResult = hybridSubscriptionSchema.safeParse(req.body);
+
+      if (!validationResult.success) {
+        console.error('Pricing calculator validation error:', validationResult.error.errors);
+        return res.status(400).json({ 
+          error: 'Invalid pricing data', 
+          details: validationResult.error.errors 
+        });
+      }
+
+      const { baseType, teamTier, organizerPlan, addons } = validationResult.data;
+      
+      // Pricing configuration
+      const PRICING = {
+        team: {
+          starter: { monthly: 23, annual: 276 },
+          growing: { monthly: 39, annual: 468 },
+          elite: { monthly: 63, annual: 756 }
+        },
+        organizer: {
+          annual: { monthly: 99, annual: 99 }, // Annual plan billed yearly
+          monthly: { monthly: 39, annual: 468 }
+        },
+        addons: {
+          tournamentPerEvent: 50, // Per tournament fee
+          teamManagement: 20 // Monthly recurring for organizers adding team features
+        }
+      };
+
+      let pricing = {
+        basePrice: 0,
+        recurringAddons: 0,
+        perEventCosts: 0
+      };
+
+      // Calculate base subscription price
+      if (baseType === 'team' && teamTier) {
+        pricing.basePrice = PRICING.team[teamTier].monthly;
+      } else if (baseType === 'organizer' && organizerPlan) {
+        pricing.basePrice = PRICING.organizer[organizerPlan].monthly;
+      }
+
+      // Calculate add-on costs
+      if (addons.teamManagement && baseType === 'organizer') {
+        pricing.recurringAddons += PRICING.addons.teamManagement;
+      }
+      
+      if (addons.tournamentPerEvent) {
+        pricing.perEventCosts = PRICING.addons.tournamentPerEvent;
+      }
+
+      // Calculate totals
+      const monthlyTotal = pricing.basePrice + pricing.recurringAddons;
+      const annualSavings = baseType === 'team' && teamTier ? 
+        (monthlyTotal * 12) - PRICING.team[teamTier].annual : 0;
+
+      const response = {
+        success: true,
+        pricing,
+        totals: {
+          monthly: monthlyTotal,
+          annual: monthlyTotal * 12 - annualSavings,
+          perEventFee: pricing.perEventCosts,
+          annualSavings: Math.max(0, annualSavings)
+        },
+        breakdown: {
+          baseSubscription: pricing.basePrice,
+          recurringAddons: pricing.recurringAddons,
+          perTournamentFee: pricing.perEventCosts
+        },
+        recommendations: {
+          bestValue: annualSavings > 0 ? 'annual' : 'monthly',
+          suggestedUpgrade: baseType === 'team' && teamTier === 'starter' ? 'growing' : null
+        }
+      };
+
+      res.json(response);
+
+    } catch (error: any) {
+      console.error('Pricing calculator error:', error);
+      res.status(500).json({ 
+        error: 'Failed to calculate pricing',
+        message: error.message 
+      });
+    }
+  });
+
   // Update team
   app.patch('/api/teams/:id', isAuthenticated, async (req, res) => {
     try {
