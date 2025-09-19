@@ -35,6 +35,12 @@ export default function TeamDashboardPage() {
   const [isEditPlayerOpen, setIsEditPlayerOpen] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState<TeamPlayer | null>(null);
   const [isEditTeamOpen, setIsEditTeamOpen] = useState(false);
+  
+  // Secure state management for medical history data (replacing window globals)
+  const [addPlayerMedicalData, setAddPlayerMedicalData] = useState<any>({});
+  const [editPlayerMedicalData, setEditPlayerMedicalData] = useState<any>({});
+  const [savedMedicalData, setSavedMedicalData] = useState<any>(null);
+  
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -165,13 +171,10 @@ export default function TeamDashboardPage() {
 
   // Pre-populate medical history when navigating to Edit Step 2
   useEffect(() => {
-    console.log('Edit step changed to:', editStep);
-    console.log('Saved medical data available:', !!(window as any).savedMedicalData);
     if (editStep === 2) {
-      if ((window as any).savedMedicalData) {
-        console.log('Pre-populating medical data:', (window as any).savedMedicalData);
+      if (savedMedicalData) {
       setTimeout(() => {
-        const medicalData = (window as any).savedMedicalData;
+        const medicalData = savedMedicalData;
         const questions = [
           { key: 'q1_recent_illness', name: 'edit_q1' },
           { key: 'q2_hospitalized', name: 'edit_q2' },
@@ -212,13 +215,11 @@ export default function TeamDashboardPage() {
             }
           }
         });
-        console.log('Finished pre-populating radio buttons');
       }, 100);
       } else {
-        console.log('No saved medical data found for pre-population');
       }
     }
-  }, [editStep]);
+  }, [editStep, savedMedicalData]);
 
   // Add player form with proper null handling
   const addPlayerForm = useForm<InsertTeamPlayer>({
@@ -256,6 +257,8 @@ export default function TeamDashboardPage() {
       toast({ title: "Player Added", description: "Player has been successfully added to the roster!" });
       setIsAddPlayerOpen(false);
       addPlayerForm.reset();
+      // Clear medical data for security
+      setAddPlayerMedicalData({});
     },
     onError: (error: any) => {
       toast({
@@ -317,6 +320,10 @@ export default function TeamDashboardPage() {
     setEditingPlayer(player);
     setEditStep(1); // Reset to first step when opening
     
+    // Clear any previous medical data for security
+    setEditPlayerMedicalData({});
+    setSavedMedicalData(null);
+    
     // Load existing player data into form
     editPlayerForm.reset({
       playerName: player.playerName || '',
@@ -344,11 +351,10 @@ export default function TeamDashboardPage() {
         const medicalData = await response.json();
         
         // Store medical data for later use when user navigates to Step 2
-        (window as any).savedMedicalData = medicalData;
+        setSavedMedicalData(medicalData);
       }
     } catch (error) {
-      console.log('No existing medical history found for player');
-      (window as any).savedMedicalData = null;
+      setSavedMedicalData(null);
     }
   };
 
@@ -407,6 +413,8 @@ export default function TeamDashboardPage() {
       addPlayerForm.reset();
       setAddressSuggestions([]);
       setAddressSearchQuery('');
+      // Clear medical data for security
+      setAddPlayerMedicalData({});
     }
   };
 
@@ -1522,10 +1530,8 @@ export default function TeamDashboardPage() {
                                 onClick={() => {
                                   // Validate and collect Step 2 medical questions before proceeding
                                   if (registrationStep === 2) {
-                                    console.log('ADD PLAYER: Validating Step 2, looking for radio buttons...');
                                     const allQRadios = document.querySelectorAll('input[name^="q"]');
                                     const answeredQuestions = document.querySelectorAll('input[name^="q"]:checked');
-                                    console.log(`ADD PLAYER: Found ${allQRadios.length} total radio buttons, ${answeredQuestions.length} checked`);
                                     
                                     if (answeredQuestions.length < 21) {
                                       alert(`Please answer all 21 medical history questions before proceeding. You have answered ${answeredQuestions.length} out of 21 questions.`);
@@ -1561,7 +1567,6 @@ export default function TeamDashboardPage() {
                                     questions.forEach(({ key, name }) => {
                                       const allRadios = document.querySelectorAll(`input[name="${name}"]`);
                                       const checkedRadio = document.querySelector(`input[name="${name}"]:checked`);
-                                      console.log(`ADD PLAYER ${name}: found ${allRadios.length} radios, ${checkedRadio ? '1 checked' : 'none checked'}`);
                                       if (checkedRadio) {
                                         const value = (checkedRadio as HTMLInputElement).value;
                                         // Q20 and Q21 need string values, others need boolean
@@ -1573,9 +1578,8 @@ export default function TeamDashboardPage() {
                                       }
                                     });
                                     
-                                    console.log('ADD PLAYER: Storing medical data for Step 3:', medicalData);
                                     // Store medical data for use in Step 3
-                                    (window as any).addPlayerMedicalData = medicalData;
+                                    setAddPlayerMedicalData(medicalData);
                                   }
                                   setRegistrationStep(registrationStep + 1);
                                 }} 
@@ -1589,8 +1593,7 @@ export default function TeamDashboardPage() {
                                 type="button"
                                 onClick={async () => {
                                   // Use the medical data stored during Step 2 -> Step 3 transition
-                                  const medicalData = (window as any).addPlayerMedicalData || {};
-                                  console.log('ADD PLAYER: Using stored medical data:', medicalData);
+                                  const medicalData = addPlayerMedicalData || {};
                                   
                                   try {
                                     // First create the player
@@ -1644,7 +1647,15 @@ export default function TeamDashboardPage() {
                 </Dialog>
 
                 {/* Edit Player Dialog - Multi-Step Wizard */}
-                <Dialog open={isEditPlayerOpen} onOpenChange={setIsEditPlayerOpen}>
+                <Dialog open={isEditPlayerOpen} onOpenChange={(open) => {
+                  setIsEditPlayerOpen(open);
+                  if (!open) {
+                    // CRITICAL: Clear medical data for security when dialog closes
+                    setEditPlayerMedicalData({});
+                    setSavedMedicalData(null);
+                    setEditStep(1);
+                  }
+                }}>
                   <DialogContent className="bg-slate-800 border-slate-700 max-w-3xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle className="text-slate-100">Edit Player Information</DialogTitle>
@@ -2518,9 +2529,8 @@ export default function TeamDashboardPage() {
                                       }
                                     });
                                     
-                                    console.log('EDIT PLAYER: Storing medical data for Step 3:', medicalData);
                                     // Store medical data for use in Step 3
-                                    (window as any).editPlayerMedicalData = medicalData;
+                                    setEditPlayerMedicalData(medicalData);
                                   }
                                   setEditStep(editStep + 1);
                                 }} 
@@ -2548,8 +2558,7 @@ export default function TeamDashboardPage() {
                                     });
 
                                     // Use the medical data stored during Step 2 -> Step 3 transition
-                                    const medicalData = (window as any).editPlayerMedicalData || {};
-                                    console.log('EDIT PLAYER: Using stored medical data:', medicalData);
+                                    const medicalData = editPlayerMedicalData || {};
                                     
                                     // Save medical history if any answers provided
                                     if (editingPlayer && Object.keys(medicalData).length > 0) {
@@ -2559,7 +2568,6 @@ export default function TeamDashboardPage() {
                                       medicalData.isComplete = true;
                                       medicalData.signatureDate = new Date().toISOString().split('T')[0];
                                       
-                                      console.log('Sending medical history data to API:', medicalData);
                                       const medicalResponse = await fetch(`/api/players/${editingPlayer.id}/medical-history`, {
                                         method: 'POST',
                                         headers: {
@@ -2568,7 +2576,6 @@ export default function TeamDashboardPage() {
                                         credentials: 'include',
                                         body: JSON.stringify(medicalData)
                                       });
-                                      console.log('Medical history API response:', medicalResponse.status, medicalResponse.statusText);
                                       
                                       if (!medicalResponse.ok) {
                                         const errorText = await medicalResponse.text();

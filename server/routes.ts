@@ -874,6 +874,271 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Coach Dashboard API Endpoints
+  
+  // Get teams managed by coach
+  app.get('/api/coach/teams', isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+
+      const storage = await getStorage();
+      
+      // Explicit coach role verification - only team owners can access coach endpoints
+      const teams = await storage.getTeamsByCoach(userId);
+      
+      // RBAC: If user has no teams as coach, deny access to coach endpoints
+      if (teams.length === 0) {
+        return res.status(403).json({ error: 'Access denied: User is not a coach of any teams' });
+      }
+      
+      res.json(teams);
+    } catch (error: any) {
+      console.error('Get coach teams error:', error);
+      res.status(500).json({ error: 'Failed to get teams' });
+    }
+  });
+
+  // Get player health status summaries for coach
+  app.get('/api/coach/player-health-status', isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+
+      const storage = await getStorage();
+      
+      // Explicit coach role verification - only team owners can access coach endpoints  
+      const teams = await storage.getTeamsByCoach(userId);
+      
+      // RBAC: If user has no teams as coach, deny access to coach endpoints
+      if (teams.length === 0) {
+        return res.status(403).json({ error: 'Access denied: User is not a coach of any teams' });
+      }
+      
+      let totalPlayers = 0;
+      let cleared = 0;
+      let restricted = 0;
+      let pending = 0;
+      
+      // Get all players from coach's teams and their medical status
+      for (const team of teams) {
+        const players = await storage.getTeamPlayers(team.id);
+        
+        for (const player of players) {
+          totalPlayers++;
+          
+          // Check if player has completed medical history
+          try {
+            const medicalHistory = await storage.getMedicalHistoryByPlayer(player.id);
+            
+            // Audit log for HIPAA compliance - accessing PHI for health status calculation
+            await storage.createComplianceAuditLog({
+              userId: userId,
+              actionType: 'data_access',
+              resourceType: 'medical_history',
+              resourceId: player.id,
+              ipAddress: req.ip,
+              userAgent: req.get('User-Agent'),
+              complianceNotes: `Coach accessed medical history for health status calculation - player ${player.playerName}`
+            });
+            
+            if (medicalHistory && medicalHistory.isComplete) {
+              // Check for health concerns that would restrict the player
+              const hasHealthConcerns = medicalHistory.q2_hospitalized || 
+                                      medicalHistory.q3_chest_pain_exercise || 
+                                      medicalHistory.q4_head_injury || 
+                                      medicalHistory.q5_seizure || 
+                                      medicalHistory.q14_asthma;
+              
+              if (hasHealthConcerns) {
+                restricted++;
+              } else {
+                cleared++;
+              }
+            } else {
+              pending++;
+            }
+          } catch (error) {
+            // No medical history found = pending
+            pending++;
+          }
+        }
+      }
+      
+      // Audit log for HIPAA compliance
+      await storage.createComplianceAuditLog({
+        userId: userId,
+        actionType: 'data_access',
+        resourceType: 'health_summary',
+        resourceId: 'team_health_status',
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+        complianceNotes: `Coach accessed team health status summary (${totalPlayers} players)`
+      });
+
+      res.json({
+        totalPlayers,
+        cleared,
+        restricted,
+        pending
+      });
+    } catch (error: any) {
+      console.error('Get player health status error:', error);
+      res.status(500).json({ error: 'Failed to get player health status' });
+    }
+  });
+
+  // Get health alerts for coach's players
+  app.get('/api/coach/health-alerts', isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+
+      const storage = await getStorage();
+      
+      // Explicit coach role verification - only team owners can access coach endpoints
+      const coachTeams = await storage.getTeamsByCoach(userId);
+      
+      // RBAC: If user has no teams as coach, deny access to coach endpoints
+      if (coachTeams.length === 0) {
+        return res.status(403).json({ error: 'Access denied: User is not a coach of any teams' });
+      }
+      
+      // Get all teams for this coach
+      const teams = await storage.getTeamsByCoach(userId);
+      
+      const alerts = [];
+      
+      // Check each team's players for health alerts
+      for (const team of teams) {
+        const players = await storage.getTeamPlayers(team.id);
+        
+        for (const player of players) {
+          try {
+            const medicalHistory = await storage.getMedicalHistoryByPlayer(player.id);
+            
+            // Create alert if no medical history
+            if (!medicalHistory || !medicalHistory.isComplete) {
+              alerts.push({
+                id: `missing-medical-${player.id}`,
+                playerId: player.id,
+                playerName: player.playerName,
+                teamName: team.teamName,
+                teamId: team.id,
+                jerseyNumber: player.jerseyNumber,
+                type: 'missing_medical',
+                severity: 'warning',
+                clearanceStatus: 'pending',
+                coachMessage: 'Medical history form not completed',
+                message: 'Medical history form not completed',
+                createdAt: new Date()
+              });
+            }
+            
+            // Check for health concerns in completed medical history
+            if (medicalHistory && medicalHistory.isComplete) {
+              const concerns = [];
+              
+              // Check key medical questions that might require attention
+              // Server-side PHI minimization: only flag existence of concerns, not specific details
+              const hasSeriousconcerns = medicalHistory.q2_hospitalized || 
+                                       medicalHistory.q3_chest_pain_exercise || 
+                                       medicalHistory.q4_head_injury || 
+                                       medicalHistory.q5_seizure;
+              const hasMinorConcerns = medicalHistory.q14_asthma;
+              
+              if (hasSeriousconcerns || hasMinorConcerns) {
+                // HIPAA-compliant: Provide minimal necessary information to coaches
+                alerts.push({
+                  id: `health-concern-${player.id}`,
+                  playerId: player.id,
+                  playerName: player.playerName,
+                  teamName: team.teamName,
+                  teamId: team.id,
+                  jerseyNumber: player.jerseyNumber,
+                  type: 'health_concern',
+                  severity: hasSeriousconcerns ? 'high' : 'medium',
+                  clearanceStatus: 'restricted',
+                  coachMessage: hasSeriousconcerns ? 
+                    'Medical concerns require athletic trainer review before participation' :
+                    'Minor medical conditions noted - discuss with athletic trainer',
+                  message: 'Medical history contains health concerns requiring review',
+                  // Do not include specific medical details for privacy
+                  createdAt: new Date()
+                });
+                
+                // Audit log for HIPAA compliance
+                await storage.createComplianceAuditLog({
+                  userId: userId,
+                  actionType: 'data_access',
+                  resourceType: 'health_summary',
+                  resourceId: player.id,
+                  ipAddress: req.ip,
+                  userAgent: req.get('User-Agent'),
+                  complianceNotes: `Coach accessed health alert summary for player ${player.playerName}`
+                });
+              }
+            }
+          } catch (error) {
+            // Medical history not found - already handled above
+          }
+        }
+      }
+      
+      res.json(alerts);
+    } catch (error: any) {
+      console.error('Get health alerts error:', error);
+      res.status(500).json({ error: 'Failed to get health alerts' });
+    }
+  });
+
+  // Get trainer communications for coach - HIPAA-compliant stub with RBAC
+  app.get('/api/coach/trainer-communications', isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+
+      const storage = await getStorage();
+      
+      // Explicit coach role verification - only team owners can access coach endpoints
+      const teams = await storage.getTeamsByCoach(userId);
+      
+      // RBAC: If user has no teams as coach, deny access to coach endpoints
+      if (teams.length === 0) {
+        return res.status(403).json({ error: 'Access denied: User is not a coach of any teams' });
+      }
+
+      // Audit log for HIPAA compliance
+      await storage.createComplianceAuditLog({
+        userId: userId,
+        actionType: 'data_access',
+        resourceType: 'trainer_communications',
+        resourceId: 'coach_communications',
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+        complianceNotes: `Coach accessed trainer communications interface`
+      });
+
+      // Return empty array - trainer communications will be implemented in future version
+      res.json([]);
+    } catch (error: any) {
+      console.error('Get trainer communications error:', error);
+      res.status(500).json({ error: 'Failed to get trainer communications' });
+    }
+  });
+
   // Update team subscription
   // DELETE team endpoint
   app.delete('/api/teams/:id', isAuthenticated, async (req, res) => {
