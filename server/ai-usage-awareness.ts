@@ -55,7 +55,7 @@ export class AIUsageAwarenessService extends AIContextService {
     let status: 'plenty' | 'moderate' | 'warning' | 'critical' | 'unlimited';
     let recommendedAction: string | undefined;
     
-    if (user.subscriptionPlan !== 'foundation' && user.subscriptionPlan !== 'starter') {
+    if (user.subscriptionPlan !== 'starter' && user.subscriptionPlan !== 'free') {
       status = 'unlimited';
     } else if (total <= 0) {
       status = 'critical';

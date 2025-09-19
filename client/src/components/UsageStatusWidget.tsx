@@ -35,7 +35,7 @@ export function UsageStatusWidget({ user, onPurchaseCredits, onUpgrade }: UsageS
   
   const isNearLimit = usagePercentage >= 80;
   const isAtLimit = remainingTournaments <= 0 && user.tournamentCredits <= 0;
-  const isUnlimited = !['foundation', 'starter'].includes(user.subscriptionPlan);
+  const isUnlimited = !['starter', 'free'].includes(user.subscriptionPlan);
 
   return (
     <Card className={`${isNearLimit && !isUnlimited ? 'border-yellow-200 bg-yellow-50' : ''} ${isAtLimit ? 'border-red-200 bg-red-50' : ''}`}>
@@ -43,7 +43,7 @@ export function UsageStatusWidget({ user, onPurchaseCredits, onUpgrade }: UsageS
         <CardTitle className="flex items-center gap-2">
           <Trophy className="h-5 w-5 text-blue-600" />
           Tournament Usage
-          {user.subscriptionPlan === 'foundation' && (
+          {user.subscriptionPlan === 'free' && (
             <Badge variant="outline" className="text-xs">Free Plan</Badge>
           )}
           {user.subscriptionPlan === 'starter' && (

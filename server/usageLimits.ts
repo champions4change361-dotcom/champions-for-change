@@ -69,7 +69,7 @@ export class UsageLimitService {
     const [updatedUser] = await db.select().from(users).where(eq(users.id, userId));
     
     // Check subscription limits - unlimited for paid plans
-    if (updatedUser.subscriptionPlan !== 'foundation' && updatedUser.subscriptionPlan !== 'starter') {
+    if (updatedUser.subscriptionPlan !== 'starter' && updatedUser.subscriptionPlan !== 'free') {
       return { allowed: true };
     }
     

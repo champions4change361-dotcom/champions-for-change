@@ -25,7 +25,7 @@ export const users = pgTable("users", {
     enum: ["active", "inactive", "trialing", "past_due", "canceled", "unpaid", "pending", "pending_approval"] 
   }).default("inactive"),
   subscriptionPlan: text("subscription_plan", { 
-    enum: ["free", "foundation", "starter", "growing", "elite", "professional", "champion", "enterprise", "district_enterprise", "tournament-organizer", "business-enterprise", "annual-pro"] 
+    enum: ["starter", "growing", "elite", "professional", "champion", "enterprise", "district_enterprise", "tournament-organizer", "business-enterprise", "annual-pro"] 
   }).default("starter"),
   
   // Hybrid subscription system for base + add-on pricing
@@ -521,7 +521,7 @@ export const nonprofitSubscriptions = pgTable("nonprofit_subscriptions", {
   organizationId: varchar("organization_id").notNull().references(() => organizations.id),
   billingContactUserId: varchar("billing_contact_user_id").notNull().references(() => users.id),
   subscriptionTier: text("subscription_tier", {
-    enum: ["foundation", "champion", "enterprise", "district_enterprise"]
+    enum: ["starter", "champion", "enterprise", "district_enterprise"]
   }).notNull(),
   flatRateAmount: numeric("flat_rate_amount", { precision: 10, scale: 2 }).notNull(),
   billingCycle: text("billing_cycle", {
@@ -631,8 +631,8 @@ export const registrationRequests = pgTable("registration_requests", {
   references: jsonb("references"),
   requestReason: text("request_reason"),
   selectedTier: text("selected_tier", {
-    enum: ["foundation", "champion", "enterprise"]
-  }).default("foundation"),
+    enum: ["starter", "champion", "enterprise"]
+  }).default("starter"),
   paymentMethod: text("payment_method", {
     enum: ["stripe", "check", "pending"]
   }).default("pending"),

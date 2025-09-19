@@ -410,7 +410,7 @@ export function registerTournamentRoutes(app: Express) {
         if (status !== 'active') return 1; // Inactive accounts get 1 tournament
         
         switch (plan) {
-          case 'foundation':
+          case 'starter':
           case 'free':
             return 3; // 3 tournaments per month
           case 'tournament-organizer':
@@ -426,7 +426,7 @@ export function registerTournamentRoutes(app: Express) {
         }
       };
 
-      const limit = getTournamentLimit(user.subscriptionPlan || 'foundation', user.subscriptionStatus || 'inactive');
+      const limit = getTournamentLimit(user.subscriptionPlan || 'starter', user.subscriptionStatus || 'inactive');
       
       // For enterprise accounts, skip limit checking entirely
       if (user.subscriptionPlan === 'district_enterprise' || user.subscriptionPlan === 'enterprise' || user.subscriptionPlan === 'annual-pro') {

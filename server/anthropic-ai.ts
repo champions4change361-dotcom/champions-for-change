@@ -69,7 +69,7 @@ async function createTournamentWithAI(
     const getTournamentLimit = (plan: string, status: string) => {
       if (status !== 'active') return 1;
       switch (plan) {
-        case 'foundation':
+        case 'starter':
         case 'free':
           return 3;
         case 'tournament-organizer':
@@ -85,7 +85,7 @@ async function createTournamentWithAI(
       }
     };
 
-    const limit = getTournamentLimit(user.subscriptionPlan || 'foundation', user.subscriptionStatus || 'inactive');
+    const limit = getTournamentLimit(user.subscriptionPlan || 'starter', user.subscriptionStatus || 'inactive');
     
     if (limit !== -1 && userTournaments.length >= limit) {
       return { 
