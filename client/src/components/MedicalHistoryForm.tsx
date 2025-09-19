@@ -4,10 +4,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -20,12 +21,12 @@ import {
   Activity,
   Loader2,
   Check,
-  Clock
+  Brain,
+  Thermometer
 } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { insertMedicalHistorySchema, type InsertMedicalHistory, type TeamPlayer } from '@shared/schema';
-import { z } from 'zod';
 
 interface MedicalHistoryFormProps {
   playerId: string;
@@ -39,13 +40,13 @@ export function MedicalHistoryForm({ playerId, onComplete, readonly = false }: M
 
   // Fetch player data for auto-population
   const { data: player, isLoading: playerLoading } = useQuery<TeamPlayer>({
-    queryKey: [`/api/players/${playerId}`],
+    queryKey: ['/api/players', playerId],
     enabled: !!playerId,
   });
 
   // Fetch existing medical history if available
   const { data: existingMedicalHistory, isLoading: medicalHistoryLoading } = useQuery({
-    queryKey: [`/api/players/${playerId}/medical-history`],
+    queryKey: ['/api/players', playerId, 'medical-history'],
     enabled: !!playerId,
   });
 
@@ -53,70 +54,117 @@ export function MedicalHistoryForm({ playerId, onComplete, readonly = false }: M
     resolver: zodResolver(insertMedicalHistorySchema),
     defaultValues: {
       playerId,
-      // Auto-populate from player data when it loads
-      studentName: player?.playerName || '',
-      dateOfBirth: player?.dateOfBirth || '',
-      // All 21 medical questions default to false/empty
-      hasHeartCondition: false as boolean,
-      heartConditionDetails: '',
-      hasHighBloodPressure: false,
-      bloodPressureDetails: '',
-      hasAsthma: false,
-      asthmaDetails: '',
-      hasDiabetes: false,
-      diabetesDetails: '',
-      hasSeizureDisorder: false,
-      seizureDisorderDetails: '',
-      hasHeadInjuries: false,
-      headInjuriesDetails: '',
-      hasBrokenBones: false,
-      brokenBonesDetails: '',
-      hasJointProblems: false,
-      jointProblemsDetails: '',
-      hasSurgeries: false,
-      surgeriesDetails: '',
-      hasAllergies: false,
-      allergiesDetails: '',
-      takesMedications: false,
-      medicationsDetails: '',
-      hasVisionProblems: false,
-      visionProblemsDetails: '',
-      hasHearingProblems: false,
-      hearingProblemsDetails: '',
-      hasSkinConditions: false,
-      skinConditionsDetails: '',
-      hasKidneyProblems: false,
-      kidneyProblemsDetails: '',
-      hasMentalHealthConditions: false,
-      mentalHealthDetails: '',
-      hasEatingDisorders: false,
-      eatingDisordersDetails: '',
-      hasFamilyHistory: false,
-      familyHistoryDetails: '',
-      additionalConcerns: '',
+      studentName: '',
+      // Initialize all PPE questions to false/empty
+      q1_recent_illness: false,
+      q1_explanation: '',
+      q2_hospitalized: false,
+      q2_surgery: false,
+      q2_explanation: '',
+      q3_heart_testing: false,
+      q3_passed_out_exercise: false,
+      q3_chest_pain_exercise: false,
+      q3_tired_quickly: false,
+      q3_racing_heart: false,
+      q3_high_bp_cholesterol: false,
+      q3_heart_murmur: false,
+      q3_family_heart_death: false,
+      q3_family_heart_disease: false,
+      q3_viral_infection: false,
+      q3_physician_restricted: false,
+      q3_explanation: '',
+      q4_head_injury: false,
+      q4_unconscious: false,
+      q4_concussion_count: 0,
+      q4_last_concussion_date: '',
+      q4_explanation: '',
+      q5_seizure: false,
+      q5_headaches: false,
+      q5_numbness: false,
+      q5_stinger_burner: false,
+      q5_explanation: '',
+      q6_missing_organs: false,
+      q6_explanation: '',
+      q7_doctors_care: false,
+      q7_explanation: '',
+      q8_medications: false,
+      q8_explanation: '',
+      q9_allergies: false,
+      q9_explanation: '',
+      q10_dizzy_exercise: false,
+      q10_explanation: '',
+      q11_skin_problems: false,
+      q11_explanation: '',
+      q12_heat_illness: false,
+      q12_explanation: '',
+      q13_vision_problems: false,
+      q13_explanation: '',
+      q14_short_breath: false,
+      q14_asthma: false,
+      q14_seasonal_allergies: false,
+      q14_explanation: '',
+      q15_protective_equipment: false,
+      q15_explanation: '',
+      q16_sprain_strain: false,
+      q16_broken_bones: false,
+      q16_joint_problems: false,
+      q16_body_parts: {},
+      q16_explanation: '',
+      q17_weight_concerns: false,
+      q17_explanation: '',
+      q18_stressed: false,
+      q18_explanation: '',
+      q19_sickle_cell: false,
+      q19_explanation: '',
+      q20_first_menstrual_period: '',
+      q20_most_recent_period: '',
+      q20_cycle_length: '',
+      q20_periods_last_year: undefined,
+      q20_longest_time_between: '',
+      q21_missing_testicle: false,
+      q21_testicular_swelling: false,
+      q21_explanation: '',
       parentSignature: '',
       signatureDate: '',
-      isCompleted: false,
+      isComplete: false,
     },
   });
 
-  // Auto-populate form when player data loads
+  // Reset form when player changes
   React.useEffect(() => {
     if (player) {
-      form.setValue('studentName', player.playerName || '');
-      form.setValue('dateOfBirth', player.dateOfBirth || '');
+      form.reset({
+        ...form.getValues(),
+        playerId: player.id,
+        studentName: player.playerName || '',
+      });
     }
   }, [player, form]);
 
   // Populate form with existing medical history if available
   React.useEffect(() => {
     if (existingMedicalHistory && typeof existingMedicalHistory === 'object') {
-      const data = existingMedicalHistory as any;
-      Object.keys(data).forEach(key => {
-        if (key !== 'id' && key !== 'createdAt' && key !== 'updatedAt' && data[key] !== undefined) {
-          form.setValue(key as keyof InsertMedicalHistory, data[key]);
+      // Normalize null values to appropriate defaults
+      const normalizedData: any = {};
+      Object.entries(existingMedicalHistory).forEach(([key, value]) => {
+        if (key.startsWith('q') && key.includes('_') && !key.includes('explanation')) {
+          // Boolean fields - convert null to false
+          normalizedData[key] = value === null ? false : value;
+        } else if (typeof value === 'string' || key.includes('explanation') || key.includes('signature')) {
+          // String fields - convert null to empty string
+          normalizedData[key] = value ?? '';
+        } else if (key === 'q4_concussion_count' || key === 'q20_periods_last_year') {
+          // Number fields - convert null to 0 or undefined
+          normalizedData[key] = value ?? undefined;
+        } else if (key === 'q16_body_parts') {
+          // Object field - ensure it's an object
+          normalizedData[key] = value ?? {};
+        } else {
+          // Keep other values as-is
+          normalizedData[key] = value;
         }
       });
+      form.reset(normalizedData as InsertMedicalHistory);
     }
   }, [existingMedicalHistory, form]);
 
@@ -130,7 +178,7 @@ export function MedicalHistoryForm({ playerId, onComplete, readonly = false }: M
         title: "Medical history saved",
         description: "The player's medical history has been successfully recorded.",
       });
-      queryClient.invalidateQueries({ queryKey: [`/api/players/${playerId}/medical-history`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/players', playerId, 'medical-history'] });
       if (onComplete) onComplete();
     },
     onError: (error: any) => {
@@ -152,7 +200,7 @@ export function MedicalHistoryForm({ playerId, onComplete, readonly = false }: M
         title: "Medical history updated",
         description: "The player's medical history has been successfully updated.",
       });
-      queryClient.invalidateQueries({ queryKey: [`/api/players/${playerId}/medical-history`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/players', playerId, 'medical-history'] });
       if (onComplete) onComplete();
     },
     onError: (error: any) => {
@@ -168,7 +216,7 @@ export function MedicalHistoryForm({ playerId, onComplete, readonly = false }: M
     // Mark as completed and add signature date if not provided
     const formData = {
       ...data,
-      isCompleted: true,
+      isComplete: true,
       signatureDate: data.signatureDate || new Date().toISOString().split('T')[0]
     };
 
@@ -202,7 +250,24 @@ export function MedicalHistoryForm({ playerId, onComplete, readonly = false }: M
   }
 
   const isSubmitting = createMedicalHistoryMutation.isPending || updateMedicalHistoryMutation.isPending;
-  const isCompleted = existingMedicalHistory && typeof existingMedicalHistory === 'object' && (existingMedicalHistory as any).isCompleted;
+  const isCompleted = existingMedicalHistory && typeof existingMedicalHistory === 'object' && (existingMedicalHistory as any).isComplete;
+
+  // Helper to check if any heart question is checked
+  const hasHeartIssues = form.watch('q3_heart_testing') || form.watch('q3_passed_out_exercise') || 
+    form.watch('q3_chest_pain_exercise') || form.watch('q3_tired_quickly') || 
+    form.watch('q3_racing_heart') || form.watch('q3_high_bp_cholesterol') || 
+    form.watch('q3_heart_murmur') || form.watch('q3_family_heart_death') || 
+    form.watch('q3_family_heart_disease') || form.watch('q3_viral_infection') || 
+    form.watch('q3_physician_restricted');
+
+  const hasNeuroIssues = form.watch('q5_seizure') || form.watch('q5_headaches') || 
+    form.watch('q5_numbness') || form.watch('q5_stinger_burner');
+
+  const hasInjuryHistory = form.watch('q16_sprain_strain') || form.watch('q16_broken_bones') || 
+    form.watch('q16_joint_problems');
+
+  const hasBreathingIssues = form.watch('q14_short_breath') || form.watch('q14_asthma') || 
+    form.watch('q14_seasonal_allergies');
 
   return (
     <div className="space-y-6" data-testid="medical-history-form">
@@ -211,7 +276,7 @@ export function MedicalHistoryForm({ playerId, onComplete, readonly = false }: M
         <CardHeader>
           <CardTitle className="flex items-center gap-3">
             <Heart className="h-6 w-6 text-red-500" />
-            Participation Physical Evaluation - Medical History
+            UIL Participation Physical Evaluation - Medical History
             {isCompleted && (
               <Badge className="bg-green-600 text-white">
                 <Check className="h-4 w-4 mr-1" />
@@ -224,8 +289,8 @@ export function MedicalHistoryForm({ playerId, onComplete, readonly = false }: M
               <User className="h-4 w-4" />
               <span className="font-medium">{player.playerName}</span>
             </div>
-            {player.dateOfBirth && (
-              <div>DOB: {new Date(player.dateOfBirth).toLocaleDateString()}</div>
+            {player.jerseyNumber && (
+              <Badge variant="outline">#{player.jerseyNumber}</Badge>
             )}
           </div>
         </CardHeader>
@@ -235,937 +300,1051 @@ export function MedicalHistoryForm({ playerId, onComplete, readonly = false }: M
       <Alert>
         <Shield className="h-4 w-4" />
         <AlertDescription>
-          <strong>Privacy Notice:</strong> This medical information is protected under HIPAA and FERPA regulations. 
-          Access is restricted to authorized personnel only.
+          <strong>Privacy Notice:</strong> This medical information is sensitive and confidential. 
+          Access is restricted to authorized personnel only. All access and modifications are tracked for security.
         </AlertDescription>
       </Alert>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          {/* Student Information Section */}
+          {/* Q1: Recent Medical Illness or Injury */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
-                Student Information
-              </CardTitle>
+              <CardTitle className="text-lg">Question 1: Recent Medical Issues</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="studentName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Student Name *</FormLabel>
-                      <FormControl>
-                        <Input 
-                          {...field} 
-                          readOnly={readonly}
-                          className="bg-slate-50 dark:bg-slate-800"
-                          data-testid="input-student-name"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="dateOfBirth"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Date of Birth *</FormLabel>
-                      <FormControl>
-                        <Input 
-                          {...field} 
-                          type="date"
-                          value={field.value || ''}
-                          readOnly={readonly}
-                          className="bg-slate-50 dark:bg-slate-800"
-                          data-testid="input-date-of-birth"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Medical History Questions - Organized by Category */}
-          
-          {/* Cardiovascular & Respiratory */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Heart className="h-5 w-5 text-red-500" />
-                Cardiovascular & Respiratory History
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Heart Condition */}
-              <div className="space-y-3">
-                <FormField
-                  control={form.control}
-                  name="hasHeartCondition"
-                  render={({ field }) => (
-                    <FormItem className="flex items-start space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox 
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          disabled={readonly}
-                          data-testid="checkbox-heart-condition"
-                        />
-                      </FormControl>
-                      <FormLabel className="font-normal leading-5">
-                        Has the student ever had any heart problems, heart murmur, chest pain, or shortness of breath during exercise?
-                      </FormLabel>
-                    </FormItem>
-                  )}
-                />
-                {form.watch('hasHeartCondition') && (
-                  <FormField
-                    control={form.control}
-                    name="heartConditionDetails"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Please provide details:</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            {...field} 
-                            readOnly={readonly}
-                            placeholder="Describe the heart condition, treatment, and any restrictions..."
-                            data-testid="textarea-heart-condition-details"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-              </div>
-
-              <Separator />
-
-              {/* High Blood Pressure */}
-              <div className="space-y-3">
-                <FormField
-                  control={form.control}
-                  name="hasHighBloodPressure"
-                  render={({ field }) => (
-                    <FormItem className="flex items-start space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox 
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          disabled={readonly}
-                          data-testid="checkbox-high-blood-pressure"
-                        />
-                      </FormControl>
-                      <FormLabel className="font-normal leading-5">
-                        Has the student ever been told they have high blood pressure?
-                      </FormLabel>
-                    </FormItem>
-                  )}
-                />
-                {form.watch('hasHighBloodPressure') && (
-                  <FormField
-                    control={form.control}
-                    name="bloodPressureDetails"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Please provide details:</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            {...field} 
-                            readOnly={readonly}
-                            placeholder="Include medication, monitoring requirements, etc..."
-                            data-testid="textarea-blood-pressure-details"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-              </div>
-
-              <Separator />
-
-              {/* Asthma */}
-              <div className="space-y-3">
-                <FormField
-                  control={form.control}
-                  name="hasAsthma"
-                  render={({ field }) => (
-                    <FormItem className="flex items-start space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox 
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          disabled={readonly}
-                          data-testid="checkbox-asthma"
-                        />
-                      </FormControl>
-                      <FormLabel className="font-normal leading-5">
-                        Does the student have asthma or any breathing problems?
-                      </FormLabel>
-                    </FormItem>
-                  )}
-                />
-                {form.watch('hasAsthma') && (
-                  <FormField
-                    control={form.control}
-                    name="asthmaDetails"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Please provide details:</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            {...field} 
-                            readOnly={readonly}
-                            placeholder="Include triggers, medications (inhaler type), emergency procedures..."
-                            data-testid="textarea-asthma-details"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Chronic Conditions */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Activity className="h-5 w-5 text-orange-500" />
-                Chronic Conditions & Medications
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Diabetes */}
-              <div className="space-y-3">
-                <FormField
-                  control={form.control}
-                  name="hasDiabetes"
-                  render={({ field }) => (
-                    <FormItem className="flex items-start space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox 
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          disabled={readonly}
-                          data-testid="checkbox-diabetes"
-                        />
-                      </FormControl>
-                      <FormLabel className="font-normal leading-5">
-                        Does the student have diabetes or blood sugar problems?
-                      </FormLabel>
-                    </FormItem>
-                  )}
-                />
-                {form.watch('hasDiabetes') && (
-                  <FormField
-                    control={form.control}
-                    name="diabetesDetails"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Please provide details:</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            {...field} 
-                            readOnly={readonly}
-                            placeholder="Type of diabetes, medications, monitoring requirements, emergency procedures..."
-                            data-testid="textarea-diabetes-details"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-              </div>
-
-              <Separator />
-
-              {/* Seizure Disorder */}
-              <div className="space-y-3">
-                <FormField
-                  control={form.control}
-                  name="hasSeizureDisorder"
-                  render={({ field }) => (
-                    <FormItem className="flex items-start space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox 
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          disabled={readonly}
-                          data-testid="checkbox-seizure-disorder"
-                        />
-                      </FormControl>
-                      <FormLabel className="font-normal leading-5">
-                        Has the student ever had seizures, epilepsy, or been unconscious?
-                      </FormLabel>
-                    </FormItem>
-                  )}
-                />
-                {form.watch('hasSeizureDisorder') && (
-                  <FormField
-                    control={form.control}
-                    name="seizureDisorderDetails"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Please provide details:</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            {...field} 
-                            readOnly={readonly}
-                            placeholder="Type of seizures, triggers, medications, emergency procedures..."
-                            data-testid="textarea-seizure-disorder-details"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-              </div>
-
-              <Separator />
-
-              {/* Medications */}
-              <div className="space-y-3">
-                <FormField
-                  control={form.control}
-                  name="takesMedications"
-                  render={({ field }) => (
-                    <FormItem className="flex items-start space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox 
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          disabled={readonly}
-                          data-testid="checkbox-takes-medications"
-                        />
-                      </FormControl>
-                      <FormLabel className="font-normal leading-5">
-                        Does the student currently take any medications or supplements?
-                      </FormLabel>
-                    </FormItem>
-                  )}
-                />
-                {form.watch('takesMedications') && (
-                  <FormField
-                    control={form.control}
-                    name="medicationsDetails"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Please list all medications and supplements:</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            {...field} 
-                            readOnly={readonly}
-                            placeholder="Include medication names, dosages, frequency, and purpose..."
-                            data-testid="textarea-medications-details"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-              </div>
-
-              <Separator />
-
-              {/* Allergies */}
-              <div className="space-y-3">
-                <FormField
-                  control={form.control}
-                  name="hasAllergies"
-                  render={({ field }) => (
-                    <FormItem className="flex items-start space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox 
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          disabled={readonly}
-                          data-testid="checkbox-allergies"
-                        />
-                      </FormControl>
-                      <FormLabel className="font-normal leading-5">
-                        Does the student have any allergies (food, medication, environmental)?
-                      </FormLabel>
-                    </FormItem>
-                  )}
-                />
-                {form.watch('hasAllergies') && (
-                  <FormField
-                    control={form.control}
-                    name="allergiesDetails"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Please list all allergies and reactions:</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            {...field} 
-                            readOnly={readonly}
-                            placeholder="Include specific allergens, type of reactions, and emergency procedures..."
-                            data-testid="textarea-allergies-details"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Injuries & Physical History */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-yellow-500" />
-                Injury & Physical History
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Head Injuries */}
-              <div className="space-y-3">
-                <FormField
-                  control={form.control}
-                  name="hasHeadInjuries"
-                  render={({ field }) => (
-                    <FormItem className="flex items-start space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox 
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          disabled={readonly}
-                          data-testid="checkbox-head-injuries"
-                        />
-                      </FormControl>
-                      <FormLabel className="font-normal leading-5">
-                        Has the student ever had a head injury, concussion, or been knocked unconscious?
-                      </FormLabel>
-                    </FormItem>
-                  )}
-                />
-                {form.watch('hasHeadInjuries') && (
-                  <FormField
-                    control={form.control}
-                    name="headInjuriesDetails"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Please provide details:</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            {...field} 
-                            readOnly={readonly}
-                            placeholder="Date, cause, treatment received, any lasting effects..."
-                            data-testid="textarea-head-injuries-details"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-              </div>
-
-              <Separator />
-
-              {/* Broken Bones */}
-              <div className="space-y-3">
-                <FormField
-                  control={form.control}
-                  name="hasBrokenBones"
-                  render={({ field }) => (
-                    <FormItem className="flex items-start space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox 
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          disabled={readonly}
-                          data-testid="checkbox-broken-bones"
-                        />
-                      </FormControl>
-                      <FormLabel className="font-normal leading-5">
-                        Has the student ever had any broken bones, fractures, or dislocations?
-                      </FormLabel>
-                    </FormItem>
-                  )}
-                />
-                {form.watch('hasBrokenBones') && (
-                  <FormField
-                    control={form.control}
-                    name="brokenBonesDetails"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Please provide details:</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            {...field} 
-                            readOnly={readonly}
-                            placeholder="Which bones, when, treatment, any ongoing issues..."
-                            data-testid="textarea-broken-bones-details"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-              </div>
-
-              <Separator />
-
-              {/* Joint Problems */}
-              <div className="space-y-3">
-                <FormField
-                  control={form.control}
-                  name="hasJointProblems"
-                  render={({ field }) => (
-                    <FormItem className="flex items-start space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox 
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          disabled={readonly}
-                          data-testid="checkbox-joint-problems"
-                        />
-                      </FormControl>
-                      <FormLabel className="font-normal leading-5">
-                        Has the student ever had joint pain, swelling, or problems with knees, ankles, or other joints?
-                      </FormLabel>
-                    </FormItem>
-                  )}
-                />
-                {form.watch('hasJointProblems') && (
-                  <FormField
-                    control={form.control}
-                    name="jointProblemsDetails"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Please provide details:</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            {...field} 
-                            readOnly={readonly}
-                            placeholder="Which joints, symptoms, treatment, activity restrictions..."
-                            data-testid="textarea-joint-problems-details"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-              </div>
-
-              <Separator />
-
-              {/* Surgeries */}
-              <div className="space-y-3">
-                <FormField
-                  control={form.control}
-                  name="hasSurgeries"
-                  render={({ field }) => (
-                    <FormItem className="flex items-start space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox 
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          disabled={readonly}
-                          data-testid="checkbox-surgeries"
-                        />
-                      </FormControl>
-                      <FormLabel className="font-normal leading-5">
-                        Has the student ever had any surgeries or hospitalizations?
-                      </FormLabel>
-                    </FormItem>
-                  )}
-                />
-                {form.watch('hasSurgeries') && (
-                  <FormField
-                    control={form.control}
-                    name="surgeriesDetails"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Please provide details:</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            {...field} 
-                            readOnly={readonly}
-                            placeholder="Type of surgery/hospitalization, date, recovery, any restrictions..."
-                            data-testid="textarea-surgeries-details"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Sensory & Other Conditions */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileCheck className="h-5 w-5 text-purple-500" />
-                Other Medical Conditions
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Vision Problems */}
-              <div className="space-y-3">
-                <FormField
-                  control={form.control}
-                  name="hasVisionProblems"
-                  render={({ field }) => (
-                    <FormItem className="flex items-start space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox 
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          disabled={readonly}
-                          data-testid="checkbox-vision-problems"
-                        />
-                      </FormControl>
-                      <FormLabel className="font-normal leading-5">
-                        Does the student wear glasses, contacts, or have any vision problems?
-                      </FormLabel>
-                    </FormItem>
-                  )}
-                />
-                {form.watch('hasVisionProblems') && (
-                  <FormField
-                    control={form.control}
-                    name="visionProblemsDetails"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Please provide details:</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            {...field} 
-                            readOnly={readonly}
-                            placeholder="Type of vision problem, corrective measures, any restrictions for sports..."
-                            data-testid="textarea-vision-problems-details"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-              </div>
-
-              <Separator />
-
-              {/* Hearing Problems */}
-              <div className="space-y-3">
-                <FormField
-                  control={form.control}
-                  name="hasHearingProblems"
-                  render={({ field }) => (
-                    <FormItem className="flex items-start space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox 
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          disabled={readonly}
-                          data-testid="checkbox-hearing-problems"
-                        />
-                      </FormControl>
-                      <FormLabel className="font-normal leading-5">
-                        Does the student have any hearing problems or use hearing aids?
-                      </FormLabel>
-                    </FormItem>
-                  )}
-                />
-                {form.watch('hasHearingProblems') && (
-                  <FormField
-                    control={form.control}
-                    name="hearingProblemsDetails"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Please provide details:</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            {...field} 
-                            readOnly={readonly}
-                            placeholder="Type of hearing loss, hearing aids, communication needs..."
-                            data-testid="textarea-hearing-problems-details"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-              </div>
-
-              <Separator />
-
-              {/* Additional sections continue in similar pattern... */}
-              {/* I'll add the remaining questions to keep the component comprehensive */}
-
-              {/* Skin Conditions */}
-              <div className="space-y-3">
-                <FormField
-                  control={form.control}
-                  name="hasSkinConditions"
-                  render={({ field }) => (
-                    <FormItem className="flex items-start space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox 
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          disabled={readonly}
-                          data-testid="checkbox-skin-conditions"
-                        />
-                      </FormControl>
-                      <FormLabel className="font-normal leading-5">
-                        Does the student have any skin conditions, rashes, or infections?
-                      </FormLabel>
-                    </FormItem>
-                  )}
-                />
-                {form.watch('hasSkinConditions') && (
-                  <FormField
-                    control={form.control}
-                    name="skinConditionsDetails"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Please provide details:</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            {...field} 
-                            readOnly={readonly}
-                            placeholder="Type of skin condition, treatments, contagious concerns..."
-                            data-testid="textarea-skin-conditions-details"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-              </div>
-
-              <Separator />
-
-              {/* Kidney Problems */}
-              <div className="space-y-3">
-                <FormField
-                  control={form.control}
-                  name="hasKidneyProblems"
-                  render={({ field }) => (
-                    <FormItem className="flex items-start space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox 
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          disabled={readonly}
-                          data-testid="checkbox-kidney-problems"
-                        />
-                      </FormControl>
-                      <FormLabel className="font-normal leading-5">
-                        Has the student ever had kidney or urinary tract problems?
-                      </FormLabel>
-                    </FormItem>
-                  )}
-                />
-                {form.watch('hasKidneyProblems') && (
-                  <FormField
-                    control={form.control}
-                    name="kidneyProblemsDetails"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Please provide details:</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            {...field} 
-                            readOnly={readonly}
-                            placeholder="Type of kidney/urinary problem, treatments, current status..."
-                            data-testid="textarea-kidney-problems-details"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-              </div>
-
-              <Separator />
-
-              {/* Mental Health */}
-              <div className="space-y-3">
-                <FormField
-                  control={form.control}
-                  name="hasMentalHealthConditions"
-                  render={({ field }) => (
-                    <FormItem className="flex items-start space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox 
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          disabled={readonly}
-                          data-testid="checkbox-mental-health"
-                        />
-                      </FormControl>
-                      <FormLabel className="font-normal leading-5">
-                        Does the student have any mental health conditions, anxiety, or depression?
-                      </FormLabel>
-                    </FormItem>
-                  )}
-                />
-                {form.watch('hasMentalHealthConditions') && (
-                  <FormField
-                    control={form.control}
-                    name="mentalHealthDetails"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Please provide details (optional):</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            {...field} 
-                            readOnly={readonly}
-                            placeholder="Support needs, accommodations, emergency contacts..."
-                            data-testid="textarea-mental-health-details"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-              </div>
-
-              <Separator />
-
-              {/* Eating Disorders */}
-              <div className="space-y-3">
-                <FormField
-                  control={form.control}
-                  name="hasEatingDisorders"
-                  render={({ field }) => (
-                    <FormItem className="flex items-start space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox 
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          disabled={readonly}
-                          data-testid="checkbox-eating-disorders"
-                        />
-                      </FormControl>
-                      <FormLabel className="font-normal leading-5">
-                        Has the student ever been treated for an eating disorder?
-                      </FormLabel>
-                    </FormItem>
-                  )}
-                />
-                {form.watch('hasEatingDisorders') && (
-                  <FormField
-                    control={form.control}
-                    name="eatingDisordersDetails"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Please provide details (optional):</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            {...field} 
-                            readOnly={readonly}
-                            placeholder="Treatment status, monitoring needs, support requirements..."
-                            data-testid="textarea-eating-disorders-details"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-              </div>
-
-              <Separator />
-
-              {/* Family History */}
-              <div className="space-y-3">
-                <FormField
-                  control={form.control}
-                  name="hasFamilyHistory"
-                  render={({ field }) => (
-                    <FormItem className="flex items-start space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox 
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          disabled={readonly}
-                          data-testid="checkbox-family-history"
-                        />
-                      </FormControl>
-                      <FormLabel className="font-normal leading-5">
-                        Is there any family history of heart disease, sudden death, or other significant medical conditions?
-                      </FormLabel>
-                    </FormItem>
-                  )}
-                />
-                {form.watch('hasFamilyHistory') && (
-                  <FormField
-                    control={form.control}
-                    name="familyHistoryDetails"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Please provide details:</FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            {...field} 
-                            readOnly={readonly}
-                            placeholder="Relationship to student, condition, age at diagnosis/death..."
-                            data-testid="textarea-family-history-details"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-              </div>
-
-              <Separator />
-
-              {/* Additional Concerns */}
               <FormField
                 control={form.control}
-                name="additionalConcerns"
+                name="q1_recent_illness"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Additional health concerns or information:</FormLabel>
+                  <FormItem className="flex items-start space-x-3 space-y-0">
                     <FormControl>
-                      <Textarea 
-                        {...field} 
-                        readOnly={readonly}
-                        placeholder="Any other health information, concerns, or special needs that should be known..."
-                        className="min-h-[100px]"
-                        data-testid="textarea-additional-concerns"
+                      <Checkbox 
+                        checked={!!field.value}
+                        onCheckedChange={(checked) => field.onChange(!!checked)}
+                        disabled={readonly}
+                        data-testid="checkbox-q1-recent-illness"
                       />
                     </FormControl>
-                    <FormMessage />
+                    <FormLabel className="font-normal leading-5">
+                      Has the student had a medical illness or injury since last medical evaluation or sports physical?
+                    </FormLabel>
                   </FormItem>
                 )}
               />
+              {form.watch('q1_recent_illness') && (
+                <FormField
+                  control={form.control}
+                  name="q1_explanation"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Please explain:</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          {...field}
+                          value={field.value ?? ''}
+                          readOnly={readonly}
+                          placeholder="Describe the illness or injury, treatment received, and recovery status..."
+                          data-testid="textarea-q1-explanation"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Q2: Hospitalizations and Surgeries */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Question 2: Hospitalizations & Surgeries</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <FormField
+                control={form.control}
+                name="q2_hospitalized"
+                render={({ field }) => (
+                  <FormItem className="flex items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox 
+                        checked={!!field.value}
+                        onCheckedChange={(checked) => field.onChange(!!checked)}
+                        disabled={readonly}
+                        data-testid="checkbox-q2-hospitalized"
+                      />
+                    </FormControl>
+                    <FormLabel className="font-normal">
+                      Has the student been hospitalized overnight?
+                    </FormLabel>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="q2_surgery"
+                render={({ field }) => (
+                  <FormItem className="flex items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox 
+                        checked={!!field.value}
+                        onCheckedChange={(checked) => field.onChange(!!checked)}
+                        disabled={readonly}
+                        data-testid="checkbox-q2-surgery"
+                      />
+                    </FormControl>
+                    <FormLabel className="font-normal">
+                      Has the student had surgery?
+                    </FormLabel>
+                  </FormItem>
+                )}
+              />
+              {(form.watch('q2_hospitalized') || form.watch('q2_surgery')) && (
+                <FormField
+                  control={form.control}
+                  name="q2_explanation"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Please explain:</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          {...field}
+                          value={field.value ?? ''}
+                          readOnly={readonly}
+                          placeholder="Type of hospitalization/surgery, date, reason, recovery status..."
+                          data-testid="textarea-q2-explanation"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Q3: Heart-Related Questions */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Heart className="h-5 w-5 text-red-500" />
+                Question 3: Cardiovascular History
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <FormDescription className="text-sm text-muted-foreground">
+                Check all that apply to the student's medical history:
+              </FormDescription>
+              
+              <div className="space-y-3">
+                <FormField
+                  control={form.control}
+                  name="q3_heart_testing"
+                  render={({ field }) => (
+                    <FormItem className="flex items-start space-x-3 space-y-0">
+                      <FormControl>
+                        <Checkbox 
+                          checked={!!field.value}
+                          onCheckedChange={(checked) => field.onChange(!!checked)}
+                          disabled={readonly}
+                        />
+                      </FormControl>
+                      <FormLabel className="font-normal">
+                        Has ever been told by a doctor to have heart tests (EKG, echocardiogram)
+                      </FormLabel>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="q3_passed_out_exercise"
+                  render={({ field }) => (
+                    <FormItem className="flex items-start space-x-3 space-y-0">
+                      <FormControl>
+                        <Checkbox 
+                          checked={!!field.value}
+                          onCheckedChange={(checked) => field.onChange(!!checked)}
+                          disabled={readonly}
+                        />
+                      </FormControl>
+                      <FormLabel className="font-normal">
+                        Has passed out or nearly passed out DURING or AFTER exercise
+                      </FormLabel>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="q3_chest_pain_exercise"
+                  render={({ field }) => (
+                    <FormItem className="flex items-start space-x-3 space-y-0">
+                      <FormControl>
+                        <Checkbox 
+                          checked={!!field.value}
+                          onCheckedChange={(checked) => field.onChange(!!checked)}
+                          disabled={readonly}
+                        />
+                      </FormControl>
+                      <FormLabel className="font-normal">
+                        Has discomfort, pain, tightness, or pressure in chest during exercise
+                      </FormLabel>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="q3_tired_quickly"
+                  render={({ field }) => (
+                    <FormItem className="flex items-start space-x-3 space-y-0">
+                      <FormControl>
+                        <Checkbox 
+                          checked={!!field.value}
+                          onCheckedChange={(checked) => field.onChange(!!checked)}
+                          disabled={readonly}
+                        />
+                      </FormControl>
+                      <FormLabel className="font-normal">
+                        Gets tired more quickly than friends during exercise
+                      </FormLabel>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="q3_racing_heart"
+                  render={({ field }) => (
+                    <FormItem className="flex items-start space-x-3 space-y-0">
+                      <FormControl>
+                        <Checkbox 
+                          checked={!!field.value}
+                          onCheckedChange={(checked) => field.onChange(!!checked)}
+                          disabled={readonly}
+                        />
+                      </FormControl>
+                      <FormLabel className="font-normal">
+                        Has heart that races, flutters, pounds, or skips beats
+                      </FormLabel>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="q3_high_bp_cholesterol"
+                  render={({ field }) => (
+                    <FormItem className="flex items-start space-x-3 space-y-0">
+                      <FormControl>
+                        <Checkbox 
+                          checked={!!field.value}
+                          onCheckedChange={(checked) => field.onChange(!!checked)}
+                          disabled={readonly}
+                        />
+                      </FormControl>
+                      <FormLabel className="font-normal">
+                        Has been told they have high blood pressure or high cholesterol
+                      </FormLabel>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="q3_heart_murmur"
+                  render={({ field }) => (
+                    <FormItem className="flex items-start space-x-3 space-y-0">
+                      <FormControl>
+                        <Checkbox 
+                          checked={!!field.value}
+                          onCheckedChange={(checked) => field.onChange(!!checked)}
+                          disabled={readonly}
+                        />
+                      </FormControl>
+                      <FormLabel className="font-normal">
+                        Has been told they have a heart murmur
+                      </FormLabel>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="q3_family_heart_death"
+                  render={({ field }) => (
+                    <FormItem className="flex items-start space-x-3 space-y-0">
+                      <FormControl>
+                        <Checkbox 
+                          checked={!!field.value}
+                          onCheckedChange={(checked) => field.onChange(!!checked)}
+                          disabled={readonly}
+                        />
+                      </FormControl>
+                      <FormLabel className="font-normal">
+                        Any family member died of heart problems or had sudden death before age 35
+                      </FormLabel>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="q3_family_heart_disease"
+                  render={({ field }) => (
+                    <FormItem className="flex items-start space-x-3 space-y-0">
+                      <FormControl>
+                        <Checkbox 
+                          checked={!!field.value}
+                          onCheckedChange={(checked) => field.onChange(!!checked)}
+                          disabled={readonly}
+                        />
+                      </FormControl>
+                      <FormLabel className="font-normal">
+                        Family member with heart disease, pacemaker, or defibrillator
+                      </FormLabel>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="q3_viral_infection"
+                  render={({ field }) => (
+                    <FormItem className="flex items-start space-x-3 space-y-0">
+                      <FormControl>
+                        <Checkbox 
+                          checked={!!field.value}
+                          onCheckedChange={(checked) => field.onChange(!!checked)}
+                          disabled={readonly}
+                        />
+                      </FormControl>
+                      <FormLabel className="font-normal">
+                        Had a severe viral infection (myocarditis, mononucleosis, etc.) within last month
+                      </FormLabel>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="q3_physician_restricted"
+                  render={({ field }) => (
+                    <FormItem className="flex items-start space-x-3 space-y-0">
+                      <FormControl>
+                        <Checkbox 
+                          checked={!!field.value}
+                          onCheckedChange={(checked) => field.onChange(!!checked)}
+                          disabled={readonly}
+                        />
+                      </FormControl>
+                      <FormLabel className="font-normal">
+                        Has a doctor ever restricted participation in sports for heart problems
+                      </FormLabel>
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              {hasHeartIssues && (
+                <FormField
+                  control={form.control}
+                  name="q3_explanation"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Please provide details about checked items:</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          {...field}
+                          value={field.value ?? ''}
+                          readOnly={readonly}
+                          placeholder="Provide specific details about any heart-related conditions, test results, restrictions..."
+                          className="min-h-[100px]"
+                          data-testid="textarea-q3-explanation"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Q4: Head Injuries and Concussions */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Brain className="h-5 w-5 text-purple-500" />
+                Question 4: Head Injuries & Concussions
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <FormField
+                control={form.control}
+                name="q4_head_injury"
+                render={({ field }) => (
+                  <FormItem className="flex items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox 
+                        checked={!!field.value}
+                        onCheckedChange={(checked) => field.onChange(!!checked)}
+                        disabled={readonly}
+                        data-testid="checkbox-q4-head-injury"
+                      />
+                    </FormControl>
+                    <FormLabel className="font-normal">
+                      Has the student ever had a head injury or concussion?
+                    </FormLabel>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="q4_unconscious"
+                render={({ field }) => (
+                  <FormItem className="flex items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox 
+                        checked={!!field.value}
+                        onCheckedChange={(checked) => field.onChange(!!checked)}
+                        disabled={readonly}
+                      />
+                    </FormControl>
+                    <FormLabel className="font-normal">
+                      Has been knocked out, become unconscious, or lost memory?
+                    </FormLabel>
+                  </FormItem>
+                )}
+              />
+              {(form.watch('q4_head_injury') || form.watch('q4_unconscious')) && (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="q4_concussion_count"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Number of concussions:</FormLabel>
+                        <FormControl>
+                          <Input 
+                            {...field}
+                            value={field.value ?? 0}
+                            type="number"
+                            min="0"
+                            readOnly={readonly}
+                            onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="q4_last_concussion_date"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Date of most recent concussion:</FormLabel>
+                        <FormControl>
+                          <Input 
+                            {...field}
+                            value={field.value ?? ''}
+                            type="date"
+                            readOnly={readonly}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="q4_explanation"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Please provide details:</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            {...field}
+                            value={field.value ?? ''}
+                            readOnly={readonly}
+                            placeholder="Describe circumstances, symptoms, treatment received..."
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Q5: Neurological Questions */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Question 5: Neurological History</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                <FormField
+                  control={form.control}
+                  name="q5_seizure"
+                  render={({ field }) => (
+                    <FormItem className="flex items-start space-x-3 space-y-0">
+                      <FormControl>
+                        <Checkbox 
+                          checked={!!field.value}
+                          onCheckedChange={(checked) => field.onChange(!!checked)}
+                          disabled={readonly}
+                        />
+                      </FormControl>
+                      <FormLabel className="font-normal">
+                        Has ever had a seizure
+                      </FormLabel>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="q5_headaches"
+                  render={({ field }) => (
+                    <FormItem className="flex items-start space-x-3 space-y-0">
+                      <FormControl>
+                        <Checkbox 
+                          checked={!!field.value}
+                          onCheckedChange={(checked) => field.onChange(!!checked)}
+                          disabled={readonly}
+                        />
+                      </FormControl>
+                      <FormLabel className="font-normal">
+                        Has frequent or severe headaches
+                      </FormLabel>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="q5_numbness"
+                  render={({ field }) => (
+                    <FormItem className="flex items-start space-x-3 space-y-0">
+                      <FormControl>
+                        <Checkbox 
+                          checked={!!field.value}
+                          onCheckedChange={(checked) => field.onChange(!!checked)}
+                          disabled={readonly}
+                        />
+                      </FormControl>
+                      <FormLabel className="font-normal">
+                        Has ever had numbness, tingling, or weakness in arms or legs
+                      </FormLabel>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="q5_stinger_burner"
+                  render={({ field }) => (
+                    <FormItem className="flex items-start space-x-3 space-y-0">
+                      <FormControl>
+                        <Checkbox 
+                          checked={!!field.value}
+                          onCheckedChange={(checked) => field.onChange(!!checked)}
+                          disabled={readonly}
+                        />
+                      </FormControl>
+                      <FormLabel className="font-normal">
+                        Has ever had a stinger, burner, or pinched nerve
+                      </FormLabel>
+                    </FormItem>
+                  )}
+                />
+              </div>
+              {hasNeuroIssues && (
+                <FormField
+                  control={form.control}
+                  name="q5_explanation"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Please provide details:</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          {...field}
+                          value={field.value ?? ''}
+                          readOnly={readonly}
+                          placeholder="Describe symptoms, triggers, treatment..."
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Q6: Missing Paired Organs */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Question 6: Missing Organs</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <FormField
+                control={form.control}
+                name="q6_missing_organs"
+                render={({ field }) => (
+                  <FormItem className="flex items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox 
+                        checked={!!field.value}
+                        onCheckedChange={(checked) => field.onChange(!!checked)}
+                        disabled={readonly}
+                        data-testid="checkbox-q6-missing-organs"
+                      />
+                    </FormControl>
+                    <FormLabel className="font-normal">
+                      Is the student missing a kidney, eye, testicle, or any other organ?
+                    </FormLabel>
+                  </FormItem>
+                )}
+              />
+              {form.watch('q6_missing_organs') && (
+                <FormField
+                  control={form.control}
+                  name="q6_explanation"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Please specify which organ(s):</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          {...field}
+                          value={field.value ?? ''}
+                          readOnly={readonly}
+                          placeholder="Specify which organ(s) and any protective equipment needed..."
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Q10: Exercise-related dizziness (Critical for syncope) */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Question 10: Exercise-Related Symptoms</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <FormField
+                control={form.control}
+                name="q10_dizzy_exercise"
+                render={({ field }) => (
+                  <FormItem className="flex items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox 
+                        checked={!!field.value}
+                        onCheckedChange={(checked) => field.onChange(!!checked)}
+                        disabled={readonly}
+                        data-testid="checkbox-q10-dizzy"
+                      />
+                    </FormControl>
+                    <FormLabel className="font-normal">
+                      Does the student get dizzy or feel faint during or after exercise?
+                    </FormLabel>
+                  </FormItem>
+                )}
+              />
+              {form.watch('q10_dizzy_exercise') && (
+                <FormField
+                  control={form.control}
+                  name="q10_explanation"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Please describe when this occurs:</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          {...field}
+                          value={field.value ?? ''}
+                          readOnly={readonly}
+                          placeholder="Describe triggers, frequency, recovery time..."
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Q12: Heat Illness (Critical for Texas athletes) */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Thermometer className="h-5 w-5 text-orange-500" />
+                Question 12: Heat-Related Illness
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <FormField
+                control={form.control}
+                name="q12_heat_illness"
+                render={({ field }) => (
+                  <FormItem className="flex items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox 
+                        checked={!!field.value}
+                        onCheckedChange={(checked) => field.onChange(!!checked)}
+                        disabled={readonly}
+                        data-testid="checkbox-q12-heat"
+                      />
+                    </FormControl>
+                    <FormLabel className="font-normal">
+                      Has the student ever had heat stroke, heat exhaustion, or severe muscle cramps?
+                    </FormLabel>
+                  </FormItem>
+                )}
+              />
+              {form.watch('q12_heat_illness') && (
+                <FormField
+                  control={form.control}
+                  name="q12_explanation"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Please provide details:</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          {...field}
+                          value={field.value ?? ''}
+                          readOnly={readonly}
+                          placeholder="When did it occur? What treatment was received? Any ongoing precautions..."
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Q14: Breathing and Asthma */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Question 14: Respiratory Health</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                <FormField
+                  control={form.control}
+                  name="q14_short_breath"
+                  render={({ field }) => (
+                    <FormItem className="flex items-start space-x-3 space-y-0">
+                      <FormControl>
+                        <Checkbox 
+                          checked={!!field.value}
+                          onCheckedChange={(checked) => field.onChange(!!checked)}
+                          disabled={readonly}
+                        />
+                      </FormControl>
+                      <FormLabel className="font-normal">
+                        Has unexplained shortness of breath with exercise
+                      </FormLabel>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="q14_asthma"
+                  render={({ field }) => (
+                    <FormItem className="flex items-start space-x-3 space-y-0">
+                      <FormControl>
+                        <Checkbox 
+                          checked={!!field.value}
+                          onCheckedChange={(checked) => field.onChange(!!checked)}
+                          disabled={readonly}
+                        />
+                      </FormControl>
+                      <FormLabel className="font-normal">
+                        Has asthma or uses an inhaler
+                      </FormLabel>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="q14_seasonal_allergies"
+                  render={({ field }) => (
+                    <FormItem className="flex items-start space-x-3 space-y-0">
+                      <FormControl>
+                        <Checkbox 
+                          checked={!!field.value}
+                          onCheckedChange={(checked) => field.onChange(!!checked)}
+                          disabled={readonly}
+                        />
+                      </FormControl>
+                      <FormLabel className="font-normal">
+                        Has seasonal allergies that require medication
+                      </FormLabel>
+                    </FormItem>
+                  )}
+                />
+              </div>
+              {hasBreathingIssues && (
+                <FormField
+                  control={form.control}
+                  name="q14_explanation"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Please provide details:</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          {...field}
+                          value={field.value ?? ''}
+                          readOnly={readonly}
+                          placeholder="List medications, triggers, emergency procedures..."
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Q16: Injuries and Pain */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Question 16: Injury History</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                <FormField
+                  control={form.control}
+                  name="q16_sprain_strain"
+                  render={({ field }) => (
+                    <FormItem className="flex items-start space-x-3 space-y-0">
+                      <FormControl>
+                        <Checkbox 
+                          checked={!!field.value}
+                          onCheckedChange={(checked) => field.onChange(!!checked)}
+                          disabled={readonly}
+                        />
+                      </FormControl>
+                      <FormLabel className="font-normal">
+                        Has had sprains, strains, or muscle injuries
+                      </FormLabel>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="q16_broken_bones"
+                  render={({ field }) => (
+                    <FormItem className="flex items-start space-x-3 space-y-0">
+                      <FormControl>
+                        <Checkbox 
+                          checked={!!field.value}
+                          onCheckedChange={(checked) => field.onChange(!!checked)}
+                          disabled={readonly}
+                        />
+                      </FormControl>
+                      <FormLabel className="font-normal">
+                        Has had broken or fractured bones
+                      </FormLabel>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="q16_joint_problems"
+                  render={({ field }) => (
+                    <FormItem className="flex items-start space-x-3 space-y-0">
+                      <FormControl>
+                        <Checkbox 
+                          checked={!!field.value}
+                          onCheckedChange={(checked) => field.onChange(!!checked)}
+                          disabled={readonly}
+                        />
+                      </FormControl>
+                      <FormLabel className="font-normal">
+                        Has joint problems (pain, swelling, instability)
+                      </FormLabel>
+                    </FormItem>
+                  )}
+                />
+              </div>
+              {hasInjuryHistory && (
+                <FormField
+                  control={form.control}
+                  name="q16_explanation"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Please describe injuries and affected body parts:</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          {...field}
+                          value={field.value ?? ''}
+                          readOnly={readonly}
+                          placeholder="List specific injuries, dates, affected body parts, current status..."
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Q19: Sickle Cell (Required screening) */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Question 19: Sickle Cell Trait</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <FormField
+                control={form.control}
+                name="q19_sickle_cell"
+                render={({ field }) => (
+                  <FormItem className="flex items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox 
+                        checked={!!field.value}
+                        onCheckedChange={(checked) => field.onChange(!!checked)}
+                        disabled={readonly}
+                        data-testid="checkbox-q19-sickle"
+                      />
+                    </FormControl>
+                    <FormLabel className="font-normal">
+                      Does the student have sickle cell trait or sickle cell disease?
+                    </FormLabel>
+                  </FormItem>
+                )}
+              />
+              {form.watch('q19_sickle_cell') && (
+                <FormField
+                  control={form.control}
+                  name="q19_explanation"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Please specify:</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          {...field}
+                          value={field.value ?? ''}
+                          readOnly={readonly}
+                          placeholder="Trait or disease? Any precautions or management plan..."
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Additional Questions - Condensed for brevity but maintaining all fields */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Additional Medical Information</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Q7: Under doctor's care */}
+              <FormField
+                control={form.control}
+                name="q7_doctors_care"
+                render={({ field }) => (
+                  <FormItem className="flex items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox 
+                        checked={!!field.value}
+                        onCheckedChange={(checked) => field.onChange(!!checked)}
+                        disabled={readonly}
+                      />
+                    </FormControl>
+                    <FormLabel className="font-normal">
+                      Is currently under a doctor's care for any condition
+                    </FormLabel>
+                  </FormItem>
+                )}
+              />
+
+              {/* Q8: Medications */}
+              <FormField
+                control={form.control}
+                name="q8_medications"
+                render={({ field }) => (
+                  <FormItem className="flex items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox 
+                        checked={!!field.value}
+                        onCheckedChange={(checked) => field.onChange(!!checked)}
+                        disabled={readonly}
+                      />
+                    </FormControl>
+                    <FormLabel className="font-normal">
+                      Currently takes prescription or non-prescription medications
+                    </FormLabel>
+                  </FormItem>
+                )}
+              />
+              {form.watch('q8_medications') && (
+                <FormField
+                  control={form.control}
+                  name="q8_explanation"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>List all medications:</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          {...field}
+                          value={field.value ?? ''}
+                          readOnly={readonly}
+                          placeholder="Include medication name, dosage, frequency, purpose..."
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+
+              {/* Q9: Allergies */}
+              <FormField
+                control={form.control}
+                name="q9_allergies"
+                render={({ field }) => (
+                  <FormItem className="flex items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox 
+                        checked={!!field.value}
+                        onCheckedChange={(checked) => field.onChange(!!checked)}
+                        disabled={readonly}
+                      />
+                    </FormControl>
+                    <FormLabel className="font-normal">
+                      Has allergies to medicines, foods, or stinging insects
+                    </FormLabel>
+                  </FormItem>
+                )}
+              />
+              {form.watch('q9_allergies') && (
+                <FormField
+                  control={form.control}
+                  name="q9_explanation"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>List all allergies and reactions:</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          {...field}
+                          value={field.value ?? ''}
+                          readOnly={readonly}
+                          placeholder="Include allergen, type of reaction, treatment needed (EpiPen, etc.)..."
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
             </CardContent>
           </Card>
 
@@ -1183,7 +1362,7 @@ export function MedicalHistoryForm({ playerId, onComplete, readonly = false }: M
                   <Shield className="h-4 w-4" />
                   <AlertDescription>
                     By signing below, I certify that the information provided is accurate and complete to the best of my knowledge. 
-                    I authorize school personnel to provide emergency medical care for my child if needed.
+                    I authorize qualified healthcare providers to perform a pre-participation physical evaluation and share results with appropriate school personnel.
                   </AlertDescription>
                 </Alert>
                 
