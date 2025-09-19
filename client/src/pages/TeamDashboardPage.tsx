@@ -166,6 +166,7 @@ export default function TeamDashboardPage() {
   // Pre-populate medical history when navigating to Edit Step 2
   useEffect(() => {
     if (editStep === 2 && (window as any).savedMedicalData) {
+      console.log('Pre-populating medical data:', (window as any).savedMedicalData);
       setTimeout(() => {
         const medicalData = (window as any).savedMedicalData;
         const questions = [
@@ -2504,6 +2505,9 @@ export default function TeamDashboardPage() {
                                       }
                                     });
                                     
+                                    console.log('Collected medical data:', medicalData);
+                                    console.log('Medical data keys length:', Object.keys(medicalData).length);
+                                    
                                     // Save medical history if any answers provided
                                     if (editingPlayer && Object.keys(medicalData).length > 0) {
                                       medicalData.playerId = editingPlayer.id;
@@ -2511,7 +2515,8 @@ export default function TeamDashboardPage() {
                                       medicalData.isComplete = true;
                                       medicalData.signatureDate = new Date().toISOString().split('T')[0];
                                       
-                                      await fetch(`/api/players/${editingPlayer.id}/medical-history`, {
+                                      console.log('Sending medical history data to API:', medicalData);
+                                      const medicalResponse = await fetch(`/api/players/${editingPlayer.id}/medical-history`, {
                                         method: 'POST',
                                         headers: {
                                           'Content-Type': 'application/json',
@@ -2519,6 +2524,12 @@ export default function TeamDashboardPage() {
                                         credentials: 'include',
                                         body: JSON.stringify(medicalData)
                                       });
+                                      console.log('Medical history API response:', medicalResponse.status, medicalResponse.statusText);
+                                      
+                                      if (!medicalResponse.ok) {
+                                        const errorText = await medicalResponse.text();
+                                        console.error('Failed to save medical history:', errorText);
+                                      }
                                     }
 
                                     // Success - refresh and close
