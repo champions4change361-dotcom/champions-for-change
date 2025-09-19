@@ -5,12 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Trophy, Users, MessageSquare, Calendar, CheckCircle, ArrowLeft, Mail, Globe, ArrowRight, Eye, EyeOff } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Trophy, Users, MessageSquare, Calendar, CheckCircle, ArrowLeft, Mail, Globe, ArrowRight, Eye, EyeOff, Settings, Calculator } from "lucide-react";
 import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { insertTeamSchema, InsertTeam } from "@shared/schema";
@@ -52,6 +53,13 @@ export default function TeamSignupPage() {
   const [authMethod, setAuthMethod] = useState<'google' | 'email'>('google');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Hybrid subscription state
+  const [addons, setAddons] = useState({
+    tournamentPerEvent: false,
+    teamManagement: false
+  });
+  const [livePricing, setLivePricing] = useState<any>(null);
 
   // Get plan and price from URL params
   const urlParams = new URLSearchParams(window.location.search);
@@ -120,6 +128,25 @@ export default function TeamSignupPage() {
   };
 
   const currentPlan = planConfig[plan as keyof typeof planConfig] || planConfig.growing;
+
+  // Live pricing calculator API call
+  const { data: pricingData, refetch: recalculatePrice } = useQuery({
+    queryKey: ['pricing-calculator', plan, addons],
+    queryFn: async () => {
+      const response = await apiRequest('/api/pricing/calculate', 'POST', {
+        baseType: 'team',
+        teamTier: plan as 'starter' | 'growing' | 'elite',
+        addons: addons
+      });
+      return response;
+    },
+    enabled: true
+  });
+
+  // Update live pricing when addons change
+  useEffect(() => {
+    recalculatePrice();
+  }, [addons, recalculatePrice]);
 
   // Team information form
   const teamForm = useForm<TeamSignupForm>({
@@ -291,6 +318,109 @@ export default function TeamSignupPage() {
                     </div>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Hybrid Subscription Add-ons */}
+            <Card className="mt-6 bg-slate-800/50 border-slate-600/50">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-white flex items-center">
+                  <Settings className="h-5 w-5 mr-2" />
+                  Add Tournament Features
+                </CardTitle>
+                <CardDescription className="text-slate-400">
+                  Enhance your subscription with tournament organizing capabilities
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Tournament Per-Event Add-on */}
+                <div className="flex items-center justify-between p-4 bg-slate-700/30 rounded-lg border border-slate-600/30">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-3">
+                      <Trophy className="h-5 w-5 text-yellow-400" />
+                      <div>
+                        <h4 className="font-semibold text-white">Tournament Hosting</h4>
+                        <p className="text-sm text-slate-400">Host tournaments with $50 per event fee</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <span className="text-slate-300 font-medium">$50/event</span>
+                    <Switch
+                      checked={addons.tournamentPerEvent}
+                      onCheckedChange={(checked) => 
+                        setAddons(prev => ({ ...prev, tournamentPerEvent: checked }))
+                      }
+                      data-testid="switch-tournament-addon"
+                    />
+                  </div>
+                </div>
+
+                {/* Team Management Add-on (for future organizers) */}
+                <div className="flex items-center justify-between p-4 bg-slate-700/30 rounded-lg border border-slate-600/30 opacity-60">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-3">
+                      <Users className="h-5 w-5 text-blue-400" />
+                      <div>
+                        <h4 className="font-semibold text-white">Advanced Team Management</h4>
+                        <p className="text-sm text-slate-400">Additional team coordination tools (Future)</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <span className="text-slate-300 font-medium">$20/month</span>
+                    <Switch
+                      checked={false}
+                      disabled={true}
+                      data-testid="switch-team-addon"
+                    />
+                  </div>
+                </div>
+
+                {/* Live Pricing Calculator */}
+                {pricingData && (
+                  <div className="mt-4 p-4 bg-blue-900/20 border border-blue-500/30 rounded-lg">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-semibold text-white flex items-center">
+                        <Calculator className="h-4 w-4 mr-2" />
+                        Live Pricing Calculator
+                      </h4>
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between text-slate-300">
+                        <span>Base Subscription ({currentPlan.name}):</span>
+                        <span className="font-medium">${pricingData.breakdown?.baseSubscription || currentPlan.price.replace('$', '')}/month</span>
+                      </div>
+                      {addons.tournamentPerEvent && (
+                        <div className="flex justify-between text-slate-300">
+                          <span>Tournament Hosting:</span>
+                          <span className="font-medium">${pricingData.breakdown?.perTournamentFee || 50}/event</span>
+                        </div>
+                      )}
+                      {pricingData.totals?.recurringAddons > 0 && (
+                        <div className="flex justify-between text-slate-300">
+                          <span>Monthly Add-ons:</span>
+                          <span className="font-medium">${pricingData.totals.recurringAddons}/month</span>
+                        </div>
+                      )}
+                      <hr className="border-slate-600/50 my-2" />
+                      <div className="flex justify-between text-white font-semibold text-base">
+                        <span>Monthly Total:</span>
+                        <span className="text-blue-400">${pricingData.totals?.monthly || currentPlan.price.replace('$', '')}/month</span>
+                      </div>
+                      {addons.tournamentPerEvent && (
+                        <div className="text-xs text-slate-400 mt-2">
+                          * Plus ${pricingData.totals?.perEventFee || 50} per tournament you host
+                        </div>
+                      )}
+                      {pricingData.totals?.annualSavings > 0 && (
+                        <div className="text-xs text-green-400 mt-2">
+                          💰 Save ${pricingData.totals.annualSavings} with annual billing
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
