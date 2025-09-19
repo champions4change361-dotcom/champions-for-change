@@ -52,42 +52,42 @@ export default function TrialSignup() {
       name: 'Starter Team',
       price: '$23',
       period: 'month',
-      description: 'Team management + limited tournament hosting',
+      description: 'Everything Jersey Watch offers + professional tournament hosting',
       features: [
         'Up to 20 players',
-        '1 tournament per year included',
-        'Additional tournaments: $25 each',
-        'Module-based website builder',
+        '1 professional tournament per year included',
+        'Additional tournaments: $25 each (vs $50+ elsewhere)',
+        'Module-based website builder (Jersey Watch alternative)',
         '400 communications/month',
-        'Basic roster management'
+        'Smart seeding algorithm (not random brackets)'
       ]
     },
     growing: {
       name: 'Growing Team',
       price: '$39',
       period: 'month', 
-      description: 'Full team management + tournament hosting',
+      description: 'Complete team platform + professional tournament business tools',
       features: [
         'Up to 35 players',
-        '5 tournaments per year included',
-        'Additional tournaments: $25 each',
-        'Advanced module builder',
+        '5 professional tournaments per year included',
+        'Additional tournaments: $25 each (50% less than competitors)',
+        'Advanced module builder + tournament formats',
         '4,000 communications/month',
-        'Parent portal access'
+        'Pool Play, Double Elimination, Round Robin (vs basic brackets)'
       ]
     },
     elite: {
       name: 'Elite Program',
       price: '$63',
       period: 'month',
-      description: 'Unlimited team management + tournament hosting',
+      description: 'Enterprise-grade team management + unlimited tournament hosting',
       features: [
         'Unlimited players & teams',
-        '10 tournaments per year included',
-        'Additional tournaments: $25 each',
-        'Premium module builder',
+        '10 professional tournaments per year included',
+        'Additional tournaments: $25 each (enterprise pricing for everyone)',
+        'Premium module builder + all tournament formats',
         '16,000 communications/month',
-        'Multi-team coordination'
+        'Swiss System, Leaderboards, Multi-division management'
       ]
     },
     // Tournament Organizer Plans
@@ -95,28 +95,28 @@ export default function TrialSignup() {
       name: 'Annual Tournament Organizer',
       price: '$99',
       period: 'year',
-      description: 'Professional single-event tournament hosting',
+      description: 'Enterprise tournament tools at 1/10th the cost of competitors',
       features: [
-        'One professional tournament per year',
-        'Smart seeding algorithm (vs random)',
-        'Multiple formats: Single/Double/Pool Play',
-        'Module-based website builder',
-        'Payment processing & registration',
-        'Professional branding'
+        'One professional tournament (vs basic Challonge brackets)',
+        'Smart skill-based seeding algorithm (not random placement)',
+        'Multiple formats: Single/Double/Pool/Round Robin/Swiss',
+        'Module-based website builder (easy start)',
+        'Automatic bye handling + tiebreaker systems',
+        'Professional registration + payment processing'
       ]
     },
     monthly: {
       name: 'Multi-Tournament Organizer',
       price: '$39',
       period: 'month',
-      description: 'Unlimited professional tournament hosting',
+      description: 'Complete tournament business platform with growth path',
       features: [
-        'Unlimited tournaments',
-        'Smart seeding + multiple formats',
-        'Module-based + White-label access',
-        'Custom domains & branding',
-        'Advanced analytics & reporting',
-        'Priority support'
+        'Unlimited professional tournaments',
+        'All tournament formats + smart seeding (enterprise-grade)',
+        'CHOICE: Module-based OR White-label building',
+        'Custom domains + complete branding control',
+        'Skills-based progression: Start simple → Go advanced',
+        'Everything enterprise companies get (no feature restrictions)'
       ]
     }
   };
