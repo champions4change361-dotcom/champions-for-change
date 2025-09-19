@@ -1515,7 +1515,11 @@ export default function TeamDashboardPage() {
                                 onClick={() => {
                                   // Validate and collect Step 2 medical questions before proceeding
                                   if (registrationStep === 2) {
+                                    console.log('ADD PLAYER: Validating Step 2, looking for radio buttons...');
+                                    const allQRadios = document.querySelectorAll('input[name^="q"]');
                                     const answeredQuestions = document.querySelectorAll('input[name^="q"]:checked');
+                                    console.log(`ADD PLAYER: Found ${allQRadios.length} total radio buttons, ${answeredQuestions.length} checked`);
+                                    
                                     if (answeredQuestions.length < 21) {
                                       alert(`Please answer all 21 medical history questions before proceeding. You have answered ${answeredQuestions.length} out of 21 questions.`);
                                       return;
@@ -1548,7 +1552,9 @@ export default function TeamDashboardPage() {
                                     ];
                                     
                                     questions.forEach(({ key, name }) => {
+                                      const allRadios = document.querySelectorAll(`input[name="${name}"]`);
                                       const checkedRadio = document.querySelector(`input[name="${name}"]:checked`);
+                                      console.log(`ADD PLAYER ${name}: found ${allRadios.length} radios, ${checkedRadio ? '1 checked' : 'none checked'}`);
                                       if (checkedRadio) {
                                         medicalData[key] = (checkedRadio as HTMLInputElement).value === 'yes';
                                       }
