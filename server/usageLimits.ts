@@ -50,12 +50,14 @@ export const TOURNAMENT_CREDIT_PACKAGES = {
 
 export class UsageLimitService {
   
-  // Check if user can create a tournament
+  // Check if user can create a tournament based on hybrid subscription
   static async canCreateTournament(userId: string): Promise<{
     allowed: boolean;
     reason?: string;
     suggestedAction?: string;
     creditsAvailable?: number;
+    requiresPerEventCharge?: boolean;
+    perEventCharge?: number;
   }> {
     const [user] = await db.select().from(users).where(eq(users.id, userId));
     if (!user) {
@@ -68,30 +70,128 @@ export class UsageLimitService {
     // Get updated user data after potential reset
     const [updatedUser] = await db.select().from(users).where(eq(users.id, userId));
     
-    // Check subscription limits - unlimited for paid plans
-    if (updatedUser.subscriptionPlan !== 'starter' && updatedUser.subscriptionPlan !== 'free') {
+    // Get hybrid subscription limits
+    const limits = this.getHybridSubscriptionLimits(updatedUser);
+    
+    // If unlimited subscription, allow creation
+    if (limits.unlimited) {
       return { allowed: true };
     }
     
+    // Check if creating tournament requires per-event charge
+    const requiresPerEventCharge = limits.requiresPerEventCharge;
+    const perEventCharge = requiresPerEventCharge ? 50 : 0; // $50 per tournament for team subscribers hosting tournaments
+    
     // Check monthly limit
-    if (updatedUser.currentMonthTournaments < updatedUser.monthlyTournamentLimit) {
-      return { allowed: true };
+    if (updatedUser.currentMonthTournaments < limits.monthlyLimit) {
+      return { 
+        allowed: true,
+        requiresPerEventCharge,
+        perEventCharge 
+      };
     }
     
     // Check if they have credits
     if (updatedUser.tournamentCredits > 0) {
       return { 
         allowed: true, 
-        creditsAvailable: updatedUser.tournamentCredits 
+        creditsAvailable: updatedUser.tournamentCredits,
+        requiresPerEventCharge,
+        perEventCharge
       };
     }
     
     // Limit reached - suggest upgrade options
     return {
       allowed: false,
-      reason: `You've reached your monthly limit of ${updatedUser.monthlyTournamentLimit} tournaments`,
-      suggestedAction: 'upgrade_or_buy_credits'
+      reason: `You've reached your monthly limit of ${limits.monthlyLimit} tournaments`,
+      suggestedAction: this.getSuggestedAction(updatedUser),
+      requiresPerEventCharge,
+      perEventCharge
     };
+  }
+
+  // Get tournament limits based on hybrid subscription
+  static getHybridSubscriptionLimits(user: any): {
+    monthlyLimit: number;
+    unlimited: boolean;
+    requiresPerEventCharge: boolean;
+    subscriptionType: string;
+  } {
+    // Check if user has hybrid subscription
+    if (user.hybridSubscription) {
+      const { baseType, teamTier, organizerPlan, addons } = user.hybridSubscription;
+      
+      // Team subscribers
+      if (baseType === 'team') {
+        const requiresPerEventCharge = addons?.tournamentPerEvent === true;
+        
+        switch (teamTier) {
+          case 'starter':
+            return { monthlyLimit: 5, unlimited: false, requiresPerEventCharge, subscriptionType: 'team-starter' };
+          case 'growing':
+            return { monthlyLimit: 15, unlimited: false, requiresPerEventCharge, subscriptionType: 'team-growing' };
+          case 'elite':
+            return { monthlyLimit: 50, unlimited: false, requiresPerEventCharge, subscriptionType: 'team-elite' };
+        }
+      }
+      
+      // Tournament organizers
+      if (baseType === 'organizer') {
+        switch (organizerPlan) {
+          case 'monthly':
+            return { monthlyLimit: 25, unlimited: false, requiresPerEventCharge: false, subscriptionType: 'organizer-monthly' };
+          case 'annual':
+            return { monthlyLimit: -1, unlimited: true, requiresPerEventCharge: false, subscriptionType: 'organizer-annual' };
+        }
+      }
+      
+      // District subscriptions
+      if (baseType === 'district') {
+        return { monthlyLimit: -1, unlimited: true, requiresPerEventCharge: false, subscriptionType: 'district' };
+      }
+    }
+    
+    // Legacy subscription plan fallback
+    const legacyLimits = this.getLegacySubscriptionLimits(user.subscriptionPlan);
+    return legacyLimits;
+  }
+
+  // Legacy subscription limits for backward compatibility
+  static getLegacySubscriptionLimits(subscriptionPlan: string): {
+    monthlyLimit: number;
+    unlimited: boolean;
+    requiresPerEventCharge: boolean;
+    subscriptionType: string;
+  } {
+    switch (subscriptionPlan) {
+      case 'starter':
+      case 'free':
+        return { monthlyLimit: 3, unlimited: false, requiresPerEventCharge: false, subscriptionType: 'legacy-starter' };
+      case 'growing':
+        return { monthlyLimit: 15, unlimited: false, requiresPerEventCharge: false, subscriptionType: 'legacy-growing' };
+      case 'elite':
+        return { monthlyLimit: 50, unlimited: false, requiresPerEventCharge: false, subscriptionType: 'legacy-elite' };
+      case 'tournament-organizer':
+        return { monthlyLimit: 25, unlimited: false, requiresPerEventCharge: false, subscriptionType: 'legacy-organizer' };
+      case 'business-enterprise':
+      case 'district-enterprise':
+      case 'enterprise':
+      case 'annual-pro':
+        return { monthlyLimit: -1, unlimited: true, requiresPerEventCharge: false, subscriptionType: 'legacy-enterprise' };
+      default:
+        return { monthlyLimit: 2, unlimited: false, requiresPerEventCharge: false, subscriptionType: 'legacy-default' };
+    }
+  }
+
+  // Get suggested action based on subscription
+  static getSuggestedAction(user: any): string {
+    if (user.hybridSubscription?.baseType === 'team') {
+      return 'upgrade_team_tier_or_buy_credits';
+    } else if (user.hybridSubscription?.baseType === 'organizer') {
+      return 'upgrade_to_annual_or_buy_credits';
+    }
+    return 'upgrade_or_buy_credits';
   }
   
   // Use a tournament slot (monthly limit or credit)
