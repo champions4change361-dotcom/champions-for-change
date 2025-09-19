@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Users, Settings, User, Crown, Plus, Upload, Heart, FileCheck } from 'lucide-react';
+import { ArrowLeft, Users, Settings, User, Crown, Plus, Upload, Heart, FileCheck, MapPin, ChevronRight, ChevronLeft, Check, Loader2, Search } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useToast } from '@/hooks/use-toast';
@@ -27,6 +27,11 @@ export default function TeamDashboardPage() {
   const { id } = useParams();
   const [location, navigate] = useLocation();
   const [isAddPlayerOpen, setIsAddPlayerOpen] = useState(false);
+  const [registrationStep, setRegistrationStep] = useState(1); // 1: Demographics, 2: Medical History, 3: Finalize
+  const [addressSuggestions, setAddressSuggestions] = useState<any[]>([]);
+  const [isLoadingAddress, setIsLoadingAddress] = useState(false);
+  const [addressSearchQuery, setAddressSearchQuery] = useState('');
+  const [showAddressSuggestions, setShowAddressSuggestions] = useState(false);
   const [isEditPlayerOpen, setIsEditPlayerOpen] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState<TeamPlayer | null>(null);
   const [isEditTeamOpen, setIsEditTeamOpen] = useState(false);
@@ -277,6 +282,62 @@ export default function TeamDashboardPage() {
     setIsMedicalHistoryOpen(true);
   };
 
+  // Search for address using Nominatim (OpenStreetMap) - completely free, no API key required
+  const searchAddress = async (query: string) => {
+    if (query.length < 5) {
+      setAddressSuggestions([]);
+      return;
+    }
+
+    setIsLoadingAddress(true);
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=us&limit=5&addressdetails=1`
+      );
+      
+      if (!response.ok) throw new Error('Failed to fetch addresses');
+      
+      const results = await response.json();
+      setAddressSuggestions(results);
+      setShowAddressSuggestions(true);
+    } catch (error) {
+      console.error('Address search error:', error);
+      setAddressSuggestions([]);
+    } finally {
+      setIsLoadingAddress(false);
+    }
+  };
+
+  // Handle address selection - auto-fill city, state, zip
+  const selectAddress = (suggestion: any) => {
+    const address = suggestion.address || {};
+    const streetNumber = address.house_number || '';
+    const streetName = address.road || '';
+    const fullStreet = `${streetNumber} ${streetName}`.trim();
+    const city = address.city || address.town || address.village || '';
+    const state = address.state || '';
+    const zipCode = address.postcode || '';
+    
+    // Create the full address string
+    const fullAddress = `${fullStreet}, ${city}, ${state} ${zipCode}`;
+    
+    addPlayerForm.setValue('homeAddress', fullAddress);
+    setAddressSuggestions([]);
+    setShowAddressSuggestions(false);
+    setAddressSearchQuery('');
+  };
+
+  // Handle when dialog closes - reset step
+  const handleDialogClose = (open: boolean) => {
+    setIsAddPlayerOpen(open);
+    if (!open) {
+      setRegistrationStep(1);
+      addPlayerForm.reset();
+      setAddressSuggestions([]);
+      setAddressSearchQuery('');
+    }
+  };
+
   const getSubscriptionBadgeVariant = (status: string | null) => {
     switch (status) {
       case 'active': return 'default';
@@ -500,24 +561,55 @@ export default function TeamDashboardPage() {
                     Manage your team's players and roster ({players.length} players)
                   </CardDescription>
                 </div>
-                <Dialog open={isAddPlayerOpen} onOpenChange={setIsAddPlayerOpen}>
+                <Dialog open={isAddPlayerOpen} onOpenChange={handleDialogClose}>
                   <DialogTrigger asChild>
                     <Button className="bg-blue-600 hover:bg-blue-700 text-white" data-testid="button-add-player">
                       <Plus className="w-4 h-4 mr-2" />
                       Add Player
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="bg-slate-800 border-slate-700 max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <DialogContent className="bg-slate-800 border-slate-700 max-w-3xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
-                      <DialogTitle className="text-slate-100">Add New Player</DialogTitle>
+                      <DialogTitle className="text-slate-100 text-xl">Player Registration</DialogTitle>
                       <DialogDescription className="text-slate-300">
-                        Add a new player to your team roster with all required information.
+                        Complete all three steps to register a new player
                       </DialogDescription>
                     </DialogHeader>
+                    
+                    {/* Progress Indicator */}
+                    <div className="flex items-center justify-between mb-6 px-2">
+                      <div className="flex items-center flex-1">
+                        <div className={`flex items-center justify-center w-10 h-10 rounded-full ${registrationStep >= 1 ? 'bg-blue-600' : 'bg-slate-600'} text-white`}>
+                          {registrationStep > 1 ? <Check className="w-5 h-5" /> : '1'}
+                        </div>
+                        <div className={`flex-1 h-1 mx-2 ${registrationStep > 1 ? 'bg-blue-600' : 'bg-slate-600'}`} />
+                        
+                        <div className={`flex items-center justify-center w-10 h-10 rounded-full ${registrationStep >= 2 ? 'bg-blue-600' : 'bg-slate-600'} text-white`}>
+                          {registrationStep > 2 ? <Check className="w-5 h-5" /> : '2'}
+                        </div>
+                        <div className={`flex-1 h-1 mx-2 ${registrationStep > 2 ? 'bg-blue-600' : 'bg-slate-600'}`} />
+                        
+                        <div className={`flex items-center justify-center w-10 h-10 rounded-full ${registrationStep >= 3 ? 'bg-blue-600' : 'bg-slate-600'} text-white`}>
+                          {registrationStep > 3 ? <Check className="w-5 h-5" /> : '3'}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="text-center mb-4">
+                      <h3 className="text-lg font-semibold text-slate-100">
+                        {registrationStep === 1 && 'Step 1: Player Information'}
+                        {registrationStep === 2 && 'Step 2: Medical History'}
+                        {registrationStep === 3 && 'Step 3: Documents & Signature'}
+                      </h3>
+                    </div>
                     <Form {...addPlayerForm}>
                       <form onSubmit={addPlayerForm.handleSubmit((data) => addPlayerMutation.mutate(data))} className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <FormField
+                        
+                        {/* Step 1: Demographics */}
+                        {registrationStep === 1 && (
+                          <div className="space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <FormField
                             control={addPlayerForm.control}
                             name="playerName"
                             render={({ field }) => (
@@ -605,10 +697,65 @@ export default function TeamDashboardPage() {
                             name="homeAddress"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel className="text-slate-100">Home Address</FormLabel>
+                                <FormLabel className="text-slate-100">
+                                  <MapPin className="w-4 h-4 inline mr-1" />
+                                  Home Address (Start typing to search)
+                                </FormLabel>
                                 <FormControl>
-                                  <Textarea {...field} value={field.value || ''} className="bg-slate-700 border-slate-600 text-slate-100" data-testid="input-home-address" />
+                                  <div className="relative">
+                                    <Input 
+                                      {...field}
+                                      value={addressSearchQuery || field.value || ''}
+                                      onChange={(e) => {
+                                        const value = e.target.value;
+                                        setAddressSearchQuery(value);
+                                        field.onChange(value);
+                                        if (value.length > 4) {
+                                          searchAddress(value);
+                                        } else {
+                                          setAddressSuggestions([]);
+                                          setShowAddressSuggestions(false);
+                                        }
+                                      }}
+                                      className="bg-slate-700 border-slate-600 text-slate-100 pr-10" 
+                                      placeholder="123 Main St, City, State"
+                                      data-testid="input-home-address"
+                                    />
+                                    {isLoadingAddress && (
+                                      <Loader2 className="absolute right-3 top-3 w-4 h-4 animate-spin text-slate-400" />
+                                    )}
+                                    {!isLoadingAddress && addressSearchQuery && (
+                                      <Search className="absolute right-3 top-3 w-4 h-4 text-slate-400" />
+                                    )}
+                                    
+                                    {/* Address Suggestions Dropdown */}
+                                    {showAddressSuggestions && addressSuggestions.length > 0 && (
+                                      <div className="absolute z-50 w-full mt-1 bg-slate-700 border border-slate-600 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                                        {addressSuggestions.map((suggestion, index) => (
+                                          <button
+                                            key={index}
+                                            type="button"
+                                            onClick={() => selectAddress(suggestion)}
+                                            className="w-full px-4 py-2 text-left text-slate-100 hover:bg-slate-600 focus:bg-slate-600 focus:outline-none transition-colors"
+                                          >
+                                            <div className="flex items-start gap-2">
+                                              <MapPin className="w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0" />
+                                              <div>
+                                                <div className="font-medium">{suggestion.display_name?.split(',')[0]}</div>
+                                                <div className="text-sm text-slate-300">
+                                                  {suggestion.display_name?.split(',').slice(1).join(',')}
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </button>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
                                 </FormControl>
+                                <p className="text-xs text-slate-400 mt-1">
+                                  Powered by OpenStreetMap - Free address lookup
+                                </p>
                                 <FormMessage />
                               </FormItem>
                             )}
@@ -785,13 +932,138 @@ export default function TeamDashboardPage() {
                             </div>
                           </div>
                         </div>
-                        <div className="flex justify-end space-x-2 pt-4">
-                          <Button type="button" variant="outline" onClick={() => setIsAddPlayerOpen(false)} className="border-slate-600 text-slate-100 hover:bg-slate-700">
-                            Cancel
-                          </Button>
-                          <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white" disabled={addPlayerMutation.isPending} data-testid="button-save-player">
-                            {addPlayerMutation.isPending ? 'Adding...' : 'Add Player'}
-                          </Button>
+                          </div>
+                        )}
+                        
+                        {/* Step 2: Medical History (PPE Questions) */}
+                        {registrationStep === 2 && (
+                          <div className="space-y-4">
+                            <Alert className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700 mb-4">
+                              <Heart className="h-4 w-4 text-blue-600" />
+                              <AlertDescription>
+                                Please answer the following medical history questions for UIL participation physical evaluation.
+                              </AlertDescription>
+                            </Alert>
+                            
+                            {/* Sample medical questions - Add all 21 questions here */}
+                            <div className="space-y-4">
+                              <div className="flex items-center space-x-2">
+                                <input type="checkbox" className="w-4 h-4" />
+                                <label className="text-slate-100">Has the student had any recent illness or injury?</label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <input type="checkbox" className="w-4 h-4" />
+                                <label className="text-slate-100">Has the student been hospitalized or had surgery?</label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <input type="checkbox" className="w-4 h-4" />
+                                <label className="text-slate-100">Has the student had any heart problems or chest pain during exercise?</label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <input type="checkbox" className="w-4 h-4" />
+                                <label className="text-slate-100">Does the student have any allergies to medications?</label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <input type="checkbox" className="w-4 h-4" />
+                                <label className="text-slate-100">Has the student had a concussion or head injury?</label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <input type="checkbox" className="w-4 h-4" />
+                                <label className="text-slate-100">Does the student have asthma or breathing problems?</label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <input type="checkbox" className="w-4 h-4" />
+                                <label className="text-slate-100">Is the student currently taking any medications?</label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <input type="checkbox" className="w-4 h-4" />
+                                <label className="text-slate-100">Has the student had heat-related illness during exercise?</label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <input type="checkbox" className="w-4 h-4" />
+                                <label className="text-slate-100">Does the student have any vision problems?</label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <input type="checkbox" className="w-4 h-4" />
+                                <label className="text-slate-100">Has the student had any broken bones or joint problems?</label>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Step 3: Documents & Signature */}
+                        {registrationStep === 3 && (
+                          <div className="space-y-4">
+                            <Alert className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700 mb-4">
+                              <FileCheck className="h-4 w-4 text-green-600" />
+                              <AlertDescription>
+                                Upload required documents and provide a digital signature to complete registration.
+                              </AlertDescription>
+                            </Alert>
+                            
+                            <div className="space-y-4">
+                              <h3 className="text-lg font-semibold text-slate-100">Digital Signature</h3>
+                              <div className="border-2 border-dashed border-slate-600 rounded-lg p-8 text-center">
+                                <p className="text-slate-300 mb-4">Click or touch here to sign</p>
+                                <div className="bg-slate-700 h-32 rounded flex items-center justify-center">
+                                  <span className="text-slate-400">Signature Pad (Touch to sign)</span>
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-center space-x-2">
+                                <input type="checkbox" className="w-4 h-4" />
+                                <label className="text-slate-100 text-sm">
+                                  I certify that all information provided is true and accurate. I understand this medical history will be used for athletic participation evaluation.
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Navigation Buttons */}
+                        <div className="flex justify-between pt-4">
+                          <div>
+                            {registrationStep > 1 && (
+                              <Button 
+                                type="button" 
+                                variant="outline" 
+                                onClick={() => setRegistrationStep(registrationStep - 1)} 
+                                className="border-slate-600 text-slate-100 hover:bg-slate-700"
+                              >
+                                <ChevronLeft className="w-4 h-4 mr-2" />
+                                Previous
+                              </Button>
+                            )}
+                          </div>
+                          <div className="flex space-x-2">
+                            <Button 
+                              type="button" 
+                              variant="outline" 
+                              onClick={() => handleDialogClose(false)} 
+                              className="border-slate-600 text-slate-100 hover:bg-slate-700"
+                            >
+                              Cancel
+                            </Button>
+                            {registrationStep < 3 ? (
+                              <Button 
+                                type="button" 
+                                onClick={() => setRegistrationStep(registrationStep + 1)} 
+                                className="bg-blue-600 hover:bg-blue-700 text-white"
+                              >
+                                Next
+                                <ChevronRight className="w-4 h-4 ml-2" />
+                              </Button>
+                            ) : (
+                              <Button 
+                                type="submit" 
+                                className="bg-green-600 hover:bg-green-700 text-white" 
+                                disabled={addPlayerMutation.isPending} 
+                                data-testid="button-save-player"
+                              >
+                                {addPlayerMutation.isPending ? 'Submitting...' : 'Complete Registration'}
+                              </Button>
+                            )}
+                          </div>
                         </div>
                       </form>
                     </Form>
