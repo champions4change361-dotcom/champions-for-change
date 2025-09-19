@@ -21,6 +21,7 @@ import {
 import SmartSeedingDemo from '@/components/SmartSeedingDemo';
 import TournamentFormatShowcase from '@/components/TournamentFormatShowcase';
 import BuildingChoiceDemo from '@/components/BuildingChoiceDemo';
+import ValueDiscoveryOverview from '@/components/ValueDiscoveryOverview';
 
 interface TrialFlowStep {
   id: string;
@@ -34,6 +35,16 @@ interface TrialFlowStep {
 }
 
 const trialFlowSteps: TrialFlowStep[] = [
+  {
+    id: 'value-overview',
+    title: 'Why Choose Our Platform?',
+    description: 'Discover our competitive advantages vs Challonge, Jersey Watch, and other platforms',
+    icon: Trophy,
+    component: ValueDiscoveryOverview,
+    forPlans: ['all'],
+    competitorComparison: 'Other platforms have significant limitations',
+    valueProposition: 'Enterprise features for everyone with complete flexibility'
+  },
   {
     id: 'smart-seeding',
     title: 'Smart Seeding Algorithm',
@@ -335,7 +346,15 @@ export default function TrialExperienceFlow({
 
       {/* Demo Component */}
       <div className="pt-8">
-        <CurrentComponent />
+        {currentStepData.id === 'value-overview' ? (
+          <CurrentComponent
+            selectedPlan={selectedPlan}
+            onStartFlow={() => handleNext()}
+            onSkipToTrial={onStartTrial}
+          />
+        ) : (
+          <CurrentComponent />
+        )}
       </div>
 
       {/* Bottom Navigation */}
