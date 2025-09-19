@@ -1310,9 +1310,9 @@ export default function TeamDashboardPage() {
                             {registrationStep > 1 && (
                               <Button 
                                 type="button" 
-                                variant="outline" 
+                                variant="secondary" 
                                 onClick={() => setRegistrationStep(registrationStep - 1)} 
-                                className="border-slate-600 text-slate-100 hover:bg-slate-700"
+                                className="bg-slate-700 border-slate-600 text-slate-100 hover:bg-slate-600 hover:text-white"
                               >
                                 <ChevronLeft className="w-4 h-4 mr-2" />
                                 Previous
@@ -1322,9 +1322,9 @@ export default function TeamDashboardPage() {
                           <div className="flex space-x-2">
                             <Button 
                               type="button" 
-                              variant="outline" 
+                              variant="secondary" 
                               onClick={() => handleDialogClose(false)} 
-                              className="border-slate-600 text-slate-100 hover:bg-slate-700"
+                              className="bg-slate-700 border-slate-600 text-slate-100 hover:bg-slate-600 hover:text-white"
                             >
                               Cancel
                             </Button>
@@ -1708,9 +1708,9 @@ export default function TeamDashboardPage() {
                             {editStep > 1 && (
                               <Button 
                                 type="button" 
-                                variant="outline" 
+                                variant="secondary" 
                                 onClick={() => setEditStep(editStep - 1)} 
-                                className="border-slate-600 text-slate-100 hover:bg-slate-700"
+                                className="bg-slate-700 border-slate-600 text-slate-100 hover:bg-slate-600 hover:text-white"
                               >
                                 <ChevronLeft className="w-4 h-4 mr-2" />
                                 Previous
@@ -1720,9 +1720,9 @@ export default function TeamDashboardPage() {
                           <div className="flex space-x-2">
                             <Button 
                               type="button" 
-                              variant="outline" 
+                              variant="secondary" 
                               onClick={() => setIsEditPlayerOpen(false)} 
-                              className="border-slate-600 text-slate-100 hover:bg-slate-700"
+                              className="bg-slate-700 border-slate-600 text-slate-100 hover:bg-slate-600 hover:text-white"
                             >
                               Cancel
                             </Button>
