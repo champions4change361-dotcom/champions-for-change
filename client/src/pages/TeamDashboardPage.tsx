@@ -1293,11 +1293,123 @@ export default function TeamDashboardPage() {
                             
                             <div className="space-y-4">
                               <h3 className="text-lg font-semibold text-slate-100">Digital Signature</h3>
-                              <div className="border-2 border-dashed border-slate-600 rounded-lg p-8 text-center">
-                                <p className="text-slate-300 mb-4">Click or touch here to sign</p>
-                                <div className="bg-slate-700 h-32 rounded flex items-center justify-center">
-                                  <span className="text-slate-400">Signature Pad (Touch to sign)</span>
-                                </div>
+                              <div className="border-2 border-dashed border-slate-600 rounded-lg p-4 text-center">
+                                <p className="text-slate-300 mb-4">Click or touch to sign below</p>
+                                <canvas
+                                  ref={(canvas) => {
+                                    if (canvas && !canvas.hasAttribute('data-initialized')) {
+                                      canvas.setAttribute('data-initialized', 'true');
+                                      const ctx = canvas.getContext('2d');
+                                      if (ctx) {
+                                        let isDrawing = false;
+                                        let lastX = 0;
+                                        let lastY = 0;
+                                        
+                                        // Set canvas size
+                                        const rect = canvas.getBoundingClientRect();
+                                        canvas.width = rect.width * 2; // High DPI
+                                        canvas.height = 120 * 2; // High DPI
+                                        canvas.style.width = '100%';
+                                        canvas.style.height = '120px';
+                                        
+                                        // Scale for high DPI
+                                        ctx.scale(2, 2);
+                                        
+                                        // Set drawing styles
+                                        ctx.strokeStyle = '#ffffff';
+                                        ctx.lineWidth = 2;
+                                        ctx.lineCap = 'round';
+                                        ctx.lineJoin = 'round';
+                                        
+                                        // Clear canvas background
+                                        ctx.fillStyle = '#374151'; // slate-700
+                                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                                        
+                                        const startDrawing = (e: MouseEvent | TouchEvent) => {
+                                          isDrawing = true;
+                                          const rect = canvas.getBoundingClientRect();
+                                          if (e.type.includes('touch')) {
+                                            const touch = (e as TouchEvent).touches[0];
+                                            lastX = touch.clientX - rect.left;
+                                            lastY = touch.clientY - rect.top;
+                                          } else {
+                                            lastX = (e as MouseEvent).clientX - rect.left;
+                                            lastY = (e as MouseEvent).clientY - rect.top;
+                                          }
+                                        };
+                                        
+                                        const draw = (e: MouseEvent | TouchEvent) => {
+                                          if (!isDrawing) return;
+                                          e.preventDefault();
+                                          
+                                          const rect = canvas.getBoundingClientRect();
+                                          let currentX, currentY;
+                                          
+                                          if (e.type.includes('touch')) {
+                                            const touch = (e as TouchEvent).touches[0];
+                                            currentX = touch.clientX - rect.left;
+                                            currentY = touch.clientY - rect.top;
+                                          } else {
+                                            currentX = (e as MouseEvent).clientX - rect.left;
+                                            currentY = (e as MouseEvent).clientY - rect.top;
+                                          }
+                                          
+                                          ctx.beginPath();
+                                          ctx.moveTo(lastX, lastY);
+                                          ctx.lineTo(currentX, currentY);
+                                          ctx.stroke();
+                                          
+                                          lastX = currentX;
+                                          lastY = currentY;
+                                        };
+                                        
+                                        const stopDrawing = () => {
+                                          isDrawing = false;
+                                        };
+                                        
+                                        // Mouse events
+                                        canvas.addEventListener('mousedown', startDrawing);
+                                        canvas.addEventListener('mousemove', draw);
+                                        canvas.addEventListener('mouseup', stopDrawing);
+                                        canvas.addEventListener('mouseout', stopDrawing);
+                                        
+                                        // Touch events with passive: false to prevent scrolling
+                                        canvas.addEventListener('touchstart', startDrawing, { passive: false });
+                                        canvas.addEventListener('touchmove', draw, { passive: false });
+                                        canvas.addEventListener('touchend', stopDrawing, { passive: false });
+                                        
+                                        // Add clear button functionality
+                                        // Mark canvas as empty initially and track signature state
+                                        (canvas as any).isEmpty = true;
+                                        (canvas as any).hasSignature = () => !(canvas as any).isEmpty;
+                                        
+                                        // Override draw to track if signature exists
+                                        const originalStartDrawing = startDrawing;
+                                        const trackingStartDrawing = (e: MouseEvent | TouchEvent) => {
+                                          originalStartDrawing(e);
+                                          (canvas as any).isEmpty = false;
+                                        };
+                                        
+                                        const clearButton = document.createElement('button');
+                                        clearButton.innerText = 'Clear Signature';
+                                        clearButton.className = 'mt-2 px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700';
+                                        clearButton.onclick = (e) => {
+                                          e.preventDefault();
+                                          ctx.fillStyle = '#374151';
+                                          ctx.fillRect(0, 0, canvas.width, canvas.height);
+                                          (canvas as any).isEmpty = true;
+                                        };
+                                        canvas.parentNode?.appendChild(clearButton);
+                                        
+                                        // Use tracking version of startDrawing
+                                        canvas.addEventListener('mousedown', trackingStartDrawing);
+                                        canvas.addEventListener('touchstart', trackingStartDrawing, { passive: false });
+                                      }
+                                    }
+                                  }}
+                                  className="bg-slate-700 rounded border border-slate-600 cursor-crosshair w-full"
+                                  style={{ touchAction: 'none' }}
+                                />
                               </div>
                               
                               <div className="flex items-center space-x-2">
@@ -2035,11 +2147,123 @@ export default function TeamDashboardPage() {
                             
                             <div className="space-y-4">
                               <h3 className="text-lg font-semibold text-slate-100">Digital Signature</h3>
-                              <div className="border-2 border-dashed border-slate-600 rounded-lg p-8 text-center">
-                                <p className="text-slate-300 mb-4">Click or touch here to sign</p>
-                                <div className="bg-slate-700 h-32 rounded flex items-center justify-center">
-                                  <span className="text-slate-400">Signature Pad (Touch to sign)</span>
-                                </div>
+                              <div className="border-2 border-dashed border-slate-600 rounded-lg p-4 text-center">
+                                <p className="text-slate-300 mb-4">Click or touch to sign below</p>
+                                <canvas
+                                  ref={(canvas) => {
+                                    if (canvas && !canvas.hasAttribute('data-initialized')) {
+                                      canvas.setAttribute('data-initialized', 'true');
+                                      const ctx = canvas.getContext('2d');
+                                      if (ctx) {
+                                        let isDrawing = false;
+                                        let lastX = 0;
+                                        let lastY = 0;
+                                        
+                                        // Set canvas size
+                                        const rect = canvas.getBoundingClientRect();
+                                        canvas.width = rect.width * 2; // High DPI
+                                        canvas.height = 120 * 2; // High DPI
+                                        canvas.style.width = '100%';
+                                        canvas.style.height = '120px';
+                                        
+                                        // Scale for high DPI
+                                        ctx.scale(2, 2);
+                                        
+                                        // Set drawing styles
+                                        ctx.strokeStyle = '#ffffff';
+                                        ctx.lineWidth = 2;
+                                        ctx.lineCap = 'round';
+                                        ctx.lineJoin = 'round';
+                                        
+                                        // Clear canvas background
+                                        ctx.fillStyle = '#374151'; // slate-700
+                                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                                        
+                                        const startDrawing = (e: MouseEvent | TouchEvent) => {
+                                          isDrawing = true;
+                                          const rect = canvas.getBoundingClientRect();
+                                          if (e.type.includes('touch')) {
+                                            const touch = (e as TouchEvent).touches[0];
+                                            lastX = touch.clientX - rect.left;
+                                            lastY = touch.clientY - rect.top;
+                                          } else {
+                                            lastX = (e as MouseEvent).clientX - rect.left;
+                                            lastY = (e as MouseEvent).clientY - rect.top;
+                                          }
+                                        };
+                                        
+                                        const draw = (e: MouseEvent | TouchEvent) => {
+                                          if (!isDrawing) return;
+                                          e.preventDefault();
+                                          
+                                          const rect = canvas.getBoundingClientRect();
+                                          let currentX, currentY;
+                                          
+                                          if (e.type.includes('touch')) {
+                                            const touch = (e as TouchEvent).touches[0];
+                                            currentX = touch.clientX - rect.left;
+                                            currentY = touch.clientY - rect.top;
+                                          } else {
+                                            currentX = (e as MouseEvent).clientX - rect.left;
+                                            currentY = (e as MouseEvent).clientY - rect.top;
+                                          }
+                                          
+                                          ctx.beginPath();
+                                          ctx.moveTo(lastX, lastY);
+                                          ctx.lineTo(currentX, currentY);
+                                          ctx.stroke();
+                                          
+                                          lastX = currentX;
+                                          lastY = currentY;
+                                        };
+                                        
+                                        const stopDrawing = () => {
+                                          isDrawing = false;
+                                        };
+                                        
+                                        // Mouse events
+                                        canvas.addEventListener('mousedown', startDrawing);
+                                        canvas.addEventListener('mousemove', draw);
+                                        canvas.addEventListener('mouseup', stopDrawing);
+                                        canvas.addEventListener('mouseout', stopDrawing);
+                                        
+                                        // Touch events with passive: false to prevent scrolling
+                                        canvas.addEventListener('touchstart', startDrawing, { passive: false });
+                                        canvas.addEventListener('touchmove', draw, { passive: false });
+                                        canvas.addEventListener('touchend', stopDrawing, { passive: false });
+                                        
+                                        // Add clear button functionality
+                                        // Mark canvas as empty initially and track signature state
+                                        (canvas as any).isEmpty = true;
+                                        (canvas as any).hasSignature = () => !(canvas as any).isEmpty;
+                                        
+                                        // Override draw to track if signature exists
+                                        const originalStartDrawing = startDrawing;
+                                        const trackingStartDrawing = (e: MouseEvent | TouchEvent) => {
+                                          originalStartDrawing(e);
+                                          (canvas as any).isEmpty = false;
+                                        };
+                                        
+                                        const clearButton = document.createElement('button');
+                                        clearButton.innerText = 'Clear Signature';
+                                        clearButton.className = 'mt-2 px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700';
+                                        clearButton.onclick = (e) => {
+                                          e.preventDefault();
+                                          ctx.fillStyle = '#374151';
+                                          ctx.fillRect(0, 0, canvas.width, canvas.height);
+                                          (canvas as any).isEmpty = true;
+                                        };
+                                        canvas.parentNode?.appendChild(clearButton);
+                                        
+                                        // Use tracking version of startDrawing
+                                        canvas.addEventListener('mousedown', trackingStartDrawing);
+                                        canvas.addEventListener('touchstart', trackingStartDrawing, { passive: false });
+                                      }
+                                    }
+                                  }}
+                                  className="bg-slate-700 rounded border border-slate-600 cursor-crosshair w-full"
+                                  style={{ touchAction: 'none' }}
+                                />
                               </div>
                               
                               <div className="flex items-center space-x-2">
