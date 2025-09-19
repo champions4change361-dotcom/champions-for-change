@@ -150,7 +150,7 @@ export default function TeamListPage() {
           {filteredTeams.map((team) => (
             <Card 
               key={team.id} 
-              className="hover:shadow-lg transition-shadow cursor-pointer border-l-4 border-l-blue-500"
+              className="bg-slate-800 border-slate-600 hover:bg-slate-700 hover:shadow-lg transition-all cursor-pointer border-l-4 border-l-blue-500"
               data-testid={`card-team-${team.id}`}
             >
               <CardHeader className="pb-3">
