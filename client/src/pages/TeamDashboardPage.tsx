@@ -1449,7 +1449,17 @@ export default function TeamDashboardPage() {
                             {registrationStep < 3 ? (
                               <Button 
                                 type="button" 
-                                onClick={() => setRegistrationStep(registrationStep + 1)} 
+                                onClick={() => {
+                                  // Validate Step 2 medical questions before proceeding
+                                  if (registrationStep === 2) {
+                                    const answeredQuestions = document.querySelectorAll('input[name^="q"]:checked');
+                                    if (answeredQuestions.length < 21) {
+                                      alert(`Please answer all 21 medical history questions before proceeding. You have answered ${answeredQuestions.length} out of 21 questions.`);
+                                      return;
+                                    }
+                                  }
+                                  setRegistrationStep(registrationStep + 1);
+                                }} 
                                 className="bg-blue-600 hover:bg-blue-700 text-white"
                               >
                                 Next
@@ -2303,7 +2313,17 @@ export default function TeamDashboardPage() {
                             {editStep < 3 ? (
                               <Button 
                                 type="button" 
-                                onClick={() => setEditStep(editStep + 1)} 
+                                onClick={() => {
+                                  // Validate Step 2 medical questions before proceeding
+                                  if (editStep === 2) {
+                                    const answeredQuestions = document.querySelectorAll('input[name^="edit_q"]:checked');
+                                    if (answeredQuestions.length < 21) {
+                                      alert(`Please answer all 21 medical history questions before proceeding. You have answered ${answeredQuestions.length} out of 21 questions.`);
+                                      return;
+                                    }
+                                  }
+                                  setEditStep(editStep + 1);
+                                }} 
                                 className="bg-blue-600 hover:bg-blue-700 text-white"
                               >
                                 Next
