@@ -45,9 +45,20 @@ export function MedicalHistoryForm({ playerId, onComplete, readonly = false }: M
   });
 
   // Fetch existing medical history if available
-  const { data: existingMedicalHistory, isLoading: medicalHistoryLoading } = useQuery({
+  const { data: existingMedicalHistory, isLoading: medicalHistoryLoading, error: medicalHistoryError } = useQuery({
     queryKey: ['/api/players', playerId, 'medical-history'],
     enabled: !!playerId,
+    retry: (failureCount, error: any) => {
+      // Don't retry if it's a 404 - this means no medical history exists yet, which is fine
+      if (error?.status === 404) {
+        return false;
+      }
+      return failureCount < 3;
+    },
+    retryOnMount: false,
+    meta: {
+      errorMessage: "Failed to load medical history"
+    }
   });
 
   const form = useForm<InsertMedicalHistory>({
@@ -249,8 +260,23 @@ export function MedicalHistoryForm({ playerId, onComplete, readonly = false }: M
     );
   }
 
+  // Check if there's an error loading medical history (except 404, which means no medical history exists yet)
+  if (medicalHistoryError && (medicalHistoryError as any)?.status !== 404) {
+    return (
+      <Alert variant="destructive">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertDescription>
+          Error loading medical history: {(medicalHistoryError as any)?.message || 'Unknown error'}
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
   const isSubmitting = createMedicalHistoryMutation.isPending || updateMedicalHistoryMutation.isPending;
   const isCompleted = existingMedicalHistory && typeof existingMedicalHistory === 'object' && (existingMedicalHistory as any).isComplete;
+  
+  // Check if this is a new medical history (404 error means no medical history exists yet)
+  const isNewMedicalHistory = (medicalHistoryError as any)?.status === 404 || !existingMedicalHistory;
 
   // Helper to check if any heart question is checked
   const hasHeartIssues = form.watch('q3_heart_testing') || form.watch('q3_passed_out_exercise') || 
@@ -271,6 +297,16 @@ export function MedicalHistoryForm({ playerId, onComplete, readonly = false }: M
 
   return (
     <div className="space-y-6" data-testid="medical-history-form">
+      {/* Status banner for new medical history */}
+      {isNewMedicalHistory && (
+        <Alert className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700">
+          <Check className="h-4 w-4 text-green-600" />
+          <AlertDescription className="text-green-800 dark:text-green-200">
+            <strong>Creating New Medical History</strong> - No previous medical record found for this player. Please complete the form below.
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Header with player info */}
       <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700">
         <CardHeader>
