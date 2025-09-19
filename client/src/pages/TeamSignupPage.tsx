@@ -97,7 +97,7 @@ export default function TeamSignupPage() {
       price: "$23",
       period: "/month",
       description: "Perfect for small teams getting started",
-      features: ["Up to 20 players", "400 communications/month", "Basic roster management", "Tournament registration"],
+      features: ["Up to 20 players", "5 tournaments/month included", "400 communications/month", "Basic roster management", "Tournament registration"],
       color: "green",
       maxPlayers: 20,
       communications: 400,
@@ -108,7 +108,7 @@ export default function TeamSignupPage() {
       price: "$39",
       period: "/month",
       description: "Most popular choice for active teams",
-      features: ["Up to 35 players", "4,000 communications/month", "Advanced scheduling", "Parent portal access"],
+      features: ["Up to 35 players", "15 tournaments/month included", "4,000 communications/month", "Advanced scheduling", "Parent portal access"],
       color: "blue",
       maxPlayers: 35,
       communications: 4000,
@@ -119,7 +119,7 @@ export default function TeamSignupPage() {
       price: "$63", 
       period: "/month",
       description: "Complete solution for large organizations",
-      features: ["Unlimited players & teams", "16,000 communications/month", "Full organization management", "Multi-team coordination"],
+      features: ["Unlimited players & teams", "50 tournaments/month included", "16,000 communications/month", "Full organization management", "Multi-team coordination"],
       color: "purple",
       maxPlayers: "unlimited",
       communications: 16000,
@@ -389,33 +389,33 @@ export default function TeamSignupPage() {
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between text-slate-300">
                         <span>Base Subscription ({currentPlan.name}):</span>
-                        <span className="font-medium">${pricingData.breakdown?.baseSubscription || currentPlan.price.replace('$', '')}/month</span>
+                        <span className="font-medium">${(pricingData as any).breakdown?.baseSubscription || currentPlan.price.replace('$', '')}/month</span>
                       </div>
                       {addons.tournamentPerEvent && (
                         <div className="flex justify-between text-slate-300">
                           <span>Tournament Hosting:</span>
-                          <span className="font-medium">${pricingData.breakdown?.perTournamentFee || 50}/event</span>
+                          <span className="font-medium">${(pricingData as any).breakdown?.perTournamentFee || 50}/event</span>
                         </div>
                       )}
-                      {pricingData.totals?.recurringAddons > 0 && (
+                      {(pricingData as any).totals?.recurringAddons > 0 && (
                         <div className="flex justify-between text-slate-300">
                           <span>Monthly Add-ons:</span>
-                          <span className="font-medium">${pricingData.totals.recurringAddons}/month</span>
+                          <span className="font-medium">${(pricingData as any).totals.recurringAddons}/month</span>
                         </div>
                       )}
                       <hr className="border-slate-600/50 my-2" />
                       <div className="flex justify-between text-white font-semibold text-base">
                         <span>Monthly Total:</span>
-                        <span className="text-blue-400">${pricingData.totals?.monthly || currentPlan.price.replace('$', '')}/month</span>
+                        <span className="text-blue-400">${(pricingData as any).totals?.monthly || currentPlan.price.replace('$', '')}/month</span>
                       </div>
                       {addons.tournamentPerEvent && (
                         <div className="text-xs text-slate-400 mt-2">
-                          * Plus ${pricingData.totals?.perEventFee || 50} per tournament you host
+                          * Plus ${(pricingData as any).totals?.perEventFee || 50} per tournament you host
                         </div>
                       )}
-                      {pricingData.totals?.annualSavings > 0 && (
+                      {(pricingData as any).totals?.annualSavings > 0 && (
                         <div className="text-xs text-green-400 mt-2">
-                          💰 Save ${pricingData.totals.annualSavings} with annual billing
+                          💰 Save ${(pricingData as any).totals.annualSavings} with annual billing
                         </div>
                       )}
                     </div>
