@@ -23,6 +23,21 @@ interface FakeUser {
   userType: 'district' | 'organizer' | 'business' | 'general';
   organizationType: 'business' | 'nonprofit' | 'sports_club' | 'district' | 'school' | 'club';
   medicalDataAccess: boolean;
+  // Hybrid subscription support
+  hybridSubscription?: {
+    baseType: 'team' | 'organizer';
+    teamTier?: 'starter' | 'growing' | 'elite';
+    organizerPlan?: 'annual' | 'monthly';
+    addons: {
+      tournamentPerEvent: boolean;
+      teamManagement: boolean;
+    };
+    pricing?: {
+      basePrice: number;
+      recurringAddons: number;
+      perEventCosts: number;
+    };
+  };
 }
 
 export default function AdminManagement() {
@@ -39,7 +54,16 @@ export default function AdminManagement() {
     organizationName: '',
     userType: 'district',
     organizationType: 'district',
-    medicalDataAccess: false
+    medicalDataAccess: false,
+    hybridSubscription: {
+      baseType: 'team',
+      teamTier: 'starter',
+      organizerPlan: 'annual',
+      addons: {
+        tournamentPerEvent: false,
+        teamManagement: false
+      }
+    }
   });
 
   // Helper function to get defaults for a userType
@@ -251,9 +275,11 @@ export default function AdminManagement() {
         ];
       case 'organizer':
         return [
-          { value: 'starter', label: 'Starter Team ($23/month)' },
-          { value: 'growing', label: 'Growing Team ($39/month)' },
-          { value: 'elite', label: 'Elite Program ($63/month)' },
+          { value: 'hybrid-starter', label: 'Hybrid: Starter Team ($23/month)' },
+          { value: 'hybrid-growing', label: 'Hybrid: Growing Team ($39/month)' },
+          { value: 'hybrid-elite', label: 'Hybrid: Elite Program ($63/month)' },
+          { value: 'hybrid-organizer-annual', label: 'Hybrid: Organizer Annual ($99/year)' },
+          { value: 'hybrid-organizer-monthly', label: 'Hybrid: Organizer Monthly ($39/month)' },
           { value: 'tournament-organizer', label: 'Tournament Organizer ($39/month) - Legacy' },
         ];
       case 'business':
@@ -265,10 +291,9 @@ export default function AdminManagement() {
         ];
       default:
         return [
-          { value: 'starter', label: 'Starter Team ($23/month)' },
-          { value: 'growing', label: 'Growing Team ($39/month)' },
-          { value: 'elite', label: 'Elite Program ($63/month)' },
-          { value: 'foundation', label: 'Foundation (Free)' },
+          { value: 'hybrid-starter', label: 'Hybrid: Starter Team ($23/month)' },
+          { value: 'hybrid-growing', label: 'Hybrid: Growing Team ($39/month)' },
+          { value: 'hybrid-elite', label: 'Hybrid: Elite Program ($63/month)' },
         ];
     }
   };
@@ -535,6 +560,201 @@ export default function AdminManagement() {
                           ))}
                         </select>
                       </div>
+
+                      {/* Hybrid Subscription Configuration */}
+                      {(newUser.subscriptionPlan?.startsWith('hybrid-') || newUser.userType === 'organizer') && (
+                        <div className="space-y-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                          <h4 className="font-semibold text-blue-900 flex items-center">
+                            <Settings className="h-4 w-4 mr-2" />
+                            Hybrid Subscription Configuration
+                          </h4>
+
+                          {/* Base Type Selection */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="baseType">Base Type</Label>
+                              <select
+                                id="baseType"
+                                value={newUser.hybridSubscription?.baseType || 'team'}
+                                onChange={(e) => {
+                                  const baseType = e.target.value as 'team' | 'organizer';
+                                  setNewUser(prev => ({
+                                    ...prev,
+                                    hybridSubscription: {
+                                      ...prev.hybridSubscription!,
+                                      baseType,
+                                      teamTier: baseType === 'team' ? 'starter' : undefined,
+                                      organizerPlan: baseType === 'organizer' ? 'annual' : undefined
+                                    }
+                                  }));
+                                }}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                                data-testid="select-base-type"
+                              >
+                                <option value="team">Team Management</option>
+                                <option value="organizer">Tournament Organizer</option>
+                              </select>
+                            </div>
+
+                            {/* Team Tier Selection */}
+                            {newUser.hybridSubscription?.baseType === 'team' && (
+                              <div>
+                                <Label htmlFor="teamTier">Team Tier</Label>
+                                <select
+                                  id="teamTier"
+                                  value={newUser.hybridSubscription?.teamTier || 'starter'}
+                                  onChange={(e) => {
+                                    const teamTier = e.target.value as 'starter' | 'growing' | 'elite';
+                                    setNewUser(prev => ({
+                                      ...prev,
+                                      hybridSubscription: {
+                                        ...prev.hybridSubscription!,
+                                        teamTier
+                                      }
+                                    }));
+                                  }}
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                                  data-testid="select-team-tier"
+                                >
+                                  <option value="starter">Starter Team ($23/month)</option>
+                                  <option value="growing">Growing Team ($39/month)</option>
+                                  <option value="elite">Elite Program ($63/month)</option>
+                                </select>
+                              </div>
+                            )}
+
+                            {/* Organizer Plan Selection */}
+                            {newUser.hybridSubscription?.baseType === 'organizer' && (
+                              <div>
+                                <Label htmlFor="organizerPlan">Organizer Plan</Label>
+                                <select
+                                  id="organizerPlan"
+                                  value={newUser.hybridSubscription?.organizerPlan || 'annual'}
+                                  onChange={(e) => {
+                                    const organizerPlan = e.target.value as 'annual' | 'monthly';
+                                    setNewUser(prev => ({
+                                      ...prev,
+                                      hybridSubscription: {
+                                        ...prev.hybridSubscription!,
+                                        organizerPlan
+                                      }
+                                    }));
+                                  }}
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                                  data-testid="select-organizer-plan"
+                                >
+                                  <option value="annual">Annual Plan ($99/year)</option>
+                                  <option value="monthly">Monthly Plan ($39/month)</option>
+                                </select>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Add-ons Section */}
+                          <div>
+                            <Label className="text-sm font-semibold">Add-ons</Label>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                              {/* Tournament Per-Event Add-on */}
+                              <div className="flex items-start space-x-3">
+                                <input
+                                  type="checkbox"
+                                  id="tournamentPerEvent"
+                                  checked={newUser.hybridSubscription?.addons?.tournamentPerEvent || false}
+                                  onChange={(e) => {
+                                    setNewUser(prev => ({
+                                      ...prev,
+                                      hybridSubscription: {
+                                        ...prev.hybridSubscription!,
+                                        addons: {
+                                          ...prev.hybridSubscription!.addons,
+                                          tournamentPerEvent: e.target.checked
+                                        }
+                                      }
+                                    }));
+                                  }}
+                                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mt-1"
+                                  data-testid="checkbox-tournament-addon"
+                                />
+                                <div>
+                                  <Label htmlFor="tournamentPerEvent" className="text-sm font-medium">
+                                    Tournament Per-Event
+                                  </Label>
+                                  <p className="text-xs text-gray-600">$50 per tournament</p>
+                                </div>
+                              </div>
+
+                              {/* Team Management Add-on */}
+                              <div className="flex items-start space-x-3">
+                                <input
+                                  type="checkbox"
+                                  id="teamManagement"
+                                  checked={newUser.hybridSubscription?.addons?.teamManagement || false}
+                                  onChange={(e) => {
+                                    setNewUser(prev => ({
+                                      ...prev,
+                                      hybridSubscription: {
+                                        ...prev.hybridSubscription!,
+                                        addons: {
+                                          ...prev.hybridSubscription!.addons,
+                                          teamManagement: e.target.checked
+                                        }
+                                      }
+                                    }));
+                                  }}
+                                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mt-1"
+                                  data-testid="checkbox-team-addon"
+                                />
+                                <div>
+                                  <Label htmlFor="teamManagement" className="text-sm font-medium">
+                                    Team Management
+                                  </Label>
+                                  <p className="text-xs text-gray-600">$20/month recurring</p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Pricing Preview */}
+                          <div className="bg-white p-3 rounded-lg border border-blue-200">
+                            <h5 className="font-semibold text-sm text-blue-900 mb-2">Pricing Preview</h5>
+                            <div className="text-sm space-y-1">
+                              <div className="flex justify-between">
+                                <span>Base Subscription:</span>
+                                <span className="font-medium">
+                                  ${newUser.hybridSubscription?.baseType === 'team' 
+                                    ? (newUser.hybridSubscription?.teamTier === 'starter' ? 23 : 
+                                       newUser.hybridSubscription?.teamTier === 'growing' ? 39 : 63)
+                                    : (newUser.hybridSubscription?.organizerPlan === 'annual' ? 99 : 39)
+                                  }/month
+                                </span>
+                              </div>
+                              {newUser.hybridSubscription?.addons?.teamManagement && (
+                                <div className="flex justify-between">
+                                  <span>Team Management:</span>
+                                  <span className="font-medium">$20/month</span>
+                                </div>
+                              )}
+                              {newUser.hybridSubscription?.addons?.tournamentPerEvent && (
+                                <div className="flex justify-between">
+                                  <span>Per-Tournament Fee:</span>
+                                  <span className="font-medium">$50/event</span>
+                                </div>
+                              )}
+                              <hr className="my-2" />
+                              <div className="flex justify-between font-semibold text-blue-900">
+                                <span>Monthly Total:</span>
+                                <span>
+                                  ${(newUser.hybridSubscription?.baseType === 'team' 
+                                    ? (newUser.hybridSubscription?.teamTier === 'starter' ? 23 : 
+                                       newUser.hybridSubscription?.teamTier === 'growing' ? 39 : 63)
+                                    : (newUser.hybridSubscription?.organizerPlan === 'annual' ? 99 : 39))
+                                  + (newUser.hybridSubscription?.addons?.teamManagement ? 20 : 0)}/month
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
 
