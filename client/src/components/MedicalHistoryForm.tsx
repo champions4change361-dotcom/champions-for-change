@@ -39,9 +39,14 @@ export function MedicalHistoryForm({ playerId, onComplete, readonly = false }: M
   const queryClient = useQueryClient();
 
   // Fetch player data for auto-population
-  const { data: player, isLoading: playerLoading } = useQuery<TeamPlayer>({
+  const { data: player, isLoading: playerLoading, error: playerError } = useQuery<TeamPlayer>({
     queryKey: ['/api/players', playerId],
     enabled: !!playerId,
+    retry: 3,
+    retryDelay: 1000,
+    meta: {
+      errorMessage: "Failed to load player data"
+    }
   });
 
   // Fetch existing medical history if available
@@ -249,12 +254,24 @@ export function MedicalHistoryForm({ playerId, onComplete, readonly = false }: M
     );
   }
 
+  // Show specific error if player query failed
+  if (playerError) {
+    return (
+      <Alert variant="destructive">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertDescription>
+          Error loading player: {(playerError as any)?.message || 'Unknown error'}. Player ID: {playerId}
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
   if (!player) {
     return (
       <Alert>
         <AlertTriangle className="h-4 w-4" />
         <AlertDescription>
-          Player not found. Please check the player ID and try again.
+          Player not found. Please check the player ID and try again. Player ID: {playerId}
         </AlertDescription>
       </Alert>
     );
