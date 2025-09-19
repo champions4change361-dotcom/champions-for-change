@@ -199,7 +199,13 @@ export default function TeamDashboardPage() {
         questions.forEach(({ key, name }) => {
           const value = medicalData[key];
           if (value !== null && value !== undefined) {
-            const radioValue = value ? 'yes' : 'no';
+            let radioValue;
+            // Q20 and Q21 are strings, others are booleans
+            if (key === 'q20_first_menstrual_period' || key === 'q21_missing_testicle') {
+              radioValue = value; // Use string value directly: 'yes', 'no', 'na'
+            } else {
+              radioValue = value ? 'yes' : 'no'; // Convert boolean to string
+            }
             const radioButton = document.querySelector(`input[name="${name}"][value="${radioValue}"]`);
             if (radioButton) {
               (radioButton as HTMLInputElement).checked = true;
@@ -1557,7 +1563,13 @@ export default function TeamDashboardPage() {
                                       const checkedRadio = document.querySelector(`input[name="${name}"]:checked`);
                                       console.log(`ADD PLAYER ${name}: found ${allRadios.length} radios, ${checkedRadio ? '1 checked' : 'none checked'}`);
                                       if (checkedRadio) {
-                                        medicalData[key] = (checkedRadio as HTMLInputElement).value === 'yes';
+                                        const value = (checkedRadio as HTMLInputElement).value;
+                                        // Q20 and Q21 need string values, others need boolean
+                                        if (key === 'q20_first_menstrual_period' || key === 'q21_missing_testicle') {
+                                          medicalData[key] = value; // Keep as string: 'yes', 'no', 'na'
+                                        } else {
+                                          medicalData[key] = value === 'yes'; // Convert to boolean
+                                        }
                                       }
                                     });
                                     
@@ -1599,6 +1611,7 @@ export default function TeamDashboardPage() {
                                       // Add required fields for medical history
                                       medicalData.playerId = playerResponse.id;
                                       medicalData.studentName = addPlayerForm.getValues('playerName');
+                                      medicalData.parentSignature = 'Digital Signature Collected';
                                       medicalData.isComplete = true;
                                       medicalData.signatureDate = new Date().toISOString().split('T')[0];
                                       
@@ -2495,7 +2508,13 @@ export default function TeamDashboardPage() {
                                     questions.forEach(({ key, name }) => {
                                       const checkedRadio = document.querySelector(`input[name="${name}"]:checked`);
                                       if (checkedRadio) {
-                                        medicalData[key] = (checkedRadio as HTMLInputElement).value === 'yes';
+                                        const value = (checkedRadio as HTMLInputElement).value;
+                                        // Q20 and Q21 need string values, others need boolean
+                                        if (key === 'q20_first_menstrual_period' || key === 'q21_missing_testicle') {
+                                          medicalData[key] = value; // Keep as string: 'yes', 'no', 'na'
+                                        } else {
+                                          medicalData[key] = value === 'yes'; // Convert to boolean
+                                        }
                                       }
                                     });
                                     
@@ -2536,6 +2555,7 @@ export default function TeamDashboardPage() {
                                     if (editingPlayer && Object.keys(medicalData).length > 0) {
                                       medicalData.playerId = editingPlayer.id;
                                       medicalData.studentName = editPlayerForm.getValues('playerName');
+                                      medicalData.parentSignature = 'Digital Signature Collected';
                                       medicalData.isComplete = true;
                                       medicalData.signatureDate = new Date().toISOString().split('T')[0];
                                       
