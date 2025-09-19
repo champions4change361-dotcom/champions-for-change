@@ -1714,6 +1714,257 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // HYBRID SUBSCRIPTION CREATION WITH STRIPE
+  app.post('/api/subscription/hybrid/create', isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as any)?.claims?.sub;
+      const { hybridSubscriptionSchema } = await import('@shared/schema');
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User not authenticated' });
+      }
+
+      // Validate hybrid subscription data
+      const validationResult = hybridSubscriptionSchema.safeParse(req.body.subscriptionData);
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          error: 'Invalid subscription data', 
+          details: validationResult.error.errors 
+        });
+      }
+
+      const { baseType, teamTier, organizerPlan, addons } = validationResult.data;
+      const { paymentMethodId, customerInfo } = req.body;
+
+      if (!paymentMethodId) {
+        return res.status(400).json({ error: 'Payment method is required' });
+      }
+
+      const storage = await getStorage();
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      // Create or retrieve Stripe customer
+      let customerId = user.stripeCustomerId;
+      if (!customerId) {
+        const customer = await stripe.customers.create({
+          email: user.email,
+          name: `${user.firstName} ${user.lastName}`,
+          metadata: {
+            userId: userId,
+            subscriptionType: 'hybrid',
+            baseType: baseType
+          }
+        });
+        customerId = customer.id;
+        
+        // Update user with customer ID
+        await storage.updateUser(userId, { stripeCustomerId: customerId });
+      }
+
+      // Attach payment method to customer
+      await stripe.paymentMethods.attach(paymentMethodId, {
+        customer: customerId
+      });
+
+      await stripe.customers.update(customerId, {
+        invoice_settings: {
+          default_payment_method: paymentMethodId
+        }
+      });
+
+      // Determine Stripe price ID based on subscription configuration
+      const STRIPE_PRICE_IDS = {
+        team: {
+          starter: process.env.STRIPE_PRICE_TEAM_STARTER || 'price_team_starter_23',
+          growing: process.env.STRIPE_PRICE_TEAM_GROWING || 'price_team_growing_39', 
+          elite: process.env.STRIPE_PRICE_TEAM_ELITE || 'price_team_elite_63'
+        },
+        organizer: {
+          annual: process.env.STRIPE_PRICE_ORGANIZER_ANNUAL || 'price_organizer_annual_99',
+          monthly: process.env.STRIPE_PRICE_ORGANIZER_MONTHLY || 'price_organizer_monthly_39'
+        },
+        addons: {
+          teamManagement: process.env.STRIPE_PRICE_ADDON_TEAM_MGMT || 'price_addon_team_mgmt_20'
+        }
+      };
+
+      // Create subscription line items
+      const lineItems: any[] = [];
+
+      // Add base subscription
+      if (baseType === 'team' && teamTier) {
+        lineItems.push({
+          price: STRIPE_PRICE_IDS.team[teamTier],
+          quantity: 1
+        });
+      } else if (baseType === 'organizer' && organizerPlan) {
+        lineItems.push({
+          price: STRIPE_PRICE_IDS.organizer[organizerPlan],
+          quantity: 1
+        });
+      }
+
+      // Add recurring add-ons (team management)
+      if (addons.teamManagement && baseType === 'organizer') {
+        lineItems.push({
+          price: STRIPE_PRICE_IDS.addons.teamManagement,
+          quantity: 1
+        });
+      }
+
+      if (lineItems.length === 0) {
+        return res.status(400).json({ error: 'No valid subscription items found' });
+      }
+
+      // Create Stripe subscription
+      const subscription = await stripe.subscriptions.create({
+        customer: customerId,
+        items: lineItems,
+        payment_behavior: 'default_incomplete',
+        payment_settings: { save_default_payment_method: 'on_subscription' },
+        expand: ['latest_invoice.payment_intent'],
+        metadata: {
+          userId: userId,
+          subscriptionType: 'hybrid',
+          baseType: baseType,
+          tier: teamTier || organizerPlan || '',
+          tournamentPerEvent: addons.tournamentPerEvent.toString(),
+          teamManagement: addons.teamManagement.toString()
+        }
+      });
+
+      // Update user with hybrid subscription data
+      const subscriptionPlan = baseType === 'team' ? teamTier : `organizer-${organizerPlan}`;
+      await storage.updateUser(userId, {
+        stripeSubscriptionId: subscription.id,
+        subscriptionPlan: subscriptionPlan,
+        subscriptionStatus: subscription.status,
+        hybridSubscription: validationResult.data
+      });
+
+      const invoice = subscription.latest_invoice as any;
+      const paymentIntent = invoice?.payment_intent;
+
+      console.log(`✅ Hybrid subscription created - User: ${userId}, Base: ${baseType}, Tier: ${teamTier || organizerPlan}, Subscription ID: ${subscription.id}`);
+
+      res.json({
+        success: true,
+        subscriptionId: subscription.id,
+        clientSecret: paymentIntent?.client_secret,
+        status: subscription.status,
+        subscription: {
+          baseType,
+          tier: teamTier || organizerPlan,
+          addons,
+          monthlyAmount: invoice?.amount_due ? invoice.amount_due / 100 : 0
+        }
+      });
+
+    } catch (error: any) {
+      console.error('Hybrid subscription creation error:', error);
+      res.status(500).json({ 
+        error: 'Failed to create hybrid subscription',
+        message: error.message 
+      });
+    }
+  });
+
+  // STRIPE PRICE CREATION FOR HYBRID SUBSCRIPTIONS (Development Helper)
+  app.post('/api/admin/stripe/create-prices', async (req, res) => {
+    try {
+      // This endpoint helps create Stripe prices for development
+      // In production, these would be created manually in Stripe dashboard
+      
+      const prices = [];
+
+      // Create team tier prices
+      const teamPrices = [
+        { tier: 'starter', amount: 2300, nickname: 'Team Starter $23/month' },
+        { tier: 'growing', amount: 3900, nickname: 'Team Growing $39/month' },
+        { tier: 'elite', amount: 6300, nickname: 'Team Elite $63/month' }
+      ];
+
+      for (const teamPrice of teamPrices) {
+        try {
+          const price = await stripe.prices.create({
+            unit_amount: teamPrice.amount,
+            currency: 'usd',
+            recurring: { interval: 'month' },
+            nickname: teamPrice.nickname,
+            metadata: {
+              type: 'team_tier',
+              tier: teamPrice.tier
+            }
+          });
+          prices.push({ type: 'team', tier: teamPrice.tier, priceId: price.id });
+        } catch (err: any) {
+          console.error(`Failed to create price for ${teamPrice.tier}:`, err.message);
+        }
+      }
+
+      // Create organizer prices
+      const organizerPrices = [
+        { plan: 'monthly', amount: 3900, nickname: 'Organizer Monthly $39/month' },
+        { plan: 'annual', amount: 9900, nickname: 'Organizer Annual $99/year', interval: 'year' }
+      ];
+
+      for (const orgPrice of organizerPrices) {
+        try {
+          const price = await stripe.prices.create({
+            unit_amount: orgPrice.amount,
+            currency: 'usd',
+            recurring: { interval: orgPrice.interval || 'month' },
+            nickname: orgPrice.nickname,
+            metadata: {
+              type: 'organizer_plan',
+              plan: orgPrice.plan
+            }
+          });
+          prices.push({ type: 'organizer', plan: orgPrice.plan, priceId: price.id });
+        } catch (err: any) {
+          console.error(`Failed to create price for organizer ${orgPrice.plan}:`, err.message);
+        }
+      }
+
+      // Create add-on price (team management)
+      try {
+        const addonPrice = await stripe.prices.create({
+          unit_amount: 2000, // $20/month
+          currency: 'usd',
+          recurring: { interval: 'month' },
+          nickname: 'Team Management Add-on $20/month',
+          metadata: {
+            type: 'addon',
+            addon: 'team_management'
+          }
+        });
+        prices.push({ type: 'addon', addon: 'team_management', priceId: addonPrice.id });
+      } catch (err: any) {
+        console.error('Failed to create team management add-on price:', err.message);
+      }
+
+      console.log('📊 Stripe prices created for hybrid subscriptions:', prices);
+
+      res.json({
+        success: true,
+        message: 'Stripe prices created for hybrid subscriptions',
+        prices: prices,
+        note: 'Add these price IDs to your environment variables'
+      });
+
+    } catch (error: any) {
+      console.error('Stripe price creation error:', error);
+      res.status(500).json({ 
+        error: 'Failed to create Stripe prices',
+        message: error.message 
+      });
+    }
+  });
+
   // Tournament Coordination Intelligence API endpoints
   
   // Get coordination data for a specific tournament
