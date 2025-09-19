@@ -165,8 +165,11 @@ export default function TeamDashboardPage() {
 
   // Pre-populate medical history when navigating to Edit Step 2
   useEffect(() => {
-    if (editStep === 2 && (window as any).savedMedicalData) {
-      console.log('Pre-populating medical data:', (window as any).savedMedicalData);
+    console.log('Edit step changed to:', editStep);
+    console.log('Saved medical data available:', !!(window as any).savedMedicalData);
+    if (editStep === 2) {
+      if ((window as any).savedMedicalData) {
+        console.log('Pre-populating medical data:', (window as any).savedMedicalData);
       setTimeout(() => {
         const medicalData = (window as any).savedMedicalData;
         const questions = [
@@ -203,7 +206,11 @@ export default function TeamDashboardPage() {
             }
           }
         });
+        console.log('Finished pre-populating radio buttons');
       }, 100);
+      } else {
+        console.log('No saved medical data found for pre-population');
+      }
     }
   }, [editStep]);
 
@@ -1553,12 +1560,16 @@ export default function TeamDashboardPage() {
                                   ];
                                   
                                   // Collect medical history answers
+                                  console.log('ADD PLAYER: Collecting medical history answers...');
                                   questions.forEach(({ key, name }) => {
+                                    const allRadios = document.querySelectorAll(`input[name="${name}"]`);
                                     const checkedRadio = document.querySelector(`input[name="${name}"]:checked`);
+                                    console.log(`ADD PLAYER ${name}: found ${allRadios.length} radio buttons, ${checkedRadio ? '1 checked' : 'none checked'}`);
                                     if (checkedRadio) {
                                       medicalData[key] = (checkedRadio as HTMLInputElement).value === 'yes';
                                     }
                                   });
+                                  console.log('ADD PLAYER: Collected medical data:', medicalData);
                                   
                                   try {
                                     // First create the player
@@ -2498,8 +2509,11 @@ export default function TeamDashboardPage() {
                                     ];
                                     
                                     // Collect medical answers
+                                    console.log('Looking for radio buttons in the DOM...');
                                     questions.forEach(({ key, name }) => {
+                                      const allRadios = document.querySelectorAll(`input[name="${name}"]`);
                                       const checkedRadio = document.querySelector(`input[name="${name}"]:checked`);
+                                      console.log(`Question ${name}: found ${allRadios.length} radio buttons, ${checkedRadio ? '1 checked' : 'none checked'}`);
                                       if (checkedRadio) {
                                         medicalData[key] = (checkedRadio as HTMLInputElement).value === 'yes';
                                       }
