@@ -1718,14 +1718,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/subscription/hybrid/create', isAuthenticated, async (req, res) => {
     try {
       const userId = (req.user as any)?.claims?.sub;
-      const { hybridSubscriptionSchema } = await import('@shared/schema');
+      const { pricingCalculatorInputSchema } = await import('@shared/schema');
       
       if (!userId) {
         return res.status(401).json({ message: 'User not authenticated' });
       }
 
       // Validate hybrid subscription data
-      const validationResult = hybridSubscriptionSchema.safeParse(req.body.subscriptionData);
+      const validationResult = pricingCalculatorInputSchema.safeParse(req.body.subscriptionData);
       if (!validationResult.success) {
         return res.status(400).json({ 
           error: 'Invalid subscription data', 

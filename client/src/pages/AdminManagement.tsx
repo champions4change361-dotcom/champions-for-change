@@ -25,9 +25,10 @@ interface FakeUser {
   medicalDataAccess: boolean;
   // Hybrid subscription support
   hybridSubscription?: {
-    baseType: 'team' | 'organizer';
+    baseType: 'team' | 'organizer' | 'district';
     teamTier?: 'starter' | 'growing' | 'elite';
     organizerPlan?: 'annual' | 'monthly';
+    districtPlan?: 'enterprise' | 'unlimited';
     addons: {
       tournamentPerEvent: boolean;
       teamManagement: boolean;
@@ -577,14 +578,15 @@ export default function AdminManagement() {
                                 id="baseType"
                                 value={newUser.hybridSubscription?.baseType || 'team'}
                                 onChange={(e) => {
-                                  const baseType = e.target.value as 'team' | 'organizer';
+                                  const baseType = e.target.value as 'team' | 'organizer' | 'district';
                                   setNewUser(prev => ({
                                     ...prev,
                                     hybridSubscription: {
                                       ...prev.hybridSubscription!,
                                       baseType,
                                       teamTier: baseType === 'team' ? 'starter' : undefined,
-                                      organizerPlan: baseType === 'organizer' ? 'annual' : undefined
+                                      organizerPlan: baseType === 'organizer' ? 'annual' : undefined,
+                                      districtPlan: baseType === 'district' ? 'enterprise' : undefined
                                     }
                                   }));
                                 }}
@@ -593,6 +595,7 @@ export default function AdminManagement() {
                               >
                                 <option value="team">Team Management</option>
                                 <option value="organizer">Tournament Organizer</option>
+                                <option value="district">District Platform</option>
                               </select>
                             </div>
 
