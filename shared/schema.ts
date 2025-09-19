@@ -35,7 +35,7 @@ export const users = pgTable("users", {
     organizerPlan?: 'annual' | 'monthly';
     addons: {
       tournamentPerEvent?: boolean;
-      teamManagement?: 'basic';
+      teamManagement?: boolean;
     };
     pricing: {
       basePrice: number;
@@ -2133,14 +2133,25 @@ export const upsertUserSchema = createInsertSchema(users).omit({
   updatedAt: true,
 });
 
-// Hybrid subscription schema
+// Pricing calculator input schema (for API requests)
+export const pricingCalculatorInputSchema = z.object({
+  baseType: z.enum(['team', 'organizer', 'district']),
+  teamTier: z.enum(['starter', 'growing', 'elite']).optional(),
+  organizerPlan: z.enum(['annual', 'monthly']).optional(),
+  addons: z.object({
+    tournamentPerEvent: z.boolean().default(false),
+    teamManagement: z.boolean().default(false),
+  }),
+});
+
+// Hybrid subscription schema (stored in database)
 export const hybridSubscriptionSchema = z.object({
   baseType: z.enum(['team', 'organizer', 'district']),
   teamTier: z.enum(['starter', 'growing', 'elite']).optional(),
   organizerPlan: z.enum(['annual', 'monthly']).optional(),
   addons: z.object({
-    tournamentPerEvent: z.boolean().optional(),
-    teamManagement: z.enum(['basic']).optional(),
+    tournamentPerEvent: z.boolean().default(false),
+    teamManagement: z.boolean().default(false),
   }),
   pricing: z.object({
     basePrice: z.number().min(0),

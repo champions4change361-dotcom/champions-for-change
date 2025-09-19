@@ -441,10 +441,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // HYBRID SUBSCRIPTION PRICING CALCULATOR API
   app.post('/api/pricing/calculate', async (req, res) => {
     try {
-      const { hybridSubscriptionSchema } = await import('@shared/schema');
+      const { pricingCalculatorInputSchema } = await import('@shared/schema');
       
       // Validate request body with Zod schema
-      const validationResult = hybridSubscriptionSchema.safeParse(req.body);
+      const validationResult = pricingCalculatorInputSchema.safeParse(req.body);
 
       if (!validationResult.success) {
         console.error('Pricing calculator validation error:', validationResult.error.errors);
