@@ -1541,6 +1541,179 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // HYBRID SUBSCRIPTION MANAGEMENT API
+  app.post('/api/subscription/hybrid', isAuthenticated, async (req, res) => {
+    try {
+      const { updateUserHybridSubscriptionSchema } = await import('@shared/schema');
+      const userId = (req.user as any)?.claims?.sub;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User not authenticated' });
+      }
+
+      // Validate request body with Zod schema
+      const validationResult = updateUserHybridSubscriptionSchema.safeParse(req.body);
+
+      if (!validationResult.success) {
+        console.error('Hybrid subscription validation error:', validationResult.error.errors);
+        return res.status(400).json({ 
+          error: 'Invalid hybrid subscription data', 
+          details: validationResult.error.errors 
+        });
+      }
+
+      const { hybridSubscription, subscriptionPlan, subscriptionStatus } = validationResult.data;
+      
+      const storage = await getStorage();
+      
+      // Update user with hybrid subscription data
+      const updateData: any = {
+        hybridSubscription,
+        subscriptionPlan,
+        ...(subscriptionStatus && { subscriptionStatus })
+      };
+
+      const updatedUser = await storage.updateUser(userId, updateData);
+
+      if (!updatedUser) {
+        return res.status(500).json({ error: 'Failed to update hybrid subscription' });
+      }
+
+      console.log(`✅ Hybrid subscription updated - User: ${userId}, Base: ${hybridSubscription.baseType}, Tier: ${hybridSubscription.teamTier || hybridSubscription.organizerPlan}`);
+
+      res.json({
+        success: true,
+        message: 'Hybrid subscription updated successfully',
+        subscription: {
+          baseType: hybridSubscription.baseType,
+          tier: hybridSubscription.teamTier || hybridSubscription.organizerPlan,
+          addons: hybridSubscription.addons,
+          pricing: hybridSubscription.pricing
+        }
+      });
+
+    } catch (error: any) {
+      console.error('Hybrid subscription update error:', error);
+      res.status(500).json({ 
+        error: 'Failed to update hybrid subscription',
+        message: error.message 
+      });
+    }
+  });
+
+  // PER-TOURNAMENT CHARGE API (for team subscribers hosting tournaments)
+  app.post('/api/subscription/tournament-charge', isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as any)?.claims?.sub;
+      const { tournamentId, tournamentName } = req.body;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User not authenticated' });
+      }
+
+      if (!tournamentId || !tournamentName) {
+        return res.status(400).json({ error: 'Tournament ID and name are required' });
+      }
+
+      const storage = await getStorage();
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      // Check if user has hybrid subscription and needs per-tournament charges
+      const hybridSub = user.hybridSubscription as any;
+      const needsPerTournamentCharge = hybridSub?.baseType === 'team' && hybridSub?.addons?.tournamentPerEvent;
+
+      if (!needsPerTournamentCharge) {
+        return res.status(400).json({ 
+          error: 'Per-tournament charges only apply to team subscribers with tournament add-on' 
+        });
+      }
+
+      // Create Stripe payment intent for $50 tournament fee
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: 5000, // $50.00 in cents
+        currency: 'usd',
+        customer: user.stripeCustomerId,
+        description: `Tournament hosting fee - ${tournamentName}`,
+        metadata: {
+          userId: userId,
+          tournamentId: tournamentId,
+          feeType: 'per_tournament'
+        },
+        automatic_payment_methods: {
+          enabled: true
+        }
+      });
+
+      console.log(`💰 Per-tournament charge created - User: ${userId}, Tournament: ${tournamentName}, Amount: $50`);
+
+      res.json({
+        success: true,
+        clientSecret: paymentIntent.client_secret,
+        amount: 5000,
+        description: `Tournament hosting fee for "${tournamentName}"`,
+        message: 'Tournament charge created successfully'
+      });
+
+    } catch (error: any) {
+      console.error('Tournament charge error:', error);
+      res.status(500).json({ 
+        error: 'Failed to create tournament charge',
+        message: error.message 
+      });
+    }
+  });
+
+  // GET HYBRID SUBSCRIPTION STATUS
+  app.get('/api/subscription/hybrid', isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as any)?.claims?.sub;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User not authenticated' });
+      }
+
+      const storage = await getStorage();
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      const hybridSub = user.hybridSubscription as any;
+      
+      if (!hybridSub) {
+        return res.json({
+          hasHybridSubscription: false,
+          subscriptionPlan: user.subscriptionPlan,
+          subscriptionStatus: user.subscriptionStatus
+        });
+      }
+
+      res.json({
+        hasHybridSubscription: true,
+        hybridSubscription: hybridSub,
+        subscriptionPlan: user.subscriptionPlan,
+        subscriptionStatus: user.subscriptionStatus,
+        capabilities: {
+          canCreateTournaments: hybridSub.baseType === 'organizer' || hybridSub.addons?.tournamentPerEvent,
+          canManageTeams: hybridSub.baseType === 'team' || hybridSub.addons?.teamManagement,
+          perTournamentFee: hybridSub.baseType === 'team' && hybridSub.addons?.tournamentPerEvent ? 50 : 0
+        }
+      });
+
+    } catch (error: any) {
+      console.error('Get hybrid subscription error:', error);
+      res.status(500).json({ 
+        error: 'Failed to fetch hybrid subscription',
+        message: error.message 
+      });
+    }
+  });
+
   // Tournament Coordination Intelligence API endpoints
   
   // Get coordination data for a specific tournament
