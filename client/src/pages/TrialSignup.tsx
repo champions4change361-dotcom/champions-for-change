@@ -47,46 +47,76 @@ export default function TrialSignup() {
   const planPrice = urlParams.get('price') || '39';
 
   const planDetails: Record<string, PlanDetails> = {
+    // Team Management Plans
+    starter: {
+      name: 'Starter Team',
+      price: '$23',
+      period: 'month',
+      description: 'Team management + limited tournament hosting',
+      features: [
+        'Up to 20 players',
+        '1 tournament per year included',
+        'Additional tournaments: $25 each',
+        'Module-based website builder',
+        '400 communications/month',
+        'Basic roster management'
+      ]
+    },
+    growing: {
+      name: 'Growing Team',
+      price: '$39',
+      period: 'month', 
+      description: 'Full team management + tournament hosting',
+      features: [
+        'Up to 35 players',
+        '5 tournaments per year included',
+        'Additional tournaments: $25 each',
+        'Advanced module builder',
+        '4,000 communications/month',
+        'Parent portal access'
+      ]
+    },
+    elite: {
+      name: 'Elite Program',
+      price: '$63',
+      period: 'month',
+      description: 'Unlimited team management + tournament hosting',
+      features: [
+        'Unlimited players & teams',
+        '10 tournaments per year included',
+        'Additional tournaments: $25 each',
+        'Premium module builder',
+        '16,000 communications/month',
+        'Multi-team coordination'
+      ]
+    },
+    // Tournament Organizer Plans
     annual: {
-      name: 'Annual Plan',
+      name: 'Annual Tournament Organizer',
       price: '$99',
       period: 'year',
-      description: 'Complete annual tournament solution',
+      description: 'Professional single-event tournament hosting',
       features: [
-        'One tournament per year',
-        'Year-round website hosting',
-        'Full platform access',
-        'Payment processing',
-        'Professional branding',
-        'White-label experience'
+        'One professional tournament per year',
+        'Smart seeding algorithm (vs random)',
+        'Multiple formats: Single/Double/Pool Play',
+        'Module-based website builder',
+        'Payment processing & registration',
+        'Professional branding'
       ]
     },
     monthly: {
-      name: 'Monthly Plan',
+      name: 'Multi-Tournament Organizer',
       price: '$39',
       period: 'month',
-      description: 'Flexible monthly tournament management',
+      description: 'Unlimited professional tournament hosting',
       features: [
         'Unlimited tournaments',
-        'Full platform access',
-        'Advanced analytics',
-        'Payment processing',
-        'Professional branding',
-        'White-label experience'
-      ]
-    },
-    enterprise: {
-      name: 'Enterprise Plan',
-      price: '$149',
-      period: 'month',
-      description: 'Complete athletics management solution',
-      features: [
-        'Unlimited tournaments',
-        'Enterprise AI assistance',
-        'Advanced analytics',
-        'White-label branding',
-        'Priority support',
-        'API access'
+        'Smart seeding + multiple formats',
+        'Module-based + White-label access',
+        'Custom domains & branding',
+        'Advanced analytics & reporting',
+        'Priority support'
       ]
     }
   };
@@ -181,11 +211,11 @@ export default function TrialSignup() {
                   </li>
                   <li className="flex items-center text-green-700">
                     <Check className="h-4 w-4 mr-3 text-green-600" />
-                    Unlimited tournament creation and management
+                    Professional tournament features vs basic brackets
                   </li>
                   <li className="flex items-center text-green-700">
                     <Check className="h-4 w-4 mr-3 text-green-600" />
-                    Professional website hosting and branding
+                    Smart seeding algorithm + multiple tournament formats
                   </li>
                   <li className="flex items-center text-green-700">
                     <Check className="h-4 w-4 mr-3 text-green-600" />
@@ -193,7 +223,7 @@ export default function TrialSignup() {
                   </li>
                   <li className="flex items-center text-green-700">
                     <Check className="h-4 w-4 mr-3 text-green-600" />
-                    White-label branding and customization
+                    Module-based or white-label website building
                   </li>
                 </ul>
               </CardContent>
