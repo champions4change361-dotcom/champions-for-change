@@ -605,7 +605,13 @@ export default function TeamDashboardPage() {
                       </h3>
                     </div>
                     <Form {...addPlayerForm}>
-                      <form onSubmit={addPlayerForm.handleSubmit((data) => addPlayerMutation.mutate(data))} className="space-y-4">
+                      <form onSubmit={(e) => {
+                        e.preventDefault();
+                        // Only submit if we're on the final step
+                        if (registrationStep === 3) {
+                          addPlayerForm.handleSubmit((data) => addPlayerMutation.mutate(data))(e);
+                        }
+                      }} className="space-y-4">
                         
                         {/* Step 1: Demographics */}
                         {registrationStep === 1 && (
@@ -1392,7 +1398,13 @@ export default function TeamDashboardPage() {
                     </div>
                     
                     <Form {...editPlayerForm}>
-                      <form onSubmit={editPlayerForm.handleSubmit((data) => updatePlayerMutation.mutate(data))} className="space-y-4">
+                      <form onSubmit={(e) => {
+                        e.preventDefault();
+                        // Only submit if we're on the final step
+                        if (editStep === 3) {
+                          editPlayerForm.handleSubmit((data) => updatePlayerMutation.mutate(data))(e);
+                        }
+                      }} className="space-y-4">
                         
                         {/* Step 1: Demographics */}
                         {editStep === 1 && (
