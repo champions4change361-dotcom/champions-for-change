@@ -251,10 +251,10 @@ export default function AdminManagement() {
         ];
       case 'organizer':
         return [
-          { value: 'tournament-organizer', label: 'Tournament Organizer ($39/month)' },
-          { value: 'annual-pro', label: 'Annual Pro ($399/year)' },
-          { value: 'professional', label: 'Professional' },
-          { value: 'champion', label: 'Champion' },
+          { value: 'starter', label: 'Starter Team ($23/month)' },
+          { value: 'growing', label: 'Growing Team ($39/month)' },
+          { value: 'elite', label: 'Elite Program ($63/month)' },
+          { value: 'tournament-organizer', label: 'Tournament Organizer ($39/month) - Legacy' },
         ];
       case 'business':
         return [
@@ -265,9 +265,10 @@ export default function AdminManagement() {
         ];
       default:
         return [
+          { value: 'starter', label: 'Starter Team ($23/month)' },
+          { value: 'growing', label: 'Growing Team ($39/month)' },
+          { value: 'elite', label: 'Elite Program ($63/month)' },
           { value: 'foundation', label: 'Foundation (Free)' },
-          { value: 'starter', label: 'Starter' },
-          { value: 'professional', label: 'Professional' },
         ];
     }
   };
