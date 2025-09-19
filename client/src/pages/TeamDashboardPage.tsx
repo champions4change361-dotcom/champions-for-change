@@ -259,7 +259,7 @@ export default function TeamDashboardPage() {
   });
 
   // Handle opening edit player dialog
-  const handleEditPlayer = async (player: TeamPlayer) => {
+  const handleEditPlayer = (player: TeamPlayer) => {
     setEditingPlayer(player);
     setEditStep(1); // Reset to first step when opening
     
@@ -277,59 +277,6 @@ export default function TeamDashboardPage() {
       birthCertificateDoc: player.birthCertificateDoc || '',
       physicalFormDoc: player.physicalFormDoc || '',
     });
-    
-    // Load existing medical history data and pre-populate radio buttons
-    try {
-      const response = await fetch(`/api/players/${player.id}/medical-history`, {
-        credentials: 'include'
-      });
-      
-      if (response.ok) {
-        const medicalData = await response.json();
-        
-        // Pre-populate medical history radio buttons after a short delay to ensure DOM is ready
-        setTimeout(() => {
-          // Pre-check radio buttons based on existing medical history data
-          const questions = [
-            { key: 'q1_recent_illness', name: 'edit_q1' },
-            { key: 'q2_hospitalized', name: 'edit_q2' },
-            { key: 'q3_chest_pain_exercise', name: 'edit_q3' },
-            { key: 'q4_head_injury', name: 'edit_q4' },
-            { key: 'q5_seizure', name: 'edit_q5' },
-            { key: 'q6_missing_organs', name: 'edit_q6' },
-            { key: 'q7_doctors_care', name: 'edit_q7' },
-            { key: 'q8_medications', name: 'edit_q8' },
-            { key: 'q9_allergies', name: 'edit_q9' },
-            { key: 'q10_dizzy_exercise', name: 'edit_q10' },
-            { key: 'q11_skin_problems', name: 'edit_q11' },
-            { key: 'q12_heat_illness', name: 'edit_q12' },
-            { key: 'q13_vision_problems', name: 'edit_q13' },
-            { key: 'q14_asthma', name: 'edit_q14' },
-            { key: 'q15_protective_equipment', name: 'edit_q15' },
-            { key: 'q16_sprain_strain', name: 'edit_q16' },
-            { key: 'q17_weight_concerns', name: 'edit_q17' },
-            { key: 'q18_stressed', name: 'edit_q18' },
-            { key: 'q19_sickle_cell', name: 'edit_q19' },
-            { key: 'q20_first_menstrual_period', name: 'edit_q20' },
-            { key: 'q21_missing_testicle', name: 'edit_q21' }
-          ];
-          
-          questions.forEach(({ key, name }) => {
-            const value = medicalData[key];
-            if (value !== null && value !== undefined) {
-              const radioValue = value ? 'yes' : 'no';
-              const radioButton = document.querySelector(`input[name="${name}"][value="${radioValue}"]`);
-              if (radioButton) {
-                (radioButton as HTMLInputElement).checked = true;
-              }
-            }
-          });
-        }, 100);
-      }
-    } catch (error) {
-      // Medical history doesn't exist yet - that's fine, user will fill it out
-      console.log('No existing medical history found for player');
-    }
     
     setIsEditPlayerOpen(true);
   };
@@ -1524,9 +1471,77 @@ export default function TeamDashboardPage() {
                             ) : (
                               <Button 
                                 type="button"
-                                onClick={() => {
-                                  // Only submit when Complete Registration is clicked
-                                  addPlayerForm.handleSubmit((data) => addPlayerMutation.mutate(data))();
+                                onClick={async () => {
+                                  // Collect medical history data from radio buttons
+                                  const medicalData: any = {};
+                                  
+                                  const questions = [
+                                    { key: 'q1_recent_illness', name: 'q1' },
+                                    { key: 'q2_hospitalized', name: 'q2' },
+                                    { key: 'q3_chest_pain_exercise', name: 'q3' },
+                                    { key: 'q4_head_injury', name: 'q4' },
+                                    { key: 'q5_seizure', name: 'q5' },
+                                    { key: 'q6_missing_organs', name: 'q6' },
+                                    { key: 'q7_doctors_care', name: 'q7' },
+                                    { key: 'q8_medications', name: 'q8' },
+                                    { key: 'q9_allergies', name: 'q9' },
+                                    { key: 'q10_dizzy_exercise', name: 'q10' },
+                                    { key: 'q11_skin_problems', name: 'q11' },
+                                    { key: 'q12_heat_illness', name: 'q12' },
+                                    { key: 'q13_vision_problems', name: 'q13' },
+                                    { key: 'q14_asthma', name: 'q14' },
+                                    { key: 'q15_protective_equipment', name: 'q15' },
+                                    { key: 'q16_sprain_strain', name: 'q16' },
+                                    { key: 'q17_weight_concerns', name: 'q17' },
+                                    { key: 'q18_stressed', name: 'q18' },
+                                    { key: 'q19_sickle_cell', name: 'q19' },
+                                    { key: 'q20_first_menstrual_period', name: 'q20' },
+                                    { key: 'q21_missing_testicle', name: 'q21' }
+                                  ];
+                                  
+                                  // Collect medical history answers
+                                  questions.forEach(({ key, name }) => {
+                                    const checkedRadio = document.querySelector(`input[name="${name}"]:checked`);
+                                    if (checkedRadio) {
+                                      medicalData[key] = (checkedRadio as HTMLInputElement).value === 'yes';
+                                    }
+                                  });
+                                  
+                                  try {
+                                    // First create the player
+                                    const playerResponse = await new Promise((resolve, reject) => {
+                                      addPlayerForm.handleSubmit(
+                                        (data) => {
+                                          addPlayerMutation.mutate(data, {
+                                            onSuccess: (response) => resolve(response),
+                                            onError: reject
+                                          });
+                                        },
+                                        reject
+                                      )();
+                                    }) as any;
+                                    
+                                    // Then save medical history if any answers were provided
+                                    if (playerResponse?.id && Object.keys(medicalData).some(key => medicalData[key] !== undefined)) {
+                                      // Add required fields for medical history
+                                      medicalData.playerId = playerResponse.id;
+                                      medicalData.studentName = addPlayerForm.getValues('playerName');
+                                      medicalData.isComplete = true;
+                                      medicalData.signatureDate = new Date().toISOString().split('T')[0];
+                                      
+                                      await fetch(`/api/players/${playerResponse.id}/medical-history`, {
+                                        method: 'POST',
+                                        headers: {
+                                          'Content-Type': 'application/json',
+                                        },
+                                        credentials: 'include',
+                                        body: JSON.stringify(medicalData)
+                                      });
+                                    }
+                                    
+                                  } catch (error) {
+                                    console.error('Error saving player data:', error);
+                                  }
                                 }}
                                 className="bg-green-600 hover:bg-green-700 text-white" 
                                 disabled={addPlayerMutation.isPending} 
@@ -2388,77 +2403,9 @@ export default function TeamDashboardPage() {
                             ) : (
                               <Button 
                                 type="button"
-                                onClick={async () => {
-                                  // Collect medical history data from radio buttons
-                                  const medicalData: any = {};
-                                  
-                                  const questions = [
-                                    { key: 'q1_recent_illness', name: 'edit_q1' },
-                                    { key: 'q2_hospitalized', name: 'edit_q2' },
-                                    { key: 'q3_chest_pain_exercise', name: 'edit_q3' },
-                                    { key: 'q4_head_injury', name: 'edit_q4' },
-                                    { key: 'q5_seizure', name: 'edit_q5' },
-                                    { key: 'q6_missing_organs', name: 'edit_q6' },
-                                    { key: 'q7_doctors_care', name: 'edit_q7' },
-                                    { key: 'q8_medications', name: 'edit_q8' },
-                                    { key: 'q9_allergies', name: 'edit_q9' },
-                                    { key: 'q10_dizzy_exercise', name: 'edit_q10' },
-                                    { key: 'q11_skin_problems', name: 'edit_q11' },
-                                    { key: 'q12_heat_illness', name: 'edit_q12' },
-                                    { key: 'q13_vision_problems', name: 'edit_q13' },
-                                    { key: 'q14_asthma', name: 'edit_q14' },
-                                    { key: 'q15_protective_equipment', name: 'edit_q15' },
-                                    { key: 'q16_sprain_strain', name: 'edit_q16' },
-                                    { key: 'q17_weight_concerns', name: 'edit_q17' },
-                                    { key: 'q18_stressed', name: 'edit_q18' },
-                                    { key: 'q19_sickle_cell', name: 'edit_q19' },
-                                    { key: 'q20_first_menstrual_period', name: 'edit_q20' },
-                                    { key: 'q21_missing_testicle', name: 'edit_q21' }
-                                  ];
-                                  
-                                  // Collect medical history answers
-                                  questions.forEach(({ key, name }) => {
-                                    const checkedRadio = document.querySelector(`input[name="${name}"]:checked`);
-                                    if (checkedRadio) {
-                                      medicalData[key] = (checkedRadio as HTMLInputElement).value === 'yes';
-                                    }
-                                  });
-                                  
-                                  // Add required fields for medical history
-                                  medicalData.playerId = editingPlayer?.id;
-                                  medicalData.studentName = editPlayerForm.getValues('playerName');
-                                  medicalData.isComplete = true;
-                                  medicalData.signatureDate = new Date().toISOString().split('T')[0];
-                                  
-                                  try {
-                                    // First update player demographics
-                                    await new Promise((resolve, reject) => {
-                                      editPlayerForm.handleSubmit(
-                                        (data) => {
-                                          updatePlayerMutation.mutate(data, {
-                                            onSuccess: resolve,
-                                            onError: reject
-                                          });
-                                        },
-                                        reject
-                                      )();
-                                    });
-                                    
-                                    // Then save medical history if any answers were provided
-                                    if (Object.keys(medicalData).length > 4) { // More than just the required fields
-                                      await fetch(`/api/players/${editingPlayer?.id}/medical-history`, {
-                                        method: 'PUT',
-                                        headers: {
-                                          'Content-Type': 'application/json',
-                                        },
-                                        credentials: 'include',
-                                        body: JSON.stringify(medicalData)
-                                      });
-                                    }
-                                    
-                                  } catch (error) {
-                                    console.error('Error saving player data:', error);
-                                  }
+                                onClick={() => {
+                                  // Simply save player demographics - medical history handled separately
+                                  editPlayerForm.handleSubmit((data) => updatePlayerMutation.mutate(data))();
                                 }}
                                 className="bg-green-600 hover:bg-green-700 text-white" 
                                 disabled={updatePlayerMutation.isPending} 
