@@ -21,7 +21,6 @@ import type { Team, TeamPlayer, InsertTeamPlayer } from '@shared/schema';
 import { insertTeamPlayerSchema } from '@shared/schema';
 import { z } from 'zod';
 import { ObjectUploader } from '../../components/ObjectUploader';
-import { MedicalHistoryForm } from '@/components/MedicalHistoryForm';
 
 export default function TeamDashboardPage() {
   const { id } = useParams();
@@ -36,8 +35,6 @@ export default function TeamDashboardPage() {
   const [isEditPlayerOpen, setIsEditPlayerOpen] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState<TeamPlayer | null>(null);
   const [isEditTeamOpen, setIsEditTeamOpen] = useState(false);
-  const [isMedicalHistoryOpen, setIsMedicalHistoryOpen] = useState(false);
-  const [selectedPlayerForMedical, setSelectedPlayerForMedical] = useState<TeamPlayer | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -166,6 +163,49 @@ export default function TeamDashboardPage() {
     }
   }, [team, editTeamForm]);
 
+  // Pre-populate medical history when navigating to Edit Step 2
+  useEffect(() => {
+    if (editStep === 2 && (window as any).savedMedicalData) {
+      setTimeout(() => {
+        const medicalData = (window as any).savedMedicalData;
+        const questions = [
+          { key: 'q1_recent_illness', name: 'edit_q1' },
+          { key: 'q2_hospitalized', name: 'edit_q2' },
+          { key: 'q3_chest_pain_exercise', name: 'edit_q3' },
+          { key: 'q4_head_injury', name: 'edit_q4' },
+          { key: 'q5_seizure', name: 'edit_q5' },
+          { key: 'q6_missing_organs', name: 'edit_q6' },
+          { key: 'q7_doctors_care', name: 'edit_q7' },
+          { key: 'q8_medications', name: 'edit_q8' },
+          { key: 'q9_allergies', name: 'edit_q9' },
+          { key: 'q10_dizzy_exercise', name: 'edit_q10' },
+          { key: 'q11_skin_problems', name: 'edit_q11' },
+          { key: 'q12_heat_illness', name: 'edit_q12' },
+          { key: 'q13_vision_problems', name: 'edit_q13' },
+          { key: 'q14_asthma', name: 'edit_q14' },
+          { key: 'q15_protective_equipment', name: 'edit_q15' },
+          { key: 'q16_sprain_strain', name: 'edit_q16' },
+          { key: 'q17_weight_concerns', name: 'edit_q17' },
+          { key: 'q18_stressed', name: 'edit_q18' },
+          { key: 'q19_sickle_cell', name: 'edit_q19' },
+          { key: 'q20_first_menstrual_period', name: 'edit_q20' },
+          { key: 'q21_missing_testicle', name: 'edit_q21' }
+        ];
+        
+        questions.forEach(({ key, name }) => {
+          const value = medicalData[key];
+          if (value !== null && value !== undefined) {
+            const radioValue = value ? 'yes' : 'no';
+            const radioButton = document.querySelector(`input[name="${name}"][value="${radioValue}"]`);
+            if (radioButton) {
+              (radioButton as HTMLInputElement).checked = true;
+            }
+          }
+        });
+      }, 100);
+    }
+  }, [editStep]);
+
   // Add player form with proper null handling
   const addPlayerForm = useForm<InsertTeamPlayer>({
     resolver: zodResolver(insertTeamPlayerSchema),
@@ -259,7 +299,7 @@ export default function TeamDashboardPage() {
   });
 
   // Handle opening edit player dialog
-  const handleEditPlayer = (player: TeamPlayer) => {
+  const handleEditPlayer = async (player: TeamPlayer) => {
     setEditingPlayer(player);
     setEditStep(1); // Reset to first step when opening
     
@@ -279,13 +319,25 @@ export default function TeamDashboardPage() {
     });
     
     setIsEditPlayerOpen(true);
+    
+    // Load existing medical history in background and pre-populate when user gets to Step 2
+    try {
+      const response = await fetch(`/api/players/${player.id}/medical-history`, {
+        credentials: 'include'
+      });
+      
+      if (response.ok) {
+        const medicalData = await response.json();
+        
+        // Store medical data for later use when user navigates to Step 2
+        (window as any).savedMedicalData = medicalData;
+      }
+    } catch (error) {
+      console.log('No existing medical history found for player');
+      (window as any).savedMedicalData = null;
+    }
   };
 
-  // Handle opening medical history dialog
-  const handleMedicalHistory = (player: TeamPlayer) => {
-    setSelectedPlayerForMedical(player);
-    setIsMedicalHistoryOpen(true);
-  };
 
   // Search for address using Nominatim (OpenStreetMap) - completely free, no API key required
   const searchAddress = async (query: string) => {
@@ -2403,9 +2455,90 @@ export default function TeamDashboardPage() {
                             ) : (
                               <Button 
                                 type="button"
-                                onClick={() => {
-                                  // Simply save player demographics - medical history handled separately
-                                  editPlayerForm.handleSubmit((data) => updatePlayerMutation.mutate(data))();
+                                onClick={async () => {
+                                  try {
+                                    // First save player demographics
+                                    await new Promise((resolve, reject) => {
+                                      editPlayerForm.handleSubmit(
+                                        (data) => {
+                                          updatePlayerMutation.mutate(data, {
+                                            onSuccess: resolve,
+                                            onError: reject
+                                          });
+                                        },
+                                        reject
+                                      )();
+                                    });
+
+                                    // Collect updated medical history data from edit form
+                                    const medicalData: any = {};
+                                    const questions = [
+                                      { key: 'q1_recent_illness', name: 'edit_q1' },
+                                      { key: 'q2_hospitalized', name: 'edit_q2' },
+                                      { key: 'q3_chest_pain_exercise', name: 'edit_q3' },
+                                      { key: 'q4_head_injury', name: 'edit_q4' },
+                                      { key: 'q5_seizure', name: 'edit_q5' },
+                                      { key: 'q6_missing_organs', name: 'edit_q6' },
+                                      { key: 'q7_doctors_care', name: 'edit_q7' },
+                                      { key: 'q8_medications', name: 'edit_q8' },
+                                      { key: 'q9_allergies', name: 'edit_q9' },
+                                      { key: 'q10_dizzy_exercise', name: 'edit_q10' },
+                                      { key: 'q11_skin_problems', name: 'edit_q11' },
+                                      { key: 'q12_heat_illness', name: 'edit_q12' },
+                                      { key: 'q13_vision_problems', name: 'edit_q13' },
+                                      { key: 'q14_asthma', name: 'edit_q14' },
+                                      { key: 'q15_protective_equipment', name: 'edit_q15' },
+                                      { key: 'q16_sprain_strain', name: 'edit_q16' },
+                                      { key: 'q17_weight_concerns', name: 'edit_q17' },
+                                      { key: 'q18_stressed', name: 'edit_q18' },
+                                      { key: 'q19_sickle_cell', name: 'edit_q19' },
+                                      { key: 'q20_first_menstrual_period', name: 'edit_q20' },
+                                      { key: 'q21_missing_testicle', name: 'edit_q21' }
+                                    ];
+                                    
+                                    // Collect medical answers
+                                    questions.forEach(({ key, name }) => {
+                                      const checkedRadio = document.querySelector(`input[name="${name}"]:checked`);
+                                      if (checkedRadio) {
+                                        medicalData[key] = (checkedRadio as HTMLInputElement).value === 'yes';
+                                      }
+                                    });
+                                    
+                                    // Save medical history if any answers provided
+                                    if (editingPlayer && Object.keys(medicalData).length > 0) {
+                                      medicalData.playerId = editingPlayer.id;
+                                      medicalData.studentName = editPlayerForm.getValues('playerName');
+                                      medicalData.isComplete = true;
+                                      medicalData.signatureDate = new Date().toISOString().split('T')[0];
+                                      
+                                      await fetch(`/api/players/${editingPlayer.id}/medical-history`, {
+                                        method: 'POST',
+                                        headers: {
+                                          'Content-Type': 'application/json',
+                                        },
+                                        credentials: 'include',
+                                        body: JSON.stringify(medicalData)
+                                      });
+                                    }
+
+                                    // Success - refresh and close
+                                    queryClient.invalidateQueries({ queryKey: ['/api/teams', id, 'players'] });
+                                    setIsEditPlayerOpen(false);
+                                    setEditStep(1);
+                                    
+                                    toast({
+                                      title: "Player Updated Successfully!",
+                                      description: "Player information and medical history have been saved."
+                                    });
+                                    
+                                  } catch (error) {
+                                    console.error('Error updating player:', error);
+                                    toast({
+                                      title: "Error",
+                                      description: "Failed to update player. Please try again.",
+                                      variant: "destructive"
+                                    });
+                                  }
                                 }}
                                 className="bg-green-600 hover:bg-green-700 text-white" 
                                 disabled={updatePlayerMutation.isPending} 
@@ -2468,16 +2601,6 @@ export default function TeamDashboardPage() {
                               <p className="text-slate-300 text-xs">{player.parentGuardianPhone}</p>
                             </div>
                             <div className="flex gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleMedicalHistory(player)}
-                                className="bg-red-600/20 border-red-500 text-red-300 hover:bg-red-600/30 hover:text-red-200"
-                                data-testid={`button-medical-history-${player.id}`}
-                              >
-                                <Heart className="w-4 h-4 mr-1" />
-                                Medical
-                              </Button>
                               <Button
                                 variant="outline"
                                 size="sm"
@@ -2716,26 +2839,6 @@ export default function TeamDashboardPage() {
           </DialogContent>
         </Dialog>
 
-        {/* Medical History Dialog */}
-        <Dialog open={isMedicalHistoryOpen} onOpenChange={setIsMedicalHistoryOpen}>
-          <DialogContent className="bg-slate-800 border-slate-700 max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 text-slate-100">
-                <Heart className="h-5 w-5 text-red-500" />
-                Medical History - {selectedPlayerForMedical?.playerName}
-              </DialogTitle>
-              <DialogDescription className="text-slate-300">
-                Complete the participation physical evaluation medical history form. All medical data is HIPAA compliant and encrypted.
-              </DialogDescription>
-            </DialogHeader>
-            {selectedPlayerForMedical && (
-              <MedicalHistoryForm 
-                playerId={selectedPlayerForMedical.id} 
-                onComplete={() => setIsMedicalHistoryOpen(false)}
-              />
-            )}
-          </DialogContent>
-        </Dialog>
       </div>
     </div>
   );
