@@ -1345,7 +1345,11 @@ export default function TeamDashboardPage() {
                               </Button>
                             ) : (
                               <Button 
-                                type="submit" 
+                                type="button"
+                                onClick={() => {
+                                  // Only submit when Complete Registration is clicked
+                                  addPlayerForm.handleSubmit((data) => addPlayerMutation.mutate(data))();
+                                }}
                                 className="bg-green-600 hover:bg-green-700 text-white" 
                                 disabled={addPlayerMutation.isPending} 
                                 data-testid="button-save-player"
@@ -2019,18 +2023,32 @@ export default function TeamDashboardPage() {
                           </div>
                         )}
                         
-                        {/* Step 3: Documents - Edit Mode */}
+                        {/* Step 3: Documents & Signature - Edit Mode */}
                         {editStep === 3 && (
                           <div className="space-y-4">
                             <Alert className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700 mb-4">
                               <FileCheck className="h-4 w-4 text-green-600" />
                               <AlertDescription>
-                                Review and update documents as needed.
+                                Add signature to confirm all information is accurate and save changes.
                               </AlertDescription>
                             </Alert>
                             
-                            <p className="text-slate-300 text-sm">Upload new documents or keep existing ones.</p>
-                            <p className="text-slate-300 text-sm italic">Document upload section already available in Step 1 will move here.</p>
+                            <div className="space-y-4">
+                              <h3 className="text-lg font-semibold text-slate-100">Digital Signature</h3>
+                              <div className="border-2 border-dashed border-slate-600 rounded-lg p-8 text-center">
+                                <p className="text-slate-300 mb-4">Click or touch here to sign</p>
+                                <div className="bg-slate-700 h-32 rounded flex items-center justify-center">
+                                  <span className="text-slate-400">Signature Pad (Touch to sign)</span>
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-center space-x-2">
+                                <input type="checkbox" className="w-4 h-4" />
+                                <label className="text-slate-100 text-sm">
+                                  I certify that all updated information is true and accurate.
+                                </label>
+                              </div>
+                            </div>
                           </div>
                         )}
                         
@@ -2069,7 +2087,11 @@ export default function TeamDashboardPage() {
                               </Button>
                             ) : (
                               <Button 
-                                type="submit" 
+                                type="button"
+                                onClick={() => {
+                                  // Only submit when Save Changes is clicked
+                                  editPlayerForm.handleSubmit((data) => updatePlayerMutation.mutate(data))();
+                                }}
                                 className="bg-green-600 hover:bg-green-700 text-white" 
                                 disabled={updatePlayerMutation.isPending} 
                                 data-testid="button-update-player"
