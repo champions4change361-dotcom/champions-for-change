@@ -60,7 +60,7 @@ export default function AdminManagement() {
         orgType = 'business';
         break;
       case 'general':
-        orgType = 'individual';
+        orgType = 'club';
         break;
     }
     
@@ -186,6 +186,7 @@ export default function AdminManagement() {
           { value: 'scorekeeper', label: 'Scorekeeper/Judge' },
           { value: 'head_coach', label: 'Head Coach' },
           { value: 'assistant_coach', label: 'Assistant Coach' },
+          { value: 'parent_guardian', label: 'Parent/Guardian' },
         ];
       case 'business':
         return [
@@ -197,6 +198,7 @@ export default function AdminManagement() {
         return [
           { value: 'fan', label: 'General User/Fan' },
           { value: 'athlete', label: 'Athlete' },
+          { value: 'parent_guardian', label: 'Parent/Guardian' },
           { value: 'scorekeeper', label: 'Scorekeeper' }
         ];
     }
@@ -224,6 +226,7 @@ export default function AdminManagement() {
           { value: 'tournament_manager', label: 'Tournament Manager' },
           { value: 'assistant_tournament_manager', label: 'Assistant Tournament Manager' },
           { value: 'scorekeeper', label: 'Scorekeeper/Judge' },
+          { value: 'parent_guardian', label: 'Parent/Guardian' },
         ];
       case 'business':
         return [
@@ -232,7 +235,8 @@ export default function AdminManagement() {
         ];
       default:
         return [
-          { value: 'scorekeeper', label: 'Scorekeeper' }
+          { value: 'scorekeeper', label: 'Scorekeeper' },
+          { value: 'parent_guardian', label: 'Parent/Guardian' }
         ];
     }
   };
