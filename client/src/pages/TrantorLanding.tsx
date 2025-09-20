@@ -17,13 +17,17 @@ export default function TrantorLanding() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
       {/* Professional Tournament Header */}
       <header className="relative border-b border-yellow-500/20 bg-slate-900/80 backdrop-blur-sm pt-4 lg:pt-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Champions for Change Coin - Upper Left Corner */}
+        <div className="absolute top-4 left-4 z-10">
+          <TrantorCoin size="lg" />
+        </div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pl-20 lg:pl-24">
           <div className="lg:flex lg:items-center lg:justify-between lg:min-h-16">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between w-full py-4 lg:py-0 space-y-4 lg:space-y-0">
               
-              {/* Trantor Tournaments Logo */}
+              {/* Header Text */}
               <div className="flex items-center space-x-3 mb-5 lg:mb-0">
-                <TrantorCoin size="lg" />
                 <div>
                   <h1 className="text-xl font-bold text-white">Champions for Change</h1>
                   <p className="text-xs text-yellow-300">Click coin to create account</p>
