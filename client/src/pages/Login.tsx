@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { GraduationCap, LogIn, AlertCircle } from "lucide-react";
+import { Link } from "wouter";
 
 export default function Login() {
   const [formData, setFormData] = useState({
@@ -184,10 +185,14 @@ export default function Login() {
           </CardContent>
         </Card>
 
-        {/* Additional Info */}
+        {/* Forgot Password Link */}
         <div className="text-center text-sm text-slate-600">
           <p>Need help accessing your account?</p>
-          <p className="text-blue-600">Contact your district administrator</p>
+          <Link href="/forgot-password">
+            <Button variant="link" className="p-0 h-auto font-normal text-blue-600" data-testid="link-forgot-password">
+              Forgot Username/Password?
+            </Button>
+          </Link>
         </div>
       </div>
     </div>

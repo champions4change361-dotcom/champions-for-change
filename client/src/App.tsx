@@ -114,6 +114,8 @@ import BusinessLogin from './pages/BusinessLogin';
 import LoginPortal from './pages/LoginPortal';
 import AdminManagement from './pages/AdminManagement';
 import LoginSupport from './pages/LoginSupport';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import RoleBasedDashboards from './pages/RoleBasedDashboards';
 import NonprofitDonation from './pages/NonprofitDonation';
 import NonprofitAnalytics from './pages/NonprofitAnalytics';
@@ -401,6 +403,9 @@ function AppRouter() {
       <Route path="/login" component={UnifiedLogin} />
       {/* Legacy Login Form */}
       <Route path="/legacy-login" component={Login} />
+      {/* Password Reset Flow */}
+      <Route path="/forgot-password" component={ForgotPassword} />
+      <Route path="/reset-password" component={ResetPassword} />
       {/* User Type Selection Portal */}
       <Route path="/login-portal" component={LoginPortal} />
       {/* User Type Login Portals */}
