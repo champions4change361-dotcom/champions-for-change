@@ -19,6 +19,22 @@ console.log('🏫 District athletics management platform initialized');
 console.log('💚 Champions for Change nonprofit mission active');
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  
+  // Champions for Change Domain Redirect
+  app.use((req, res, next) => {
+    const hostname = req.get('host');
+    
+    // If someone visits championsforchange.net, redirect them to trantortournaments.org with a parameter
+    if (hostname === 'championsforchange.net' || hostname === 'www.championsforchange.net') {
+      const redirectUrl = `https://trantortournaments.org${req.originalUrl}${req.originalUrl.includes('?') ? '&' : '?'}from=champions`;
+      
+      console.log(`🔄 Redirecting Champions visitor: ${hostname}${req.originalUrl} → ${redirectUrl}`);
+      
+      return res.redirect(301, redirectUrl);
+    }
+    
+    next();
+  });
   // PRIORITY: Enhanced health check endpoints with comprehensive metrics
   app.get('/api/health', async (req, res) => {
     try {
