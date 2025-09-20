@@ -240,7 +240,6 @@ export default function Checkout() {
         colorPrimary: '#16a34a',
       },
     },
-    paymentMethodCreation: 'manual' as const,
   };
 
   return (
