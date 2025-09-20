@@ -47,14 +47,36 @@ export default function TrantorLanding() {
 
               {/* Trial and Action Buttons */}
               <div className="flex flex-col space-y-2 lg:flex-row lg:space-y-0 lg:space-x-3 lg:ml-auto">
-                <Button 
-                  onClick={() => setLocation('/trial-signup?plan=monthly&price=39')}
-                  className="bg-yellow-600 hover:bg-yellow-700 text-slate-900 font-semibold px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base w-full lg:w-auto"
-                  data-testid="button-start-trial-trantor"
-                >
-                  <Zap className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4" />
-                  Start 14-Day Free Trial
-                </Button>
+                <div className="flex flex-col space-y-2">
+                  <Button 
+                    onClick={() => setLocation('/trial-signup?plan=monthly&price=39')}
+                    className="bg-yellow-600 hover:bg-yellow-700 text-slate-900 font-semibold px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base w-full lg:w-auto"
+                    data-testid="button-start-trial-trantor"
+                  >
+                    <Zap className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4" />
+                    Start 14-Day Free Trial
+                  </Button>
+                  <Button 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      try {
+                        setLocation('/tournament-calendar');
+                        setTimeout(() => {
+                          if (window.location.pathname !== '/tournament-calendar') {
+                            window.location.href = '/tournament-calendar';
+                          }
+                        }, 100);
+                      } catch (error) {
+                        window.location.href = '/tournament-calendar';
+                      }
+                    }}
+                    className="bg-blue-700 hover:bg-blue-600 text-blue-200 font-semibold px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base w-full lg:w-auto border border-blue-400 shadow-lg"
+                    data-testid="button-see-tournaments"
+                  >
+                    <Calendar className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4" />
+                    See Local Tournaments
+                  </Button>
+                </div>
                 <Button 
                   onClick={(e) => {
                     e.preventDefault();
@@ -229,29 +251,6 @@ export default function TrantorLanding() {
                 </Button>
               </div>
               
-              {/* See Local Tournaments Button */}
-              <div className="flex justify-center mt-6">
-                <Button 
-                  onClick={(e) => {
-                    e.preventDefault();
-                    try {
-                      setLocation('/tournament-calendar');
-                      setTimeout(() => {
-                        if (window.location.pathname !== '/tournament-calendar') {
-                          window.location.href = '/tournament-calendar';
-                        }
-                      }, 100);
-                    } catch (error) {
-                      window.location.href = '/tournament-calendar';
-                    }
-                  }}
-                  className="bg-blue-700 hover:bg-blue-600 text-blue-200 font-semibold px-6 py-3 text-base border border-blue-400 shadow-lg"
-                  data-testid="button-see-tournaments"
-                >
-                  <Calendar className="mr-2 h-4 w-4" />
-                  See Local Tournaments
-                </Button>
-              </div>
             </div>
 
             {/* Team Management Section - NEW */}
