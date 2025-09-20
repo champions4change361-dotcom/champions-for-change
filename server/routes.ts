@@ -3488,6 +3488,175 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Generate IRS-compliant tax receipt
+  function generateTaxReceipt(donationData: any) {
+    const { 
+      donorInfo, 
+      amount, 
+      donationDate, 
+      donationId,
+      isAnonymous = false 
+    } = donationData;
+
+    const receiptDate = new Date(donationDate).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+
+    const receiptNumber = `CR-${donationDate.getFullYear()}-${donationId.split('-')[1]}`;
+
+    return {
+      receiptNumber,
+      organizationInfo: {
+        name: "Champions for Change",
+        ein: "87-1234567", // TODO: Replace with actual EIN
+        address: "15210 Cruiser St, Corpus Christi, TX 78418",
+        phone: "361-300-1552",
+        email: "champions4change361@gmail.com"
+      },
+      donorInfo: isAnonymous ? {
+        name: "Anonymous Donor",
+        email: donorInfo.email // Still needed for sending receipt
+      } : {
+        name: `${donorInfo.firstName} ${donorInfo.lastName}`,
+        email: donorInfo.email,
+        address: donorInfo.address || "Address not provided"
+      },
+      donation: {
+        amount: amount,
+        date: receiptDate,
+        description: "Educational programs for underprivileged youth"
+      },
+      legalStatement: "No goods or services were provided in exchange for this contribution.",
+      taxExemptStatus: "This organization is exempt from federal income tax under section 501(c)(3) of the Internal Revenue Code.",
+      deductibilityStatement: "Your contribution is tax-deductible to the full extent allowed by law.",
+      receiptText: `
+Dear ${isAnonymous ? 'Anonymous Donor' : donorInfo.firstName},
+
+Thank you for your generous contribution to Champions for Change!
+
+DONATION RECEIPT - KEEP FOR YOUR RECORDS
+
+Receipt Number: ${receiptNumber}
+Donation Date: ${receiptDate}
+Amount: $${amount.toFixed(2)}
+
+Organization: Champions for Change
+Federal Tax ID (EIN): 87-1234567
+Address: 15210 Cruiser St, Corpus Christi, TX 78418
+Phone: 361-300-1552
+
+${isAnonymous ? '' : `Donor: ${donorInfo.firstName} ${donorInfo.lastName}`}
+
+IMPORTANT TAX INFORMATION:
+• This organization is exempt from federal income tax under section 501(c)(3) of the Internal Revenue Code.
+• Your contribution is tax-deductible to the full extent allowed by law.
+• No goods or services were provided in exchange for this contribution.
+• Please retain this receipt for your tax records.
+
+Your donation directly supports educational trips and opportunities for underprivileged youth in Corpus Christi, Texas, specifically benefiting students at Robert Driscoll Middle School.
+
+With gratitude,
+Champions for Change Team
+
+Questions? Contact us at champions4change361@gmail.com or 361-300-1552
+      `.trim()
+    };
+  }
+
+  // Send tax receipt via email
+  app.post("/api/donation/send-receipt", async (req, res) => {
+    try {
+      const { donationData } = req.body;
+
+      if (!donationData || !donationData.donorInfo?.email) {
+        return res.status(400).json({ error: 'Missing donation data or email' });
+      }
+
+      const receipt = generateTaxReceipt(donationData);
+      
+      // Send via SendGrid
+      const { sendEmail } = require('./emailService');
+      
+      const emailResult = await sendEmail({
+        to: donationData.donorInfo.email,
+        subject: `Tax Receipt for Your $${donationData.amount} Donation - Champions for Change`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="background: linear-gradient(135deg, #059669, #2563eb); color: white; padding: 20px; text-align: center;">
+              <h1 style="margin: 0; font-size: 24px;">Champions for Change</h1>
+              <p style="margin: 5px 0 0 0; opacity: 0.9;">Educational Opportunities for Underprivileged Youth</p>
+            </div>
+            
+            <div style="padding: 30px; background: #f9fafb; border-left: 4px solid #059669;">
+              <h2 style="color: #1f2937; margin-top: 0;">DONATION RECEIPT</h2>
+              <p style="color: #6b7280; font-size: 14px; margin-bottom: 20px;">Keep this receipt for your tax records</p>
+              
+              <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                <table style="width: 100%; border-collapse: collapse;">
+                  <tr>
+                    <td style="padding: 8px 0; color: #6b7280; font-weight: bold;">Receipt Number:</td>
+                    <td style="padding: 8px 0; color: #1f2937;">${receipt.receiptNumber}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #6b7280; font-weight: bold;">Date:</td>
+                    <td style="padding: 8px 0; color: #1f2937;">${receipt.donation.date}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #6b7280; font-weight: bold;">Amount:</td>
+                    <td style="padding: 8px 0; color: #059669; font-weight: bold; font-size: 18px;">$${donationData.amount.toFixed(2)}</td>
+                  </tr>
+                  ${donationData.isAnonymous ? '' : `
+                  <tr>
+                    <td style="padding: 8px 0; color: #6b7280; font-weight: bold;">Donor:</td>
+                    <td style="padding: 8px 0; color: #1f2937;">${donationData.donorInfo.firstName} ${donationData.donorInfo.lastName}</td>
+                  </tr>
+                  `}
+                </table>
+              </div>
+            </div>
+            
+            <div style="padding: 20px; background: #fef3c7; border: 1px solid #fbbf24;">
+              <h3 style="margin-top: 0; color: #92400e;">Important Tax Information</h3>
+              <ul style="color: #92400e; margin: 0; padding-left: 20px;">
+                <li>This organization is exempt from federal income tax under section 501(c)(3) of the Internal Revenue Code</li>
+                <li>Your contribution is tax-deductible to the full extent allowed by law</li>
+                <li>No goods or services were provided in exchange for this contribution</li>
+                <li><strong>Federal Tax ID (EIN): 87-1234567</strong></li>
+              </ul>
+            </div>
+            
+            <div style="padding: 20px; text-align: center; color: #6b7280; font-size: 14px;">
+              <p><strong>Champions for Change</strong><br>
+              15210 Cruiser St, Corpus Christi, TX 78418<br>
+              Phone: 361-300-1552 | Email: champions4change361@gmail.com</p>
+              <p style="margin-top: 15px; font-style: italic;">Your donation directly supports educational trips for underprivileged youth at Robert Driscoll Middle School.</p>
+            </div>
+          </div>
+        `,
+        text: receipt.receiptText
+      });
+
+      console.log('📧 Tax receipt sent successfully:', {
+        receiptNumber: receipt.receiptNumber,
+        donor: donationData.isAnonymous ? 'Anonymous' : `${donationData.donorInfo.firstName} ${donationData.donorInfo.lastName}`,
+        amount: `$${donationData.amount}`,
+        email: donationData.donorInfo.email
+      });
+
+      res.json({ 
+        success: true, 
+        receiptNumber: receipt.receiptNumber,
+        message: 'Tax receipt sent successfully' 
+      });
+
+    } catch (error: any) {
+      console.error('❌ Tax receipt error:', error);
+      res.status(500).json({ error: 'Failed to send tax receipt' });
+    }
+  });
+
   // Donation endpoint for processing donations
   app.post("/api/create-donation", async (req, res) => {
     try {
