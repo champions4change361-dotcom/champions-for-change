@@ -17,9 +17,11 @@ interface CheckoutFormProps {
   amount: string;
   donorId: string;
   postDonationChoice: string;
+  paymentType?: string;
+  isMonthly?: boolean;
 }
 
-function CheckoutForm({ clientSecret, amount, donorId, postDonationChoice }: CheckoutFormProps) {
+function CheckoutForm({ clientSecret, amount, donorId, postDonationChoice, paymentType, isMonthly }: CheckoutFormProps) {
   const stripe = useStripe();
   const elements = useElements();
   const { toast } = useToast();
@@ -95,7 +97,7 @@ function CheckoutForm({ clientSecret, amount, donorId, postDonationChoice }: Che
           Complete Your Donation
         </CardTitle>
         <CardDescription className="text-lg">
-          ${amount} donation to Champions for Change educational programs
+          ${amount} {isMonthly ? 'monthly ' : ''}donation to Champions for Change educational programs
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -106,13 +108,26 @@ function CheckoutForm({ clientSecret, amount, donorId, postDonationChoice }: Che
               <h3 className="font-semibold text-green-800">Your Impact</h3>
             </div>
             <p className="text-sm text-green-700">
-              Your ${amount} donation will help fund educational trips for underprivileged youth 
+              Your ${amount} {isMonthly ? 'monthly ' : ''}donation will help fund educational trips for underprivileged youth 
               in Corpus Christi, Texas, supporting Robert Driscoll Middle School students.
+              {isMonthly ? ' You can cancel your monthly donation anytime.' : ''}
             </p>
           </div>
 
           <div className="border rounded-lg p-4">
-            <PaymentElement />
+            <PaymentElement
+              options={{
+                wallets: {
+                  applePay: paymentType === 'apple_pay' ? 'auto' : 'never',
+                  googlePay: paymentType === 'google_pay' ? 'auto' : 'never'
+                },
+                ...(paymentType === 'apple_pay' || paymentType === 'google_pay' ? {
+                  fields: {
+                    billingDetails: 'never'
+                  }
+                } : {})
+              }}
+            />
           </div>
 
           <div className="flex gap-3">
@@ -154,6 +169,8 @@ export default function Checkout() {
     amount: string;
     donorId: string;
     postDonationChoice: string;
+    paymentType?: string;
+    isMonthly?: boolean;
   } | null>(null);
 
   useEffect(() => {
@@ -163,6 +180,8 @@ export default function Checkout() {
     const amount = urlParams.get('amount');
     const donorId = urlParams.get('donor_id');
     const postDonationChoice = urlParams.get('choice');
+    const paymentType = urlParams.get('payment_type');
+    const isMonthly = urlParams.get('monthly') === 'true';
 
     if (!clientSecret || !amount) {
       setError('Missing payment information. Please start over.');
@@ -174,7 +193,9 @@ export default function Checkout() {
       clientSecret,
       amount,
       donorId: donorId || '',
-      postDonationChoice: postDonationChoice || 'just_donate'
+      postDonationChoice: postDonationChoice || 'just_donate',
+      paymentType: paymentType || undefined,
+      isMonthly: isMonthly || false
     });
     setLoading(false);
   }, []);
@@ -219,6 +240,7 @@ export default function Checkout() {
         colorPrimary: '#16a34a',
       },
     },
+    paymentMethodCreation: 'manual' as const,
   };
 
   return (

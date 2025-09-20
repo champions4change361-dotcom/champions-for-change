@@ -11,6 +11,11 @@ export default function PaymentMethods() {
     postDonationChoice: string;
   } | null>(null);
   const [isMonthly, setIsMonthly] = useState(false);
+  
+  // Device detection
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isAndroid = /Android/.test(navigator.userAgent);
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
   useEffect(() => {
     // Parse URL parameters
@@ -228,45 +233,49 @@ export default function PaymentMethods() {
               </div>
             </Button>
 
-            {/* Apple Pay */}
-            <Button
-              onClick={handleApplePayPayment}
-              variant="outline"
-              className="w-full p-6 border-2 border-gray-500 hover:bg-gray-50 flex items-center justify-between"
-              data-testid="button-apple-pay"
-            >
-              <div className="flex items-center gap-3">
-                <Smartphone className="h-6 w-6 text-gray-700" />
-                <div className="text-left">
-                  <div className="font-semibold text-gray-700">Apple Pay</div>
-                  <div className="text-sm text-gray-600">Touch ID, Face ID, or passcode</div>
+            {/* Apple Pay - Only show on iOS devices */}
+            {isIOS && (
+              <Button
+                onClick={handleApplePayPayment}
+                variant="outline"
+                className="w-full p-6 border-2 border-gray-500 hover:bg-gray-50 flex items-center justify-between"
+                data-testid="button-apple-pay"
+              >
+                <div className="flex items-center gap-3">
+                  <Smartphone className="h-6 w-6 text-gray-700" />
+                  <div className="text-left">
+                    <div className="font-semibold text-gray-700">Apple Pay</div>
+                    <div className="text-sm text-gray-600">Touch ID, Face ID, or passcode</div>
+                  </div>
                 </div>
-              </div>
-              <div className="text-right">
-                <div className="text-sm text-gray-700">iPhone/Mac</div>
-                <div className="text-xs text-gray-500">One-touch payment</div>
-              </div>
-            </Button>
+                <div className="text-right">
+                  <div className="text-sm text-gray-700">iPhone/Mac</div>
+                  <div className="text-xs text-gray-500">One-touch payment</div>
+                </div>
+              </Button>
+            )}
 
-            {/* Google Pay */}
-            <Button
-              onClick={handleGooglePayPayment}
-              variant="outline"
-              className="w-full p-6 border-2 border-green-500 hover:bg-green-50 flex items-center justify-between"
-              data-testid="button-google-pay"
-            >
-              <div className="flex items-center gap-3">
-                <Smartphone className="h-6 w-6 text-green-600" />
-                <div className="text-left">
-                  <div className="font-semibold text-green-600">Google Pay</div>
-                  <div className="text-sm text-gray-600">Fingerprint or PIN verification</div>
+            {/* Google Pay - Only show on Android devices or desktop Chrome */}
+            {(isAndroid || (!isMobile && navigator.userAgent.includes('Chrome'))) && (
+              <Button
+                onClick={handleGooglePayPayment}
+                variant="outline"
+                className="w-full p-6 border-2 border-green-500 hover:bg-green-50 flex items-center justify-between"
+                data-testid="button-google-pay"
+              >
+                <div className="flex items-center gap-3">
+                  <Smartphone className="h-6 w-6 text-green-600" />
+                  <div className="text-left">
+                    <div className="font-semibold text-green-600">Google Pay</div>
+                    <div className="text-sm text-gray-600">Fingerprint or PIN verification</div>
+                  </div>
                 </div>
-              </div>
-              <div className="text-right">
-                <div className="text-sm text-green-600">Android/Chrome</div>
-                <div className="text-xs text-gray-500">Quick checkout</div>
-              </div>
-            </Button>
+                <div className="text-right">
+                  <div className="text-sm text-green-600">Android/Chrome</div>
+                  <div className="text-xs text-gray-500">Quick checkout</div>
+                </div>
+              </Button>
+            )}
 
             {/* PayPal */}
             <Button
