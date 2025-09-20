@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Heart, CreditCard, ArrowLeft } from 'lucide-react';
+import { Heart, CreditCard, ArrowLeft, Smartphone, Repeat } from 'lucide-react';
 import { SiPaypal, SiVenmo } from 'react-icons/si';
 
 export default function PaymentMethods() {
@@ -10,6 +10,7 @@ export default function PaymentMethods() {
     donorId: string;
     postDonationChoice: string;
   } | null>(null);
+  const [isMonthly, setIsMonthly] = useState(false);
 
   useEffect(() => {
     // Parse URL parameters
@@ -50,11 +51,11 @@ export default function PaymentMethods() {
     }
   };
 
-  const handleStripePayment = async () => {
+  const handleStripePayment = async (paymentType = 'card') => {
     if (!paymentData) return;
     
     // Track payment method selection
-    await trackPaymentMethod('stripe');
+    await trackPaymentMethod(paymentType);
     
     try {
       // Use existing payment intent - get clientSecret from URL params or create new one
@@ -62,8 +63,9 @@ export default function PaymentMethods() {
       let clientSecret = urlParams.get('client_secret');
       
       if (!clientSecret) {
-        // If no client secret in URL, create a new payment intent
-        const response = await fetch('/api/create-payment-intent', {
+        // Create payment intent or subscription based on monthly selection
+        const endpoint = isMonthly ? '/api/create-subscription' : '/api/create-payment-intent';
+        const response = await fetch(endpoint, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -71,7 +73,9 @@ export default function PaymentMethods() {
           credentials: 'include',
           body: JSON.stringify({
             amount: parseInt(paymentData.amount),
-            description: `$${paymentData.amount} donation to Champions for Change educational programs`
+            description: `$${paymentData.amount} ${isMonthly ? 'monthly ' : ''}donation to Champions for Change educational programs`,
+            isMonthly,
+            donorId: paymentData.donorId
           }),
         });
 
@@ -80,7 +84,8 @@ export default function PaymentMethods() {
       }
 
       if (clientSecret) {
-        window.location.href = `/checkout?client_secret=${encodeURIComponent(clientSecret)}&amount=${paymentData.amount}&donor_id=${paymentData.donorId}&choice=${paymentData.postDonationChoice}`;
+        const checkoutUrl = `/checkout?client_secret=${encodeURIComponent(clientSecret)}&amount=${paymentData.amount}&donor_id=${paymentData.donorId}&choice=${paymentData.postDonationChoice}&monthly=${isMonthly}&payment_type=${paymentType}`;
+        window.location.href = checkoutUrl;
       } else {
         throw new Error('Failed to create payment intent');
       }
@@ -88,6 +93,9 @@ export default function PaymentMethods() {
       console.error('Payment setup error:', error);
     }
   };
+
+  const handleApplePayPayment = () => handleStripePayment('apple_pay');
+  const handleGooglePayPayment = () => handleStripePayment('google_pay');
 
   const handlePayPalPayment = async () => {
     if (!paymentData) return;
@@ -163,9 +171,39 @@ export default function PaymentMethods() {
               <h3 className="font-semibold text-green-800">Your Impact</h3>
             </div>
             <p className="text-sm text-green-700">
-              Your ${paymentData.amount} donation will help fund educational trips for underprivileged youth 
+              Your ${paymentData.amount} {isMonthly ? 'monthly ' : ''}donation will help fund educational trips for underprivileged youth 
               in Corpus Christi, Texas, supporting Robert Driscoll Middle School students.
             </p>
+          </div>
+
+          {/* Monthly Donation Toggle */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Repeat className="h-5 w-5 text-blue-600" />
+                <div>
+                  <h3 className="font-semibold text-blue-800">Monthly Donation</h3>
+                  <p className="text-sm text-blue-600">Support students every month</p>
+                </div>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isMonthly}
+                  onChange={(e) => setIsMonthly(e.target.checked)}
+                  className="sr-only peer"
+                  data-testid="toggle-monthly"
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
+            </div>
+            {isMonthly && (
+              <div className="mt-3 p-3 bg-blue-100 rounded-md">
+                <p className="text-xs text-blue-700">
+                  <strong>Monthly Impact:</strong> ${paymentData.amount}/month helps provide consistent support for student educational opportunities. Cancel anytime.
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="space-y-4">
@@ -173,7 +211,7 @@ export default function PaymentMethods() {
             
             {/* Credit Card / Stripe */}
             <Button
-              onClick={handleStripePayment}
+              onClick={() => handleStripePayment('card')}
               className="w-full p-6 bg-blue-600 hover:bg-blue-700 flex items-center justify-between"
               data-testid="button-stripe-payment"
             >
@@ -181,12 +219,52 @@ export default function PaymentMethods() {
                 <CreditCard className="h-6 w-6" />
                 <div className="text-left">
                   <div className="font-semibold">Credit / Debit Card</div>
-                  <div className="text-sm opacity-90">Secure payment with Stripe</div>
+                  <div className="text-sm opacity-90">Includes Cash App, Klarna, Link</div>
                 </div>
               </div>
               <div className="text-right">
                 <div className="text-sm">Most Popular</div>
                 <div className="text-xs opacity-75">Instant processing</div>
+              </div>
+            </Button>
+
+            {/* Apple Pay */}
+            <Button
+              onClick={handleApplePayPayment}
+              variant="outline"
+              className="w-full p-6 border-2 border-gray-500 hover:bg-gray-50 flex items-center justify-between"
+              data-testid="button-apple-pay"
+            >
+              <div className="flex items-center gap-3">
+                <Smartphone className="h-6 w-6 text-gray-700" />
+                <div className="text-left">
+                  <div className="font-semibold text-gray-700">Apple Pay</div>
+                  <div className="text-sm text-gray-600">Touch ID, Face ID, or passcode</div>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-sm text-gray-700">iPhone/Mac</div>
+                <div className="text-xs text-gray-500">One-touch payment</div>
+              </div>
+            </Button>
+
+            {/* Google Pay */}
+            <Button
+              onClick={handleGooglePayPayment}
+              variant="outline"
+              className="w-full p-6 border-2 border-green-500 hover:bg-green-50 flex items-center justify-between"
+              data-testid="button-google-pay"
+            >
+              <div className="flex items-center gap-3">
+                <Smartphone className="h-6 w-6 text-green-600" />
+                <div className="text-left">
+                  <div className="font-semibold text-green-600">Google Pay</div>
+                  <div className="text-sm text-gray-600">Fingerprint or PIN verification</div>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-sm text-green-600">Android/Chrome</div>
+                <div className="text-xs text-gray-500">Quick checkout</div>
               </div>
             </Button>
 

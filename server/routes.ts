@@ -3675,6 +3675,64 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
     }
   });
 
+  // Monthly subscription endpoint for recurring donations
+  app.post("/api/create-subscription", async (req, res) => {
+    try {
+      const { amount, description, donorId } = req.body;
+      
+      if (!amount || isNaN(parseInt(amount))) {
+        return res.status(400).json({ error: 'Invalid amount' });
+      }
+
+      console.log('Creating Stripe subscription for monthly donation:', { amount, donorId });
+
+      // Create a subscription with Stripe
+      const subscription = await stripe.subscriptions.create({
+        payment_behavior: 'default_incomplete',
+        payment_settings: { save_default_payment_method: 'on_subscription' },
+        expand: ['latest_invoice.payment_intent'],
+        items: [{
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: 'Champions for Change Monthly Donation',
+              description: description || 'Monthly donation to support student educational opportunities'
+            },
+            unit_amount: parseInt(amount) * 100, // Convert to cents
+            recurring: {
+              interval: 'month'
+            }
+          }
+        }],
+        metadata: {
+          donorId: donorId || '',
+          type: 'monthly_donation',
+          organization: 'Champions for Change'
+        }
+      });
+
+      const clientSecret = subscription.latest_invoice?.payment_intent?.client_secret;
+
+      if (!clientSecret) {
+        throw new Error('Failed to create subscription payment intent');
+      }
+
+      console.log('✅ Stripe subscription created:', subscription.id);
+
+      res.json({
+        success: true,
+        clientSecret,
+        subscriptionId: subscription.id
+      });
+
+    } catch (error: any) {
+      console.error('❌ Subscription creation error:', error);
+      res.status(500).json({ 
+        error: error.message || 'Failed to create subscription' 
+      });
+    }
+  });
+
   // Donation endpoint for processing donations
   app.post("/api/create-donation", async (req, res) => {
     try {
