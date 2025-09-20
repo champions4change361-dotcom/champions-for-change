@@ -16,7 +16,9 @@ import {
   AlertCircle,
   ArrowLeft,
   Play,
-  Eye
+  Eye,
+  Zap,
+  Loader2
 } from 'lucide-react';
 import { Link } from 'wouter';
 import TrialExperienceFlow from '@/components/TrialExperienceFlow';
@@ -38,11 +40,7 @@ export default function TrialSignup() {
     firstName: '',
     lastName: '',
     email: '',
-    organizationName: '',
-    cardNumber: '',
-    expiryDate: '',
-    cvv: '',
-    billingZip: ''
+    organizationName: ''
   });
 
   // Get plan details from URL params
@@ -313,11 +311,11 @@ export default function TrialSignup() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <CreditCard className="h-5 w-5 mr-2" />
-                  Start Your Free Trial
+                  <Zap className="h-5 w-5 mr-2" />
+                  Start Your 14-Day Free Trial
                 </CardTitle>
                 <CardDescription>
-                  We'll collect your payment info but won't charge you until your trial ends
+                  No credit card required • Start immediately • Full platform access
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -380,68 +378,18 @@ export default function TrialSignup() {
 
                   <Separator />
 
-                  {/* Payment Information */}
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-semibold text-gray-900">Payment Information</h3>
-                      <div className="flex items-center text-sm text-gray-500">
-                        <Shield className="h-4 w-4 mr-1" />
-                        Secure & Encrypted
-                      </div>
+                  {/* Trial Benefits */}
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div className="flex items-center mb-2">
+                      <Shield className="h-5 w-5 text-green-600 mr-2" />
+                      <h3 className="font-semibold text-green-800">Your Free Trial Includes:</h3>
                     </div>
-                    
-                    <div>
-                      <Label htmlFor="cardNumber">Card Number</Label>
-                      <Input
-                        id="cardNumber"
-                        name="cardNumber"
-                        value={formData.cardNumber}
-                        onChange={handleInputChange}
-                        placeholder="1234 5678 9012 3456"
-                        required
-                        data-testid="input-card-number"
-                      />
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="expiryDate">Expiry Date</Label>
-                        <Input
-                          id="expiryDate"
-                          name="expiryDate"
-                          value={formData.expiryDate}
-                          onChange={handleInputChange}
-                          placeholder="MM/YY"
-                          required
-                          data-testid="input-expiry"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="cvv">CVV</Label>
-                        <Input
-                          id="cvv"
-                          name="cvv"
-                          value={formData.cvv}
-                          onChange={handleInputChange}
-                          placeholder="123"
-                          required
-                          data-testid="input-cvv"
-                        />
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="billingZip">Billing ZIP Code</Label>
-                      <Input
-                        id="billingZip"
-                        name="billingZip"
-                        value={formData.billingZip}
-                        onChange={handleInputChange}
-                        placeholder="12345"
-                        required
-                        data-testid="input-billing-zip"
-                      />
-                    </div>
+                    <ul className="text-sm text-green-700 space-y-1">
+                      <li>• Full access to all tournament management features</li>
+                      <li>• Smart seeding algorithms and professional formats</li>
+                      <li>• No restrictions during your 14-day trial period</li>
+                      <li>• Cancel anytime - no credit card required to start</li>
+                    </ul>
                   </div>
 
                   {/* Trial Terms */}
