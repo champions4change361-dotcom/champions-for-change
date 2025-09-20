@@ -8,15 +8,15 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { 
   CreditCard, DollarSign, Users, Check, AlertCircle, 
-  Clock, Shield, Star, ArrowRight, Receipt, Calculator
+  Clock, Shield, Star, ArrowRight, Receipt, Calculator, Smartphone, Repeat
 } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { loadStripe } from "@stripe/stripe-js";
-import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 
 // Load Stripe
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY || "");
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "");
 
 interface TeamPaymentInfo {
   teamId: string;
@@ -47,6 +47,16 @@ interface TeamPaymentFlowProps {
   onPaymentComplete: (paymentData: any) => void;
 }
 
+// Device detection for payment methods
+const getDevicePaymentMethods = () => {
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isAndroid = /Android/.test(navigator.userAgent);
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  const supportsGooglePay = isAndroid || (!isMobile && navigator.userAgent.includes('Chrome'));
+  
+  return { isIOS, isAndroid, isMobile, supportsGooglePay };
+};
+
 // Payment form component that uses Stripe Elements
 function PaymentForm({ 
   amount, 
@@ -65,6 +75,9 @@ function PaymentForm({
 }) {
   const stripe = useStripe();
   const elements = useElements();
+  const { isIOS, supportsGooglePay } = getDevicePaymentMethods();
+  const [isMonthly, setIsMonthly] = useState(false);
+  const [paymentType, setPaymentType] = useState<'card' | 'apple_pay' | 'google_pay'>('card');
   const [billingDetails, setBillingDetails] = useState({
     name: "",
     email: "",
@@ -86,15 +99,36 @@ function PaymentForm({
 
     setIsProcessing(true);
 
-    const cardElement = elements.getElement(CardElement);
-    if (!cardElement) {
-      onError("Card element not found");
+    try {
+      const { error } = await stripe.confirmPayment({
+        elements,
+        redirect: 'if_required',
+        confirmParams: {
+          return_url: window.location.origin + '/team-payment-success',
+        },
+      });
+
+      if (error) {
+        onError(error.message || "Payment failed");
+      } else {
+        onSuccess({ status: 'succeeded' });
+      }
+    } catch (error: any) {
+      onError(error.message || "Payment processing failed");
+    } finally {
       setIsProcessing(false);
+    }
+  };
+
+  const handleApplePayPayment = async () => {
+    if (!stripe) {
+      onError("Stripe not loaded");
       return;
     }
 
+    setIsProcessing(true);
     try {
-      // Create payment intent
+      // Create payment intent first
       const paymentIntentResponse = await apiRequest("POST", "/api/team-payments/create-intent", {
         amount: Math.round(amount * 100), // Convert to cents
         description,
@@ -103,22 +137,42 @@ function PaymentForm({
 
       const { client_secret } = await paymentIntentResponse.json();
 
-      // Confirm payment
-      const { error, paymentIntent } = await stripe.confirmCardPayment(client_secret, {
-        payment_method: {
-          card: cardElement,
-          billing_details: billingDetails,
-        }
+      const paymentRequest = stripe.paymentRequest({
+        country: 'US',
+        currency: 'usd',
+        total: {
+          label: description,
+          amount: Math.round(amount * 100),
+        },
+        requestPayerName: true,
+        requestPayerEmail: true,
       });
 
-      if (error) {
-        onError(error.message || "Payment failed");
-      } else if (paymentIntent?.status === "succeeded") {
-        onSuccess(paymentIntent);
+      const canMakePayment = await paymentRequest.canMakePayment();
+      if (!canMakePayment || !canMakePayment.applePay) {
+        onError('Apple Pay is not available on this device or browser.');
+        setIsProcessing(false);
+        return;
       }
+
+      paymentRequest.on('paymentmethod', async (event) => {
+        const { error } = await stripe.confirmCardPayment(client_secret, {
+          payment_method: event.paymentMethod.id,
+        });
+
+        if (error) {
+          event.complete('fail');
+          onError(error.message || "Apple Pay payment failed");
+        } else {
+          event.complete('success');
+          onSuccess({ status: 'succeeded' });
+        }
+        setIsProcessing(false);
+      });
+
+      paymentRequest.show();
     } catch (error: any) {
-      onError(error.message || "Payment processing failed");
-    } finally {
+      onError(error.message || "Failed to initialize Apple Pay");
       setIsProcessing(false);
     }
   };
@@ -157,20 +211,82 @@ function PaymentForm({
         </div>
       </div>
 
-      <div>
-        <Label>Card Information *</Label>
-        <div className="mt-2 p-3 border rounded-md">
-          <CardElement
+      {/* Monthly Payment Toggle */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Repeat className="h-5 w-5 text-blue-600" />
+            <div>
+              <h3 className="font-semibold text-blue-800">Monthly Payments</h3>
+              <p className="text-sm text-blue-600">Split into monthly installments</p>
+            </div>
+          </div>
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              checked={isMonthly}
+              onChange={(e) => setIsMonthly(e.target.checked)}
+              className="sr-only peer"
+              data-testid="toggle-monthly-team"
+            />
+            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+          </label>
+        </div>
+        {isMonthly && (
+          <div className="mt-3 p-3 bg-blue-100 rounded-md">
+            <p className="text-xs text-blue-700">
+              <strong>Monthly Plan:</strong> ${(amount / 3).toFixed(2)}/month for 3 months. Cancel anytime.
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Payment Method Selection */}
+      <div className="space-y-4">
+        {/* Apple Pay - iOS only */}
+        {isIOS && (
+          <Button
+            type="button"
+            onClick={handleApplePayPayment}
+            disabled={isProcessing}
+            variant="outline"
+            className="w-full p-4 border-2 border-gray-500 hover:bg-gray-50 flex items-center justify-center gap-3"
+            data-testid="button-apple-pay-team"
+          >
+            <Smartphone className="h-5 w-5 text-gray-700" />
+            <span className="font-semibold text-gray-700">
+              {isProcessing && paymentType === 'apple_pay' ? 'Processing...' : 'Pay with Apple Pay'}
+            </span>
+          </Button>
+        )}
+
+        {/* Google Pay - Android/Chrome */}
+        {supportsGooglePay && (
+          <Button
+            type="button"
+            disabled={isProcessing}
+            variant="outline"
+            className="w-full p-4 border-2 border-green-500 hover:bg-green-50 flex items-center justify-center gap-3"
+            data-testid="button-google-pay-team"
+          >
+            <Smartphone className="h-5 w-5 text-green-600" />
+            <span className="font-semibold text-green-600">Pay with Google Pay</span>
+          </Button>
+        )}
+      </div>
+
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <CreditCard className="h-5 w-5 text-gray-600" />
+          <Label className="text-base font-semibold">Credit/Debit Card & Other Methods</Label>
+        </div>
+        <div className="border rounded-lg p-4">
+          <PaymentElement
             options={{
-              style: {
-                base: {
-                  fontSize: '16px',
-                  color: '#424770',
-                  '::placeholder': {
-                    color: '#aab7c4',
-                  },
-                },
-              },
+              wallets: {
+                applePay: 'never', // We handle Apple Pay separately above
+                googlePay: 'never' // We handle Google Pay separately above
+              }
             }}
           />
         </div>
