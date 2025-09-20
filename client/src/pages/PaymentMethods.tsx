@@ -153,9 +153,30 @@ export default function PaymentMethods() {
       });
 
       // Check if Apple Pay is available
+      console.log('Checking Apple Pay availability...');
       const canMakePayment = await paymentRequest.canMakePayment();
-      if (!canMakePayment || !canMakePayment.applePay) {
-        throw new Error('Apple Pay is not available on this device');
+      console.log('Apple Pay availability result:', canMakePayment);
+      
+      if (!canMakePayment) {
+        throw new Error('Payment methods are not available on this device or browser. This may be due to the preview domain not supporting Apple Pay.');
+      }
+      
+      if (!canMakePayment.applePay) {
+        // Apple Pay specifically not available - try to determine why
+        const userAgent = navigator.userAgent;
+        const isIOS = /iPad|iPhone|iPod/.test(userAgent);
+        const isSecure = window.location.protocol === 'https:';
+        
+        let errorMessage = 'Apple Pay is not available. ';
+        if (!isIOS) {
+          errorMessage += 'Apple Pay requires an iOS device.';
+        } else if (!isSecure) {
+          errorMessage += 'Apple Pay requires a secure (HTTPS) connection.';
+        } else {
+          errorMessage += 'This may be due to Apple Pay not being set up on your device, or the current domain not being registered for Apple Pay.';
+        }
+        
+        throw new Error(errorMessage);
       }
 
       // Handle payment
@@ -190,9 +211,19 @@ export default function PaymentMethods() {
 
     } catch (error: any) {
       console.error('Apple Pay error:', error);
+      
+      // Provide specific error messages based on the error
+      let title = "Apple Pay Error";
+      let description = error.message || "Failed to initialize Apple Pay. Please try another payment method.";
+      
+      // Add suggestion for preview environment
+      if (window.location.hostname.includes('replit.dev')) {
+        description += ' Note: Apple Pay may not be available in the preview environment. Try using a credit card instead.';
+      }
+      
       toast({
-        title: "Apple Pay Error",
-        description: error.message || "Failed to initialize Apple Pay. Please try another payment method.",
+        title,
+        description,
         variant: "destructive",
       });
       setIsProcessingApplePay(false);
@@ -327,32 +358,42 @@ export default function PaymentMethods() {
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-sm">Most Popular</div>
-                <div className="text-xs opacity-75">Instant processing</div>
+                <div className="text-sm">Most Reliable</div>
+                <div className="text-xs opacity-75">Works everywhere</div>
               </div>
             </Button>
 
             {/* Apple Pay - Only show on iOS devices */}
             {isIOS && (
-              <Button
-                onClick={handleDirectApplePay}
-                disabled={isProcessingApplePay}
-                variant="outline"
-                className="w-full p-6 border-2 border-gray-500 hover:bg-gray-50 flex items-center justify-between disabled:opacity-50"
-                data-testid="button-apple-pay"
-              >
-                <div className="flex items-center gap-3">
-                  <Smartphone className="h-6 w-6 text-gray-700" />
-                  <div className="text-left">
-                    <div className="font-semibold text-gray-700">Apple Pay</div>
-                    <div className="text-sm text-gray-600">Touch ID, Face ID, or passcode</div>
+              <div className="space-y-2">
+                <Button
+                  onClick={handleDirectApplePay}
+                  disabled={isProcessingApplePay}
+                  variant="outline"
+                  className="w-full p-6 border-2 border-gray-500 hover:bg-gray-50 flex items-center justify-between disabled:opacity-50"
+                  data-testid="button-apple-pay"
+                >
+                  <div className="flex items-center gap-3">
+                    <Smartphone className="h-6 w-6 text-gray-700" />
+                    <div className="text-left">
+                      <div className="font-semibold text-gray-700">{isProcessingApplePay ? 'Loading Apple Pay...' : 'Apple Pay'}</div>
+                      <div className="text-sm text-gray-600">Touch ID, Face ID, or passcode</div>
+                    </div>
                   </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-sm text-gray-700">iPhone/Mac</div>
-                  <div className="text-xs text-gray-500">One-touch payment</div>
-                </div>
-              </Button>
+                  <div className="text-right">
+                    <div className="text-sm text-gray-700">iPhone/Mac</div>
+                    <div className="text-xs text-gray-500">One-touch payment</div>
+                  </div>
+                </Button>
+                {window.location.hostname.includes('replit.dev') && (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                    <p className="text-xs text-yellow-800">
+                      💡 <strong>Note:</strong> Apple Pay may not be available in the preview environment. 
+                      If Apple Pay doesn't work, please use the Credit Card option above.
+                    </p>
+                  </div>
+                )}
+              </div>
             )}
 
             {/* Google Pay - Only show on Android devices or desktop Chrome */}
