@@ -3565,6 +3565,9 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
     };
   }
 
+  // Track sent receipts to prevent duplicates
+  const sentReceipts = new Set();
+
   // Send tax receipt via email
   app.post("/api/donation/send-receipt", async (req, res) => {
     try {
@@ -3572,6 +3575,17 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
 
       if (!donationData || !donationData.donorInfo?.email) {
         return res.status(400).json({ error: 'Missing donation data or email' });
+      }
+
+      // Check if receipt already sent
+      const receiptKey = `${donationData.donationId}-${donationData.amount}-${donationData.donorInfo.email}`;
+      if (sentReceipts.has(receiptKey)) {
+        console.log('📧 Receipt already sent for donation:', receiptKey);
+        return res.json({ 
+          success: true, 
+          message: 'Receipt already sent',
+          alreadySent: true 
+        });
       }
 
       const receipt = generateTaxReceipt(donationData);
@@ -3638,11 +3652,15 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
         text: receipt.receiptText
       });
 
+      // Mark receipt as sent
+      sentReceipts.add(receiptKey);
+
       console.log('📧 Tax receipt sent successfully:', {
         receiptNumber: receipt.receiptNumber,
         donor: donationData.isAnonymous ? 'Anonymous' : `${donationData.donorInfo.firstName} ${donationData.donorInfo.lastName}`,
         amount: `$${donationData.amount}`,
-        email: donationData.donorInfo.email
+        email: donationData.donorInfo.email,
+        receiptKey
       });
 
       res.json({ 
