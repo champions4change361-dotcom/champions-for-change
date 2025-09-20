@@ -28,8 +28,27 @@ export function useDomain() {
     console.log('Domain detection - hostname:', hostname); // Debug logging
     let config: DomainConfig;
 
+    // Champions for Change - Primary Tournament Management Platform
+    if (hostname === 'championsforchange.net' || hostname === 'www.championsforchange.net') {
+      config = {
+        type: 'pro',
+        brand: 'CHAMPIONS_FOR_CHANGE',
+        theme: 'champions',
+        allowFantasyPromo: true,
+        allowProPromo: false,    // Already on primary platform
+        allowSchoolPromo: true,  // Can promote educational services
+        primaryColor: 'green',
+        features: {
+          fantasyLeagues: true,   // Full tournament management
+          ageVerification: true,  // Professional tournaments
+          crossSelling: true,
+          guestAccess: true,
+          registration: true
+        }
+      };
+    }
     // Competitive Education Hub - School Athletics Domain
-    if (hostname === 'competitiveeducationhub.com' || hostname === 'www.competitiveeducationhub.com') {
+    else if (hostname === 'competitiveeducationhub.com' || hostname === 'www.competitiveeducationhub.com') {
       config = {
         type: 'school',
         brand: 'COMPETITIVE_EDUCATION_HUB',
@@ -47,37 +66,37 @@ export function useDomain() {
         }
       };
     }
-    // Trantor Tournaments - Commercial Tournament Management
+    // Trantor Tournaments - Future Development Platform
     else if (hostname === 'trantortournaments.org' || hostname === 'www.trantortournaments.org') {
       config = {
         type: 'pro',
         brand: 'TRANTOR_TOURNAMENTS',
         theme: 'professional',
         allowFantasyPromo: true,
-        allowProPromo: false,    // Already on pro domain
-        allowSchoolPromo: true,  // Can promote school services
+        allowProPromo: false,    
+        allowSchoolPromo: true,  
         primaryColor: 'orange',
         features: {
-          fantasyLeagues: true,   // Commercial fantasy leagues
-          ageVerification: true,  // Professional tournaments
+          fantasyLeagues: true,   
+          ageVerification: true,  
           crossSelling: true,
           guestAccess: true,
           registration: true
         }
       };
     } else {
-      // Default for development - Trantor commercial platform
+      // Default for development - Champions for Change platform
       config = {
         type: 'pro',
-        brand: 'TRANTOR_TOURNAMENTS',
-        theme: 'professional',
+        brand: 'CHAMPIONS_FOR_CHANGE',
+        theme: 'champions',
         allowFantasyPromo: true,
-        allowProPromo: false,    // Already on pro domain
-        allowSchoolPromo: true,  // Can promote school services
-        primaryColor: 'orange',
+        allowProPromo: false,    
+        allowSchoolPromo: true,  
+        primaryColor: 'green',
         features: {
-          fantasyLeagues: true,   // Commercial fantasy leagues
-          ageVerification: true,  // Professional tournaments
+          fantasyLeagues: true,   
+          ageVerification: true,  
           crossSelling: true,
           guestAccess: true,
           registration: true

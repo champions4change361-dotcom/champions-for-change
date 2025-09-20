@@ -17,7 +17,12 @@ let supportedDomains = process.env.REPLIT_DOMAINS ?
 // Auto-detect current Replit domain - the workspace domain from REPLIT_DOMAINS is the actual domain
 // Don't construct a domain from REPL_SLUG/REPL_OWNER as it may not match the actual URL
 
-// Add trantortournaments.org as supported domain
+// Add championsforchange.net as primary supported domain
+if (!supportedDomains.includes('championsforchange.net')) {
+  supportedDomains.push('championsforchange.net');
+}
+
+// Add trantortournaments.org as supported domain for future development
 if (!supportedDomains.includes('trantortournaments.org')) {
   supportedDomains.push('trantortournaments.org');
 }

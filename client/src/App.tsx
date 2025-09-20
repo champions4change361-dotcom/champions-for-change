@@ -286,6 +286,9 @@ function AuthenticatedRoutes() {
 }
 
 function getDomainBackgroundClass(brand: string) {
+  if (brand === 'CHAMPIONS_FOR_CHANGE') {
+    return "min-h-screen bg-gradient-to-br from-green-900 via-emerald-800 to-teal-900";
+  }
   if (brand === 'COMPETITIVE_EDUCATION_HUB') {
     return "min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900";
   }
