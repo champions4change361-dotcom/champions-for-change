@@ -95,13 +95,12 @@ export default function PaymentMethods() {
     // Track payment method selection
     await trackPaymentMethod('paypal');
     
-    // PayPal donation link - replace YOUR_PAYPAL_EMAIL with your actual PayPal email
-    const paypalEmail = 'champions4change361@gmail.com'; // Your PayPal email
+    // PayPal donation link with mobile app deep linking
+    const paypalEmail = 'champions4change361@gmail.com';
     const paypalUrl = `https://www.paypal.com/donate/?business=${encodeURIComponent(paypalEmail)}&amount=${paymentData.amount}&currency_code=USD&item_name=${encodeURIComponent('Champions for Change Educational Donation')}`;
-    window.open(paypalUrl, '_blank');
     
-    // Keep user on page - they must complete payment externally
-    // Do not auto-redirect to success without payment confirmation
+    // Use location.href for better mobile app support
+    window.location.href = paypalUrl;
   };
 
   const handleVenmoPayment = async () => {
@@ -110,15 +109,30 @@ export default function PaymentMethods() {
     // Track payment method selection  
     await trackPaymentMethod('venmo');
     
-    // Venmo deep link - using your actual Venmo username
+    // Venmo deep link with mobile app support
     const venmoUsername = 'championsforchange'; // Your Venmo business username
     const note = encodeURIComponent(`$${paymentData.amount} donation for Champions for Change educational programs`);
-    const venmoUrl = `https://venmo.com/${venmoUsername}?txn=pay&amount=${paymentData.amount}&note=${note}`;
     
-    window.open(venmoUrl, '_blank');
+    // Try mobile app deep link first, fallback to web
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     
-    // Keep user on page - they must complete payment externally
-    // Do not auto-redirect to success without payment confirmation
+    if (isMobile) {
+      // Use Venmo app deep link for mobile
+      const venmoDeepLink = `venmo://paycharge?txn=pay&recipients=${venmoUsername}&amount=${paymentData.amount}&note=${note}`;
+      
+      // Try to open Venmo app, fallback to web if app not installed
+      window.location.href = venmoDeepLink;
+      
+      // Fallback to web after a short delay if app doesn't open
+      setTimeout(() => {
+        const venmoWebUrl = `https://venmo.com/${venmoUsername}?txn=pay&amount=${paymentData.amount}&note=${note}`;
+        window.location.href = venmoWebUrl;
+      }, 1000);
+    } else {
+      // Desktop - use web version
+      const venmoWebUrl = `https://venmo.com/${venmoUsername}?txn=pay&amount=${paymentData.amount}&note=${note}`;
+      window.location.href = venmoWebUrl;
+    }
   };
 
   if (!paymentData) {
