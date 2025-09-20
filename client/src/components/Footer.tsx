@@ -17,7 +17,7 @@ export default function Footer() {
             </p>
             <div className="flex items-center text-sm text-green-400">
               <GraduationCap className="h-4 w-4 mr-2" />
-              <span>100% of revenue supports student education</span>
+              <span>All profits support student education</span>
             </div>
           </div>
 

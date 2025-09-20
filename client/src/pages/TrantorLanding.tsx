@@ -191,7 +191,7 @@ export default function TrantorLanding() {
 
           <div className="flex flex-wrap gap-2 justify-center mb-4">
             <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-1.5 border border-white/20">
-              <span className="text-white font-semibold text-sm">100% to Students</span>
+              <span className="text-white font-semibold text-sm">All Profits to Students</span>
             </div>
             <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-1.5 border border-white/20">
               <span className="text-white font-semibold text-sm">Tax Deductible</span>

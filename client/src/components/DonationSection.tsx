@@ -237,8 +237,8 @@ export function DonationSection({ variant = 'full', className = '' }: DonationSe
         
         <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg text-center">
           <p className="text-blue-800 text-sm">
-            <strong>100% of donations</strong> go directly to funding student educational trips. 
-            Platform revenue covers operational costs separately.
+            <strong>100% of donations</strong> go directly to student educational programs. 
+            Operational costs are covered by platform subscription revenue.
           </p>
         </div>
 
