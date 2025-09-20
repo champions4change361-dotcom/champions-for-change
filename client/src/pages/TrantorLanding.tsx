@@ -83,46 +83,46 @@ export default function TrantorLanding() {
             {/* Right: Login Card */}
             <div className="lg:justify-self-end w-full lg:w-auto">
               <Card className="bg-slate-800/70 border border-yellow-500/20 text-white shadow-xl">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-xl font-bold text-center">Welcome Back</CardTitle>
-                  <CardDescription className="text-slate-300 text-center text-sm">
+                <CardHeader className="pb-2 pt-3">
+                  <CardTitle className="text-lg font-bold text-center">Welcome Back</CardTitle>
+                  <CardDescription className="text-slate-300 text-center text-xs">
                     Sign in to access your tournaments
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="pt-0 space-y-3">
+                <CardContent className="pt-0 space-y-2 pb-3">
                   <Button 
                     onClick={() => window.location.href = '/auth/google'}
-                    className="w-full h-11 lg:h-12 bg-white text-slate-900 hover:bg-slate-100 font-semibold"
+                    className="w-full h-9 bg-white text-slate-900 hover:bg-slate-100 font-semibold text-sm"
                     data-testid="button-continue-google"
                   >
-                    <SiGoogle className="mr-2 h-4 w-4" />
+                    <SiGoogle className="mr-2 h-3 w-3" />
                     Continue with Google
                   </Button>
                   
-                  <div className="flex items-center gap-3 my-3">
+                  <div className="flex items-center gap-2 my-2">
                     <span className="h-px flex-1 bg-white/20"></span>
-                    <span className="text-[11px] tracking-widest text-white/70">OR USE EMAIL</span>
+                    <span className="text-[10px] tracking-widest text-white/70">OR USE EMAIL</span>
                     <span className="h-px flex-1 bg-white/20"></span>
                   </div>
                   
                   <Button 
                     onClick={() => setLocation('/login')}
-                    className="w-full h-11 lg:h-12 bg-slate-700 hover:bg-slate-600 text-yellow-300 border border-yellow-500/40"
+                    className="w-full h-9 bg-slate-700 hover:bg-slate-600 text-yellow-300 border border-yellow-500/40 text-sm"
                     data-testid="button-signin-email"
                   >
                     Sign in with Email
                   </Button>
                   
-                  <div className="flex items-center justify-center gap-2 mt-3">
-                    <CheckCircle className="h-3 w-3 text-green-400" />
-                    <Badge className="px-2 py-0.5 text-xs bg-yellow-600 text-slate-900">
+                  <div className="flex items-center justify-center gap-1.5 mt-2">
+                    <CheckCircle className="h-2.5 w-2.5 text-green-400" />
+                    <Badge className="px-1.5 py-0 text-[10px] bg-yellow-600 text-slate-900">
                       Enterprise Security
                     </Badge>
                   </div>
                   
-                  <div className="text-center pt-2">
-                    <p className="text-xs text-slate-400">
-                      New to Trantor Tournaments?{" "}
+                  <div className="text-center pt-1">
+                    <p className="text-[11px] text-slate-400">
+                      New to Trantor?{" "}
                       <button 
                         onClick={() => setLocation('/register')}
                         className="text-yellow-300 hover:text-yellow-200 underline"
@@ -131,8 +131,8 @@ export default function TrantorLanding() {
                         Create account
                       </button>
                     </p>
-                    <p className="text-[10px] text-slate-500 mt-1">
-                      Your data is protected with enterprise-grade security
+                    <p className="text-[9px] text-slate-500 mt-0.5">
+                      Enterprise-grade security
                     </p>
                   </div>
                 </CardContent>
