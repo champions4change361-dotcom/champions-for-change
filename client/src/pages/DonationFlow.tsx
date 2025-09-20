@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Heart, GraduationCap, MapPin, Users, ArrowRight, Trophy, Zap, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'wouter';
@@ -15,6 +16,7 @@ interface DonorInfo {
   email: string;
   phone: string;
   source: string;
+  isAnonymous?: boolean;
 }
 
 export default function DonationFlow() {
@@ -30,7 +32,8 @@ export default function DonationFlow() {
     lastName: '',
     email: '',
     phone: '',
-    source: 'landing_page'
+    source: 'landing_page',
+    isAnonymous: false
   });
   const [postDonationChoice, setPostDonationChoice] = useState<'test_platform' | 'just_donate' | 'learn_more'>('test_platform');
   const [, setLocation] = useLocation();
@@ -273,6 +276,26 @@ export default function DonationFlow() {
             placeholder="(555) 123-4567"
             data-testid="input-phone"
           />
+        </div>
+
+        {/* Anonymous Donation Option */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-center space-x-3">
+            <Checkbox
+              id="anonymous"
+              checked={donorInfo.isAnonymous || false}
+              onCheckedChange={(checked) => setDonorInfo(prev => ({ ...prev, isAnonymous: !!checked }))}
+              data-testid="checkbox-anonymous"
+            />
+            <div className="flex-1">
+              <Label htmlFor="anonymous" className="text-sm font-medium cursor-pointer">
+                Keep my donation anonymous
+              </Label>
+              <p className="text-xs text-gray-600 mt-1">
+                Your contact information will be kept private. You'll still receive a tax receipt.
+              </p>
+            </div>
+          </div>
         </div>
 
         <div>
