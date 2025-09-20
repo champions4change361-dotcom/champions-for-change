@@ -92,7 +92,7 @@ function getUserConfig(userType: string) {
     organizationId: 'champions-for-change-master',
     organizationName: 'Champions for Change - Master Admin',
     isWhitelabelClient: true,
-    whitelabelDomain: 'trantortournaments.org'
+    whitelabelDomain: 'championsforchange.net'
   };
 }
 
@@ -118,7 +118,7 @@ async function upsertUser(
       organizationId: 'champions-for-change',
       organizationName: 'Champions for Change',
       isWhitelabelClient: true,
-      whitelabelDomain: 'trantortournaments.org'
+      whitelabelDomain: 'championsforchange.net'
     })
   });
 }
