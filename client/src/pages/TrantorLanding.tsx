@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Users, Zap, Globe, CreditCard, Star, Target, Building, CheckCircle, BarChart3, Clock, Smartphone, Calendar, GraduationCap, Heart } from "lucide-react";
+import { Trophy, Users, Zap, Globe, CreditCard, Star, Target, Building, CheckCircle, BarChart3, Clock, Smartphone, Calendar, GraduationCap, Heart, Repeat } from "lucide-react";
 import { useLocation } from "wouter";
 import React, { useState } from "react";
 import Footer from "@/components/Footer";
@@ -80,7 +80,7 @@ export default function TrantorLanding() {
                       <h3 className="text-lg font-bold text-white">Donate & Support Students</h3>
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-3 mb-4 text-xs">
+                    <div className="grid grid-cols-3 gap-2 mb-4 text-xs">
                       <div className="bg-white/20 rounded-lg p-2">
                         <CreditCard className="h-4 w-4 text-white mx-auto mb-1" />
                         <div className="text-white font-semibold">Cards</div>
@@ -97,18 +97,31 @@ export default function TrantorLanding() {
                         <div className="text-red-100">Mobile Apps</div>
                       </div>
                       <div className="bg-white/20 rounded-lg p-2">
-                        <Zap className="h-4 w-4 text-white mx-auto mb-1" />
-                        <div className="text-white font-semibold">More</div>
-                        <div className="text-red-100">Cash App, Klarna</div>
+                        <Smartphone className="h-4 w-4 text-white mx-auto mb-1" />
+                        <div className="text-white font-semibold">Apple Pay</div>
+                        <div className="text-red-100">Touch/Face ID</div>
+                      </div>
+                      <div className="bg-white/20 rounded-lg p-2">
+                        <Smartphone className="h-4 w-4 text-white mx-auto mb-1" />
+                        <div className="text-white font-semibold">Google Pay</div>
+                        <div className="text-red-100">Fingerprint</div>
+                      </div>
+                      <div className="bg-white/20 rounded-lg p-2">
+                        <Repeat className="h-4 w-4 text-white mx-auto mb-1" />
+                        <div className="text-white font-semibold">Monthly</div>
+                        <div className="text-red-100">Recurring</div>
                       </div>
                     </div>
 
-                    <div className="flex gap-2 mb-3 text-xs">
+                    <div className="flex gap-1 mb-3 text-xs">
                       <div className="bg-white/20 rounded px-2 py-1">
                         <span className="text-white font-semibold">100% to Students</span>
                       </div>
                       <div className="bg-white/20 rounded px-2 py-1">
                         <span className="text-white font-semibold">Tax Deductible</span>
+                      </div>
+                      <div className="bg-white/20 rounded px-2 py-1">
+                        <span className="text-white font-semibold">One-time/Monthly</span>
                       </div>
                     </div>
 
