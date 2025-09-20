@@ -207,10 +207,10 @@ export default function TrantorLanding() {
                   <p className="text-xs text-green-200 mb-3">Paid annually ($276/year)</p>
                   <ul className="text-sm text-green-100 space-y-1 mb-4">
                     <li>• Up to 20 players</li>
-                    <li>• 5 tournaments/month included</li>
+                    <li>• 1 professional tournament per year included</li>
+                    <li>• Additional tournaments: $25 each (vs $50+ elsewhere)</li>
                     <li>• 400 communications/month</li>
-                    <li>• Basic roster management</li>
-                    <li>• +$50/tournament for unlimited hosting</li>
+                    <li>• Smart seeding algorithm (not random brackets)</li>
                   </ul>
                   <Button 
                     onClick={() => setLocation('/team-signup?plan=starter&price=23')}
@@ -231,10 +231,10 @@ export default function TrantorLanding() {
                   <p className="text-xs text-blue-200 mb-3">Paid annually ($468/year)</p>
                   <ul className="text-sm text-blue-100 space-y-1 mb-4">
                     <li>• Up to 35 players</li>
-                    <li>• 15 tournaments/month included</li>
+                    <li>• 5 professional tournaments per year included</li>
+                    <li>• Additional tournaments: $25 each (50% less than competitors)</li>
                     <li>• 4,000 communications/month</li>
-                    <li>• Advanced scheduling</li>
-                    <li>• +$50/tournament for unlimited hosting</li>
+                    <li>• Pool Play, Double Elimination, Round Robin formats</li>
                   </ul>
                   <Button 
                     onClick={() => setLocation('/team-signup?plan=growing&price=39')}
@@ -252,10 +252,10 @@ export default function TrantorLanding() {
                   <p className="text-xs text-purple-200 mb-3">Annual only ($756/year)</p>
                   <ul className="text-sm text-purple-100 space-y-1 mb-4">
                     <li>• Unlimited players & teams</li>
-                    <li>• 50 tournaments/month included</li>
+                    <li>• 10 professional tournaments per year included</li>
+                    <li>• Additional tournaments: $25 each (enterprise pricing for everyone)</li>
                     <li>• 16,000 communications/month</li>
-                    <li>• Full organization management</li>
-                    <li>• +$50/tournament for unlimited hosting</li>
+                    <li>• Swiss System, Leaderboards, Multi-division management</li>
                   </ul>
                   <Button 
                     onClick={() => setLocation('/team-signup?plan=elite&price=63')}
