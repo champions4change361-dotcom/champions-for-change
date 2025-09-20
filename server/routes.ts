@@ -3429,6 +3429,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Track payment method selection for donations
+  app.post("/api/donation/track-payment-method", async (req, res) => {
+    try {
+      const { donorId, amount, paymentMethod, timestamp } = req.body;
+      
+      console.log('🎯 Payment method selected:', {
+        donorId,
+        amount: `$${amount}`,
+        paymentMethod,
+        timestamp: timestamp || new Date().toISOString(),
+        userAgent: req.headers['user-agent']
+      });
+      
+      // Log specifically for Venmo to help track issues
+      if (paymentMethod === 'venmo') {
+        console.log('📱 VENMO payment attempt:', {
+          donorId,
+          amount,
+          timestamp: timestamp || new Date().toISOString(),
+          note: 'Tracking for debugging Venmo payment issues'
+        });
+      }
+      
+      res.json({ success: true, message: 'Payment method selection tracked' });
+    } catch (error: any) {
+      console.error('❌ Payment method tracking error:', error);
+      res.status(500).json({ error: 'Failed to track payment method' });
+    }
+  });
+
+  // Track donation completion status
+  app.post("/api/donation/track-completion", async (req, res) => {
+    try {
+      const { donorId, amount, paymentMethod, status, errorMessage } = req.body;
+      
+      const completionData = {
+        donorId,
+        amount: `$${amount}`,
+        paymentMethod,
+        status, // 'success', 'failed', 'abandoned'
+        timestamp: new Date().toISOString(),
+        errorMessage: errorMessage || null
+      };
+      
+      if (status === 'success') {
+        console.log('✅ DONATION COMPLETED:', completionData);
+      } else if (status === 'failed') {
+        console.log('❌ DONATION FAILED:', completionData);
+      } else {
+        console.log('⚠️ DONATION STATUS:', completionData);
+      }
+      
+      res.json({ success: true, message: 'Donation completion tracked' });
+    } catch (error: any) {
+      console.error('❌ Donation completion tracking error:', error);
+      res.status(500).json({ error: 'Failed to track donation completion' });
+    }
+  });
+
   // Donation endpoint for processing donations
   app.post("/api/create-donation", async (req, res) => {
     try {

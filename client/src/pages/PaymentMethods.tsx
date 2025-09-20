@@ -30,8 +30,31 @@ export default function PaymentMethods() {
     });
   }, []);
 
+  const trackPaymentMethod = async (method: string) => {
+    if (!paymentData) return;
+    
+    try {
+      await fetch('/api/donation/track-payment-method', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          donorId: paymentData.donorId,
+          amount: paymentData.amount,
+          paymentMethod: method,
+          timestamp: new Date().toISOString()
+        })
+      });
+    } catch (error) {
+      console.error('Payment tracking error:', error);
+    }
+  };
+
   const handleStripePayment = async () => {
     if (!paymentData) return;
+    
+    // Track payment method selection
+    await trackPaymentMethod('stripe');
     
     try {
       // Use existing payment intent - get clientSecret from URL params or create new one
@@ -66,8 +89,11 @@ export default function PaymentMethods() {
     }
   };
 
-  const handlePayPalPayment = () => {
+  const handlePayPalPayment = async () => {
     if (!paymentData) return;
+    
+    // Track payment method selection
+    await trackPaymentMethod('paypal');
     
     // PayPal donation link - replace YOUR_PAYPAL_EMAIL with your actual PayPal email
     const paypalEmail = 'champions4change361@gmail.com'; // Your PayPal email
@@ -78,8 +104,11 @@ export default function PaymentMethods() {
     // Do not auto-redirect to success without payment confirmation
   };
 
-  const handleVenmoPayment = () => {
+  const handleVenmoPayment = async () => {
     if (!paymentData) return;
+    
+    // Track payment method selection  
+    await trackPaymentMethod('venmo');
     
     // Venmo deep link - using your actual Venmo username
     const venmoUsername = 'championsforchange'; // Your Venmo business username
