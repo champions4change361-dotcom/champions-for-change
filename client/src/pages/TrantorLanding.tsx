@@ -16,9 +16,9 @@ export default function TrantorLanding() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
       {/* Professional Tournament Header */}
-      <header className="relative border-b border-yellow-500/20 bg-slate-900/80 backdrop-blur-sm pt-10">
+      <header className="relative border-b border-yellow-500/20 bg-slate-900/80 backdrop-blur-sm pt-4 lg:pt-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="lg:flex lg:items-center lg:justify-between lg:h-16">
+          <div className="lg:flex lg:items-center lg:justify-between lg:min-h-16">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between w-full py-4 lg:py-0 space-y-4 lg:space-y-0">
               
               {/* Trantor Tournaments Logo */}
@@ -73,14 +73,14 @@ export default function TrantorLanding() {
                   Sign In
                 </Button>
                 {/* Donation Card with Payment Options */}
-                <div className="bg-gradient-to-br from-red-600 via-red-500 to-red-700 rounded-xl border border-red-400/50 p-6 w-full lg:w-auto shadow-2xl">
+                <div className="bg-gradient-to-br from-red-600 via-red-500 to-red-700 rounded-xl border border-red-400/50 p-3 lg:p-4 w-full lg:w-80 shadow-2xl">
                   <div className="text-center">
                     <div className="flex items-center justify-center mb-3">
                       <Heart className="h-6 w-6 text-white mr-2" />
                       <h3 className="text-lg font-bold text-white">Donate & Support Students</h3>
                     </div>
                     
-                    <div className="grid grid-cols-3 gap-2 mb-4 text-xs">
+                    <div className="grid grid-cols-3 gap-1 lg:gap-2 mb-3 lg:mb-4 text-xs">
                       <div className="bg-white/20 rounded-lg p-2">
                         <CreditCard className="h-4 w-4 text-white mx-auto mb-1" />
                         <div className="text-white font-semibold">Cards</div>
@@ -174,9 +174,9 @@ export default function TrantorLanding() {
       </header>
 
       {/* Educational Mission Banner */}
-      <div className="relative py-12 mt-8 bg-gradient-to-r from-green-600/90 via-blue-600/90 to-purple-600/90 backdrop-blur-sm">
+      <div className="relative py-8 lg:py-12 mt-4 lg:mt-8 bg-gradient-to-r from-green-600/90 via-blue-600/90 to-purple-600/90 backdrop-blur-sm">
         <div className="absolute inset-0 bg-black/20"></div>
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 text-center">
           <div className="flex items-center justify-center mb-4">
             <GraduationCap className="h-8 w-8 text-yellow-300 mr-3" />
             <Badge className="bg-yellow-500 text-slate-900 px-4 py-2 text-base font-bold">
@@ -211,9 +211,9 @@ export default function TrantorLanding() {
       </div>
 
       {/* Tournament Management Hero */}
-      <div className="relative py-16 lg:py-24">
+      <div className="relative py-12 lg:py-20">
         <div className="absolute inset-0 bg-gradient-to-r from-yellow-600/10 via-transparent to-yellow-600/10"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
           <div className="text-center">
             <Badge className="mb-6 bg-yellow-600 text-slate-900 px-4 py-2">
               🏆 Professional Tournament Platform
