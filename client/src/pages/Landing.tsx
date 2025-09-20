@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Trophy, Users, Zap, Globe, CreditCard, Star, Heart, GraduationCap, BookOpen, Award, Mail, Phone, Timer, UserCheck, Shield, Target, Building, Check } from "lucide-react";
+import { SiPaypal, SiVenmo } from "react-icons/si";
 import { useLocation } from "wouter";
 import React, { useState } from "react";
 import championLogo from "@assets/IMG_1442_1754896656003.jpeg";
@@ -396,12 +397,12 @@ export default function Landing() {
                     <div className="text-xs text-green-100">Visa, Mastercard, Amex</div>
                   </div>
                   <div className="bg-white/10 rounded-lg p-3">
-                    <SiPaypal className="h-6 w-6 text-white mx-auto mb-2" />
+                    <Globe className="h-6 w-6 text-white mx-auto mb-2" />
                     <div className="text-sm font-semibold text-white">PayPal</div>
                     <div className="text-xs text-green-100">Secure & Fast</div>
                   </div>
                   <div className="bg-white/10 rounded-lg p-3">
-                    <SiVenmo className="h-6 w-6 text-white mx-auto mb-2" />
+                    <Users className="h-6 w-6 text-white mx-auto mb-2" />
                     <div className="text-sm font-semibold text-white">Venmo</div>
                     <div className="text-xs text-green-100">Mobile Friendly</div>
                   </div>

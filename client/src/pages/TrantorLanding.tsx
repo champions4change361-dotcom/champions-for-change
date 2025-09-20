@@ -72,26 +72,68 @@ export default function TrantorLanding() {
                   <Trophy className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4" />
                   Sign In
                 </Button>
-                <Button 
-                  onClick={(e) => {
-                    e.preventDefault();
-                    try {
-                      setLocation('/donate');
-                      setTimeout(() => {
-                        if (window.location.pathname !== '/donate') {
+                {/* Donation Card with Payment Options */}
+                <div className="bg-gradient-to-br from-red-600 via-red-500 to-red-700 rounded-xl border border-red-400/50 p-6 w-full lg:w-auto shadow-2xl">
+                  <div className="text-center">
+                    <div className="flex items-center justify-center mb-3">
+                      <Heart className="h-6 w-6 text-white mr-2" />
+                      <h3 className="text-lg font-bold text-white">Donate & Support Students</h3>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-3 mb-4 text-xs">
+                      <div className="bg-white/20 rounded-lg p-2">
+                        <CreditCard className="h-4 w-4 text-white mx-auto mb-1" />
+                        <div className="text-white font-semibold">Cards</div>
+                        <div className="text-red-100">Visa, MC, Amex</div>
+                      </div>
+                      <div className="bg-white/20 rounded-lg p-2">
+                        <Globe className="h-4 w-4 text-white mx-auto mb-1" />
+                        <div className="text-white font-semibold">PayPal</div>
+                        <div className="text-red-100">Secure & Fast</div>
+                      </div>
+                      <div className="bg-white/20 rounded-lg p-2">
+                        <Users className="h-4 w-4 text-white mx-auto mb-1" />
+                        <div className="text-white font-semibold">Venmo</div>
+                        <div className="text-red-100">Mobile Apps</div>
+                      </div>
+                      <div className="bg-white/20 rounded-lg p-2">
+                        <Zap className="h-4 w-4 text-white mx-auto mb-1" />
+                        <div className="text-white font-semibold">More</div>
+                        <div className="text-red-100">Cash App, Klarna</div>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2 mb-3 text-xs">
+                      <div className="bg-white/20 rounded px-2 py-1">
+                        <span className="text-white font-semibold">100% to Students</span>
+                      </div>
+                      <div className="bg-white/20 rounded px-2 py-1">
+                        <span className="text-white font-semibold">Tax Deductible</span>
+                      </div>
+                    </div>
+
+                    <Button 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        try {
+                          setLocation('/donate');
+                          setTimeout(() => {
+                            if (window.location.pathname !== '/donate') {
+                              window.location.href = '/donate';
+                            }
+                          }, 100);
+                        } catch (error) {
                           window.location.href = '/donate';
                         }
-                      }, 100);
-                    } catch (error) {
-                      window.location.href = '/donate';
-                    }
-                  }}
-                  className="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base w-full lg:w-auto border border-red-400 shadow-lg"
-                  data-testid="button-donate-here"
-                >
-                  <Heart className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4" />
-                  Donate Here
-                </Button>
+                      }}
+                      className="bg-white text-red-600 hover:bg-red-50 font-bold px-6 py-3 text-sm w-full shadow-lg"
+                      data-testid="button-donate-here"
+                    >
+                      <Heart className="mr-2 h-4 w-4" />
+                      Donate Any Amount
+                    </Button>
+                  </div>
+                </div>
                 <Button 
                   onClick={(e) => {
                     e.preventDefault();
