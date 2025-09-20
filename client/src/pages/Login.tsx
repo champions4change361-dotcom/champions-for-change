@@ -105,7 +105,6 @@ export default function Login() {
                 >
                   <option value="team">Team Management</option>
                   <option value="organizer">Tournament Organizer</option>
-                  <option value="business">Business Enterprise</option>
                 </select>
               </div>
 

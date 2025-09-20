@@ -278,8 +278,6 @@ export async function setupAuth(app: Express) {
             redirectPath = '/admin'; // Team management users get admin access
           } else if (userType === 'organizer') {
             redirectPath = '/create'; // Tournament organizers go to tournament creation
-          } else if (userType === 'business') {
-            redirectPath = '/'; // Business users go to main page
           }
           return res.redirect(redirectPath);
         });
