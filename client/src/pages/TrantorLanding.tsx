@@ -98,86 +98,93 @@ export default function TrantorLanding() {
                     Sign In
                   </Button>
                 </div>
-                {/* Donation Card with Payment Options */}
-                <div className="bg-gradient-to-br from-red-600 via-red-500 to-red-700 rounded-xl border border-red-400/50 p-3 lg:p-4 w-full lg:w-80 shadow-2xl">
-                  <div className="text-center">
-                    <div className="flex items-center justify-center mb-3">
-                      <Heart className="h-6 w-6 text-white mr-2" />
-                      <h3 className="text-lg font-bold text-white">Donate & Support Students</h3>
-                    </div>
-                    
-                    <div className="grid grid-cols-3 gap-1 lg:gap-2 mb-3 lg:mb-4 text-xs">
-                      <div className="bg-white/20 rounded-lg p-2">
-                        <CreditCard className="h-4 w-4 text-white mx-auto mb-1" />
-                        <div className="text-white font-semibold">Cards</div>
-                        <div className="text-red-100">Visa, MC, Amex</div>
-                      </div>
-                      <div className="bg-white/20 rounded-lg p-2">
-                        <Globe className="h-4 w-4 text-white mx-auto mb-1" />
-                        <div className="text-white font-semibold">PayPal</div>
-                        <div className="text-red-100">Secure & Fast</div>
-                      </div>
-                      <div className="bg-white/20 rounded-lg p-2">
-                        <Users className="h-4 w-4 text-white mx-auto mb-1" />
-                        <div className="text-white font-semibold">Venmo</div>
-                        <div className="text-red-100">Mobile Apps</div>
-                      </div>
-                      <div className="bg-white/20 rounded-lg p-2">
-                        <Smartphone className="h-4 w-4 text-white mx-auto mb-1" />
-                        <div className="text-white font-semibold">Apple Pay</div>
-                        <div className="text-red-100">Touch/Face ID</div>
-                      </div>
-                      <div className="bg-white/20 rounded-lg p-2">
-                        <Smartphone className="h-4 w-4 text-white mx-auto mb-1" />
-                        <div className="text-white font-semibold">Google Pay</div>
-                        <div className="text-red-100">Fingerprint</div>
-                      </div>
-                      <div className="bg-white/20 rounded-lg p-2">
-                        <Repeat className="h-4 w-4 text-white mx-auto mb-1" />
-                        <div className="text-white font-semibold">Monthly</div>
-                        <div className="text-red-100">Recurring</div>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-1 mb-3 text-xs">
-                      <div className="bg-white/20 rounded px-2 py-1">
-                        <span className="text-white font-semibold">100% to Students</span>
-                      </div>
-                      <div className="bg-white/20 rounded px-2 py-1">
-                        <span className="text-white font-semibold">Tax Deductible</span>
-                      </div>
-                      <div className="bg-white/20 rounded px-2 py-1">
-                        <span className="text-white font-semibold">One-time/Monthly</span>
-                      </div>
-                    </div>
-
-                    <Button 
-                      onClick={(e) => {
-                        e.preventDefault();
-                        try {
-                          setLocation('/donate');
-                          setTimeout(() => {
-                            if (window.location.pathname !== '/donate') {
-                              window.location.href = '/donate';
-                            }
-                          }, 100);
-                        } catch (error) {
-                          window.location.href = '/donate';
-                        }
-                      }}
-                      className="bg-white text-red-600 hover:bg-red-50 font-bold px-6 py-3 text-sm w-full shadow-lg"
-                      data-testid="button-donate-here"
-                    >
-                      <Heart className="mr-2 h-4 w-4" />
-                      Donate Any Amount
-                    </Button>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
         </div>
       </header>
+
+      {/* Donation Section - Support Students */}
+      <div className="relative py-8 lg:py-12 mt-4 lg:mt-8 bg-gradient-to-r from-red-600/90 via-red-500/90 to-red-700/90 backdrop-blur-sm">
+        <div className="absolute inset-0 bg-black/20"></div>
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 text-center">
+          <div className="flex items-center justify-center mb-6">
+            <Heart className="h-8 w-8 text-white mr-3" />
+            <h2 className="text-2xl lg:text-4xl font-bold text-white">Donate & Support Students</h2>
+            <Heart className="h-8 w-8 text-white ml-3" />
+          </div>
+          
+          <p className="text-lg lg:text-xl text-red-100 max-w-4xl mx-auto mb-8 leading-relaxed">
+            <strong>Support educational opportunities for underprivileged student competitors.</strong> Every donation directly funds student travel experiences and educational programs.
+          </p>
+          
+          <div className="grid grid-cols-3 lg:grid-cols-6 gap-4 lg:gap-6 max-w-4xl mx-auto mb-8">
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+              <CreditCard className="h-6 w-6 text-white mx-auto mb-2" />
+              <div className="text-white font-semibold text-sm">Cards</div>
+              <div className="text-red-100 text-xs">Visa, MC, Amex</div>
+            </div>
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+              <Globe className="h-6 w-6 text-white mx-auto mb-2" />
+              <div className="text-white font-semibold text-sm">PayPal</div>
+              <div className="text-red-100 text-xs">Secure & Fast</div>
+            </div>
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+              <Users className="h-6 w-6 text-white mx-auto mb-2" />
+              <div className="text-white font-semibold text-sm">Venmo</div>
+              <div className="text-red-100 text-xs">Mobile Apps</div>
+            </div>
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+              <Smartphone className="h-6 w-6 text-white mx-auto mb-2" />
+              <div className="text-white font-semibold text-sm">Apple Pay</div>
+              <div className="text-red-100 text-xs">Touch/Face ID</div>
+            </div>
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+              <Smartphone className="h-6 w-6 text-white mx-auto mb-2" />
+              <div className="text-white font-semibold text-sm">Google Pay</div>
+              <div className="text-red-100 text-xs">Fingerprint</div>
+            </div>
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+              <Repeat className="h-6 w-6 text-white mx-auto mb-2" />
+              <div className="text-white font-semibold text-sm">Monthly</div>
+              <div className="text-red-100 text-xs">Recurring</div>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2 justify-center mb-6">
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/20">
+              <span className="text-white font-semibold">100% to Students</span>
+            </div>
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/20">
+              <span className="text-white font-semibold">Tax Deductible</span>
+            </div>
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/20">
+              <span className="text-white font-semibold">One-time/Monthly</span>
+            </div>
+          </div>
+
+          <Button 
+            onClick={(e) => {
+              e.preventDefault();
+              try {
+                setLocation('/donate');
+                setTimeout(() => {
+                  if (window.location.pathname !== '/donate') {
+                    window.location.href = '/donate';
+                  }
+                }, 100);
+              } catch (error) {
+                window.location.href = '/donate';
+              }
+            }}
+            className="bg-white text-red-600 hover:bg-red-50 font-bold px-8 py-4 text-lg shadow-xl"
+            data-testid="button-donate-here"
+          >
+            <Heart className="mr-3 h-5 w-5" />
+            Donate Any Amount
+          </Button>
+        </div>
+      </div>
 
       {/* Educational Mission Banner */}
       <div className="relative py-8 lg:py-12 mt-4 lg:mt-8 bg-gradient-to-r from-green-600/90 via-blue-600/90 to-purple-600/90 backdrop-blur-sm">
