@@ -1,8 +1,13 @@
 import { useState, useEffect } from 'react';
+import { loadStripe } from '@stripe/stripe-js';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Heart, CreditCard, ArrowLeft, Smartphone, Repeat } from 'lucide-react';
 import { SiPaypal, SiVenmo } from 'react-icons/si';
+import { useToast } from '@/hooks/use-toast';
+
+// Load Stripe
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY!);
 
 export default function PaymentMethods() {
   const [paymentData, setPaymentData] = useState<{
@@ -11,6 +16,8 @@ export default function PaymentMethods() {
     postDonationChoice: string;
   } | null>(null);
   const [isMonthly, setIsMonthly] = useState(false);
+  const [isProcessingApplePay, setIsProcessingApplePay] = useState(false);
+  const { toast } = useToast();
   
   // Device detection
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -99,7 +106,101 @@ export default function PaymentMethods() {
     }
   };
 
-  const handleApplePayPayment = () => handleStripePayment('apple_pay');
+  const handleDirectApplePay = async () => {
+    if (!paymentData) return;
+    
+    setIsProcessingApplePay(true);
+    await trackPaymentMethod('apple_pay');
+    
+    try {
+      // Create payment intent for Apple Pay
+      const endpoint = isMonthly ? '/api/create-subscription' : '/api/create-payment-intent';
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          amount: parseInt(paymentData.amount),
+          description: `$${paymentData.amount} ${isMonthly ? 'monthly ' : ''}donation to Champions for Change educational programs`,
+          isMonthly,
+          donorId: paymentData.donorId
+        }),
+      });
+
+      const data = await response.json();
+      const clientSecret = data.clientSecret;
+
+      if (!clientSecret) {
+        throw new Error('Failed to create payment intent');
+      }
+
+      // Initialize Stripe and create payment request
+      const stripe = await stripePromise;
+      if (!stripe) {
+        throw new Error('Stripe failed to load');
+      }
+
+      // Create payment request for Apple Pay
+      const paymentRequest = stripe.paymentRequest({
+        country: 'US',
+        currency: 'usd',
+        total: {
+          label: `Champions for Change ${isMonthly ? 'Monthly ' : ''}Donation`,
+          amount: parseInt(paymentData.amount) * 100,
+        },
+        requestPayerName: true,
+        requestPayerEmail: true,
+      });
+
+      // Check if Apple Pay is available
+      const canMakePayment = await paymentRequest.canMakePayment();
+      if (!canMakePayment || !canMakePayment.applePay) {
+        throw new Error('Apple Pay is not available on this device');
+      }
+
+      // Handle payment
+      paymentRequest.on('paymentmethod', async (event) => {
+        const { error } = await stripe.confirmPayment({
+          clientSecret,
+          payment_method: event.paymentMethod.id,
+          return_url: `${window.location.origin}/donation-success?amount=${paymentData.amount}&choice=${paymentData.postDonationChoice}&donor_id=${paymentData.donorId}&monthly=${isMonthly}`,
+        });
+
+        if (error) {
+          event.complete('fail');
+          toast({
+            title: "Payment Failed",
+            description: error.message || "Apple Pay payment failed. Please try again.",
+            variant: "destructive",
+          });
+        } else {
+          event.complete('success');
+          toast({
+            title: "Payment Successful!",
+            description: "Thank you for your donation to Champions for Change!",
+          });
+          // Redirect to success page
+          setTimeout(() => {
+            window.location.href = `/donation-success?amount=${paymentData.amount}&choice=${paymentData.postDonationChoice}&donor_id=${paymentData.donorId}&monthly=${isMonthly}`;
+          }, 1000);
+        }
+        setIsProcessingApplePay(false);
+      });
+
+      // Show Apple Pay
+      paymentRequest.show();
+
+    } catch (error: any) {
+      console.error('Apple Pay error:', error);
+      toast({
+        title: "Apple Pay Error",
+        description: error.message || "Failed to initialize Apple Pay. Please try another payment method.",
+        variant: "destructive",
+      });
+      setIsProcessingApplePay(false);
+    }
+  };
+
   const handleGooglePayPayment = () => handleStripePayment('google_pay');
 
   const handlePayPalPayment = async () => {
@@ -236,9 +337,10 @@ export default function PaymentMethods() {
             {/* Apple Pay - Only show on iOS devices */}
             {isIOS && (
               <Button
-                onClick={handleApplePayPayment}
+                onClick={handleDirectApplePay}
+                disabled={isProcessingApplePay}
                 variant="outline"
-                className="w-full p-6 border-2 border-gray-500 hover:bg-gray-50 flex items-center justify-between"
+                className="w-full p-6 border-2 border-gray-500 hover:bg-gray-50 flex items-center justify-between disabled:opacity-50"
                 data-testid="button-apple-pay"
               >
                 <div className="flex items-center gap-3">
