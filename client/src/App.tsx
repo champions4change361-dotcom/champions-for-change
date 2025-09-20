@@ -139,6 +139,7 @@ import TeamListPage from './pages/TeamListPage';
 import TeamCreatePage from './pages/TeamCreatePage';
 import TeamDashboardPage from './pages/TeamDashboardPage';
 import TeamSignupPage from './pages/TeamSignupPage';
+import ChampionsBanner from './components/ChampionsBanner';
 
 function AuthenticatedRoutes() {
   const { isFeatureEnabled, isFantasyDomain, config } = useDomain();
@@ -334,9 +335,11 @@ function AppRouter() {
   }
 
   return (
-    <Switch>
-      {/* Fantasy Coaching AI - High Priority Route */}
-      <Route path="/fantasy-coaching" component={FantasyCoaching} />
+    <>
+      <ChampionsBanner />
+      <Switch>
+        {/* Fantasy Coaching AI - High Priority Route */}
+        <Route path="/fantasy-coaching" component={FantasyCoaching} />
       
       {/* Fantasy Tournaments - Public Access for Demo */}
       <Route path="/fantasy-tournaments" component={FantasyTournaments} />
@@ -497,6 +500,7 @@ function AppRouter() {
         )}
       </Route>
     </Switch>
+    </>
   );
 }
 
