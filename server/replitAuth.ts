@@ -274,8 +274,8 @@ export async function setupAuth(app: Express) {
           
           // Redirect based on user type to appropriate dashboard
           let redirectPath = '/';
-          if (userType === 'district') {
-            redirectPath = '/admin'; // District users get admin access
+          if (userType === 'team') {
+            redirectPath = '/admin'; // Team management users get admin access
           } else if (userType === 'organizer') {
             redirectPath = '/create'; // Tournament organizers go to tournament creation
           } else if (userType === 'business') {

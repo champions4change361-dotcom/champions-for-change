@@ -11,7 +11,7 @@ export default function Login() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    userType: 'district'
+    userType: 'team'
   });
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -88,7 +88,7 @@ export default function Login() {
           <CardHeader className="text-center space-y-2 p-4 lg:p-6">
             <CardTitle className="text-xl lg:text-2xl text-slate-900">Platform Access</CardTitle>
             <CardDescription className="text-sm lg:text-base">
-              Enter your credentials to access the tournament management system
+              Choose your platform type and enter credentials to access your dashboard
             </CardDescription>
           </CardHeader>
           <CardContent className="p-4 lg:p-6">
@@ -103,7 +103,7 @@ export default function Login() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
                   data-testid="select-usertype"
                 >
-                  <option value="district">District Platform</option>
+                  <option value="team">Team Management</option>
                   <option value="organizer">Tournament Organizer</option>
                   <option value="business">Business Enterprise</option>
                 </select>
@@ -153,7 +153,7 @@ export default function Login() {
                   onClick={() => setFormData({
                     email: 'champions4change361@gmail.com',
                     password: 'master-admin-danielthornton',
-                    userType: 'district'
+                    userType: 'team'
                   })}
                   className="text-xs"
                   data-testid="button-autofill"

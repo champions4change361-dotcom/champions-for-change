@@ -2602,7 +2602,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           subscriptionStatus: 'active',
           organizationId: 'champions-for-change',
           organizationName: 'Champions for Change',
-          userType: userType || 'district',
+          userType: userType || 'team',
           isAdmin: true,
           isWhitelabelClient: true,
           whitelabelDomain: 'trantortournaments.org'
