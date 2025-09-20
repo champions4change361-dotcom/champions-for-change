@@ -29,19 +29,19 @@ export default function TrantorLanding() {
                 </div>
                 
                 {/* Header Text and Status */}
-                <div className="flex flex-col lg:flex-row lg:items-center lg:space-x-6">
+                <div className="flex flex-col">
                   <div>
                     <h1 className="text-xl font-bold text-white">Champions for Change</h1>
-                    <p className="text-xs text-yellow-300">Click coin to create account</p>
+                    <p className="text-xs text-yellow-300 mb-2">Click coin to create account</p>
                   </div>
                   
                   {/* Platform Status */}
-                  <div className="flex flex-col lg:flex-row lg:items-center lg:space-x-4 mt-2 lg:mt-0">
+                  <div className="flex flex-col lg:flex-row lg:items-center lg:space-x-4 space-y-1 lg:space-y-0">
                     <div className="flex items-center space-x-2">
                       <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                       <span className="text-sm text-slate-200">Live Platform</span>
                     </div>
-                    <Badge variant="outline" className="border-yellow-400 text-yellow-300 mt-1 lg:mt-0 w-fit">
+                    <Badge variant="outline" className="border-yellow-400 text-yellow-300 w-fit">
                       Commercial Ready
                     </Badge>
                   </div>
