@@ -2605,7 +2605,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           userType: userType || 'team',
           isAdmin: true,
           isWhitelabelClient: true,
-          whitelabelDomain: 'championsforchange.net'
+          whitelabelDomain: 'trantortournaments.org'
         };
 
         // Store in session and wait for it to be saved before responding

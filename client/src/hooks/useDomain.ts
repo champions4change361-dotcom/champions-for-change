@@ -28,16 +28,16 @@ export function useDomain() {
     console.log('Domain detection - hostname:', hostname); // Debug logging
     let config: DomainConfig;
 
-    // Champions for Change - Primary Tournament Management Platform
+    // Champions for Change - Primary Tournament Management Platform (same branding as Trantor)
     if (hostname === 'championsforchange.net' || hostname === 'www.championsforchange.net') {
       config = {
         type: 'pro',
-        brand: 'CHAMPIONS_FOR_CHANGE',
-        theme: 'champions',
+        brand: 'TRANTOR_TOURNAMENTS',
+        theme: 'professional',
         allowFantasyPromo: true,
         allowProPromo: false,    // Already on primary platform
         allowSchoolPromo: true,  // Can promote educational services
-        primaryColor: 'green',
+        primaryColor: 'orange',
         features: {
           fantasyLeagues: true,   // Full tournament management
           ageVerification: true,  // Professional tournaments
@@ -85,15 +85,15 @@ export function useDomain() {
         }
       };
     } else {
-      // Default for development - Champions for Change platform
+      // Default for development - Trantor platform
       config = {
         type: 'pro',
-        brand: 'CHAMPIONS_FOR_CHANGE',
-        theme: 'champions',
+        brand: 'TRANTOR_TOURNAMENTS',
+        theme: 'professional',
         allowFantasyPromo: true,
         allowProPromo: false,    
         allowSchoolPromo: true,  
-        primaryColor: 'green',
+        primaryColor: 'orange',
         features: {
           fantasyLeagues: true,   
           ageVerification: true,  
