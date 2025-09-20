@@ -66,15 +66,6 @@ export default function SmartSignup() {
 
   const orgTypes: OrgType[] = [
     {
-      id: 'participant',
-      name: 'Team/Participant',
-      description: 'Teams, coaches, or participants registering for tournaments',
-      icon: <Trophy className="h-8 w-8" />,
-      examples: ['Basketball teams', 'Track & field athletes', 'Swimming teams', 'School teams'],
-      recommendedPlan: 'participant',
-      requiresPayment: false
-    },
-    {
       id: 'individual',
       name: 'Tournament Organizer',
       description: 'Individual coaches, parents, or community organizers running tournaments',
@@ -433,6 +424,13 @@ export default function SmartSignup() {
             <h1 className="text-3xl font-bold mb-2">Join Champions for Change</h1>
             <p className="text-xl">Professional Tournament Management Platform</p>
             <p className="text-blue-100 mt-2">Supporting educational opportunities for students</p>
+          </div>
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+            <h3 className="font-semibold text-yellow-800 mb-2">📝 Looking to register a team for a tournament?</h3>
+            <p className="text-yellow-700 text-sm">
+              Teams and participants register through the tournament organizer's website, not here. 
+              This signup is for organizations who want to <strong>create and manage tournaments</strong> using our platform.
+            </p>
           </div>
         </div>
 
