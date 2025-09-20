@@ -22,26 +22,26 @@ export default function TrantorLanding() {
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between w-full py-4 lg:py-0 space-y-4 lg:space-y-0">
               
               {/* Left Side: Logo and Text */}
-              <div className="flex items-center space-x-4 mb-5 lg:mb-0">
+              <div className="grid grid-cols-[auto_1fr] items-center gap-2 lg:gap-3">
                 {/* Champions for Change Coin */}
                 <div className="flex-shrink-0">
                   <TrantorCoin size="lg" />
                 </div>
                 
                 {/* Header Text and Status */}
-                <div className="flex flex-col">
+                <div className="flex flex-col space-y-0.5 leading-tight">
                   <div>
-                    <h1 className="text-xl font-bold text-white">Champions for Change</h1>
-                    <p className="text-xs text-yellow-300 mb-2">Click coin to create account</p>
+                    <h1 className="text-lg lg:text-xl font-bold text-white leading-tight">Champions for Change</h1>
+                    <p className="text-[11px] lg:text-xs text-yellow-300 mb-1">Click coin to create account</p>
                   </div>
                   
                   {/* Platform Status */}
-                  <div className="flex flex-col lg:flex-row lg:items-center lg:space-x-4 space-y-1 lg:space-y-0">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                      <span className="text-sm text-slate-200">Live Platform</span>
+                  <div className="flex flex-col lg:flex-row lg:items-center gap-2 space-y-1 lg:space-y-0 leading-tight">
+                    <div className="flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
+                      <span className="text-xs text-slate-200">Live Platform</span>
                     </div>
-                    <Badge variant="outline" className="border-yellow-400 text-yellow-300 w-fit">
+                    <Badge variant="outline" className="border-yellow-400 text-yellow-300 w-fit px-2 py-0.5 text-xs">
                       Commercial Ready
                     </Badge>
                   </div>
@@ -108,61 +108,61 @@ export default function TrantorLanding() {
       </header>
 
       {/* Donation Section - Support Students */}
-      <div className="relative py-8 lg:py-12 mt-4 lg:mt-8 bg-gradient-to-r from-red-600/90 via-red-500/90 to-red-700/90 backdrop-blur-sm">
+      <div className="relative py-6 lg:py-8 mt-3 lg:mt-6 bg-gradient-to-r from-red-600/90 via-red-500/90 to-red-700/90 backdrop-blur-sm">
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 text-center">
-          <div className="flex items-center justify-center mb-6">
-            <Heart className="h-8 w-8 text-white mr-3" />
-            <h2 className="text-2xl lg:text-4xl font-bold text-white">Donate & Support Students</h2>
-            <Heart className="h-8 w-8 text-white ml-3" />
+          <div className="flex items-center justify-center mb-2">
+            <Heart className="h-6 w-6 text-white mr-3" />
+            <h2 className="text-xl lg:text-3xl font-bold text-white">Donate & Support Students</h2>
+            <Heart className="h-6 w-6 text-white ml-3" />
           </div>
           
-          <p className="text-lg lg:text-xl text-red-100 max-w-4xl mx-auto mb-8 leading-relaxed">
+          <p className="text-base lg:text-lg text-red-100 max-w-4xl mx-auto mb-4 leading-snug">
             <strong>Support educational opportunities for underprivileged student competitors.</strong> Every donation directly funds student travel experiences and educational programs.
           </p>
           
-          <div className="grid grid-cols-3 lg:grid-cols-6 gap-4 lg:gap-6 max-w-4xl mx-auto mb-8">
-            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-              <CreditCard className="h-6 w-6 text-white mx-auto mb-2" />
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-3 lg:gap-4 max-w-4xl mx-auto mb-4">
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-3 border border-white/20">
+              <CreditCard className="h-5 w-5 text-white mx-auto mb-2" />
               <div className="text-white font-semibold text-sm">Cards</div>
-              <div className="text-red-100 text-xs">Visa, MC, Amex</div>
+              <div className="text-red-100 text-[11px] sm:text-xs hidden sm:block">Visa, MC, Amex</div>
             </div>
-            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-              <Globe className="h-6 w-6 text-white mx-auto mb-2" />
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-3 border border-white/20">
+              <Globe className="h-5 w-5 text-white mx-auto mb-2" />
               <div className="text-white font-semibold text-sm">PayPal</div>
-              <div className="text-red-100 text-xs">Secure & Fast</div>
+              <div className="text-red-100 text-[11px] sm:text-xs hidden sm:block">Secure & Fast</div>
             </div>
-            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-              <Users className="h-6 w-6 text-white mx-auto mb-2" />
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-3 border border-white/20">
+              <Users className="h-5 w-5 text-white mx-auto mb-2" />
               <div className="text-white font-semibold text-sm">Venmo</div>
-              <div className="text-red-100 text-xs">Mobile Apps</div>
+              <div className="text-red-100 text-[11px] sm:text-xs hidden sm:block">Mobile Apps</div>
             </div>
-            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-              <Smartphone className="h-6 w-6 text-white mx-auto mb-2" />
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-3 border border-white/20">
+              <Smartphone className="h-5 w-5 text-white mx-auto mb-2" />
               <div className="text-white font-semibold text-sm">Apple Pay</div>
-              <div className="text-red-100 text-xs">Touch/Face ID</div>
+              <div className="text-red-100 text-[11px] sm:text-xs hidden sm:block">Touch/Face ID</div>
             </div>
-            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-              <Smartphone className="h-6 w-6 text-white mx-auto mb-2" />
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-3 border border-white/20">
+              <Smartphone className="h-5 w-5 text-white mx-auto mb-2" />
               <div className="text-white font-semibold text-sm">Google Pay</div>
-              <div className="text-red-100 text-xs">Fingerprint</div>
+              <div className="text-red-100 text-[11px] sm:text-xs hidden sm:block">Fingerprint</div>
             </div>
-            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-              <Repeat className="h-6 w-6 text-white mx-auto mb-2" />
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-3 border border-white/20">
+              <Repeat className="h-5 w-5 text-white mx-auto mb-2" />
               <div className="text-white font-semibold text-sm">Monthly</div>
-              <div className="text-red-100 text-xs">Recurring</div>
+              <div className="text-red-100 text-[11px] sm:text-xs hidden sm:block">Recurring</div>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2 justify-center mb-6">
-            <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/20">
-              <span className="text-white font-semibold">100% to Students</span>
+          <div className="flex flex-wrap gap-2 justify-center mb-4">
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-1.5 border border-white/20">
+              <span className="text-white font-semibold text-sm">100% to Students</span>
             </div>
-            <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/20">
-              <span className="text-white font-semibold">Tax Deductible</span>
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-1.5 border border-white/20">
+              <span className="text-white font-semibold text-sm">Tax Deductible</span>
             </div>
-            <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/20">
-              <span className="text-white font-semibold">One-time/Monthly</span>
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-1.5 border border-white/20">
+              <span className="text-white font-semibold text-sm">One-time/Monthly</span>
             </div>
           </div>
 
@@ -180,10 +180,10 @@ export default function TrantorLanding() {
                 window.location.href = '/donate';
               }
             }}
-            className="bg-white text-red-600 hover:bg-red-50 font-bold px-8 py-4 text-lg shadow-xl"
+            className="bg-white text-red-600 hover:bg-red-50 font-bold px-6 py-3 text-base shadow-lg"
             data-testid="button-donate-here"
           >
-            <Heart className="mr-3 h-5 w-5" />
+            <Heart className="mr-3 h-4 w-4" />
             Donate Any Amount
           </Button>
         </div>
