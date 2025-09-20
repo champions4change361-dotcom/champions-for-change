@@ -74,26 +74,22 @@ export default function PaymentMethods() {
     const paypalUrl = `https://www.paypal.com/donate/?business=${encodeURIComponent(paypalEmail)}&amount=${paymentData.amount}&currency_code=USD&item_name=${encodeURIComponent('Champions for Change Educational Donation')}`;
     window.open(paypalUrl, '_blank');
     
-    // Also redirect to success page after a delay
-    setTimeout(() => {
-      window.location.href = `/donation-success?amount=${paymentData.amount}&choice=${paymentData.postDonationChoice}&donor_id=${paymentData.donorId}&method=paypal`;
-    }, 2000);
+    // Keep user on page - they must complete payment externally
+    // Do not auto-redirect to success without payment confirmation
   };
 
   const handleVenmoPayment = () => {
     if (!paymentData) return;
     
     // Venmo deep link - using your actual Venmo username
-    const venmoUsername = 'championsforcahnge'; // Your Venmo business username
+    const venmoUsername = 'championsforchange'; // Your Venmo business username
     const note = encodeURIComponent(`$${paymentData.amount} donation for Champions for Change educational programs`);
     const venmoUrl = `https://venmo.com/${venmoUsername}?txn=pay&amount=${paymentData.amount}&note=${note}`;
     
     window.open(venmoUrl, '_blank');
     
-    // Also redirect to success page after a delay
-    setTimeout(() => {
-      window.location.href = `/donation-success?amount=${paymentData.amount}&choice=${paymentData.postDonationChoice}&donor_id=${paymentData.donorId}&method=venmo`;
-    }, 2000);
+    // Keep user on page - they must complete payment externally
+    // Do not auto-redirect to success without payment confirmation
   };
 
   if (!paymentData) {
