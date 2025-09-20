@@ -373,6 +373,74 @@ export default function Landing() {
           </div>
         </div>
 
+        {/* Featured Donation Card - Above the fold */}
+        <div className="bg-gradient-to-br from-green-600 via-green-500 to-emerald-600 rounded-2xl border border-green-400/30 p-8 mb-12 shadow-2xl">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-8">
+              <div className="flex items-center justify-center mb-4">
+                <Heart className="h-8 w-8 text-white mr-3" />
+                <h2 className="text-3xl md:text-4xl font-bold text-white">
+                  Support Student Education
+                </h2>
+              </div>
+              <p className="text-xl text-green-100 mb-6 leading-relaxed">
+                Your donation directly funds educational trips and opportunities for underprivileged youth
+              </p>
+              
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-8">
+                <h3 className="text-xl font-bold text-white mb-4">✨ Multiple Payment Options Available</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                  <div className="bg-white/10 rounded-lg p-3">
+                    <CreditCard className="h-6 w-6 text-white mx-auto mb-2" />
+                    <div className="text-sm font-semibold text-white">Credit Cards</div>
+                    <div className="text-xs text-green-100">Visa, Mastercard, Amex</div>
+                  </div>
+                  <div className="bg-white/10 rounded-lg p-3">
+                    <SiPaypal className="h-6 w-6 text-white mx-auto mb-2" />
+                    <div className="text-sm font-semibold text-white">PayPal</div>
+                    <div className="text-xs text-green-100">Secure & Fast</div>
+                  </div>
+                  <div className="bg-white/10 rounded-lg p-3">
+                    <SiVenmo className="h-6 w-6 text-white mx-auto mb-2" />
+                    <div className="text-sm font-semibold text-white">Venmo</div>
+                    <div className="text-xs text-green-100">Mobile Friendly</div>
+                  </div>
+                  <div className="bg-white/10 rounded-lg p-3">
+                    <Zap className="h-6 w-6 text-white mx-auto mb-2" />
+                    <div className="text-sm font-semibold text-white">More Options</div>
+                    <div className="text-xs text-green-100">Cash App, Klarna, Amazon Pay</div>
+                  </div>
+                </div>
+                
+                <div className="mt-6 grid md:grid-cols-3 gap-4 text-center">
+                  <div className="bg-emerald-500/30 rounded-lg p-3">
+                    <div className="text-lg font-bold text-white">100%</div>
+                    <div className="text-sm text-green-100">Goes to Students</div>
+                  </div>
+                  <div className="bg-emerald-500/30 rounded-lg p-3">
+                    <div className="text-lg font-bold text-white">501(c)(3)</div>
+                    <div className="text-sm text-green-100">Tax Deductible</div>
+                  </div>
+                  <div className="bg-emerald-500/30 rounded-lg p-3">
+                    <div className="text-lg font-bold text-white">Instant</div>
+                    <div className="text-sm text-green-100">Tax Receipt</div>
+                  </div>
+                </div>
+              </div>
+
+              <Button 
+                size="lg" 
+                className="bg-white text-green-600 hover:bg-green-50 font-bold px-12 py-6 text-xl shadow-lg"
+                onClick={() => setLocation("/donate")}
+                data-testid="button-featured-donate"
+              >
+                <Heart className="mr-3 h-6 w-6" />
+                Donate Now - Any Amount
+              </Button>
+            </div>
+          </div>
+        </div>
+
         {/* Donation Impact Section - Above the fold */}
         <section className="bg-gradient-to-r from-green-600 via-green-500 to-emerald-600 text-white py-12 mb-16">
           <div className="max-w-6xl mx-auto px-4 text-center">
