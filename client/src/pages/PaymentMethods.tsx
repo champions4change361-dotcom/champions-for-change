@@ -160,10 +160,8 @@ export default function PaymentMethods() {
 
       // Handle payment
       paymentRequest.on('paymentmethod', async (event) => {
-        const { error } = await stripe.confirmPayment({
-          clientSecret,
+        const { error } = await stripe.confirmCardPayment(clientSecret, {
           payment_method: event.paymentMethod.id,
-          return_url: `${window.location.origin}/donation-success?amount=${paymentData.amount}&choice=${paymentData.postDonationChoice}&donor_id=${paymentData.donorId}&monthly=${isMonthly}`,
         });
 
         if (error) {
