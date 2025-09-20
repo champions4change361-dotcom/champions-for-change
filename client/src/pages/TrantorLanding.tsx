@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Trophy, Users, Zap, Globe, CreditCard, Star, Target, Building, CheckCircle, BarChart3, Clock, Smartphone, Calendar, GraduationCap, Heart, Repeat } from "lucide-react";
+import { SiGoogle } from "react-icons/si";
 import { useLocation } from "wouter";
 import React, { useState } from "react";
 import Footer from "@/components/Footer";
@@ -18,8 +19,7 @@ export default function TrantorLanding() {
       {/* Professional Tournament Header */}
       <header className="relative border-b border-yellow-500/20 bg-slate-900/80 backdrop-blur-sm pt-4 lg:pt-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="lg:flex lg:items-center lg:justify-between lg:min-h-16">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between w-full py-4 lg:py-0 space-y-4 lg:space-y-0">
+          <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr_24rem] items-center gap-4 lg:gap-6 py-4 lg:py-0 lg:min-h-16">
               
               {/* Left Side: Logo and Text */}
               <div className="grid grid-cols-[auto_1fr] items-center gap-2 lg:gap-3">
@@ -48,60 +48,95 @@ export default function TrantorLanding() {
                 </div>
               </div>
 
-              {/* Trial and Action Buttons */}
-              <div className="flex flex-col space-y-2 lg:flex-row lg:space-y-0 lg:space-x-3 lg:ml-auto">
-                <div className="flex flex-col space-y-2">
-                  <Button 
-                    onClick={() => setLocation('/trial-signup?plan=monthly&price=39')}
-                    className="bg-yellow-600 hover:bg-yellow-700 text-slate-900 font-semibold px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base w-full lg:w-auto"
-                    data-testid="button-start-trial-trantor"
-                  >
-                    <Zap className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4" />
-                    Start 14-Day Free Trial
-                  </Button>
-                  <Button 
-                    onClick={(e) => {
-                      e.preventDefault();
-                      try {
-                        setLocation('/tournament-calendar');
-                        setTimeout(() => {
-                          if (window.location.pathname !== '/tournament-calendar') {
-                            window.location.href = '/tournament-calendar';
-                          }
-                        }, 100);
-                      } catch (error) {
+            {/* Center: Enlarged Action Buttons */}
+            <div className="flex flex-col space-y-2 lg:justify-center lg:items-center">
+              <Button 
+                onClick={() => setLocation('/trial-signup?plan=monthly&price=39')}
+                className="bg-yellow-600 hover:bg-yellow-700 text-slate-900 font-semibold h-12 lg:h-14 px-6 lg:px-8 text-base lg:text-lg rounded-xl shadow-xl w-full lg:w-auto"
+                data-testid="button-start-trial-trantor"
+              >
+                <Zap className="mr-2 h-4 w-4 lg:h-5 lg:w-5" />
+                Start 14-Day Free Trial
+              </Button>
+              <Button 
+                onClick={(e) => {
+                  e.preventDefault();
+                  try {
+                    setLocation('/tournament-calendar');
+                    setTimeout(() => {
+                      if (window.location.pathname !== '/tournament-calendar') {
                         window.location.href = '/tournament-calendar';
                       }
-                    }}
-                    className="bg-blue-700 hover:bg-blue-600 text-blue-200 font-semibold px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base w-full lg:w-auto border border-blue-400 shadow-lg"
-                    data-testid="button-see-tournaments"
-                  >
-                    <Calendar className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4" />
-                    See Local Tournaments
-                  </Button>
+                    }, 100);
+                  } catch (error) {
+                    window.location.href = '/tournament-calendar';
+                  }
+                }}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold h-12 lg:h-14 px-6 lg:px-8 text-base lg:text-lg rounded-xl shadow-xl w-full lg:w-auto"
+                data-testid="button-see-tournaments"
+              >
+                <Calendar className="mr-2 h-4 w-4 lg:h-5 lg:w-5" />
+                See Local Tournaments
+              </Button>
+            </div>
+
+            {/* Right: Login Card */}
+            <div className="lg:justify-self-end w-full lg:w-auto">
+              <Card className="bg-slate-800/70 border border-yellow-500/20 text-white shadow-xl">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-xl font-bold text-center">Welcome Back</CardTitle>
+                  <CardDescription className="text-slate-300 text-center text-sm">
+                    Sign in to access your tournaments
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pt-0 space-y-3">
                   <Button 
-                    onClick={(e) => {
-                      e.preventDefault();
-                      try {
-                        setLocation('/login');
-                        // Mobile fallback
-                        setTimeout(() => {
-                          if (window.location.pathname !== '/login') {
-                            window.location.href = '/login';
-                          }
-                        }, 100);
-                      } catch (error) {
-                        window.location.href = '/login';
-                      }
-                    }}
-                    className="bg-slate-700 hover:bg-slate-600 text-yellow-300 font-semibold px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base w-full lg:w-auto border border-yellow-500 shadow-lg"
-                    data-testid="button-signin-trantor"
+                    onClick={() => window.location.href = '/auth/google'}
+                    className="w-full h-11 lg:h-12 bg-white text-slate-900 hover:bg-slate-100 font-semibold"
+                    data-testid="button-continue-google"
                   >
-                    <Trophy className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4" />
-                    Sign In
+                    <SiGoogle className="mr-2 h-4 w-4" />
+                    Continue with Google
                   </Button>
-                </div>
-              </div>
+                  
+                  <div className="flex items-center gap-3 my-3">
+                    <span className="h-px flex-1 bg-white/20"></span>
+                    <span className="text-[11px] tracking-widest text-white/70">OR USE EMAIL</span>
+                    <span className="h-px flex-1 bg-white/20"></span>
+                  </div>
+                  
+                  <Button 
+                    onClick={() => setLocation('/login')}
+                    className="w-full h-11 lg:h-12 bg-slate-700 hover:bg-slate-600 text-yellow-300 border border-yellow-500/40"
+                    data-testid="button-signin-email"
+                  >
+                    Sign in with Email
+                  </Button>
+                  
+                  <div className="flex items-center justify-center gap-2 mt-3">
+                    <CheckCircle className="h-3 w-3 text-green-400" />
+                    <Badge className="px-2 py-0.5 text-xs bg-yellow-600 text-slate-900">
+                      Enterprise Security
+                    </Badge>
+                  </div>
+                  
+                  <div className="text-center pt-2">
+                    <p className="text-xs text-slate-400">
+                      New to Trantor Tournaments?{" "}
+                      <button 
+                        onClick={() => setLocation('/register')}
+                        className="text-yellow-300 hover:text-yellow-200 underline"
+                        data-testid="link-create-account"
+                      >
+                        Create account
+                      </button>
+                    </p>
+                    <p className="text-[10px] text-slate-500 mt-1">
+                      Your data is protected with enterprise-grade security
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </div>
