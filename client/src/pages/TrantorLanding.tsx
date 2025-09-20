@@ -76,28 +76,28 @@ export default function TrantorLanding() {
                     <Calendar className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4" />
                     See Local Tournaments
                   </Button>
+                  <Button 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      try {
+                        setLocation('/login');
+                        // Mobile fallback
+                        setTimeout(() => {
+                          if (window.location.pathname !== '/login') {
+                            window.location.href = '/login';
+                          }
+                        }, 100);
+                      } catch (error) {
+                        window.location.href = '/login';
+                      }
+                    }}
+                    className="bg-slate-700 hover:bg-slate-600 text-yellow-300 font-semibold px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base w-full lg:w-auto border border-yellow-500 shadow-lg"
+                    data-testid="button-signin-trantor"
+                  >
+                    <Trophy className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4" />
+                    Sign In
+                  </Button>
                 </div>
-                <Button 
-                  onClick={(e) => {
-                    e.preventDefault();
-                    try {
-                      setLocation('/login');
-                      // Mobile fallback
-                      setTimeout(() => {
-                        if (window.location.pathname !== '/login') {
-                          window.location.href = '/login';
-                        }
-                      }, 100);
-                    } catch (error) {
-                      window.location.href = '/login';
-                    }
-                  }}
-                  className="bg-slate-700 hover:bg-slate-600 text-yellow-300 font-semibold px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base w-full lg:w-auto border border-yellow-500 shadow-lg"
-                  data-testid="button-signin-trantor"
-                >
-                  <Trophy className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4" />
-                  Sign In
-                </Button>
                 {/* Donation Card with Payment Options */}
                 <div className="bg-gradient-to-br from-red-600 via-red-500 to-red-700 rounded-xl border border-red-400/50 p-3 lg:p-4 w-full lg:w-80 shadow-2xl">
                   <div className="text-center">
