@@ -189,14 +189,20 @@ export function FantasyPlayerCard({ player, onPlayerSelect, onPlayerDrillDown, i
           {/* Depth Chart Badge */}
           {(player.status || player.depth) && (
             <Badge 
-              variant="outline" 
-              className={`text-xs ${
-                player.status === 'starter' || player.depth === 1 
-                  ? 'border-green-500 text-green-700' 
-                  : 'border-gray-400 text-gray-600'
+              className={`text-xs font-semibold ${
+                player.status === 'out' ? 'bg-red-600 text-white' 
+                  : player.status === 'doubtful' ? 'bg-orange-600 text-white'
+                  : player.status === 'questionable' ? 'bg-yellow-500 text-black'
+                  : player.status === 'starter' || player.depth === 1 
+                  ? 'bg-green-600 text-white' 
+                  : 'border-gray-400 text-gray-600 border'
               }`}
             >
-              {player.status === 'starter' ? 'Starter' : `${player.depth}${player.depth === 2 ? 'nd' : player.depth === 3 ? 'rd' : 'th'} String`}
+              {player.status === 'out' ? '❌ OUT' 
+                : player.status === 'doubtful' ? '🔴 Doubtful'
+                : player.status === 'questionable' ? '⚠️ Questionable'
+                : player.status === 'starter' ? '✅ Starter' 
+                : `${player.depth}${player.depth === 2 ? 'nd' : player.depth === 3 ? 'rd' : 'th'} String`}
             </Badge>
           )}
         </div>

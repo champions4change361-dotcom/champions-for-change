@@ -4303,6 +4303,14 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
             gameTimeDecision: false,
             dateUpdated: '2025-09-21T18:00:00Z'
           }],
+          ['joe burrow_cin', {
+            injuryStatus: 'out',
+            injuryType: 'Wrist',
+            description: 'Wrist injury',
+            severity: 'high', 
+            gameTimeDecision: false,
+            dateUpdated: '2025-09-21T18:00:00Z'
+          }],
           // Add more current injuries as needed
         ]);
         
@@ -4362,8 +4370,24 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
               // Adjust projections based on injury status
               const adjustedProjections = adjustProjectionsForInjury(projectedPoints, injuryData);
               
+              // 🚨 CRITICAL: Override player status based on injury status for DraftKings-like experience
+              let finalStatus = player.status || 'backup';
+              let finalDepth = player.depth || 3;
+              
+              if (injuryData?.injuryStatus === 'out') {
+                finalStatus = 'out';  // Override to show OUT status
+                finalDepth = 999;     // Move to bottom of depth chart
+              } else if (injuryData?.injuryStatus === 'doubtful') {
+                finalStatus = 'doubtful';
+              } else if (injuryData?.injuryStatus === 'questionable') {
+                finalStatus = 'questionable';
+              }
+              
               return {
                 ...player,
+                // 🚨 Override status and depth based on injury 
+                status: finalStatus,
+                depth: finalDepth,
                 projectedPoints: adjustedProjections.points,
                 confidence: adjustedProjections.confidence,
                 opponent,
