@@ -9,16 +9,18 @@ import { Shield, AlertTriangle, Calendar, Lock, CheckCircle } from 'lucide-react
 
 interface AgeVerificationProps {
   requiredAge?: number;
-  onVerified: () => void;
+  onVerified: (dateOfBirth: string) => void;
   onDenied: () => void;
   platform?: string;
+  isLoading?: boolean;
 }
 
 export function AgeVerification({ 
   requiredAge = 21, 
   onVerified, 
   onDenied,
-  platform = "Fantasy Sports Platform"
+  platform = "Fantasy Sports Platform",
+  isLoading = false
 }: AgeVerificationProps) {
   const [birthMonth, setBirthMonth] = useState('');
   const [birthDay, setBirthDay] = useState('');
@@ -27,32 +29,7 @@ export function AgeVerification({
   const [error, setError] = useState('');
   const [attempts, setAttempts] = useState(0);
 
-  // Check if user has already been verified
-  useEffect(() => {
-    const ageVerified = localStorage.getItem('ageVerified21Plus');
-    const verificationDate = localStorage.getItem('ageVerificationDate');
-    
-    // For debugging - temporarily clear age verification to ensure it shows
-    console.log('Age verification check:', { ageVerified, verificationDate });
-    
-    if (ageVerified === 'true' && verificationDate) {
-      const verificationTime = new Date(verificationDate).getTime();
-      const now = new Date().getTime();
-      const dayInMs = 24 * 60 * 60 * 1000;
-      
-      // Age verification is valid for 30 days
-      if (now - verificationTime < (30 * dayInMs)) {
-        console.log('Age verification still valid, auto-verifying');
-        onVerified();
-        return;
-      } else {
-        // Clear expired verification
-        console.log('Age verification expired, clearing');
-        localStorage.removeItem('ageVerified21Plus');
-        localStorage.removeItem('ageVerificationDate');
-      }
-    }
-  }, [onVerified]);
+  // Server-backed system - no localStorage checks needed
 
   const calculateAge = (month: number, day: number, year: number): number => {
     const today = new Date();
@@ -91,44 +68,44 @@ export function AgeVerification({
     }
 
     if (day < 1 || day > 31) {
-      setError('Please enter a valid day (1-31)');
+      setError('Please enter a valid day');
       setIsSubmitting(false);
       return;
     }
 
-    const currentYear = new Date().getFullYear();
-    if (year < 1900 || year > currentYear) {
+    if (year < 1900 || year > new Date().getFullYear()) {
       setError('Please enter a valid birth year');
       setIsSubmitting(false);
       return;
     }
 
-    // Calculate age
+    // Calculate age locally for immediate feedback
     const age = calculateAge(month, day, year);
-
-    // Simulate processing delay for security
-    await new Promise(resolve => setTimeout(resolve, 1500));
-
-    if (age >= requiredAge) {
-      // Store verification status
-      localStorage.setItem('ageVerified21Plus', 'true');
-      localStorage.setItem('ageVerificationDate', new Date().toISOString());
-      localStorage.setItem('ageVerificationBirthYear', year.toString());
-      
-      onVerified();
-    } else {
+    
+    if (age < requiredAge) {
+      setError(`You must be ${requiredAge} years or older to access this platform`);
+      setIsSubmitting(false);
       setAttempts(prev => prev + 1);
       
       if (attempts >= 2) {
-        // After 3 attempts, deny access
-        localStorage.setItem('ageVerificationDenied', 'true');
         onDenied();
-      } else {
-        setError(`You must be at least ${requiredAge} years old to access this platform. Age calculated: ${age}`);
+        return;
       }
+      return;
     }
 
-    setIsSubmitting(false);
+    // Format date for server
+    const birthDate = new Date(year, month - 1, day);
+    const dateOfBirth = birthDate.toISOString().split('T')[0]; // YYYY-MM-DD format
+
+    try {
+      // Call the server-backed verification
+      await onVerified(dateOfBirth);
+    } catch (error: any) {
+      console.error('Age verification failed:', error);
+      setError(error.message || 'Age verification failed. Please try again.');
+      setIsSubmitting(false);
+    }
   };
 
   const months = [

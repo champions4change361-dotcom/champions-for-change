@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useFantasyAuth } from '@/hooks/useFantasyAuth';
 import { AgeVerification } from './AgeVerification';
 import { Button } from '@/components/ui/button';
-import { Shield, Brain } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Shield, Brain, Loader2, FileText, CheckCircle } from 'lucide-react';
 
 interface FantasyAgeGateProps {
   children: React.ReactNode;
@@ -14,27 +16,127 @@ export function FantasyAgeGate({
   platform = "Fantasy Sports Platform",
   requiredAge = 21 
 }: FantasyAgeGateProps) {
-  const [ageVerified, setAgeVerified] = useState(false);
+  const { 
+    mainUser,
+    isFantasyAuthenticated,
+    canActivateFantasy,
+    isAgeVerified,
+    hasTOSAccepted,
+    isLoading,
+    verifyAge,
+    acceptTOS,
+    isVerifyingAge,
+    isAcceptingTOS
+  } = useFantasyAuth();
+  
   const [accessDenied, setAccessDenied] = useState(false);
 
-  useEffect(() => {
-    // Check if age was previously denied
-    const denied = localStorage.getItem('ageVerificationDenied');
-    if (denied === 'true') {
-      setAccessDenied(true);
-    }
-  }, []);
-
-  // Show age verification if not verified and not denied
-  if (!ageVerified && !accessDenied) {
+  // Show loading while checking authentication
+  if (isLoading) {
     return (
-      <AgeVerification
-        requiredAge={requiredAge}
-        platform={platform}
-        onVerified={() => setAgeVerified(true)}
-        onDenied={() => setAccessDenied(true)}
-      />
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto" />
+          <p className="text-gray-600">Checking authentication...</p>
+        </div>
+      </div>
     );
+  }
+
+  // If user is fully fantasy authenticated, show content
+  if (isFantasyAuthenticated) {
+    return <>{children}</>;
+  }
+
+  // If no main user is logged in, require main authentication first
+  if (!mainUser) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-orange-50 flex items-center justify-center p-4">
+        <div className="max-w-md w-full text-center space-y-6">
+          <Shield className="h-16 w-16 text-yellow-600 mx-auto" />
+          <h1 className="text-3xl font-bold text-yellow-700">Authentication Required</h1>
+          <p className="text-yellow-600">
+            Please log in to your Champions for Change account to access {platform.toLowerCase()}.
+          </p>
+          <Button 
+            onClick={() => window.location.href = '/login'}
+            className="bg-yellow-600 hover:bg-yellow-700 text-white"
+          >
+            Log In
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Progressive activation flow for authenticated users
+  if (canActivateFantasy) {
+    // Step 1: Age verification
+    if (!isAgeVerified && !accessDenied) {
+      return (
+        <AgeVerification
+          requiredAge={requiredAge}
+          platform={platform}
+          onVerified={(dateOfBirth) => {
+            verifyAge(dateOfBirth).catch(() => setAccessDenied(true));
+          }}
+          onDenied={() => setAccessDenied(true)}
+          isLoading={isVerifyingAge}
+        />
+      );
+    }
+
+    // Step 2: TOS acceptance (after age verification)
+    if (isAgeVerified && !hasTOSAccepted) {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
+          <Card className="w-full max-w-lg">
+            <CardHeader className="text-center">
+              <FileText className="h-12 w-12 text-green-600 mx-auto mb-4" />
+              <CardTitle className="text-2xl">Terms of Service</CardTitle>
+              <CardDescription>
+                Please review and accept our terms of service to access {platform.toLowerCase()}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="bg-gray-50 p-4 rounded-lg max-h-64 overflow-y-auto text-sm">
+                <h3 className="font-semibold mb-2">Fantasy Sports Terms of Service</h3>
+                <p className="mb-2">By accessing this fantasy sports platform, you agree to:</p>
+                <ul className="list-disc pl-5 space-y-1">
+                  <li>Use the platform for entertainment purposes only</li>
+                  <li>Comply with all applicable laws and regulations</li>
+                  <li>Provide accurate information about yourself</li>
+                  <li>Not engage in fraudulent or illegal activities</li>
+                  <li>Respect other users and maintain fair play</li>
+                </ul>
+                <p className="mt-4 text-xs text-gray-600">
+                  This is a non-profit educational platform operated by Champions for Change (501c3).
+                  No monetary prizes are awarded - this platform is for educational and entertainment purposes only.
+                </p>
+              </div>
+              <Button 
+                onClick={() => acceptTOS()}
+                disabled={isAcceptingTOS}
+                className="w-full bg-green-600 hover:bg-green-700"
+                data-testid="button-accept-tos"
+              >
+                {isAcceptingTOS ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Accepting...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Accept Terms & Continue
+                  </>
+                )}
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
   }
 
   // Show access denied page if user is under required age
