@@ -23,13 +23,19 @@ async function createTournamentForUser(
   extractedContext: any
 ): Promise<{ success: boolean; tournament?: any; error?: string }> {
   try {
-    // Check if user is authenticated
+    // Enhanced authentication validation
     const isAuth = req.isAuthenticated && req.isAuthenticated();
-    if (!isAuth || !(req.user as any)?.claims?.sub) {
+    const userClaims = (req.user as any)?.claims;
+    
+    if (!isAuth || !userClaims?.sub || typeof userClaims.sub !== 'string') {
       return { success: false, error: 'User not authenticated' };
     }
 
-    const userId = (req.user as any).claims.sub;
+    // Validate and sanitize user ID
+    const userId = userClaims.sub;
+    if (!/^[a-zA-Z0-9_-]+$/.test(userId) || userId.length > 50) {
+      return { success: false, error: 'Invalid user credentials' };
+    }
     
     // Extract tournament details from the message
     const tournamentDetails = extractTournamentDetailsFromMessage(message, extractedContext);
@@ -40,9 +46,12 @@ async function createTournamentForUser(
       return { success: false, error: 'User not found' };
     }
 
-    // Check tournament limits
+    // Check tournament limits with proper access control
     const existingTournaments = await storage.getTournaments();
-    const userTournaments = existingTournaments.filter((t: any) => t.createdBy === userId);
+    // Only get tournaments for the authenticated user to prevent data leakage
+    const userTournaments = existingTournaments.filter((t: any) => 
+      t.createdBy === userId && typeof t.createdBy === 'string'
+    );
     
     const getTournamentLimit = (plan: string, status: string) => {
       if (status !== 'active') return 1;
@@ -91,8 +100,13 @@ async function createTournamentForUser(
       createdBy: userId
     };
 
-    // Validate and create tournament
+    // Validate tournament data thoroughly
     const validatedData = insertTournamentSchema.parse(tournamentData);
+    
+    // Additional security validation
+    if ((validatedData as any).createdBy !== userId) {
+      return { success: false, error: 'Unauthorized tournament creation' };
+    }
 
     const tournament = await storage.createTournament(validatedData);
     return { success: true, tournament };
@@ -105,16 +119,34 @@ async function createTournamentForUser(
 
 export async function handleAIConversation(req: Request, res: Response) {
   try {
+    // Validate request body structure and sanitize inputs
+    const requestBody = req.body;
+    if (!requestBody || typeof requestBody !== 'object') {
+      return res.status(400).json({ error: 'Invalid request body', success: false });
+    }
+
     const { 
       message, 
       conversation_history, 
       domain, 
       user_context 
-    }: ConversationRequest = req.body;
+    }: ConversationRequest = requestBody;
 
-    // Analyze the user's message for intent and context
-    const intent = analyzeIntent(message);
-    const extractedContext = extractContextFromMessage(message);
+    // Input validation and sanitization
+    if (!message || typeof message !== 'string' || message.length > 1000) {
+      return res.status(400).json({ error: 'Invalid or missing message', success: false });
+    }
+    
+    if (domain && !['education', 'business', 'coaches'].includes(domain)) {
+      return res.status(400).json({ error: 'Invalid domain', success: false });
+    }
+
+    // Sanitize message to prevent injection attacks
+    const sanitizedMessage = message.replace(/[<>"'&]/g, '').substring(0, 1000);
+
+    // Analyze the user's message for intent and context using sanitized input
+    const intent = analyzeIntent(sanitizedMessage);
+    const extractedContext = extractContextFromMessage(sanitizedMessage);
     
     let response: string;
     let tournamentCreated = false;
@@ -133,18 +165,18 @@ export async function handleAIConversation(req: Request, res: Response) {
       conversationState = conversationResult.conversationState;
     } else if (intent === 'tournament_creation') {
       // Start new tournament creation conversation
-      const shouldCreate = shouldCreateTournament(message);
-      console.log(`🤖 AI Analysis: intent=${intent}, shouldCreate=${shouldCreate}, message="${message}"`);
+      const shouldCreate = shouldCreateTournament(sanitizedMessage);
+      console.log(`🤖 AI Analysis: intent=${intent}, shouldCreate=${shouldCreate}`);
       
       if (shouldCreate) {
-        // Try to extract complete details from the message
-        const tournamentDetails = extractTournamentDetailsFromMessage(message, extractedContext);
+        // Try to extract complete details from the sanitized message
+        const tournamentDetails = extractTournamentDetailsFromMessage(sanitizedMessage, extractedContext);
         const missingDetails = identifyMissingTournamentDetails(tournamentDetails);
         
         if (missingDetails.length === 0) {
           // All details provided, create immediately
           console.log('🏆 Creating tournament via AI...');
-          const createResult = await createTournamentForUser(req, message, extractedContext);
+          const createResult = await createTournamentForUser(req, sanitizedMessage, extractedContext);
           
           if (createResult.success) {
             tournamentCreated = true;
@@ -168,12 +200,12 @@ export async function handleAIConversation(req: Request, res: Response) {
         response = generatePlatformResponse(message, intent, domain, user_context, conversation_history);
       }
     } else {
-      // Generate normal conversational response
-      response = generatePlatformResponse(message, intent, domain, user_context, conversation_history);
+      // Generate normal conversational response using sanitized input
+      response = generatePlatformResponse(sanitizedMessage, intent, domain, user_context, conversation_history);
     }
     
-    // Generate helpful suggestions for next steps
-    const suggestions = generateSuggestions(intent, domain, message, tournamentCreated);
+    // Generate helpful suggestions for next steps using sanitized input
+    const suggestions = generateSuggestions(intent, domain, sanitizedMessage, tournamentCreated);
 
     res.json({
       response,

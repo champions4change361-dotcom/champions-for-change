@@ -52,8 +52,7 @@ export function MedicalHistoryForm({ playerId, onComplete, readonly = false }: M
       if (!playerId || !/^[a-zA-Z0-9_-]+$/.test(playerId)) {
         throw new Error('Invalid player ID format');
       }
-      const response = await apiRequest(`/api/players/${encodeURIComponent(playerId)}`, 'GET');
-      return response.data || response;
+      return await apiRequest(`/api/players/${encodeURIComponent(playerId)}`, 'GET') as TeamPlayer;
     },
     retry: 3,
     retryDelay: 1000,
