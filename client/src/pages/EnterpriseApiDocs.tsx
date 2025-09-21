@@ -27,7 +27,7 @@ export default function EnterpriseApiDocs() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [selectedEndpoint, setSelectedEndpoint] = useState("tournaments");
-  const [apiKey, setApiKey] = useState(process.env.VITE_STRIPE_PUBLIC_KEY || "your_api_key_here");
+  const [apiKey, setApiKey] = useState(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "your_api_key_here");
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
