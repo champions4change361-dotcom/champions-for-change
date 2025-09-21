@@ -250,6 +250,18 @@ export function DailyFantasyLineupBuilder({
           </CardTitle>
         </CardHeader>
         <CardContent>
+          {/* Data Source Disclaimer */}
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center gap-2 text-sm text-blue-800">
+              <span className="font-medium">📊 Data Source:</span>
+              <span>NFL.com | Champions for Change Fantasy Platform</span>
+            </div>
+            <div className="text-xs text-blue-600 mt-1">
+              ⚠️ Always verify player status on NFL.com before finalizing lineups. 
+              We do our best but you should do your research too!
+            </div>
+          </div>
+          
           <div className="flex items-center justify-between">
             <div className="text-sm text-gray-600">
               <span className="font-medium">Salary Used:</span> ${(totalSalary/1000).toFixed(1)}K / ${(salaryCap/1000).toFixed(0)}K

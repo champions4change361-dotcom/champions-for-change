@@ -45,50 +45,57 @@ export class NFLInjuryScraper {
 
   /**
    * 📅 Setup automated injury report updates
-   * Sunday: 2am, 11am, 11:45am, 2pm, 2:45pm, 3:30pm EST
-   * Monday: 6am, 12pm, 7pm EST (MNF)
-   * Thursday: 6am, 12pm, 7pm EST (TNF)
+   * OPTIMIZED: Game-focused schedule aligned with NFL game times
+   * - Thursday at noon (for Thursday Night Football)
+   * - Sunday morning (for early games)  
+   * - Sunday at 2 PM (for late afternoon games)
+   * - Sunday at 6 PM (for Sunday Night Football)
+   * - Monday at 4 PM (for Monday Night Football)
    */
   private setupScheduledUpdates(): void {
     console.log('🏥 Setting up NFL injury report scheduled updates...');
 
-    // Sunday injury updates (Eastern Time)
-    const sundayTimes = ['2 0', '11 0', '45 11', '14 0', '45 14', '30 15'];
-    sundayTimes.forEach((time, index) => {
-      const [minute, hour] = time.split(' ');
-      const job = cron.schedule(`${minute} ${hour} * * 0`, () => {
-        this.updateInjuryReport(`Sunday Update ${index + 1}`);
-      }, {
-        timezone: "America/New_York"
-      });
-      this.jobs.push(job);
+    // Thursday at noon CST (for Thursday Night Football)
+    const thursdayJob = cron.schedule('0 12 * * 4', () => {
+      this.updateInjuryReport('Thursday TNF Game Day');
+    }, {
+      timezone: "America/Chicago"
     });
+    this.jobs.push(thursdayJob);
 
-    // Monday updates (MNF)
-    const mondayTimes = ['0 6', '0 12', '0 19'];
-    mondayTimes.forEach((time, index) => {
-      const [minute, hour] = time.split(' ');
-      const job = cron.schedule(`${minute} ${hour} * * 1`, () => {
-        this.updateInjuryReport(`Monday MNF Update ${index + 1}`);
-      }, {
-        timezone: "America/New_York"
-      });
-      this.jobs.push(job);
+    // Sunday morning 9 AM CST (for early games)
+    const sundayMorningJob = cron.schedule('0 9 * * 0', () => {
+      this.updateInjuryReport('Sunday Early Games');
+    }, {
+      timezone: "America/Chicago"
     });
+    this.jobs.push(sundayMorningJob);
 
-    // Thursday updates (TNF)
-    const thursdayTimes = ['0 6', '0 12', '0 19'];
-    thursdayTimes.forEach((time, index) => {
-      const [minute, hour] = time.split(' ');
-      const job = cron.schedule(`${minute} ${hour} * * 4`, () => {
-        this.updateInjuryReport(`Thursday TNF Update ${index + 1}`);
-      }, {
-        timezone: "America/New_York"
-      });
-      this.jobs.push(job);
+    // Sunday 2 PM CST (for late afternoon games)
+    const sundayAfternoonJob = cron.schedule('0 14 * * 0', () => {
+      this.updateInjuryReport('Sunday Late Afternoon Games');
+    }, {
+      timezone: "America/Chicago"
     });
+    this.jobs.push(sundayAfternoonJob);
 
-    console.log(`🗓️ Scheduled ${this.jobs.length} NFL injury update jobs`);
+    // Sunday 6 PM CST (for Sunday Night Football)
+    const sundayNightJob = cron.schedule('0 18 * * 0', () => {
+      this.updateInjuryReport('Sunday Night Football');
+    }, {
+      timezone: "America/Chicago"
+    });
+    this.jobs.push(sundayNightJob);
+
+    // Monday 4 PM CST (for Monday Night Football)
+    const mondayJob = cron.schedule('0 16 * * 1', () => {
+      this.updateInjuryReport('Monday Night Football');
+    }, {
+      timezone: "America/Chicago"
+    });
+    this.jobs.push(mondayJob);
+
+    console.log(`🗓️ Scheduled ${this.jobs.length} NFL injury update jobs (game-focused)`);
   }
 
   /**

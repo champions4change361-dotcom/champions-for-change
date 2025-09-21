@@ -48,33 +48,20 @@ export class NFLScheduleScraper {
 
   /**
    * 📅 Setup automated schedule updates
-   * Tuesday: 3am EST (New week setup)
-   * Sunday: 1am, 10am, 1pm EST (Game day updates)
+   * OPTIMIZED: Wednesday only - NFL weeks run Thursday to Monday
    */
   private setupScheduledUpdates(): void {
     console.log('📅 Setting up NFL schedule update system...');
 
-    // Tuesday new week setup (3am EST)
-    const tuesdayJob = cron.schedule('0 3 * * 2', () => {
-      this.updateSchedule('Tuesday New Week');
+    // Wednesday 11 PM CST - Get fresh schedule before Thursday Night Football
+    const job = cron.schedule('0 23 * * 3', () => {
+      this.updateSchedule('Weekly Wednesday Update');
     }, {
-      timezone: "America/New_York"
+      timezone: "America/Chicago"
     });
-    this.jobs.push(tuesdayJob);
+    this.jobs.push(job);
 
-    // Sunday game day updates
-    const sundayTimes = ['0 1', '0 10', '0 13']; // 1am, 10am, 1pm EST
-    sundayTimes.forEach((time, index) => {
-      const [minute, hour] = time.split(' ');
-      const job = cron.schedule(`${minute} ${hour} * * 0`, () => {
-        this.updateSchedule(`Sunday Game Day ${index + 1}`);
-      }, {
-        timezone: "America/New_York"
-      });
-      this.jobs.push(job);
-    });
-
-    console.log(`🗓️ Scheduled ${this.jobs.length} NFL schedule update jobs`);
+    console.log(`🗓️ Scheduled ${this.jobs.length} NFL schedule update job (Wednesday only)`);
   }
 
   /**

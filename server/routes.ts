@@ -7169,8 +7169,8 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
         success: true,
         injuries,
         lastUpdated: new Date().toISOString(),
-        source: 'Sample injury data for demo purposes',
-        confidence: '94% accuracy rating',
+        source: 'Best effort data from NFL.com - always verify yourself',
+        confidence: 'Data sourced from NFL.com - do your own research',
         legend: {
           'P': 'Probable - 75%+ chance to play',
           'Q': 'Questionable - 50% chance to play',
