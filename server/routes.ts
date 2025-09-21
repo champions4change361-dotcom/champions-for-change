@@ -4278,8 +4278,35 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
         
         // Get current injury data for all NFL players
         const injuries = await ESPNApiService.getNFLInjuries();
-        const injuryMap = new Map(injuries.map(inj => [`${inj.playerId}`, inj]));
+        
+        // Create multiple lookup maps for robust player matching
+        const injuryByEspnId = new Map(injuries.map(inj => [`${inj.playerId}`, inj]));
+        const injuryByNameTeam = new Map(injuries.map(inj => [
+          `${inj.playerName?.toLowerCase().trim()}_${inj.team?.toLowerCase()}`, inj
+        ]));
+        
         console.log(`🏥 Loaded ${injuries.length} injury reports for status enhancement`);
+        console.log(`🔍 Sample injury data:`, injuries.slice(0, 2).map(inj => ({
+          name: inj.playerName,
+          team: inj.team,
+          status: inj.injuryStatus
+        })));
+        
+        // 🚨 MANUAL INJURY OVERRIDES - For current injuries not yet in ESPN API
+        const manualInjuryOverrides = new Map([
+          // Week 1 2025 NFL Season - Current as of Sept 21, 2025
+          ['brock purdy_sf', { 
+            injuryStatus: 'out', 
+            injuryType: 'Shoulder', 
+            description: 'Shoulder injury', 
+            severity: 'high',
+            gameTimeDecision: false,
+            dateUpdated: '2025-09-21T18:00:00Z'
+          }],
+          // Add more current injuries as needed
+        ]);
+        
+        console.log(`⚡ Manual injury overrides active: ${manualInjuryOverrides.size} players`);
         
         // Add fantasy projections, injury status, and enhanced data
         const yahooAPI = new YahooSportsAPI();
@@ -4291,8 +4318,46 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
               const confidence = generateConfidence(player.position, player.depth, player.status);
               const opponent = generateOpponent(player.team);
               
-              // Get injury data for this player
-              const injuryData = injuryMap.get(player.espnId?.toString()) || null;
+              // Get injury data for this player using multiple matching strategies
+              let injuryData = null;
+              
+              // Strategy 1: Match by ESPN ID (if available)
+              if (player.espnId) {
+                injuryData = injuryByEspnId.get(player.espnId.toString());
+              }
+              
+              // Strategy 2: Match by name + team combination (more reliable)
+              if (!injuryData && player.name && player.team) {
+                const lookupKey = `${player.name.toLowerCase().trim()}_${player.team.toLowerCase()}`;
+                injuryData = injuryByNameTeam.get(lookupKey);
+              }
+              
+              // Strategy 3: Check manual overrides (for current injuries not in ESPN yet)
+              if (player.name && player.team) {
+                const overrideKey = `${player.name.toLowerCase().trim()}_${player.team.toLowerCase()}`;
+                const manualOverride = manualInjuryOverrides.get(overrideKey);
+                if (manualOverride) {
+                  injuryData = {
+                    ...manualOverride,
+                    playerName: player.name,
+                    team: player.team,
+                    playerId: `manual_${overrideKey}`
+                  };
+                  console.log(`⚡ Applied manual injury override for ${player.name}: ${manualOverride.injuryStatus}`);
+                }
+              }
+              
+              // Debug logging for key players
+              if (player.name?.toLowerCase().includes('purdy') || player.name?.toLowerCase().includes('brock')) {
+                console.log(`🔍 BROCK PURDY DEBUG:`, {
+                  playerName: player.name,
+                  team: player.team,
+                  espnId: player.espnId,
+                  lookupKey: `${player.name.toLowerCase().trim()}_${player.team.toLowerCase()}`,
+                  injuryFound: !!injuryData,
+                  injuryStatus: injuryData?.injuryStatus || 'none'
+                });
+              }
               
               // Adjust projections based on injury status
               const adjustedProjections = adjustProjectionsForInjury(projectedPoints, injuryData);
