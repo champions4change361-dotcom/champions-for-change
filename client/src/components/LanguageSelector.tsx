@@ -15,7 +15,18 @@ interface LanguageSelectorProps {
 }
 
 export default function LanguageSelector({ variant = 'header', className = '' }: LanguageSelectorProps) {
-  const { language, setLanguage } = useLanguage();
+  // Handle missing context gracefully
+  let language: Language = 'en';
+  let setLanguage = (_lang: Language) => {};
+  
+  try {
+    const context = useLanguage();
+    language = context.language;
+    setLanguage = context.setLanguage;
+  } catch (error) {
+    // Context not available, use defaults
+    console.warn('LanguageSelector: LanguageProvider not found, using defaults');
+  }
 
   const languages = [
     { code: 'en' as Language, name: 'English', flag: '🇺🇸' },
