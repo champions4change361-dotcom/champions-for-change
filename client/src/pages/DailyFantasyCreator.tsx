@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+// Using native select for better mobile UX
 import { ArrowLeft, Trophy, Users, Settings, DollarSign, Clock, Globe, Lock, Calendar } from 'lucide-react';
 import { useFantasyAuth } from '@/hooks/useFantasyAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -148,48 +148,51 @@ export default function DailyFantasyCreator() {
 
                 <div>
                   <Label htmlFor="salary-cap">Salary Cap</Label>
-                  <Select value={salaryCap} onValueChange={setSalaryCap}>
-                    <SelectTrigger data-testid="salary-cap-select">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="40000">$40,000</SelectItem>
-                      <SelectItem value="50000">$50,000 (Standard)</SelectItem>
-                      <SelectItem value="60000">$60,000</SelectItem>
-                      <SelectItem value="75000">$75,000 (High Cap)</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select 
+                    id="salary-cap"
+                    value={salaryCap} 
+                    onChange={(e) => setSalaryCap(e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-md bg-white text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    data-testid="salary-cap-select"
+                  >
+                    <option value="40000">$40,000</option>
+                    <option value="50000">$50,000 (Standard)</option>
+                    <option value="60000">$60,000</option>
+                    <option value="75000">$75,000 (High Cap)</option>
+                  </select>
                 </div>
 
                 <div>
                   <Label htmlFor="max-entries">Max Participants</Label>
-                  <Select value={maxEntries} onValueChange={setMaxEntries}>
-                    <SelectTrigger data-testid="max-entries-select">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="25">25 Participants</SelectItem>
-                      <SelectItem value="50">50 Participants</SelectItem>
-                      <SelectItem value="100">100 Participants</SelectItem>
-                      <SelectItem value="200">200 Participants</SelectItem>
-                      <SelectItem value="unlimited">Unlimited</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select 
+                    id="max-entries"
+                    value={maxEntries} 
+                    onChange={(e) => setMaxEntries(e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-md bg-white text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    data-testid="max-entries-select"
+                  >
+                    <option value="25">25 Participants</option>
+                    <option value="50">50 Participants</option>
+                    <option value="100">100 Participants</option>
+                    <option value="200">200 Participants</option>
+                    <option value="unlimited">Unlimited</option>
+                  </select>
                 </div>
 
                 <div>
                   <Label htmlFor="contest-duration">Contest Duration</Label>
-                  <Select value={contestDuration} onValueChange={setContestDuration}>
-                    <SelectTrigger data-testid="contest-duration-select">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="single-game">Single Game</SelectItem>
-                      <SelectItem value="daily">Daily (1 Day)</SelectItem>
-                      <SelectItem value="weekly">Weekly (NFL Week)</SelectItem>
-                      <SelectItem value="monthly">Monthly</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select 
+                    id="contest-duration"
+                    value={contestDuration} 
+                    onChange={(e) => setContestDuration(e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-md bg-white text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    data-testid="contest-duration-select"
+                  >
+                    <option value="single-game">Single Game</option>
+                    <option value="daily">Daily (1 Day)</option>
+                    <option value="weekly">Weekly (NFL Week)</option>
+                    <option value="monthly">Monthly</option>
+                  </select>
                 </div>
               </CardContent>
             </Card>
@@ -204,32 +207,34 @@ export default function DailyFantasyCreator() {
               <CardContent className="space-y-4">
                 <div>
                   <Label htmlFor="roster-format">Roster Format</Label>
-                  <Select value={rosterFormat} onValueChange={setRosterFormat}>
-                    <SelectTrigger data-testid="roster-format-select">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="standard">Standard (QB/RB/RB/WR/WR/TE/FLEX/DEF)</SelectItem>
-                      <SelectItem value="showdown">Showdown (1 CPT + 5 FLEX)</SelectItem>
-                      <SelectItem value="classic">Classic (QB/RB/WR/TE/K/DEF)</SelectItem>
-                      <SelectItem value="turbo">Turbo (3 FLEX positions)</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select 
+                    id="roster-format"
+                    value={rosterFormat} 
+                    onChange={(e) => setRosterFormat(e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-md bg-white text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    data-testid="roster-format-select"
+                  >
+                    <option value="standard">Standard (QB/RB/RB/WR/WR/TE/FLEX/DEF)</option>
+                    <option value="showdown">Showdown (1 CPT + 5 FLEX)</option>
+                    <option value="classic">Classic (QB/RB/WR/TE/K/DEF)</option>
+                    <option value="turbo">Turbo (3 FLEX positions)</option>
+                  </select>
                 </div>
 
                 <div>
                   <Label htmlFor="sport-selection">Sport</Label>
-                  <Select value={selectedSport} onValueChange={setSelectedSport}>
-                    <SelectTrigger data-testid="sport-selection-select">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="nfl">🏈 NFL Football</SelectItem>
-                      <SelectItem value="nba">🏀 NBA Basketball</SelectItem>
-                      <SelectItem value="nhl">🏒 NHL Hockey</SelectItem>
-                      <SelectItem value="soccer">⚽ Soccer</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select 
+                    id="sport-selection"
+                    value={selectedSport} 
+                    onChange={(e) => setSelectedSport(e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-md bg-white text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    data-testid="sport-selection-select"
+                  >
+                    <option value="nfl">🏈 NFL Football</option>
+                    <option value="nba">🏀 NBA Basketball</option>
+                    <option value="nhl">🏒 NHL Hockey</option>
+                    <option value="soccer">⚽ Soccer</option>
+                  </select>
                 </div>
 
                 <div className="bg-green-50 p-4 rounded-lg border border-green-200">
@@ -255,16 +260,17 @@ export default function DailyFantasyCreator() {
               <CardContent className="space-y-4">
                 <div>
                   <Label htmlFor="slate-time">Slate Timing</Label>
-                  <Select value={slateTime} onValueChange={setSlateTime}>
-                    <SelectTrigger data-testid="slate-time-select">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="morning">🌅 Morning Slate (9:00 AM - 12:00 PM EST)</SelectItem>
-                      <SelectItem value="afternoon">☀️ Afternoon Slate (1:00 PM - 4:00 PM EST)</SelectItem>
-                      <SelectItem value="evening">🌙 Evening Slate (7:00 PM - 11:00 PM EST)</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select 
+                    id="slate-time"
+                    value={slateTime} 
+                    onChange={(e) => setSlateTime(e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-md bg-white text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    data-testid="slate-time-select"
+                  >
+                    <option value="morning">🌅 Morning Slate (9:00 AM - 12:00 PM EST)</option>
+                    <option value="afternoon">☀️ Afternoon Slate (1:00 PM - 4:00 PM EST)</option>
+                    <option value="evening">🌙 Evening Slate (7:00 PM - 11:00 PM EST)</option>
+                  </select>
                   <p className="text-xs text-gray-500 mt-1">
                     Choose when your contest games will be played
                   </p>

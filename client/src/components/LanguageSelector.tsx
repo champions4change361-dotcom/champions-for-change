@@ -37,33 +37,21 @@ export default function LanguageSelector({ variant = 'header', className = '' }:
 
   if (variant === 'compact') {
     return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className={`h-8 px-2 text-xs ${className}`}
-            data-testid="language-selector-compact"
-          >
-            <Globe className="h-3 w-3 mr-1" />
-            {currentLanguage?.code.toUpperCase()}
-            <ChevronDown className="h-3 w-3 ml-1" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="min-w-[120px]">
+      <div className={`flex items-center ${className}`}>
+        <Globe className="h-3 w-3 mr-1 text-gray-500" />
+        <select
+          value={language}
+          onChange={(e) => setLanguage(e.target.value as Language)}
+          className="text-xs bg-transparent border-0 focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5"
+          data-testid="language-selector-compact"
+        >
           {languages.map((lang) => (
-            <DropdownMenuItem
-              key={lang.code}
-              onClick={() => setLanguage(lang.code)}
-              className={`cursor-pointer ${language === lang.code ? 'bg-blue-50' : ''}`}
-              data-testid={`language-option-${lang.code}`}
-            >
-              <span className="mr-2">{lang.flag}</span>
-              {lang.name}
-            </DropdownMenuItem>
+            <option key={lang.code} value={lang.code} data-testid={`language-option-${lang.code}`}>
+              {lang.flag} {lang.code.toUpperCase()}
+            </option>
           ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
+        </select>
+      </div>
     );
   }
 
