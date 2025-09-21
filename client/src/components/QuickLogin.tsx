@@ -10,6 +10,16 @@ export default function QuickLogin() {
   const { toast } = useToast();
 
   const quickLogin = async (userType: 'district' | 'organizer' | 'business' = 'district') => {
+    // SECURITY: Only allow in development mode
+    if (!import.meta.env.DEV) {
+      toast({
+        title: "Error",
+        description: "This feature is only available in development mode",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsLoading(true);
     try {
       const response = await fetch('/api/auth/login', {

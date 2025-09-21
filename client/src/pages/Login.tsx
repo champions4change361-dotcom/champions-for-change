@@ -137,30 +137,32 @@ export default function Login() {
                 />
               </div>
 
-              {/* Master Admin Info with Auto-Fill Button */}
-              <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                <div className="flex items-center space-x-2 mb-2">
-                  <AlertCircle className="h-4 w-4 text-blue-600" />
-                  <span className="text-sm font-medium text-blue-900">Master Admin Access</span>
+              {/* Master Admin Info with Auto-Fill Button - DEVELOPMENT ONLY */}
+              {import.meta.env.DEV && (
+                <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <AlertCircle className="h-4 w-4 text-blue-600" />
+                    <span className="text-sm font-medium text-blue-900">DEV: Master Admin Access</span>
+                  </div>
+                  <p className="text-xs text-blue-700 mb-2">
+                    Development Mode Only - Not visible in production
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setFormData({
+                      email: 'champions4change361@gmail.com',
+                      password: 'master-admin-danielthornton',
+                      userType: 'team'
+                    })}
+                    className="text-xs"
+                    data-testid="button-autofill"
+                  >
+                    Auto-fill Dev Credentials
+                  </Button>
                 </div>
-                <p className="text-xs text-blue-700 mb-2">
-                  Champions4change361@gmail.com / master-admin-danielthornton
-                </p>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setFormData({
-                    email: 'champions4change361@gmail.com',
-                    password: 'master-admin-danielthornton',
-                    userType: 'team'
-                  })}
-                  className="text-xs"
-                  data-testid="button-autofill"
-                >
-                  Auto-fill Credentials
-                </Button>
-              </div>
+              )}
 
               {/* Login Button */}
               <Button 
