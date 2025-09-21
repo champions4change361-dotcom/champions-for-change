@@ -4278,7 +4278,7 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
         // Add fantasy projections and enhanced data
         const yahooAPI = new YahooSportsAPI();
         const enhancedPlayers = await Promise.all(
-          filteredPlayers.slice(0, 50).map(async (player: any) => { // Limit to 50 for performance
+          filteredPlayers.map(async (player: any) => { // Full player pool - all 32 teams
             try {
               // Generate realistic projected points based on position and depth
               const projectedPoints = generateProjectedPoints(player.position, player.depth, player.status);
