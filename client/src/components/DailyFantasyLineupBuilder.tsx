@@ -239,12 +239,12 @@ export function DailyFantasyLineupBuilder({
       {/* Salary Cap Header */}
       <Card className="bg-gradient-to-r from-green-50 to-blue-50 border-2 border-green-200">
         <CardHeader>
-          <CardTitle className="flex items-center justify-between">
+          <CardTitle className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2">
-              <DollarSign className="w-6 h-6 text-green-600" />
-              <span>Daily Fantasy Lineup - Week {contestWeek}</span>
+              <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
+              <span className="text-lg sm:text-xl">Daily Fantasy Lineup - Week {contestWeek}</span>
             </div>
-            <Badge className="bg-green-600 text-white text-lg px-3 py-2">
+            <Badge className="bg-green-600 text-white text-sm sm:text-lg px-2 py-1 sm:px-3 sm:py-2 text-center">
               ${(remainingSalary/1000).toFixed(1)}K Remaining
             </Badge>
           </CardTitle>
@@ -262,11 +262,11 @@ export function DailyFantasyLineupBuilder({
             </div>
           </div>
           
-          <div className="flex items-center justify-between">
-            <div className="text-sm text-gray-600">
-              <span className="font-medium">Salary Used:</span> ${(totalSalary/1000).toFixed(1)}K / ${(salaryCap/1000).toFixed(0)}K
-            </div>
-            <div className="flex items-center gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+              <div className="text-sm text-gray-600">
+                <span className="font-medium">Salary Used:</span> ${(totalSalary/1000).toFixed(1)}K / ${(salaryCap/1000).toFixed(0)}K
+              </div>
               <div className="text-sm">
                 <span className="font-medium">Players:</span> {lineup.filter(slot => slot.player).length}/9
               </div>
@@ -280,16 +280,16 @@ export function DailyFantasyLineupBuilder({
                   All teams playing
                 </div>
               )}
-              <Button 
-                onClick={submitLineup}
-                disabled={!isLineupValid}
-                className="bg-green-600 hover:bg-green-700"
-                data-testid="submit-lineup-button"
-              >
-                <Trophy className="w-4 h-4 mr-2" />
-                Submit Lineup
-              </Button>
             </div>
+            <Button 
+              onClick={submitLineup}
+              disabled={!isLineupValid}
+              className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
+              data-testid="submit-lineup-button"
+            >
+              <Trophy className="w-4 h-4 mr-2" />
+              Submit Lineup
+            </Button>
           </div>
           
           {/* Progress Bar */}

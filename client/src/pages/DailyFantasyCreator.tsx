@@ -83,7 +83,7 @@ export default function DailyFantasyCreator() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 overflow-x-hidden">
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -107,20 +107,22 @@ export default function DailyFantasyCreator() {
               </p>
             </div>
           </div>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Badge className="bg-blue-600 text-white">
-                <Users className="w-4 h-4 mr-1" />
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge className="bg-blue-600 text-white text-xs px-2 py-1 sm:text-sm">
+                <Users className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                 Commissioner: {fantasyUser?.email?.split('@')[0]}
               </Badge>
-              <Badge variant="outline" className="text-blue-600 border-blue-600">
+              <Badge variant="outline" className="text-blue-600 border-blue-600 text-xs px-2 py-1 sm:text-sm whitespace-normal">
                 💰 Daily Fantasy Format
               </Badge>
-              <Badge variant="outline" className="text-green-600 border-green-600">
+              <Badge variant="outline" className="text-green-600 border-green-600 text-xs px-2 py-1 sm:text-sm whitespace-normal">
                 FREE - No Entry Fees
               </Badge>
             </div>
-            <LanguageSelector variant="compact" />
+            <div className="shrink-0">
+              <LanguageSelector variant="compact" />
+            </div>
           </div>
         </div>
 

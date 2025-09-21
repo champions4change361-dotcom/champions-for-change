@@ -51,37 +51,38 @@ export default function DailyFantasyLineup() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 overflow-x-hidden">
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setLocation(`/fantasy/league/${leagueId}`)}
                 data-testid="back-to-league"
+                className="w-full sm:w-auto mb-3 sm:mb-0"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to League
               </Button>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-                  <Trophy className="h-8 w-8 text-green-600 mr-3" />
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center">
+                  <Trophy className="h-6 w-6 sm:h-8 sm:w-8 text-green-600 mr-2 sm:mr-3" />
                   Daily Fantasy Lineup
                 </h1>
-                <p className="text-gray-600 mt-1">
+                <p className="text-sm sm:text-base text-gray-600 mt-1">
                   Build your lineup within the $50K salary cap
                 </p>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <Badge className="bg-purple-600 text-white">
-                <Users className="w-4 h-4 mr-1" />
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge className="bg-purple-600 text-white text-xs px-2 py-1 sm:text-sm">
+                <Users className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                 {fantasyUser?.email?.split('@')[0] || 'Player'}
               </Badge>
-              <Badge variant="outline" className="text-green-600 border-green-600">
+              <Badge variant="outline" className="text-green-600 border-green-600 text-xs px-2 py-1 sm:text-sm">
                 NFL Week {currentWeek}
               </Badge>
             </div>
