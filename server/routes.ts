@@ -4739,66 +4739,147 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
     try {
       const { sport } = req.params;
       
-      // Sample NFL players for survivor pool with proper interface
-      const nflPlayers = [
-        { 
-          id: "1", 
-          playerName: "Patrick Mahomes", 
-          teamName: "Kansas City Chiefs",
-          teamAbbreviation: "KC", 
-          position: "QB",
-          sport: "nfl",
-          jerseyNumber: 15,
-          salary: 9800,
-          injuryStatus: "healthy",
-          isActive: true
-        },
-        { 
-          id: "2", 
-          playerName: "Josh Allen", 
-          teamName: "Buffalo Bills",
-          teamAbbreviation: "BUF", 
-          position: "QB",
-          sport: "nfl",
-          jerseyNumber: 17,
-          salary: 9600,
-          injuryStatus: "healthy",
-          isActive: true
-        },
-        { 
-          id: "3", 
-          playerName: "Lamar Jackson", 
-          teamName: "Baltimore Ravens",
-          teamAbbreviation: "BAL", 
-          position: "QB",
-          sport: "nfl",
-          jerseyNumber: 8,
-          salary: 9400,
-          injuryStatus: "healthy",
-          isActive: true
-        },
-        { 
-          id: "4", 
-          playerName: "Christian McCaffrey", 
-          teamName: "San Francisco 49ers",
-          teamAbbreviation: "SF", 
-          position: "RB",
-          sport: "nfl",
-          jerseyNumber: 23,
-          salary: 9200,
-          injuryStatus: "healthy",
-          isActive: true
+      if (sport === "nfl") {
+        // Get current week opponents from schedule scraper
+        const { nflScheduleScraper } = await import('./nfl-schedule-scraper.js');
+        
+        // Create opponent lookup map
+        const opponents: Record<string, string> = {};
+        try {
+          const schedule = nflScheduleScraper.getCurrentWeekData();
+          if (schedule?.games) {
+            schedule.games.forEach((game: any) => {
+              opponents[game.homeTeam] = game.awayTeam;
+              opponents[game.awayTeam] = game.homeTeam;
+            });
+          }
+        } catch (error) {
+          console.log('⚠️ Could not load opponents from schedule, using fallback');
         }
-      ];
-      
-      const players = sport === "nfl" ? nflPlayers : [];
-      
-      res.json({
-        success: true,
-        sport,
-        players,
-        count: players.length
-      });
+
+        // Sample NFL players for survivor pool with real opponent data
+        const nflPlayers = [
+          { 
+            id: "1", 
+            playerName: "Patrick Mahomes", 
+            teamName: "Kansas City Chiefs",
+            teamAbbreviation: "KC", 
+            position: "QB",
+            sport: "nfl",
+            jerseyNumber: 15,
+            salary: 9800,
+            injuryStatus: "healthy",
+            isActive: true,
+            opponent: opponents["KC"] || null
+          },
+          { 
+            id: "2", 
+            playerName: "Josh Allen", 
+            teamName: "Buffalo Bills",
+            teamAbbreviation: "BUF", 
+            position: "QB",
+            sport: "nfl",
+            jerseyNumber: 17,
+            salary: 9600,
+            injuryStatus: "healthy",
+            isActive: true,
+            opponent: opponents["BUF"] || null
+          },
+          { 
+            id: "3", 
+            playerName: "Lamar Jackson", 
+            teamName: "Baltimore Ravens",
+            teamAbbreviation: "BAL", 
+            position: "QB",
+            sport: "nfl",
+            jerseyNumber: 8,
+            salary: 9400,
+            injuryStatus: "healthy",
+            isActive: true,
+            opponent: opponents["BAL"] || null
+          },
+          { 
+            id: "4", 
+            playerName: "Christian McCaffrey", 
+            teamName: "San Francisco 49ers",
+            teamAbbreviation: "SF", 
+            position: "RB",
+            sport: "nfl",
+            jerseyNumber: 23,
+            salary: 9200,
+            injuryStatus: "healthy",
+            isActive: true,
+            opponent: opponents["SF"] || null
+          },
+          { 
+            id: "5", 
+            playerName: "Stefon Diggs", 
+            teamName: "Buffalo Bills",
+            teamAbbreviation: "BUF", 
+            position: "WR",
+            sport: "nfl",
+            jerseyNumber: 14,
+            salary: 8800,
+            injuryStatus: "healthy",
+            isActive: true,
+            opponent: opponents["BUF"] || null
+          },
+          { 
+            id: "6", 
+            playerName: "Saquon Barkley", 
+            teamName: "Philadelphia Eagles",
+            teamAbbreviation: "PHI", 
+            position: "RB",
+            sport: "nfl",
+            jerseyNumber: 26,
+            salary: 8600,
+            injuryStatus: "healthy",
+            isActive: true,
+            opponent: opponents["PHI"] || null
+          },
+          { 
+            id: "7", 
+            playerName: "Travis Kelce", 
+            teamName: "Kansas City Chiefs",
+            teamAbbreviation: "KC", 
+            position: "TE",
+            sport: "nfl",
+            jerseyNumber: 87,
+            salary: 8400,
+            injuryStatus: "healthy",
+            isActive: true,
+            opponent: opponents["KC"] || null
+          },
+          { 
+            id: "8", 
+            playerName: "Derrick Henry", 
+            teamName: "Baltimore Ravens",
+            teamAbbreviation: "BAL", 
+            position: "RB",
+            sport: "nfl",
+            jerseyNumber: 22,
+            salary: 8200,
+            injuryStatus: "healthy",
+            isActive: true,
+            opponent: opponents["BAL"] || null
+          }
+        ];
+        
+        res.json({
+          success: true,
+          sport,
+          players: nflPlayers,
+          count: nflPlayers.length,
+          weeklyOpponents: opponents
+        });
+      } else {
+        res.json({
+          success: true,
+          sport,
+          players: [],
+          count: 0
+        });
+      }
     } catch (error: any) {
       console.error("Fantasy players error:", error);
       res.status(500).json({ 

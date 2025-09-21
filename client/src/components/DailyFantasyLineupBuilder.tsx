@@ -258,6 +258,16 @@ export function DailyFantasyLineupBuilder({
               <div className="text-sm">
                 <span className="font-medium">Players:</span> {lineup.filter(slot => slot.player).length}/9
               </div>
+              {byeTeams.length > 0 && (
+                <div className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
+                  {byeTeams.length} teams on bye
+                </div>
+              )}
+              {byeTeams.length === 0 && (
+                <div className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                  All teams playing
+                </div>
+              )}
               <Button 
                 onClick={submitLineup}
                 disabled={!isLineupValid}
