@@ -13,7 +13,20 @@ import NBADepthChartParser from './nba-depth-chart-parser';
 import { stripe } from "./nonprofitStripeConfig";
 import { registerDomainRoutes } from "./domainRoutes";
 import { registerTournamentRoutes } from "./routes/tournamentRoutes";
-import { tournamentSubscriptions, insertTournamentSubscriptionSchema, type InsertTournamentSubscription, insertRegistrationSubmissionSchema, insertTeamSchema, insertTeamPlayerSchema, insertMedicalHistorySchema, type InsertTeam, type InsertTeamPlayer, type InsertMedicalHistory, type Team, type TeamPlayer, type MedicalHistory, updateTeamSubscriptionSchema } from "@shared/schema";
+import { tournamentSubscriptions, insertTournamentSubscriptionSchema, type InsertTournamentSubscription, insertRegistrationSubmissionSchema, insertTeamSchema, insertTeamPlayerSchema, insertMedicalHistorySchema, type InsertTeam, type InsertTeamPlayer, type InsertMedicalHistory, type Team, type TeamPlayer, type MedicalHistory, updateTeamSubscriptionSchema, type User } from "@shared/schema";
+
+// Type extensions to fix compilation issues
+declare module 'express-session' {
+  interface SessionData {
+    user?: User & { id: string; claims?: any };
+  }
+}
+
+// Type extensions for User with missing properties
+type ExtendedUser = User & { 
+  id: string; 
+  claims?: any;
+};
 
 console.log('🏫 District athletics management platform initialized');
 console.log('💚 Champions for Change nonprofit mission active');
@@ -52,7 +65,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       // Test database connectivity
-      let databaseHealth = {
+      let databaseHealth: any = {
         status: 'unknown',
         responseTime: 0,
         type: 'memory'

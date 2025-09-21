@@ -6,13 +6,37 @@ import { Heart, CreditCard, ArrowLeft, Smartphone, Repeat } from 'lucide-react';
 import { SiPaypal, SiVenmo } from 'react-icons/si';
 import { useToast } from '@/hooks/use-toast';
 
-// Load Stripe with error handling
-const stripePromise = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY 
-  ? loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY).catch(error => {
-      console.warn('Failed to load Stripe.js:', error);
-      return null;
-    })
-  : Promise.resolve(null);
+// Load Stripe with improved error handling and validation
+const getStripePromise = () => {
+  const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+  
+  console.log('Stripe key check:', {
+    exists: !!publishableKey,
+    length: publishableKey?.length || 0,
+    startsWithPk: publishableKey?.startsWith('pk_') || false
+  });
+  
+  if (!publishableKey) {
+    console.warn('VITE_STRIPE_PUBLISHABLE_KEY is not set');
+    return Promise.resolve(null);
+  }
+  
+  if (!publishableKey.startsWith('pk_')) {
+    console.warn('Invalid Stripe publishable key format. Should start with "pk_"');
+    return Promise.resolve(null);
+  }
+  
+  return loadStripe(publishableKey).catch(error => {
+    console.error('Failed to load Stripe.js:', {
+      error: error?.message || error,
+      key: publishableKey.substring(0, 12) + '...',
+      stack: error?.stack
+    });
+    return null;
+  });
+};
+
+const stripePromise = getStripePromise();
 
 export default function PaymentMethods() {
   const [paymentData, setPaymentData] = useState<{
