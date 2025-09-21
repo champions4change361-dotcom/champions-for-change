@@ -26,7 +26,11 @@ export function FantasyAgeGate({
     verifyAge,
     acceptTOS,
     isVerifyingAge,
-    isAcceptingTOS
+    isAcceptingTOS,
+    needsMigration,
+    legacyData,
+    attemptLegacyMigration,
+    clearLegacyData
   } = useFantasyAuth();
   
   const [accessDenied, setAccessDenied] = useState(false);
@@ -65,6 +69,59 @@ export function FantasyAgeGate({
             Log In
           </Button>
         </div>
+      </div>
+    );
+  }
+
+  // Check for legacy data migration
+  if (needsMigration && !accessDenied) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
+        <Card className="w-full max-w-lg">
+          <CardHeader className="text-center">
+            <Shield className="h-12 w-12 text-blue-600 mx-auto mb-4" />
+            <CardTitle className="text-2xl">Welcome Back!</CardTitle>
+            <CardDescription>
+              We found your previous fantasy preferences. Let's upgrade your account to our new secure system.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-blue-800 mb-2">What's New:</h3>
+              <ul className="text-sm text-blue-700 space-y-1">
+                <li>✅ Unified account - No separate fantasy login needed</li>
+                <li>✅ Enhanced security - Server-backed age verification</li>
+                <li>✅ Better experience - Seamless access to all features</li>
+              </ul>
+            </div>
+            
+            {legacyData.legacyAgeVerified && (
+              <div className="bg-green-50 p-3 rounded-lg">
+                <p className="text-sm text-green-700">
+                  ✅ Your previous age verification found - we can migrate this automatically!
+                </p>
+              </div>
+            )}
+            
+            <div className="flex gap-3">
+              <Button 
+                onClick={() => attemptLegacyMigration()}
+                className="flex-1 bg-blue-600 hover:bg-blue-700"
+                data-testid="button-migrate-legacy"
+              >
+                Upgrade My Account
+              </Button>
+              <Button 
+                variant="outline"
+                onClick={() => clearLegacyData()}
+                className="flex-1"
+                data-testid="button-start-fresh"
+              >
+                Start Fresh
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }

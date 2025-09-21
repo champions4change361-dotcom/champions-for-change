@@ -37,6 +37,39 @@ export function useFantasyAuth() {
     refetchOnWindowFocus: false
   });
 
+  // Migration helper: Check for legacy localStorage fantasy data
+  const checkLegacyFantasyData = () => {
+    try {
+      const legacyUser = localStorage.getItem("fantasyUser");
+      const legacyAgeVerified = localStorage.getItem("ageVerified21Plus");
+      const legacyVerificationDate = localStorage.getItem("ageVerificationDate");
+      
+      return {
+        hasLegacyData: !!(legacyUser || legacyAgeVerified),
+        legacyUser: legacyUser ? JSON.parse(legacyUser) : null,
+        legacyAgeVerified: legacyAgeVerified === 'true',
+        legacyVerificationDate: legacyVerificationDate ? new Date(legacyVerificationDate) : null
+      };
+    } catch (error) {
+      console.warn("Error checking legacy fantasy data:", error);
+      return { hasLegacyData: false, legacyUser: null, legacyAgeVerified: false, legacyVerificationDate: null };
+    }
+  };
+
+  // Clean up legacy localStorage data after successful migration
+  const clearLegacyData = () => {
+    try {
+      localStorage.removeItem("fantasyUser");
+      localStorage.removeItem("ageVerified21Plus");
+      localStorage.removeItem("ageVerificationDate");
+      localStorage.removeItem("ageVerificationBirthYear");
+      localStorage.removeItem("ageVerificationDenied");
+      console.log("✅ Legacy fantasy data cleaned up");
+    } catch (error) {
+      console.warn("Error cleaning legacy data:", error);
+    }
+  };
+
   // Fetch fantasy profile if main user is authenticated
   const { 
     data: fantasyData, 
@@ -104,6 +137,10 @@ export function useFantasyAuth() {
   // Check if ready for fantasy activation (main user exists but missing fantasy steps)
   const canActivateFantasy = !!(mainUser && !isFantasyAuthenticated);
 
+  // Check for legacy data migration need
+  const legacyData = checkLegacyFantasyData();
+  const needsMigration = !!(mainUser && legacyData.hasLegacyData && !fantasyData?.hasProfile);
+
   const verifyAge = (dateOfBirth: string) => {
     return ageVerifyMutation.mutateAsync(dateOfBirth);
   };
@@ -114,6 +151,44 @@ export function useFantasyAuth() {
 
   const createFantasyProfile = () => {
     return createProfileMutation.mutateAsync();
+  };
+
+  // Auto-migration for legacy age verification if still valid
+  const attemptLegacyMigration = async () => {
+    if (!mainUser || !legacyData.hasLegacyData) return false;
+
+    try {
+      // If legacy age verification is still valid (within 30 days), migrate it
+      if (legacyData.legacyAgeVerified && legacyData.legacyVerificationDate) {
+        const now = new Date();
+        const daysDiff = (now.getTime() - legacyData.legacyVerificationDate.getTime()) / (1000 * 60 * 60 * 24);
+        
+        if (daysDiff < 30) {
+          // Create fantasy profile without re-verifying age
+          await createFantasyProfile();
+          
+          // For migration, we'll accept the legacy age verification as valid
+          // and the server will set appropriate expiry
+          await acceptTOS();
+          
+          // Clear legacy data after successful migration
+          clearLegacyData();
+          
+          // Refresh fantasy profile data
+          await refetchFantasyProfile();
+          
+          console.log(`✅ Successfully migrated legacy age verification (${remainingDays} days remaining)`);
+          return true;
+        }
+      }
+      
+      // If we can't migrate age verification, just clear legacy data
+      clearLegacyData();
+      return false;
+    } catch (error) {
+      console.error('Legacy migration failed:', error);
+      return false;
+    }
   };
 
   return {
@@ -136,6 +211,12 @@ export function useFantasyAuth() {
     acceptTOS,
     createFantasyProfile,
     refetchFantasyProfile,
+    
+    // Migration
+    needsMigration,
+    legacyData,
+    attemptLegacyMigration,
+    clearLegacyData,
     
     // Mutation states for loading indicators
     isVerifyingAge: ageVerifyMutation.isPending,
