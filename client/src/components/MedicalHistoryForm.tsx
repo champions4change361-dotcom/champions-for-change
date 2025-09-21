@@ -34,22 +34,26 @@ interface MedicalHistoryFormProps {
   readonly?: boolean;
 }
 
+// Utility function to sanitize and validate player ID
+function validatePlayerId(playerId: string): boolean {
+  return !!playerId && typeof playerId === 'string' && /^[a-zA-Z0-9_-]+$/.test(playerId) && playerId.length <= 50;
+}
+
 export function MedicalHistoryForm({ playerId, onComplete, readonly = false }: MedicalHistoryFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch player data for auto-population with custom fetch to bypass validation
-  const { data: player, isLoading: playerLoading, error: playerError } = useQuery<any>({
+  // Fetch player data for auto-population with secure validation
+  const { data: player, isLoading: playerLoading, error: playerError } = useQuery<TeamPlayer>({
     queryKey: ['/api/players', playerId],
-    enabled: !!playerId,
+    enabled: !!playerId && /^[a-zA-Z0-9_-]+$/.test(playerId),
     queryFn: async () => {
-      const response = await fetch(`/api/players/${playerId}`, {
-        credentials: 'include'
-      });
-      if (!response.ok) {
-        throw new Error(`Failed to fetch player: ${response.status} ${response.statusText}`);
+      // Validate playerId format to prevent injection attacks
+      if (!playerId || !/^[a-zA-Z0-9_-]+$/.test(playerId)) {
+        throw new Error('Invalid player ID format');
       }
-      return await response.json();
+      const response = await apiRequest(`/api/players/${encodeURIComponent(playerId)}`, 'GET');
+      return response.data || response;
     },
     retry: 3,
     retryDelay: 1000,
@@ -61,7 +65,7 @@ export function MedicalHistoryForm({ playerId, onComplete, readonly = false }: M
   // Fetch existing medical history if available
   const { data: existingMedicalHistory, isLoading: medicalHistoryLoading, error: medicalHistoryError } = useQuery({
     queryKey: ['/api/players', playerId, 'medical-history'],
-    enabled: !!playerId,
+    enabled: !!playerId && /^[a-zA-Z0-9_-]+$/.test(playerId),
     retry: (failureCount, error: any) => {
       // Don't retry if it's a 404 - this means no medical history exists yet, which is fine
       if (error?.status === 404) {
@@ -157,11 +161,11 @@ export function MedicalHistoryForm({ playerId, onComplete, readonly = false }: M
 
   // Reset form when player changes
   React.useEffect(() => {
-    if (player) {
+    if (player && typeof player === 'object' && 'id' in player) {
       form.reset({
         ...form.getValues(),
-        playerId: player.id,
-        studentName: player.playerName || '',
+        playerId: player.id as string,
+        studentName: (player as any).playerName || '',
       });
     }
   }, [player, form]);
@@ -195,7 +199,13 @@ export function MedicalHistoryForm({ playerId, onComplete, readonly = false }: M
 
   const createMedicalHistoryMutation = useMutation({
     mutationFn: async (data: InsertMedicalHistory) => {
-      const response = await apiRequest(`/api/players/${playerId}/medical-history`, 'POST', data);
+      // Validate playerId before making request
+      if (!playerId || !/^[a-zA-Z0-9_-]+$/.test(playerId)) {
+        throw new Error('Invalid player ID format');
+      }
+      // Validate data using schema before sending
+      const validatedData = insertMedicalHistorySchema.parse(data);
+      const response = await apiRequest(`/api/players/${encodeURIComponent(playerId)}/medical-history`, 'POST', validatedData);
       return response;
     },
     onSuccess: () => {
@@ -217,7 +227,13 @@ export function MedicalHistoryForm({ playerId, onComplete, readonly = false }: M
 
   const updateMedicalHistoryMutation = useMutation({
     mutationFn: async (data: InsertMedicalHistory) => {
-      const response = await apiRequest(`/api/players/${playerId}/medical-history`, 'PUT', data);
+      // Validate playerId before making request
+      if (!playerId || !/^[a-zA-Z0-9_-]+$/.test(playerId)) {
+        throw new Error('Invalid player ID format');
+      }
+      // Validate data using schema before sending
+      const validatedData = insertMedicalHistorySchema.parse(data);
+      const response = await apiRequest(`/api/players/${encodeURIComponent(playerId)}/medical-history`, 'PUT', validatedData);
       return response;
     },
     onSuccess: () => {
@@ -349,10 +365,10 @@ export function MedicalHistoryForm({ playerId, onComplete, readonly = false }: M
           <div className="flex items-center gap-4 text-sm">
             <div className="flex items-center gap-2">
               <User className="h-4 w-4" />
-              <span className="font-medium">{player.playerName}</span>
+              <span className="font-medium">{(player as any)?.playerName || 'Player'}</span>
             </div>
-            {player.jerseyNumber && (
-              <Badge variant="outline">#{player.jerseyNumber}</Badge>
+            {(player as any)?.jerseyNumber && (
+              <Badge variant="outline">#{(player as any).jerseyNumber}</Badge>
             )}
           </div>
         </CardHeader>

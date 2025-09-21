@@ -82,7 +82,7 @@ export default function MerchandiseStore() {
   }>({});
 
   // Fetch products for the user's organization
-  const { data: products = [], isLoading, error } = useQuery({
+  const { data: products = [], isLoading, error } = useQuery<Product[]>({
     queryKey: ['/api/webstore/products'],
     enabled: isAuthenticated && !!user?.organizationId,
   });
@@ -175,8 +175,8 @@ export default function MerchandiseStore() {
     }
   ];
 
-  // Use sample products for demo purposes
-  const displayProducts = products.length > 0 ? products : sampleProducts;
+  // Use sample products for demo purposes - ensure type safety
+  const displayProducts: Product[] = Array.isArray(products) && products.length > 0 ? products : sampleProducts;
 
   const getPrice = (product: Product, variant?: ProductVariant) => {
     const basePrice = product.basePrice;
@@ -190,7 +190,17 @@ export default function MerchandiseStore() {
   const handleAddToCart = () => {
     if (!selectedProduct || !isAuthenticated) return;
 
-    const finalPrice = getPrice(selectedProduct, selectedVariant);
+    // Validate inputs before adding to cart
+    if (quantity <= 0 || quantity > selectedProduct.maxQuantityPerOrder) {
+      toast({
+        title: "Invalid quantity",
+        description: `Please select a quantity between 1 and ${selectedProduct.maxQuantityPerOrder}`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const finalPrice = getPrice(selectedProduct, selectedVariant || undefined);
     
     addToCart({
       type: 'merchandise',
@@ -312,7 +322,11 @@ export default function MerchandiseStore() {
                     <Input
                       placeholder="Enter player name"
                       value={customization.playerName || ''}
-                      onChange={(e) => setCustomization(prev => ({ ...prev, playerName: e.target.value }))}
+                      onChange={(e) => {
+                        const sanitizedValue = e.target.value.replace(/[<>\"'&]/g, '').substring(0, 50);
+                        setCustomization(prev => ({ ...prev, playerName: sanitizedValue }));
+                      }}
+                      maxLength={50}
                       data-testid="input-player-name"
                     />
                   </div>
@@ -324,7 +338,11 @@ export default function MerchandiseStore() {
                     <Input
                       placeholder="Enter player number"
                       value={customization.playerNumber || ''}
-                      onChange={(e) => setCustomization(prev => ({ ...prev, playerNumber: e.target.value }))}
+                      onChange={(e) => {
+                        const sanitizedValue = e.target.value.replace(/[^0-9]/g, '').substring(0, 3);
+                        setCustomization(prev => ({ ...prev, playerNumber: sanitizedValue }));
+                      }}
+                      maxLength={3}
                       data-testid="input-player-number"
                     />
                   </div>
@@ -352,7 +370,7 @@ export default function MerchandiseStore() {
                   <div className="flex justify-between items-center font-medium">
                     <span>Total Price:</span>
                     <span className="text-green-600 text-lg" data-testid="text-total-price">
-                      ${(getPrice(product, selectedVariant) * quantity).toFixed(2)}
+                      ${(getPrice(product, selectedVariant || undefined) * quantity).toFixed(2)}
                     </span>
                   </div>
                 </div>
