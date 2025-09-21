@@ -104,8 +104,7 @@ export function DailyFantasyLineupBuilder({
     // Generate realistic projected points if not provided
     let points = projectedPoints;
     if (points === 0) {
-      const tier = depth === 1 ? 'solid' : depth === 2 ? 'value' : 'budget';
-      points = fantasySalaryCalculator.generateProjectedPoints(position, tier);
+      points = fantasySalaryCalculator.generateProjectedPoints(position, depth);
     }
     
     // Create adjustments based on player data

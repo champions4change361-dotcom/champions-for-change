@@ -201,24 +201,45 @@ export class FantasySalaryCalculator {
   }
 
   /**
-   * 🏈 Generate realistic projected points for demo players
+   * 🏈 Generate realistic projected points based on depth chart and playing likelihood
    */
-  generateProjectedPoints(position: string, tier: 'elite' | 'solid' | 'value' | 'budget'): number {
-    const basePoints = {
-      QB: { elite: 24, solid: 18, value: 14, budget: 10 },
-      RB: { elite: 22, solid: 16, value: 12, budget: 8 },
-      WR: { elite: 20, solid: 15, value: 11, budget: 7 },
-      TE: { elite: 16, solid: 12, value: 9, budget: 6 },
-      DEF: { elite: 12, solid: 9, value: 7, budget: 5 }
+  generateProjectedPoints(position: string, depth: number): number {
+    // Realistic projections based on actual playing likelihood
+    const projectionsByDepth = {
+      QB: { 
+        1: { min: 16, max: 26 },  // Starting QBs
+        2: { min: 2, max: 8 },    // Backup QBs (limited snaps)
+        3: { min: 0, max: 3 }     // 3rd string (very unlikely to play)
+      },
+      RB: { 
+        1: { min: 12, max: 24 },  // Starting RBs
+        2: { min: 6, max: 14 },   // Backup RBs (some touches)
+        3: { min: 1, max: 6 }     // 3rd string RBs
+      },
+      WR: { 
+        1: { min: 10, max: 22 },  // WR1/WR2
+        2: { min: 6, max: 12 },   // WR3/WR4
+        3: { min: 2, max: 7 }     // Deep bench WRs
+      },
+      TE: { 
+        1: { min: 8, max: 18 },   // Starting TEs
+        2: { min: 3, max: 8 },    // Backup TEs
+        3: { min: 1, max: 4 }     // 3rd string TEs
+      },
+      DEF: { 
+        1: { min: 6, max: 14 },   // All defenses similar range
+        2: { min: 6, max: 14 },   
+        3: { min: 6, max: 14 }    
+      }
     };
 
-    const points = basePoints[position as keyof typeof basePoints]?.[tier] || 10;
+    const depthData = projectionsByDepth[position as keyof typeof projectionsByDepth];
+    if (!depthData) return 8; // Default fallback
+
+    const range = depthData[Math.min(depth, 3) as keyof typeof depthData] || depthData[3];
+    const points = range.min + Math.random() * (range.max - range.min);
     
-    // Add some randomness (±10%) for realism
-    const variance = points * 0.1;
-    const randomFactor = (Math.random() - 0.5) * 2 * variance;
-    
-    return Math.round((points + randomFactor) * 10) / 10;
+    return Math.round(points * 10) / 10;
   }
 
   /**
