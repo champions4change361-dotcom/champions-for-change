@@ -17,8 +17,8 @@ export function setupSecurity(app: express.Application) {
         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
         imgSrc: ["'self'", "data:", "https:", "blob:"],
-        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // Vite needs these in dev
-        connectSrc: ["'self'", "https:", "wss:", "ws:"], // Allow WebSocket connections for Vite HMR
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://js.stripe.com"], // Added Stripe.js
+        connectSrc: ["'self'", "https:", "wss:", "ws:", "https://api.stripe.com"], // Added Stripe API
         objectSrc: ["'none'"],
         mediaSrc: ["'self'"],
         frameSrc: ["'self'", "https://js.stripe.com"], // Allow Stripe
