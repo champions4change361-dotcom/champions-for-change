@@ -6997,6 +6997,144 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
     }
   });
 
+  // Fantasy Profile Management - Unified Authentication System
+  
+  // Get user's fantasy profile
+  app.get("/api/fantasy/profile", async (req, res) => {
+    try {
+      const user = await checkAuthUser(req);
+      if (!user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const fantasyProfile = await storage.getFantasyProfile(user.id);
+      
+      res.json({
+        success: true,
+        profile: fantasyProfile,
+        hasProfile: !!fantasyProfile,
+        isAgeVerified: fantasyProfile?.ageVerifiedAt && 
+                      fantasyProfile?.ageVerificationExpiresAt && 
+                      new Date() < fantasyProfile.ageVerificationExpiresAt,
+        hasTOSAccepted: !!fantasyProfile?.tosAcceptedAt
+      });
+    } catch (error: any) {
+      console.error("Fantasy profile error:", error);
+      res.status(500).json({ 
+        error: "Failed to get fantasy profile",
+        details: error.message 
+      });
+    }
+  });
+
+  // Set age verification for fantasy profile
+  app.post("/api/fantasy/profile/age-verify", async (req, res) => {
+    try {
+      const user = await checkAuthUser(req);
+      if (!user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const { dateOfBirth } = req.body;
+      
+      if (!dateOfBirth) {
+        return res.status(400).json({ error: "Date of birth is required" });
+      }
+
+      // Calculate age
+      const birthDate = new Date(dateOfBirth);
+      const today = new Date();
+      const age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+
+      if (age < 21) {
+        return res.status(403).json({ 
+          error: "Must be 21 or older to access fantasy features",
+          age: age 
+        });
+      }
+
+      // Set age verification (expires in 90 days)
+      const verifiedAt = new Date();
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 90);
+
+      const updatedProfile = await storage.setFantasyAgeVerification(user.id, verifiedAt, expiresAt);
+
+      res.json({
+        success: true,
+        message: "Age verification successful",
+        profile: updatedProfile,
+        expiresAt: expiresAt.toISOString()
+      });
+    } catch (error: any) {
+      console.error("Age verification error:", error);
+      res.status(500).json({ 
+        error: "Failed to verify age",
+        details: error.message 
+      });
+    }
+  });
+
+  // Accept fantasy terms of service
+  app.post("/api/fantasy/profile/accept-tos", async (req, res) => {
+    try {
+      const user = await checkAuthUser(req);
+      if (!user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const updatedProfile = await storage.acceptFantasyTOS(user.id);
+
+      res.json({
+        success: true,
+        message: "Terms of service accepted",
+        profile: updatedProfile
+      });
+    } catch (error: any) {
+      console.error("TOS acceptance error:", error);
+      res.status(500).json({ 
+        error: "Failed to accept terms of service",
+        details: error.message 
+      });
+    }
+  });
+
+  // Create or update fantasy profile
+  app.post("/api/fantasy/profile", async (req, res) => {
+    try {
+      const user = await checkAuthUser(req);
+      if (!user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const { status } = req.body;
+      
+      const profileData = {
+        userId: user.id,
+        status: status || "active"
+      };
+
+      const fantasyProfile = await storage.upsertFantasyProfile(profileData);
+
+      res.json({
+        success: true,
+        message: "Fantasy profile updated",
+        profile: fantasyProfile
+      });
+    } catch (error: any) {
+      console.error("Fantasy profile upsert error:", error);
+      res.status(500).json({ 
+        error: "Failed to update fantasy profile",
+        details: error.message 
+      });
+    }
+  });
+
   // Showdown Contest routes
   app.post("/api/fantasy/showdown-contests", async (req, res) => {
     try {
