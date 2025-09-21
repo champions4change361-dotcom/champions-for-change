@@ -223,6 +223,20 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Fantasy Profile - Linked to main user accounts for 21+ fantasy sports access
+export const fantasyProfiles = pgTable("fantasy_profiles", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  tosAcceptedAt: timestamp("tos_accepted_at"),
+  ageVerifiedAt: timestamp("age_verified_at"),
+  ageVerificationExpiresAt: timestamp("age_verification_expires_at"),
+  status: text("status", { 
+    enum: ["active", "restricted"] 
+  }).default("active"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // HIPAA/FERPA Compliance Audit Trail
 export const complianceAuditLog = pgTable("compliance_audit_log", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -5410,3 +5424,13 @@ export type CreateTeamRegistrationInput = z.infer<typeof createTeamRegistrationS
 export type CreateContactInput = z.infer<typeof createContactSchema>;
 export type PaginationInput = z.infer<typeof paginationSchema>;
 export type SearchInput = z.infer<typeof searchSchema>;
+
+// FantasyProfile schemas
+export const insertFantasyProfileSchema = createInsertSchema(fantasyProfiles).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertFantasyProfile = z.infer<typeof insertFantasyProfileSchema>;
+export type FantasyProfile = typeof fantasyProfiles.$inferSelect;

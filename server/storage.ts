@@ -20,7 +20,8 @@ import {
   type MerchandiseProduct, type InsertMerchandiseProduct, type MerchandiseOrder, type InsertMerchandiseOrder,
   type EventTicket, type InsertEventTicket, type TicketOrder, type InsertTicketOrder,
   type TournamentRegistrationForm, type InsertTournamentRegistrationForm, type RegistrationSubmission, type InsertRegistrationSubmission, type RegistrationAssignmentLog, type InsertRegistrationAssignmentLog,
-  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, teams, teamPlayers, medicalHistory, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog, taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices, supportTeams, supportTeamMembers, supportTeamInjuries, supportTeamAiConsultations, jerseyTeamMembers, jerseyTeamPayments, tournamentSubscriptions, clientConfigurations, guestParticipants, passwordResetTokens, showdownContests, showdownEntries, showdownLeaderboards, professionalPlayers, merchandiseProducts, merchandiseOrders, eventTickets, ticketOrders, tournamentRegistrationForms, registrationSubmissions, registrationAssignmentLog
+  type FantasyProfile, type InsertFantasyProfile,
+  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, teams, teamPlayers, medicalHistory, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog, taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices, supportTeams, supportTeamMembers, supportTeamInjuries, supportTeamAiConsultations, jerseyTeamMembers, jerseyTeamPayments, tournamentSubscriptions, clientConfigurations, guestParticipants, passwordResetTokens, showdownContests, showdownEntries, showdownLeaderboards, professionalPlayers, merchandiseProducts, merchandiseOrders, eventTickets, ticketOrders, tournamentRegistrationForms, registrationSubmissions, registrationAssignmentLog, fantasyProfiles
 } from "@shared/schema";
 
 type SportCategory = typeof sportCategories.$inferSelect;
@@ -55,6 +56,12 @@ export interface IStorage {
   upsertUser(user: UpsertUser): Promise<User>;
   updateUser(id: string, updates: Partial<User>): Promise<User | undefined>;
   updateUserStripeInfo(id: string, customerId: string, subscriptionId: string): Promise<User | undefined>;
+  
+  // Fantasy profile methods
+  getFantasyProfile(userId: string): Promise<FantasyProfile | undefined>;
+  upsertFantasyProfile(profile: InsertFantasyProfile): Promise<FantasyProfile>;
+  setFantasyAgeVerification(userId: string, verifiedAt: Date, expiresAt: Date): Promise<FantasyProfile | undefined>;
+  acceptFantasyTOS(userId: string): Promise<FantasyProfile | undefined>;
   
   // Compliance operations
   createComplianceAuditLog(log: ComplianceAuditLog): Promise<ComplianceAuditLog>;
@@ -665,6 +672,88 @@ export class DbStorage implements IStorage {
           updatedAt: new Date() 
         })
         .where(eq(users.id, id))
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  // Fantasy profile methods
+  async getFantasyProfile(userId: string): Promise<FantasyProfile | undefined> {
+    try {
+      const result = await this.db.select().from(fantasyProfiles).where(eq(fantasyProfiles.userId, userId));
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async upsertFantasyProfile(profile: InsertFantasyProfile): Promise<FantasyProfile> {
+    try {
+      // Check if profile exists
+      const existing = await this.db
+        .select()
+        .from(fantasyProfiles)
+        .where(eq(fantasyProfiles.userId, profile.userId))
+        .limit(1);
+
+      if (existing.length > 0) {
+        // Update existing profile
+        const result = await this.db
+          .update(fantasyProfiles)
+          .set({ ...profile, updatedAt: new Date() })
+          .where(eq(fantasyProfiles.userId, profile.userId))
+          .returning();
+        return result[0];
+      } else {
+        // Create new profile
+        const result = await this.db.insert(fantasyProfiles).values(profile).returning();
+        return result[0];
+      }
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to upsert fantasy profile");
+    }
+  }
+
+  async setFantasyAgeVerification(userId: string, verifiedAt: Date, expiresAt: Date): Promise<FantasyProfile | undefined> {
+    try {
+      // First ensure fantasy profile exists
+      await this.upsertFantasyProfile({ userId, status: "active" });
+      
+      // Update age verification fields
+      const result = await this.db
+        .update(fantasyProfiles)
+        .set({ 
+          ageVerifiedAt: verifiedAt,
+          ageVerificationExpiresAt: expiresAt,
+          updatedAt: new Date()
+        })
+        .where(eq(fantasyProfiles.userId, userId))
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async acceptFantasyTOS(userId: string): Promise<FantasyProfile | undefined> {
+    try {
+      // First ensure fantasy profile exists
+      await this.upsertFantasyProfile({ userId, status: "active" });
+      
+      // Update TOS acceptance
+      const result = await this.db
+        .update(fantasyProfiles)
+        .set({ 
+          tosAcceptedAt: new Date(),
+          updatedAt: new Date()
+        })
+        .where(eq(fantasyProfiles.userId, userId))
         .returning();
       return result[0];
     } catch (error) {
@@ -2939,6 +3028,9 @@ export class MemStorage implements IStorage {
   private teams: Map<string, Team>;
   private teamPlayers: Map<string, TeamPlayer>;
   private medicalHistories: Map<string, MedicalHistory>;
+  
+  // FANTASY PROFILE MAPS
+  private fantasyProfiles: Map<string, FantasyProfile>;
 
   constructor() {
     this.users = new Map();
@@ -2980,6 +3072,9 @@ export class MemStorage implements IStorage {
     this.teams = new Map();
     this.teamPlayers = new Map();
     this.medicalHistories = new Map();
+    
+    // FANTASY PROFILE INITIALIZATION
+    this.fantasyProfiles = new Map();
     
     // Initialize with default tournament structures, sport division rules, track events, tournament integration, competition formats, and KRAKEN!
     this.initializeDefaultStructures();
@@ -3136,6 +3231,88 @@ export class MemStorage implements IStorage {
     };
     this.users.set(id, updatedUser);
     return updatedUser;
+  }
+
+  // Fantasy profile methods
+  async getFantasyProfile(userId: string): Promise<FantasyProfile | undefined> {
+    for (const [id, profile] of this.fantasyProfiles) {
+      if (profile.userId === userId) {
+        return profile;
+      }
+    }
+    return undefined;
+  }
+
+  async upsertFantasyProfile(profileData: InsertFantasyProfile): Promise<FantasyProfile> {
+    // Check if profile exists
+    let existingProfile: FantasyProfile | undefined;
+    let existingId: string | undefined;
+    
+    for (const [id, profile] of this.fantasyProfiles) {
+      if (profile.userId === profileData.userId) {
+        existingProfile = profile;
+        existingId = id;
+        break;
+      }
+    }
+
+    if (existingProfile && existingId) {
+      // Update existing profile
+      const updatedProfile = { 
+        ...existingProfile, 
+        ...profileData, 
+        updatedAt: new Date() 
+      };
+      this.fantasyProfiles.set(existingId, updatedProfile);
+      return updatedProfile;
+    } else {
+      // Create new profile
+      const newProfile: FantasyProfile = {
+        ...profileData,
+        id: randomUUID(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      this.fantasyProfiles.set(newProfile.id, newProfile);
+      return newProfile;
+    }
+  }
+
+  async setFantasyAgeVerification(userId: string, verifiedAt: Date, expiresAt: Date): Promise<FantasyProfile | undefined> {
+    // First ensure fantasy profile exists
+    await this.upsertFantasyProfile({ userId, status: "active" });
+    
+    // Update age verification fields
+    const existingProfile = await this.getFantasyProfile(userId);
+    if (existingProfile) {
+      const updatedProfile = {
+        ...existingProfile,
+        ageVerifiedAt: verifiedAt,
+        ageVerificationExpiresAt: expiresAt,
+        updatedAt: new Date()
+      };
+      this.fantasyProfiles.set(existingProfile.id, updatedProfile);
+      return updatedProfile;
+    }
+    return undefined;
+  }
+
+  async acceptFantasyTOS(userId: string): Promise<FantasyProfile | undefined> {
+    // First ensure fantasy profile exists
+    await this.upsertFantasyProfile({ userId, status: "active" });
+    
+    // Update TOS acceptance
+    const existingProfile = await this.getFantasyProfile(userId);
+    if (existingProfile) {
+      const updatedProfile = {
+        ...existingProfile,
+        tosAcceptedAt: new Date(),
+        updatedAt: new Date()
+      };
+      this.fantasyProfiles.set(existingProfile.id, updatedProfile);
+      return updatedProfile;
+    }
+    return undefined;
   }
 
   // White-label methods
