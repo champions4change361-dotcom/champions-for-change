@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+// Removed Select components - using native HTML selects for better mobile UX
 import { ArrowLeft, Trophy, Users, Settings, Shield, Calendar } from 'lucide-react';
 import { useFantasyAuth } from '@/hooks/useFantasyAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -140,49 +140,52 @@ export default function NFLKnockoutCreator() {
 
                 <div>
                   <Label htmlFor="max-participants">Max Participants</Label>
-                  <Select value={maxParticipants} onValueChange={setMaxParticipants}>
-                    <SelectTrigger data-testid="max-participants-select">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="25">25 Participants</SelectItem>
-                      <SelectItem value="50">50 Participants</SelectItem>
-                      <SelectItem value="100">100 Participants</SelectItem>
-                      <SelectItem value="200">200 Participants</SelectItem>
-                      <SelectItem value="unlimited">Unlimited</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select 
+                    id="max-participants"
+                    value={maxParticipants} 
+                    onChange={(e) => setMaxParticipants(e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-md bg-white text-base focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    data-testid="max-participants-select"
+                  >
+                    <option value="25">25 Participants</option>
+                    <option value="50">50 Participants</option>
+                    <option value="100">100 Participants</option>
+                    <option value="200">200 Participants</option>
+                    <option value="unlimited">Unlimited</option>
+                  </select>
                 </div>
 
                 <div>
                   <Label htmlFor="start-week">Starting Week</Label>
-                  <Select value={startWeek} onValueChange={setStartWeek}>
-                    <SelectTrigger data-testid="start-week-select">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">Week 1</SelectItem>
-                      <SelectItem value="2">Week 2</SelectItem>
-                      <SelectItem value="3">Week 3</SelectItem>
-                      <SelectItem value="4">Week 4</SelectItem>
-                      <SelectItem value="5">Week 5</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select 
+                    id="start-week"
+                    value={startWeek} 
+                    onChange={(e) => setStartWeek(e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-md bg-white text-base focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    data-testid="start-week-select"
+                  >
+                    <option value="1">Week 1</option>
+                    <option value="2">Week 2</option>
+                    <option value="3">Week 3</option>
+                    <option value="4">Week 4</option>
+                    <option value="5">Week 5</option>
+                  </select>
                 </div>
 
                 <div>
                   <Label htmlFor="pick-deadline">Pick Deadline</Label>
-                  <Select value={pickDeadline} onValueChange={setPickDeadline}>
-                    <SelectTrigger data-testid="pick-deadline-select">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="thursday-8pm">Thursday 8:00 PM ET</SelectItem>
-                      <SelectItem value="sunday-1pm">Sunday 1:00 PM ET</SelectItem>
-                      <SelectItem value="sunday-kickoff">Each Game Kickoff</SelectItem>
-                      <SelectItem value="saturday-midnight">Saturday Midnight</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select 
+                    id="pick-deadline"
+                    value={pickDeadline} 
+                    onChange={(e) => setPickDeadline(e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-md bg-white text-base focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    data-testid="pick-deadline-select"
+                  >
+                    <option value="thursday-8pm">Thursday 8:00 PM ET</option>
+                    <option value="sunday-1pm">Sunday 1:00 PM ET</option>
+                    <option value="sunday-kickoff">Each Game Kickoff</option>
+                    <option value="saturday-midnight">Saturday Midnight</option>
+                  </select>
                 </div>
               </CardContent>
             </Card>
@@ -197,17 +200,18 @@ export default function NFLKnockoutCreator() {
               <CardContent className="space-y-4">
                 <div>
                   <Label htmlFor="elimination-rule">Elimination Type</Label>
-                  <Select value={eliminationRule} onValueChange={setEliminationRule}>
-                    <SelectTrigger data-testid="elimination-rule-select">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="single-loss">Single Loss (Standard)</SelectItem>
-                      <SelectItem value="double-elimination">Double Elimination</SelectItem>
-                      <SelectItem value="strike-system">3-Strike System</SelectItem>
-                      <SelectItem value="margin-of-victory">Margin of Victory Tiebreaker</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select 
+                    id="elimination-rule"
+                    value={eliminationRule} 
+                    onChange={(e) => setEliminationRule(e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-md bg-white text-base focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    data-testid="elimination-rule-select"
+                  >
+                    <option value="single-loss">Single Loss (Standard)</option>
+                    <option value="double-elimination">Double Elimination</option>
+                    <option value="strike-system">3-Strike System</option>
+                    <option value="margin-of-victory">Margin of Victory Tiebreaker</option>
+                  </select>
                 </div>
 
                 <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
