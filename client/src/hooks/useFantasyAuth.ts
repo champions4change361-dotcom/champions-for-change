@@ -85,10 +85,7 @@ export function useFantasyAuth() {
   // Age verification mutation
   const ageVerifyMutation = useMutation({
     mutationFn: async (dateOfBirth: string) => {
-      return apiRequest("/api/fantasy/profile/age-verify", {
-        method: "POST",
-        body: { dateOfBirth }
-      });
+      return apiRequest("/api/fantasy/profile/age-verify", "POST", { dateOfBirth });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/fantasy/profile"] });
@@ -98,9 +95,7 @@ export function useFantasyAuth() {
   // TOS acceptance mutation
   const acceptTOSMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest("/api/fantasy/profile/accept-tos", {
-        method: "POST"
-      });
+      return apiRequest("/api/fantasy/profile/accept-tos", "POST");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/fantasy/profile"] });
@@ -110,10 +105,7 @@ export function useFantasyAuth() {
   // Create fantasy profile mutation
   const createProfileMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest("/api/fantasy/profile", {
-        method: "POST",
-        body: { status: "active" }
-      });
+      return apiRequest("/api/fantasy/profile", "POST", { status: "active" });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/fantasy/profile"] });
