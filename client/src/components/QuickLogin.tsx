@@ -10,55 +10,13 @@ export default function QuickLogin() {
   const { toast } = useToast();
 
   const quickLogin = async (userType: 'district' | 'organizer' | 'business' = 'district') => {
-    // SECURITY: Only allow in development mode
-    if (!import.meta.env.DEV) {
-      toast({
-        title: "Error",
-        description: "This feature is only available in development mode",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    setIsLoading(true);
-    try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: 'champions4change361@gmail.com',
-          password: 'master-admin-danielthornton',
-          userType
-        }),
-      });
-
-      if (response.ok) {
-        toast({
-          title: "Success",
-          description: "Logged in successfully!",
-        });
-        
-        // Redirect to dashboard instead of reload
-        window.location.href = '/role-based-dashboards';
-      } else {
-        const error = await response.json();
-        toast({
-          title: "Error",
-          description: error.message || "Login failed",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Network error during login",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    // SECURITY: This component is disabled for security reasons
+    toast({
+      title: "Access Disabled",
+      description: "This feature has been disabled for security purposes",
+      variant: "destructive",
+    });
+    return;
   };
 
   return (

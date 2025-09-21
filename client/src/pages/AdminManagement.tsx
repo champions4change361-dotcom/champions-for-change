@@ -326,65 +326,7 @@ export default function AdminManagement() {
 
           {/* Create Test Users Tab */}
           <TabsContent value="create-users">
-            {/* Quick Login Component - DEVELOPMENT ONLY */}
-            {import.meta.env.DEV && (
-              <Card className="mb-4 border-orange-200 bg-orange-50">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-sm">
-                    <Shield className="h-4 w-4" />
-                    DEV: Quick Admin Login (Testing)
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <Button
-                      onClick={async () => {
-                        try {
-                          const response = await fetch('/api/auth/login', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                              email: 'champions4change361@gmail.com',
-                              password: 'master-admin-danielthornton',
-                              userType: 'district'
-                            }),
-                          });
-                          if (response.ok) {
-                            toast({ title: "Success", description: "Logged in as District Admin!" });
-                            // Immediately redirect to district dashboard without delay
-                            navigate('/role-based-dashboards');
-                          } else {
-                            const error = await response.json();
-                            toast({ title: "Error", description: error.message || "Login failed", variant: "destructive" });
-                          }
-                        } catch (error) {
-                          toast({ title: "Error", description: "Network error during login", variant: "destructive" });
-                        }
-                      }}
-                      size="sm"
-                      className="bg-green-600 hover:bg-green-700 text-xs"
-                      data-testid="button-quick-login-district"
-                    >
-                      <User className="h-3 w-3 mr-1" />
-                      Login as District Admin
-                    </Button>
-                  
-                  <Button
-                    onClick={() => navigate('/role-based-dashboards')}
-                    size="sm"
-                    className="bg-blue-600 hover:bg-blue-700 text-xs"
-                    data-testid="button-org-chart"
-                  >
-                    <Building2 className="h-3 w-3 mr-1" />
-                    Organizational Chart
-                  </Button>
-                </div>
-                <p className="text-xs text-gray-600 mt-2">
-                  Use this to authenticate and test user creation features
-                </p>
-              </CardContent>
-            </Card>
-            )}
+            {/* Quick Login Component removed for security - No longer exposed */}
             
             <Card>
               <CardHeader>
