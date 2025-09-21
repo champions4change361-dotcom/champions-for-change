@@ -107,6 +107,122 @@ export class ESPNApiService {
     return 'backup';
   }
 
+  // 🏥 Get comprehensive NFL injury data for daily fantasy
+  static async getNFLInjuries(): Promise<any[]> {
+    try {
+      console.log('🏥 ESPN: Fetching current NFL injury reports...');
+      
+      const response = await fetch(`${this.baseUrl}/injuries`);
+      if (!response.ok) {
+        throw new Error(`ESPN Injuries API error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      const injuries = data.injuries || [];
+      
+      console.log(`✅ ESPN: Found ${injuries.length} injury reports`);
+      
+      // Transform ESPN injury data to our format
+      const processedInjuries = injuries.map((injury: any) => ({
+        playerId: injury.athlete?.id,
+        playerName: injury.athlete?.displayName,
+        team: injury.team?.abbreviation,
+        position: injury.athlete?.position?.abbreviation,
+        injuryStatus: this.parseInjuryStatus(injury.status),
+        injuryType: injury.type || 'Unknown',
+        description: injury.description || '',
+        dateUpdated: injury.date || new Date().toISOString(),
+        severity: this.determineInjurySeverity(injury.status, injury.type),
+        gameTimeDecision: injury.status?.toLowerCase().includes('questionable') || 
+                         injury.status?.toLowerCase().includes('game time'),
+        espnInjuryId: injury.id
+      }));
+      
+      return processedInjuries;
+      
+    } catch (error) {
+      console.error('ESPN injury data error:', error);
+      return [];
+    }
+  }
+  
+  // 📰 Get NFL news for injury updates and context
+  static async getNFLNews(limit: number = 20): Promise<any[]> {
+    try {
+      console.log(`📰 ESPN: Fetching NFL news (limit: ${limit})...`);
+      
+      const response = await fetch(`${this.baseUrl}/news`);
+      if (!response.ok) {
+        throw new Error(`ESPN News API error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      const articles = (data.articles || []).slice(0, limit);
+      
+      console.log(`✅ ESPN: Found ${articles.length} news articles`);
+      
+      // Filter and process injury-related news
+      const processedNews = articles
+        .filter((article: any) => 
+          article.headline?.toLowerCase().includes('injur') ||
+          article.headline?.toLowerCase().includes('out') ||
+          article.headline?.toLowerCase().includes('doubtful') ||
+          article.headline?.toLowerCase().includes('questionable')
+        )
+        .map((article: any) => ({
+          headline: article.headline,
+          description: article.description,
+          published: article.published,
+          link: article.links?.web?.href,
+          source: 'ESPN',
+          injuryRelated: true
+        }));
+      
+      return processedNews;
+      
+    } catch (error) {
+      console.error('ESPN news data error:', error);
+      return [];
+    }
+  }
+  
+  // Helper: Parse ESPN injury status to standardized format
+  private static parseInjuryStatus(status: string): 'active' | 'out' | 'questionable' | 'doubtful' | 'day-to-day' {
+    if (!status) return 'active';
+    
+    const statusLower = status.toLowerCase();
+    
+    if (statusLower.includes('out') || statusLower.includes('inactive')) return 'out';
+    if (statusLower.includes('questionable')) return 'questionable';
+    if (statusLower.includes('doubtful')) return 'doubtful';
+    if (statusLower.includes('day') && statusLower.includes('day')) return 'day-to-day';
+    
+    return 'active';
+  }
+  
+  // Helper: Determine injury severity for fantasy relevance
+  private static determineInjurySeverity(status: string, type: string): 'low' | 'medium' | 'high' {
+    const statusLower = status?.toLowerCase() || '';
+    const typeLower = type?.toLowerCase() || '';
+    
+    // High severity - likely to miss games
+    if (statusLower.includes('out') || 
+        statusLower.includes('ir') || 
+        typeLower.includes('acl') ||
+        typeLower.includes('season')) {
+      return 'high';
+    }
+    
+    // Medium severity - game-time decisions
+    if (statusLower.includes('questionable') || 
+        statusLower.includes('doubtful') ||
+        typeLower.includes('concussion')) {
+      return 'medium';
+    }
+    
+    return 'low';
+  }
+
   // Get live scores for all NFL games
   static async getLiveScores(): Promise<any[]> {
     try {

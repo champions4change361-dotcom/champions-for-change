@@ -4276,7 +4276,12 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
           allPlayers.filter(p => (p.position || '').toLowerCase() === position.toLowerCase()) : 
           allPlayers;
         
-        // Add fantasy projections and enhanced data
+        // Get current injury data for all NFL players
+        const injuries = await ESPNApiService.getNFLInjuries();
+        const injuryMap = new Map(injuries.map(inj => [`${inj.playerId}`, inj]));
+        console.log(`🏥 Loaded ${injuries.length} injury reports for status enhancement`);
+        
+        // Add fantasy projections, injury status, and enhanced data
         const yahooAPI = new YahooSportsAPI();
         const enhancedPlayers = await Promise.all(
           filteredPlayers.map(async (player: any) => { // Full player pool - all 32 teams
@@ -4286,12 +4291,29 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
               const confidence = generateConfidence(player.position, player.depth, player.status);
               const opponent = generateOpponent(player.team);
               
+              // Get injury data for this player
+              const injuryData = injuryMap.get(player.espnId?.toString()) || null;
+              
+              // Adjust projections based on injury status
+              const adjustedProjections = adjustProjectionsForInjury(projectedPoints, injuryData);
+              
               return {
                 ...player,
-                projectedPoints,
-                confidence,
+                projectedPoints: adjustedProjections.points,
+                confidence: adjustedProjections.confidence,
                 opponent,
-                fantasyRelevant: true
+                fantasyRelevant: true,
+                // 🏥 Enhanced injury status data
+                injuryStatus: injuryData?.injuryStatus || 'active',
+                injuryType: injuryData?.injuryType || null,
+                injuryDescription: injuryData?.description || null,
+                gameTimeDecision: injuryData?.gameTimeDecision || false,
+                injurySeverity: injuryData?.severity || 'low',
+                lastUpdated: injuryData?.dateUpdated || new Date().toISOString(),
+                // 📊 Status indicators for UI
+                statusIcon: getStatusIcon(injuryData?.injuryStatus || 'active'),
+                statusColor: getStatusColor(injuryData?.injuryStatus || 'active'),
+                fantasyImpact: calculateFantasyImpact(injuryData)
               };
             } catch (error: any) {
               console.log(`⚠️ Projection failed for ${player.name}, using base data`);
@@ -4374,6 +4396,65 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
     const nflTeams = ['ARI', 'ATL', 'BAL', 'BUF', 'CAR', 'CHI', 'CIN', 'CLE', 'DAL', 'DEN', 'DET', 'GB', 'HOU', 'IND', 'JAX', 'KC', 'LV', 'LAC', 'LAR', 'MIA', 'MIN', 'NE', 'NO', 'NYG', 'NYJ', 'PHI', 'PIT', 'SF', 'SEA', 'TB', 'TEN', 'WAS'];
     const otherTeams = nflTeams.filter(t => t !== team);
     return otherTeams[Math.floor(Math.random() * otherTeams.length)];
+  }
+
+  // 🏥 INJURY STATUS HELPER FUNCTIONS FOR DAILY FANTASY ENHANCEMENT
+  
+  function adjustProjectionsForInjury(basePoints: number, injuryData: any): { points: number; confidence: number } {
+    if (!injuryData) {
+      return { points: basePoints, confidence: 85 };
+    }
+    
+    const status = injuryData.injuryStatus;
+    
+    switch (status) {
+      case 'out':
+        return { points: 0, confidence: 100 }; // Definitely not playing
+      case 'doubtful':
+        return { points: basePoints * 0.3, confidence: 20 }; // Very unlikely to play
+      case 'questionable':
+        return { points: basePoints * 0.7, confidence: 50 }; // Game-time decision
+      case 'day-to-day':
+        return { points: basePoints * 0.85, confidence: 70 }; // Minor concern
+      default:
+        return { points: basePoints, confidence: 85 }; // Active/healthy
+    }
+  }
+  
+  function getStatusIcon(status: string): string {
+    const icons = {
+      'active': '✅',
+      'out': '❌', 
+      'questionable': '⚠️',
+      'doubtful': '🔴',
+      'day-to-day': '🟡'
+    };
+    return icons[status as keyof typeof icons] || '✅';
+  }
+  
+  function getStatusColor(status: string): string {
+    const colors = {
+      'active': 'green',
+      'out': 'red',
+      'questionable': 'yellow', 
+      'doubtful': 'orange',
+      'day-to-day': 'yellow'
+    };
+    return colors[status as keyof typeof colors] || 'green';
+  }
+  
+  function calculateFantasyImpact(injuryData: any): 'none' | 'low' | 'medium' | 'high' {
+    if (!injuryData) return 'none';
+    
+    const status = injuryData.injuryStatus;
+    const severity = injuryData.severity;
+    
+    if (status === 'out') return 'high';
+    if (status === 'doubtful' || severity === 'high') return 'high';
+    if (status === 'questionable' || severity === 'medium') return 'medium';
+    if (status === 'day-to-day' || severity === 'low') return 'low';
+    
+    return 'none';
   }
 
   // 🔍 ALL NFL PLAYERS ENDPOINT - For searchable table (MUST COME FIRST!)
