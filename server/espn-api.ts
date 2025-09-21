@@ -32,35 +32,43 @@ export class ESPNApiService {
           teamCount++;
           console.log(`🏈 ESPN: Loading team ${teamCount}/${teams.length}: ${team.displayName}...`);
           
-          const rosterResponse = await fetch(`${this.baseUrl}/teams/${team.id}/athletes`);
+          const rosterResponse = await fetch(`${this.baseUrl}/teams/${team.id}/roster`);
           if (rosterResponse.ok) {
             const rosterData = await rosterResponse.json();
-            const athletes = rosterData.athletes || [];
+            let playerCount = 0;
             
-            // Convert ESPN athlete data to our format
-            for (const athlete of athletes) {
-              if (athlete.athlete) {
-                const player = {
-                  id: `${athlete.athlete.id}_${team.abbreviation.toLowerCase()}`,
-                  name: athlete.athlete.displayName,
-                  team: team.abbreviation,
-                  number: athlete.athlete.jersey || '',
-                  position: athlete.athlete.position?.abbreviation || 'UNKNOWN',
-                  status: this.determinePlayerStatus(athlete),
-                  depth: athlete.athlete.depth || 1,
-                  espnId: athlete.athlete.id,
-                  teamId: team.id,
-                  teamName: team.displayName,
-                  headshot: athlete.athlete.headshot?.href || null,
-                  experience: athlete.athlete.experience?.years || 0,
-                  height: athlete.athlete.height || '',
-                  weight: athlete.athlete.weight || 0,
-                  age: athlete.athlete.age || 0
-                };
-                allPlayers.push(player);
+            // ESPN returns array of position groups, each with items array
+            if (Array.isArray(rosterData)) {
+              for (const positionGroup of rosterData) {
+                if (positionGroup.items && Array.isArray(positionGroup.items)) {
+                  // Convert ESPN player data to our format
+                  for (const player of positionGroup.items) {
+                    if (player.id && player.displayName) {
+                      const playerData = {
+                        id: `${player.id}_${team.abbreviation.toLowerCase()}`,
+                        name: player.displayName,
+                        team: team.abbreviation,
+                        number: player.jersey || '',
+                        position: player.position?.abbreviation || 'UNKNOWN',
+                        status: player.status?.name === 'Active' ? 'starter' : 'backup',
+                        depth: 1, // ESPN doesn't provide depth in roster
+                        espnId: player.id,
+                        teamId: team.id,
+                        teamName: team.displayName,
+                        headshot: player.headshot?.href || null,
+                        experience: player.experience?.years || 0,
+                        height: player.displayHeight || '',
+                        weight: player.displayWeight || '',
+                        age: player.age || 0
+                      };
+                      allPlayers.push(playerData);
+                      playerCount++;
+                    }
+                  }
+                }
               }
             }
-            console.log(`  ✅ ${team.abbreviation}: ${athletes.length} players`);
+            console.log(`  ✅ ${team.abbreviation}: ${playerCount} players`);
           } else {
             console.log(`  ❌ ${team.abbreviation}: Roster unavailable (${rosterResponse.status})`);
           }

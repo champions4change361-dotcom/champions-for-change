@@ -4269,8 +4269,9 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
         const { ESPNApiService } = await import('./espn-api');
         const { YahooSportsAPI } = await import('./yahooSportsAPI');
         
-        // Get comprehensive player data from all 32 NFL teams via ESPN API
-        const allPlayers = await ESPNApiService.getAllNFLPlayers();
+        // Get base player data (revert to working depth chart while ESPN is enhanced)
+        const { NFLDepthChartParser } = await import('./nfl-depth-chart-parser');
+        const allPlayers = NFLDepthChartParser.getAllPlayers();
         let filteredPlayers = position ? 
           allPlayers.filter(p => (p.position || '').toLowerCase() === position.toLowerCase()) : 
           allPlayers;
