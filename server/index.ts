@@ -54,6 +54,11 @@ app.use((req, res, next) => {
   // Create server early to start listening immediately
   const server = await registerRoutes(app);
 
+  // Initialize NFL Injury Scraper for automated injury updates
+  const { nflInjuryScraper } = await import('./nfl-injury-scraper.js');
+  nflInjuryScraper.startScheduledUpdates();
+  console.log('🏥 NFL injury scraping system initialized');
+
   // Setup Vite before starting server
   if (process.env.NODE_ENV === 'development') {
     await setupVite(app, server);
