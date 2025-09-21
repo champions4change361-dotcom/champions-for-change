@@ -32,6 +32,9 @@ export function AgeVerification({
     const ageVerified = localStorage.getItem('ageVerified21Plus');
     const verificationDate = localStorage.getItem('ageVerificationDate');
     
+    // For debugging - temporarily clear age verification to ensure it shows
+    console.log('Age verification check:', { ageVerified, verificationDate });
+    
     if (ageVerified === 'true' && verificationDate) {
       const verificationTime = new Date(verificationDate).getTime();
       const now = new Date().getTime();
@@ -39,10 +42,12 @@ export function AgeVerification({
       
       // Age verification is valid for 30 days
       if (now - verificationTime < (30 * dayInMs)) {
+        console.log('Age verification still valid, auto-verifying');
         onVerified();
         return;
       } else {
         // Clear expired verification
+        console.log('Age verification expired, clearing');
         localStorage.removeItem('ageVerified21Plus');
         localStorage.removeItem('ageVerificationDate');
       }

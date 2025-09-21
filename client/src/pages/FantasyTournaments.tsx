@@ -172,10 +172,14 @@ export default function FantasyTournaments() {
   };
 
   const handleFormatSelection = (format: string) => {
-    // Proper authentication flow for fantasy tournament creation
-    if (isFantasyAuthenticated) {
+    // Enhanced authentication flow for fantasy tournament creation
+    console.log('Format selection:', format, 'isAuthenticated:', isFantasyAuthenticated, 'fantasyUser:', fantasyUser);
+    
+    if (isFantasyAuthenticated && fantasyUser) {
+      console.log('User authenticated, navigating to:', `/fantasy/create/${format}`);
       setLocation(`/fantasy/create/${format}`);
     } else {
+      console.log('User not authenticated, showing auth modal');
       sessionStorage.setItem('pendingFantasyFormat', format);
       setShowFantasyAuth(true);
     }
@@ -207,6 +211,28 @@ export default function FantasyTournaments() {
           </div>
         )}
         
+        {/* Debug Info & Clear Cache */}
+        <div className="mb-6 p-4 bg-yellow-100 rounded-lg">
+          <h4 className="font-semibold text-yellow-800 mb-2">🐛 Debug Info</h4>
+          <div className="text-sm text-yellow-700 space-y-1">
+            <p>Fantasy Authenticated: {isFantasyAuthenticated ? '✅ Yes' : '❌ No'}</p>
+            <p>Fantasy User: {fantasyUser ? fantasyUser.email : '❌ None'}</p>
+            <p>Age Verified: {localStorage.getItem('ageVerified21Plus') === 'true' ? '✅ Yes' : '❌ No'}</p>
+          </div>
+          <Button 
+            size="sm" 
+            variant="outline"
+            className="mt-2 text-yellow-800 border-yellow-800"
+            onClick={() => {
+              localStorage.clear();
+              sessionStorage.clear();
+              window.location.reload();
+            }}
+          >
+            🔄 Clear All Cache & Reload
+          </Button>
+        </div>
+
         {/* Create Tournament Buttons */}
         <div className="pt-6 space-y-4">
           <h3 className="text-lg font-semibold text-center mb-4">Create Your League</h3>
