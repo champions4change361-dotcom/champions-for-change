@@ -205,7 +205,10 @@ export function DailyFantasyLineupBuilder({
       }
     }
     
-    return matchesSearch && matchesPosition;
+    // 🏈 CRITICAL: Filter out players from teams on bye week
+    const notOnByeWeek = !byeTeams.includes(player.team);
+    
+    return matchesSearch && matchesPosition && notOnByeWeek;
   });
 
   const isLineupComplete = lineup.every(slot => slot.player !== null);
