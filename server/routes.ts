@@ -4746,15 +4746,22 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
         // Create opponent lookup map
         const opponents: Record<string, string> = {};
         try {
-          const schedule = nflScheduleScraper.getCurrentWeekData();
+          console.log('🔍 Attempting to get schedule data...');
+          const schedule = nflScheduleScraper.getLatestSchedule();
+          console.log('📊 Schedule result:', schedule ? 'found' : 'null', schedule ? `${Object.keys(schedule).join(', ')}` : '');
+          
           if (schedule?.games) {
+            console.log(`🎮 Found ${schedule.games.length} games in schedule`);
             schedule.games.forEach((game: any) => {
               opponents[game.homeTeam] = game.awayTeam;
               opponents[game.awayTeam] = game.homeTeam;
             });
+            console.log(`✅ Created opponent map: ${JSON.stringify(opponents)}`);
+          } else {
+            console.log('❌ No games found in schedule data');
           }
         } catch (error) {
-          console.log('⚠️ Could not load opponents from schedule, using fallback');
+          console.log('⚠️ Could not load opponents from schedule, error:', error);
         }
 
         // Sample NFL players for survivor pool with real opponent data
