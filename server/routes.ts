@@ -7503,7 +7503,11 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
   app.get("/api/fantasy/projections/:position", async (req, res) => {
     try {
       const { position } = req.params;
-      const { week = 1 } = req.query;
+      
+      // Get current week from NFL schedule scraper instead of hardcoded week 1
+      const { nflScheduleScraper } = await import('./nfl-schedule-scraper.js');
+      const currentWeek = nflScheduleScraper.getCurrentWeek();
+      const { week = currentWeek } = req.query;
       
       if (!['RB', 'WR', 'QB', 'TE'].includes(position.toUpperCase())) {
         return res.status(400).json({ error: "Invalid position" });
@@ -7545,6 +7549,74 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
       success: false,
       response: 'AI consultation is currently under development. Please use the standard tournament creation process.'
     });
+  });
+
+  // NFL Schedule API endpoints
+  app.get('/api/nfl/schedule', async (req, res) => {
+    try {
+      const { nflScheduleScraper } = await import('./nfl-schedule-scraper.js');
+      const schedule = nflScheduleScraper.getLatestSchedule();
+      
+      if (!schedule) {
+        return res.status(404).json({ 
+          error: 'Schedule data not available',
+          currentWeek: 1 // Fallback
+        });
+      }
+      
+      res.json({
+        success: true,
+        schedule,
+        currentWeek: schedule.currentWeek,
+        byeTeams: schedule.byeTeams,
+        totalGames: schedule.totalGames
+      });
+    } catch (error: any) {
+      console.error('Schedule fetch error:', error);
+      res.status(500).json({ error: 'Failed to get schedule data' });
+    }
+  });
+
+  app.get('/api/nfl/current-week', async (req, res) => {
+    try {
+      const { nflScheduleScraper } = await import('./nfl-schedule-scraper.js');
+      const currentWeek = nflScheduleScraper.getCurrentWeek();
+      const byeTeams = nflScheduleScraper.getByeTeams();
+      
+      res.json({
+        success: true,
+        currentWeek,
+        byeTeams,
+        season: new Date().getFullYear()
+      });
+    } catch (error: any) {
+      console.error('Current week fetch error:', error);
+      res.status(500).json({ 
+        error: 'Failed to get current week',
+        currentWeek: 1 // Fallback
+      });
+    }
+  });
+
+  app.get('/api/nfl/team/:team/opponent', async (req, res) => {
+    try {
+      const { team } = req.params;
+      const { nflScheduleScraper } = await import('./nfl-schedule-scraper.js');
+      
+      const opponent = nflScheduleScraper.getOpponent(team.toUpperCase());
+      const isPlaying = nflScheduleScraper.isTeamPlaying(team.toUpperCase());
+      
+      res.json({
+        success: true,
+        team: team.toUpperCase(),
+        opponent,
+        isPlaying,
+        status: opponent ? 'playing' : 'bye'
+      });
+    } catch (error: any) {
+      console.error('Team opponent fetch error:', error);
+      res.status(500).json({ error: 'Failed to get team matchup data' });
+    }
   });
 
   // Session management routes

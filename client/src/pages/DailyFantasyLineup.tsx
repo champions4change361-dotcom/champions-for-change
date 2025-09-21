@@ -1,5 +1,6 @@
 import { useParams, useLocation } from 'wouter';
 import { useFantasyAuth } from '@/hooks/useFantasyAuth';
+import { useCurrentWeek } from '@/hooks/useCurrentWeek';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +12,7 @@ export default function DailyFantasyLineup() {
   const params = useParams();
   const [location, setLocation] = useLocation();
   const { fantasyUser, isFantasyAuthenticated } = useFantasyAuth();
+  const { currentWeek, byeTeams } = useCurrentWeek();
   const { toast } = useToast();
   
   const leagueId = params.leagueId;
@@ -80,7 +82,7 @@ export default function DailyFantasyLineup() {
                 {fantasyUser?.email?.split('@')[0] || 'Player'}
               </Badge>
               <Badge variant="outline" className="text-green-600 border-green-600">
-                NFL Week 1
+                NFL Week {currentWeek}
               </Badge>
             </div>
           </div>
@@ -90,7 +92,8 @@ export default function DailyFantasyLineup() {
         <DailyFantasyLineupBuilder
           leagueId={leagueId || ''}
           sport={sport}
-          contestWeek={1}
+          contestWeek={currentWeek}
+          byeTeams={byeTeams}
           onLineupSubmit={handleLineupSubmit}
         />
       </div>

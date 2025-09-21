@@ -373,3 +373,6 @@ export class NFLScheduleScraper {
     return this.latestSchedule.teamsPlaying.includes(team);
   }
 }
+
+// Export singleton instance for easy access
+export const nflScheduleScraper = NFLScheduleScraper.getInstance();

@@ -60,8 +60,7 @@ app.use((req, res, next) => {
   console.log('🏥 NFL injury scraping system initialized');
 
   // Initialize NFL Schedule Scraper for current week and matchup tracking
-  const { NFLScheduleScraper } = await import('./nfl-schedule-scraper.js');
-  const nflScheduleScraper = NFLScheduleScraper.getInstance();
+  const { nflScheduleScraper } = await import('./nfl-schedule-scraper.js');
   nflScheduleScraper.startScheduledUpdates();
   console.log('🗓️ NFL schedule scraping system initialized');
 

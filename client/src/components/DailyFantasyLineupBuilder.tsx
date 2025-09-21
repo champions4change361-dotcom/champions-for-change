@@ -31,6 +31,7 @@ interface DailyFantasyLineupBuilderProps {
   leagueId: string;
   sport: string;
   contestWeek?: number;
+  byeTeams?: string[];
   onLineupSubmit?: (lineup: LineupSlot[]) => void;
 }
 
@@ -38,6 +39,7 @@ export function DailyFantasyLineupBuilder({
   leagueId, 
   sport, 
   contestWeek = 1,
+  byeTeams = [],
   onLineupSubmit 
 }: DailyFantasyLineupBuilderProps) {
   const { toast } = useToast();
