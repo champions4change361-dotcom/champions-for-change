@@ -49,8 +49,12 @@ export function FantasyAuth({ open, onOpenChange, onAuthSuccess }: FantasyAuthPr
         createdAt: new Date().toISOString()
       };
 
-      // Store in localStorage for now (in real app, use proper auth)
+      // Store in localStorage for fantasy-specific auth
       localStorage.setItem("fantasyUser", JSON.stringify(fantasyUser));
+      
+      // Also mark this as a fantasy session to prevent main app redirects
+      sessionStorage.setItem("isFantasySession", "true");
+      sessionStorage.setItem("fantasyCreatedAccount", "true");
       
       setTimeout(() => {
         setIsLoading(false);

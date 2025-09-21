@@ -478,15 +478,28 @@ function AppRouter() {
       {/* Show Domain-Specific Landing page if not authenticated or on guest-access domains */}
       {(!isAuthenticated || allowGuestAccess) && (
         <Route path="/">
-          {config?.brand === 'COMPETITIVE_EDUCATION_HUB' ? (
-            <EducationHubLanding />
-          ) : config?.brand === 'TRANTOR_TOURNAMENTS' ? (
-            <TrantorLanding />
-          ) : (
-            <div className={config ? getDomainBackgroundClass(config.brand) : "min-h-screen bg-gradient-to-br from-blue-50 to-slate-50"}>
-              <Landing />
-            </div>
-          )}
+          {() => {
+            // Check if this is a fantasy session to prevent unwanted redirects
+            const isFantasySession = sessionStorage.getItem("isFantasySession");
+            const justCreatedFantasyAccount = sessionStorage.getItem("fantasyCreatedAccount");
+            
+            if (isFantasySession && justCreatedFantasyAccount) {
+              // Clear the flag and redirect to fantasy platform
+              sessionStorage.removeItem("fantasyCreatedAccount");
+              window.location.href = '/fantasy-tournaments';
+              return null;
+            }
+            
+            return config?.brand === 'COMPETITIVE_EDUCATION_HUB' ? (
+              <EducationHubLanding />
+            ) : config?.brand === 'TRANTOR_TOURNAMENTS' ? (
+              <TrantorLanding />
+            ) : (
+              <div className={config ? getDomainBackgroundClass(config.brand) : "min-h-screen bg-gradient-to-br from-blue-50 to-slate-50"}>
+                <Landing />
+              </div>
+            );
+          }}
         </Route>
       )}
       {/* Show authenticated routes if authenticated */}
