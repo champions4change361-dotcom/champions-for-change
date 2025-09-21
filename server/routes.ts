@@ -7042,7 +7042,7 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
       // Calculate age
       const birthDate = new Date(dateOfBirth);
       const today = new Date();
-      const age = today.getFullYear() - birthDate.getFullYear();
+      let age = today.getFullYear() - birthDate.getFullYear();
       const monthDiff = today.getMonth() - birthDate.getMonth();
       
       if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
