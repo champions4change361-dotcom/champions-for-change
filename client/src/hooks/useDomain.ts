@@ -26,29 +26,19 @@ export function useDomain() {
   useEffect(() => {
     const hostname = window.location.hostname;
     console.log('Domain detection - hostname:', hostname); // Debug logging
+    
+    // Redirect Champions for Change domain to Trantor Tournaments
+    if (hostname === 'championsforchange.net' || hostname === 'www.championsforchange.net') {
+      console.log('🔄 Redirecting championsforchange.net to trantortournaments.org');
+      const currentPath = window.location.pathname + window.location.search + window.location.hash;
+      window.location.replace(`https://trantortournaments.org${currentPath}`);
+      return; // Don't set any config, redirect is in progress
+    }
+    
     let config: DomainConfig;
 
-    // Champions for Change - Primary Tournament Management Platform (same branding as Trantor)
-    if (hostname === 'championsforchange.net' || hostname === 'www.championsforchange.net') {
-      config = {
-        type: 'pro',
-        brand: 'TRANTOR_TOURNAMENTS',
-        theme: 'professional',
-        allowFantasyPromo: true,
-        allowProPromo: false,    // Already on primary platform
-        allowSchoolPromo: true,  // Can promote educational services
-        primaryColor: 'orange',
-        features: {
-          fantasyLeagues: true,   // Full tournament management
-          ageVerification: true,  // Professional tournaments
-          crossSelling: true,
-          guestAccess: true,
-          registration: true
-        }
-      };
-    }
-    // Competitive Education Hub - School Athletics Domain
-    else if (hostname === 'competitiveeducationhub.com' || hostname === 'www.competitiveeducationhub.com') {
+    // Competitive Education Hub - School Athletics Domain  
+    if (hostname === 'competitiveeducationhub.com' || hostname === 'www.competitiveeducationhub.com') {
       config = {
         type: 'school',
         brand: 'COMPETITIVE_EDUCATION_HUB',
