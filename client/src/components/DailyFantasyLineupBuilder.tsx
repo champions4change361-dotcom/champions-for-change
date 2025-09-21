@@ -20,6 +20,7 @@ import {
 import { FantasyPlayerCard } from './FantasyPlayerCard';
 import { useQuery } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
+import { fantasySalaryCalculator } from '@shared/fantasySalaryCalculator';
 
 interface LineupSlot {
   position: string;
@@ -96,30 +97,30 @@ export function DailyFantasyLineupBuilder({
     setShowPlayerModal(true);
   };
 
+  // 🚀 PROFESSIONAL FANTASY SALARY CALCULATION - Same as FantasyPlayerCard
   const generateFantasySalary = (player: any): number => {
     const { position, projectedPoints = 0, depth = 1, status } = player;
     
-    const positionBaseSalary = {
-      'QB': 70, 'RB': 65, 'WR': 60, 'TE': 50, 'K': 45, 'DEF': 40
+    // Generate realistic projected points if not provided
+    let points = projectedPoints;
+    if (points === 0) {
+      const tier = depth === 1 ? 'solid' : depth === 2 ? 'value' : 'budget';
+      points = fantasySalaryCalculator.generateProjectedPoints(position, tier);
+    }
+    
+    // Create adjustments based on player data
+    const adjustments = {
+      injuryStatus: status === 'out' ? 'out' as const :
+                   status === 'doubtful' ? 'doubtful' as const :
+                   status === 'questionable' ? 'questionable' as const : 
+                   'healthy' as const,
+      gameScript: 'neutral' as const,
+      weather: 'clear' as const,
+      ownershipProjection: depth === 1 ? 0.25 : depth === 2 ? 0.15 : 0.08
     };
     
-    let baseSalary = positionBaseSalary[position as keyof typeof positionBaseSalary] || 50;
-    
-    if (projectedPoints > 0) {
-      if (projectedPoints >= 20) baseSalary += 35;
-      else if (projectedPoints >= 15) baseSalary += 20;
-      else if (projectedPoints >= 10) baseSalary += 10;
-    }
-    
-    if (status === 'starter' || depth === 1) {
-      baseSalary += 15;
-    } else if (depth === 2) {
-      baseSalary += 5;
-    } else if (depth >= 3) {
-      baseSalary -= 10;
-    }
-    
-    return Math.max(40, Math.min(120, baseSalary)) * 100;
+    // Calculate salary using sophisticated algorithm
+    return fantasySalaryCalculator.calculateSalary(points, position as any, adjustments);
   };
 
   const selectPlayer = (player: any) => {
@@ -254,11 +255,11 @@ export function DailyFantasyLineupBuilder({
           <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
             <div className="flex items-center gap-2 text-sm text-blue-800">
               <span className="font-medium">📊 Data Source:</span>
-              <span>NFL.com | Champions for Change Fantasy Platform</span>
+              <span>NFL.com | Professional DraftKings-Style Pricing</span>
             </div>
             <div className="text-xs text-blue-600 mt-1">
-              ⚠️ Always verify player status on NFL.com before finalizing lineups. 
-              We do our best but you should do your research too!
+              💰 Salaries calculated using position scarcity, projected points, and injury adjustments.
+              Always verify player status on NFL.com before finalizing lineups!
             </div>
           </div>
           

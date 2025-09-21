@@ -3,6 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { TrendingUp, DollarSign, Users, Activity } from 'lucide-react';
+import { fantasySalaryCalculator } from '@shared/fantasySalaryCalculator';
 
 interface FantasyPlayerCardProps {
   player: {
@@ -24,74 +25,71 @@ interface FantasyPlayerCardProps {
 
 export function FantasyPlayerCard({ player, onPlayerSelect, onPlayerDrillDown, isSelected }: FantasyPlayerCardProps) {
   
-  // Fantasy salary algorithm based on position, projections, and tier
+  // 🚀 PROFESSIONAL FANTASY SALARY CALCULATION
+  // Uses advanced DraftKings-style algorithm with position scarcity and adjustments
   const generateFantasySalary = (player: any): number => {
     const { position, projectedPoints = 0, depth = 1, status } = player;
     
-    // Base salary ranges by position (in hundreds, will multiply by 100)
-    const positionBaseSalary = {
-      'QB': 70,    // $7,000 base
-      'RB': 65,    // $6,500 base  
-      'WR': 60,    // $6,000 base
-      'TE': 50,    // $5,000 base
-      'K': 45,     // $4,500 base
-      'DEF': 40    // $4,000 base
+    // Generate realistic projected points if not provided
+    let points = projectedPoints;
+    if (points === 0) {
+      const tier = depth === 1 ? 'solid' : depth === 2 ? 'value' : 'budget';
+      points = fantasySalaryCalculator.generateProjectedPoints(position, tier);
+    }
+    
+    // Create adjustments based on player data
+    const adjustments = {
+      injuryStatus: status === 'out' ? 'out' as const :
+                   status === 'doubtful' ? 'doubtful' as const :
+                   status === 'questionable' ? 'questionable' as const : 
+                   'healthy' as const,
+      gameScript: 'neutral' as const, // Default - could be enhanced with game data
+      weather: 'clear' as const, // Default - could be enhanced with weather data
+      ownershipProjection: depth === 1 ? 0.25 : depth === 2 ? 0.15 : 0.08 // Starters higher ownership
     };
     
-    let baseSalary = positionBaseSalary[position as keyof typeof positionBaseSalary] || 50;
-    
-    // Adjust for projected points (if available)
-    if (projectedPoints > 0) {
-      if (projectedPoints >= 20) baseSalary += 35; // Star players: $10K+
-      else if (projectedPoints >= 15) baseSalary += 20; // Solid players: $6-9K
-      else if (projectedPoints >= 10) baseSalary += 10; // Mid-tier
-      // Budget options stay at base level: $4-6K
-    }
-    
-    // Adjust for depth chart position
-    if (status === 'starter' || depth === 1) {
-      baseSalary += 15; // Starters get premium
-    } else if (depth === 2) {
-      baseSalary += 5;  // Backups get slight bump
-    } else if (depth >= 3) {
-      baseSalary -= 10; // Deep bench players cheaper
-    }
-    
-    // Ensure salary stays in DraftKings range ($4,000 - $12,000)
-    const finalSalary = Math.max(40, Math.min(120, baseSalary)) * 100;
-    
-    return finalSalary;
+    // Calculate salary using sophisticated algorithm
+    return fantasySalaryCalculator.calculateSalary(points, position as any, adjustments);
   };
   
   const salary = generateFantasySalary(player);
+  const tier = fantasySalaryCalculator.getSalaryTier(salary);
   
-  // Determine tier based on salary for styling
-  const getTierStyling = (salary: number) => {
-    if (salary >= 10000) {
-      return {
-        borderColor: 'border-yellow-400',
-        bgGradient: 'from-yellow-50 to-orange-50',
-        salaryColor: 'text-yellow-700 bg-yellow-100',
-        tierBadge: { text: 'ELITE', color: 'bg-yellow-500' }
-      };
-    } else if (salary >= 7000) {
-      return {
-        borderColor: 'border-blue-400', 
-        bgGradient: 'from-blue-50 to-indigo-50',
-        salaryColor: 'text-blue-700 bg-blue-100',
-        tierBadge: { text: 'SOLID', color: 'bg-blue-500' }
-      };
-    } else {
-      return {
-        borderColor: 'border-green-400',
-        bgGradient: 'from-green-50 to-emerald-50', 
-        salaryColor: 'text-green-700 bg-green-100',
-        tierBadge: { text: 'VALUE', color: 'bg-green-500' }
-      };
+  // Professional tier styling based on sophisticated salary ranges
+  const getTierStyling = (tier: string) => {
+    switch (tier) {
+      case 'elite':
+        return {
+          borderColor: 'border-yellow-400',
+          bgGradient: 'from-yellow-50 to-orange-50',
+          salaryColor: 'text-yellow-700 bg-yellow-100',
+          tierBadge: { text: 'ELITE', color: 'bg-yellow-500' }
+        };
+      case 'solid':
+        return {
+          borderColor: 'border-blue-400', 
+          bgGradient: 'from-blue-50 to-indigo-50',
+          salaryColor: 'text-blue-700 bg-blue-100',
+          tierBadge: { text: 'SOLID', color: 'bg-blue-500' }
+        };
+      case 'value':
+        return {
+          borderColor: 'border-green-400',
+          bgGradient: 'from-green-50 to-emerald-50', 
+          salaryColor: 'text-green-700 bg-green-100',
+          tierBadge: { text: 'VALUE', color: 'bg-green-500' }
+        };
+      default: // budget
+        return {
+          borderColor: 'border-gray-400',
+          bgGradient: 'from-gray-50 to-slate-50', 
+          salaryColor: 'text-gray-700 bg-gray-100',
+          tierBadge: { text: 'BUDGET', color: 'bg-gray-500' }
+        };
     }
   };
   
-  const styling = getTierStyling(salary);
+  const styling = getTierStyling(tier);
   
   // Format salary for display
   const formatSalary = (amount: number) => {
