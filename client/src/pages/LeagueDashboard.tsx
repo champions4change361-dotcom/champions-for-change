@@ -61,15 +61,19 @@ export default function LeagueDashboard() {
 
   // Mock data - in real app, fetch from API
   useEffect(() => {
+    if (!leagueId) return;
+    
     setIsLoading(true);
     
     // Simulate API call
     setTimeout(() => {
+      const userEmail = fantasyUser?.email || "user@example.com";
+      
       const mockLeague: LeagueData = {
-        id: leagueId || "league-123",
+        id: leagueId,
         name: "Office Champions Survivor Pool",
         description: "Family fun league",
-        createdBy: fantasyUser?.email || "user@example.com",
+        createdBy: userEmail,
         createdAt: new Date().toISOString(),
         status: 'draft',
         participantCount: 1,
@@ -81,8 +85,8 @@ export default function LeagueDashboard() {
       const mockParticipants: Participant[] = [
         {
           id: "1",
-          email: fantasyUser?.email || "user@example.com",
-          displayName: fantasyUser?.email?.split('@')[0] || "You",
+          email: userEmail,
+          displayName: userEmail.split('@')[0] || "You",
           joinedAt: new Date().toISOString(),
           isOwner: true,
           isActive: true,
@@ -95,7 +99,7 @@ export default function LeagueDashboard() {
       setParticipants(mockParticipants);
       setIsLoading(false);
     }, 1000);
-  }, [leagueId, fantasyUser]);
+  }, [leagueId, fantasyUser?.email]);
 
   const inviteLink = `${window.location.origin}/fantasy/join/${leagueId}`;
 
