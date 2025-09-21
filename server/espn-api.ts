@@ -2,12 +2,12 @@
 // Provides real-time NFL data for Fantasy Coaching Brain
 
 export class ESPNApiService {
-  private baseUrl = 'https://site.api.espn.com/apis/site/v2/sports/football/nfl';
+  private static baseUrl = 'https://site.api.espn.com/apis/site/v2/sports/football/nfl';
   
   // Get live scores for all NFL games
   static async getLiveScores(): Promise<any[]> {
     try {
-      const response = await fetch(`${this.prototype.baseUrl}/scoreboard`);
+      const response = await fetch(`${this.baseUrl}/scoreboard`);
       if (!response.ok) {
         throw new Error(`ESPN API error: ${response.status}`);
       }
@@ -23,7 +23,7 @@ export class ESPNApiService {
   // Get detailed game information
   static async getGameDetails(gameId: string): Promise<any> {
     try {
-      const response = await fetch(`${this.prototype.baseUrl}/summary?event=${gameId}`);
+      const response = await fetch(`${this.baseUrl}/summary?event=${gameId}`);
       if (!response.ok) {
         throw new Error(`ESPN API error: ${response.status}`);
       }
@@ -38,7 +38,7 @@ export class ESPNApiService {
   // Get team standings
   static async getStandings(): Promise<any[]> {
     try {
-      const response = await fetch(`${this.prototype.baseUrl}/standings`);
+      const response = await fetch(`${this.baseUrl}/standings`);
       if (!response.ok) {
         throw new Error(`ESPN API error: ${response.status}`);
       }
@@ -265,7 +265,7 @@ export class ESPNApiService {
   // Get upcoming games for the week
   static async getUpcomingGames(week: number): Promise<any[]> {
     try {
-      const response = await fetch(`${this.prototype.baseUrl}/scoreboard`);
+      const response = await fetch(`${this.baseUrl}/scoreboard`);
       if (!response.ok) {
         throw new Error(`ESPN API error: ${response.status}`);
       }
