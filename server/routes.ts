@@ -7002,10 +7002,10 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
   // Get user's fantasy profile
   app.get("/api/fantasy/profile", async (req, res) => {
     try {
-      const user = await checkAuthUser(req);
-      if (!user) {
+      if (!req.user) {
         return res.status(401).json({ error: "Authentication required" });
       }
+      const user = req.user;
 
       const fantasyProfile = await storage.getFantasyProfile(user.id);
       
@@ -7030,10 +7030,10 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
   // Set age verification for fantasy profile
   app.post("/api/fantasy/profile/age-verify", async (req, res) => {
     try {
-      const user = await checkAuthUser(req);
-      if (!user) {
+      if (!req.user) {
         return res.status(401).json({ error: "Authentication required" });
       }
+      const user = req.user;
 
       const { dateOfBirth } = req.body;
       
@@ -7083,10 +7083,10 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
   // Accept fantasy terms of service
   app.post("/api/fantasy/profile/accept-tos", async (req, res) => {
     try {
-      const user = await checkAuthUser(req);
-      if (!user) {
+      if (!req.user) {
         return res.status(401).json({ error: "Authentication required" });
       }
+      const user = req.user;
 
       const updatedProfile = await storage.acceptFantasyTOS(user.id);
 
@@ -7107,10 +7107,10 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
   // Create or update fantasy profile
   app.post("/api/fantasy/profile", async (req, res) => {
     try {
-      const user = await checkAuthUser(req);
-      if (!user) {
+      if (!req.user) {
         return res.status(401).json({ error: "Authentication required" });
       }
+      const user = req.user;
 
       const { status } = req.body;
       
