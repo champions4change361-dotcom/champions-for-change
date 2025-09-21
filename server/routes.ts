@@ -6903,6 +6903,62 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
   });
 
 
+  // 🏈 LIVE NFL SCHEDULE ENDPOINT - Real ESPN API Data for Today
+  app.get("/api/fantasy/nfl-schedule", async (req, res) => {
+    try {
+      console.log('🏈 Live NFL Schedule Request for', new Date().toLocaleDateString());
+      
+      const { ESPNApiService } = await import('./espn-api');
+      
+      // Get live scores/games from ESPN
+      const liveGames = await ESPNApiService.getLiveScores();
+      
+      // Format games for fantasy frontend
+      const formattedGames = liveGames.map((game: any) => {
+        const homeTeam = game.competitions?.[0]?.competitors?.find((c: any) => c.homeAway === 'home');
+        const awayTeam = game.competitions?.[0]?.competitors?.find((c: any) => c.homeAway === 'away');
+        
+        return {
+          id: game.id,
+          homeTeam: homeTeam?.team?.abbreviation || 'TBD',
+          awayTeam: awayTeam?.team?.abbreviation || 'TBD',
+          homeTeamName: homeTeam?.team?.displayName || 'TBD',
+          awayTeamName: awayTeam?.team?.displayName || 'TBD',
+          gameTime: game.date,
+          status: game.status?.type?.name || 'Scheduled',
+          week: game.week?.number || 3,
+          homeScore: homeTeam?.score || 0,
+          awayScore: awayTeam?.score || 0,
+          venue: game.competitions?.[0]?.venue?.fullName || 'TBD',
+          network: game.competitions?.[0]?.broadcasts?.[0]?.names?.[0] || 'TBD'
+        };
+      });
+
+      // Filter for today's games
+      const today = new Date();
+      const todaysGames = formattedGames.filter((game: any) => {
+        const gameDate = new Date(game.gameTime);
+        return gameDate.toDateString() === today.toDateString();
+      });
+
+      res.json({
+        success: true,
+        date: today.toLocaleDateString(),
+        gamesCount: todaysGames.length,
+        games: todaysGames,
+        lastUpdated: new Date().toISOString(),
+        source: 'ESPN API - Live Data'
+      });
+
+    } catch (error: any) {
+      console.error("Live NFL schedule error:", error);
+      res.status(500).json({ 
+        error: "Failed to get live NFL schedule",
+        details: error.message 
+      });
+    }
+  });
+
   // Fantasy system status endpoint for dropdowns
   app.get("/api/fantasy/status", async (req, res) => {
     try {
