@@ -6,8 +6,13 @@ import { Heart, CreditCard, ArrowLeft, Smartphone, Repeat } from 'lucide-react';
 import { SiPaypal, SiVenmo } from 'react-icons/si';
 import { useToast } from '@/hooks/use-toast';
 
-// Load Stripe
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY!);
+// Load Stripe with error handling
+const stripePromise = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY 
+  ? loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY).catch(error => {
+      console.warn('Failed to load Stripe.js:', error);
+      return null;
+    })
+  : Promise.resolve(null);
 
 export default function PaymentMethods() {
   const [paymentData, setPaymentData] = useState<{

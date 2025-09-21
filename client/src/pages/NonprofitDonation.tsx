@@ -11,8 +11,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Heart, GraduationCap, Users, Trophy } from "lucide-react";
 
-// Load Stripe with your publishable key
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+// Load Stripe with proper error handling
+const stripePromise = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY 
+  ? loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY).catch(error => {
+      console.warn('Failed to load Stripe.js:', error);
+      return null;
+    })
+  : Promise.resolve(null);
 
 const DonationForm = () => {
   const stripe = useStripe();

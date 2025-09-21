@@ -15,8 +15,13 @@ import { apiRequest } from "@/lib/queryClient";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 
-// Load Stripe
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "");
+// Load Stripe with proper error handling  
+const stripePromise = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY 
+  ? loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY).catch(error => {
+      console.warn('Failed to load Stripe.js:', error);
+      return null;
+    })
+  : Promise.resolve(null);
 
 interface TeamPaymentInfo {
   teamId: string;

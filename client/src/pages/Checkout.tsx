@@ -6,11 +6,13 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Heart, CreditCard, CheckCircle, ArrowLeft } from 'lucide-react';
 
-// Load Stripe with public key from environment
-if (!import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY) {
-  throw new Error('Missing required Stripe key: VITE_STRIPE_PUBLISHABLE_KEY');
-}
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+// Load Stripe with proper error handling
+const stripePromise = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY 
+  ? loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY).catch(error => {
+      console.warn('Failed to load Stripe.js:', error);
+      return null;
+    })
+  : Promise.resolve(null);
 
 interface CheckoutFormProps {
   clientSecret: string;
@@ -27,11 +29,28 @@ function CheckoutForm({ clientSecret, amount, donorId, postDonationChoice, payme
   const { toast } = useToast();
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentSucceeded, setPaymentSucceeded] = useState(false);
+  const [stripeLoadError, setStripeLoadError] = useState(false);
+
+  // Check if Stripe failed to load
+  useEffect(() => {
+    stripePromise.then(stripe => {
+      if (!stripe) {
+        setStripeLoadError(true);
+      }
+    });
+  }, []);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
     if (!stripe || !elements) {
+      if (stripeLoadError) {
+        toast({
+          title: "Payment system unavailable",
+          description: "Payment processing is temporarily unavailable in development mode. Please try again later.",
+          variant: "destructive",
+        });
+      }
       return;
     }
 
