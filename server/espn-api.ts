@@ -4,6 +4,101 @@
 export class ESPNApiService {
   private static baseUrl = 'https://site.api.espn.com/apis/site/v2/sports/football/nfl';
   
+  // 🏈 Get comprehensive NFL player data for all 32 teams (Daily Fantasy System)
+  static async getAllNFLPlayers(): Promise<any[]> {
+    try {
+      console.log('🔍 ESPN: Loading all 32 NFL teams and their complete rosters...');
+      
+      // Step 1: Get all 32 NFL teams
+      const teamsResponse = await fetch(`${this.baseUrl}/teams`);
+      if (!teamsResponse.ok) {
+        throw new Error(`ESPN Teams API error: ${teamsResponse.status}`);
+      }
+      
+      const teamsData = await teamsResponse.json();
+      const teams = teamsData.sports?.[0]?.leagues?.[0]?.teams || [];
+      
+      console.log(`📊 ESPN: Found ${teams.length} NFL teams`);
+      
+      // Step 2: Get roster for each team
+      const allPlayers = [];
+      let teamCount = 0;
+      
+      for (const teamWrapper of teams) {
+        const team = teamWrapper.team;
+        if (!team?.id) continue;
+        
+        try {
+          teamCount++;
+          console.log(`🏈 ESPN: Loading team ${teamCount}/${teams.length}: ${team.displayName}...`);
+          
+          const rosterResponse = await fetch(`${this.baseUrl}/teams/${team.id}/athletes`);
+          if (rosterResponse.ok) {
+            const rosterData = await rosterResponse.json();
+            const athletes = rosterData.athletes || [];
+            
+            // Convert ESPN athlete data to our format
+            for (const athlete of athletes) {
+              if (athlete.athlete) {
+                const player = {
+                  id: `${athlete.athlete.id}_${team.abbreviation.toLowerCase()}`,
+                  name: athlete.athlete.displayName,
+                  team: team.abbreviation,
+                  number: athlete.athlete.jersey || '',
+                  position: athlete.athlete.position?.abbreviation || 'UNKNOWN',
+                  status: this.determinePlayerStatus(athlete),
+                  depth: athlete.athlete.depth || 1,
+                  espnId: athlete.athlete.id,
+                  teamId: team.id,
+                  teamName: team.displayName,
+                  headshot: athlete.athlete.headshot?.href || null,
+                  experience: athlete.athlete.experience?.years || 0,
+                  height: athlete.athlete.height || '',
+                  weight: athlete.athlete.weight || 0,
+                  age: athlete.athlete.age || 0
+                };
+                allPlayers.push(player);
+              }
+            }
+            console.log(`  ✅ ${team.abbreviation}: ${athletes.length} players`);
+          } else {
+            console.log(`  ❌ ${team.abbreviation}: Roster unavailable (${rosterResponse.status})`);
+          }
+          
+          // Small delay to avoid hitting rate limits
+          await new Promise(resolve => setTimeout(resolve, 100));
+          
+        } catch (teamError: any) {
+          console.log(`  ❌ ${team.displayName}: ${teamError.message}`);
+        }
+      }
+      
+      console.log(`🎉 ESPN: Successfully loaded ${allPlayers.length} players from ${teamCount} teams`);
+      
+      // Log position distribution
+      const positionCounts = allPlayers.reduce((acc, player) => {
+        acc[player.position] = (acc[player.position] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      
+      console.log('📊 ESPN Position Distribution:', positionCounts);
+      
+      return allPlayers;
+      
+    } catch (error) {
+      console.error('ESPN comprehensive player data error:', error);
+      return [];
+    }
+  }
+  
+  // Helper: Determine player status from ESPN data
+  private static determinePlayerStatus(athlete: any): string {
+    if (athlete.athlete?.status?.name === 'Active') {
+      return athlete.athlete.depth === 1 ? 'starter' : 'backup';
+    }
+    return 'backup';
+  }
+
   // Get live scores for all NFL games
   static async getLiveScores(): Promise<any[]> {
     try {

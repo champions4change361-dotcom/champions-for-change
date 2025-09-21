@@ -4266,11 +4266,11 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
       console.log(`🃏 FANTASY CARDS REQUEST: ${sport} ${position || 'all positions'}`);
       
       if (sport.toLowerCase() === 'nfl') {
-        const { NFLDepthChartParser } = await import('./nfl-depth-chart-parser');
+        const { ESPNApiService } = await import('./espn-api');
         const { YahooSportsAPI } = await import('./yahooSportsAPI');
         
-        // Get base player data
-        const allPlayers = NFLDepthChartParser.getAllPlayers();
+        // Get comprehensive player data from all 32 NFL teams via ESPN API
+        const allPlayers = await ESPNApiService.getAllNFLPlayers();
         let filteredPlayers = position ? 
           allPlayers.filter(p => (p.position || '').toLowerCase() === position.toLowerCase()) : 
           allPlayers;
