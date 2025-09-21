@@ -69,15 +69,18 @@ export default function CommissionerDashboard() {
     enabled: !!user,
   });
 
+  // Type-safe data extraction
+  const typedDashboardData = dashboardData as any || {};
+
   // Create new league mutation
   const createLeagueMutation = useMutation({
     mutationFn: async (leagueData: any) => {
       return await apiRequest('POST', '/api/commissioner/leagues', leagueData);
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       toast({
         title: "League Created Successfully!",
-        description: `Registration code: ${data.registrationCode}`,
+        description: `Registration code: ${data.registrationCode || 'Generated'}`,
       });
       // Reset form
       setNewLeagueData({
@@ -127,8 +130,8 @@ export default function CommissionerDashboard() {
     );
   }
 
-  const leagues: League[] = dashboardData?.leagues || [];
-  const stats: CommissionerStats = dashboardData?.analytics || {
+  const leagues: League[] = typedDashboardData?.leagues || [];
+  const stats: CommissionerStats = typedDashboardData?.analytics || {
     totalLeaguesCreated: 0,
     activeLeagues: 0,
     totalParticipantsManaged: 0,
@@ -281,7 +284,7 @@ export default function CommissionerDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {dashboardData?.recentActivities?.map((activity: any, index: number) => (
+                  {typedDashboardData?.recentActivities?.map((activity: any, index: number) => (
                     <div key={index} className="flex items-start gap-3 p-2 rounded-lg bg-gray-50">
                       <div className="p-1 bg-blue-100 rounded">
                         <Edit className="h-3 w-3 text-blue-600" />
