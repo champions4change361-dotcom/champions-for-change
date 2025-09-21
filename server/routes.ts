@@ -2555,8 +2555,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Miller VLC Demo route for district firewall compatibility
-  app.get('/', (req, res, next) => {
-    if (req.query.demo === 'miller' || req.query.vlc === 'true') {
+  app.get('/demo/miller', (req, res) => {
       res.send(`
 <!DOCTYPE html>
 <html lang="en">
@@ -2595,12 +2594,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 </body>
 </html>
       `);
-      return;
-    } else {
-      // Continue with normal routing for other requests
-      // Let Vite middleware handle the React app
-      next();
-    }
   });
 
   // Login endpoint for form-based authentication
