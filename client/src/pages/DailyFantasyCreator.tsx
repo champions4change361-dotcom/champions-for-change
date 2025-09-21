@@ -6,9 +6,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Trophy, Users, Settings, DollarSign, Clock } from 'lucide-react';
+import { ArrowLeft, Trophy, Users, Settings, DollarSign, Clock, Globe, Lock, Calendar } from 'lucide-react';
 import { useFantasyAuth } from '@/hooks/useFantasyAuth';
 import { useToast } from '@/hooks/use-toast';
+import { Switch } from '@/components/ui/switch';
+import LanguageSelector from '@/components/LanguageSelector';
 
 export default function DailyFantasyCreator() {
   const [location, setLocation] = useLocation();
@@ -20,6 +22,9 @@ export default function DailyFantasyCreator() {
   const [maxEntries, setMaxEntries] = useState('100');
   const [contestDuration, setContestDuration] = useState('weekly');
   const [rosterFormat, setRosterFormat] = useState('standard');
+  const [slateTime, setSlateTime] = useState('afternoon');
+  const [isPublic, setIsPublic] = useState(false);
+  const [selectedSport, setSelectedSport] = useState('nfl');
   const [isCreating, setIsCreating] = useState(false);
 
   if (!isFantasyAuthenticated) {
@@ -102,17 +107,20 @@ export default function DailyFantasyCreator() {
               </p>
             </div>
           </div>
-          <div className="flex items-center space-x-2">
-            <Badge className="bg-blue-600 text-white">
-              <Users className="w-4 h-4 mr-1" />
-              Commissioner: {fantasyUser?.email?.split('@')[0]}
-            </Badge>
-            <Badge variant="outline" className="text-blue-600 border-blue-600">
-              💰 Daily Fantasy Format
-            </Badge>
-            <Badge variant="outline" className="text-green-600 border-green-600">
-              FREE - No Entry Fees
-            </Badge>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Badge className="bg-blue-600 text-white">
+                <Users className="w-4 h-4 mr-1" />
+                Commissioner: {fantasyUser?.email?.split('@')[0]}
+              </Badge>
+              <Badge variant="outline" className="text-blue-600 border-blue-600">
+                💰 Daily Fantasy Format
+              </Badge>
+              <Badge variant="outline" className="text-green-600 border-green-600">
+                FREE - No Entry Fees
+              </Badge>
+            </div>
+            <LanguageSelector variant="compact" />
           </div>
         </div>
 
@@ -209,6 +217,21 @@ export default function DailyFantasyCreator() {
                   </Select>
                 </div>
 
+                <div>
+                  <Label htmlFor="sport-selection">Sport</Label>
+                  <Select value={selectedSport} onValueChange={setSelectedSport}>
+                    <SelectTrigger data-testid="sport-selection-select">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="nfl">🏈 NFL Football</SelectItem>
+                      <SelectItem value="nba">🏀 NBA Basketball</SelectItem>
+                      <SelectItem value="nhl">🏒 NHL Hockey</SelectItem>
+                      <SelectItem value="soccer">⚽ Soccer</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 <div className="bg-green-50 p-4 rounded-lg border border-green-200">
                   <h4 className="font-semibold text-green-800 mb-2">Player Salary System</h4>
                   <ul className="text-sm text-green-700 space-y-1">
@@ -218,6 +241,66 @@ export default function DailyFantasyCreator() {
                     <li>• Budget players: $3,000-$3,999</li>
                   </ul>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Slate Timing & Visibility */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Calendar className="w-5 w-5 mr-2" />
+                  Contest Schedule & Visibility
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="slate-time">Slate Timing</Label>
+                  <Select value={slateTime} onValueChange={setSlateTime}>
+                    <SelectTrigger data-testid="slate-time-select">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="morning">🌅 Morning Slate (9:00 AM - 12:00 PM EST)</SelectItem>
+                      <SelectItem value="afternoon">☀️ Afternoon Slate (1:00 PM - 4:00 PM EST)</SelectItem>
+                      <SelectItem value="evening">🌙 Evening Slate (7:00 PM - 11:00 PM EST)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Choose when your contest games will be played
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <Label htmlFor="public-contest" className="text-sm font-medium">
+                      Make Contest Public
+                    </Label>
+                    <p className="text-xs text-gray-600">
+                      {isPublic ? '🌍 Anyone can discover and join this contest' : '🔒 Only people with invite links can join'}
+                    </p>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    {isPublic ? <Globe className="h-4 w-4 text-green-600" /> : <Lock className="h-4 w-4 text-gray-500" />}
+                    <Switch
+                      id="public-contest"
+                      checked={isPublic}
+                      onCheckedChange={setIsPublic}
+                      data-testid="public-contest-toggle"
+                    />
+                  </div>
+                </div>
+
+                {isPublic && (
+                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                    <h4 className="font-semibold text-blue-800 mb-2">🌍 International Competition</h4>
+                    <ul className="text-sm text-blue-700 space-y-1">
+                      <li>• Your contest will appear in the global contest directory</li>
+                      <li>• Players from any country can join and compete</li>
+                      <li>• Perfect for building an international fantasy community</li>
+                      <li>• Example: Compete with fantasy players from France, Mexico, Canada!</li>
+                    </ul>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
