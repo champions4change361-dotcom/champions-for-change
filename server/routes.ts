@@ -4277,7 +4277,7 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
           allPlayers;
         
         // Get current injury data from NFL.com official injury reports
-        const { nflInjuryScraper } = await import('./nfl-injury-scraper');
+        const { nflInjuryScraper, NFLInjuryScraper } = await import('./nfl-injury-scraper');
         const nflReport = nflInjuryScraper.getLatestReport();
         
         // Create lookup map for robust player matching from NFL.com data
@@ -4288,7 +4288,7 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
             injuryByNameTeam.set(key, {
               playerName: inj.playerName,
               team: inj.team,
-              injuryStatus: nflInjuryScraper.convertToInjuryStatus(inj.gameStatus),
+              injuryStatus: NFLInjuryScraper.convertToInjuryStatus(inj.gameStatus),
               injuryType: inj.injury,
               description: `${inj.injury} - ${inj.practiceStatus}`,
               severity: inj.gameStatus === 'Out' ? 'high' : inj.gameStatus === 'Doubtful' ? 'medium' : 'low',
