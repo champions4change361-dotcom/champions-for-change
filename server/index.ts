@@ -2,14 +2,15 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { nightlySportsIntelligence } from "./nightly-sports-intelligence.js";
+import { setupSecurity } from "./security";
 
 const app = express();
 
 // Health check endpoints are handled in routes.ts to avoid conflicts
 // Root endpoint will be handled by Vite/React app after setupVite() is called
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+// Setup comprehensive security BEFORE other middleware
+setupSecurity(app);
 
 app.use((req, res, next) => {
   const start = Date.now();
