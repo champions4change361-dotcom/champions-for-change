@@ -64,6 +64,21 @@ app.use((req, res, next) => {
   nflScheduleScraper.startScheduledUpdates();
   console.log('🗓️ NFL schedule scraping system initialized');
 
+  // Initialize NFL Stats Scraper for Tuesday comprehensive player statistics
+  const { nflStatsService } = await import('./nfl-stats-scraper.js');
+  console.log('📊 NFL statistics scraping system initialized');
+  
+  // Schedule Tuesday stats updates (after Monday Night Football)
+  const cron = await import('node-cron');
+  cron.default.schedule('0 10 * * 2', () => {
+    console.log('🗓️ [Tuesday 10 AM CST] Starting weekly NFL player stats update...');
+    nflStatsService.updateAllStats().catch(console.error);
+  }, {
+    scheduled: true,
+    timezone: "America/Chicago"
+  });
+  console.log('🗓️ Scheduled Tuesday NFL stats updates (10 AM CST)');
+
   // Setup Vite before starting server
   if (process.env.NODE_ENV === 'development') {
     await setupVite(app, server);

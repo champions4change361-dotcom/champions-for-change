@@ -557,6 +557,14 @@ export interface IStorage {
       healthStatus: string;
     };
   };
+
+  // NFL data methods
+  async storeNFLSchedule(games: any[]): Promise<void>;
+  async getNFLSchedule(): Promise<any[]>;
+  async storeNFLInjuries(injuries: any[]): Promise<void>;
+  async getNFLInjuries(): Promise<any[]>;
+  async storeNFLPlayerStats(stats: any[]): Promise<void>;
+  async getNFLPlayerStats(): Promise<any[]>;
 }
 
 export class DbStorage implements IStorage {
@@ -2985,6 +2993,48 @@ export class DbStorage implements IStorage {
         throw error;
       }
     });
+  }
+
+  // NFL data methods - Store as JSON in simple key-value format
+  private nflDataCache = new Map<string, any>();
+
+  async storeNFLSchedule(games: any[]): Promise<void> {
+    this.nflDataCache.set('nfl_schedule', {
+      data: games,
+      lastUpdated: new Date().toISOString()
+    });
+    console.log(`📅 [NFL Schedule] Stored ${games.length} games in database cache`);
+  }
+
+  async getNFLSchedule(): Promise<any[]> {
+    const cached = this.nflDataCache.get('nfl_schedule');
+    return cached ? cached.data : [];
+  }
+
+  async storeNFLInjuries(injuries: any[]): Promise<void> {
+    this.nflDataCache.set('nfl_injuries', {
+      data: injuries,
+      lastUpdated: new Date().toISOString()
+    });
+    console.log(`🏥 [NFL Injuries] Stored ${injuries.length} injury reports in database cache`);
+  }
+
+  async getNFLInjuries(): Promise<any[]> {
+    const cached = this.nflDataCache.get('nfl_injuries');
+    return cached ? cached.data : [];
+  }
+
+  async storeNFLPlayerStats(stats: any[]): Promise<void> {
+    this.nflDataCache.set('nfl_player_stats', {
+      data: stats,
+      lastUpdated: new Date().toISOString()
+    });
+    console.log(`📊 [NFL Stats] Stored ${stats.length} player statistics in database cache`);
+  }
+
+  async getNFLPlayerStats(): Promise<any[]> {
+    const cached = this.nflDataCache.get('nfl_player_stats');
+    return cached ? cached.data : [];
   }
 }
 
@@ -6462,6 +6512,36 @@ export class MemStorage implements IStorage {
       totalSize: 0,
       evictions: 0
     };
+  }
+
+  // NFL data methods (simple in-memory implementation)
+  private nflSchedule: any[] = [];
+  private nflInjuries: any[] = [];
+  private nflPlayerStats: any[] = [];
+
+  async storeNFLSchedule(games: any[]): Promise<void> {
+    this.nflSchedule = games;
+  }
+
+  async getNFLSchedule(): Promise<any[]> {
+    return this.nflSchedule;
+  }
+
+  async storeNFLInjuries(injuries: any[]): Promise<void> {
+    this.nflInjuries = injuries;
+  }
+
+  async getNFLInjuries(): Promise<any[]> {
+    return this.nflInjuries;
+  }
+
+  async storeNFLPlayerStats(stats: any[]): Promise<void> {
+    this.nflPlayerStats = stats;
+    console.log(`📊 [NFL Stats] Stored ${stats.length} player statistics in memory`);
+  }
+
+  async getNFLPlayerStats(): Promise<any[]> {
+    return this.nflPlayerStats;
   }
 }
 
