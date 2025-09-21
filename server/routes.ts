@@ -7000,14 +7000,13 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
   // Fantasy Profile Management - Unified Authentication System
   
   // Get user's fantasy profile
-  app.get("/api/fantasy/profile", async (req, res) => {
+  app.get("/api/fantasy/profile", checkAuth, async (req, res) => {
     try {
-      if (!req.user) {
-        return res.status(401).json({ error: "Authentication required" });
-      }
-      const user = req.user;
+      // Support both OAuth and session authentication
+      const userId = req.user?.claims?.sub || req.session?.user?.id || req.user?.id;
+      const userEmail = req.user?.claims?.email || req.session?.user?.email || req.user?.email;
 
-      const fantasyProfile = await storage.getFantasyProfile(user.id);
+      const fantasyProfile = await storage.getFantasyProfile(userId);
       
       res.json({
         success: true,
@@ -7028,12 +7027,11 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
   });
 
   // Set age verification for fantasy profile
-  app.post("/api/fantasy/profile/age-verify", async (req, res) => {
+  app.post("/api/fantasy/profile/age-verify", checkAuth, async (req, res) => {
     try {
-      if (!req.user) {
-        return res.status(401).json({ error: "Authentication required" });
-      }
-      const user = req.user;
+      // Support both OAuth and session authentication
+      const userId = req.user?.claims?.sub || req.session?.user?.id || req.user?.id;
+      const userEmail = req.user?.claims?.email || req.session?.user?.email || req.user?.email;
 
       const { dateOfBirth } = req.body;
       
@@ -7063,7 +7061,7 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + 90);
 
-      const updatedProfile = await storage.setFantasyAgeVerification(user.id, verifiedAt, expiresAt);
+      const updatedProfile = await storage.setFantasyAgeVerification(userId, verifiedAt, expiresAt);
 
       res.json({
         success: true,
@@ -7081,14 +7079,13 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
   });
 
   // Accept fantasy terms of service
-  app.post("/api/fantasy/profile/accept-tos", async (req, res) => {
+  app.post("/api/fantasy/profile/accept-tos", checkAuth, async (req, res) => {
     try {
-      if (!req.user) {
-        return res.status(401).json({ error: "Authentication required" });
-      }
-      const user = req.user;
+      // Support both OAuth and session authentication
+      const userId = req.user?.claims?.sub || req.session?.user?.id || req.user?.id;
+      const userEmail = req.user?.claims?.email || req.session?.user?.email || req.user?.email;
 
-      const updatedProfile = await storage.acceptFantasyTOS(user.id);
+      const updatedProfile = await storage.acceptFantasyTOS(userId);
 
       res.json({
         success: true,
@@ -7105,17 +7102,17 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
   });
 
   // Create or update fantasy profile
-  app.post("/api/fantasy/profile", async (req, res) => {
+  app.post("/api/fantasy/profile", checkAuth, async (req, res) => {
     try {
-      if (!req.user) {
-        return res.status(401).json({ error: "Authentication required" });
-      }
-      const user = req.user;
+      // Support both OAuth and session authentication
+      const userId = req.user?.claims?.sub || req.session?.user?.id || req.user?.id;
+      const userEmail = req.user?.claims?.email || req.session?.user?.email || req.user?.email;
 
       const { status } = req.body;
       
       const profileData = {
-        userId: user.id,
+        userId: userId,
+        userEmail: userEmail,
         status: status || "active"
       };
 
