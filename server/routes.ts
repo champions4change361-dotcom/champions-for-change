@@ -4302,13 +4302,16 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
         console.log(`📊 NFL Report Status: Week ${nflReport?.week || 'N/A'}, ${nflReport?.totalPlayers || 0} total injured players`);
         
         // Show sample of current injury data
-        const sampleInjuries = Array.from(injuryByNameTeam.values()).slice(0, 3);
+        const sampleInjuries = Array.from(injuryByNameTeam.values()).slice(0, 5);
         console.log(`🔍 Sample NFL.com injury data:`, sampleInjuries.map(inj => ({
           name: inj.playerName,
           team: inj.team,
           status: inj.injuryStatus,
           gameStatus: inj.description
         })));
+        
+        // 🐛 DEBUG: Show actual lookup keys being generated  
+        console.log(`🔑 Sample NFL.com lookup keys:`, Array.from(injuryByNameTeam.keys()).slice(0, 5));
         
         // 🚨 MANUAL INJURY OVERRIDES - For current injuries not yet in NFL.com reports or urgent updates
         const manualInjuryOverrides = new Map([
@@ -4351,6 +4354,15 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
               if (player.name && player.team) {
                 const lookupKey = `${player.name.toLowerCase().trim()}_${player.team.toLowerCase()}`;
                 injuryData = injuryByNameTeam.get(lookupKey);
+                
+                // 🚨 FALLBACK: If no team match, try name-only lookup for scraped players with missing teams
+                if (!injuryData) {
+                  const nameOnlyKey = `${player.name.toLowerCase().trim()}_`;
+                  injuryData = injuryByNameTeam.get(nameOnlyKey);
+                  if (injuryData) {
+                    console.log(`📍 Name-only match found for ${player.name}: ${injuryData.injuryStatus}`);
+                  }
+                }
               }
               
               // Strategy 2: Check manual overrides (for current injuries not in NFL.com yet or urgent updates)

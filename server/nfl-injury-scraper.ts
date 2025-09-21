@@ -172,27 +172,57 @@ export class NFLInjuryScraper {
       const $ = cheerio.load(response.data);
       const injuries: NFLInjuryData[] = [];
       
-      // Parse the injury table structure
+      // Parse injury table structure - revert to working approach and enhance team detection
       $('table').each((tableIndex: number, table: any) => {
-        const teamName = $(table).closest('div').find('h3, h4').first().text().trim();
+        // Try multiple methods to find team name
+        let teamName = '';
+        
+        // Method 1: Look for team name in preceding headers
+        const precedingHeaders = $(table).prevAll('h2, h3, h4, h5').first();
+        if (precedingHeaders.length > 0) {
+          teamName = precedingHeaders.text().trim();
+        }
+        
+        // Method 2: Look for team name in parent containers
+        if (!teamName || !this.isNFLTeamName(teamName)) {
+          const parentHeaders = $(table).closest('div').find('h2, h3, h4, h5').filter((i: number, el: any) => {
+            const text = $(el).text().trim();
+            return this.isNFLTeamName(text);
+          }).first();
+          if (parentHeaders.length > 0) {
+            teamName = parentHeaders.text().trim();
+          }
+        }
+        
+        // Method 3: Look for team logos or images
+        if (!teamName || !this.isNFLTeamName(teamName)) {
+          const teamLogo = $(table).closest('div').find('img').filter((i: number, img: any) => {
+            const src = $(img).attr('src') || '';
+            const alt = $(img).attr('alt') || '';
+            return src.includes('team') || src.includes('logo') || this.isNFLTeamName(alt);
+          }).first();
+          if (teamLogo.length > 0) {
+            teamName = teamLogo.attr('alt') || '';
+          }
+        }
+        
+        // Extract team abbreviation - fallback to unknown if not found
+        const team = this.isNFLTeamName(teamName) ? this.extractTeamAbbreviation(teamName) : 'UNK';
         
         $(table).find('tbody tr').each((rowIndex: number, row: any) => {
           const cells = $(row).find('td');
           
-          if (cells.length >= 5) {
+          if (cells.length >= 4) {
             const playerName = $(cells[0]).text().trim();
             const position = $(cells[1]).text().trim();
             const injury = $(cells[2]).text().trim();
             const practiceStatus = $(cells[3]).text().trim();
-            const gameStatus = $(cells[4]).text().trim() as 'Out' | 'Questionable' | 'Doubtful' | 'Probable' | '';
+            const gameStatus = cells.length >= 5 ? $(cells[4]).text().trim() as 'Out' | 'Questionable' | 'Doubtful' | 'Probable' | '' : '';
             
             if (playerName && position) {
-              // Extract team abbreviation from team name or use a mapping
-              const team = this.extractTeamAbbreviation(teamName);
-              
               injuries.push({
                 playerName,
-                team,
+                team: team !== 'UNK' ? team : '', // Use empty string if unknown for now
                 position,
                 injury: injury || '',
                 practiceStatus: practiceStatus || '',
@@ -223,6 +253,20 @@ export class NFLInjuryScraper {
       console.error('❌ Failed to scrape NFL injury data:', error.message);
       throw error;
     }
+  }
+
+  /**
+   * 🏈 Check if text contains an NFL team name
+   */
+  private isNFLTeamName(text: string): boolean {
+    const teamNames = [
+      'Cardinals', 'Falcons', 'Ravens', 'Bills', 'Panthers', 'Bears', 'Bengals', 'Browns',
+      'Cowboys', 'Broncos', 'Lions', 'Packers', 'Texans', 'Colts', 'Jaguars', 'Chiefs',
+      'Raiders', 'Chargers', 'Rams', 'Dolphins', 'Vikings', 'Patriots', 'Saints', 'Giants',
+      'Jets', 'Eagles', 'Steelers', '49ers', 'Seahawks', 'Buccaneers', 'Titans', 'Commanders'
+    ];
+    
+    return teamNames.some(team => text.toLowerCase().includes(team.toLowerCase()));
   }
 
   /**
