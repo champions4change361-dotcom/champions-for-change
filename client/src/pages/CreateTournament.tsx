@@ -114,7 +114,7 @@ export default function CreateTournament() {
         <TournamentPreviewBanner className={isPreviewMode ? "pt-24 md:pt-32" : ""} />
         <TournamentSmartPrompt />
         
-        <header className={`relative border-b border-yellow-500/20 bg-slate-900/80 backdrop-blur-sm ${isPreviewMode ? 'mt-32 md:mt-40' : ''}`}>
+        <header className={`relative border-b border-yellow-500/20 bg-slate-900/80 backdrop-blur-sm ${isPreviewMode ? 'mt-40 md:mt-48' : ''}`}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <div className="flex items-center space-x-3">

@@ -2131,6 +2131,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Tournament creation endpoint
+  app.post('/api/tournaments', async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const { createTournamentSchema } = await import('@shared/schema');
+      
+      console.log('🏆 Creating tournament with data:', req.body);
+      
+      // Validate the tournament data
+      const validatedData = createTournamentSchema.parse(req.body);
+      
+      // Create the tournament (let storage generate the ID)
+      const tournament = await storage.createTournament({
+        ...validatedData,
+        status: 'draft',
+        isActive: true
+      });
+      
+      console.log('✅ Tournament created successfully:', tournament.id);
+      
+      res.status(201).json({
+        success: true,
+        message: 'Tournament created successfully',
+        tournament: tournament
+      });
+      
+    } catch (error: any) {
+      console.error('❌ Tournament creation error:', error);
+      res.status(500).json({ 
+        message: 'Failed to create tournament',
+        error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+      });
+    }
+  });
+
   // Tournament notification subscriptions
   app.post('/api/tournament-subscriptions', async (req, res) => {
     try {
