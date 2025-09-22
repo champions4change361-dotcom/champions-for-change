@@ -74,7 +74,6 @@ app.use((req, res, next) => {
     console.log('🗓️ [Tuesday 10 AM CST] Starting weekly NFL player stats update...');
     nflStatsService.updateAllStats().catch(console.error);
   }, {
-    scheduled: true,
     timezone: "America/Chicago"
   });
   console.log('🗓️ Scheduled Tuesday NFL stats updates (10 AM CST)');

@@ -110,7 +110,7 @@ export function setupSecurity(app: express.Application) {
     if (maliciousPaths.some(malPath => path.startsWith(malPath))) {
       logSecurityEvent(
         'malicious_path',
-        req.ip,
+        req.ip || 'unknown',
         req.get('User-Agent') || 'unknown',
         req.path,
         `Attempted access to blocked path: ${req.path}`,
@@ -160,7 +160,7 @@ export function setupSecurity(app: express.Application) {
     if (suspiciousReferrers.some(suspicious => referer.includes(suspicious))) {
       logSecurityEvent(
         'suspicious_referrer',
-        req.ip,
+        req.ip || 'unknown',
         userAgent,
         req.path,
         `Suspicious referrer: ${referer}`,
