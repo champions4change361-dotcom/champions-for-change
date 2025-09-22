@@ -1,4 +1,4 @@
-import type { NFLGame } from '../shared/types/nfl.js';
+import type { NFLGame } from './nfl-schedule-scraper.js';
 
 /**
  * Centralized service for managing game lockout logic across all fantasy formats
@@ -20,7 +20,7 @@ export class GameLockoutService {
     }
 
     // For scheduled games, check if we're within the lockout buffer
-    if (game.status === 'scheduled' || game.status === 'upcoming') {
+    if (game.status === 'scheduled') {
       try {
         // Parse game time - handle different formats from NFL.com
         const gameTime = this.parseGameTime(game.gameTime, game.gameDay);
@@ -115,7 +115,7 @@ export class GameLockoutService {
       let minutesUntilLock: number | undefined;
       let lockReason: string | undefined;
 
-      if (!isLocked && (game.status === 'scheduled' || game.status === 'upcoming')) {
+      if (!isLocked && game.status === 'scheduled') {
         const gameTime = this.parseGameTime(game.gameTime, game.gameDay);
         if (gameTime) {
           const timeDiffMs = gameTime.getTime() - now.getTime();

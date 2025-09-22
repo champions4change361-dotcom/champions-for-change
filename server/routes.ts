@@ -14,6 +14,7 @@ import { stripe } from "./nonprofitStripeConfig";
 import { registerDomainRoutes } from "./domainRoutes";
 import { registerTournamentRoutes } from "./routes/tournamentRoutes";
 import { tournamentSubscriptions, insertTournamentSubscriptionSchema, type InsertTournamentSubscription, insertRegistrationSubmissionSchema, insertTeamSchema, insertTeamPlayerSchema, insertMedicalHistorySchema, type InsertTeam, type InsertTeamPlayer, type InsertMedicalHistory, type Team, type TeamPlayer, type MedicalHistory, updateTeamSubscriptionSchema, type User } from "@shared/schema";
+import { GameLockoutService } from "./game-lockout-service.js";
 
 // Type extensions to fix compilation issues
 declare module 'express-session' {
@@ -7704,6 +7705,73 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
     } catch (error: any) {
       console.error('Team opponent fetch error:', error);
       res.status(500).json({ error: 'Failed to get team matchup data' });
+    }
+  });
+
+  // GAME LOCKOUT API ENDPOINTS - Critical for fantasy integrity
+  
+  // Get only games available for fantasy play (not locked)
+  app.get('/api/nfl/available-games', async (req, res) => {
+    try {
+      const { nflScheduleScraper } = await import('./nfl-schedule-scraper.js');
+      const schedule = nflScheduleScraper.getLatestSchedule();
+      
+      if (!schedule || !schedule.games) {
+        return res.status(404).json({ 
+          error: 'Schedule data not available',
+          availableGames: []
+        });
+      }
+      
+      // Filter to only available (unlocked) games
+      const availableGames = GameLockoutService.getAvailableGames(schedule.games);
+      
+      res.json({
+        success: true,
+        currentWeek: schedule.currentWeek,
+        totalGames: schedule.games.length,
+        availableGames: availableGames.length,
+        lockedGames: schedule.games.length - availableGames.length,
+        games: availableGames,
+        lockoutBuffer: GameLockoutService.getLockoutBufferMinutes(),
+        lastUpdated: schedule.lastUpdated
+      });
+    } catch (error: any) {
+      console.error('Available games fetch error:', error);
+      res.status(500).json({ error: 'Failed to get available games' });
+    }
+  });
+
+  // Get games with detailed lockout status information
+  app.get('/api/nfl/games-with-lockout-status', async (req, res) => {
+    try {
+      const { nflScheduleScraper } = await import('./nfl-schedule-scraper.js');
+      const schedule = nflScheduleScraper.getLatestSchedule();
+      
+      if (!schedule || !schedule.games) {
+        return res.status(404).json({ 
+          error: 'Schedule data not available',
+          games: []
+        });
+      }
+      
+      // Get games with detailed lockout information
+      const gamesWithLockStatus = GameLockoutService.getGamesWithLockStatus(schedule.games);
+      
+      res.json({
+        success: true,
+        currentWeek: schedule.currentWeek,
+        totalGames: gamesWithLockStatus.length,
+        availableGames: gamesWithLockStatus.filter(g => !g.isLocked).length,
+        lockedGames: gamesWithLockStatus.filter(g => g.isLocked).length,
+        games: gamesWithLockStatus,
+        lockoutBuffer: GameLockoutService.getLockoutBufferMinutes(),
+        lastUpdated: schedule.lastUpdated,
+        message: 'Games are locked 30 minutes before kickoff and during/after the game'
+      });
+    } catch (error: any) {
+      console.error('Games lockout status fetch error:', error);
+      res.status(500).json({ error: 'Failed to get games lockout status' });
     }
   });
 
