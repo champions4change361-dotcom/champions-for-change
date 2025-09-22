@@ -785,13 +785,22 @@ export default function AdminManagement() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <p className="text-sm text-slate-600">Professional tournament management tools</p>
-                  <Button 
-                    className="w-full bg-purple-600 hover:bg-purple-700" 
-                    data-testid="button-access-tournament"
-                    onClick={() => navigate('/create')}
-                  >
-                    Access Tournament Features
-                  </Button>
+                  <div className="space-y-2">
+                    <Button 
+                      className="w-full bg-purple-600 hover:bg-purple-700" 
+                      data-testid="button-access-tournament"
+                      onClick={() => navigate('/create-tournament')}
+                    >
+                      Access Tournament Features (No Auth)
+                    </Button>
+                    <Button 
+                      className="w-full bg-purple-500 hover:bg-purple-600" 
+                      data-testid="button-fantasy-tournaments"
+                      onClick={() => navigate('/fantasy-tournaments')}
+                    >
+                      Fantasy Sports Testing
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
 
