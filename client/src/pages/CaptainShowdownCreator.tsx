@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+// Removed Select components - using native HTML selects for better mobile UX
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
@@ -194,23 +194,20 @@ export default function CaptainShowdownCreator() {
                   {/* Game Selection */}
                   <div className="space-y-2">
                     <Label htmlFor="gameSelect">Select Game</Label>
-                    <Select value={selectedGame} onValueChange={setSelectedGame}>
-                      <SelectTrigger data-testid="game-select">
-                        <SelectValue placeholder="Choose a game for your contest" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {upcomingGames.map((game) => (
-                          <SelectItem key={game.id} value={game.id}>
-                            <div className="flex items-center justify-between w-full">
-                              <span className="font-medium">{game.description}</span>
-                              <div className="text-sm text-muted-foreground ml-4">
-                                {new Date(game.gameTime).toLocaleDateString()} {new Date(game.gameTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                              </div>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <select 
+                      id="game-select"
+                      value={selectedGame} 
+                      onChange={(e) => setSelectedGame(e.target.value)}
+                      className="w-full p-3 border border-gray-300 rounded-md bg-white text-base focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                      data-testid="game-select"
+                    >
+                      <option value="">Choose a game for your contest</option>
+                      {upcomingGames.map((game) => (
+                        <option key={game.id} value={game.id}>
+                          {game.description} - {new Date(game.gameTime).toLocaleDateString()} {new Date(game.gameTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
                   {/* Max Entries */}

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+// Removed Select components - using native HTML selects for better mobile UX
 import { ArrowLeft, Trophy, Users, Settings, Calendar, Target } from 'lucide-react';
 import { useFantasyAuth } from '@/hooks/useFantasyAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -140,18 +140,19 @@ export default function SnakeDraftCreator() {
 
                 <div>
                   <Label htmlFor="max-teams">Number of Teams</Label>
-                  <Select value={maxTeams} onValueChange={setMaxTeams}>
-                    <SelectTrigger data-testid="max-teams-select">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="8">8 Teams</SelectItem>
-                      <SelectItem value="10">10 Teams</SelectItem>
-                      <SelectItem value="12">12 Teams</SelectItem>
-                      <SelectItem value="14">14 Teams</SelectItem>
-                      <SelectItem value="16">16 Teams</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select 
+                    id="max-teams"
+                    value={maxTeams} 
+                    onChange={(e) => setMaxTeams(e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-md bg-white text-base focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                    data-testid="max-teams-select"
+                  >
+                    <option value="8">8 Teams</option>
+                    <option value="10">10 Teams</option>
+                    <option value="12">12 Teams</option>
+                    <option value="14">14 Teams</option>
+                    <option value="16">16 Teams</option>
+                  </select>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -189,32 +190,34 @@ export default function SnakeDraftCreator() {
               <CardContent className="space-y-4">
                 <div>
                   <Label htmlFor="scoring-format">Scoring Format</Label>
-                  <Select value={scoringFormat} onValueChange={setScoringFormat}>
-                    <SelectTrigger data-testid="scoring-format-select">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="standard">Standard Scoring</SelectItem>
-                      <SelectItem value="ppr">PPR (Point Per Reception)</SelectItem>
-                      <SelectItem value="half-ppr">Half PPR</SelectItem>
-                      <SelectItem value="custom">Custom Scoring</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select 
+                    id="scoring-format"
+                    value={scoringFormat} 
+                    onChange={(e) => setScoringFormat(e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-md bg-white text-base focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                    data-testid="scoring-format-select"
+                  >
+                    <option value="standard">Standard Scoring</option>
+                    <option value="ppr">PPR (Point Per Reception)</option>
+                    <option value="half-ppr">Half PPR</option>
+                    <option value="custom">Custom Scoring</option>
+                  </select>
                 </div>
 
                 <div>
                   <Label htmlFor="roster-format">Roster Format</Label>
-                  <Select value={rosterFormat} onValueChange={setRosterFormat}>
-                    <SelectTrigger data-testid="roster-format-select">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="standard">Standard (QB/RB/RB/WR/WR/TE/FLEX/DEF/K)</SelectItem>
-                      <SelectItem value="superflex">Superflex (2 QB/Superflex)</SelectItem>
-                      <SelectItem value="deep">Deep Roster (Extra Bench)</SelectItem>
-                      <SelectItem value="custom">Custom Roster</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select 
+                    id="roster-format"
+                    value={rosterFormat} 
+                    onChange={(e) => setRosterFormat(e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-md bg-white text-base focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                    data-testid="roster-format-select"
+                  >
+                    <option value="standard">Standard (QB/RB/RB/WR/WR/TE/FLEX/DEF/K)</option>
+                    <option value="superflex">Superflex (2 QB/Superflex)</option>
+                    <option value="deep">Deep Roster (Extra Bench)</option>
+                    <option value="custom">Custom Roster</option>
+                  </select>
                 </div>
               </CardContent>
             </Card>

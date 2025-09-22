@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+// Removed Select components - using native HTML selects for better mobile UX
 import { ArrowLeft, Trophy, Users, Settings, Star, Zap } from 'lucide-react';
 import { useFantasyAuth } from '@/hooks/useFantasyAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -141,48 +141,51 @@ export default function BestBallCreator() {
 
                 <div>
                   <Label htmlFor="league-size">League Size</Label>
-                  <Select value={leagueSize} onValueChange={setLeagueSize}>
-                    <SelectTrigger data-testid="league-size-select">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="10">10 Teams</SelectItem>
-                      <SelectItem value="12">12 Teams</SelectItem>
-                      <SelectItem value="14">14 Teams</SelectItem>
-                      <SelectItem value="16">16 Teams</SelectItem>
-                      <SelectItem value="20">20 Teams</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select 
+                    id="league-size"
+                    value={leagueSize} 
+                    onChange={(e) => setLeagueSize(e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-md bg-white text-base focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    data-testid="league-size-select"
+                  >
+                    <option value="10">10 Teams</option>
+                    <option value="12">12 Teams</option>
+                    <option value="14">14 Teams</option>
+                    <option value="16">16 Teams</option>
+                    <option value="20">20 Teams</option>
+                  </select>
                 </div>
 
                 <div>
                   <Label htmlFor="draft-style">Draft Style</Label>
-                  <Select value={draftStyle} onValueChange={setDraftStyle}>
-                    <SelectTrigger data-testid="draft-style-select">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="snake">Snake Draft</SelectItem>
-                      <SelectItem value="linear">Linear Draft</SelectItem>
-                      <SelectItem value="auction">Auction Draft</SelectItem>
-                      <SelectItem value="slow-draft">Slow Draft (Email)</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select 
+                    id="draft-style"
+                    value={draftStyle} 
+                    onChange={(e) => setDraftStyle(e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-md bg-white text-base focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    data-testid="draft-style-select"
+                  >
+                    <option value="snake">Snake Draft</option>
+                    <option value="linear">Linear Draft</option>
+                    <option value="auction">Auction Draft</option>
+                    <option value="slow-draft">Slow Draft (Email)</option>
+                  </select>
                 </div>
 
                 <div>
                   <Label htmlFor="roster-size">Roster Size</Label>
-                  <Select value={rosterSize} onValueChange={setRosterSize}>
-                    <SelectTrigger data-testid="roster-size-select">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="15">15 Players</SelectItem>
-                      <SelectItem value="18">18 Players</SelectItem>
-                      <SelectItem value="20">20 Players</SelectItem>
-                      <SelectItem value="22">22 Players</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select 
+                    id="roster-size"
+                    value={rosterSize} 
+                    onChange={(e) => setRosterSize(e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-md bg-white text-base focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    data-testid="roster-size-select"
+                  >
+                    <option value="15">15 Players</option>
+                    <option value="18">18 Players</option>
+                    <option value="20">20 Players</option>
+                    <option value="22">22 Players</option>
+                  </select>
                 </div>
               </CardContent>
             </Card>
@@ -197,32 +200,34 @@ export default function BestBallCreator() {
               <CardContent className="space-y-4">
                 <div>
                   <Label htmlFor="scoring-format">Scoring Format</Label>
-                  <Select value={scoringFormat} onValueChange={setScoringFormat}>
-                    <SelectTrigger data-testid="scoring-format-select">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="standard">Standard Scoring</SelectItem>
-                      <SelectItem value="half-ppr">Half PPR</SelectItem>
-                      <SelectItem value="full-ppr">Full PPR</SelectItem>
-                      <SelectItem value="premium-scoring">Premium Scoring</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select 
+                    id="scoring-format"
+                    value={scoringFormat} 
+                    onChange={(e) => setScoringFormat(e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-md bg-white text-base focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    data-testid="scoring-format-select"
+                  >
+                    <option value="standard">Standard Scoring</option>
+                    <option value="half-ppr">Half PPR</option>
+                    <option value="full-ppr">Full PPR</option>
+                    <option value="premium-scoring">Premium Scoring</option>
+                  </select>
                 </div>
 
                 <div>
                   <Label htmlFor="playoff-weeks">Playoff Period</Label>
-                  <Select value={playoffWeeks} onValueChange={setPlayoffWeeks}>
-                    <SelectTrigger data-testid="playoff-weeks-select">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="weeks-15-17">Weeks 15-17 (Standard)</SelectItem>
-                      <SelectItem value="weeks-16-18">Weeks 16-18</SelectItem>
-                      <SelectItem value="weeks-14-17">Weeks 14-17 (Extended)</SelectItem>
-                      <SelectItem value="season-long">Entire Season</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select 
+                    id="playoff-weeks"
+                    value={playoffWeeks} 
+                    onChange={(e) => setPlayoffWeeks(e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-md bg-white text-base focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    data-testid="playoff-weeks-select"
+                  >
+                    <option value="weeks-15-17">Weeks 15-17 (Standard)</option>
+                    <option value="weeks-16-18">Weeks 16-18</option>
+                    <option value="weeks-14-17">Weeks 14-17 (Extended)</option>
+                    <option value="season-long">Entire Season</option>
+                  </select>
                 </div>
 
                 <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">

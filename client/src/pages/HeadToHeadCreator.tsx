@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+// Removed Select components - using native HTML selects for better mobile UX
 import { ArrowLeft, Trophy, Users, Settings, Swords, Target } from 'lucide-react';
 import { useFantasyAuth } from '@/hooks/useFantasyAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -140,48 +140,51 @@ export default function HeadToHeadCreator() {
 
                 <div>
                   <Label htmlFor="max-players">Tournament Size</Label>
-                  <Select value={maxPlayers} onValueChange={setMaxPlayers}>
-                    <SelectTrigger data-testid="max-players-select">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="4">4 Players</SelectItem>
-                      <SelectItem value="8">8 Players</SelectItem>
-                      <SelectItem value="16">16 Players</SelectItem>
-                      <SelectItem value="32">32 Players</SelectItem>
-                      <SelectItem value="64">64 Players</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select 
+                    id="max-players"
+                    value={maxPlayers} 
+                    onChange={(e) => setMaxPlayers(e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-md bg-white text-base focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    data-testid="max-players-select"
+                  >
+                    <option value="4">4 Players</option>
+                    <option value="8">8 Players</option>
+                    <option value="16">16 Players</option>
+                    <option value="32">32 Players</option>
+                    <option value="64">64 Players</option>
+                  </select>
                 </div>
 
                 <div>
                   <Label htmlFor="tournament-format">Tournament Format</Label>
-                  <Select value={tournamentFormat} onValueChange={setTournamentFormat}>
-                    <SelectTrigger data-testid="tournament-format-select">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="single-elimination">Single Elimination</SelectItem>
-                      <SelectItem value="double-elimination">Double Elimination</SelectItem>
-                      <SelectItem value="round-robin">Round Robin</SelectItem>
-                      <SelectItem value="swiss-system">Swiss System</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select 
+                    id="tournament-format"
+                    value={tournamentFormat} 
+                    onChange={(e) => setTournamentFormat(e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-md bg-white text-base focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    data-testid="tournament-format-select"
+                  >
+                    <option value="single-elimination">Single Elimination</option>
+                    <option value="double-elimination">Double Elimination</option>
+                    <option value="round-robin">Round Robin</option>
+                    <option value="swiss-system">Swiss System</option>
+                  </select>
                 </div>
 
                 <div>
                   <Label htmlFor="matchup-duration">Matchup Duration</Label>
-                  <Select value={matchupDuration} onValueChange={setMatchupDuration}>
-                    <SelectTrigger data-testid="matchup-duration-select">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="single-game">Single Game</SelectItem>
-                      <SelectItem value="daily">Daily</SelectItem>
-                      <SelectItem value="weekly">Weekly</SelectItem>
-                      <SelectItem value="bi-weekly">Bi-Weekly</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select 
+                    id="matchup-duration"
+                    value={matchupDuration} 
+                    onChange={(e) => setMatchupDuration(e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-md bg-white text-base focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    data-testid="matchup-duration-select"
+                  >
+                    <option value="single-game">Single Game</option>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="bi-weekly">Bi-Weekly</option>
+                  </select>
                 </div>
               </CardContent>
             </Card>
@@ -196,17 +199,18 @@ export default function HeadToHeadCreator() {
               <CardContent className="space-y-4">
                 <div>
                   <Label htmlFor="scoring-system">Scoring System</Label>
-                  <Select value={scoringSystem} onValueChange={setScoringSystem}>
-                    <SelectTrigger data-testid="scoring-system-select">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="standard">Standard Fantasy Scoring</SelectItem>
-                      <SelectItem value="ppr">PPR (Point Per Reception)</SelectItem>
-                      <SelectItem value="half-ppr">Half PPR</SelectItem>
-                      <SelectItem value="salary-cap">Salary Cap + Performance</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select 
+                    id="scoring-system"
+                    value={scoringSystem} 
+                    onChange={(e) => setScoringSystem(e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-md bg-white text-base focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    data-testid="scoring-system-select"
+                  >
+                    <option value="standard">Standard Fantasy Scoring</option>
+                    <option value="ppr">PPR (Point Per Reception)</option>
+                    <option value="half-ppr">Half PPR</option>
+                    <option value="salary-cap">Salary Cap + Performance</option>
+                  </select>
                 </div>
 
                 <div className="bg-red-50 p-4 rounded-lg border border-red-200">
