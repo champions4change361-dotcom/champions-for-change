@@ -16,9 +16,11 @@ export default function ContestDetail({ params }: ContestDetailProps) {
   const { contestId } = params;
 
   // Fetch contest details
-  const { data: contest, isLoading } = useQuery<any>({
-    queryKey: [`/api/fantasy/showdown-contests/${contestId}`],
+  const { data: contestResponse, isLoading } = useQuery<{success: boolean; contest: any}>({
+    queryKey: [`/api/fantasy/showdown/${contestId}`],
   });
+
+  const contest = contestResponse?.contest;
 
   if (isLoading) {
     return (
