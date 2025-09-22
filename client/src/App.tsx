@@ -135,6 +135,7 @@ import HeadToHeadCreator from './pages/HeadToHeadCreator';
 import BestBallCreator from './pages/BestBallCreator';
 import FantasyDashboard from './pages/FantasyDashboard';
 import CaptainShowdownCreator from './pages/CaptainShowdownCreator';
+import ContestDetail from './pages/ContestDetail';
 import PublicContests from './pages/PublicContests';
 import TeamListPage from './pages/TeamListPage';
 import TeamCreatePage from './pages/TeamCreatePage';
@@ -260,6 +261,9 @@ function AuthenticatedRoutes() {
         )}
         {isFeatureEnabled('fantasyLeagues') && (
           <Route path="/fantasy/contests" component={PublicContests} />
+        )}
+        {isFeatureEnabled('fantasyLeagues') && (
+          <Route path="/fantasy/contest/:contestId" component={ContestDetail} />
         )}
         
         {/* Coaches Lounge Landing for fantasy domains */}

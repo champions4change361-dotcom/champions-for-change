@@ -74,6 +74,16 @@ export default function FantasyTournaments() {
     queryKey: ["/api/fantasy/status"],
   });
 
+  // Fetch created showdown contests
+  const { data: showdownContests, isLoading: contestsLoading } = useQuery<{
+    success: boolean;
+    contests: any[];
+    count: number;
+  }>({
+    queryKey: ["/api/fantasy/showdown-contests"],
+    enabled: isFantasyAuthenticated,
+  });
+
   // Fetch fantasy leagues
   const { data: fantasyLeagues, isLoading: leaguesLoading } = useQuery<{ success: boolean; leagues: FantasyLeague[]; count: number }>({
     queryKey: ["/api/fantasy/leagues"],
@@ -232,6 +242,96 @@ export default function FantasyTournaments() {
             🔄 Clear All Cache & Reload
           </Button>
         </div>
+
+        {/* My Showdown Contests */}
+        {isFantasyAuthenticated && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Trophy className="w-5 h-5 text-yellow-500" />
+                <span>My Showdown Contests</span>
+              </CardTitle>
+              <CardDescription>
+                Contests you've created
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {contestsLoading ? (
+                <div className="text-center py-4">
+                  <div className="animate-spin w-6 h-6 border-4 border-primary border-t-transparent rounded-full mx-auto" />
+                  <p className="text-sm text-muted-foreground mt-2">Loading contests...</p>
+                </div>
+              ) : (showdownContests?.contests?.length ?? 0) > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {(showdownContests?.contests ?? []).map((contest: any) => (
+                    <Card key={contest.id} className="border hover:border-blue-300 transition-colors">
+                      <CardContent className="p-4">
+                        <div className="space-y-3">
+                          <div className="flex items-start justify-between">
+                            <h3 className="font-bold text-lg">{contest.contestName}</h3>
+                            <Badge variant={contest.status === 'open' ? 'default' : 'secondary'}>
+                              {contest.status}
+                            </Badge>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <div className="flex items-center space-x-2">
+                              <span className="text-sm text-muted-foreground">Game:</span>
+                              <span className="text-sm font-medium">{contest.gameDescription}</span>
+                            </div>
+                            
+                            <div className="flex items-center justify-between text-sm">
+                              <div className="flex items-center space-x-2">
+                                <Users className="w-4 h-4" />
+                                <span>{contest.currentEntries}/{contest.maxEntries}</span>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <Clock className="w-4 h-4" />
+                                <span>{new Date(contest.lineupLockTime).toLocaleTimeString()}</span>
+                              </div>
+                            </div>
+                            
+                            <div className="text-sm text-muted-foreground">
+                              Prize: {contest.prizePool}
+                            </div>
+                          </div>
+                          
+                          <div className="flex space-x-2">
+                            <Button 
+                              size="sm" 
+                              className="flex-1"
+                              onClick={() => window.open(`/fantasy/contest/${contest.id}`, '_blank')}
+                            >
+                              View Contest
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => {
+                                navigator.clipboard.writeText(`${window.location.origin}/fantasy/contest/${contest.id}`);
+                                // TODO: Add toast notification
+                              }}
+                            >
+                              Share Link
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Trophy className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground mb-4">You haven't created any showdown contests yet.</p>
+                  <Button onClick={() => setLocation('/fantasy/create/captain_showdown')}>
+                    Create Your First Contest
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Create Tournament Buttons */}
         <div className="pt-6 space-y-4">
