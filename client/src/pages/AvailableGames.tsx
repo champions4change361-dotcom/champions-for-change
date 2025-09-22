@@ -115,14 +115,15 @@ export default function AvailableGames() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto p-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2">Available Prime Time Games</h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              Select from our pre-created showdown contests for Monday Night, Thursday Night, and Sunday Night Football.
-            </p>
-          </div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
+        <div className="container mx-auto p-6">
+          <div className="max-w-4xl mx-auto">
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold mb-2 text-white">Available Prime Time Games</h1>
+              <p className="text-gray-200 font-medium">
+                Select from our pre-created showdown contests for Monday Night, Thursday Night, and Sunday Night Football.
+              </p>
+            </div>
           
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {[1, 2, 3].map((i) => (
@@ -145,20 +146,23 @@ export default function AvailableGames() {
           </div>
         </div>
       </div>
+    </div>
     );
   }
 
   if (error) {
     return (
-      <div className="container mx-auto p-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-3xl font-bold mb-4">Unable to Load Games</h1>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
-            We're having trouble loading the available contests. Please try again later.
-          </p>
-          <Button onClick={() => window.location.reload()}>
-            Retry
-          </Button>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
+        <div className="container mx-auto p-6">
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-3xl font-bold mb-4 text-white">Unable to Load Games</h1>
+            <p className="text-gray-200 font-medium mb-6">
+              We're having trouble loading the available contests. Please try again later.
+            </p>
+            <Button onClick={() => window.location.reload()}>
+              Retry
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -167,17 +171,18 @@ export default function AvailableGames() {
   const contests = (data as any)?.contests || [];
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2" data-testid="text-page-title">
-            Available Prime Time Games
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Select from our pre-created showdown contests for Monday Night, Thursday Night, and Sunday Night Football.
-            Once you add a contest to your dashboard, you can share the link with friends to join and compete!
-          </p>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
+      <div className="container mx-auto p-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold mb-2 text-white" data-testid="text-page-title">
+              Available Prime Time Games
+            </h1>
+            <p className="text-gray-200 font-medium">
+              Select from our pre-created showdown contests for Monday Night, Thursday Night, and Sunday Night Football.
+              Once you add a contest to your dashboard, you can share the link with friends to join and compete!
+            </p>
+          </div>
 
         {contests.length === 0 ? (
           <Card className="text-center p-8">
@@ -263,15 +268,16 @@ export default function AvailableGames() {
           </div>
         )}
         
-        <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
-          <h3 className="font-semibold mb-2">How It Works:</h3>
-          <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-            <p>1. <strong>Select a Game:</strong> Choose from Monday Night, Thursday Night, or Sunday Night Football</p>
-            <p>2. <strong>Add to Dashboard:</strong> Click "Add to My Dashboard" to claim the contest</p>
-            <p>3. <strong>Share with Friends:</strong> Get a shareable link to invite others to join</p>
-            <p>4. <strong>Captain Mode:</strong> Pick 6 players (1 Captain + 5 FLEX) from both teams</p>
-            <p>5. <strong>Compete:</strong> Captain gets {contests[0]?.captainMultiplier || '1.5'}x points, highest score wins!</p>
+        <div className="mt-8 p-4 bg-slate-800/50 backdrop-blur-sm rounded-lg border border-slate-700">
+          <h3 className="font-bold mb-2 text-white">How It Works:</h3>
+          <div className="text-sm text-gray-200 font-medium space-y-1">
+            <p>1. <strong className="text-white">Select a Game:</strong> Choose from Monday Night, Thursday Night, or Sunday Night Football</p>
+            <p>2. <strong className="text-white">Add to Dashboard:</strong> Click "Add to My Dashboard" to claim the contest</p>
+            <p>3. <strong className="text-white">Share with Friends:</strong> Get a shareable link to invite others to join</p>
+            <p>4. <strong className="text-white">Captain Mode:</strong> Pick 6 players (1 Captain + 5 FLEX) from both teams</p>
+            <p>5. <strong className="text-white">Compete:</strong> Captain gets {contests[0]?.captainMultiplier || '1.5'}x points, highest score wins!</p>
           </div>
+        </div>
         </div>
       </div>
     </div>
