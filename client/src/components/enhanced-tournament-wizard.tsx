@@ -2259,45 +2259,22 @@ export default function EnhancedTournamentWizard({
                 <Label htmlFor="teamSize" className="block text-sm font-medium text-gray-700 mb-2">
                   {competitionFormat === 'leaderboard' ? 'Number of Participants' : 'Number of Teams'} *
                 </Label>
-                <div className="space-y-3">
-                  {/* Quick Selection Buttons */}
-                  <div className="flex flex-wrap gap-2">
-                    {[4, 8, 16, 32, 64].map((size) => (
-                      <Button
-                        key={size}
-                        type="button"
-                        variant={teamSize === size ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => form.setValue("teamSize", size)}
-                        className="h-8 px-3"
-                      >
-                        {size}
-                      </Button>
+                <Select
+                  value={teamSize?.toString() || ""}
+                  onValueChange={(value) => form.setValue("teamSize", parseInt(value))}
+                  data-testid="select-team-size"
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select number of teams" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-60 overflow-y-auto">
+                    {Array.from({ length: 63 }, (_, i) => i + 2).map((size) => (
+                      <SelectItem key={size} value={size.toString()}>
+                        {size} {competitionFormat === 'leaderboard' ? 'Participants' : 'Teams'}
+                      </SelectItem>
                     ))}
-                  </div>
-                  
-                  {/* Custom Input - Better UX */}
-                  <div className="relative">
-                    <Input
-                      type="text"
-                      inputMode="numeric"
-                      value={teamSize || ""}
-                      onChange={(e) => {
-                        const value = e.target.value.replace(/[^0-9]/g, ''); // Only allow numbers
-                        const numValue = parseInt(value);
-                        if (value === "" || (numValue >= 2 && numValue <= 128)) {
-                          form.setValue("teamSize", value === "" ? 2 : numValue);
-                        }
-                      }}
-                      placeholder="Enter number of teams (2-128)"
-                      className="w-full text-center text-lg font-semibold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                      data-testid="input-team-size"
-                    />
-                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-400">
-                      Max: 128
-                    </div>
-                  </div>
-                </div>
+                  </SelectContent>
+                </Select>
                 
                 {teamSize && teamSize > 64 && (
                   <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-700">
