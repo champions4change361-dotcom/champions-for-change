@@ -2139,8 +2139,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log('🏆 Creating tournament with data:', req.body);
       
-      // Validate the tournament data
-      const validatedData = createTournamentSchema.parse(req.body);
+      // Validate the tournament data - make optional fields more flexible
+      const tournamentData = {
+        ...req.body,
+        // Make these fields optional if they're empty or not in expected format
+        ageGroup: req.body.ageGroup && req.body.ageGroup.trim() !== '' ? req.body.ageGroup : undefined,
+        genderDivision: req.body.genderDivision && req.body.genderDivision.trim() !== '' ? req.body.genderDivision : undefined,
+        skillLevel: req.body.skillLevel && req.body.skillLevel.trim() !== '' ? req.body.skillLevel : undefined,
+      };
+      
+      const validatedData = createTournamentSchema.parse(tournamentData);
       
       // Create the tournament (let storage generate the ID)
       const tournament = await storage.createTournament({

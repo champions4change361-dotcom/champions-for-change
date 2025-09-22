@@ -5306,12 +5306,20 @@ export const createMatchSchema = insertMatchSchema.extend({
   }
 });
 
-// Enhanced Tournament Validation 
-export const createTournamentSchema = insertTournamentSchema.extend({
+// Enhanced Tournament Validation - Override problematic enum fields
+export const createTournamentSchema = insertTournamentSchema.omit({
+  ageGroup: true,
+  genderDivision: true,
+  skillLevel: true,
+}).extend({
   name: z.string().min(3, "Tournament name must be at least 3 characters").max(100, "Name too long"),
-  teamSize: z.number().int().min(1, "Team size must be at least 1").max(50, "Team size too large"),
+  teamSize: z.number().int().min(1, "Team size must be at least 1").max(128, "Team size too large"),
   maxParticipants: z.number().int().min(2, "Need at least 2 participants").max(10000, "Too many participants").optional(),
   entryFee: z.coerce.number().min(0, "Entry fee cannot be negative").optional(),
+  // Make these completely optional strings to avoid enum validation issues
+  ageGroup: z.string().optional(),
+  genderDivision: z.string().optional(),
+  skillLevel: z.string().optional(),
   tournamentDate: z.coerce.date({
     errorMap: () => ({ message: "Invalid tournament date format" })
   }).refine((date) => {
