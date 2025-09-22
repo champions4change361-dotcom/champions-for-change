@@ -74,7 +74,34 @@ export function DailyFantasyLineupBuilder({
     enabled: !!sport,
   });
 
-  const availablePlayers = (playersData as any)?.players || [];
+  // Fetch available games to filter out players from locked games
+  const { data: availableGamesData, isLoading: gamesLoading } = useQuery({
+    queryKey: ['/api/nfl/available-games'],
+    enabled: sport === 'nfl',
+    refetchInterval: 60000, // Refresh every minute to update lockout status
+  });
+
+  // Get teams that have available (unlocked) games
+  const availableTeams = React.useMemo(() => {
+    if (!availableGamesData?.games) return new Set();
+    
+    const teams = new Set<string>();
+    availableGamesData.games.forEach((game: any) => {
+      teams.add(game.homeTeam);
+      teams.add(game.awayTeam);
+    });
+    return teams;
+  }, [availableGamesData]);
+
+  // Filter players to only include those from teams with available games
+  const allPlayers = (playersData as any)?.players || [];
+  const availablePlayers = React.useMemo(() => {
+    if (sport !== 'nfl' || !availableGamesData) {
+      return allPlayers; // For non-NFL sports, return all players
+    }
+    
+    return allPlayers.filter((player: any) => availableTeams.has(player.team));
+  }, [allPlayers, availableTeams, sport, availableGamesData]);
 
   const getPositionColor = (position: string) => {
     const colors = {
@@ -383,6 +410,17 @@ export function DailyFantasyLineupBuilder({
             <DialogTitle>
               Select {selectedPosition} Player - ${(remainingSalary/1000).toFixed(1)}K Available
             </DialogTitle>
+            {sport === 'nfl' && availableGamesData && (
+              <div className="text-sm text-muted-foreground space-y-1">
+                <p>
+                  {availablePlayers.length} players available from {availableTeams.size} teams 
+                  ({allPlayers.length - availablePlayers.length} players locked due to game start times)
+                </p>
+                <p className="text-xs">
+                  Games lock 30 minutes before kickoff - {availableGamesData.availableGames} of {availableGamesData.totalGames} games available
+                </p>
+              </div>
+            )}
           </DialogHeader>
           
           <div className="space-y-4">
