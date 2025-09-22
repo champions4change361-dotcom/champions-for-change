@@ -90,11 +90,8 @@ export default function CaptainShowdownCreator() {
   // Create showdown contest mutation
   const createContestMutation = useMutation({
     mutationFn: async (contestData: InsertShowdownContest) => {
-      const response = await apiRequest("/api/fantasy/showdown-contests", {
-        method: "POST",
-        body: JSON.stringify(contestData),
-      });
-      return response;
+      const response = await apiRequest("/api/fantasy/showdown-contests", "POST", contestData);
+      return response.json();
     },
     onSuccess: (data: any) => {
       toast({
@@ -144,11 +141,20 @@ export default function CaptainShowdownCreator() {
     // Validate game hasn't started (simple check - backend will do detailed validation)
     try {
       // Re-fetch current available games to check if this game is still available
-      const currentAvailableGames = await queryClient.fetchQuery({
+      const currentAvailableGames = await queryClient.fetchQuery<{
+        success: boolean; 
+        currentWeek: number;
+        totalGames: number;
+        availableGames: number;
+        lockedGames: number;
+        games: NFLGame[];
+        lockoutBuffer: number;
+        lastUpdated: string;
+      }>({
         queryKey: ["/api/nfl/available-games"],
       });
       
-      const stillAvailable = currentAvailableGames?.games?.some((g: any) => 
+      const stillAvailable = currentAvailableGames?.games?.some((g: NFLGame) => 
         g.homeTeam === game.team2 && g.awayTeam === game.team1
       );
       
