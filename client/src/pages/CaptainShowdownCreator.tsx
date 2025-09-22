@@ -84,7 +84,7 @@ export default function CaptainShowdownCreator() {
           gameDay: game.gameDay,
           status: game.status
         }))
-        .slice(0, 20) // Show more games since they're pre-filtered
+        // Show all available games (they're already filtered by lockout logic)
     : [];
 
   // Create showdown contest mutation
@@ -218,10 +218,9 @@ export default function CaptainShowdownCreator() {
                   {/* Game Selection */}
                   <div className="space-y-2">
                     <Label htmlFor="gameSelect">Select Game</Label>
-                    {availableGamesData && (
+                    {availableGamesData && availableGamesData.availableGames > 0 && (
                       <p className="text-sm text-muted-foreground">
-                        {availableGamesData.availableGames} of {availableGamesData.totalGames} games available 
-                        (games lock 30 min before kickoff)
+                        {availableGamesData.availableGames} games available for contests
                       </p>
                     )}
                     <select 
@@ -237,16 +236,11 @@ export default function CaptainShowdownCreator() {
                       ) : upcomingGames.length > 0 ? (
                         upcomingGames.map((game) => (
                           <option key={game.id} value={game.id}>
-                            {game.description} - {game.week} - {new Date(game.gameTime).toLocaleDateString()}
+                            {game.description} - {game.gameTime} - {game.gameDay}
                           </option>
                         ))
                       ) : (
-                        <option value="">
-                          {availableGamesData ? 
-                            `No games available - ${availableGamesData.lockedGames} games locked (within 30 min of kickoff or already started)` :
-                            'Loading available games...'
-                          }
-                        </option>
+                        <option value="">No games available for contests</option>
                       )}
                     </select>
                   </div>
