@@ -9,7 +9,6 @@ import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -2260,22 +2259,19 @@ export default function EnhancedTournamentWizard({
                 <Label htmlFor="teamSize" className="block text-sm font-medium text-gray-700 mb-2">
                   {competitionFormat === 'leaderboard' ? 'Number of Participants' : 'Number of Teams'} *
                 </Label>
-                <Select
+                <select
                   value={teamSize?.toString() || ""}
-                  onValueChange={(value) => form.setValue("teamSize", parseInt(value))}
+                  onChange={(e) => form.setValue("teamSize", parseInt(e.target.value))}
+                  className="w-full p-3 border border-gray-300 rounded-md bg-white text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   data-testid="select-team-size"
                 >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select number of teams" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-60 overflow-y-auto">
-                    {Array.from({ length: 63 }, (_, i) => i + 2).map((size) => (
-                      <SelectItem key={size} value={size.toString()}>
-                        {size} {competitionFormat === 'leaderboard' ? 'Participants' : 'Teams'}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  <option value="">Select number of {competitionFormat === 'leaderboard' ? 'participants' : 'teams'}</option>
+                  {Array.from({ length: 63 }, (_, i) => i + 2).map((size) => (
+                    <option key={size} value={size.toString()}>
+                      {size} {competitionFormat === 'leaderboard' ? 'Participants' : 'Teams'}
+                    </option>
+                  ))}
+                </select>
                 
                 {teamSize && teamSize > 64 && (
                   <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-700">
