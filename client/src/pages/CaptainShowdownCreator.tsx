@@ -38,6 +38,8 @@ interface FormattedGame {
   gameTime: string;
   description: string;
   week: string;
+  gameDay?: string;
+  status?: string;
 }
 
 export default function CaptainShowdownCreator() {
@@ -54,24 +56,35 @@ export default function CaptainShowdownCreator() {
   const [salaryCapEnabled, setSalaryCapEnabled] = useState(false);
   const [salaryCap, setSalaryCap] = useState(50000);
 
-  // Fetch real NFL schedule data
-  const { data: scheduleData, isLoading: scheduleLoading } = useQuery<{success: boolean; schedule: NFLSchedule}>({
-    queryKey: ["/api/nfl/schedule"],
+  // Fetch available NFL games (not locked for fantasy play)
+  const { data: availableGamesData, isLoading: scheduleLoading } = useQuery<{
+    success: boolean; 
+    currentWeek: number;
+    totalGames: number;
+    availableGames: number;
+    lockedGames: number;
+    games: NFLGame[];
+    lockoutBuffer: number;
+    lastUpdated: string;
+  }>({
+    queryKey: ["/api/nfl/available-games"],
+    refetchInterval: 60000, // Refresh every minute to update lockout status
   });
 
-  // Format games for captain showdown (Week 3 onwards)
-  const upcomingGames: FormattedGame[] = scheduleData?.schedule?.games
-    ? scheduleData.schedule.games
-        .filter(() => scheduleData.schedule.currentWeek >= 3) // Only show when current week is 3+
+  // Format available games for captain showdown
+  const upcomingGames: FormattedGame[] = availableGamesData?.games
+    ? availableGamesData.games
         .map((game, index) => ({
           id: `game-${index}`,
           team1: game.awayTeam,
           team2: game.homeTeam,
-          gameTime: new Date().toISOString(), // Use current time for demo
+          gameTime: game.gameTime,
           description: `${game.awayTeam} @ ${game.homeTeam}`,
-          week: `Week ${scheduleData.schedule.currentWeek}`
+          week: `Week ${availableGamesData.currentWeek}`,
+          gameDay: game.gameDay,
+          status: game.status
         }))
-        .slice(0, 10) // Limit to 10 games for display
+        .slice(0, 20) // Show more games since they're pre-filtered
     : [];
 
   // Create showdown contest mutation
@@ -205,6 +218,12 @@ export default function CaptainShowdownCreator() {
                   {/* Game Selection */}
                   <div className="space-y-2">
                     <Label htmlFor="gameSelect">Select Game</Label>
+                    {availableGamesData && (
+                      <p className="text-sm text-muted-foreground">
+                        {availableGamesData.availableGames} of {availableGamesData.totalGames} games available 
+                        (games lock 30 min before kickoff)
+                      </p>
+                    )}
                     <select 
                       id="game-select"
                       value={selectedGame} 
@@ -222,7 +241,12 @@ export default function CaptainShowdownCreator() {
                           </option>
                         ))
                       ) : (
-                        <option value="">No games available for Captain mode (Week 3+)</option>
+                        <option value="">
+                          {availableGamesData ? 
+                            `No games available - ${availableGamesData.lockedGames} games locked (within 30 min of kickoff or already started)` :
+                            'Loading available games...'
+                          }
+                        </option>
                       )}
                     </select>
                   </div>
