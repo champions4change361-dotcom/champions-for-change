@@ -59,10 +59,10 @@ export default function CaptainShowdownCreator() {
     queryKey: ["/api/nfl/schedule"],
   });
 
-  // Format games for captain showdown (Week 4 onwards)
+  // Format games for captain showdown (Week 3 onwards)
   const upcomingGames: FormattedGame[] = scheduleData?.schedule?.games
     ? scheduleData.schedule.games
-        .filter(() => scheduleData.schedule.currentWeek >= 4) // Only show when current week is 4+
+        .filter(() => scheduleData.schedule.currentWeek >= 3) // Only show when current week is 3+
         .map((game, index) => ({
           id: `game-${index}`,
           team1: game.awayTeam,
@@ -222,7 +222,7 @@ export default function CaptainShowdownCreator() {
                           </option>
                         ))
                       ) : (
-                        <option value="">No games available for Captain mode (Week 4+)</option>
+                        <option value="">No games available for Captain mode (Week 3+)</option>
                       )}
                     </select>
                   </div>
