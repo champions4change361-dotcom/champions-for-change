@@ -164,12 +164,12 @@ export default function FantasyTournaments() {
           color: "bg-orange-600 hover:bg-orange-700",
           description: "Draft once - best players auto-selected!"
         };
-      case "captain_showdown": 
+      case "available_games": 
         return {
-          title: "Captain Showdown", 
-          icon: "👑", 
+          title: "Prime Time Games", 
+          icon: "🎮", 
           color: "bg-yellow-600 hover:bg-yellow-700",
-          description: "Pick 1 Captain + 5 FLEX from single game!"
+          description: "Pre-created showdown contests for Monday/Thursday/Sunday night games!"
         };
       default: 
         return {
@@ -324,8 +324,8 @@ export default function FantasyTournaments() {
                 <div className="text-center py-8">
                   <Trophy className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                   <p className="text-muted-foreground mb-4">You haven't created any showdown contests yet.</p>
-                  <Button onClick={() => setLocation('/fantasy/create/captain_showdown')}>
-                    Create Your First Contest
+                  <Button onClick={() => setLocation('/fantasy/available-games')}>
+                    Browse Available Games
                   </Button>
                 </div>
               )}
@@ -412,13 +412,13 @@ export default function FantasyTournaments() {
                 <Button 
                   size="sm"
                   className="w-full bg-yellow-600 hover:bg-yellow-700 text-white px-1 py-3 text-xs font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
-                  onClick={() => handleFormatSelection('captain_showdown')}
-                  data-testid="create-captain_showdown-tournament"
+                  onClick={() => setLocation('/fantasy/available-games')}
+                  data-testid="browse-available-games"
                 >
-                  <span className="text-sm">👑</span> Captain
+                  <span className="text-sm">🎮</span> Prime Time
                 </Button>
                 <p className="text-xs text-muted-foreground mt-1 px-1">
-                  Single-game contests
+                  Monday/Thursday/Sunday
                 </p>
               </div>
             </div>

@@ -7504,11 +7504,11 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
   app.get("/api/fantasy/available-contests", async (req, res) => {
     try {
       const { PrimeTimeContestsService } = await import('./prime-time-contests.js');
-      const { nflScheduleService } = await import('./nfl-schedule-scraper.js');
+      const { nflScheduleScraper } = await import('./nfl-schedule-scraper.js');
       const storage = await getStorage();
       
       // Get current NFL schedule
-      const schedule = await nflScheduleService.getSchedule();
+      const schedule = nflScheduleScraper.getLatestSchedule();
       if (!schedule?.games) {
         return res.json({
           success: true,

@@ -134,7 +134,7 @@ import NFLKnockoutCreator from './pages/NFLKnockoutCreator';
 import HeadToHeadCreator from './pages/HeadToHeadCreator';
 import BestBallCreator from './pages/BestBallCreator';
 import FantasyDashboard from './pages/FantasyDashboard';
-import CaptainShowdownCreator from './pages/CaptainShowdownCreator';
+import AvailableGames from './pages/AvailableGames';
 import ContestDetail from './pages/ContestDetail';
 import PublicContests from './pages/PublicContests';
 import TeamListPage from './pages/TeamListPage';
@@ -257,7 +257,7 @@ function AuthenticatedRoutes() {
           <Route path="/fantasy/create/best_ball" component={BestBallCreator} />
         )}
         {isFeatureEnabled('fantasyLeagues') && (
-          <Route path="/fantasy/create/captain_showdown" component={CaptainShowdownCreator} />
+          <Route path="/fantasy/available-games" component={AvailableGames} />
         )}
         {isFeatureEnabled('fantasyLeagues') && (
           <Route path="/fantasy/contests" component={PublicContests} />
