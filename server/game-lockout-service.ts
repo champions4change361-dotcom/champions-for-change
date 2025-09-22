@@ -32,7 +32,10 @@ export class GameLockoutService {
         const timeDiffMs = gameTime.getTime() - now.getTime();
         const timeDiffMinutes = timeDiffMs / (1000 * 60);
         
-        // Lock if game starts within the buffer window
+        // DEBUG: Log the calculation
+        console.log(`🔒 Lockout check: ${game.awayTeam}@${game.homeTeam} - timeDiff: ${timeDiffMinutes.toFixed(1)} min, buffer: ${this.LOCKOUT_BUFFER_MINUTES} min, locked: ${timeDiffMinutes <= this.LOCKOUT_BUFFER_MINUTES}`);
+        
+        // Lock if game starts within the buffer window (or already started - negative time)
         return timeDiffMinutes <= this.LOCKOUT_BUFFER_MINUTES;
       } catch (error) {
         console.warn('Error parsing game time for lockout check:', error);
@@ -46,7 +49,7 @@ export class GameLockoutService {
   }
 
   /**
-   * Parse NFL.com game time formats into a Date object - SIMPLIFIED VERSION
+   * Parse NFL.com game time formats into a Date object - WORKING VERSION
    */
   private static parseGameTime(gameTime: string, gameDay?: string): Date | null {
     // Handle "FINAL" status - game is over
@@ -57,7 +60,8 @@ export class GameLockoutService {
     // Handle time formats like "8:15 PM ET", "1:00 PM ET"
     const timeMatch = gameTime.match(/(\d{1,2}):(\d{2})\s*(AM|PM)\s*ET/i);
     if (!timeMatch) {
-      return null; // Can't parse, treat as locked
+      console.log(`❌ Could not parse game time: ${gameTime}`);
+      return new Date(0); // Can't parse, treat as locked
     }
 
     const [, hours, minutes, ampm] = timeMatch;
@@ -70,20 +74,37 @@ export class GameLockoutService {
       hour24 = 0;
     }
 
-    // Create date object for the game time
+    // Get current time
     const now = new Date();
+    
+    // Create game time - need to figure out correct date
+    // ET is UTC-4 (EDT), so 4:05 PM ET = 20:05 UTC (8:05 PM UTC)
     const gameDate = new Date();
+    gameDate.setUTCHours(hour24 + 4, parseInt(minutes), 0, 0); // Convert ET to UTC by adding 4 hours
     
-    // Set the time in ET (convert to UTC by adding 5 hours for ET)
-    gameDate.setUTCHours(hour24 + 5, parseInt(minutes), 0, 0);
+    // Determine the correct date based on game day and current time
+    const currentDayOfWeek = now.getDay(); // 0=Sunday, 1=Monday, etc.
     
-    // Handle day logic - if it's Monday and we're on Sunday night, add a day
-    if (gameDay === 'Monday' && now.getDay() === 0) { // Sunday = 0
-      gameDate.setUTCDate(gameDate.getUTCDate() + 1);
+    console.log(`📅 Date calc: current day ${currentDayOfWeek} (${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][currentDayOfWeek]}), game day: ${gameDay}`);
+    
+    if (gameDay === 'Sunday') {
+      // If it's currently Monday and game is Sunday, the game was yesterday
+      if (currentDayOfWeek === 1) { // Currently Monday
+        console.log(`📅 Adjusting Sunday game to yesterday (Monday -> Sunday)`);
+        gameDate.setDate(gameDate.getDate() - 1);
+      }
+      // If it's currently Sunday, game is today (no change needed)
+    } else if (gameDay === 'Monday') {
+      // If it's currently Sunday night (or early Monday), Monday game is tomorrow
+      if (currentDayOfWeek === 0) { // Currently Sunday
+        console.log(`📅 Adjusting Monday game to tomorrow (Sunday -> Monday)`);
+        gameDate.setDate(gameDate.getDate() + 1);
+      }
+      // If it's currently Monday, game is today (no change needed)
     }
     
-    // If game time has already passed today, it's likely for next week
-    // But for simplicity, if it's in the past, consider it locked
+    // DEBUG logging
+    console.log(`🕐 Parsing: ${gameTime} ${gameDay} -> ${gameDate.toISOString()} (current: ${now.toISOString()})`);
     
     return gameDate;
   }

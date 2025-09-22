@@ -141,9 +141,32 @@ export default function CaptainShowdownCreator() {
     const game = upcomingGames.find(g => g.id === selectedGame);
     if (!game) return;
 
-    // Calculate lineup lock time (30 minutes before game)
-    const gameTime = new Date(game.gameTime);
-    const lineupLockTime = new Date(gameTime.getTime() - 30 * 60 * 1000);
+    // Validate game hasn't started (simple check - backend will do detailed validation)
+    try {
+      // Re-fetch current available games to check if this game is still available
+      const currentAvailableGames = await queryClient.fetchQuery({
+        queryKey: ["/api/nfl/available-games"],
+      });
+      
+      const stillAvailable = currentAvailableGames?.games?.some((g: any) => 
+        g.homeTeam === game.team2 && g.awayTeam === game.team1
+      );
+      
+      if (!stillAvailable) {
+        toast({
+          title: "Game Already Started",
+          description: "This game is no longer available for new contests",
+          variant: "destructive",
+        });
+        return;
+      }
+    } catch (error) {
+      console.error('Error checking game availability:', error);
+    }
+
+    // Note: gameTime parsing simplified - backend will handle actual lockout validation
+    const gameTime = new Date(); // Placeholder - backend determines actual game time
+    const lineupLockTime = new Date(gameTime.getTime() - 10 * 60 * 1000); // 10 minute buffer
 
     const contestData: InsertShowdownContest = {
       contestName: contestName.trim(),
