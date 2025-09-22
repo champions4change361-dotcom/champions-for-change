@@ -2860,6 +2860,150 @@ export class DbStorage implements IStorage {
     }
   }
 
+  // Fantasy Showdown Contest methods
+  async createShowdownContest(contest: InsertShowdownContest): Promise<ShowdownContest> {
+    try {
+      const id = randomUUID();
+      const now = new Date();
+      const newContest = {
+        id,
+        ...contest,
+        createdAt: now,
+        updatedAt: now
+      };
+      
+      const result = await this.db.insert(showdownContests).values(newContest).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw error;
+    }
+  }
+
+  async getShowdownContest(id: string): Promise<ShowdownContest | undefined> {
+    try {
+      const result = await this.db.select().from(showdownContests).where(eq(showdownContests.id, id));
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async getShowdownContests(): Promise<ShowdownContest[]> {
+    try {
+      const result = await this.db.select().from(showdownContests).orderBy(desc(showdownContests.createdAt));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async getShowdownContestsByCommissioner(commissionerId: string): Promise<ShowdownContest[]> {
+    try {
+      const result = await this.db.select().from(showdownContests)
+        .where(eq(showdownContests.commissionerId, commissionerId))
+        .orderBy(desc(showdownContests.createdAt));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async updateShowdownContest(id: string, updates: Partial<ShowdownContest>): Promise<ShowdownContest | undefined> {
+    try {
+      const updatedData = {
+        ...updates,
+        updatedAt: new Date()
+      };
+      
+      const result = await this.db.update(showdownContests)
+        .set(updatedData)
+        .where(eq(showdownContests.id, id))
+        .returning();
+      
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  // Fantasy Showdown Entry methods
+  async createShowdownEntry(entry: InsertShowdownEntry): Promise<ShowdownEntry> {
+    try {
+      const id = randomUUID();
+      const now = new Date();
+      const newEntry = {
+        id,
+        ...entry,
+        createdAt: now,
+        updatedAt: now
+      };
+      
+      const result = await this.db.insert(showdownEntries).values(newEntry).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw error;
+    }
+  }
+
+  async getShowdownEntry(id: string): Promise<ShowdownEntry | undefined> {
+    try {
+      const result = await this.db.select().from(showdownEntries).where(eq(showdownEntries.id, id));
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async getShowdownEntriesByContest(contestId: string): Promise<ShowdownEntry[]> {
+    try {
+      const result = await this.db.select().from(showdownEntries)
+        .where(eq(showdownEntries.contestId, contestId))
+        .orderBy(desc(showdownEntries.createdAt));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async getShowdownEntriesByUser(userId: string): Promise<ShowdownEntry[]> {
+    try {
+      const result = await this.db.select().from(showdownEntries)
+        .where(eq(showdownEntries.userId, userId))
+        .orderBy(desc(showdownEntries.createdAt));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async updateShowdownEntry(id: string, updates: Partial<ShowdownEntry>): Promise<ShowdownEntry | undefined> {
+    try {
+      const updatedData = {
+        ...updates,
+        updatedAt: new Date()
+      };
+      
+      const result = await this.db.update(showdownEntries)
+        .set(updatedData)
+        .where(eq(showdownEntries.id, id))
+        .returning();
+      
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
   // =============================================================================
   // TRANSACTION SUPPORT FOR COMPLEX OPERATIONS
   // Comprehensive transaction methods for data consistency
@@ -3081,6 +3225,8 @@ export class MemStorage implements IStorage {
   
   // FANTASY PROFILE MAPS
   private fantasyProfiles: Map<string, FantasyProfile>;
+  private showdownContests: Map<string, ShowdownContest>;
+  private showdownEntries: Map<string, ShowdownEntry>;
 
   constructor() {
     this.users = new Map();
@@ -3125,6 +3271,10 @@ export class MemStorage implements IStorage {
     
     // FANTASY PROFILE INITIALIZATION
     this.fantasyProfiles = new Map();
+    
+    // FANTASY SHOWDOWN INITIALIZATION
+    this.showdownContests = new Map();
+    this.showdownEntries = new Map();
     
     // Initialize with default tournament structures, sport division rules, track events, tournament integration, competition formats, and KRAKEN!
     this.initializeDefaultStructures();
@@ -5748,6 +5898,99 @@ export class MemStorage implements IStorage {
     this.initializeApiConfigurations();
     
     console.log("🎮 ADULT FANTASY EMPIRE DEPLOYED! Age-verified leagues, professional players, and API integrations ready!");
+  }
+
+  // Fantasy Showdown Contest methods
+  async createShowdownContest(contest: InsertShowdownContest): Promise<ShowdownContest> {
+    const id = randomUUID();
+    const now = new Date();
+    const newContest = {
+      id,
+      ...contest,
+      createdAt: now,
+      updatedAt: now
+    };
+    
+    this.showdownContests.set(id, newContest);
+    return newContest;
+  }
+
+  async getShowdownContest(id: string): Promise<ShowdownContest | undefined> {
+    return this.showdownContests.get(id);
+  }
+
+  async getShowdownContests(): Promise<ShowdownContest[]> {
+    return Array.from(this.showdownContests.values())
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async getShowdownContestsByCommissioner(commissionerId: string): Promise<ShowdownContest[]> {
+    return Array.from(this.showdownContests.values())
+      .filter(contest => contest.commissionerId === commissionerId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async updateShowdownContest(id: string, updates: Partial<ShowdownContest>): Promise<ShowdownContest | undefined> {
+    const existing = this.showdownContests.get(id);
+    if (!existing) {
+      return undefined;
+    }
+    
+    const updated = {
+      ...existing,
+      ...updates,
+      updatedAt: new Date()
+    };
+    
+    this.showdownContests.set(id, updated);
+    return updated;
+  }
+
+  // Fantasy Showdown Entry methods
+  async createShowdownEntry(entry: InsertShowdownEntry): Promise<ShowdownEntry> {
+    const id = randomUUID();
+    const now = new Date();
+    const newEntry = {
+      id,
+      ...entry,
+      createdAt: now,
+      updatedAt: now
+    };
+    
+    this.showdownEntries.set(id, newEntry);
+    return newEntry;
+  }
+
+  async getShowdownEntry(id: string): Promise<ShowdownEntry | undefined> {
+    return this.showdownEntries.get(id);
+  }
+
+  async getShowdownEntriesByContest(contestId: string): Promise<ShowdownEntry[]> {
+    return Array.from(this.showdownEntries.values())
+      .filter(entry => entry.contestId === contestId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async getShowdownEntriesByUser(userId: string): Promise<ShowdownEntry[]> {
+    return Array.from(this.showdownEntries.values())
+      .filter(entry => entry.userId === userId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async updateShowdownEntry(id: string, updates: Partial<ShowdownEntry>): Promise<ShowdownEntry | undefined> {
+    const existing = this.showdownEntries.get(id);
+    if (!existing) {
+      return undefined;
+    }
+    
+    const updated = {
+      ...existing,
+      ...updates,
+      updatedAt: new Date()
+    };
+    
+    this.showdownEntries.set(id, updated);
+    return updated;
   }
 
   // Initialize fantasy leagues with comprehensive adult-only formats

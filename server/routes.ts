@@ -7469,6 +7469,7 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
   // Showdown Contest routes
   app.post("/api/fantasy/showdown-contests", async (req, res) => {
     try {
+      const storage = await getStorage();
       const contestData = req.body;
       
       // Basic validation
@@ -7478,15 +7479,12 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
         });
       }
 
-      // Create the contest (for now, return mock data)
-      const contest = {
-        id: `contest-${Date.now()}`,
+      // Create the contest using real storage
+      const contest = await storage.createShowdownContest({
         ...contestData,
         currentEntries: 0,
-        status: "open",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
+        status: "open"
+      });
 
       res.json({
         success: true,
@@ -7504,37 +7502,15 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
 
   app.get("/api/fantasy/showdown-contests", async (req, res) => {
     try {
-      const sampleContests = [
-        {
-          id: "contest-1",
-          contestName: "KC @ LAC Showdown",
-          commissionerId: "user-1",
-          sport: "nfl",
-          gameDate: "2025-01-12T21:25:00Z",
-          team1: "KC",
-          team2: "LAC",
-          gameDescription: "KC @ LAC",
-          maxEntries: 20,
-          currentEntries: 12,
-          entryFee: 0,
-          prizePool: "Bragging Rights",
-          captainMultiplier: "1.5",
-          flexPositions: 5,
-          totalLineupSize: 6,
-          salaryCapEnabled: false,
-          status: "open",
-          lineupLockTime: "2025-01-12T20:55:00Z",
-          contestStartTime: "2025-01-12T21:25:00Z",
-          contestEndTime: "2025-01-13T01:25:00Z",
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        }
-      ];
+      const storage = await getStorage();
+      
+      // Get all showdown contests from storage
+      const contests = await storage.getShowdownContests();
       
       res.json({
         success: true,
-        contests: sampleContests,
-        count: sampleContests.length
+        contests,
+        count: contests.length
       });
     } catch (error: any) {
       console.error("Get showdown contests error:", error);
