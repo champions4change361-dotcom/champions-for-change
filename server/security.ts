@@ -92,7 +92,7 @@ export function setupSecurity(app: express.Application) {
     '/wordpress',
     '/.env',
     '/config',
-    '/admin',
+    // NOTE: /admin removed - this is our legitimate admin interface
     '/phpmyadmin',
     '/mysql',
     '/database',
