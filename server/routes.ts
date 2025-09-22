@@ -7504,6 +7504,7 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
   app.get("/api/fantasy/available-contests", async (req, res) => {
     try {
       const { PrimeTimeContestsService } = await import('./prime-time-contests.js');
+      const { GameLockoutService } = await import('./game-lockout-service.js');
       const { nflScheduleScraper } = await import('./nfl-schedule-scraper.js');
       const storage = await getStorage();
       
@@ -7517,8 +7518,12 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
         });
       }
       
-      // Generate prime time contests from schedule
-      const primeTimeContests = PrimeTimeContestsService.generatePrimeTimeContests(schedule.games);
+      // CRITICAL FIX: Filter out locked games BEFORE generating contests
+      const availableGames = GameLockoutService.getAvailableGames(schedule.games);
+      console.log(`🔒 Lockout filtering: ${schedule.games.length} total games -> ${availableGames.length} available games`);
+      
+      // Generate prime time contests from ONLY available (unlocked) games
+      const primeTimeContests = PrimeTimeContestsService.generatePrimeTimeContests(availableGames);
       
       // Get existing contests to avoid duplicates
       const existingContests = await storage.getShowdownContests();
