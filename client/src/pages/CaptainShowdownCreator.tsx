@@ -14,41 +14,31 @@ import { Trophy, Users, Calendar, Crown, Target, DollarSign, Clock } from "lucid
 import { apiRequest } from "@/lib/queryClient";
 import type { InsertShowdownContest } from "@shared/schema";
 
-// Mock NFL games data - in production this would come from ESPN/Yahoo API
-const upcomingGames = [
-  {
-    id: "game-1",
-    team1: "KC",
-    team2: "LAC",
-    gameTime: "2025-01-12T21:25:00Z",
-    description: "KC @ LAC",
-    week: "Wild Card"
-  },
-  {
-    id: "game-2", 
-    team1: "BAL",
-    team2: "PIT",
-    gameTime: "2025-01-11T20:15:00Z",
-    description: "BAL @ PIT",
-    week: "Wild Card"
-  },
-  {
-    id: "game-3",
-    team1: "BUF",
-    team2: "DEN",
-    gameTime: "2025-01-12T18:00:00Z",
-    description: "BUF @ DEN", 
-    week: "Wild Card"
-  },
-  {
-    id: "game-4",
-    team1: "PHI",
-    team2: "GB",
-    gameTime: "2025-01-12T16:30:00Z",
-    description: "PHI @ GB",
-    week: "Wild Card"
-  }
-];
+// NFL Games interface to match our schedule data
+interface NFLGame {
+  homeTeam: string;
+  awayTeam: string;
+  gameTime: string;
+  gameDay: string;
+  status: 'scheduled' | 'live' | 'final';
+}
+
+interface NFLSchedule {
+  currentWeek: number;
+  season: number;
+  games: NFLGame[];
+  byeTeams: string[];
+  totalGames: number;
+}
+
+interface FormattedGame {
+  id: string;
+  team1: string;
+  team2: string;
+  gameTime: string;
+  description: string;
+  week: string;
+}
 
 export default function CaptainShowdownCreator() {
   const [, setLocation] = useLocation();
@@ -64,22 +54,43 @@ export default function CaptainShowdownCreator() {
   const [salaryCapEnabled, setSalaryCapEnabled] = useState(false);
   const [salaryCap, setSalaryCap] = useState(50000);
 
+  // Fetch real NFL schedule data
+  const { data: scheduleData, isLoading: scheduleLoading } = useQuery<{success: boolean; schedule: NFLSchedule}>({
+    queryKey: ["/api/nfl/schedule"],
+  });
+
+  // Format games for captain showdown (Week 4 onwards)
+  const upcomingGames: FormattedGame[] = scheduleData?.schedule?.games
+    ? scheduleData.schedule.games
+        .filter(() => scheduleData.schedule.currentWeek >= 4) // Only show when current week is 4+
+        .map((game, index) => ({
+          id: `game-${index}`,
+          team1: game.awayTeam,
+          team2: game.homeTeam,
+          gameTime: new Date().toISOString(), // Use current time for demo
+          description: `${game.awayTeam} @ ${game.homeTeam}`,
+          week: `Week ${scheduleData.schedule.currentWeek}`
+        }))
+        .slice(0, 10) // Limit to 10 games for display
+    : [];
+
   // Create showdown contest mutation
   const createContestMutation = useMutation({
     mutationFn: async (contestData: InsertShowdownContest) => {
-      return await apiRequest("/api/fantasy/showdown-contests", {
+      const response = await apiRequest("/api/fantasy/showdown-contests", {
         method: "POST",
         body: JSON.stringify(contestData),
       });
+      return response;
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       toast({
         title: "Showdown Contest Created!",
         description: `${contestName} is ready for entries`,
       });
       
-      // Redirect to the contest page or back to fantasy dashboard
-      setLocation(`/fantasy/showdown/${data.contest.id}`);
+      // Redirect to fantasy dashboard 
+      setLocation("/fantasy-tournaments");
       
       // Invalidate related queries
       queryClient.invalidateQueries({ queryKey: ["/api/fantasy/showdown-contests"] });
@@ -202,11 +213,17 @@ export default function CaptainShowdownCreator() {
                       data-testid="game-select"
                     >
                       <option value="">Choose a game for your contest</option>
-                      {upcomingGames.map((game) => (
-                        <option key={game.id} value={game.id}>
-                          {game.description} - {new Date(game.gameTime).toLocaleDateString()} {new Date(game.gameTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </option>
-                      ))}
+                      {scheduleLoading ? (
+                        <option value="">Loading games...</option>
+                      ) : upcomingGames.length > 0 ? (
+                        upcomingGames.map((game) => (
+                          <option key={game.id} value={game.id}>
+                            {game.description} - {game.week} - {new Date(game.gameTime).toLocaleDateString()}
+                          </option>
+                        ))
+                      ) : (
+                        <option value="">No games available for Captain mode (Week 4+)</option>
+                      )}
                     </select>
                   </div>
 
