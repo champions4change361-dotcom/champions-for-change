@@ -7500,12 +7500,62 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
     }
   });
 
+  // Get available prime time contests (system-generated, ready to be claimed)
+  app.get("/api/fantasy/available-contests", async (req, res) => {
+    try {
+      const { PrimeTimeContestsService } = await import('./prime-time-contests.js');
+      const { nflScheduleService } = await import('./nfl-schedule-scraper.js');
+      const storage = await getStorage();
+      
+      // Get current NFL schedule
+      const schedule = await nflScheduleService.getSchedule();
+      if (!schedule?.games) {
+        return res.json({
+          success: true,
+          contests: [],
+          count: 0
+        });
+      }
+      
+      // Generate prime time contests from schedule
+      const primeTimeContests = PrimeTimeContestsService.generatePrimeTimeContests(schedule.games);
+      
+      // Get existing contests to avoid duplicates
+      const existingContests = await storage.getShowdownContests();
+      const existingGameKeys = new Set(existingContests.map(c => `${c.team1}-${c.team2}-${c.gameDate.toDateString()}`));
+      
+      // Filter out contests that already exist
+      const newContests = primeTimeContests.filter(contest => {
+        const gameKey = `${contest.team1}-${contest.team2}-${contest.gameDate.toDateString()}`;
+        return !existingGameKeys.has(gameKey);
+      });
+      
+      res.json({
+        success: true,
+        contests: newContests,
+        count: newContests.length
+      });
+    } catch (error: any) {
+      console.error("Get available contests error:", error);
+      res.status(500).json({ 
+        error: "Failed to get available contests",
+        details: error.message 
+      });
+    }
+  });
+
+  // Get user's claimed showdown contests
   app.get("/api/fantasy/showdown-contests", async (req, res) => {
     try {
       const storage = await getStorage();
+      const userId = req.user?.id;
       
-      // Get all showdown contests from storage
-      const contests = await storage.getShowdownContests();
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      // Get contests claimed by this user (commissioner)
+      const contests = await storage.getShowdownContestsByCommissioner(userId);
       
       res.json({
         success: true,
@@ -7516,6 +7566,42 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
       console.error("Get showdown contests error:", error);
       res.status(500).json({ 
         error: "Failed to get showdown contests",
+        details: error.message 
+      });
+    }
+  });
+
+  // Claim a prime time contest (add to dashboard)
+  app.post("/api/fantasy/claim-contest", async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const userId = req.user?.id;
+      const { contestData } = req.body;
+      
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      if (!contestData) {
+        return res.status(400).json({ error: "Contest data required" });
+      }
+      
+      // Create the contest with the user as commissioner
+      const contest = await storage.createShowdownContest({
+        ...contestData,
+        commissionerId: userId,
+        status: "open" // Change from 'available' to 'open' when claimed
+      });
+      
+      res.json({
+        success: true,
+        contest,
+        message: "Contest added to your dashboard successfully"
+      });
+    } catch (error: any) {
+      console.error("Claim contest error:", error);
+      res.status(500).json({ 
+        error: "Failed to claim contest",
         details: error.message 
       });
     }
