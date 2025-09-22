@@ -46,7 +46,7 @@ export default function TournamentPreviewBanner({ className = "" }: TournamentPr
 
   if (isMinimized) {
     return (
-      <div className={`fixed top-0 left-0 right-0 z-50 ${className}`}>
+      <div className={`w-full ${className}`}>
         <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 shadow-lg">
           <div className="max-w-7xl mx-auto flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -82,7 +82,7 @@ export default function TournamentPreviewBanner({ className = "" }: TournamentPr
   }
 
   return (
-    <div className={`fixed top-0 left-0 right-0 z-50 ${className}`}>
+    <div className={`w-full ${className}`}>
       <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 text-white shadow-xl">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between mb-3">

@@ -126,7 +126,7 @@ export default function TournamentDesign() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 py-12 px-4">
       {/* Tournament Preview Banner */}
-      {isPreviewMode && <TournamentPreviewBanner />}
+      <TournamentPreviewBanner />
       {/* Smart Prompts for Preview Mode */}
       {isPreviewMode && <TournamentSmartPrompt />}
       

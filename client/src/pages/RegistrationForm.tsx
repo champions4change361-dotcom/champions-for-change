@@ -224,9 +224,9 @@ export default function RegistrationFormPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
       {/* Tournament Preview Banner */}
-      {isPreviewMode && <TournamentPreviewBanner />}
+      <TournamentPreviewBanner />
       {/* Smart Prompts for Preview Mode */}
-      {isPreviewMode && <TournamentSmartPrompt />}
+      <TournamentSmartPrompt />
       <div className="max-w-4xl mx-auto">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold mb-2 text-gray-900">Join Champions for Change</h1>
