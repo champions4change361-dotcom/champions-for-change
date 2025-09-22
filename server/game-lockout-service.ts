@@ -2,11 +2,11 @@ import type { NFLGame } from './nfl-schedule-scraper.js';
 
 /**
  * Centralized service for managing game lockout logic across all fantasy formats
- * Games are locked 30 minutes before kickoff to prevent integrity issues
+ * Games are locked 10 minutes before kickoff to prevent integrity issues
  */
 export class GameLockoutService {
-  // Games lock 30 minutes before kickoff
-  private static readonly LOCKOUT_BUFFER_MINUTES = 30;
+  // Games lock 10 minutes before kickoff (simplified per user request)
+  private static readonly LOCKOUT_BUFFER_MINUTES = 10;
 
   /**
    * Determines if a game is locked for fantasy play
@@ -46,51 +46,46 @@ export class GameLockoutService {
   }
 
   /**
-   * Parse NFL.com game time formats into a Date object
+   * Parse NFL.com game time formats into a Date object - SIMPLIFIED VERSION
    */
   private static parseGameTime(gameTime: string, gameDay?: string): Date | null {
-    const now = new Date();
-    
-    // Handle "FINAL" status
+    // Handle "FINAL" status - game is over
     if (gameTime === 'FINAL') {
-      return null; // Game is over
+      return new Date(0); // Very old date = definitely locked
     }
 
     // Handle time formats like "8:15 PM ET", "1:00 PM ET"
     const timeMatch = gameTime.match(/(\d{1,2}):(\d{2})\s*(AM|PM)\s*ET/i);
-    if (timeMatch) {
-      const [, hours, minutes, ampm] = timeMatch;
-      let hour24 = parseInt(hours);
-      
-      if (ampm.toUpperCase() === 'PM' && hour24 !== 12) {
-        hour24 += 12;
-      } else if (ampm.toUpperCase() === 'AM' && hour24 === 12) {
-        hour24 = 0;
-      }
-
-      // Create date for today with the parsed time (assuming ET timezone)
-      const gameDate = new Date();
-      gameDate.setHours(hour24 + 5, parseInt(minutes), 0, 0); // Convert ET to UTC (rough approximation)
-      
-      // If the time has passed today, assume it's for this week
-      if (gameDate < now && gameDay) {
-        // Try to find the next occurrence of this day
-        const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-        const targetDayIndex = daysOfWeek.indexOf(gameDay);
-        const currentDayIndex = now.getDay();
-        
-        let daysToAdd = targetDayIndex - currentDayIndex;
-        if (daysToAdd <= 0) {
-          daysToAdd += 7; // Next week
-        }
-        
-        gameDate.setDate(now.getDate() + daysToAdd);
-      }
-      
-      return gameDate;
+    if (!timeMatch) {
+      return null; // Can't parse, treat as locked
     }
 
-    return null;
+    const [, hours, minutes, ampm] = timeMatch;
+    let hour24 = parseInt(hours);
+    
+    // Convert to 24-hour format
+    if (ampm.toUpperCase() === 'PM' && hour24 !== 12) {
+      hour24 += 12;
+    } else if (ampm.toUpperCase() === 'AM' && hour24 === 12) {
+      hour24 = 0;
+    }
+
+    // Create date object for the game time
+    const now = new Date();
+    const gameDate = new Date();
+    
+    // Set the time in ET (convert to UTC by adding 5 hours for ET)
+    gameDate.setUTCHours(hour24 + 5, parseInt(minutes), 0, 0);
+    
+    // Handle day logic - if it's Monday and we're on Sunday night, add a day
+    if (gameDay === 'Monday' && now.getDay() === 0) { // Sunday = 0
+      gameDate.setUTCDate(gameDate.getUTCDate() + 1);
+    }
+    
+    // If game time has already passed today, it's likely for next week
+    // But for simplicity, if it's in the past, consider it locked
+    
+    return gameDate;
   }
 
   /**

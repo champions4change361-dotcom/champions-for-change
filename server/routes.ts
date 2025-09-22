@@ -7767,7 +7767,7 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
         games: gamesWithLockStatus,
         lockoutBuffer: GameLockoutService.getLockoutBufferMinutes(),
         lastUpdated: schedule.lastUpdated,
-        message: 'Games are locked 30 minutes before kickoff and during/after the game'
+        message: 'Games are locked 10 minutes before kickoff and during/after the game'
       });
     } catch (error: any) {
       console.error('Games lockout status fetch error:', error);
