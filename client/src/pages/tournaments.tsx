@@ -8,7 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   Trophy, 
-  Plus, 
   Search, 
   Filter, 
   Calendar,
@@ -26,8 +25,6 @@ import {
 import { Link } from 'wouter';
 import { useAuth } from '@/hooks/useAuth';
 import { useTournamentAccess } from '@/hooks/useTournamentAccess';
-import EnhancedTournamentWizard from '@/components/enhanced-tournament-wizard';
-import { TournamentAccessGate, FeatureLimitGate } from '@/components/tournament-access-gate';
 import PricingComparison from '@/components/pricing-comparison';
 
 interface Tournament {
@@ -46,7 +43,6 @@ interface Tournament {
 }
 
 export default function TournamentsPage() {
-  const [showCreateWizard, setShowCreateWizard] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('active'); // Hide completed by default
   const [formatFilter, setFormatFilter] = useState('all');
@@ -138,38 +134,6 @@ export default function TournamentsPage() {
     return tournament.competitionFormat === 'leaderboard' ? 'participants' : 'teams';
   };
 
-  if (showCreateWizard) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
-        <div className="container mx-auto p-6">
-          <div className="mb-6">
-            <Button 
-              variant="outline" 
-              onClick={() => setShowCreateWizard(false)}
-              className="mb-4"
-            >
-              ← Back to Tournaments
-            </Button>
-          </div>
-        
-        <FeatureLimitGate
-          feature="tournaments"
-          currentCount={tournaments.length}
-          checkLimit={canCreateTournament}
-        >
-          <EnhancedTournamentWizard 
-            onClose={() => setShowCreateWizard(false)}
-            onTournamentCreated={() => {
-              setShowCreateWizard(false);
-              // Refresh tournaments list
-              window.location.reload();
-            }}
-          />
-        </FeatureLimitGate>
-        </div>
-      </div>
-    );
-  }
 
   // Authentication check
   if (!isAuthenticated) {
@@ -251,34 +215,6 @@ export default function TournamentsPage() {
             <p className="text-medium-contrast mt-1 text-sm sm:text-base">
               Create and manage tournaments with comprehensive bracket systems
             </p>
-          </div>
-          
-          {/* Mobile-optimized create button */}
-          <div className="flex-shrink-0 w-full sm:w-auto">
-            {!canCreateTournament(tournaments.length) ? (
-              <div className="text-center sm:text-right">
-                <Button 
-                  disabled
-                  className="w-full sm:w-auto flex items-center justify-center gap-2"
-                  data-testid="button-create-tournament-disabled"
-                >
-                  <Lock className="h-4 w-4" />
-                  <span>Limit Reached</span>
-                </Button>
-                <p className="text-xs text-gray-500 mt-1">
-                  {getUpgradeMessage('more tournaments')}
-                </p>
-              </div>
-            ) : (
-              <Button 
-                onClick={() => setShowCreateWizard(true)}
-                className="w-full sm:w-auto flex items-center justify-center gap-2"
-                data-testid="button-create-tournament"
-              >
-                <Plus className="h-4 w-4" />
-                <span>Create Tournament</span>
-              </Button>
-            )}
           </div>
         </div>
 
@@ -372,15 +308,6 @@ export default function TournamentsPage() {
                 : 'Try adjusting your search or filter criteria'
               }
             </p>
-            {tournaments.length === 0 && (
-              <Button 
-                onClick={() => setShowCreateWizard(true)}
-                className="flex items-center gap-2"
-              >
-                <Plus className="h-4 w-4" />
-                Create Your First Tournament
-              </Button>
-            )}
           </CardContent>
         </Card>
       ) : (
