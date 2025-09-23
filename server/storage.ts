@@ -1874,63 +1874,40 @@ export class DbStorage implements IStorage {
   async createTournament(insertTournament: InsertTournament): Promise<Tournament> {
     // TRANSACTIONAL APPROACH: Split incoming data into core + sport config, create both in single transaction
     return await this.db.transaction(async (tx) => {
-      // Step 1: WHITELIST core tournament fields (safe approach)
-      const coreTournamentData = {
-        id: insertTournament.id,
-        name: insertTournament.name,
-        teamSize: insertTournament.teamSize,
-        description: insertTournament.description,
-        userId: insertTournament.userId,
-        status: insertTournament.status,
-        sport: insertTournament.sport,
-        sportCategory: insertTournament.sportCategory,
-        ageGroup: insertTournament.ageGroup,
-        genderDivision: insertTournament.genderDivision,
-        location: insertTournament.location,
-        tournamentDate: insertTournament.tournamentDate,
-        registrationDeadline: insertTournament.registrationDeadline,
-        entryFee: insertTournament.entryFee,
-        maxParticipants: insertTournament.maxParticipants,
-        competitionFormat: insertTournament.competitionFormat,
-        tournamentType: insertTournament.tournamentType,
-        tournamentStructure: insertTournament.tournamentStructure,
-        divisions: insertTournament.divisions,
-        teams: insertTournament.teams,
-        bracket: insertTournament.bracket,
-        scoringMethod: insertTournament.scoringMethod,
-        seriesLength: insertTournament.seriesLength,
-        currentStage: insertTournament.currentStage,
-        totalStages: insertTournament.totalStages,
-        stageConfiguration: insertTournament.stageConfiguration,
-        isPublic: insertTournament.isPublic,
-        donationsEnabled: insertTournament.donationsEnabled,
-        donationGoal: insertTournament.donationGoal,
-        donationDescription: insertTournament.donationDescription,
-        // Core business fields
-        registrationType: insertTournament.registrationType,
-        allowPartialTeamPayments: insertTournament.allowPartialTeamPayments,
-        maxTeamSize: insertTournament.maxTeamSize,
-        minTeamSize: insertTournament.minTeamSize,
-        registrationFeeEnabled: insertTournament.registrationFeeEnabled,
-        // Metadata
-        createdBy: insertTournament.createdBy,
-        whitelabelConfigId: insertTournament.whitelabelConfigId,
-        stripeAccountId: insertTournament.stripeAccountId,
-        // Calendar and public data
-        isPublicCalendarVisible: insertTournament.isPublicCalendarVisible,
-        calendarApprovalStatus: insertTournament.calendarApprovalStatus,
-        calendarFeatured: insertTournament.calendarFeatured,
-        calendarRegion: insertTournament.calendarRegion,
-        calendarState: insertTournament.calendarStateCode,
-        calendarCity: insertTournament.calendarCity,
-        calendarCoordinates: insertTournament.calendarCoordinates,
-        calendarTags: insertTournament.calendarTags,
-        // AI and setup
-        aiContext: insertTournament.aiContext,
-        aiSetupProgress: insertTournament.aiSetupProgress,
-        setupAssistanceLevel: insertTournament.setupAssistanceLevel,
-        donationSetupData: insertTournament.donationSetupData
-      };
+      // Step 1: WHITELIST core tournament fields (safe approach) - ONLY include fields that exist in tournaments table
+      const coreTournamentData: any = {};
+      
+      // Core tournament fields that exist in DB
+      if (insertTournament.id !== undefined) coreTournamentData.id = insertTournament.id;
+      if (insertTournament.name !== undefined) coreTournamentData.name = insertTournament.name;
+      if (insertTournament.teamSize !== undefined) coreTournamentData.teamSize = insertTournament.teamSize;
+      if (insertTournament.description !== undefined) coreTournamentData.description = insertTournament.description;
+      if (insertTournament.userId !== undefined) coreTournamentData.userId = insertTournament.userId;
+      if (insertTournament.status !== undefined) coreTournamentData.status = insertTournament.status;
+      if (insertTournament.sport !== undefined) coreTournamentData.sport = insertTournament.sport;
+      if (insertTournament.sportCategory !== undefined) coreTournamentData.sportCategory = insertTournament.sportCategory;
+      if (insertTournament.ageGroup !== undefined) coreTournamentData.ageGroup = insertTournament.ageGroup;
+      if (insertTournament.genderDivision !== undefined) coreTournamentData.genderDivision = insertTournament.genderDivision;
+      if (insertTournament.location !== undefined) coreTournamentData.location = insertTournament.location;
+      if (insertTournament.tournamentDate !== undefined) coreTournamentData.tournamentDate = insertTournament.tournamentDate;
+      if (insertTournament.registrationDeadline !== undefined) coreTournamentData.registrationDeadline = insertTournament.registrationDeadline;
+      if (insertTournament.entryFee !== undefined) coreTournamentData.entryFee = insertTournament.entryFee;
+      if (insertTournament.maxParticipants !== undefined) coreTournamentData.maxParticipants = insertTournament.maxParticipants;
+      if (insertTournament.competitionFormat !== undefined) coreTournamentData.competitionFormat = insertTournament.competitionFormat;
+      if (insertTournament.tournamentType !== undefined) coreTournamentData.tournamentType = insertTournament.tournamentType;
+      if (insertTournament.tournamentStructure !== undefined) coreTournamentData.tournamentStructure = insertTournament.tournamentStructure;
+      if (insertTournament.divisions !== undefined) coreTournamentData.divisions = insertTournament.divisions;
+      if (insertTournament.teams !== undefined) coreTournamentData.teams = insertTournament.teams;
+      if (insertTournament.bracket !== undefined) coreTournamentData.bracket = insertTournament.bracket;
+      if (insertTournament.scoringMethod !== undefined) coreTournamentData.scoringMethod = insertTournament.scoringMethod;
+      if (insertTournament.seriesLength !== undefined) coreTournamentData.seriesLength = insertTournament.seriesLength;
+      if (insertTournament.currentStage !== undefined) coreTournamentData.currentStage = insertTournament.currentStage;
+      if (insertTournament.totalStages !== undefined) coreTournamentData.totalStages = insertTournament.totalStages;
+      if (insertTournament.stageConfiguration !== undefined) coreTournamentData.stageConfiguration = insertTournament.stageConfiguration;
+      if (insertTournament.isPublic !== undefined) coreTournamentData.isPublic = insertTournament.isPublic;
+      if (insertTournament.donationsEnabled !== undefined) coreTournamentData.donationsEnabled = insertTournament.donationsEnabled;
+      if (insertTournament.donationGoal !== undefined) coreTournamentData.donationGoal = insertTournament.donationGoal;
+      if (insertTournament.donationDescription !== undefined) coreTournamentData.donationDescription = insertTournament.donationDescription;
 
       // Step 2: Create core tournament record
       const [createdTournament] = await tx.insert(tournaments).values(coreTournamentData).returning();
