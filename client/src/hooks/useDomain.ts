@@ -65,7 +65,7 @@ export function useDomain() {
         allowFantasyPromo: true,
         allowProPromo: false,    
         allowSchoolPromo: true,  
-        primaryColor: 'orange',
+        primaryColor: '#1e293b',
         features: {
           fantasyLeagues: true,   
           ageVerification: true,  
@@ -83,7 +83,7 @@ export function useDomain() {
         allowFantasyPromo: true,
         allowProPromo: false,    
         allowSchoolPromo: true,  
-        primaryColor: 'orange',
+        primaryColor: '#1e293b',
         features: {
           fantasyLeagues: true,   
           ageVerification: true,  
