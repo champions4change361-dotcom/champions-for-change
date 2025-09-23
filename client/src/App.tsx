@@ -141,6 +141,7 @@ import TeamListPage from './pages/TeamListPage';
 import TeamCreatePage from './pages/TeamCreatePage';
 import TeamDashboardPage from './pages/TeamDashboardPage';
 import TeamSignupPage from './pages/TeamSignupPage';
+import TournamentManagerDashboard from './pages/TournamentManagerDashboard';
 import ChampionsBanner from './components/ChampionsBanner';
 
 function AuthenticatedRoutes() {
@@ -161,6 +162,7 @@ function AuthenticatedRoutes() {
         <Route path="/tournaments/:id" component={TournamentDetailPage} />
         <Route path="/tournaments/:id/edit" component={TournamentEditPage} />
         <Route path="/create" component={CreateTournament} />
+        <Route path="/tournament-manager" component={TournamentManagerDashboard} />
         
         {/* Team Management - Jersey Watch-style standalone team system */}
         <Route path="/teams" component={TeamListPage} />
