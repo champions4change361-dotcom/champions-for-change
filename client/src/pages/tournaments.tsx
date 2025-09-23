@@ -206,14 +206,14 @@ export default function TournamentsPage() {
           <div className="flex-1 min-w-0">
             <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2 text-high-contrast">
               <Trophy className="h-6 w-6 sm:h-8 sm:w-8 text-primary flex-shrink-0" />
-              <span className="truncate">Tournament Management</span>
+              <span className="truncate">Tournament Directory</span>
               <div className="flex gap-1">
                 {isDistrictUser && <Badge className="bg-blue-500 text-xs">District</Badge>}
                 {isTournamentManager && <Badge className="bg-green-500 text-xs">Pro</Badge>}
               </div>
             </h1>
             <p className="text-medium-contrast mt-1 text-sm sm:text-base">
-              Create and manage tournaments with comprehensive bracket systems
+              Discover tournaments, view schedules, and register your teams
             </p>
           </div>
         </div>
