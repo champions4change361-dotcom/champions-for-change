@@ -5442,3 +5442,7 @@ export const insertFantasyProfileSchema = createInsertSchema(fantasyProfiles).om
 
 export type InsertFantasyProfile = z.infer<typeof insertFantasyProfileSchema>;
 export type FantasyProfile = typeof fantasyProfiles.$inferSelect;
+
+// SPORT-SPECIFIC CONFIGURATION TABLES
+// Import and re-export sport configuration tables
+export * from "./sport-configs-schema";
