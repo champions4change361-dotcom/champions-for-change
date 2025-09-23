@@ -83,6 +83,13 @@ export default function DomainNavigation() {
             </Link>
           )}
           
+          {/* Tournament Manager - Role-based access */}
+          {config.brand !== 'COACHES_LOUNGE' && (
+            <Link href="/tournament-manager">
+              <a className={getNavItemClass("/tournament-manager")}>Tournament Manager</a>
+            </Link>
+          )}
+
           {/* Show Tournament Empire for school-safe and pro domains */}
           {config.brand !== 'COACHES_LOUNGE' && (
             <Link href="/tournament-empire">
@@ -168,6 +175,16 @@ export default function DomainNavigation() {
                       <a className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-testid="link-mobile-tournaments">
                         <Trophy className="w-4 h-4 mr-3" />
                         Tournaments
+                      </a>
+                    </Link>
+                  )}
+                  
+                  {/* Tournament Manager - Role-based access */}
+                  {config.brand !== 'COACHES_LOUNGE' && (
+                    <Link href="/tournament-manager">
+                      <a className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-testid="link-mobile-tournament-manager">
+                        <Settings className="w-4 h-4 mr-3" />
+                        Tournament Manager
                       </a>
                     </Link>
                   )}
