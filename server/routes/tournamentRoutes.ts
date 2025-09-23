@@ -30,8 +30,24 @@ export function registerTournamentRoutes(app: Express) {
   // Get all tournaments for the current user
   app.get("/api/tournaments", async (req: any, res) => {
     try {
-      // Check authentication
-      if (!req.isAuthenticated || !req.isAuthenticated()) {
+      // Hybrid authentication: OAuth or session-based
+      let isAuthenticated = false;
+      let userId = null;
+
+      // Check OAuth authentication first
+      if (req.isAuthenticated && req.isAuthenticated()) {
+        isAuthenticated = true;
+        userId = req.user?.claims?.sub;
+        console.log('Using OAuth authentication');
+      }
+      // Fallback to session-based authentication
+      else if (req.session?.user) {
+        isAuthenticated = true;
+        userId = req.session.user.id;
+        console.log('Using session-based authentication');
+      }
+
+      if (!isAuthenticated) {
         return res.status(401).json({ message: "Authentication required" });
       }
 
