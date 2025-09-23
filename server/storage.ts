@@ -29,8 +29,7 @@ type InsertSportCategory = typeof sportCategories.$inferInsert;
 type SportDivisionRules = typeof sportDivisionRules.$inferSelect;
 type InsertSportDivisionRules = typeof sportDivisionRules.$inferInsert;
 import { randomUUID } from "crypto";
-import { neon } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-http";
+import { db } from "./db";
 import { eq, desc, sql, and, gte, lte } from "drizzle-orm";
 import { createCachedStorage } from "./cache";
 import { createMonitoredStorage } from "./monitoring";
@@ -568,18 +567,11 @@ export interface IStorage {
 }
 
 export class DbStorage implements IStorage {
-  private db: ReturnType<typeof drizzle>;
+  private db: typeof db;
 
   constructor() {
-    // Always use the Replit Database components to build proper PostgreSQL URL
-    const databaseUrl = `postgresql://${process.env.PGUSER}:${process.env.PGPASSWORD}@${process.env.PGHOST}:${process.env.PGPORT}/${process.env.PGDATABASE}`;
-    
-    if (!databaseUrl || databaseUrl.includes('undefined')) {
-      throw new Error("Database connection parameters are not properly configured");
-    }
-    
-    const sql = neon(databaseUrl);
-    this.db = drizzle(sql);
+    // Use the transaction-capable database from db.ts
+    this.db = db;
   }
 
   // User authentication methods
