@@ -2017,21 +2017,21 @@ export class DbStorage implements IStorage {
     return 'Athletic'; // Default to athletic for unknown sports
   }
 
-  // Helper method to get sport config for READ operations (join sport-specific data)
+  // Helper method to get sport config for READ operations (from unified sport_configs table)
   private async getSportConfig(tournamentId: string, sportCategory?: string): Promise<any> {
     if (!sportCategory) return {};
     
     try {
-      if (sportCategory === 'Athletic') {
-        const [config] = await this.db.select().from(athleticConfigs).where(eq(athleticConfigs.tournamentId, tournamentId));
-        return config || {};
-      } else if (sportCategory === 'Academic') {
-        const [config] = await this.db.select().from(academicConfigs).where(eq(academicConfigs.tournamentId, tournamentId));
-        return config || {};
-      } else if (sportCategory === 'Fine Arts') {
-        const [config] = await this.db.select().from(fineArtsConfigs).where(eq(fineArtsConfigs.tournamentId, tournamentId));
-        return config || {};
+      // Read from unified sport_configs table with JSONB
+      const result = await this.db.execute(sql`
+        SELECT config FROM sport_configs WHERE tournament_id = ${tournamentId}
+      `);
+      
+      if (result.rows && result.rows.length > 0) {
+        const configRow = result.rows[0] as any;
+        return JSON.parse(configRow.config) || {};
       }
+      
       return {};
     } catch (error) {
       console.error("Error fetching sport config:", error);
