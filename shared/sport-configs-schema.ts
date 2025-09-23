@@ -17,7 +17,7 @@ import { tournaments } from "./schema";
 // Covers: Basketball, Soccer, Tennis, Golf, Swimming, Track, Wrestling, etc.
 export const athleticConfigs = pgTable("athletic_configs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  tournamentId: varchar("tournament_id").notNull().references(() => tournaments.id, { onDelete: 'cascade' }),
+  tournamentId: varchar("tournament_id").notNull().references(() => tournaments.id, { onDelete: 'cascade' }).unique(),
   
   // Basketball-Specific Fields
   basketballFormat: text("basketball_format", {
@@ -133,7 +133,7 @@ export const athleticConfigs = pgTable("athletic_configs", {
 // Covers: UIL Academic events, Debate, Math competitions, Science fairs, etc.
 export const academicConfigs = pgTable("academic_configs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  tournamentId: varchar("tournament_id").notNull().references(() => tournaments.id, { onDelete: 'cascade' }),
+  tournamentId: varchar("tournament_id").notNull().references(() => tournaments.id, { onDelete: 'cascade' }).unique(),
   
   academicFormat: text("academic_format", {
     enum: ["written-test", "oral-competition", "portfolio-review", "team-competition", "debate-bracket"]
@@ -154,7 +154,7 @@ export const academicConfigs = pgTable("academic_configs", {
 // Covers: Band, Choir, Theater, Art competitions, etc.
 export const fineArtsConfigs = pgTable("fine_arts_configs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  tournamentId: varchar("tournament_id").notNull().references(() => tournaments.id, { onDelete: 'cascade' }),
+  tournamentId: varchar("tournament_id").notNull().references(() => tournaments.id, { onDelete: 'cascade' }).unique(),
   
   fineArtsFormat: text("fine_arts_format", {
     enum: ["rating-system", "ranked-competition", "festival-format", "adjudicated-event"]

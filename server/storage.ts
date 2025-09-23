@@ -21,7 +21,7 @@ import {
   type EventTicket, type InsertEventTicket, type TicketOrder, type InsertTicketOrder,
   type TournamentRegistrationForm, type InsertTournamentRegistrationForm, type RegistrationSubmission, type InsertRegistrationSubmission, type RegistrationAssignmentLog, type InsertRegistrationAssignmentLog,
   type FantasyProfile, type InsertFantasyProfile,
-  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, teams, teamPlayers, medicalHistory, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog, taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices, supportTeams, supportTeamMembers, supportTeamInjuries, supportTeamAiConsultations, jerseyTeamMembers, jerseyTeamPayments, tournamentSubscriptions, clientConfigurations, guestParticipants, passwordResetTokens, showdownContests, showdownEntries, showdownLeaderboards, professionalPlayers, merchandiseProducts, merchandiseOrders, eventTickets, ticketOrders, tournamentRegistrationForms, registrationSubmissions, registrationAssignmentLog, fantasyProfiles
+  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, teams, teamPlayers, medicalHistory, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog, taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices, supportTeams, supportTeamMembers, supportTeamInjuries, supportTeamAiConsultations, jerseyTeamMembers, jerseyTeamPayments, tournamentSubscriptions, clientConfigurations, guestParticipants, passwordResetTokens, showdownContests, showdownEntries, showdownLeaderboards, professionalPlayers, merchandiseProducts, merchandiseOrders, eventTickets, ticketOrders, tournamentRegistrationForms, registrationSubmissions, registrationAssignmentLog, fantasyProfiles, athleticConfigs, academicConfigs, fineArtsConfigs
 } from "@shared/schema";
 
 type SportCategory = typeof sportCategories.$inferSelect;
@@ -1822,9 +1822,22 @@ export class DbStorage implements IStorage {
     try {
       let query = this.db.select().from(tournaments).orderBy(desc(tournaments.createdAt));
       if (userId) {
-        query = query.where(eq(tournaments.organizerId, userId));
+        query = query.where(eq(tournaments.userId, userId));
       }
-      return await query;
+      const tournaments = await query;
+      
+      // Join sport configs for ALL tournaments to maintain consistent shape
+      const tournamentsWithConfigs = await Promise.all(
+        tournaments.map(async (tournament) => {
+          const sportConfig = await this.getSportConfig(tournament.id, tournament.sportCategory);
+          return {
+            ...tournament,
+            ...sportConfig
+          } as Tournament;
+        })
+      );
+      
+      return tournamentsWithConfigs;
     } catch (error) {
       console.error("Database error:", error);
       throw new Error("Failed to fetch tournaments");
@@ -1833,8 +1846,18 @@ export class DbStorage implements IStorage {
 
   async getTournament(id: string): Promise<Tournament | undefined> {
     try {
-      const result = await this.db.select().from(tournaments).where(eq(tournaments.id, id));
-      return result[0];
+      // Get core tournament
+      const [tournament] = await this.db.select().from(tournaments).where(eq(tournaments.id, id));
+      if (!tournament) return undefined;
+
+      // Join with sport-specific config for consistent shape
+      const sportConfig = await this.getSportConfig(tournament.id, tournament.sportCategory);
+      
+      // Return merged response (consistent with createTournament)
+      return {
+        ...tournament,
+        ...sportConfig
+      } as Tournament;
     } catch (error) {
       console.error("Database error:", error);
       return undefined;
@@ -1857,12 +1880,170 @@ export class DbStorage implements IStorage {
   }
 
   async createTournament(insertTournament: InsertTournament): Promise<Tournament> {
+    // TRANSACTIONAL APPROACH: Split incoming data into core + sport config, create both in single transaction
+    return await this.db.transaction(async (tx) => {
+      // Step 1: WHITELIST core tournament fields (safe approach)
+      const coreTournamentData = {
+        id: insertTournament.id,
+        name: insertTournament.name,
+        teamSize: insertTournament.teamSize,
+        description: insertTournament.description,
+        userId: insertTournament.userId,
+        status: insertTournament.status,
+        sport: insertTournament.sport,
+        sportCategory: insertTournament.sportCategory,
+        ageGroup: insertTournament.ageGroup,
+        genderDivision: insertTournament.genderDivision,
+        location: insertTournament.location,
+        tournamentDate: insertTournament.tournamentDate,
+        registrationDeadline: insertTournament.registrationDeadline,
+        entryFee: insertTournament.entryFee,
+        maxParticipants: insertTournament.maxParticipants,
+        competitionFormat: insertTournament.competitionFormat,
+        tournamentType: insertTournament.tournamentType,
+        tournamentStructure: insertTournament.tournamentStructure,
+        divisions: insertTournament.divisions,
+        teams: insertTournament.teams,
+        bracket: insertTournament.bracket,
+        scoringMethod: insertTournament.scoringMethod,
+        seriesLength: insertTournament.seriesLength,
+        currentStage: insertTournament.currentStage,
+        totalStages: insertTournament.totalStages,
+        stageConfiguration: insertTournament.stageConfiguration,
+        isPublic: insertTournament.isPublic,
+        donationsEnabled: insertTournament.donationsEnabled,
+        donationGoal: insertTournament.donationGoal,
+        donationDescription: insertTournament.donationDescription,
+        // Core business fields
+        registrationType: insertTournament.registrationType,
+        allowPartialTeamPayments: insertTournament.allowPartialTeamPayments,
+        maxTeamSize: insertTournament.maxTeamSize,
+        minTeamSize: insertTournament.minTeamSize,
+        registrationFeeEnabled: insertTournament.registrationFeeEnabled,
+        // Metadata
+        createdBy: insertTournament.createdBy,
+        whitelabelConfigId: insertTournament.whitelabelConfigId,
+        stripeAccountId: insertTournament.stripeAccountId,
+        // Calendar and public data
+        isPublicCalendarVisible: insertTournament.isPublicCalendarVisible,
+        calendarApprovalStatus: insertTournament.calendarApprovalStatus,
+        calendarFeatured: insertTournament.calendarFeatured,
+        calendarRegion: insertTournament.calendarRegion,
+        calendarState: insertTournament.calendarStateCode,
+        calendarCity: insertTournament.calendarCity,
+        calendarCoordinates: insertTournament.calendarCoordinates,
+        calendarTags: insertTournament.calendarTags,
+        // AI and setup
+        aiContext: insertTournament.aiContext,
+        aiSetupProgress: insertTournament.aiSetupProgress,
+        setupAssistanceLevel: insertTournament.setupAssistanceLevel,
+        donationSetupData: insertTournament.donationSetupData
+      };
+
+      // Step 2: Create core tournament record
+      const [createdTournament] = await tx.insert(tournaments).values(coreTournamentData).returning();
+
+      // Step 3: Create sport-specific config with CANONICAL detection
+      const sportConfig = await this.createSportConfig(tx, createdTournament.id, insertTournament);
+
+      // Step 4: Return MERGED response for backward compatibility
+      return {
+        ...createdTournament,
+        ...sportConfig // Include sport-specific fields in response
+      } as Tournament;
+    });
+  }
+
+  // Helper method to create sport-specific configuration with CANONICAL detection
+  private async createSportConfig(tx: any, tournamentId: string, data: InsertTournament): Promise<any> {
+    // CANONICAL sport detection using sportCategory field
+    const sportCategory = data.sportCategory || this.getSportCategory(data.sport || '');
+    
+    if (sportCategory === 'Athletic') {
+      const athleticConfig = {
+        tournamentId,
+        basketballFormat: (data as any).basketballFormat || null,
+        basketballSkillsEvents: (data as any).basketballSkillsEvents || null,
+        basketballOvertimeRules: (data as any).basketballOvertimeRules || null,
+        basketballSeedingMethod: (data as any).basketballSeedingMethod || null,
+        soccerFormat: (data as any).soccerFormat || null,
+        soccerExtraTime: (data as any).soccerExtraTime || null,
+        soccerPenaltyShootouts: (data as any).soccerPenaltyShootouts || null,
+        tennisFormat: (data as any).tennisFormat || null,
+        tennisDrawSize: (data as any).tennisDrawSize || null,
+        tennisConsolationBracket: (data as any).tennisConsolationBracket || null,
+        golfFormat: (data as any).golfFormat || null,
+        golfCutSystem: (data as any).golfCutSystem || null,
+        golfHandicapSystem: (data as any).golfHandicapSystem || null,
+        golfRounds: (data as any).golfRounds || null,
+        seedingMethod: (data as any).seedingMethod || null,
+        tiebreakerRules: (data as any).tiebreakerRules || null,
+        advancementCriteria: (data as any).advancementCriteria || null,
+        consolationBracket: (data as any).consolationBracket || null,
+        wildcardSlots: (data as any).wildcardSlots || null,
+      };
+      const [result] = await tx.insert(athleticConfigs).values(athleticConfig).returning();
+      return result;
+    } else if (sportCategory === 'Academic') {
+      const academicConfig = {
+        tournamentId,
+        academicFormat: (data as any).academicFormat || null,
+        academicAdvancementRules: (data as any).academicAdvancementRules || null,
+        academicJudgingCriteria: (data as any).academicJudgingCriteria || null,
+        academicSubstitutionRules: (data as any).academicSubstitutionRules || null,
+      };
+      const [result] = await tx.insert(academicConfigs).values(academicConfig).returning();
+      return result;
+    } else if (sportCategory === 'Fine Arts') {
+      const fineArtsConfig = {
+        tournamentId,
+        fineArtsFormat: (data as any).fineArtsFormat || null,
+        fineArtsRatingScale: (data as any).fineArtsRatingScale || null,
+        fineArtsCategories: (data as any).fineArtsCategories || null,
+        fineArtsScoringMethod: (data as any).fineArtsScoringMethod || null,
+        fineArtsJudgingPanel: (data as any).fineArtsJudgingPanel || null,
+        fineArtsScoringRubric: (data as any).fineArtsScoringRubric || null,
+        fineArtsAdjudicationMethod: (data as any).fineArtsAdjudicationMethod || null,
+      };
+      const [result] = await tx.insert(fineArtsConfigs).values(fineArtsConfig).returning();
+      return result;
+    }
+    
+    // Return empty object if no sport config needed
+    return {};
+  }
+
+  // Helper method to determine sport category from sport name (fallback)
+  private getSportCategory(sport: string): 'Athletic' | 'Academic' | 'Fine Arts' {
+    const athleticSports = ['basketball', 'soccer', 'tennis', 'golf', 'football', 'swimming', 'wrestling', 'track', 'volleyball', 'baseball'];
+    const academicSports = ['academic', 'debate', 'math', 'science', 'history'];
+    const fineArtsSports = ['band', 'choir', 'drama', 'art'];
+    
+    if (athleticSports.includes(sport?.toLowerCase())) return 'Athletic';
+    if (academicSports.includes(sport?.toLowerCase())) return 'Academic';  
+    if (fineArtsSports.includes(sport?.toLowerCase())) return 'Fine Arts';
+    return 'Athletic'; // Default to athletic for unknown sports
+  }
+
+  // Helper method to get sport config for READ operations (join sport-specific data)
+  private async getSportConfig(tournamentId: string, sportCategory?: string): Promise<any> {
+    if (!sportCategory) return {};
+    
     try {
-      const result = await this.db.insert(tournaments).values(insertTournament).returning();
-      return result[0];
+      if (sportCategory === 'Athletic') {
+        const [config] = await this.db.select().from(athleticConfigs).where(eq(athleticConfigs.tournamentId, tournamentId));
+        return config || {};
+      } else if (sportCategory === 'Academic') {
+        const [config] = await this.db.select().from(academicConfigs).where(eq(academicConfigs.tournamentId, tournamentId));
+        return config || {};
+      } else if (sportCategory === 'Fine Arts') {
+        const [config] = await this.db.select().from(fineArtsConfigs).where(eq(fineArtsConfigs.tournamentId, tournamentId));
+        return config || {};
+      }
+      return {};
     } catch (error) {
-      console.error("Database error:", error);
-      throw new Error("Failed to create tournament");
+      console.error("Error fetching sport config:", error);
+      return {};
     }
   }
 
@@ -3630,13 +3811,20 @@ export class MemStorage implements IStorage {
   }
 
   async getTournaments(): Promise<Tournament[]> {
-    return Array.from(this.tournaments.values()).sort((a, b) => 
+    // Mirror DbStorage: return tournaments with sport configs for consistency
+    const tournaments = Array.from(this.tournaments.values()).sort((a, b) => 
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
+    
+    // In MemStorage, sport configs are already merged in tournaments
+    return tournaments;
   }
 
   async getTournament(id: string): Promise<Tournament | undefined> {
-    return this.tournaments.get(id);
+    // Mirror DbStorage: return tournament with sport config for consistency  
+    const tournament = this.tournaments.get(id);
+    // In MemStorage, sport configs are already merged in tournaments
+    return tournament;
   }
 
   async getDraftTournaments(userId: string): Promise<Tournament[]> {
