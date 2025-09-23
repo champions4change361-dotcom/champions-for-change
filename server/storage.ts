@@ -1891,7 +1891,14 @@ export class DbStorage implements IStorage {
       if (insertTournament.location !== undefined) coreTournamentData.location = insertTournament.location;
       if (insertTournament.tournamentDate !== undefined) coreTournamentData.tournamentDate = insertTournament.tournamentDate;
       if (insertTournament.registrationDeadline !== undefined) coreTournamentData.registrationDeadline = insertTournament.registrationDeadline;
-      if (insertTournament.entryFee !== undefined) coreTournamentData.entryFee = insertTournament.entryFee;
+      // Handle numeric fields - convert empty strings to null, strings to numbers
+      if (insertTournament.entryFee !== undefined) {
+        coreTournamentData.entryFee = insertTournament.entryFee === '' || insertTournament.entryFee === null 
+          ? null 
+          : typeof insertTournament.entryFee === 'string' 
+            ? parseFloat(insertTournament.entryFee) || null 
+            : insertTournament.entryFee;
+      }
       if (insertTournament.maxParticipants !== undefined) coreTournamentData.maxParticipants = insertTournament.maxParticipants;
       if (insertTournament.competitionFormat !== undefined) coreTournamentData.competitionFormat = insertTournament.competitionFormat;
       if (insertTournament.tournamentType !== undefined) coreTournamentData.tournamentType = insertTournament.tournamentType;
@@ -1906,7 +1913,14 @@ export class DbStorage implements IStorage {
       if (insertTournament.stageConfiguration !== undefined) coreTournamentData.stageConfiguration = insertTournament.stageConfiguration;
       if (insertTournament.isPublic !== undefined) coreTournamentData.isPublic = insertTournament.isPublic;
       if (insertTournament.donationsEnabled !== undefined) coreTournamentData.donationsEnabled = insertTournament.donationsEnabled;
-      if (insertTournament.donationGoal !== undefined) coreTournamentData.donationGoal = insertTournament.donationGoal;
+      // Handle donationGoal - convert empty string to null for numeric field
+      if (insertTournament.donationGoal !== undefined) {
+        coreTournamentData.donationGoal = insertTournament.donationGoal === '' || insertTournament.donationGoal === null 
+          ? null 
+          : typeof insertTournament.donationGoal === 'string' 
+            ? parseFloat(insertTournament.donationGoal) || null 
+            : insertTournament.donationGoal;
+      }
       if (insertTournament.donationDescription !== undefined) coreTournamentData.donationDescription = insertTournament.donationDescription;
 
       // Step 2: Create core tournament record
