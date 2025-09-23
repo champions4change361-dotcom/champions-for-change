@@ -1816,11 +1816,11 @@ export class DbStorage implements IStorage {
       if (userId) {
         query = query.where(eq(tournaments.userId, userId));
       }
-      const tournaments = await query;
+      const tournamentResults = await query;
       
       // Join sport configs for ALL tournaments to maintain consistent shape
       const tournamentsWithConfigs = await Promise.all(
-        tournaments.map(async (tournament) => {
+        tournamentResults.map(async (tournament) => {
           const sportConfig = await this.getSportConfig(tournament.id, tournament.sportCategory);
           return {
             ...tournament,
