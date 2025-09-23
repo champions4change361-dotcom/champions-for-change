@@ -70,14 +70,14 @@ const getSportSpecificEvents = (sport: string) => {
     return [
       {
         eventName: 'Basketball Game',
-        eventType: 'Team Competition' as const,
+        eventType: 'Other' as const,
         scoringUnit: 'points',
         description: 'Full basketball game competition',
         participantLimit: 10,
         participants: [],
         resultsRecorder: 'Referee',
         status: 'registration' as const,
-        registrationUrl: `/tournaments/${sport}/register?event=basketball-game`
+        registrationUrl: `/tournaments/register?event=basketball-game`
       },
       {
         eventName: 'Free Throw Contest',
@@ -88,7 +88,7 @@ const getSportSpecificEvents = (sport: string) => {
         participants: [],
         resultsRecorder: 'Coach',
         status: 'registration' as const,
-        registrationUrl: `/tournaments/${sport}/register?event=free-throw`
+        registrationUrl: `/tournaments/register?event=free-throw`
       },
       {
         eventName: '3-Point Contest',
@@ -99,7 +99,7 @@ const getSportSpecificEvents = (sport: string) => {
         participants: [],
         resultsRecorder: 'Coach',
         status: 'registration' as const,
-        registrationUrl: `/tournaments/${sport}/register?event=3-point`
+        registrationUrl: `/tournaments/register?event=3-point`
       }
     ];
   }
