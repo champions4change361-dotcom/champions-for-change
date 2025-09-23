@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   Trophy, 
@@ -248,31 +247,31 @@ export default function TournamentsPage() {
               />
             </div>
             
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger data-testid="select-status-filter">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="active">Active Only</SelectItem>
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="upcoming">Upcoming</SelectItem>
-                <SelectItem value="stage-1">In Progress</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-              </SelectContent>
-            </Select>
+            <select 
+              value={statusFilter} 
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+              data-testid="select-status-filter"
+            >
+              <option value="active">Active Only</option>
+              <option value="all">All Statuses</option>
+              <option value="upcoming">Upcoming</option>
+              <option value="stage-1">In Progress</option>
+              <option value="completed">Completed</option>
+            </select>
             
-            <Select value={formatFilter} onValueChange={setFormatFilter}>
-              <SelectTrigger data-testid="select-format-filter">
-                <SelectValue placeholder="Filter by format" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Formats</SelectItem>
-                <SelectItem value="bracket">Bracket</SelectItem>
-                <SelectItem value="leaderboard">Leaderboard</SelectItem>
-                <SelectItem value="series">Series</SelectItem>
-                <SelectItem value="multi-stage">Multi-Stage</SelectItem>
-              </SelectContent>
-            </Select>
+            <select 
+              value={formatFilter} 
+              onChange={(e) => setFormatFilter(e.target.value)}
+              className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+              data-testid="select-format-filter"
+            >
+              <option value="all">All Formats</option>
+              <option value="bracket">Bracket</option>
+              <option value="leaderboard">Leaderboard</option>
+              <option value="series">Series</option>
+              <option value="multi-stage">Multi-Stage</option>
+            </select>
 
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <Filter className="h-4 w-4" />
