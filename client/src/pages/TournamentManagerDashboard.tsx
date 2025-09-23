@@ -76,7 +76,7 @@ export default function TournamentManagerDashboard() {
 
   // Get my tournaments
   const { data: tournaments = [], isLoading: tournamentsLoading } = useQuery({
-    queryKey: ["/api/tournaments/mine"],
+    queryKey: ["/api/tournaments"],
     enabled: isAuthenticated
   });
 
@@ -109,7 +109,7 @@ export default function TournamentManagerDashboard() {
         title: "Tournament Created",
         description: "Your tournament has been created successfully."
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/tournaments/mine"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/tournaments"] });
       setShowCreateDialog(false);
       form.reset();
     },
@@ -555,7 +555,13 @@ export default function TournamentManagerDashboard() {
                     <div>
                       <CardTitle className="flex items-center gap-2">
                         <Trophy className="h-5 w-5" />
-                        {tournament.name}
+                        <a 
+                          href={`/tournament/${tournament.id}`}
+                          className="text-primary hover:text-primary/80 hover:underline cursor-pointer"
+                          data-testid={`link-tournament-${tournament.id}`}
+                        >
+                          {tournament.name}
+                        </a>
                       </CardTitle>
                       <CardDescription>
                         {tournament.sport} • {tournament.ageGroup} • {tournament.genderDivision}
