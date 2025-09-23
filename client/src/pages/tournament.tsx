@@ -22,7 +22,7 @@ export default function Tournament() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [embedModalOpen, setEmbedModalOpen] = useState(false);
 
-  const { data, isLoading, refetch } = useQuery<TournamentData>({
+  const { data, isLoading, refetch } = useQuery<Tournament>({
     queryKey: ["/api/tournaments", id],
   });
 
@@ -62,7 +62,7 @@ export default function Tournament() {
     );
   }
 
-  if (!data || !data.tournament) {
+  if (!data) {
     return (
       <div className="font-inter bg-gray-50 min-h-screen" data-testid="tournament-not-found">
         <header className="bg-white shadow-sm border-b border-gray-200">
@@ -96,7 +96,8 @@ export default function Tournament() {
     );
   }
 
-  const { tournament, matches } = data;
+  const tournament = data;
+  const matches = []; // TODO: Get matches from separate endpoint if needed
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -108,6 +109,15 @@ export default function Tournament() {
   };
 
   const getRoundInfo = () => {
+    if (!tournament?.teamSize) {
+      return {
+        totalRounds: 0,
+        completedMatches: 0,
+        totalMatches: 0,
+        progress: 'Loading...'
+      };
+    }
+    
     const totalRounds = Math.ceil(Math.log2(tournament.teamSize));
     const completedMatches = matches.filter(m => m.status === 'completed').length;
     const totalMatches = matches.length;
@@ -123,7 +133,7 @@ export default function Tournament() {
   const roundInfo = getRoundInfo();
 
   // Determine if user can manage this tournament
-  const canManageTournament = user && (
+  const canManageTournament = user && tournament && (
     user.id === tournament.userId ||
     ['tournament_manager', 'head_coach', 'assistant_coach', 'scorekeeper'].includes(user.userRole || '')
   );
