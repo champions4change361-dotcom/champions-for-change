@@ -62,6 +62,69 @@ const generateTournamentCsv = (tournament: Tournament) => {
   return [headers.join(','), row.join(',')].join('\n');
 };
 
+// Helper function to get sport-specific events
+const getSportSpecificEvents = (sport: string) => {
+  const sportLower = sport.toLowerCase();
+  
+  if (sportLower.includes('basketball')) {
+    return [
+      {
+        eventName: 'Basketball Game',
+        eventType: 'Team Competition' as const,
+        scoringUnit: 'points',
+        description: 'Full basketball game competition',
+        participantLimit: 10,
+        participants: [],
+        resultsRecorder: 'Referee',
+        status: 'registration' as const,
+        registrationUrl: `/tournaments/${sport}/register?event=basketball-game`
+      },
+      {
+        eventName: 'Free Throw Contest',
+        eventType: 'Other' as const,
+        scoringUnit: 'percentage',
+        description: 'Free throw shooting accuracy contest',
+        participantLimit: 8,
+        participants: [],
+        resultsRecorder: 'Coach',
+        status: 'registration' as const,
+        registrationUrl: `/tournaments/${sport}/register?event=free-throw`
+      },
+      {
+        eventName: '3-Point Contest',
+        eventType: 'Other' as const,
+        scoringUnit: 'made shots',
+        description: '3-point shooting contest',
+        participantLimit: 8,
+        participants: [],
+        resultsRecorder: 'Coach',
+        status: 'registration' as const,
+        registrationUrl: `/tournaments/${sport}/register?event=3-point`
+      }
+    ];
+  }
+  
+  // Add more sports as needed
+  if (sportLower.includes('soccer')) {
+    return [
+      {
+        eventName: 'Soccer Match',
+        eventType: 'Team Competition' as const,
+        scoringUnit: 'goals',
+        description: 'Full soccer match',
+        participantLimit: 22,
+        participants: [],
+        resultsRecorder: 'Referee',
+        status: 'registration' as const,
+        registrationUrl: `/tournaments/${sport}/register?event=soccer-match`
+      }
+    ];
+  }
+  
+  // Default empty array instead of mock track events
+  return [];
+};
+
 export default function TournamentManager({ tournamentId }: TournamentManagerProps) {
   const [activeTab, setActiveTab] = useState('events');
 
@@ -256,7 +319,10 @@ export default function TournamentManager({ tournamentId }: TournamentManagerPro
         </TabsList>
 
         <TabsContent value="events" className="mt-6">
-          <EventContainerManager tournamentId={tournamentId} />
+          <EventContainerManager 
+            tournamentId={tournamentId} 
+            events={getSportSpecificEvents(tournament.sport || 'Basketball (Boys)')}
+          />
         </TabsContent>
 
         <TabsContent value="bracket" className="mt-6">
