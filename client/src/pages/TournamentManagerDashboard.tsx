@@ -191,15 +191,17 @@ export default function TournamentManagerDashboard() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "upcoming":
-        return "bg-blue-100 text-blue-800";
+        return "bg-blue-100 text-blue-800 border border-blue-200";
       case "stage-1":
       case "stage-2":
       case "stage-3":
-        return "bg-green-100 text-green-800";
+        return "bg-green-100 text-green-800 border border-green-200";
       case "completed":
-        return "bg-gray-100 text-gray-800";
+        return "bg-slate-100 text-slate-700 border border-slate-200";
+      case "draft":
+        return "bg-orange-100 text-orange-800 border border-orange-200";
       default:
-        return "bg-yellow-100 text-yellow-800";
+        return "bg-red-100 text-red-800 border border-red-200";
     }
   };
 
@@ -214,20 +216,25 @@ export default function TournamentManagerDashboard() {
 
   return (
     <div className="container mx-auto p-8 max-w-7xl">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold">Tournament Manager Dashboard</h1>
-          <p className="text-muted-foreground">
-            Create and manage tournaments, approve team registrations
-          </p>
-        </div>
-        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-          <DialogTrigger asChild>
-            <Button data-testid="button-create-tournament">
-              <Plus className="h-4 w-4 mr-2" />
-              Create Tournament
-            </Button>
-          </DialogTrigger>
+      {/* Enhanced Header with Gradient Background */}
+      <div className="bg-gradient-to-r from-slate-800 via-blue-900 to-slate-800 rounded-xl p-8 mb-8 text-white shadow-lg">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold mb-2">Tournament Manager Dashboard</h1>
+            <p className="text-blue-100 text-lg">
+              Create and manage tournaments, approve team registrations
+            </p>
+          </div>
+          <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+            <DialogTrigger asChild>
+              <Button 
+                className="bg-red-600 hover:bg-red-500 text-white font-semibold px-6 py-3 rounded-lg shadow-lg transition-all duration-200 hover:shadow-xl"
+                data-testid="button-create-tournament"
+              >
+                <Plus className="h-5 w-5 mr-2" />
+                Create Tournament
+              </Button>
+            </DialogTrigger>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Create New Tournament</DialogTitle>
@@ -533,6 +540,7 @@ export default function TournamentManagerDashboard() {
             </Form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       <Tabs defaultValue="tournaments" className="w-full">
@@ -549,21 +557,26 @@ export default function TournamentManagerDashboard() {
         <TabsContent value="tournaments" className="space-y-6">
           <div className="grid gap-4">
             {(tournaments as any[]).map((tournament: any) => (
-              <Card key={tournament.id} className={selectedTournament === tournament.id ? "ring-2 ring-primary" : ""}>
+              <Card 
+                key={tournament.id} 
+                className={`bg-gradient-to-r from-blue-50 to-green-50 border-l-4 border-l-blue-600 shadow-lg hover:shadow-xl transition-all duration-200 ${
+                  selectedTournament === tournament.id ? "ring-2 ring-blue-500 bg-gradient-to-r from-blue-100 to-green-100" : ""
+                }`}
+              >
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div>
                       <CardTitle className="flex items-center gap-2">
-                        <Trophy className="h-5 w-5" />
+                        <Trophy className="h-5 w-5 text-blue-600" />
                         <a 
                           href={`/tournament/${tournament.id}`}
-                          className="text-primary hover:text-primary/80 hover:underline cursor-pointer"
+                          className="text-blue-700 hover:text-red-600 hover:underline cursor-pointer font-semibold transition-colors"
                           data-testid={`link-tournament-${tournament.id}`}
                         >
                           {tournament.name}
                         </a>
                       </CardTitle>
-                      <CardDescription>
+                      <CardDescription className="text-slate-600">
                         {tournament.sport} • {tournament.ageGroup} • {tournament.genderDivision}
                       </CardDescription>
                     </div>
@@ -572,7 +585,7 @@ export default function TournamentManagerDashboard() {
                         {tournament.status}
                       </Badge>
                       <Button
-                        variant="outline"
+                        className="bg-red-600 hover:bg-red-500 text-white border-0 shadow-md hover:shadow-lg transition-all duration-200"
                         size="sm"
                         onClick={() => setSelectedTournament(tournament.id)}
                         data-testid={`button-select-tournament-${tournament.id}`}

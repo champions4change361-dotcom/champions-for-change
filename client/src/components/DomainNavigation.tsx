@@ -49,7 +49,7 @@ export default function DomainNavigation() {
   };
 
   const getDonateButtonClass = () => {
-    return "bg-yellow-500 hover:bg-yellow-400 text-black font-medium px-3 py-1 rounded-md transition-colors text-sm";
+    return "bg-red-600 hover:bg-red-500 text-white font-medium px-3 py-1 rounded-md transition-colors text-sm shadow-md";
   };
 
   return (
