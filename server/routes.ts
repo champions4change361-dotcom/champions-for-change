@@ -8141,7 +8141,7 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
     try {
       const storage = await getStorage();
       const { tournamentEventId } = req.params;
-      const userId = (req as any).user?.claims?.sub;
+      const userId = (req as any).user?.claims?.sub || (req as any).session?.user?.id || (req as any).user?.id;
       
       console.log('🔐 Checking tournament ownership:', { tournamentEventId, userId });
       
@@ -8178,7 +8178,7 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
     try {
       const storage = await getStorage();
       const { tournamentId } = req.params;
-      const userId = (req as any).user?.claims?.sub;
+      const userId = (req as any).user?.claims?.sub || (req as any).session?.user?.id || (req as any).user?.id;
       
       console.log('🔐 Checking direct tournament ownership:', { tournamentId, userId });
       
