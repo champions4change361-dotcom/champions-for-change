@@ -1937,63 +1937,72 @@ export class DbStorage implements IStorage {
     });
   }
 
-  // Helper method to create sport-specific configuration with CANONICAL detection
+  // Helper method to create sport-specific configuration using FLEXIBLE JSON approach
   private async createSportConfig(tx: any, tournamentId: string, data: InsertTournament): Promise<any> {
     // CANONICAL sport detection using sportCategory field
     const sportCategory = data.sportCategory || this.getSportCategory(data.sport || '');
+    const sportCode = this.getSportCode(data.sport || '');
     
-    if (sportCategory === 'Athletic') {
-      const athleticConfig = {
-        tournamentId,
-        basketballFormat: (data as any).basketballFormat || null,
-        basketballSkillsEvents: (data as any).basketballSkillsEvents || null,
-        basketballOvertimeRules: (data as any).basketballOvertimeRules || null,
-        basketballSeedingMethod: (data as any).basketballSeedingMethod || null,
-        soccerFormat: (data as any).soccerFormat || null,
-        soccerExtraTime: (data as any).soccerExtraTime || null,
-        soccerPenaltyShootouts: (data as any).soccerPenaltyShootouts || null,
-        tennisFormat: (data as any).tennisFormat || null,
-        tennisDrawSize: (data as any).tennisDrawSize || null,
-        tennisConsolationBracket: (data as any).tennisConsolationBracket || null,
-        golfFormat: (data as any).golfFormat || null,
-        golfCutSystem: (data as any).golfCutSystem || null,
-        golfHandicapSystem: (data as any).golfHandicapSystem || null,
-        golfRounds: (data as any).golfRounds || null,
-        seedingMethod: (data as any).seedingMethod || null,
-        tiebreakerRules: (data as any).tiebreakerRules || null,
-        advancementCriteria: (data as any).advancementCriteria || null,
-        consolationBracket: (data as any).consolationBracket || null,
-        wildcardSlots: (data as any).wildcardSlots || null,
-      };
-      const [result] = await tx.insert(athleticConfigs).values(athleticConfig).returning();
-      return result;
-    } else if (sportCategory === 'Academic') {
-      const academicConfig = {
-        tournamentId,
-        academicFormat: (data as any).academicFormat || null,
-        academicAdvancementRules: (data as any).academicAdvancementRules || null,
-        academicJudgingCriteria: (data as any).academicJudgingCriteria || null,
-        academicSubstitutionRules: (data as any).academicSubstitutionRules || null,
-      };
-      const [result] = await tx.insert(academicConfigs).values(academicConfig).returning();
-      return result;
-    } else if (sportCategory === 'Fine Arts') {
-      const fineArtsConfig = {
-        tournamentId,
-        fineArtsFormat: (data as any).fineArtsFormat || null,
-        fineArtsRatingScale: (data as any).fineArtsRatingScale || null,
-        fineArtsCategories: (data as any).fineArtsCategories || null,
-        fineArtsScoringMethod: (data as any).fineArtsScoringMethod || null,
-        fineArtsJudgingPanel: (data as any).fineArtsJudgingPanel || null,
-        fineArtsScoringRubric: (data as any).fineArtsScoringRubric || null,
-        fineArtsAdjudicationMethod: (data as any).fineArtsAdjudicationMethod || null,
-      };
-      const [result] = await tx.insert(fineArtsConfigs).values(fineArtsConfig).returning();
-      return result;
+    // Build flexible JSON config based on actual sport-specific data present
+    const config: any = {};
+    
+    // Extract sport-specific configurations from data if present
+    if (sportCode === 'basketball') {
+      if ((data as any).basketballFormat) config.format = (data as any).basketballFormat;
+      if ((data as any).basketballSkillsEvents) config.skillsEvents = (data as any).basketballSkillsEvents;
+      if ((data as any).basketballOvertimeRules) config.overtimeRules = (data as any).basketballOvertimeRules;
+      if ((data as any).basketballSeedingMethod) config.seedingMethod = (data as any).basketballSeedingMethod;
+    } else if (sportCode === 'football') {
+      if ((data as any).footballFormat) config.format = (data as any).footballFormat;
+      if ((data as any).footballOvertimeRules) config.overtimeRules = (data as any).footballOvertimeRules;
+    } else if (sportCode === 'soccer') {
+      if ((data as any).soccerFormat) config.format = (data as any).soccerFormat;
+      if ((data as any).soccerExtraTime) config.extraTime = (data as any).soccerExtraTime;
+      if ((data as any).soccerPenaltyShootouts) config.penaltyShootouts = (data as any).soccerPenaltyShootouts;
     }
     
-    // Return empty object if no sport config needed
-    return {};
+    // Add common configurations
+    if (data.selectedEvents) config.events = data.selectedEvents;
+    if (data.scoringMethod) config.scoringMethod = data.scoringMethod;
+    
+    // Insert into unified sport_configs table with JSONB
+    const sportConfigData = {
+      tournamentId,
+      category: sportCategory.toLowerCase(),
+      sportCode,
+      config: JSON.stringify(config)
+    };
+    
+    // Use direct SQL for sport_configs insertion (not in Drizzle schema yet)
+    await tx.execute(sql`
+      INSERT INTO sport_configs (tournament_id, category, sport_code, config)
+      VALUES (${tournamentId}, ${sportCategory.toLowerCase()}, ${sportCode}, ${JSON.stringify(config)})
+    `);
+    
+    // Return the config data for backward compatibility
+    return config;
+  }
+
+  // Helper method to convert sport name to sport code
+  private getSportCode(sport: string): string {
+    const sportMapping: { [key: string]: string } = {
+      'Basketball (Boys)': 'basketball',
+      'Basketball (Girls)': 'basketball', 
+      'Basketball': 'basketball',
+      'Football (Boys)': 'football',
+      'Football': 'football',
+      'Soccer (Boys)': 'soccer',
+      'Soccer (Girls)': 'soccer',
+      'Soccer': 'soccer',
+      'Tennis (Boys)': 'tennis',
+      'Tennis (Girls)': 'tennis',
+      'Tennis': 'tennis',
+      'Golf (Boys)': 'golf',
+      'Golf (Girls)': 'golf',
+      'Golf': 'golf'
+    };
+    
+    return sportMapping[sport] || sport.toLowerCase().replace(/[^a-z0-9]/g, '');
   }
 
   // Helper method to determine sport category from sport name (fallback)
