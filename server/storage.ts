@@ -2029,7 +2029,12 @@ export class DbStorage implements IStorage {
       
       if (result.rows && result.rows.length > 0) {
         const configRow = result.rows[0] as any;
-        return JSON.parse(configRow.config) || {};
+        // Handle both parsed objects (from JSONB) and JSON strings
+        if (typeof configRow.config === 'object') {
+          return configRow.config || {};
+        } else {
+          return JSON.parse(configRow.config) || {};
+        }
       }
       
       return {};
