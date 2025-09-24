@@ -78,12 +78,12 @@ export default function DoubleEliminationBracket({ tournament }: DoubleEliminati
   // Normalize match data: 'pending' -> 'upcoming', add default bracket
   const normalizedMatches = matches.map(match => ({
     ...match,
-    status: match.status === 'pending' ? 'upcoming' : match.status,
+    status: (match.status as any) === 'pending' ? 'upcoming' : match.status,
     bracket: match.bracket || 'winners'
   }));
 
   // Generate complete bracket structure with placeholders for proper tree visualization
-  const generateBracketStructure = (existingMatches: any[]) => {
+  const generateBracketStructure = (existingMatches: Match[]) => {
     const teamCount = 8; // From tournament
     const allBracketMatches = [...existingMatches];
 
@@ -214,9 +214,9 @@ export default function DoubleEliminationBracket({ tournament }: DoubleEliminati
                   </div>
                   
                   <div className="space-y-3">
-                    {roundMatches
+                    {(roundMatches as Match[])
                       .sort((a, b) => a.position - b.position)
-                      .map((match) => (
+                      .map((match: Match) => (
                         <div
                           key={match.id}
                           className={`bg-white rounded-lg p-3 border-2 ${getMatchBorderColor(match)} ${
@@ -295,9 +295,9 @@ export default function DoubleEliminationBracket({ tournament }: DoubleEliminati
                   </div>
                   
                   <div className="space-y-3">
-                    {roundMatches
+                    {(roundMatches as Match[])
                       .sort((a, b) => a.position - b.position)
-                      .map((match) => (
+                      .map((match: Match) => (
                         <div
                           key={match.id}
                           className={`bg-orange-50 rounded-lg p-3 border-2 ${getMatchBorderColor(match)} ${
