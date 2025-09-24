@@ -1981,6 +1981,7 @@ export const matches = pgTable("matches", {
   team2Score: integer("team2_score").default(0),
   winner: text("winner"),
   status: text("status", { enum: ["upcoming", "in-progress", "completed"] }).notNull().default("upcoming"),
+  bracket: text("bracket", { enum: ["winners", "losers", "championship"] }).default("winners"),
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
   updatedAt: timestamp("updated_at").notNull().default(sql`now()`),
 }, (table) => [

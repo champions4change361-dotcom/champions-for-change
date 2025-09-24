@@ -661,7 +661,6 @@ export function registerTournamentRoutes(app: Express) {
       // Create the next round match if it doesn't exist
       const newMatchId = `generated-r${nextRound}-p${nextPosition}`;
       nextMatch = await storage.createMatch({
-        id: newMatchId,
         tournamentId,
         round: nextRound,
         position: nextPosition,
@@ -670,7 +669,7 @@ export function registerTournamentRoutes(app: Express) {
         team1Score: 0,
         team2Score: 0,
         winner: null,
-        status: 'pending',
+        status: 'upcoming',
         bracket: 'winners'
       });
     }
@@ -690,46 +689,73 @@ export function registerTournamentRoutes(app: Express) {
     await moveLoserToLosersBracket(loser, round, position, tournamentId, allMatches);
   }
 
-  // Move loser to appropriate position in losers bracket
+  // Move loser to appropriate position in losers bracket using proper routing mathematics
   async function moveLoserToLosersBracket(loser: string, winnerRound: number, winnerPosition: number, tournamentId: string, allMatches: any[]) {
-    // For Round 1 losers, they go to Losers Round 1
-    const losersRound = 1;
-    const losersPosition = winnerPosition; // Same position in losers bracket
-    
-    // Find or create losers bracket match
-    let losersMatch = allMatches.find(m => 
-      m.round === losersRound && 
-      m.position === losersPosition && 
-      m.bracket === 'losers'
-    );
-    
-    if (!losersMatch) {
-      // Create losers bracket match
-      const newMatchId = `losers-r${losersRound}-p${losersPosition}`;
-      losersMatch = await storage.createMatch({
-        id: newMatchId,
-        tournamentId,
-        round: losersRound,
-        position: losersPosition,
-        team1: 'TBD',
-        team2: 'TBD',
-        team1Score: 0,
-        team2Score: 0,
-        winner: null,
-        status: 'pending',
-        bracket: 'losers'
-      });
-    }
-    
-    if (losersMatch) {
-      // Add loser to available slot
-      const updateData = !losersMatch.team1 || losersMatch.team1 === 'TBD' 
-        ? { team1: loser }
-        : { team2: loser };
+    try {
+      // Use the bracket generator's routing logic to determine correct placement
+      const routingInfo = BracketGenerator.routeLoser(winnerRound, winnerPosition - 1); // Convert to 0-based index
+      const { losersRound, losersMatch, side } = routingInfo;
       
-      await storage.updateMatch(losersMatch.id, updateData);
-      console.log(`🔄 Loser ${loser} moved to Losers Round ${losersRound}, Position ${losersPosition}`);
+      console.log(`🔄 Routing ${loser} from W${winnerRound}-${winnerPosition} to L${losersRound}-${losersMatch + 1} (${side} side)`);
+      
+      // Find or create losers bracket match
+      let losersMatchObj = allMatches.find(m => 
+        m.round === losersRound && 
+        m.position === losersMatch + 1 && // Convert back to 1-based for database
+        m.bracket === 'losers'
+      );
+      
+      if (!losersMatchObj) {
+        // Create losers bracket match
+        const newMatchId = `L${losersRound}-${losersMatch + 1}`;
+        losersMatchObj = await storage.createMatch({
+          tournamentId,
+          round: losersRound,
+          position: losersMatch + 1,
+          team1: 'TBD',
+          team2: 'TBD',
+          team1Score: 0,
+          team2Score: 0,
+          winner: null,
+          status: 'upcoming',
+          bracket: 'losers'
+        });
+      }
+      
+      if (losersMatchObj) {
+        // Place loser on the correct side based on routing info
+        const updateData = side === 'left' 
+          ? { team1: loser }
+          : { team2: loser };
+        
+        await storage.updateMatch(losersMatchObj.id, updateData);
+        console.log(`✅ Loser ${loser} placed in Losers Round ${losersRound}, Match ${losersMatch + 1} (${side} side)`);
+      }
+    } catch (error) {
+      console.error(`❌ Error routing loser ${loser} from W${winnerRound}-${winnerPosition}:`, error);
+      // Fallback: try to find any available losers bracket slot
+      await fallbackLoserPlacement(loser, tournamentId, allMatches);
     }
+  }
+
+  // Fallback placement for losers when routing fails
+  async function fallbackLoserPlacement(loser: string, tournamentId: string, allMatches: any[]) {
+    console.log(`🔄 Attempting fallback placement for ${loser}`);
+    const losersBracketMatches = allMatches.filter(m => m.bracket === 'losers' && m.status === 'upcoming');
+    
+    for (const match of losersBracketMatches) {
+      if (!match.team1 || match.team1 === 'TBD') {
+        await storage.updateMatch(match.id, { team1: loser });
+        console.log(`🆘 Fallback: Placed ${loser} in L${match.round}-${match.position} (team1)`);
+        return;
+      } else if (!match.team2 || match.team2 === 'TBD') {
+        await storage.updateMatch(match.id, { team2: loser });
+        console.log(`🆘 Fallback: Placed ${loser} in L${match.round}-${match.position} (team2)`);
+        return;
+      }
+    }
+    
+    console.error(`❌ Could not find any available slot for loser ${loser}`);
   }
 
   // Original single elimination logic
