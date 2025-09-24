@@ -31,13 +31,14 @@ const formSchema = insertTournamentSchema.extend({
     "match-play", "stroke-play", "scramble", "best-ball", "alternate-shot", "modified-stableford",
     "playoff-bracket", "conference-championship", "dual-meet", "triangular-meet", "weight-class-bracket",
     "multi-event-scoring", "preliminary-finals", "heat-management", "skills-competition", "draw-management",
-    "group-stage-knockout", "home-away-series"
+    "group-stage-knockout", "home-away-series", "prediction-bracket", "compass-draw", "triple-elimination", "game-guarantee"
   ]).default("single"),
   competitionFormat: z.enum([
     "bracket", "leaderboard", "series", "bracket-to-series", "multi-stage",
     "round-robin-pools", "elimination-pools", "consolation-bracket", "team-vs-individual",
     "portfolio-review", "oral-competition", "written-test", "judged-performance", 
-    "timed-competition", "scoring-average", "advancement-ladder", "rating-system"
+    "timed-competition", "scoring-average", "advancement-ladder", "rating-system",
+    "prediction-scoring", "multiple-bracket-system", "three-bracket-system", "guarantee-system"
   ]).default("bracket"),
   ageGroup: z.string().optional(),
   genderDivision: z.string().optional(),
@@ -1328,7 +1329,7 @@ export default function EnhancedTournamentWizard({
                           form.setValue("tournamentType", format.tournamentType as any);
                           form.setValue("competitionFormat", format.competitionFormat as any);
                         }}
-                        selectedFormat={selectedTournamentFormat?.format || undefined}
+                        selectedFormat={(selectedTournamentFormat as TournamentFormatConfig | null)?.format ?? undefined}
                       />
                     </div>
                   )}

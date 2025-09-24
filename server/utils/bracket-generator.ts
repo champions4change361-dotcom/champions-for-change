@@ -35,6 +35,84 @@ export interface BracketStructure {
   format: string;
 }
 
+export interface SwissSystemStructure extends BracketStructure {
+  pairings: Round[];
+  maxRounds: number;
+  isComplete: boolean;
+}
+
+export interface PredictionBracketStructure extends BracketStructure {
+  predictionMatches: PredictionMatch[];
+  scoringRules: PredictionScoringRules;
+  participants: PredictionParticipant[];
+}
+
+export interface CompassDrawStructure extends BracketStructure {
+  northBracket: MatchData[]; // Winners bracket
+  southBracket: MatchData[]; // First loss bracket  
+  eastBracket: MatchData[];  // Second loss bracket
+  westBracket: MatchData[];  // Third loss bracket
+  consolationLevels: number;
+}
+
+export interface TripleEliminationStructure extends BracketStructure {
+  upperBracket: MatchData[];   // Winners bracket
+  lowerBracket1: MatchData[];  // First losers bracket
+  lowerBracket2: MatchData[];  // Second losers bracket
+  championshipBracket: MatchData[];
+  tripleEliminationRouting: Map<string, TripleElimRoutingInfo>;
+}
+
+export interface GameGuaranteeStructure extends BracketStructure {
+  mainBracket: MatchData[];
+  consolationBrackets: MatchData[][];
+  gameGuarantee: number;
+  teamGameCounts: Map<string, number>;
+}
+
+export interface Round {
+  roundNumber: number;
+  pairings: Pairing[];
+}
+
+export interface Pairing {
+  table: number;
+  white: string;
+  black: string;
+  result?: '1-0' | '0-1' | '1/2-1/2';
+}
+
+export interface PredictionMatch {
+  id: string;
+  tournamentId: string;
+  bracketMatchId: string;
+  team1: string;
+  team2: string;
+  correctPrediction?: string;
+  predictions: Map<string, string>; // participantId -> teamPrediction
+}
+
+export interface PredictionScoringRules {
+  correctPrediction: number;
+  championPrediction: number;
+  roundMultipliers: number[];
+}
+
+export interface PredictionParticipant {
+  id: string;
+  name: string;
+  email: string;
+  totalScore: number;
+  predictions: Map<string, string>;
+}
+
+export interface TripleElimRoutingInfo {
+  bracket: 'upper' | 'lower1' | 'lower2';
+  round: number;
+  match: number;
+  lossCount: number;
+}
+
 export class BracketGenerator {
   
   /**
@@ -449,13 +527,399 @@ export class BracketGenerator {
     };
   }
 
+  /**
+   * Generate Swiss System tournament structure
+   * Popular in chess, esports, and academic competitions
+   */
+  static generateSwissSystem(teams: string[], tournamentId: string, maxRounds?: number): SwissSystemStructure {
+    const validTeams = teams.filter(team => team && team.trim() !== '');
+    
+    if (validTeams.length < 2) {
+      throw new Error('Swiss system requires at least 2 participants');
+    }
+    
+    // Calculate recommended rounds (log2 of participants, rounded up)
+    const recommendedRounds = Math.ceil(Math.log2(validTeams.length));
+    const actualRounds = maxRounds || recommendedRounds;
+    
+    const matches: MatchData[] = [];
+    const pairings: Round[] = [];
+    
+    // Generate Round 1 - random or seeded pairing
+    const round1Pairings: Pairing[] = [];
+    const shuffledTeams = [...validTeams].sort(() => Math.random() - 0.5);
+    
+    for (let i = 0; i < shuffledTeams.length; i += 2) {
+      if (i + 1 < shuffledTeams.length) {
+        round1Pairings.push({
+          table: Math.floor(i / 2) + 1,
+          white: shuffledTeams[i],
+          black: shuffledTeams[i + 1]
+        });
+        
+        // Create match data
+        matches.push({
+          id: `swiss-r1-t${Math.floor(i / 2) + 1}`,
+          tournamentId,
+          round: 1,
+          position: Math.floor(i / 2) + 1,
+          team1: shuffledTeams[i],
+          team2: shuffledTeams[i + 1],
+          team1Score: 0,
+          team2Score: 0,
+          status: 'upcoming',
+          bracket: 'winners'
+        });
+      }
+    }
+    
+    pairings.push({
+      roundNumber: 1,
+      pairings: round1Pairings
+    });
+    
+    // Placeholder rounds 2-n (to be generated dynamically based on results)
+    for (let round = 2; round <= actualRounds; round++) {
+      pairings.push({
+        roundNumber: round,
+        pairings: [] // Will be filled when previous round completes
+      });
+    }
+    
+    return {
+      matches,
+      pairings,
+      maxRounds: actualRounds,
+      isComplete: false,
+      totalRounds: actualRounds,
+      totalMatches: matches.length,
+      format: 'swiss-system'
+    };
+  }
+
+  /**
+   * Generate Prediction Bracket tournament structure
+   * Users predict outcomes instead of playing
+   */
+  static generatePredictionBracket(teams: string[], tournamentId: string, participants: PredictionParticipant[]): PredictionBracketStructure {
+    // Create underlying bracket structure
+    const underlyingBracket = this.generateSingleElimination(teams, tournamentId);
+    
+    const predictionMatches: PredictionMatch[] = [];
+    const scoringRules: PredictionScoringRules = {
+      correctPrediction: 10,
+      championPrediction: 50,
+      roundMultipliers: [1, 2, 4, 8, 16, 32] // Multiply points by round importance
+    };
+    
+    // Create prediction matches for each underlying match
+    underlyingBracket.matches.forEach(match => {
+      predictionMatches.push({
+        id: `pred-${match.id}`,
+        tournamentId,
+        bracketMatchId: match.id,
+        team1: match.team1 || 'TBD',
+        team2: match.team2 || 'TBD',
+        predictions: new Map()
+      });
+    });
+    
+    return {
+      matches: underlyingBracket.matches,
+      predictionMatches,
+      scoringRules,
+      participants,
+      totalRounds: underlyingBracket.totalRounds,
+      totalMatches: underlyingBracket.totalMatches,
+      format: 'prediction-bracket'
+    };
+  }
+
+  /**
+   * Generate Compass Draw tournament structure
+   * Used in tennis/golf for large fields with multiple consolation levels
+   */
+  static generateCompassDraw(teams: string[], tournamentId: string): CompassDrawStructure {
+    const validTeams = teams.filter(team => team && team.trim() !== '');
+    
+    if (validTeams.length < 8) {
+      throw new Error('Compass draw requires at least 8 participants');
+    }
+    
+    const matches: MatchData[] = [];
+    let matchIdCounter = 1;
+    
+    // North Bracket (Winners)
+    const northBracket: MatchData[] = [];
+    const quarterfinalTeams = validTeams.slice(0, 8); // Top 8 seeds
+    
+    // North quarterfinals
+    for (let i = 0; i < 4; i++) {
+      northBracket.push({
+        id: `north-qf-${i + 1}`,
+        tournamentId,
+        round: 1,
+        position: i + 1,
+        team1: quarterfinalTeams[i * 2],
+        team2: quarterfinalTeams[i * 2 + 1],
+        team1Score: 0,
+        team2Score: 0,
+        status: 'upcoming',
+        bracket: 'winners'
+      });
+    }
+    
+    // South Bracket (First Loss - Quarterfinal Losers)
+    const southBracket: MatchData[] = [];
+    for (let i = 0; i < 2; i++) {
+      southBracket.push({
+        id: `south-sf-${i + 1}`,
+        tournamentId,
+        round: 1,
+        position: i + 1,
+        team1: `North QF${i * 2 + 1} Loser`,
+        team2: `North QF${i * 2 + 2} Loser`,
+        team1Score: 0,
+        team2Score: 0,
+        status: 'upcoming',
+        bracket: 'losers'
+      });
+    }
+    
+    // East Bracket (Second Loss - Semifinal Losers)
+    const eastBracket: MatchData[] = [];
+    eastBracket.push({
+      id: 'east-final-1',
+      tournamentId,
+      round: 1,
+      position: 1,
+      team1: 'North SF1 Loser',
+      team2: 'North SF2 Loser',
+      team1Score: 0,
+      team2Score: 0,
+      status: 'upcoming',
+      bracket: 'losers'
+    });
+    
+    // West Bracket (Third Loss - Final Loser)
+    const westBracket: MatchData[] = [];
+    westBracket.push({
+      id: 'west-final-1',
+      tournamentId,
+      round: 1,
+      position: 1,
+      team1: 'North Final Loser',
+      team2: 'East Final Winner',
+      team1Score: 0,
+      team2Score: 0,
+      status: 'upcoming',
+      bracket: 'losers'
+    });
+    
+    const allMatches = [...northBracket, ...southBracket, ...eastBracket, ...westBracket];
+    
+    return {
+      matches: allMatches,
+      northBracket,
+      southBracket,
+      eastBracket,
+      westBracket,
+      consolationLevels: 3,
+      totalRounds: 3,
+      totalMatches: allMatches.length,
+      format: 'compass-draw'
+    };
+  }
+
+  /**
+   * Generate Triple Elimination tournament structure
+   * Three losses required for elimination
+   */
+  static generateTripleElimination(teams: string[], tournamentId: string): TripleEliminationStructure {
+    const validTeams = teams.filter(team => team && team.trim() !== '');
+    
+    if (validTeams.length < 4) {
+      throw new Error('Triple elimination requires at least 4 participants');
+    }
+    
+    const upperBracket: MatchData[] = [];
+    const lowerBracket1: MatchData[] = [];
+    const lowerBracket2: MatchData[] = [];
+    const championshipBracket: MatchData[] = [];
+    const tripleEliminationRouting = new Map<string, TripleElimRoutingInfo>();
+    
+    // Upper Bracket (Winners)
+    const upperRounds = Math.ceil(Math.log2(validTeams.length));
+    let currentTeams = [...validTeams];
+    
+    for (let round = 1; round <= upperRounds; round++) {
+      const matchesInRound = Math.floor(currentTeams.length / 2);
+      
+      for (let match = 0; match < matchesInRound; match++) {
+        const team1 = currentTeams[match * 2];
+        const team2 = currentTeams[match * 2 + 1];
+        
+        upperBracket.push({
+          id: `upper-r${round}-m${match + 1}`,
+          tournamentId,
+          round,
+          position: match + 1,
+          team1,
+          team2,
+          team1Score: 0,
+          team2Score: 0,
+          status: 'upcoming',
+          bracket: 'winners'
+        });
+        
+        // Set routing for losers
+        tripleEliminationRouting.set(`upper-r${round}-m${match + 1}`, {
+          bracket: 'lower1',
+          round: round,
+          match: match + 1,
+          lossCount: 1
+        });
+      }
+      
+      currentTeams = Array(matchesInRound).fill('TBD');
+    }
+    
+    // Lower Bracket 1 (First Loss)
+    for (let round = 1; round <= upperRounds; round++) {
+      const matchesInRound = Math.ceil((validTeams.length / Math.pow(2, round)) / 2);
+      
+      for (let match = 0; match < matchesInRound; match++) {
+        lowerBracket1.push({
+          id: `lower1-r${round}-m${match + 1}`,
+          tournamentId,
+          round,
+          position: match + 1,
+          team1: `Upper R${round} Loser A`,
+          team2: `Upper R${round} Loser B`,
+          team1Score: 0,
+          team2Score: 0,
+          status: 'upcoming',
+          bracket: 'losers'
+        });
+      }
+    }
+    
+    // Lower Bracket 2 (Second Loss)
+    for (let round = 1; round <= Math.ceil(upperRounds / 2); round++) {
+      lowerBracket2.push({
+        id: `lower2-r${round}-m1`,
+        tournamentId,
+        round,
+        position: 1,
+        team1: `Lower1 R${round} Loser`,
+        team2: `Lower1 R${round + 1} Loser`,
+        team1Score: 0,
+        team2Score: 0,
+        status: 'upcoming',
+        bracket: 'losers'
+      });
+    }
+    
+    // Championship Matches
+    championshipBracket.push({
+      id: 'championship-1',
+      tournamentId,
+      round: 1,
+      position: 1,
+      team1: 'Upper Bracket Winner',
+      team2: 'Lower Bracket 2 Winner',
+      team1Score: 0,
+      team2Score: 0,
+      status: 'upcoming',
+      bracket: 'championship'
+    });
+    
+    const allMatches = [...upperBracket, ...lowerBracket1, ...lowerBracket2, ...championshipBracket];
+    
+    return {
+      matches: allMatches,
+      upperBracket,
+      lowerBracket1,
+      lowerBracket2,
+      championshipBracket,
+      tripleEliminationRouting,
+      totalRounds: Math.max(upperRounds, championshipBracket.length),
+      totalMatches: allMatches.length,
+      format: 'triple-elimination'
+    };
+  }
+
+  /**
+   * Generate Game Guarantee tournament structure
+   * Ensures each team plays minimum number of games
+   */
+  static generateGameGuarantee(teams: string[], tournamentId: string, gameGuarantee: number = 3): GameGuaranteeStructure {
+    const validTeams = teams.filter(team => team && team.trim() !== '');
+    
+    if (validTeams.length < 4) {
+      throw new Error('Game guarantee tournaments require at least 4 participants');
+    }
+    
+    const mainBracket: MatchData[] = [];
+    const consolationBrackets: MatchData[][] = [];
+    const teamGameCounts = new Map<string, number>();
+    
+    // Initialize game counts
+    validTeams.forEach(team => teamGameCounts.set(team, 0));
+    
+    // Create main elimination bracket
+    const mainElim = this.generateSingleElimination(validTeams, tournamentId);
+    mainBracket.push(...mainElim.matches);
+    
+    // Create consolation brackets for teams that don't meet game guarantee
+    const roundsNeeded = Math.ceil(Math.log2(validTeams.length));
+    
+    for (let consolationLevel = 1; consolationLevel <= gameGuarantee - 1; consolationLevel++) {
+      const consolationMatches: MatchData[] = [];
+      const teamsInConsolation = Math.floor(validTeams.length / Math.pow(2, consolationLevel));
+      
+      for (let match = 0; match < Math.floor(teamsInConsolation / 2); match++) {
+        consolationMatches.push({
+          id: `consolation-${consolationLevel}-m${match + 1}`,
+          tournamentId,
+          round: consolationLevel,
+          position: match + 1,
+          team1: `Round ${consolationLevel} Loser A`,
+          team2: `Round ${consolationLevel} Loser B`,
+          team1Score: 0,
+          team2Score: 0,
+          status: 'upcoming',
+          bracket: 'losers'
+        });
+      }
+      
+      if (consolationMatches.length > 0) {
+        consolationBrackets.push(consolationMatches);
+      }
+    }
+    
+    const allMatches = [...mainBracket, ...consolationBrackets.flat()];
+    
+    return {
+      matches: allMatches,
+      mainBracket,
+      consolationBrackets,
+      gameGuarantee,
+      teamGameCounts,
+      totalRounds: roundsNeeded + gameGuarantee - 1,
+      totalMatches: allMatches.length,
+      format: 'game-guarantee'
+    };
+  }
+
   // Main bracket generation method
   static generateBracket(
     teams: string[], 
     tournamentId: string, 
     tournamentType: string = 'single', 
-    sport: string = 'Basketball'
-  ): BracketStructure | DoubleElimStructure {
+    sport: string = 'Basketball',
+    options: any = {}
+  ): BracketStructure | DoubleElimStructure | SwissSystemStructure | PredictionBracketStructure | CompassDrawStructure | TripleEliminationStructure | GameGuaranteeStructure {
     
     // Filter out empty team names
     const validTeams = teams.filter(team => team && team.trim() !== '');
@@ -467,6 +931,24 @@ export class BracketGenerator {
         } else {
           throw new Error(`Double elimination currently only supports exactly 64 teams. Got ${validTeams.length} teams.`);
         }
+        
+      case 'swiss-system':
+        return this.generateSwissSystem(validTeams, tournamentId, options.maxRounds);
+        
+      case 'prediction-bracket':
+        const participants: PredictionParticipant[] = options.participants || [];
+        return this.generatePredictionBracket(validTeams, tournamentId, participants);
+        
+      case 'compass-draw':
+        return this.generateCompassDraw(validTeams, tournamentId);
+        
+      case 'triple-elimination':
+        return this.generateTripleElimination(validTeams, tournamentId);
+        
+      case 'game-guarantee':
+        const gameGuarantee = options.gameGuarantee || 3;
+        return this.generateGameGuarantee(validTeams, tournamentId, gameGuarantee);
+        
       case 'single':
       default:
         return this.generateSingleElimination(validTeams, tournamentId);

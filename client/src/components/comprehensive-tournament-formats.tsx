@@ -349,18 +349,101 @@ export const academicFormats: TournamentFormatConfig[] = [
   }
 ];
 
+// ADVANCED TOURNAMENT FORMATS (Universal)
+export const advancedTournamentFormats: TournamentFormatConfig[] = [
+  {
+    sport: 'Universal',
+    format: 'swiss-system',
+    tournamentType: 'swiss-system',
+    competitionFormat: 'swiss-pairing',
+    description: 'Swiss system pairing based on current standings - no elimination, all players play all rounds',
+    features: ['Smart Pairing Algorithm', 'No Elimination', 'Balanced Competition', 'Popular in Chess & Esports'],
+    icon: TrendingUp,
+    specificOptions: {
+      maxRounds: [5, 6, 7, 8, 9],
+      pairingMethod: ['swiss-perfect', 'swiss-accelerated', 'round-robin-then-swiss'],
+      tiebreakers: ['head-to-head', 'buchholz', 'sonneborn-berger', 'cumulative'],
+      byeHandling: 'lowest-score-bye'
+    }
+  },
+  {
+    sport: 'Universal',
+    format: 'prediction-bracket',
+    tournamentType: 'prediction-bracket',
+    competitionFormat: 'prediction-scoring',
+    description: 'Users predict tournament outcomes instead of playing - scoring system for accurate predictions',
+    features: ['Prediction Contest', 'Bracket Pools', 'Scoring System', 'Leaderboards'],
+    icon: Target,
+    specificOptions: {
+      scoringRules: {
+        correctPrediction: [5, 10, 15, 20],
+        championPrediction: [25, 50, 100],
+        roundMultipliers: [1, 2, 4, 8, 16]
+      },
+      predictionDeadline: 'before-tournament-start',
+      allowChanges: false,
+      maxParticipants: 1000
+    }
+  },
+  {
+    sport: 'Universal',
+    format: 'compass-draw',
+    tournamentType: 'compass-draw',
+    competitionFormat: 'multiple-bracket-system',
+    description: 'Four-bracket system used in tennis/golf - North (winners), South (1st loss), East (2nd loss), West (3rd loss)',
+    features: ['Multiple Consolation Levels', 'Extended Play', 'Four Bracket System', 'Maximum Games'],
+    icon: Award,
+    specificOptions: {
+      minimumParticipants: 8,
+      bracketNames: ['North (Winners)', 'South (1st Loss)', 'East (2nd Loss)', 'West (3rd Loss)'],
+      advancementRules: 'compass-system',
+      finalRankings: 'full-bracket-placement'
+    }
+  },
+  {
+    sport: 'Universal',
+    format: 'triple-elimination',
+    tournamentType: 'triple-elimination',
+    competitionFormat: 'three-bracket-system',
+    description: 'Three losses required for elimination - extended bracket structure with upper and two lower brackets',
+    features: ['Three-Loss Elimination', 'Extended Competition', 'Complex Bracket System', 'Maximum Fairness'],
+    icon: Crown,
+    specificOptions: {
+      minimumParticipants: 4,
+      bracketStructure: ['upper', 'lower1', 'lower2'],
+      championshipRequirement: 'winner-from-any-bracket',
+      resetOptions: 'championship-reset-if-needed'
+    }
+  },
+  {
+    sport: 'Universal',
+    format: 'game-guarantee',
+    tournamentType: 'game-guarantee',
+    competitionFormat: 'guarantee-system',
+    description: 'Ensures each team plays minimum number of games with consolation brackets for early losers',
+    features: ['Minimum Games Guaranteed', 'Consolation Brackets', 'Youth Sports Friendly', 'Extended Participation'],
+    icon: GamepadIcon,
+    specificOptions: {
+      gameGuarantee: [2, 3, 4, 5],
+      consolationBrackets: true,
+      automaticAdvancement: 'based-on-game-count',
+      participationTrophies: true
+    }
+  }
+];
+
 // MASTER FORMAT MAPPING
 export const allTournamentFormats: Record<string, TournamentFormatConfig[]> = {
-  'Golf': golfFormats,
-  'Football': footballFormats,
-  'Swimming & Diving': swimmingFormats,
-  'Basketball': basketballFormats,
-  'Wrestling': wrestlingFormats,
-  'Tennis': tennisFormats,
-  'Academic': academicFormats,
-  'Speech & Debate': academicFormats,
-  'Music': academicFormats,
-  'Visual Arts': academicFormats,
+  'Golf': [...golfFormats, ...advancedTournamentFormats],
+  'Football': [...footballFormats, ...advancedTournamentFormats],
+  'Swimming & Diving': [...swimmingFormats, ...advancedTournamentFormats],
+  'Basketball': [...basketballFormats, ...advancedTournamentFormats],
+  'Wrestling': [...wrestlingFormats, ...advancedTournamentFormats],
+  'Tennis': [...tennisFormats, ...advancedTournamentFormats],
+  'Academic': [...academicFormats, ...advancedTournamentFormats],
+  'Speech & Debate': [...academicFormats, ...advancedTournamentFormats],
+  'Music': [...academicFormats, ...advancedTournamentFormats],
+  'Visual Arts': [...academicFormats, ...advancedTournamentFormats],
   'Theater': academicFormats,
   'STEM': academicFormats,
   'Soccer': [
