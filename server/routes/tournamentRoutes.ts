@@ -618,37 +618,137 @@ export function registerTournamentRoutes(app: Express) {
     }
   });
 
-  // Helper function to advance winner to next round
+  // Helper function to advance winner and loser for double elimination
   async function advanceWinner(completedMatch: any) {
     try {
-      const nextRound = completedMatch.round + 1;
-      const currentPosition = completedMatch.position;
+      const allMatches = await storage.getMatchesByTournament(completedMatch.tournamentId);
+      const tournament = await storage.getTournament(completedMatch.tournamentId);
       
-      // For single elimination: position in next round = ceil(currentPosition / 2)
-      const nextPosition = Math.ceil(currentPosition / 2);
-      
-      // Find the next round match that this winner should advance to
-      const nextMatches = await storage.getMatchesByTournament(completedMatch.tournamentId);
-      const nextMatch = nextMatches.find(m => 
-        m.round === nextRound && 
-        m.position === nextPosition &&
-        (!m.bracket || m.bracket === completedMatch.bracket)
-      );
-      
-      if (nextMatch) {
-        // Determine if winner goes to team1 or team2 slot
-        // Even positions go to team1, odd positions go to team2
-        const isTeam1Slot = (currentPosition % 2 === 1);
-        
-        const updateData = isTeam1Slot 
-          ? { team1: completedMatch.winner }
-          : { team2: completedMatch.winner };
-        
-        await storage.updateMatch(nextMatch.id, updateData);
-        console.log(`✅ Advanced winner ${completedMatch.winner} from Round ${completedMatch.round} to Round ${nextRound}`);
+      // Double Elimination Tournament Logic
+      if (tournament?.tournamentType === 'Double Elimination') {
+        await handleDoubleEliminationAdvancement(completedMatch, allMatches);
+      } else {
+        // Single elimination logic (unchanged)
+        await handleSingleEliminationAdvancement(completedMatch, allMatches);
       }
     } catch (error) {
       console.error("Error advancing winner:", error);
+    }
+  }
+
+  // Handle double elimination advancement
+  async function handleDoubleEliminationAdvancement(completedMatch: any, allMatches: any[]) {
+    const { winner, round, position, tournamentId } = completedMatch;
+    const loser = completedMatch.team1 === winner ? completedMatch.team2 : completedMatch.team1;
+    
+    console.log(`🏆 Double Elimination: ${winner} beats ${loser} in Round ${round}, Position ${position}`);
+    
+    // STEP 1: Advance winner to next round in winners bracket
+    const nextRound = round + 1;
+    const nextPosition = Math.ceil(position / 2);
+    
+    // Find or create next round match in winners bracket
+    let nextMatch = allMatches.find(m => 
+      m.round === nextRound && 
+      m.position === nextPosition && 
+      (!m.bracket || m.bracket === 'winners')
+    );
+    
+    if (!nextMatch) {
+      // Create the next round match if it doesn't exist
+      const newMatchId = `generated-r${nextRound}-p${nextPosition}`;
+      nextMatch = await storage.createMatch({
+        id: newMatchId,
+        tournamentId,
+        round: nextRound,
+        position: nextPosition,
+        team1: 'TBD',
+        team2: 'TBD',
+        team1Score: 0,
+        team2Score: 0,
+        winner: null,
+        status: 'pending',
+        bracket: 'winners'
+      });
+    }
+    
+    if (nextMatch) {
+      // Determine if winner goes to team1 or team2 slot (odd positions = team1)
+      const isTeam1Slot = (position % 2 === 1);
+      const updateData = isTeam1Slot 
+        ? { team1: winner }
+        : { team2: winner };
+      
+      await storage.updateMatch(nextMatch.id, updateData);
+      console.log(`✅ Winner ${winner} advanced to Winners Round ${nextRound}, Position ${nextPosition}`);
+    }
+    
+    // STEP 2: Move loser to losers bracket
+    await moveLoserToLosersBracket(loser, round, position, tournamentId, allMatches);
+  }
+
+  // Move loser to appropriate position in losers bracket
+  async function moveLoserToLosersBracket(loser: string, winnerRound: number, winnerPosition: number, tournamentId: string, allMatches: any[]) {
+    // For Round 1 losers, they go to Losers Round 1
+    const losersRound = 1;
+    const losersPosition = winnerPosition; // Same position in losers bracket
+    
+    // Find or create losers bracket match
+    let losersMatch = allMatches.find(m => 
+      m.round === losersRound && 
+      m.position === losersPosition && 
+      m.bracket === 'losers'
+    );
+    
+    if (!losersMatch) {
+      // Create losers bracket match
+      const newMatchId = `losers-r${losersRound}-p${losersPosition}`;
+      losersMatch = await storage.createMatch({
+        id: newMatchId,
+        tournamentId,
+        round: losersRound,
+        position: losersPosition,
+        team1: 'TBD',
+        team2: 'TBD',
+        team1Score: 0,
+        team2Score: 0,
+        winner: null,
+        status: 'pending',
+        bracket: 'losers'
+      });
+    }
+    
+    if (losersMatch) {
+      // Add loser to available slot
+      const updateData = !losersMatch.team1 || losersMatch.team1 === 'TBD' 
+        ? { team1: loser }
+        : { team2: loser };
+      
+      await storage.updateMatch(losersMatch.id, updateData);
+      console.log(`🔄 Loser ${loser} moved to Losers Round ${losersRound}, Position ${losersPosition}`);
+    }
+  }
+
+  // Original single elimination logic
+  async function handleSingleEliminationAdvancement(completedMatch: any, allMatches: any[]) {
+    const nextRound = completedMatch.round + 1;
+    const currentPosition = completedMatch.position;
+    const nextPosition = Math.ceil(currentPosition / 2);
+    
+    const nextMatch = allMatches.find(m => 
+      m.round === nextRound && 
+      m.position === nextPosition &&
+      (!m.bracket || m.bracket === completedMatch.bracket)
+    );
+    
+    if (nextMatch) {
+      const isTeam1Slot = (currentPosition % 2 === 1);
+      const updateData = isTeam1Slot 
+        ? { team1: completedMatch.winner }
+        : { team2: completedMatch.winner };
+      
+      await storage.updateMatch(nextMatch.id, updateData);
+      console.log(`✅ Advanced winner ${completedMatch.winner} from Round ${completedMatch.round} to Round ${nextRound}`);
     }
   }
 
