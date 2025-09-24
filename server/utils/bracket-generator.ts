@@ -1,17 +1,28 @@
 // Server-side bracket generation for tournament creation
-export interface MatchData {
-  id: string;
-  tournamentId: string;
-  round: number;
-  position: number;
-  team1?: string;
-  team2?: string;
-  team1Score: number;
-  team2Score: number;
-  winner?: string;
-  status: 'upcoming' | 'in-progress' | 'completed';
-  bracket: 'winners' | 'losers' | 'championship';
-}
+import {
+  MatchData,
+  BracketStructure,
+  FFAParticipant,
+  FFAPerformance,
+  FFAHeat,
+  FFAHeatResult,
+  FFARound,
+  FFALeaderboardEntry,
+  FFATournamentStructure,
+  MultiHeatRacingStructure,
+  BattleRoyaleStructure,
+  PointAccumulationStructure,
+  TimeTrialsStructure,
+  SurvivalEliminationStructure,
+  FFAStage,
+  FFAElimination,
+  FFAScoringRound,
+  FFARoundScore,
+  FFAScore,
+  FFATrialRound,
+  FFAAttempt,
+  FFATime
+} from '@shared/bracket-generator';
 
 export interface LoserRoutingInfo {
   losersRound: number;
@@ -26,13 +37,6 @@ export interface DoubleElimStructure extends BracketStructure {
   routingMap: Map<string, LoserRoutingInfo>;
   totalWinnersRounds: number;
   totalLosersRounds: number;
-}
-
-export interface BracketStructure {
-  matches: MatchData[];
-  totalRounds: number;
-  totalMatches: number;
-  format: string;
 }
 
 export interface SwissSystemStructure extends BracketStructure {
@@ -112,6 +116,8 @@ export interface TripleElimRoutingInfo {
   match: number;
   lossCount: number;
 }
+
+// FFA tournament interfaces are now imported from shared/bracket-generator.ts
 
 // MARCH MADNESS INTERFACES
 export interface MarchMadnessTeam {
@@ -1344,6 +1350,433 @@ export class BracketGenerator {
     };
   }
 
+  // FREE FOR ALL TOURNAMENT GENERATION METHODS
+  
+  /**
+   * Generate Multi-Heat Racing tournament structure
+   * Multiple qualifying heats → Semi-finals → Finals
+   */
+  static generateMultiHeatRacing(participants: string[], tournamentId: string, config?: any): MultiHeatRacingStructure {
+    if (participants.length < 8) {
+      throw new Error('Multi-Heat Racing requires at least 8 participants');
+    }
+
+    const ffaParticipants: FFAParticipant[] = participants.map((name, index) => ({
+      id: `participant-${index + 1}`,
+      name,
+      seedNumber: index + 1,
+      currentStatus: 'registered',
+      performanceHistory: []
+    }));
+
+    const participantsPerHeat = config?.participantsPerHeat || Math.min(8, Math.ceil(participants.length / 4));
+    const numberOfHeats = Math.ceil(participants.length / participantsPerHeat);
+    const qualificationCount = config?.qualificationCount || Math.ceil(participantsPerHeat / 2);
+
+    // Create qualifying heats
+    const qualifyingHeats: FFAHeat[] = [];
+    for (let heatNum = 0; heatNum < numberOfHeats; heatNum++) {
+      const startIndex = heatNum * participantsPerHeat;
+      const heatParticipants = ffaParticipants.slice(startIndex, startIndex + participantsPerHeat);
+      
+      qualifyingHeats.push({
+        heatNumber: heatNum + 1,
+        heatName: `Qualifying Heat ${heatNum + 1}`,
+        participants: heatParticipants.map(p => p.id),
+        status: 'upcoming',
+        results: []
+      });
+    }
+
+    // Create qualification round
+    const qualifyingRound: FFARound = {
+      roundNumber: 1,
+      roundName: 'Qualifying Heats',
+      roundType: 'qualifying',
+      heats: qualifyingHeats,
+      advancementCriteria: {
+        method: 'top-n',
+        count: qualificationCount
+      }
+    };
+
+    // Create semifinals (top performers from each heat)
+    const semifinalists = Math.min(16, numberOfHeats * qualificationCount);
+    const semifinalHeats = Math.ceil(semifinalists / 8);
+    const semifinals: FFAHeat[] = [];
+    
+    for (let heatNum = 0; heatNum < semifinalHeats; heatNum++) {
+      semifinals.push({
+        heatNumber: heatNum + 1,
+        heatName: `Semifinal Heat ${heatNum + 1}`,
+        participants: [], // Will be populated based on qualifying results
+        status: 'upcoming',
+        results: []
+      });
+    }
+
+    const semifinalRound: FFARound = {
+      roundNumber: 2,
+      roundName: 'Semifinals',
+      roundType: 'semifinal',
+      heats: semifinals,
+      advancementCriteria: {
+        method: 'top-n',
+        count: Math.ceil(semifinalists / semifinalHeats / 2)
+      }
+    };
+
+    // Create finals
+    const finals: FFAHeat[] = [{
+      heatNumber: 1,
+      heatName: 'Final',
+      participants: [], // Will be populated based on semifinal results
+      status: 'upcoming',
+      results: []
+    }];
+
+    const finalRound: FFARound = {
+      roundNumber: 3,
+      roundName: 'Finals',
+      roundType: 'final',
+      heats: finals,
+      advancementCriteria: {
+        method: 'top-n',
+        count: 1 // Winner
+      }
+    };
+
+    const leaderboard: FFALeaderboardEntry[] = ffaParticipants.map((participant, index) => ({
+      participantId: participant.id,
+      participantName: participant.name,
+      currentRanking: index + 1,
+      score: 0,
+      status: 'active',
+      performance: []
+    }));
+
+    return {
+      matches: [], // FFA doesn't use traditional matches
+      totalRounds: 3,
+      totalMatches: qualifyingHeats.length + semifinals.length + finals.length,
+      format: 'multi-heat-racing',
+      participants: ffaParticipants,
+      rounds: [qualifyingRound, semifinalRound, finalRound],
+      qualifyingHeats,
+      semifinals,
+      finals,
+      leaderboard,
+      heatConfiguration: {
+        participantsPerHeat,
+        qualificationMethod: 'top-n',
+        qualificationCount
+      }
+    };
+  }
+
+  /**
+   * Generate Battle Royale tournament structure
+   * Large field elimination with multiple rounds
+   */
+  static generateBattleRoyale(participants: string[], tournamentId: string, config?: any): BattleRoyaleStructure {
+    if (participants.length < 16) {
+      throw new Error('Battle Royale requires at least 16 participants');
+    }
+
+    const ffaParticipants: FFAParticipant[] = participants.map((name, index) => ({
+      id: `participant-${index + 1}`,
+      name,
+      seedNumber: index + 1,
+      currentStatus: 'registered',
+      performanceHistory: []
+    }));
+
+    const eliminationRate = config?.eliminationRate || 0.5; // 50% elimination per round
+    const finalFieldSize = config?.finalFieldSize || 1;
+    
+    const rounds: FFARound[] = [];
+    const survivalStages: FFAStage[] = [];
+    const eliminationHistory: FFAElimination[] = [];
+    
+    let currentParticipants = participants.length;
+    let roundNumber = 1;
+    
+    // Generate elimination rounds until we reach final field size
+    while (currentParticipants > finalFieldSize) {
+      const participantsToEliminate = Math.floor(currentParticipants * eliminationRate);
+      const participantsRemaining = currentParticipants - participantsToEliminate;
+      
+      const round: FFARound = {
+        roundNumber,
+        roundName: `Elimination Round ${roundNumber}`,
+        roundType: 'elimination',
+        heats: [{
+          heatNumber: 1,
+          heatName: `Battle ${roundNumber}`,
+          participants: [], // All remaining participants
+          status: 'upcoming',
+          results: []
+        }],
+        advancementCriteria: {
+          method: 'top-n',
+          count: participantsRemaining
+        },
+        eliminationCriteria: {
+          method: 'bottom-n',
+          count: participantsToEliminate
+        }
+      };
+      
+      rounds.push(round);
+      
+      const stage: FFAStage = {
+        stageNumber: roundNumber,
+        stageName: `Round ${roundNumber}`,
+        participantsAtStart: currentParticipants,
+        participantsEliminated: participantsToEliminate,
+        participantsRemaining: participantsRemaining,
+        eliminationCriteria: {
+          method: 'score-based',
+          threshold: participantsToEliminate
+        },
+        survivors: []
+      };
+      
+      survivalStages.push(stage);
+      
+      currentParticipants = participantsRemaining;
+      roundNumber++;
+    }
+
+    return {
+      matches: [], // Battle Royale doesn't use traditional matches
+      totalRounds: rounds.length,
+      totalMatches: rounds.length, // One battle per round
+      format: 'battle-royale',
+      participants: ffaParticipants,
+      eliminationRounds: rounds,
+      survivalStages,
+      finalSurvivors: [], // Will be populated during tournament
+      eliminationHistory,
+      eliminationRules: {
+        method: 'percentage',
+        criteria: eliminationRate,
+        finalFieldSize
+      }
+    };
+  }
+
+  /**
+   * Generate Point Accumulation tournament structure
+   * Series of matches with cumulative scoring
+   */
+  static generatePointAccumulation(participants: string[], tournamentId: string, config?: any): PointAccumulationStructure {
+    if (participants.length < 4) {
+      throw new Error('Point Accumulation requires at least 4 participants');
+    }
+
+    const ffaParticipants: FFAParticipant[] = participants.map((name, index) => ({
+      id: `participant-${index + 1}`,
+      name,
+      seedNumber: index + 1,
+      currentStatus: 'registered',
+      performanceHistory: []
+    }));
+
+    const numberOfRounds = config?.numberOfRounds || 5;
+    const pointsPerRound = config?.pointsPerRound || true;
+    const roundMultipliers = config?.roundMultipliers || [1, 1, 1.5, 2, 2.5];
+
+    const scoringRounds: FFAScoringRound[] = [];
+    for (let round = 1; round <= numberOfRounds; round++) {
+      scoringRounds.push({
+        roundNumber: round,
+        roundName: `Round ${round}`,
+        participants: ffaParticipants.map(p => p.id),
+        scoring: [],
+        multiplier: roundMultipliers[round - 1] || 1,
+        bonusOpportunities: [`Round ${round} Bonus`]
+      });
+    }
+
+    const cumulativeScores: FFAScore[] = ffaParticipants.map(participant => ({
+      participantId: participant.id,
+      roundScores: new Array(numberOfRounds).fill(0),
+      totalScore: 0,
+      averageScore: 0,
+      bestRound: 0,
+      consistency: 0
+    }));
+
+    const leaderboard: FFALeaderboardEntry[] = ffaParticipants.map((participant, index) => ({
+      participantId: participant.id,
+      participantName: participant.name,
+      currentRanking: index + 1,
+      score: 0,
+      status: 'active',
+      performance: []
+    }));
+
+    return {
+      matches: [], // Point accumulation doesn't use traditional matches
+      totalRounds: numberOfRounds,
+      totalMatches: numberOfRounds,
+      format: 'point-accumulation',
+      participants: ffaParticipants,
+      scoringRounds,
+      cumulativeScores,
+      leaderboard,
+      scoringMethodology: {
+        pointsPerRound,
+        cumulativeScoring: true,
+        roundMultipliers,
+        bonusPoints: { 'perfect_round': 10, 'comeback': 5 }
+      }
+    };
+  }
+
+  /**
+   * Generate Time Trials tournament structure
+   * Individual performance with ranking system
+   */
+  static generateTimeTrials(participants: string[], tournamentId: string, config?: any): TimeTrialsStructure {
+    if (participants.length < 2) {
+      throw new Error('Time Trials requires at least 2 participants');
+    }
+
+    const ffaParticipants: FFAParticipant[] = participants.map((name, index) => ({
+      id: `participant-${index + 1}`,
+      name,
+      seedNumber: index + 1,
+      currentStatus: 'registered',
+      performanceHistory: []
+    }));
+
+    const attemptsPerParticipant = config?.attemptsPerParticipant || 3;
+    const timingMethod = config?.timingMethod || 'best-time';
+    const numberOfRounds = config?.numberOfRounds || 1;
+
+    const trialRounds: FFATrialRound[] = [];
+    for (let round = 1; round <= numberOfRounds; round++) {
+      trialRounds.push({
+        roundNumber: round,
+        roundName: `Trial Round ${round}`,
+        attempts: [],
+        conditions: { weather: 'clear', track: 'dry' }
+      });
+    }
+
+    const bestTimes: FFATime[] = ffaParticipants.map(participant => ({
+      participantId: participant.id,
+      bestTime: Infinity,
+      averageTime: 0,
+      attempts: [],
+      improvement: 0
+    }));
+
+    const leaderboard: FFALeaderboardEntry[] = ffaParticipants.map((participant, index) => ({
+      participantId: participant.id,
+      participantName: participant.name,
+      currentRanking: index + 1,
+      score: 0,
+      status: 'active',
+      performance: []
+    }));
+
+    return {
+      matches: [], // Time trials doesn't use traditional matches
+      totalRounds: numberOfRounds,
+      totalMatches: numberOfRounds * ffaParticipants.length * attemptsPerParticipant,
+      format: 'time-trials',
+      participants: ffaParticipants,
+      trialRounds,
+      bestTimes,
+      leaderboard,
+      trialConfiguration: {
+        attemptsPerParticipant,
+        timingMethod,
+        allowMultipleAttempts: true
+      }
+    };
+  }
+
+  /**
+   * Generate Survival Elimination tournament structure
+   * Progressive elimination until winner
+   */
+  static generateSurvivalElimination(participants: string[], tournamentId: string, config?: any): SurvivalEliminationStructure {
+    if (participants.length < 8) {
+      throw new Error('Survival Elimination requires at least 8 participants');
+    }
+
+    const ffaParticipants: FFAParticipant[] = participants.map((name, index) => ({
+      id: `participant-${index + 1}`,
+      name,
+      seedNumber: index + 1,
+      currentStatus: 'registered',
+      performanceHistory: []
+    }));
+
+    const roundsToElimination = config?.roundsToElimination || Math.ceil(Math.log2(participants.length));
+    const eliminationRate = config?.eliminationRate || 0.5;
+    
+    const eliminationRounds: FFARound[] = [];
+    const survivorsByRound: Record<number, string[]> = {};
+    const eliminated: FFAElimination[] = [];
+    
+    let currentParticipants = participants.length;
+    
+    for (let round = 1; round <= roundsToElimination; round++) {
+      const participantsToEliminate = Math.floor(currentParticipants * eliminationRate);
+      const participantsRemaining = currentParticipants - participantsToEliminate;
+      
+      if (participantsRemaining <= 1) break; // We have a winner
+      
+      const eliminationRound: FFARound = {
+        roundNumber: round,
+        roundName: `Survival Round ${round}`,
+        roundType: 'elimination',
+        heats: [{
+          heatNumber: 1,
+          heatName: `Survival Challenge ${round}`,
+          participants: [], // All remaining participants
+          status: 'upcoming',
+          results: []
+        }],
+        advancementCriteria: {
+          method: 'top-n',
+          count: participantsRemaining
+        },
+        eliminationCriteria: {
+          method: 'bottom-n',
+          count: participantsToEliminate
+        }
+      };
+      
+      eliminationRounds.push(eliminationRound);
+      survivorsByRound[round] = [];
+      
+      currentParticipants = participantsRemaining;
+    }
+
+    return {
+      matches: [], // Survival elimination doesn't use traditional matches
+      totalRounds: eliminationRounds.length,
+      totalMatches: eliminationRounds.length,
+      format: 'survival-elimination',
+      participants: ffaParticipants,
+      eliminationRounds,
+      survivorsByRound,
+      eliminated,
+      finalSurvivor: ffaParticipants[0], // Placeholder
+      progressiveElimination: {
+        roundsToElimination,
+        eliminationRate,
+        finalFieldSize: 1
+      }
+    };
+  }
+
   // Main bracket generation method
   static generateBracket(
     teams: string[], 
@@ -1351,7 +1784,7 @@ export class BracketGenerator {
     tournamentType: string = 'single', 
     sport: string = 'Basketball',
     options: any = {}
-  ): BracketStructure | DoubleElimStructure | SwissSystemStructure | PredictionBracketStructure | CompassDrawStructure | TripleEliminationStructure | GameGuaranteeStructure | MarchMadnessBracket {
+  ): BracketStructure | DoubleElimStructure | SwissSystemStructure | PredictionBracketStructure | CompassDrawStructure | TripleEliminationStructure | GameGuaranteeStructure | MarchMadnessBracket | MultiHeatRacingStructure | BattleRoyaleStructure | PointAccumulationStructure | TimeTrialsStructure | SurvivalEliminationStructure {
     
     // Filter out empty team names
     const validTeams = teams.filter(team => team && team.trim() !== '');
@@ -1387,6 +1820,23 @@ export class BracketGenerator {
       case 'game-guarantee':
         const gameGuarantee = options.gameGuarantee || 3;
         return this.generateGameGuarantee(validTeams, tournamentId, gameGuarantee);
+        
+      // FREE FOR ALL TOURNAMENT TYPES
+      case 'free-for-all':
+      case 'multi-heat-racing':
+        return this.generateMultiHeatRacing(validTeams, tournamentId, options);
+        
+      case 'battle-royale':
+        return this.generateBattleRoyale(validTeams, tournamentId, options);
+        
+      case 'point-accumulation':
+        return this.generatePointAccumulation(validTeams, tournamentId, options);
+        
+      case 'time-trials':
+        return this.generateTimeTrials(validTeams, tournamentId, options);
+        
+      case 'survival-elimination':
+        return this.generateSurvivalElimination(validTeams, tournamentId, options);
         
       case 'single':
       default:

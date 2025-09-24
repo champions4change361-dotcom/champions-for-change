@@ -33,6 +33,7 @@ import { db } from "./db";
 import { eq, desc, sql, and, gte, lte } from "drizzle-orm";
 import { createCachedStorage } from "./cache";
 import { createMonitoredStorage } from "./monitoring";
+import { BracketGenerator } from "./utils/bracket-generator";
 
 // Compliance-related types
 export type ComplianceAuditLog = {
@@ -251,6 +252,18 @@ export interface IStorage {
   createTournament(tournament: InsertTournament): Promise<Tournament>;
   updateTournament(id: string, tournament: Partial<Tournament>): Promise<Tournament | undefined>;
   deleteTournament(id: string): Promise<boolean>;
+  
+  // FFA Tournament methods
+  generateFFATournament(tournamentId: string, config: {
+    tournamentType: 'multi-heat-racing' | 'battle-royale' | 'point-accumulation' | 'time-trials' | 'survival-elimination';
+    participants: Array<{ id: string; name: string; email?: string; seedNumber?: number; skillLevel?: string; }>;
+    formatConfig: Record<string, any>;
+  }): Promise<Tournament | undefined>;
+  updateFFAParticipants(tournamentId: string, participants: any[]): Promise<Tournament | undefined>;
+  updateFFAHeatAssignments(tournamentId: string, heatAssignments: any[]): Promise<Tournament | undefined>;
+  updateFFARoundResults(tournamentId: string, roundNumber: number, results: any[]): Promise<Tournament | undefined>;
+  getFFALeaderboard(tournamentId: string): Promise<any[]>;
+  getFFAParticipantPerformance(tournamentId: string, participantId: string): Promise<any | undefined>;
   
   // Tournament Registration Form methods - Smart linking system
   createTournamentRegistrationForm(form: InsertTournamentRegistrationForm): Promise<TournamentRegistrationForm>;
@@ -2021,6 +2034,311 @@ export class DbStorage implements IStorage {
       console.error("Database error:", error);
       return undefined;
     }
+  }
+
+  // FFA Tournament method implementations
+  async generateFFATournament(tournamentId: string, config: {
+    tournamentType: 'multi-heat-racing' | 'battle-royale' | 'point-accumulation' | 'time-trials' | 'survival-elimination';
+    participants: Array<{ id: string; name: string; email?: string; seedNumber?: number; skillLevel?: string; }>;
+    formatConfig: Record<string, any>;
+  }): Promise<Tournament | undefined> {
+    try {
+      const tournament = await this.getTournament(tournamentId);
+      if (!tournament) return undefined;
+
+      // Extract participant names for BracketGenerator
+      const participantNames = config.participants.map(p => p.name);
+
+      // Generate FFA bracket structure using proper BracketGenerator
+      const bracketStructure = BracketGenerator.generateBracket(
+        participantNames,
+        config.tournamentType,
+        tournamentId,
+        config.formatConfig
+      );
+
+      // Convert participants to FFA format with proper structure
+      const ffaParticipants = config.participants.map((p, index) => ({
+        id: p.id,
+        name: p.name,
+        email: p.email,
+        seedNumber: p.seedNumber || index + 1,
+        skillLevel: p.skillLevel,
+        currentStatus: 'registered' as const,
+        performanceHistory: [],
+        finalRanking: undefined,
+        finalScore: undefined
+      }));
+
+      // Extract configuration from generated bracket structure
+      let ffaConfig: Record<string, any> = {
+        participantStructure: 'individual',
+        maxParticipants: config.participants.length,
+        minParticipants: Math.min(2, config.participants.length),
+        scoringMethodology: this.getFFAScoringMethodology(config.tournamentType),
+        rankingCriteria: this.getFFARankingCriteria(config.tournamentType),
+        tieBreakingRules: ["best_performance", "head_to_head", "random"],
+        performanceTracking: {
+          trackIndividualStats: true,
+          recordPersonalBests: true,
+          performanceMetrics: this.getFFAPerformanceMetrics(config.tournamentType),
+          allowMultipleAttempts: config.tournamentType === 'time-trials' || config.tournamentType === 'point-accumulation'
+        }
+      };
+
+      // Extract heat assignments from bracket structure if available
+      let heatAssignments: any[] = [];
+      
+      if (config.tournamentType === 'multi-heat-racing' && 'qualifyingRound' in bracketStructure) {
+        const structure = bracketStructure as any;
+        if (structure.qualifyingRound?.heats) {
+          heatAssignments = structure.qualifyingRound.heats.map((heat: any) => ({
+            heatNumber: heat.heatNumber,
+            heatName: heat.heatName,
+            participants: heat.participants,
+            status: heat.status,
+            results: heat.results || []
+          }));
+        }
+      }
+
+      // For other FFA formats, use the rounds/stages from the bracket structure
+      if (config.tournamentType === 'battle-royale' && 'battleStages' in bracketStructure) {
+        const structure = bracketStructure as any;
+        ffaConfig.battleStages = structure.battleStages;
+        ffaConfig.zoneShrinkage = structure.zoneShrinkage;
+      }
+
+      if (config.tournamentType === 'point-accumulation' && 'scoringRounds' in bracketStructure) {
+        const structure = bracketStructure as any;
+        ffaConfig.scoringRounds = structure.scoringRounds;
+        ffaConfig.pointSystem = structure.pointSystem;
+      }
+
+      if (config.tournamentType === 'time-trials' && 'trialRounds' in bracketStructure) {
+        const structure = bracketStructure as any;
+        ffaConfig.trialRounds = structure.trialRounds;
+        ffaConfig.timingCriteria = structure.timingCriteria;
+      }
+
+      if (config.tournamentType === 'survival-elimination' && 'eliminationRounds' in bracketStructure) {
+        const structure = bracketStructure as any;
+        ffaConfig.eliminationRounds = structure.eliminationRounds;
+        ffaConfig.progressiveElimination = structure.progressiveElimination;
+      }
+
+      // Merge format-specific configuration
+      ffaConfig = { ...ffaConfig, ...config.formatConfig };
+
+      // Update tournament with generated FFA structure
+      return await this.updateTournament(tournamentId, {
+        tournamentType: config.tournamentType,
+        competitionFormat: this.getFFACompetitionFormat(config.tournamentType),
+        ffaConfig,
+        participants: ffaParticipants,
+        heatAssignments,
+        bracketData: bracketStructure, // Store the full bracket structure for reference
+        totalRounds: bracketStructure.totalRounds || 1,
+        currentRound: 1,
+        status: 'active'
+      });
+    } catch (error) {
+      console.error("Error generating FFA tournament:", error);
+      return undefined;
+    }
+  }
+
+  async updateFFAParticipants(tournamentId: string, participants: any[]): Promise<Tournament | undefined> {
+    try {
+      return await this.updateTournament(tournamentId, { participants });
+    } catch (error) {
+      console.error("Error updating FFA participants:", error);
+      return undefined;
+    }
+  }
+
+  async updateFFAHeatAssignments(tournamentId: string, heatAssignments: any[]): Promise<Tournament | undefined> {
+    try {
+      return await this.updateTournament(tournamentId, { heatAssignments });
+    } catch (error) {
+      console.error("Error updating FFA heat assignments:", error);
+      return undefined;
+    }
+  }
+
+  async updateFFARoundResults(tournamentId: string, roundNumber: number, results: any[]): Promise<Tournament | undefined> {
+    try {
+      const tournament = await this.getTournament(tournamentId);
+      if (!tournament || !tournament.participants) return undefined;
+
+      // Update participant performance history
+      const updatedParticipants = tournament.participants.map((participant: any) => {
+        const result = results.find(r => r.participantId === participant.id);
+        if (result) {
+          const performanceHistory = participant.performanceHistory || [];
+          performanceHistory.push({
+            round: roundNumber,
+            result: result.result,
+            ranking: result.ranking,
+            eliminated: result.eliminated,
+            advancedToNextRound: result.advancedToNextRound,
+            timestamp: new Date().toISOString()
+          });
+          
+          return {
+            ...participant,
+            performanceHistory,
+            currentStatus: result.eliminated ? 'eliminated' : 
+                          result.advancedToNextRound ? 'advanced' : 'active'
+          };
+        }
+        return participant;
+      });
+
+      return await this.updateTournament(tournamentId, { participants: updatedParticipants });
+    } catch (error) {
+      console.error("Error updating FFA round results:", error);
+      return undefined;
+    }
+  }
+
+  async getFFALeaderboard(tournamentId: string): Promise<any[]> {
+    try {
+      const tournament = await this.getTournament(tournamentId);
+      if (!tournament || !tournament.participants) return [];
+
+      // Generate leaderboard based on current performance
+      return tournament.participants
+        .map((participant: any) => ({
+          participantId: participant.id,
+          participantName: participant.name,
+          currentRanking: this.calculateFFARanking(participant, tournament.tournamentType),
+          score: this.calculateFFAScore(participant, tournament.tournamentType),
+          status: participant.currentStatus,
+          performance: participant.performanceHistory || []
+        }))
+        .sort((a: any, b: any) => a.currentRanking - b.currentRanking);
+    } catch (error) {
+      console.error("Error getting FFA leaderboard:", error);
+      return [];
+    }
+  }
+
+  async getFFAParticipantPerformance(tournamentId: string, participantId: string): Promise<any | undefined> {
+    try {
+      const tournament = await this.getTournament(tournamentId);
+      if (!tournament || !tournament.participants) return undefined;
+
+      const participant = tournament.participants.find((p: any) => p.id === participantId);
+      if (!participant) return undefined;
+
+      return {
+        participant,
+        ranking: this.calculateFFARanking(participant, tournament.tournamentType),
+        score: this.calculateFFAScore(participant, tournament.tournamentType),
+        performanceHistory: participant.performanceHistory || [],
+        personalBests: this.calculatePersonalBests(participant)
+      };
+    } catch (error) {
+      console.error("Error getting FFA participant performance:", error);
+      return undefined;
+    }
+  }
+
+  // Helper methods for FFA tournament generation
+  private getFFAScoringMethodology(tournamentType: string): string {
+    switch (tournamentType) {
+      case 'time-trials': return 'time-based';
+      case 'point-accumulation': return 'points-based';
+      case 'battle-royale':
+      case 'survival-elimination': return 'elimination-based';
+      case 'multi-heat-racing': return 'ranking-based';
+      default: return 'points-based';
+    }
+  }
+
+  private getFFARankingCriteria(tournamentType: string): string[] {
+    switch (tournamentType) {
+      case 'time-trials': return ["time", "attempts"];
+      case 'point-accumulation': return ["score", "consistency"];
+      case 'battle-royale':
+      case 'survival-elimination': return ["survival_time", "eliminations"];
+      case 'multi-heat-racing': return ["placement", "time"];
+      default: return ["score"];
+    }
+  }
+
+  private getFFAPerformanceMetrics(tournamentType: string): string[] {
+    switch (tournamentType) {
+      case 'time-trials': return ["time", "distance", "accuracy"];
+      case 'point-accumulation': return ["score", "points", "consistency"];
+      case 'battle-royale':
+      case 'survival-elimination': return ["eliminations", "survival_time"];
+      case 'multi-heat-racing': return ["time", "placement", "speed"];
+      default: return ["score"];
+    }
+  }
+
+  private getFFACompetitionFormat(tournamentType: string): string {
+    switch (tournamentType) {
+      case 'time-trials': return 'time-based-ranking';
+      case 'point-accumulation': return 'cumulative-scoring';
+      case 'battle-royale':
+      case 'survival-elimination': return 'elimination-rounds';
+      case 'multi-heat-racing': return 'heat-progression';
+      default: return 'individual-leaderboard';
+    }
+  }
+
+  private generateHeatAssignments(participants: any[], config: any): any[] {
+    const participantsPerHeat = config.heatConfiguration?.participantsPerHeat || 8;
+    const heats = [];
+    
+    for (let i = 0; i < participants.length; i += participantsPerHeat) {
+      const heatParticipants = participants.slice(i, i + participantsPerHeat);
+      heats.push({
+        heatNumber: Math.floor(i / participantsPerHeat) + 1,
+        heatName: `Heat ${Math.floor(i / participantsPerHeat) + 1}`,
+        participants: heatParticipants.map(p => p.id),
+        status: 'upcoming' as const,
+        results: []
+      });
+    }
+    
+    return heats;
+  }
+
+  private calculateFFARanking(participant: any, tournamentType: string): number {
+    const history = participant.performanceHistory || [];
+    if (history.length === 0) return 999;
+    
+    // For simplicity, use the most recent ranking
+    return history[history.length - 1]?.ranking || 999;
+  }
+
+  private calculateFFAScore(participant: any, tournamentType: string): number {
+    const history = participant.performanceHistory || [];
+    if (history.length === 0) return 0;
+    
+    switch (tournamentType) {
+      case 'point-accumulation':
+        return history.reduce((sum: number, perf: any) => sum + (perf.result || 0), 0);
+      case 'time-trials':
+        return Math.min(...history.map((perf: any) => perf.result || Infinity));
+      default:
+        return history[history.length - 1]?.result || 0;
+    }
+  }
+
+  private calculatePersonalBests(participant: any): any {
+    const history = participant.performanceHistory || [];
+    if (history.length === 0) return {};
+    
+    return {
+      bestResult: Math.max(...history.map((perf: any) => perf.result || 0)),
+      bestRanking: Math.min(...history.map((perf: any) => perf.ranking || Infinity)),
+      totalAttempts: history.length
+    };
   }
 
   async deleteTournament(id: string): Promise<boolean> {

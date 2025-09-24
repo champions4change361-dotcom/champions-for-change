@@ -6,6 +6,7 @@ import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
+import { useGenerateFFATournament, isFFATournamentType } from "@/hooks/useFFATournaments";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,7 +32,9 @@ const formSchema = insertTournamentSchema.extend({
     "match-play", "stroke-play", "scramble", "best-ball", "alternate-shot", "modified-stableford",
     "playoff-bracket", "conference-championship", "dual-meet", "triangular-meet", "weight-class-bracket",
     "multi-event-scoring", "preliminary-finals", "heat-management", "skills-competition", "draw-management",
-    "group-stage-knockout", "home-away-series", "prediction-bracket", "compass-draw", "triple-elimination", "game-guarantee", "march-madness"
+    "group-stage-knockout", "home-away-series", "prediction-bracket", "compass-draw", "triple-elimination", 
+    "game-guarantee", "march-madness", "free-for-all", "multi-heat-racing", "battle-royale", 
+    "point-accumulation", "time-trials", "survival-elimination"
   ]).default("single"),
   competitionFormat: z.enum([
     "bracket", "leaderboard", "series", "bracket-to-series", "multi-stage",
@@ -85,6 +88,7 @@ export default function EnhancedTournamentWizard({
   const { toast } = useToast();
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const generateFFATournament = useGenerateFFATournament();
   const [currentStep, setCurrentStep] = useState<WizardStep>('sport');
   const [selectedEvents, setSelectedEvents] = useState<SportEventDefinition[]>([]);
   const [eventRecorders, setEventRecorders] = useState<Record<string, string>>({});
@@ -950,8 +954,41 @@ export default function EnhancedTournamentWizard({
         } : null
       };
       
+      // Create the basic tournament first
       const response = await apiRequest("/api/tournaments", "POST", transformedData);
-      return response.json();
+      const tournament = await response.json();
+
+      // For FFA tournaments, generate the FFA-specific structure
+      if (isFFATournamentType(data.tournamentType)) {
+        // Convert teams to participants for FFA tournaments
+        const participants = data.teams.map((team, index) => ({
+          id: `participant-${index + 1}`,
+          name: team.teamName,
+          email: team.playerEmails?.[0], // Use first player's email if available
+          seedNumber: index + 1,
+          skillLevel: selectedSkillLevel || 'intermediate'
+        }));
+
+        // Generate FFA tournament structure
+        try {
+          const ffaResult = await generateFFATournament.mutateAsync({
+            tournamentId: tournament.tournament.id,
+            tournamentType: data.tournamentType,
+            participants,
+            formatConfig: sportSpecificConfig
+          });
+          
+          // Return the enhanced tournament with FFA structure
+          return tournament;
+        } catch (ffaError) {
+          console.error('Failed to generate FFA structure:', ffaError);
+          // Tournament was created but FFA generation failed
+          throw new Error(`Tournament created but FFA bracket generation failed: ${ffaError}`);
+        }
+      }
+
+      // For non-FFA tournaments, return the tournament as-is
+      return tournament;
     },
     onSuccess: (data) => {
       setCreatedTournament(data.tournament);

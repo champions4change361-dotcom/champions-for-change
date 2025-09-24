@@ -1347,8 +1347,8 @@ export const tournaments = pgTable("tournaments", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
   teamSize: integer("team_size").notNull(),
-  tournamentType: text("tournament_type", { enum: ["single", "double", "pool-play", "round-robin", "swiss-system", "double-stage", "match-play", "stroke-play", "scramble", "best-ball", "alternate-shot", "modified-stableford", "playoff-bracket", "conference-championship", "dual-meet", "triangular-meet", "weight-class-bracket", "multi-event-scoring", "preliminary-finals", "heat-management", "skills-competition", "draw-management", "group-stage-knockout", "home-away-series", "prediction-bracket", "compass-draw", "triple-elimination", "game-guarantee", "march-madness"] }).notNull().default("single"),
-  competitionFormat: text("competition_format", { enum: ["bracket", "leaderboard", "series", "bracket-to-series", "multi-stage", "round-robin-pools", "elimination-pools", "consolation-bracket", "team-vs-individual", "portfolio-review", "oral-competition", "written-test", "judged-performance", "timed-competition", "scoring-average", "advancement-ladder", "rating-system", "prediction-scoring", "multiple-bracket-system", "three-bracket-system", "guarantee-system", "regional-bracket"] }).notNull().default("bracket"),
+  tournamentType: text("tournament_type", { enum: ["single", "double", "pool-play", "round-robin", "swiss-system", "double-stage", "match-play", "stroke-play", "scramble", "best-ball", "alternate-shot", "modified-stableford", "playoff-bracket", "conference-championship", "dual-meet", "triangular-meet", "weight-class-bracket", "multi-event-scoring", "preliminary-finals", "heat-management", "skills-competition", "draw-management", "group-stage-knockout", "home-away-series", "prediction-bracket", "compass-draw", "triple-elimination", "game-guarantee", "march-madness", "free-for-all", "multi-heat-racing", "battle-royale", "point-accumulation", "time-trials", "survival-elimination"] }).notNull().default("single"),
+  competitionFormat: text("competition_format", { enum: ["bracket", "leaderboard", "series", "bracket-to-series", "multi-stage", "round-robin-pools", "elimination-pools", "consolation-bracket", "team-vs-individual", "portfolio-review", "oral-competition", "written-test", "judged-performance", "timed-competition", "scoring-average", "advancement-ladder", "rating-system", "prediction-scoring", "multiple-bracket-system", "three-bracket-system", "guarantee-system", "regional-bracket", "individual-leaderboard", "heat-progression", "elimination-rounds", "performance-ranking", "cumulative-scoring", "time-based-ranking"] }).notNull().default("bracket"),
   status: text("status", { enum: ["draft", "upcoming", "stage-1", "stage-2", "stage-3", "completed"] }).notNull().default("draft"),
   currentStage: integer("current_stage").default(1),
   totalStages: integer("total_stages").default(1),
@@ -1448,6 +1448,90 @@ export const tournaments = pgTable("tournaments", {
   maxTeamSize: integer("max_team_size"), // For team tournaments
   minTeamSize: integer("min_team_size"), // Minimum players required
   
+  // FREE FOR ALL TOURNAMENT SPECIFIC FIELDS
+  ffaConfig: jsonb("ffa_config").$type<{
+    // Participant structure for individual competition
+    participantStructure: 'individual' | 'team';
+    maxParticipants: number;
+    minParticipants: number;
+    
+    // Heat and round configuration
+    heatConfiguration?: {
+      numberOfHeats: number;
+      participantsPerHeat: number;
+      qualificationMethod: 'top-n' | 'percentage' | 'time-based' | 'score-based';
+      qualificationCount: number; // How many advance from each heat
+      heatAdvancementRules: string[];
+    };
+    
+    // Scoring and ranking methodology
+    scoringMethodology: 'time-based' | 'points-based' | 'elimination-based' | 'cumulative-scoring' | 'ranking-based';
+    rankingCriteria: string[]; // ["time", "score", "placement"] etc
+    tieBreakingRules: string[];
+    
+    // Elimination rules for Battle Royale and Survival formats
+    eliminationRules?: {
+      eliminationMethod: 'percentage' | 'fixed-number' | 'score-threshold';
+      eliminationCriteria: number;
+      roundsToElimination: number;
+      finalFieldSize: number;
+    };
+    
+    // Performance tracking
+    performanceTracking: {
+      trackIndividualStats: boolean;
+      recordPersonalBests: boolean;
+      performanceMetrics: string[]; // ["time", "distance", "score", "accuracy"] etc
+      allowMultipleAttempts: boolean;
+      attemptsPerRound?: number;
+    };
+    
+    // Advancement criteria for multi-stage tournaments
+    advancementCriteria?: {
+      stagesToAdvancement: Record<string, {
+        advancementMethod: 'top-n' | 'percentage' | 'qualifying-score';
+        advancementCount: number;
+        requirementThreshold?: number;
+      }>;
+    };
+  }>(),
+  
+  // Individual participants for FFA tournaments (replaces teams array for individual competition)
+  participants: jsonb("participants").$type<{
+    id: string;
+    name: string;
+    email?: string;
+    seedNumber?: number;
+    division?: string;
+    skillLevel?: string;
+    registrationData?: Record<string, any>;
+    performanceHistory?: {
+      round: number;
+      result: number;
+      ranking: number;
+      eliminated?: boolean;
+      advancedToNextRound?: boolean;
+    }[];
+    currentStatus: 'registered' | 'active' | 'eliminated' | 'advanced' | 'finished';
+    finalRanking?: number;
+    finalScore?: number;
+  }[]>().default([]),
+  
+  // Heat assignments and management for racing formats
+  heatAssignments: jsonb("heat_assignments").$type<{
+    heatNumber: number;
+    heatName?: string;
+    participants: string[]; // participant IDs
+    startTime?: string;
+    status: 'upcoming' | 'in-progress' | 'completed';
+    results?: {
+      participantId: string;
+      result: number;
+      ranking: number;
+      qualified?: boolean;
+    }[];
+  }[]>().default([]),
+
   // NOTE: Sport-specific fields have been moved to separate config tables:
   // - athletic_configs (basketball, soccer, tennis, golf, etc.)
   // - academic_configs (UIL academic competitions, debate, etc.)  

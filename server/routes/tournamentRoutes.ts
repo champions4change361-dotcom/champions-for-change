@@ -3,6 +3,14 @@ import { storage } from "../storage";
 import { insertTournamentSchema } from "@shared/schema";
 import { BracketGenerator } from "../utils/bracket-generator";
 import { z } from "zod";
+import type {
+  FFATournamentType,
+  FFAParticipant,
+  FFAConfig,
+  FFAHeatAssignment,
+  FFAPerformanceEntry,
+  FFALeaderboardEntry
+} from "@shared/bracket-generator";
 
 export function registerTournamentRoutes(app: Express) {
   // Sport Events API Routes
@@ -827,6 +835,290 @@ export function registerTournamentRoutes(app: Express) {
     } catch (error) {
       console.error("Error updating leaderboard entry:", error);
       res.status(500).json({ message: "Failed to update leaderboard entry" });
+    }
+  });
+
+  // FFA Tournament API Endpoints
+  
+  // Generate FFA Tournament
+  app.post("/api/ffa/generate", async (req: any, res) => {
+    try {
+      // Check authentication
+      let isAuthenticated = false;
+      let userId = null;
+
+      // Check OAuth authentication first
+      if (req.isAuthenticated && req.isAuthenticated()) {
+        isAuthenticated = true;
+        userId = req.user?.claims?.sub;
+      }
+      // Fallback to session-based authentication
+      else if (req.session?.user) {
+        isAuthenticated = true;
+        userId = req.session.user.id;
+      }
+
+      if (!isAuthenticated || !userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      // Validate request body using Zod
+      const ffaGenerateSchema = z.object({
+        tournamentId: z.string(),
+        tournamentType: z.enum(['multi-heat-racing', 'battle-royale', 'point-accumulation', 'time-trials', 'survival-elimination']),
+        participants: z.array(z.object({
+          id: z.string(),
+          name: z.string(),
+          email: z.string().optional(),
+          seedNumber: z.number().optional(),
+          skillLevel: z.string().optional()
+        })),
+        formatConfig: z.record(z.any()).optional().default({})
+      });
+
+      const validatedData = ffaGenerateSchema.parse(req.body);
+
+      // Generate FFA tournament using storage method
+      const tournament = await storage.generateFFATournament(validatedData.tournamentId, {
+        tournamentType: validatedData.tournamentType,
+        participants: validatedData.participants,
+        formatConfig: validatedData.formatConfig
+      });
+
+      if (!tournament) {
+        return res.status(404).json({ message: "Tournament not found" });
+      }
+
+      res.status(201).json({
+        success: true,
+        tournament,
+        message: "FFA tournament generated successfully"
+      });
+    } catch (error) {
+      console.error("Error generating FFA tournament:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          message: "Invalid request data", 
+          errors: error.errors 
+        });
+      }
+      res.status(500).json({ message: "Failed to generate FFA tournament" });
+    }
+  });
+
+  // Get FFA Tournament Details
+  app.get("/api/ffa/:id", async (req: any, res) => {
+    try {
+      const { id } = req.params;
+
+      // Check authentication
+      let isAuthenticated = false;
+      let userId = null;
+
+      if (req.isAuthenticated && req.isAuthenticated()) {
+        isAuthenticated = true;
+        userId = req.user?.claims?.sub;
+      }
+      else if (req.session?.user) {
+        isAuthenticated = true;
+        userId = req.session.user.id;
+      }
+
+      if (!isAuthenticated) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const tournament = await storage.getTournament(id);
+      if (!tournament) {
+        return res.status(404).json({ message: "FFA tournament not found" });
+      }
+
+      // SECURITY: Enforce tournament ownership/authorization
+      if (tournament.userId !== userId && tournament.createdBy !== userId) {
+        return res.status(403).json({ message: "Access denied. You can only view tournaments you own." });
+      }
+
+      // Ensure it's an FFA tournament
+      if (!tournament.tournamentType || !['multi-heat-racing', 'battle-royale', 'point-accumulation', 'time-trials', 'survival-elimination'].includes(tournament.tournamentType)) {
+        return res.status(400).json({ message: "Tournament is not an FFA tournament" });
+      }
+
+      // Get additional FFA data
+      const leaderboard = await storage.getFFALeaderboard(id);
+
+      res.json({
+        tournament,
+        leaderboard,
+        participants: tournament.participants || [],
+        heatAssignments: tournament.heatAssignments || [],
+        ffaConfig: tournament.ffaConfig || {}
+      });
+    } catch (error) {
+      console.error("Error fetching FFA tournament:", error);
+      res.status(500).json({ message: "Failed to fetch FFA tournament" });
+    }
+  });
+
+  // Update FFA Round Results
+  app.patch("/api/ffa/rounds/:id/results", async (req: any, res) => {
+    try {
+      const { id: tournamentId } = req.params;
+
+      // Check authentication
+      let isAuthenticated = false;
+      let userId = null;
+
+      if (req.isAuthenticated && req.isAuthenticated()) {
+        isAuthenticated = true;
+        userId = req.user?.claims?.sub;
+      }
+      else if (req.session?.user) {
+        isAuthenticated = true;
+        userId = req.session.user.id;
+      }
+
+      if (!isAuthenticated) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      // SECURITY: First check if tournament exists and user has authorization to modify it
+      const tournament = await storage.getTournament(tournamentId);
+      if (!tournament) {
+        return res.status(404).json({ message: "Tournament not found" });
+      }
+
+      if (tournament.userId !== userId && tournament.createdBy !== userId) {
+        return res.status(403).json({ message: "Access denied. You can only modify tournaments you own." });
+      }
+
+      // Validate request body
+      const roundResultsSchema = z.object({
+        roundNumber: z.number().int().positive(),
+        results: z.array(z.object({
+          participantId: z.string(),
+          result: z.union([z.number(), z.string()]),
+          ranking: z.number().int().positive(),
+          eliminated: z.boolean().optional(),
+          advancedToNextRound: z.boolean().optional(),
+          notes: z.string().optional()
+        }))
+      });
+
+      const validatedData = roundResultsSchema.parse(req.body);
+
+      // Update round results using storage method
+      const updatedTournament = await storage.updateFFARoundResults(
+        tournamentId,
+        validatedData.roundNumber,
+        validatedData.results
+      );
+
+      if (!updatedTournament) {
+        return res.status(404).json({ message: "Tournament not found or failed to update" });
+      }
+
+      // Get updated leaderboard
+      const leaderboard = await storage.getFFALeaderboard(tournamentId);
+
+      res.json({
+        success: true,
+        tournament: updatedTournament,
+        leaderboard,
+        message: "Round results updated successfully"
+      });
+    } catch (error) {
+      console.error("Error updating FFA round results:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          message: "Invalid request data", 
+          errors: error.errors 
+        });
+      }
+      res.status(500).json({ message: "Failed to update round results" });
+    }
+  });
+
+  // Get FFA Participant Performance
+  app.get("/api/ffa/:id/participants/:participantId/performance", async (req: any, res) => {
+    try {
+      const { id: tournamentId, participantId } = req.params;
+
+      // Check authentication
+      let isAuthenticated = false;
+      let userId = null;
+
+      if (req.isAuthenticated && req.isAuthenticated()) {
+        isAuthenticated = true;
+        userId = req.user?.claims?.sub;
+      }
+      else if (req.session?.user) {
+        isAuthenticated = true;
+        userId = req.session.user.id;
+      }
+
+      if (!isAuthenticated) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      // SECURITY: Check tournament ownership before revealing participant performance
+      const tournament = await storage.getTournament(tournamentId);
+      if (!tournament) {
+        return res.status(404).json({ message: "Tournament not found" });
+      }
+
+      if (tournament.userId !== userId && tournament.createdBy !== userId) {
+        return res.status(403).json({ message: "Access denied. You can only view participant performance for tournaments you own." });
+      }
+
+      const performance = await storage.getFFAParticipantPerformance(tournamentId, participantId);
+      if (!performance) {
+        return res.status(404).json({ message: "Participant performance not found" });
+      }
+
+      res.json(performance);
+    } catch (error) {
+      console.error("Error fetching FFA participant performance:", error);
+      res.status(500).json({ message: "Failed to fetch participant performance" });
+    }
+  });
+
+  // Get FFA Leaderboard
+  app.get("/api/ffa/:id/leaderboard", async (req: any, res) => {
+    try {
+      const { id: tournamentId } = req.params;
+
+      // Check authentication
+      let isAuthenticated = false;
+      let userId = null;
+
+      if (req.isAuthenticated && req.isAuthenticated()) {
+        isAuthenticated = true;
+        userId = req.user?.claims?.sub;
+      }
+      else if (req.session?.user) {
+        isAuthenticated = true;
+        userId = req.session.user.id;
+      }
+
+      if (!isAuthenticated) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      // SECURITY: Check tournament ownership before revealing leaderboard
+      const tournament = await storage.getTournament(tournamentId);
+      if (!tournament) {
+        return res.status(404).json({ message: "Tournament not found" });
+      }
+
+      if (tournament.userId !== userId && tournament.createdBy !== userId) {
+        return res.status(403).json({ message: "Access denied. You can only view leaderboards for tournaments you own." });
+      }
+
+      const leaderboard = await storage.getFFALeaderboard(tournamentId);
+      res.json(leaderboard);
+    } catch (error) {
+      console.error("Error fetching FFA leaderboard:", error);
+      res.status(500).json({ message: "Failed to fetch FFA leaderboard" });
     }
   });
 }

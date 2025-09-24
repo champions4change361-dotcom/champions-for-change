@@ -20,7 +20,12 @@ import {
   Swords,
   Timer,
   TrendingUp,
-  Award
+  Award,
+  Flame,
+  MapPin,
+  Activity,
+  BarChart3,
+  Gauge
 } from 'lucide-react';
 
 // COMPREHENSIVE TOURNAMENT FORMAT CONFIGURATIONS
@@ -449,6 +454,90 @@ export const advancedTournamentFormats: TournamentFormatConfig[] = [
   }
 ];
 
+// FREE FOR ALL TOURNAMENT FORMATS
+export const freeForAllFormats: TournamentFormatConfig[] = [
+  {
+    sport: 'Free For All',
+    format: 'multi-heat-racing',
+    tournamentType: 'multi-heat-racing',
+    competitionFormat: 'multi-stage',
+    description: 'Multiple qualifying heats with progression through semifinals to finals - perfect for racing competitions',
+    features: ['Heat Management', 'Qualifying System', 'Progression Stages', 'Performance Tracking'],
+    icon: Zap,
+    specificOptions: {
+      participantsPerHeat: [6, 8, 10, 12],
+      qualificationMethod: ['top-n', 'percentage', 'time-based'],
+      qualificationCount: [2, 3, 4, 5],
+      heatConfiguration: true,
+      advancementCriteria: ['top-performers', 'time-standards', 'points-based']
+    }
+  },
+  {
+    sport: 'Free For All',
+    format: 'battle-royale',
+    tournamentType: 'battle-royale',
+    competitionFormat: 'elimination',
+    description: 'Large field elimination tournament with progressive rounds until final winner emerges',
+    features: ['Progressive Elimination', 'Large Field Support', 'Survival Stages', 'Dynamic Field Size'],
+    icon: Flame,
+    specificOptions: {
+      eliminationRate: [0.25, 0.33, 0.5, 0.66],
+      finalFieldSize: [1, 3, 5, 8],
+      roundStructure: 'percentage-elimination',
+      battleFormat: ['elimination-rounds', 'survival-challenges'],
+      minimumParticipants: 16
+    }
+  },
+  {
+    sport: 'Free For All',
+    format: 'point-accumulation',
+    tournamentType: 'point-accumulation',
+    competitionFormat: 'scoring-system',
+    description: 'Series of rounds with cumulative point scoring to determine final rankings',
+    features: ['Cumulative Scoring', 'Multiple Rounds', 'Point Multipliers', 'Consistency Rewards'],
+    icon: BarChart3,
+    specificOptions: {
+      numberOfRounds: [3, 4, 5, 6, 8],
+      pointsPerRound: true,
+      roundMultipliers: [1, 1, 1.5, 2, 2.5],
+      bonusPoints: ['perfect-round', 'comeback', 'consistency'],
+      scoringMethodology: 'cumulative-points'
+    }
+  },
+  {
+    sport: 'Free For All',
+    format: 'time-trials',
+    tournamentType: 'time-trials',
+    competitionFormat: 'individual-performance',
+    description: 'Individual performance-based competition with time/score rankings',
+    features: ['Individual Performance', 'Multiple Attempts', 'Best Time/Score', 'Performance Analytics'],
+    icon: Timer,
+    specificOptions: {
+      attemptsPerParticipant: [1, 2, 3, 5],
+      timingMethod: ['best-time', 'average-time', 'cumulative-time'],
+      performanceMetric: ['time', 'score', 'distance', 'accuracy'],
+      allowMultipleAttempts: true,
+      trialConfiguration: true
+    }
+  },
+  {
+    sport: 'Free For All',
+    format: 'survival-elimination',
+    tournamentType: 'survival-elimination',
+    competitionFormat: 'progressive-elimination',
+    description: 'Progressive elimination format where participants are eliminated round by round until one remains',
+    features: ['Progressive Elimination', 'Round-by-Round', 'Survivor Tracking', 'Final Challenge'],
+    icon: Target,
+    specificOptions: {
+      eliminationRate: [0.25, 0.33, 0.5],
+      roundsToElimination: 'calculated',
+      finalFieldSize: 1,
+      eliminationCriteria: ['performance-based', 'bottom-percentage', 'challenge-failure'],
+      survivalChallenges: true
+    }
+  }
+];
+
 // MASTER FORMAT MAPPING
 export const allTournamentFormats: Record<string, TournamentFormatConfig[]> = {
   'Golf': [...golfFormats, ...advancedTournamentFormats],
@@ -495,7 +584,11 @@ export const allTournamentFormats: Record<string, TournamentFormatConfig[]> = {
         bracketSeeding: true
       }
     }
-  ]
+  ],
+  'Free For All': freeForAllFormats,
+  'Individual Competition': freeForAllFormats,
+  'Racing': freeForAllFormats,
+  'Battle Royale': freeForAllFormats
 };
 
 // COMPREHENSIVE TOURNAMENT FORMAT SELECTOR COMPONENT

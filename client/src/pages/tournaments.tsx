@@ -24,6 +24,7 @@ import {
 import { Link } from 'wouter';
 import { useAuth } from '@/hooks/useAuth';
 import { useTournamentAccess } from '@/hooks/useTournamentAccess';
+import { useFFATournamentDisplayInfo, isFFATournamentType } from '@/hooks/useFFATournaments';
 import PricingComparison from '@/components/pricing-comparison';
 
 interface Tournament {
@@ -31,10 +32,13 @@ interface Tournament {
   name: string;
   sport: string;
   teamSize: number;
-  tournamentType: 'single' | 'double' | 'pool-play' | 'round-robin' | 'swiss-system';
-  competitionFormat: 'bracket' | 'leaderboard' | 'series' | 'bracket-to-series' | 'multi-stage';
-  status: 'upcoming' | 'stage-1' | 'stage-2' | 'stage-3' | 'completed';
+  tournamentType: 'single' | 'double' | 'pool-play' | 'round-robin' | 'swiss-system' | 'multi-heat-racing' | 'battle-royale' | 'point-accumulation' | 'time-trials' | 'survival-elimination';
+  competitionFormat: 'bracket' | 'leaderboard' | 'series' | 'bracket-to-series' | 'multi-stage' | 'heat-progression' | 'elimination-rounds' | 'cumulative-scoring' | 'time-based-ranking' | 'individual-leaderboard';
+  status: 'upcoming' | 'stage-1' | 'stage-2' | 'stage-3' | 'completed' | 'active';
   teams: { teamName: string }[];
+  participants?: any[]; // For FFA tournaments
+  heatAssignments?: any[]; // For FFA tournaments
+  ffaConfig?: any; // For FFA tournaments
   ageGroup?: string;
   genderDivision?: string;
   createdAt: string;
@@ -113,7 +117,25 @@ export default function TournamentsPage() {
     }
   };
 
+  const getFFADisplayInfo = (type: string) => {
+    switch (type) {
+      case 'multi-heat-racing': return { icon: '🏃', displayName: 'Multi-Heat Racing' };
+      case 'battle-royale': return { icon: '⚔️', displayName: 'Battle Royale' };
+      case 'point-accumulation': return { icon: '🎯', displayName: 'Point Accumulation' };
+      case 'time-trials': return { icon: '⏱️', displayName: 'Time Trials' };
+      case 'survival-elimination': return { icon: '🏆', displayName: 'Survival Elimination' };
+      default: return { icon: '🏁', displayName: 'FFA Tournament' };
+    }
+  };
+
   const getTournamentTypeDisplay = (type: string) => {
+    // Check if it's an FFA tournament type
+    if (isFFATournamentType(type)) {
+      const ffaInfo = getFFADisplayInfo(type);
+      return `${ffaInfo.icon} ${ffaInfo.displayName}`;
+    }
+    
+    // Traditional tournament types
     switch (type) {
       case 'single': return 'Single Elimination';
       case 'double': return 'Double Elimination';
@@ -126,7 +148,12 @@ export default function TournamentsPage() {
   };
 
   const getParticipantCount = (tournament: Tournament) => {
-    return tournament.teams?.length || tournament.teamSize;
+    // For FFA tournaments, use participants array
+    if (isFFATournamentType(tournament.tournamentType) && tournament.participants) {
+      return tournament.participants.length;
+    }
+    // For traditional tournaments, use teams
+    return tournament.teams?.length || tournament.teamSize || 0;
   };
 
   const getParticipantLabel = (tournament: Tournament) => {
