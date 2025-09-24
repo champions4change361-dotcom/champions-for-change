@@ -625,9 +625,12 @@ export function registerTournamentRoutes(app: Express) {
       const tournament = await storage.getTournament(completedMatch.tournamentId);
       
       // Double Elimination Tournament Logic
-      if (tournament?.tournamentType === 'Double Elimination') {
+      console.log(`🔍 Tournament Type Check: "${tournament?.tournamentType}"`);
+      if (tournament?.tournamentType === 'double' || tournament?.tournamentType === 'Double Elimination') {
+        console.log(`🏆 Starting Double Elimination advancement for ${completedMatch.winner}`);
         await handleDoubleEliminationAdvancement(completedMatch, allMatches);
       } else {
+        console.log(`⚡ Using Single Elimination advancement for ${completedMatch.winner}`);
         // Single elimination logic (unchanged)
         await handleSingleEliminationAdvancement(completedMatch, allMatches);
       }
