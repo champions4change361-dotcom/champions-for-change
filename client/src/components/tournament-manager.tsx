@@ -23,6 +23,7 @@ import SportSpecificLeaderboard from './sport-specific-leaderboard';
 import LeaderboardView from './leaderboard-view';
 import MultiStageTournament from './multi-stage-tournament';
 import EventContainerManager from './event-container-manager';
+import MarchMadnessBracket from './march-madness-bracket';
 
 interface Tournament {
   id: string;
@@ -192,6 +193,11 @@ export default function TournamentManager({ tournamentId }: TournamentManagerPro
     // Multi-stage tournaments
     if (tournament.competitionFormat === 'multi-stage') {
       return <MultiStageTournament tournament={tournament} />;
+    }
+
+    // March Madness tournaments
+    if (tournament.tournamentType === 'march-madness') {
+      return <MarchMadnessBracket tournament={tournament} />;
     }
 
     // Double elimination tournaments

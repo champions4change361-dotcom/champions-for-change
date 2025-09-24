@@ -9,6 +9,7 @@ import EmbedCodeModal from "@/components/EmbedCodeModal";
 import LeaderboardView from "@/components/leaderboard-view";
 import MultiStageTournament from "@/components/multi-stage-tournament";
 import TrackFieldTournament from "@/components/track-field-tournament";
+import MarchMadnessBracket from "@/components/march-madness-bracket";
 import { type Tournament, type Match } from "@shared/schema";
 
 interface TournamentData {
@@ -292,6 +293,8 @@ export default function Tournament() {
           {/* Render appropriate tournament view based on format */}
           {tournament.sport?.includes("Track & Field") ? (
             <TrackFieldTournament tournamentId={tournament.id} tournamentName={tournament.name} />
+          ) : tournament.tournamentType === "march-madness" ? (
+            <MarchMadnessBracket tournament={{...tournament, sport: tournament.sport || 'Basketball'}} />
           ) : tournament.competitionFormat === "multi-stage" ? (
             <MultiStageTournament tournament={{...tournament, sport: tournament.sport || 'Unknown'}} />
           ) : tournament.competitionFormat === "leaderboard" ? (

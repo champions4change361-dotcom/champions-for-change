@@ -193,6 +193,23 @@ export const swimmingFormats: TournamentFormatConfig[] = [
 export const basketballFormats: TournamentFormatConfig[] = [
   {
     sport: 'Basketball',
+    format: 'march-madness',
+    tournamentType: 'march-madness',
+    competitionFormat: 'regional-bracket',
+    description: 'NCAA March Madness style tournament with 68 teams, First Four games, and regional brackets',
+    features: ['68-Team Field', 'First Four Play-In Games', 'Regional Brackets', 'Proper NCAA Seeding', 'Geographic Balance'],
+    icon: Crown,
+    specificOptions: {
+      teamCount: [68],
+      regionalStructure: ['South', 'West', 'East', 'Midwest'],
+      firstFourGames: true,
+      automaticSeeding: true,
+      geographicBalance: true,
+      rounds: ['First Four', 'Round of 64', 'Round of 32', 'Sweet Sixteen', 'Elite Eight', 'Final Four', 'Championship']
+    }
+  },
+  {
+    sport: 'Basketball',
     format: '5v5-bracket',
     tournamentType: 'single',
     competitionFormat: 'bracket',

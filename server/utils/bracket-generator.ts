@@ -113,8 +113,440 @@ export interface TripleElimRoutingInfo {
   lossCount: number;
 }
 
+// MARCH MADNESS INTERFACES
+export interface MarchMadnessTeam {
+  name: string;
+  seed: number; // 1-16 for main teams, 16-17 for First Four teams
+  region: 'South' | 'West' | 'East' | 'Midwest';
+  conference: string;
+  geographicLocation: {
+    state: string;
+    region: string;
+  };
+  isFirstFourTeam: boolean;
+  firstFourSlot?: 'at-large-1' | 'at-large-2' | '16-seed-1' | '16-seed-2';
+}
+
+export interface MarchMadnessMatchup extends MatchData {
+  region: 'South' | 'West' | 'East' | 'Midwest' | 'Final Four';
+  seed1: number;
+  seed2: number;
+  roundName: string; // "First Four", "Round of 64", "Round of 32", etc.
+  isFirstFour?: boolean;
+}
+
+export interface RegionalBracket {
+  region: 'South' | 'West' | 'East' | 'Midwest';
+  teams: MarchMadnessTeam[];
+  matches: MarchMadnessMatchup[];
+  championMatch?: MarchMadnessMatchup;
+}
+
+export interface MarchMadnessBracket extends BracketStructure {
+  firstFourMatches: MarchMadnessMatchup[];
+  regionalBrackets: RegionalBracket[];
+  finalFourMatches: MarchMadnessMatchup[];
+  championshipMatch: MarchMadnessMatchup;
+  allTeams: MarchMadnessTeam[];
+  seedingMap: Map<number, MarchMadnessTeam[]>; // seed -> teams with that seed
+  geographicBalance: {
+    stateDistribution: Map<string, number>;
+    conferenceDistribution: Map<string, number>;
+    regionBalance: Map<string, number>;
+  };
+}
+
 export class BracketGenerator {
   
+  // MARCH MADNESS IMPLEMENTATION
+  
+  /**
+   * Build a complete 68-team March Madness tournament bracket
+   * @param teams - Array of 68 team names
+   * @param tournamentId - Tournament identifier
+   * @returns Complete March Madness bracket structure
+   */
+  static buildMarchMadnessBracket(teams: string[], tournamentId: string): MarchMadnessBracket {
+    if (teams.length !== 68) {
+      throw new Error(`March Madness requires exactly 68 teams, got ${teams.length}`);
+    }
+
+    // Step 1: Create team objects with seeding and regional assignment
+    const seededTeams = this.createMarchMadnessTeams(teams);
+    
+    // Step 2: Balance teams across regions geographically and by conference
+    const balancedTeams = this.balanceRegionalAssignments(seededTeams);
+    
+    // Step 3: Create First Four matches
+    const firstFourMatches = this.buildFirstFourMatches(balancedTeams, tournamentId);
+    
+    // Step 4: Create regional brackets (4 regions × 16 teams each)
+    const regionalBrackets = this.buildRegionalBrackets(balancedTeams, tournamentId);
+    
+    // Step 5: Create Final Four and Championship
+    const finalFourMatches = this.buildFinalFourMatches(tournamentId);
+    const championshipMatch = this.buildChampionshipMatch(tournamentId);
+    
+    // Step 6: Compile all matches
+    const allMatches = [
+      ...firstFourMatches,
+      ...regionalBrackets.flatMap(rb => rb.matches),
+      ...finalFourMatches,
+      championshipMatch
+    ];
+    
+    // Step 7: Calculate analytics
+    const geographicBalance = this.calculateGeographicBalance(balancedTeams);
+    const seedingMap = this.createSeedingMap(balancedTeams);
+    
+    return {
+      matches: allMatches,
+      totalRounds: 7, // First Four, R64, R32, Sweet 16, Elite 8, Final Four, Championship
+      totalMatches: allMatches.length,
+      format: 'march-madness',
+      firstFourMatches,
+      regionalBrackets,
+      finalFourMatches,
+      championshipMatch,
+      allTeams: balancedTeams,
+      seedingMap,
+      geographicBalance
+    };
+  }
+
+  /**
+   * Create team objects with initial seeding and regional assignments
+   */
+  private static createMarchMadnessTeams(teamNames: string[]): MarchMadnessTeam[] {
+    const teams: MarchMadnessTeam[] = [];
+    const regions: ('South' | 'West' | 'East' | 'Midwest')[] = ['South', 'West', 'East', 'Midwest'];
+    let regionIndex = 0;
+    
+    // Seeds 1-16, with 4 teams per seed line
+    for (let seed = 1; seed <= 16; seed++) {
+      for (let i = 0; i < 4; i++) {
+        const teamIndex = (seed - 1) * 4 + i;
+        if (teamIndex < 64) { // First 64 teams get main bracket spots
+          teams.push({
+            name: teamNames[teamIndex],
+            seed,
+            region: regions[regionIndex % 4],
+            conference: this.generateConference(),
+            geographicLocation: this.generateGeographicLocation(),
+            isFirstFourTeam: false
+          });
+          regionIndex++;
+        }
+      }
+    }
+    
+    // Remaining 4 teams are First Four teams
+    for (let i = 64; i < 68; i++) {
+      const isLastFourSeed = i < 66; // First 2 are 16-seeds, last 2 are at-large
+      teams.push({
+        name: teamNames[i],
+        seed: isLastFourSeed ? 16 : 11, // 16-seeds or 11-seeds (at-large)
+        region: 'South', // Will be reassigned during balancing
+        conference: this.generateConference(),
+        geographicLocation: this.generateGeographicLocation(),
+        isFirstFourTeam: true,
+        firstFourSlot: isLastFourSeed 
+          ? (i === 64 ? '16-seed-1' : '16-seed-2')
+          : (i === 66 ? 'at-large-1' : 'at-large-2')
+      });
+    }
+    
+    return teams;
+  }
+
+  /**
+   * Build the First Four play-in games
+   */
+  private static buildFirstFourMatches(teams: MarchMadnessTeam[], tournamentId: string): MarchMadnessMatchup[] {
+    const firstFourTeams = teams.filter(t => t.isFirstFourTeam);
+    const matches: MarchMadnessMatchup[] = [];
+    
+    // Two 16-seed games
+    const sixteenSeedTeams = firstFourTeams.filter(t => t.seed === 16);
+    matches.push({
+      id: `FF-16-1`,
+      tournamentId,
+      round: 0, // Round 0 for First Four
+      position: 1,
+      bracket: 'championship',
+      region: 'South', // Will determine actual region during bracket building
+      seed1: 16,
+      seed2: 16,
+      team1: sixteenSeedTeams[0]?.name,
+      team2: sixteenSeedTeams[1]?.name,
+      team1Score: 0,
+      team2Score: 0,
+      status: 'upcoming',
+      roundName: 'First Four',
+      isFirstFour: true
+    });
+    
+    // Two at-large games (typically 11-seeds)
+    const atLargeTeams = firstFourTeams.filter(t => t.seed === 11);
+    matches.push({
+      id: `FF-11-1`,
+      tournamentId,
+      round: 0,
+      position: 2,
+      bracket: 'championship',
+      region: 'West',
+      seed1: 11,
+      seed2: 11,
+      team1: atLargeTeams[0]?.name,
+      team2: atLargeTeams[1]?.name,
+      team1Score: 0,
+      team2Score: 0,
+      status: 'upcoming',
+      roundName: 'First Four',
+      isFirstFour: true
+    });
+    
+    return matches;
+  }
+
+  /**
+   * Build regional brackets with proper NCAA seeding
+   */
+  private static buildRegionalBrackets(teams: MarchMadnessTeam[], tournamentId: string): RegionalBracket[] {
+    const regions: ('South' | 'West' | 'East' | 'Midwest')[] = ['South', 'West', 'East', 'Midwest'];
+    const brackets: RegionalBracket[] = [];
+    
+    for (const region of regions) {
+      const regionTeams = teams.filter(t => t.region === region && !t.isFirstFourTeam);
+      const matches = this.buildRegionalMatches(regionTeams, region, tournamentId);
+      
+      brackets.push({
+        region,
+        teams: regionTeams,
+        matches,
+        championMatch: matches.find(m => m.round === 4) // Elite Eight winner
+      });
+    }
+    
+    return brackets;
+  }
+
+  /**
+   * Build matches for a single region using standard NCAA bracket format
+   */
+  private static buildRegionalMatches(teams: MarchMadnessTeam[], region: string, tournamentId: string): MarchMadnessMatchup[] {
+    const matches: MarchMadnessMatchup[] = [];
+    const roundNames = ['', 'Round of 64', 'Round of 32', 'Sweet Sixteen', 'Elite Eight'];
+    
+    // Standard NCAA matchups: 1v16, 8v9, 5v12, 4v13, 6v11, 3v14, 7v10, 2v15
+    const seedMatchups = [
+      [1, 16], [8, 9], [5, 12], [4, 13], [6, 11], [3, 14], [7, 10], [2, 15]
+    ];
+    
+    let matchId = 0;
+    
+    // Round 1 (Round of 64)
+    for (let i = 0; i < seedMatchups.length; i++) {
+      const [seed1, seed2] = seedMatchups[i];
+      const team1 = teams.find(t => t.seed === seed1);
+      const team2 = teams.find(t => t.seed === seed2);
+      
+      matches.push({
+        id: `${region}-R1-${i + 1}`,
+        tournamentId,
+        round: 1,
+        position: i + 1,
+        bracket: 'championship',
+        region: region as any,
+        seed1,
+        seed2,
+        team1: team1?.name,
+        team2: team2?.name,
+        team1Score: 0,
+        team2Score: 0,
+        status: 'upcoming',
+        roundName: roundNames[1]
+      });
+    }
+    
+    // Build subsequent rounds (Round of 32, Sweet 16, Elite 8)
+    for (let round = 2; round <= 4; round++) {
+      const prevRoundMatches = matches.filter(m => m.round === round - 1);
+      const numMatches = prevRoundMatches.length / 2;
+      
+      for (let i = 0; i < numMatches; i++) {
+        matches.push({
+          id: `${region}-R${round}-${i + 1}`,
+          tournamentId,
+          round,
+          position: i + 1,
+          bracket: 'championship',
+          region: region as any,
+          seed1: 0, // TBD based on previous round
+          seed2: 0,
+          team1: `${region} R${round-1} Game ${i*2 + 1} Winner`,
+          team2: `${region} R${round-1} Game ${i*2 + 2} Winner`,
+          team1Score: 0,
+          team2Score: 0,
+          status: 'upcoming',
+          roundName: roundNames[round]
+        });
+      }
+    }
+    
+    return matches;
+  }
+
+  /**
+   * Build Final Four matches
+   */
+  private static buildFinalFourMatches(tournamentId: string): MarchMadnessMatchup[] {
+    return [
+      {
+        id: 'FF-Semifinal-1',
+        tournamentId,
+        round: 5,
+        position: 1,
+        bracket: 'championship',
+        region: 'Final Four',
+        seed1: 0,
+        seed2: 0,
+        team1: 'South Champion',
+        team2: 'West Champion',
+        team1Score: 0,
+        team2Score: 0,
+        status: 'upcoming',
+        roundName: 'Final Four'
+      },
+      {
+        id: 'FF-Semifinal-2',
+        tournamentId,
+        round: 5,
+        position: 2,
+        bracket: 'championship',
+        region: 'Final Four',
+        seed1: 0,
+        seed2: 0,
+        team1: 'East Champion',
+        team2: 'Midwest Champion',
+        team1Score: 0,
+        team2Score: 0,
+        status: 'upcoming',
+        roundName: 'Final Four'
+      }
+    ];
+  }
+
+  /**
+   * Build Championship match
+   */
+  private static buildChampionshipMatch(tournamentId: string): MarchMadnessMatchup {
+    return {
+      id: 'Championship',
+      tournamentId,
+      round: 6,
+      position: 1,
+      bracket: 'championship',
+      region: 'Final Four',
+      seed1: 0,
+      seed2: 0,
+      team1: 'Final Four Game 1 Winner',
+      team2: 'Final Four Game 2 Winner',
+      team1Score: 0,
+      team2Score: 0,
+      status: 'upcoming',
+      roundName: 'Championship'
+    };
+  }
+
+  /**
+   * Balance team assignments across regions for geographic diversity
+   */
+  private static balanceRegionalAssignments(teams: MarchMadnessTeam[]): MarchMadnessTeam[] {
+    // In a real implementation, this would use actual geographic data
+    // For now, we'll ensure balanced distribution
+    const regions: ('South' | 'West' | 'East' | 'Midwest')[] = ['South', 'West', 'East', 'Midwest'];
+    const mainBracketTeams = teams.filter(t => !t.isFirstFourTeam);
+    
+    // Redistribute teams across regions while maintaining seed line integrity
+    const seededTeams = [...teams];
+    let regionIndex = 0;
+    
+    for (let seed = 1; seed <= 16; seed++) {
+      const seedTeams = mainBracketTeams.filter(t => t.seed === seed);
+      seedTeams.forEach((team, index) => {
+        team.region = regions[index % 4];
+      });
+    }
+    
+    return seededTeams;
+  }
+
+  /**
+   * Generate mock conference data
+   */
+  private static generateConference(): string {
+    const conferences = [
+      'ACC', 'Big Ten', 'Big 12', 'SEC', 'Pac-12', 'Big East', 
+      'American', 'Mountain West', 'WCC', 'A-10', 'Conference USA', 'MAC'
+    ];
+    return conferences[Math.floor(Math.random() * conferences.length)];
+  }
+
+  /**
+   * Generate mock geographic location
+   */
+  private static generateGeographicLocation(): { state: string; region: string } {
+    const locations = [
+      { state: 'CA', region: 'West' },
+      { state: 'TX', region: 'South' },
+      { state: 'NY', region: 'East' },
+      { state: 'IL', region: 'Midwest' },
+      { state: 'FL', region: 'South' },
+      { state: 'OH', region: 'Midwest' }
+    ];
+    return locations[Math.floor(Math.random() * locations.length)];
+  }
+
+  /**
+   * Calculate geographic balance analytics
+   */
+  private static calculateGeographicBalance(teams: MarchMadnessTeam[]) {
+    const stateDistribution = new Map<string, number>();
+    const conferenceDistribution = new Map<string, number>();
+    const regionBalance = new Map<string, number>();
+    
+    teams.forEach(team => {
+      // State distribution
+      const state = team.geographicLocation.state;
+      stateDistribution.set(state, (stateDistribution.get(state) || 0) + 1);
+      
+      // Conference distribution
+      conferenceDistribution.set(team.conference, (conferenceDistribution.get(team.conference) || 0) + 1);
+      
+      // Region balance
+      regionBalance.set(team.region, (regionBalance.get(team.region) || 0) + 1);
+    });
+    
+    return { stateDistribution, conferenceDistribution, regionBalance };
+  }
+
+  /**
+   * Create seeding map for bracket analysis
+   */
+  private static createSeedingMap(teams: MarchMadnessTeam[]): Map<number, MarchMadnessTeam[]> {
+    const seedingMap = new Map<number, MarchMadnessTeam[]>();
+    
+    teams.forEach(team => {
+      if (!seedingMap.has(team.seed)) {
+        seedingMap.set(team.seed, []);
+      }
+      seedingMap.get(team.seed)!.push(team);
+    });
+    
+    return seedingMap;
+  }
+
   /**
    * Route a team that lost from the winners bracket to the correct position in the losers bracket
    * @param winnerRound - The round in winners bracket where team lost (1-6 for 64-team)
@@ -919,12 +1351,19 @@ export class BracketGenerator {
     tournamentType: string = 'single', 
     sport: string = 'Basketball',
     options: any = {}
-  ): BracketStructure | DoubleElimStructure | SwissSystemStructure | PredictionBracketStructure | CompassDrawStructure | TripleEliminationStructure | GameGuaranteeStructure {
+  ): BracketStructure | DoubleElimStructure | SwissSystemStructure | PredictionBracketStructure | CompassDrawStructure | TripleEliminationStructure | GameGuaranteeStructure | MarchMadnessBracket {
     
     // Filter out empty team names
     const validTeams = teams.filter(team => team && team.trim() !== '');
     
     switch (tournamentType) {
+      case 'march-madness':
+        if (validTeams.length === 68) {
+          return this.buildMarchMadnessBracket(validTeams, tournamentId);
+        } else {
+          throw new Error(`March Madness requires exactly 68 teams. Got ${validTeams.length} teams.`);
+        }
+        
       case 'double':
         if (validTeams.length === 64) {
           return this.buildDoubleElim64(validTeams, tournamentId);

@@ -31,14 +31,14 @@ const formSchema = insertTournamentSchema.extend({
     "match-play", "stroke-play", "scramble", "best-ball", "alternate-shot", "modified-stableford",
     "playoff-bracket", "conference-championship", "dual-meet", "triangular-meet", "weight-class-bracket",
     "multi-event-scoring", "preliminary-finals", "heat-management", "skills-competition", "draw-management",
-    "group-stage-knockout", "home-away-series", "prediction-bracket", "compass-draw", "triple-elimination", "game-guarantee"
+    "group-stage-knockout", "home-away-series", "prediction-bracket", "compass-draw", "triple-elimination", "game-guarantee", "march-madness"
   ]).default("single"),
   competitionFormat: z.enum([
     "bracket", "leaderboard", "series", "bracket-to-series", "multi-stage",
     "round-robin-pools", "elimination-pools", "consolation-bracket", "team-vs-individual",
     "portfolio-review", "oral-competition", "written-test", "judged-performance", 
     "timed-competition", "scoring-average", "advancement-ladder", "rating-system",
-    "prediction-scoring", "multiple-bracket-system", "three-bracket-system", "guarantee-system"
+    "prediction-scoring", "multiple-bracket-system", "three-bracket-system", "guarantee-system", "regional-bracket"
   ]).default("bracket"),
   ageGroup: z.string().optional(),
   genderDivision: z.string().optional(),
