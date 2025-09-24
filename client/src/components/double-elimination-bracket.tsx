@@ -75,11 +75,67 @@ export default function DoubleEliminationBracket({ tournament }: DoubleEliminati
     );
   }
 
-  // Separate matches by bracket - for now, Round 1 goes to winners bracket
-  // TODO: Implement proper bracket assignment when losers bracket is needed
-  const winnersMatches = matches.filter(m => m.round === 1); // All Round 1 matches go to winners bracket
-  const losersMatches = matches.filter(m => m.round > 1 && (m.bracket === 'losers' || !m.bracket)); // Future losers bracket matches
-  const championshipMatches = matches.filter(m => m.bracket === 'championship');
+  // Normalize match data: 'pending' -> 'upcoming', add default bracket
+  const normalizedMatches = matches.map(match => ({
+    ...match,
+    status: match.status === 'pending' ? 'upcoming' : match.status,
+    bracket: match.bracket || 'winners'
+  }));
+
+  // Generate complete bracket structure with placeholders for proper tree visualization
+  const generateBracketStructure = (existingMatches: any[]) => {
+    const teamCount = 8; // From tournament
+    const allBracketMatches = [...existingMatches];
+
+    // Add Round 2 placeholders (semifinals)
+    if (!existingMatches.find(m => m.round === 2)) {
+      for (let i = 1; i <= 2; i++) {
+        allBracketMatches.push({
+          id: `placeholder-r2-${i}`,
+          tournamentId: existingMatches[0]?.tournamentId || '',
+          round: 2,
+          position: i,
+          team1: 'TBD',
+          team2: 'TBD',
+          team1Score: 0,
+          team2Score: 0,
+          winner: null,
+          status: 'upcoming',
+          bracket: 'winners',
+          createdAt: new Date(),
+          updatedAt: new Date()
+        });
+      }
+    }
+
+    // Add Round 3 placeholder (finals)
+    if (!existingMatches.find(m => m.round === 3)) {
+      allBracketMatches.push({
+        id: 'placeholder-r3-1',
+        tournamentId: existingMatches[0]?.tournamentId || '',
+        round: 3,
+        position: 1,
+        team1: 'TBD',
+        team2: 'TBD',
+        team1Score: 0,
+        team2Score: 0,
+        winner: null,
+        status: 'upcoming',
+        bracket: 'winners',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+    }
+
+    return allBracketMatches;
+  };
+
+  const completeMatches = generateBracketStructure(normalizedMatches);
+
+  // Separate matches by bracket
+  const winnersMatches = completeMatches.filter(m => m.bracket === 'winners');
+  const losersMatches = completeMatches.filter(m => m.bracket === 'losers');
+  const championshipMatches = completeMatches.filter(m => m.bracket === 'championship');
 
   // Group by rounds
   const winnersRounds = winnersMatches.reduce((acc, match) => {
