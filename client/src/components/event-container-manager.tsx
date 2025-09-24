@@ -51,75 +51,40 @@ interface EventContainerManagerProps {
   onUpdateEvent?: (eventName: string, updates: Partial<EventContainer>) => void;
 }
 
-// Mock data for development
+// Mock data for development - Basketball events for demo
 const mockEvents: EventContainer[] = [
   {
-    eventName: '100m Sprint',
-    eventType: 'Track',
-    scoringUnit: 'seconds',
-    description: '100 meter sprint race',
-    participantLimit: 8,
-    participants: [
-      {
-        id: '1',
-        name: 'Alex Johnson',
-        email: 'alex@email.com',
-        registrationTime: '2025-09-01T10:30:00Z',
-        result: { score: 12.45, unit: 'seconds', rank: 1 }
-      },
-      {
-        id: '2',
-        name: 'Maria Garcia',
-        email: 'maria@email.com',
-        registrationTime: '2025-09-01T11:15:00Z',
-        result: { score: 12.78, unit: 'seconds', rank: 2 }
-      },
-      {
-        id: '3',
-        name: 'James Wilson',
-        email: 'james@email.com',
-        registrationTime: '2025-09-01T14:20:00Z'
-      }
-    ],
-    resultsRecorder: 'Coach Smith',
-    status: 'in-progress',
-    registrationUrl: `/tournaments/demo/register?event=100m-sprint`
+    eventName: 'Basketball Game',
+    eventType: 'Other',
+    scoringUnit: 'points',
+    description: 'Full basketball game competition',
+    participantLimit: 10,
+    participants: [],
+    resultsRecorder: 'Referee',
+    status: 'registration',
+    registrationUrl: `/tournaments/basketball/register?event=basketball-game`
   },
   {
-    eventName: 'Long Jump',
-    eventType: 'Field',
-    scoringUnit: 'meters',
-    description: 'Long jump competition',
-    participantLimit: 12,
-    participants: [
-      {
-        id: '4',
-        name: 'Sarah Davis',
-        email: 'sarah@email.com',
-        registrationTime: '2025-09-01T09:45:00Z',
-        result: { score: 5.67, unit: 'meters', rank: 1 }
-      },
-      {
-        id: '5',
-        name: 'Mike Chen',
-        email: 'mike@email.com',
-        registrationTime: '2025-09-01T12:30:00Z'
-      }
-    ],
-    resultsRecorder: 'Coach Martinez',
-    status: 'completed',
-    registrationUrl: `/tournaments/demo/register?event=long-jump`
-  },
-  {
-    eventName: '200m Sprint',
-    eventType: 'Track',
-    scoringUnit: 'seconds',
-    description: '200 meter sprint race',
+    eventName: 'Free Throw Contest',
+    eventType: 'Other',
+    scoringUnit: 'percentage',
+    description: 'Free throw shooting accuracy contest',
     participantLimit: 8,
     participants: [],
-    resultsRecorder: 'Coach Johnson',
+    resultsRecorder: 'Coach',
     status: 'registration',
-    registrationUrl: `/tournaments/demo/register?event=200m-sprint`
+    registrationUrl: `/tournaments/basketball/register?event=free-throw`
+  },
+  {
+    eventName: '3-Point Contest',
+    eventType: 'Other',
+    scoringUnit: 'made shots',
+    description: '3-point shooting contest',
+    participantLimit: 8,
+    participants: [],
+    resultsRecorder: 'Coach',
+    status: 'registration',
+    registrationUrl: `/tournaments/basketball/register?event=3-point`
   }
 ];
 
