@@ -1,14 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Trophy, Users, ArrowRight, Target } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { 
+  Trophy, 
+  Users, 
+  ArrowRight, 
+  Target, 
+  Award, 
+  TrendingUp, 
+  ArrowUpDown,
+  CheckCircle,
+  Clock,
+  AlertCircle,
+  Settings
+} from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { BracketGenerator, type TeamRecord } from '@/utils/bracket-generator';
+import { StageTransitionEngine, type TeamStanding } from '@shared/stage-transition-engine';
+import { type Pool, type TiebreakerRule, professionalTournamentFormats } from '@shared/multi-stage-schema';
 import MatchUpdateModal from './match-update-modal';
 
 interface Match {
@@ -32,24 +47,51 @@ interface Tournament {
   tournamentType: string;
   status: string;
   teams: { teamName: string }[];
+  stageConfiguration?: {
+    currentStage: number;
+    totalStages: number;
+    poolConfiguration?: {
+      poolCount: number;
+      teamsPerPool: number;
+      poolNamingScheme: 'letters' | 'numbers' | 'custom';
+      balancedGroups: boolean;
+    };
+    advancementRules?: {
+      advancementType: string;
+      teamsAdvancingPerPool?: number;
+      wildcardSpots?: number;
+    };
+    tiebreakers?: TiebreakerRule[];
+  };
 }
 
 interface PoolPlayBracketProps {
   tournament: Tournament;
+  stageNumber?: number;
+  onAdvancement?: (results: any) => void;
 }
 
-interface Pool {
-  id: string;
-  name: string;
-  teams: string[];
-  matches: Match[];
-  standings: TeamRecord[];
+interface EnhancedPool extends Pool {
+  completionPercentage: number;
+  advancementCalculated: boolean;
+  poolSettings?: {
+    pointsPerWin: number;
+    pointsPerDraw: number;
+    pointsPerLoss: number;
+    allowDraws: boolean;
+  };
 }
 
-export default function PoolPlayBracket({ tournament }: PoolPlayBracketProps) {
+export default function PoolPlayBracket({ 
+  tournament, 
+  stageNumber = 1, 
+  onAdvancement 
+}: PoolPlayBracketProps) {
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('pools');
+  const [showAdvancementDialog, setShowAdvancementDialog] = useState(false);
+  const [advancementPreview, setAdvancementPreview] = useState<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -57,8 +99,35 @@ export default function PoolPlayBracket({ tournament }: PoolPlayBracketProps) {
     queryKey: ["/api/matches", tournament.id],
   });
 
+  // Professional tournament configuration from schema
+  const poolConfig = tournament.stageConfiguration?.poolConfiguration || {
+    poolCount: 4,
+    teamsPerPool: 4,
+    poolNamingScheme: 'letters' as const,
+    balancedGroups: true,
+  };
+
+  const advancementRules = tournament.stageConfiguration?.advancementRules || {
+    advancementType: 'top-n-per-pool',
+    teamsAdvancingPerPool: 2,
+    wildcardSpots: 0,
+  };
+
+  const tiebreakers: TiebreakerRule[] = tournament.stageConfiguration?.tiebreakers || [
+    { method: "head-to-head-record", priority: 1, description: "Head-to-head record" },
+    { method: "point-differential", priority: 2, description: "Point differential" },
+    { method: "total-points-scored", priority: 3, description: "Total points scored" },
+  ];
+
   const updateMatchMutation = useMutation({
-    mutationFn: async (matchData: { matchId: string; team1Score: number; team2Score: number; winner: string; status: string }) => {
+    mutationFn: async (matchData: { 
+      matchId: string; 
+      team1Score: number; 
+      team2Score: number; 
+      winner: string; 
+      status: string;
+      isDraw?: boolean;
+    }) => {
       const response = await apiRequest(`/api/matches/${matchData.matchId}`, "PATCH", matchData);
       return response.json();
     },
@@ -78,6 +147,130 @@ export default function PoolPlayBracket({ tournament }: PoolPlayBracketProps) {
     },
   });
 
+  const calculateAdvancementMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest(`/api/tournaments/${tournament.id}/calculate-advancement`, "POST", {
+        stageNumber,
+        advancementRules,
+        tiebreakers,
+      });
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setAdvancementPreview(data);
+      setShowAdvancementDialog(true);
+    },
+    onError: () => {
+      toast({
+        title: "Calculation Failed",
+        description: "Could not calculate advancement. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Enhanced pool management with professional features
+  const enhancedPools: EnhancedPool[] = useMemo(() => {
+    if (isLoading) return [];
+    
+    const poolMatches = matches.filter(m => m.poolId);
+    const poolIds = [...new Set(poolMatches.map(m => m.poolId))].filter(Boolean) as string[];
+    
+    return poolIds.map((poolId, index) => {
+      const poolMatchesFiltered = poolMatches.filter(m => m.poolId === poolId);
+      const poolTeams = [...new Set([
+        ...poolMatchesFiltered.map(m => m.team1),
+        ...poolMatchesFiltered.map(m => m.team2)
+      ])].filter(Boolean) as string[];
+
+      // Convert matches to Pool format for StageTransitionEngine
+      const poolData: Pool = {
+        poolId,
+        poolName: poolConfig.poolNamingScheme === 'letters' 
+          ? `Pool ${String.fromCharCode(65 + index)}`
+          : `Pool ${index + 1}`,
+        poolIndex: index,
+        teams: poolTeams,
+        maxTeams: poolConfig.teamsPerPool,
+        standings: [],
+        matches: poolMatchesFiltered.map(m => ({
+          matchId: m.id,
+          team1: m.team1 || '',
+          team2: m.team2 || '',
+          team1Score: m.team1Score,
+          team2Score: m.team2Score,
+          winner: m.winner || null,
+          isDraw: false, // TODO: Add draw support
+          round: m.round,
+          completed: m.status === 'completed',
+          status: m.status === 'upcoming' ? 'scheduled' as const :
+                  m.status === 'in-progress' ? 'in-progress' as const :
+                  'completed' as const,
+        })),
+        isComplete: false,
+        completionPercentage: 0,
+        advancementCalculated: false,
+        poolSettings: {
+          pointsPerWin: 3,
+          pointsPerDraw: 1,
+          pointsPerLoss: 0,
+          allowDraws: false,
+          tiebreakingOrder: tiebreakers.map(t => t.method),
+        },
+      };
+
+      // Calculate professional standings with tiebreakers
+      const professionalStandings = StageTransitionEngine.calculatePoolStandings(poolData, tiebreakers);
+      
+      // Calculate completion percentage
+      const totalMatches = poolMatchesFiltered.length;
+      const completedMatches = poolMatchesFiltered.filter(m => m.status === 'completed').length;
+      const completionPercentage = totalMatches > 0 ? (completedMatches / totalMatches) * 100 : 0;
+      
+      return {
+        ...poolData,
+        completionPercentage,
+        standings: professionalStandings.map(standing => ({
+          team: standing.team,
+          wins: standing.wins,
+          losses: standing.losses,
+          pointsFor: standing.gamePoints,
+          pointsAgainst: standing.pointsAllowed,
+          pointDifferential: standing.pointDifferential,
+          gamesPlayed: standing.matchesPlayed,
+        })),
+        advancementCalculated: completionPercentage === 100,
+      };
+    });
+  }, [matches, isLoading, poolConfig, tiebreakers]);
+
+  // Calculate overall tournament progress
+  const overallProgress = useMemo(() => {
+    if (enhancedPools.length === 0) return 0;
+    
+    const totalProgress = enhancedPools.reduce((sum, pool) => sum + pool.completionPercentage, 0);
+    return totalProgress / enhancedPools.length;
+  }, [enhancedPools]);
+
+  // Check if ready for advancement
+  const readyForAdvancement = useMemo(() => {
+    return enhancedPools.length > 0 && enhancedPools.every(pool => pool.completionPercentage === 100);
+  }, [enhancedPools]);
+
+  // Handle advancement calculation
+  const handleCalculateAdvancement = async () => {
+    if (!readyForAdvancement) {
+      toast({
+        title: "Not Ready",
+        description: "All pool matches must be completed before calculating advancement.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    calculateAdvancementMutation.mutate();
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -85,32 +278,6 @@ export default function PoolPlayBracket({ tournament }: PoolPlayBracketProps) {
       </div>
     );
   }
-
-  // Separate pool play matches from bracket matches
-  const poolMatches = matches.filter(m => m.poolId);
-  const bracketMatches = matches.filter(m => !m.poolId && m.round > 1);
-
-  // Organize matches by pool
-  const pools: Pool[] = [];
-  const poolIds = [...new Set(poolMatches.map(m => m.poolId))].filter(Boolean) as string[];
-
-  poolIds.forEach(poolId => {
-    const poolMatchesFiltered = poolMatches.filter(m => m.poolId === poolId);
-    const poolTeams = [...new Set([
-      ...poolMatchesFiltered.map(m => m.team1),
-      ...poolMatchesFiltered.map(m => m.team2)
-    ])].filter(Boolean) as string[];
-
-    const standings = BracketGenerator.calculateStandings(poolMatchesFiltered);
-
-    pools.push({
-      id: poolId,
-      name: `Pool ${poolId.split('-')[1]?.toUpperCase() || poolId}`,
-      teams: poolTeams,
-      matches: poolMatchesFiltered,
-      standings
-    });
-  });
 
   // Group bracket matches by round
   const bracketRounds = bracketMatches.reduce((acc, match) => {

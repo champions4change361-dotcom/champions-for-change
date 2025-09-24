@@ -1,13 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Crown, Target, Trophy, ArrowRight, CheckCircle, Clock } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { 
+  Crown, 
+  Target, 
+  Trophy, 
+  ArrowRight, 
+  CheckCircle, 
+  Clock,
+  Users,
+  Zap,
+  Award,
+  TrendingUp,
+  Settings,
+  PlayCircle,
+  AlertCircle
+} from 'lucide-react';
 import PoolPlayBracket from './pool-play-bracket';
 import DoubleEliminationBracket from './double-elimination-bracket';
 import BracketVisualization from './bracket-visualization';
+import { 
+  professionalTournamentFormats, 
+  type TournamentState, 
+  type StageTransition,
+  validateTournamentFormat
+} from '@shared/multi-stage-schema';
+import { StageTransitionEngine } from '@shared/stage-transition-engine';
+import { SwissSystemEngine } from '@shared/swiss-system-engine';
+import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
 
 interface Tournament {
   id: string;
@@ -20,44 +46,157 @@ interface Tournament {
   currentStage?: number;
   totalStages?: number;
   teams: { teamName: string }[];
+  
+  // Enhanced multi-stage configuration
+  professionalFormat?: keyof typeof professionalTournamentFormats;
+  tournamentState?: TournamentState;
+  stageTransitions?: StageTransition[];
+  advancementRules?: {
+    advancementType: string;
+    teamsAdvancingPerPool?: number;
+    wildcardSpots?: number;
+  };
 }
 
 interface MultiStageTournamentProps {
   tournament: Tournament;
+  onStageTransition?: (results: any) => void;
 }
 
-export default function MultiStageTournament({ tournament }: MultiStageTournamentProps) {
+export default function MultiStageTournament({ 
+  tournament, 
+  onStageTransition 
+}: MultiStageTournamentProps) {
   const [activeTab, setActiveTab] = useState('overview');
+  const [stageTransitionInProgress, setStageTransitionInProgress] = useState(false);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
-  const stages = [
-    {
-      id: 1,
-      name: 'Pool Play',
-      description: 'Round robin within groups',
-      type: 'pool-play',
-      status: tournament.status === 'upcoming' ? 'pending' : 
-              tournament.currentStage === 1 ? 'active' :
-              (tournament.currentStage || 0) > 1 ? 'completed' : 'pending'
-    },
-    {
-      id: 2,
-      name: 'Elimination Bracket',
-      description: 'Single elimination from pool winners',
-      type: 'single-elimination',
-      status: tournament.status === 'upcoming' || (tournament.currentStage || 0) < 2 ? 'pending' :
-              tournament.currentStage === 2 ? 'active' :
-              (tournament.currentStage || 0) > 2 ? 'completed' : 'pending'
-    },
-    {
-      id: 3,
-      name: 'Championship',
-      description: 'Final match for tournament winner',
-      type: 'championship',
-      status: tournament.status === 'upcoming' || (tournament.currentStage || 0) < 3 ? 'pending' :
-              tournament.currentStage === 3 ? 'active' :
-              tournament.status === 'completed' ? 'completed' : 'pending'
+  // Helper function to get stage descriptions
+  const getStageDescription = (stageType: string): string => {
+    switch (stageType) {
+      case 'pool-play':
+        return 'Teams compete in round-robin pools to determine seeding for elimination rounds';
+      case 'single-elimination':
+        return 'Direct elimination tournament where losing teams are eliminated';
+      case 'double-elimination':
+        return 'Teams get a second chance through winner and loser brackets';
+      case 'swiss-system':
+        return 'Pairing system that avoids eliminations while determining rankings';
+      case 'championship':
+        return 'Final stage to determine the tournament champion';
+      default:
+        return 'Tournament stage with custom rules and advancement criteria';
     }
-  ];
+  };
+
+  // Professional tournament configuration
+  const professionalConfig = useMemo(() => {
+    if (tournament.professionalFormat && professionalTournamentFormats[tournament.professionalFormat]) {
+      return professionalTournamentFormats[tournament.professionalFormat];
+    }
+    
+    // Default configuration
+    return {
+      name: "Multi-Stage Tournament",
+      complexity: "intermediate",
+      stages: [
+        {
+          stageName: "Pool Play",
+          stageType: "pool-play",
+          poolConfiguration: { poolCount: 4, teamsPerPool: 4, balancedGroups: true },
+          advancementRules: { advancementType: "top-n-per-pool", teamsAdvancingPerPool: 2 },
+        },
+        {
+          stageName: "Elimination Bracket", 
+          stageType: "single-elimination",
+          advancementRules: { seedingMethod: "pool-standings" },
+        }
+      ]
+    };
+  }, [tournament.professionalFormat]);
+
+  // Dynamic stage configuration based on professional format
+  const stages = useMemo(() => {
+    return professionalConfig.stages.map((stage, index) => ({
+      id: index + 1,
+      name: stage.stageName,
+      description: getStageDescription(stage.stageType),
+      type: stage.stageType,
+      status: tournament.status === 'upcoming' ? 'pending' : 
+              tournament.currentStage === (index + 1) ? 'active' :
+              (tournament.currentStage || 0) > (index + 1) ? 'completed' : 'pending',
+      configuration: stage,
+    }));
+  }, [professionalConfig, tournament.currentStage, tournament.status]);
+
+  // Tournament state and progress tracking
+  const tournamentState: TournamentState = useMemo(() => {
+    const currentStageInfo = stages.find(s => s.status === 'active');
+    const completedStages = stages.filter(s => s.status === 'completed').length;
+    
+    return {
+      tournamentId: tournament.id,
+      currentStage: tournament.currentStage || 1,
+      totalStages: stages.length,
+      stageStatuses: stages.reduce((acc, stage) => {
+        acc[stage.name] = stage.status === 'active' ? 'in-progress' :
+                         stage.status === 'completed' ? 'completed' : 'not-started';
+        return acc;
+      }, {} as Record<string, any>),
+      overallProgress: {
+        percentComplete: (completedStages / stages.length) * 100,
+        matchesCompleted: 0, // Would be calculated from actual matches
+        totalMatches: 0, // Would be calculated from tournament structure
+        participantsRemaining: tournament.teams.length,
+        eliminatedParticipants: 0,
+      },
+      currentStageInfo: currentStageInfo ? {
+        stageName: currentStageInfo.name,
+        stageType: currentStageInfo.type,
+        stageProgress: 50, // Would be calculated from actual stage completion
+        criticalPath: true,
+      } : undefined,
+    };
+  }, [tournament, stages]);
+
+  // Stage transition mutation
+  const stageTransitionMutation = useMutation({
+    mutationFn: async (transitionData: { 
+      fromStage: number; 
+      toStage: number; 
+      results?: any;
+    }) => {
+      setStageTransitionInProgress(true);
+      const response = await apiRequest(`/api/tournaments/${tournament.id}/advance-stage`, "POST", transitionData);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: [`/api/tournaments/${tournament.id}`] });
+      toast({
+        title: "Stage Advanced",
+        description: `Successfully advanced to ${data.nextStageName}`,
+      });
+      setStageTransitionInProgress(false);
+      onStageTransition?.(data);
+    },
+    onError: () => {
+      toast({
+        title: "Advancement Failed", 
+        description: "Could not advance tournament stage. Please try again.",
+        variant: "destructive",
+      });
+      setStageTransitionInProgress(false);
+    },
+  });
+
+  // Format validation
+  const formatValidation = useMemo(() => {
+    if (tournament.professionalFormat) {
+      return validateTournamentFormat(tournament.professionalFormat, tournament.teams.length);
+    }
+    return { valid: true, recommended: true, suggestions: [] };
+  }, [tournament.professionalFormat, tournament.teams.length]);
 
   const currentStageIndex = (tournament.currentStage || 1) - 1;
   const progressPercentage = ((tournament.currentStage || 1) / 3) * 100;
