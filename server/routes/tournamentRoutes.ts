@@ -4,11 +4,7 @@ import { insertTournamentSchema } from "@shared/schema";
 import { BracketGenerator } from "../utils/bracket-generator";
 import { z } from "zod";
 import type {
-  FFATournamentType,
   FFAParticipant,
-  FFAConfig,
-  FFAHeatAssignment,
-  FFAPerformanceEntry,
   FFALeaderboardEntry
 } from "@shared/bracket-generator";
 
@@ -412,7 +408,7 @@ export function registerTournamentRoutes(app: Express) {
       const existingTournaments = await storage.getTournaments();
       // Filter by user_id OR created_by since we might have both fields
       const userTournaments = existingTournaments.filter((t: any) => 
-        t.createdBy === userId || t.user_id === userId
+        t.user_id === userId
       );
       
       // Only count tournaments that have been actually run (not just created)
@@ -457,19 +453,17 @@ export function registerTournamentRoutes(app: Express) {
         });
       }
 
-      // Parse the data directly - schema now expects strings
+      // Parse the data directly - but bracket will be generated before final validation
       console.log("Raw tournament data received:", JSON.stringify(req.body, null, 2));
-      const validatedData = insertTournamentSchema.parse(req.body);
-      console.log("Validated tournament data:", JSON.stringify(validatedData, null, 2));
       
-      // Generate bracket structure based on tournament type
-      const teams = Array.isArray(validatedData.teams) ? validatedData.teams : [];
-      let teamNames = teams.map((team: any) => typeof team === 'string' ? team : team.teamName);
+      // First extract teams and generate bracket structure
+      const teams = Array.isArray(req.body.teams) ? req.body.teams : [];
+      let teamNames = teams.map((team: any) => typeof team === 'string' ? team : team.teamName || team.name);
       
       // If no team names provided, generate placeholders
-      if (teamNames.length === 0 || teamNames.every(name => !name || name.trim() === '')) {
-        const teamSize = validatedData.teamSize || 8;
-        const isLeaderboard = validatedData.competitionFormat === 'leaderboard';
+      if (teamNames.length === 0 || teamNames.every((name: string) => !name || name.trim() === '')) {
+        const teamSize = req.body.teamSize || 8;
+        const isLeaderboard = req.body.competitionFormat === 'leaderboard';
         teamNames = Array.from({ length: teamSize }, (_, i) => 
           isLeaderboard ? `Participant ${i + 1}` : `Team ${i + 1}`
         );
@@ -479,9 +473,17 @@ export function registerTournamentRoutes(app: Express) {
       const bracketStructure = BracketGenerator.generateBracket(
         teamNames,
         '',  // Tournament ID will be set after creation
-        validatedData.tournamentType || 'single',
-        validatedData.sport || 'Basketball'
+        req.body.tournamentType || 'single',
+        req.body.sport || 'Basketball'
       );
+      
+      // Now validate the complete data including the generated bracket
+      const dataWithBracket = {
+        ...req.body,
+        bracket: bracketStructure
+      };
+      const validatedData = insertTournamentSchema.parse(dataWithBracket);
+      console.log("Validated tournament data:", JSON.stringify(validatedData, null, 2));
 
       // Create tournament with generated bracket and user association
       // Sanitize numeric fields to prevent empty string errors
@@ -511,8 +513,7 @@ export function registerTournamentRoutes(app: Express) {
         ...sanitizedData,
         bracket: bracketStructure,
         status: 'upcoming' as const,
-        createdBy: userId,
-        user_id: userId // Ensure both fields are set for consistency
+        userId: userId // Set user association
       };
 
       const tournament = await storage.createTournament(tournamentData);
@@ -881,7 +882,7 @@ export function registerTournamentRoutes(app: Express) {
       // Generate FFA tournament using storage method
       const tournament = await storage.generateFFATournament(validatedData.tournamentId, {
         tournamentType: validatedData.tournamentType,
-        participants: validatedData.participants,
+        teams: validatedData.teams || validatedData.participants || [],
         formatConfig: validatedData.formatConfig
       });
 
@@ -934,7 +935,7 @@ export function registerTournamentRoutes(app: Express) {
       }
 
       // SECURITY: Enforce tournament ownership/authorization
-      if (tournament.userId !== userId && tournament.createdBy !== userId) {
+      if (tournament.userId !== userId) {
         return res.status(403).json({ message: "Access denied. You can only view tournaments you own." });
       }
 
@@ -987,7 +988,7 @@ export function registerTournamentRoutes(app: Express) {
         return res.status(404).json({ message: "Tournament not found" });
       }
 
-      if (tournament.userId !== userId && tournament.createdBy !== userId) {
+      if (tournament.userId !== userId) {
         return res.status(403).json({ message: "Access denied. You can only modify tournaments you own." });
       }
 
@@ -1066,7 +1067,7 @@ export function registerTournamentRoutes(app: Express) {
         return res.status(404).json({ message: "Tournament not found" });
       }
 
-      if (tournament.userId !== userId && tournament.createdBy !== userId) {
+      if (tournament.userId !== userId) {
         return res.status(403).json({ message: "Access denied. You can only view participant performance for tournaments you own." });
       }
 
@@ -1110,7 +1111,7 @@ export function registerTournamentRoutes(app: Express) {
         return res.status(404).json({ message: "Tournament not found" });
       }
 
-      if (tournament.userId !== userId && tournament.createdBy !== userId) {
+      if (tournament.userId !== userId) {
         return res.status(403).json({ message: "Access denied. You can only view leaderboards for tournaments you own." });
       }
 

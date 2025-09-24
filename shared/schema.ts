@@ -1532,6 +1532,9 @@ export const tournaments = pgTable("tournaments", {
     }[];
   }[]>().default([]),
 
+  // ACTIVITY STATUS
+  isActive: boolean("is_active").default(true),
+
   // NOTE: Sport-specific fields have been moved to separate config tables:
   // - athletic_configs (basketball, soccer, tennis, golf, etc.)
   // - academic_configs (UIL academic competitions, debate, etc.)  
@@ -5283,6 +5286,7 @@ export const createMatchSchema = insertMatchSchema.extend({
 export const createTournamentSchema = insertTournamentSchema.omit({
   ageGroup: true,
   genderDivision: true,
+  ffaConfig: true, // Omit ffaConfig as it may not exist in database
 }).extend({
   name: z.string().min(3, "Tournament name must be at least 3 characters").max(100, "Name too long"),
   teamSize: z.number().int().min(1, "Team size must be at least 1").max(128, "Team size too large"),

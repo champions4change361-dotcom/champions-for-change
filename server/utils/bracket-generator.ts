@@ -1558,6 +1558,7 @@ export class BracketGenerator {
       survivalStages,
       finalSurvivors: [], // Will be populated during tournament
       eliminationHistory,
+      leaderboard: [], // Will be populated during tournament
       eliminationRules: {
         method: 'percentage',
         criteria: eliminationRate,
@@ -1769,6 +1770,7 @@ export class BracketGenerator {
       survivorsByRound,
       eliminated,
       finalSurvivor: ffaParticipants[0], // Placeholder
+      leaderboard: [], // Will be populated during tournament
       progressiveElimination: {
         roundsToElimination,
         eliminationRate,

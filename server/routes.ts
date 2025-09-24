@@ -23,6 +23,13 @@ declare module 'express-session' {
   }
 }
 
+// Extend Express Request to include user property for authentication
+declare module 'express-serve-static-core' {
+  interface Request {
+    user?: User & { id: string; claims?: any };
+  }
+}
+
 // Type extensions for User with missing properties
 type ExtendedUser = User & { 
   id: string; 
@@ -2136,12 +2143,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const storage = await getStorage();
       const { createTournamentSchema } = await import('@shared/schema');
+      const { BracketGenerator } = await import('./utils/bracket-generator');
       
       console.log('🏆 Creating tournament with data:', req.body);
+      
+      // First extract teams and generate bracket structure
+      const teams = Array.isArray(req.body.teams) ? req.body.teams : [];
+      let teamNames = teams.map((team: any) => typeof team === 'string' ? team : team.teamName || team.name);
+      
+      // If no team names provided, generate placeholders
+      if (teamNames.length === 0 || teamNames.every((name: string) => !name || name.trim() === '')) {
+        const teamSize = req.body.teamSize || 8;
+        const isLeaderboard = req.body.competitionFormat === 'leaderboard';
+        teamNames = Array.from({ length: teamSize }, (_, i) => 
+          isLeaderboard ? `Participant ${i + 1}` : `Team ${i + 1}`
+        );
+      }
+      
+      // Generate proper bracket structure
+      console.log('🔧 Generating bracket with:', { 
+        teamNames: teamNames, 
+        teamCount: teamNames.length,
+        tournamentType: req.body.tournamentType,
+        sport: req.body.sport
+      });
+      
+      const bracketStructure = BracketGenerator.generateBracket(
+        teamNames,
+        '',  // Tournament ID will be set after creation
+        req.body.tournamentType || 'single',
+        req.body.sport || 'Basketball'
+      );
+      
+      console.log('🎯 Generated bracket structure:', bracketStructure);
       
       // Validate the tournament data - make optional fields more flexible
       const tournamentData = {
         ...req.body,
+        bracket: bracketStructure, // Include generated bracket
         // Make these fields optional if they're empty or not in expected format
         ageGroup: req.body.ageGroup && req.body.ageGroup.trim() !== '' ? req.body.ageGroup : undefined,
         genderDivision: req.body.genderDivision && req.body.genderDivision.trim() !== '' ? req.body.genderDivision : undefined,
@@ -2151,8 +2190,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = createTournamentSchema.parse(tournamentData);
       
       // Create the tournament (let storage generate the ID)
+      // Filter out fields that may not exist in the database
+      const { ffaConfig, heatAssignments, ...tournamentDataForDb } = validatedData;
+      
       const tournament = await storage.createTournament({
-        ...validatedData,
+        ...tournamentDataForDb,
         status: 'draft',
         isActive: true
       });
