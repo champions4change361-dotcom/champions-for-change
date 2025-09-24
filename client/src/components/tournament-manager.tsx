@@ -256,7 +256,7 @@ export default function TournamentManager({ tournamentId }: TournamentManagerPro
               <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-sm text-gray-600">
                 <div className="flex items-center gap-1">
                   <Users className="h-4 w-4" />
-                  <span className="text-xs sm:text-sm">{tournament.teams?.length || tournament.teamSize} {tournament.competitionFormat === 'leaderboard' ? 'participants' : 'teams'}</span>
+                  <span className="text-xs sm:text-sm">{tournament.teams?.length || 8} {tournament.competitionFormat === 'leaderboard' ? 'participants' : 'teams'}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Target className="h-4 w-4" />
@@ -351,7 +351,7 @@ export default function TournamentManager({ tournamentId }: TournamentManagerPro
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="text-center p-4 bg-gray-50 rounded-lg">
                   <div className="text-2xl font-bold text-blue-600">
-                    {tournament.teams?.length || tournament.teamSize}
+                    {tournament.teams?.length || 8}
                   </div>
                   <div className="text-sm text-gray-600">Total Participants</div>
                 </div>
