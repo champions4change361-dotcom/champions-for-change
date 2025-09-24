@@ -5199,7 +5199,6 @@ export const createMatchSchema = insertMatchSchema.extend({
 export const createTournamentSchema = insertTournamentSchema.omit({
   ageGroup: true,
   genderDivision: true,
-  skillLevel: true,
 }).extend({
   name: z.string().min(3, "Tournament name must be at least 3 characters").max(100, "Name too long"),
   teamSize: z.number().int().min(1, "Team size must be at least 1").max(128, "Team size too large"),

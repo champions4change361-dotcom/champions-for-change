@@ -13,17 +13,17 @@ export function registerTournamentRoutes(app: Express) {
       res.json(events);
     } catch (error) {
       console.error("Error fetching sport events:", error);
-      res.status(500).json({ message: "Error fetching sport events", error: error.message });
+      res.status(500).json({ message: "Error fetching sport events", error: (error as Error).message });
     }
   });
 
   app.get("/api/sport-events", async (req, res) => {
     try {
-      const events = await storage.getAllSportEvents();
+      const events = await storage.getSportEvents();
       res.json(events);
     } catch (error) {
       console.error("Error fetching all sport events:", error);
-      res.status(500).json({ message: "Error fetching sport events", error: error.message });
+      res.status(500).json({ message: "Error fetching sport events", error: (error as Error).message });
     }
   });
   
@@ -83,7 +83,6 @@ export function registerTournamentRoutes(app: Express) {
   // Get public tournaments for calendar display (NO AUTH REQUIRED)
   app.get("/api/tournaments/public", async (req, res) => {
     try {
-      const storage = await getStorage();
       
       // Get tournaments that are marked as calendar visible and approved
       const allTournaments = await storage.getTournaments();
@@ -133,8 +132,6 @@ export function registerTournamentRoutes(app: Express) {
 
       const { id } = req.params;
       const { calendarRegion, calendarCity, calendarStateCode, calendarTags } = req.body;
-
-      const storage = await getStorage();
       const tournament = await storage.getTournament(id);
       
       if (!tournament) {
@@ -174,8 +171,6 @@ export function registerTournamentRoutes(app: Express) {
       if (!['approved', 'rejected'].includes(status)) {
         return res.status(400).json({ message: "Status must be 'approved' or 'rejected'" });
       }
-
-      const storage = await getStorage();
       const tournament = await storage.getTournament(id);
       
       if (!tournament) {
@@ -211,8 +206,6 @@ export function registerTournamentRoutes(app: Express) {
       if (!req.isAuthenticated || !req.isAuthenticated()) {
         return res.status(401).json({ message: "Authentication required" });
       }
-
-      const storage = await getStorage();
       const allTournaments = await storage.getTournaments();
       
       // Filter for pending calendar submissions
@@ -232,7 +225,6 @@ export function registerTournamentRoutes(app: Express) {
   app.post("/api/tournaments/:id/calendar-view", async (req, res) => {
     try {
       const { id } = req.params;
-      const storage = await getStorage();
       
       const tournament = await storage.getTournament(id);
       if (!tournament) {
@@ -261,7 +253,6 @@ export function registerTournamentRoutes(app: Express) {
       }
 
       const { id } = req.params;
-      const storage = await getStorage();
       
       const tournament = await storage.getTournament(id);
       if (!tournament) {
@@ -315,14 +306,14 @@ export function registerTournamentRoutes(app: Express) {
 
       // For bracket-based tournaments (like basketball), return divisions
       if (tournament.competitionFormat === 'bracket') {
-        const divisions = await storage.getTournamentDivisionsByTournament(id);
+        const divisions = await storage.getTournamentEventsByTournament(id);
         res.json(divisions);
       } else {
         res.json([]);
       }
     } catch (error) {
       console.error("Error fetching tournament divisions:", error);
-      res.status(500).json({ message: "Error fetching divisions", error: error.message });
+      res.status(500).json({ message: "Error fetching divisions", error: (error as Error).message });
     }
   });
 
@@ -337,7 +328,7 @@ export function registerTournamentRoutes(app: Express) {
       }
 
       // For event-based tournaments (like track & field), return events
-      if (tournament.competitionFormat === 'event') {
+      if (tournament.competitionFormat === 'timed-competition' || tournament.competitionFormat === 'judged-performance') {
         const events = await storage.getTournamentEventsByTournament(id);
         res.json(events);
       } else {
@@ -345,7 +336,7 @@ export function registerTournamentRoutes(app: Express) {
       }
     } catch (error) {
       console.error("Error fetching tournament events:", error);
-      res.status(500).json({ message: "Error fetching events", error: error.message });
+      res.status(500).json({ message: "Error fetching events", error: (error as Error).message });
     }
   });
 
@@ -355,7 +346,7 @@ export function registerTournamentRoutes(app: Express) {
       const { id } = req.params;
       
       // Get all registration forms for this tournament
-      const registrationForms = await storage.getRegistrationFormsByTournament(id);
+      const registrationForms = await storage.getTournamentRegistrationFormsByTournament(id);
       
       if (registrationForms.length === 0) {
         return res.json([]);
@@ -364,27 +355,27 @@ export function registerTournamentRoutes(app: Express) {
       // Get submissions for all forms of this tournament
       const allSubmissions = [];
       for (const form of registrationForms) {
-        const formSubmissions = await storage.getRegistrationSubmissions(form.id);
+        const formSubmissions = await storage.getRegistrationSubmissionsByTournament(id);
         allSubmissions.push(...formSubmissions);
       }
       
       // Transform submissions to SmartParticipant format
       const participants = allSubmissions.map(submission => ({
         id: submission.id,
-        participantName: submission.participantName || `${submission.firstName} ${submission.lastName}`,
+        participantName: submission.participantName || `Participant ${submission.id}`,
         skillLevel: submission.skillLevel || 'beginner',
         age: submission.age || 0,
         gender: submission.gender || 'unspecified',
-        assignedDivisionId: submission.assignedDivisionId,
-        assignedEventIds: submission.assignedEventIds,
-        seed: submission.seed,
-        assignmentResult: submission.assignmentResult
+        assignedDivisionId: submission.assignedDivisionId || null,
+        assignedEventIds: submission.assignedEventIds || [],
+        seed: null,
+        assignmentResult: null
       }));
       
       res.json(participants);
     } catch (error) {
       console.error("Error fetching tournament registration submissions:", error);
-      res.status(500).json({ message: "Error fetching registration submissions", error: error.message });
+      res.status(500).json({ message: "Error fetching registration submissions", error: (error as Error).message });
     }
   });
 
@@ -442,10 +433,10 @@ export function registerTournamentRoutes(app: Express) {
         }
       };
 
-      const limit = getTournamentLimit(user.subscriptionPlan || 'starter', user.subscriptionStatus || 'inactive');
+      const limit = getTournamentLimit(user?.subscriptionPlan || 'starter', user?.subscriptionStatus || 'inactive');
       
       // For enterprise accounts, skip limit checking entirely
-      if (user.subscriptionPlan === 'district_enterprise' || user.subscriptionPlan === 'enterprise' || user.subscriptionPlan === 'annual-pro') {
+      if (user?.subscriptionPlan === 'district_enterprise' || user?.subscriptionPlan === 'enterprise' || user?.subscriptionPlan === 'annual-pro') {
         console.log(`✅ Enterprise user ${userId} creating tournament - unlimited access`);
       } else if (limit !== -1 && activeTournaments.length >= limit) {
         return res.status(403).json({ 
@@ -453,7 +444,7 @@ export function registerTournamentRoutes(app: Express) {
           currentCount: activeTournaments.length,
           totalCreated: userTournaments.length,
           limit: limit,
-          plan: user.subscriptionPlan,
+          plan: user?.subscriptionPlan,
           note: "Only tournaments that have been run count toward your limit"
         });
       }
@@ -626,7 +617,7 @@ export function registerTournamentRoutes(app: Express) {
       
       // Double Elimination Tournament Logic
       console.log(`🔍 Tournament Type Check: "${tournament?.tournamentType}"`);
-      if (tournament?.tournamentType === 'double' || tournament?.tournamentType === 'Double Elimination') {
+      if (tournament?.tournamentType === 'double') {
         console.log(`🏆 Starting Double Elimination advancement for ${completedMatch.winner}`);
         await handleDoubleEliminationAdvancement(completedMatch, allMatches);
       } else {

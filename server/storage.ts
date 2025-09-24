@@ -558,12 +558,12 @@ export interface IStorage {
   };
 
   // NFL data methods
-  async storeNFLSchedule(games: any[]): Promise<void>;
-  async getNFLSchedule(): Promise<any[]>;
-  async storeNFLInjuries(injuries: any[]): Promise<void>;
-  async getNFLInjuries(): Promise<any[]>;
-  async storeNFLPlayerStats(stats: any[]): Promise<void>;
-  async getNFLPlayerStats(): Promise<any[]>;
+  storeNFLSchedule(games: any[]): Promise<void>;
+  getNFLSchedule(): Promise<any[]>;
+  storeNFLInjuries(injuries: any[]): Promise<void>;
+  getNFLInjuries(): Promise<any[]>;
+  storeNFLPlayerStats(stats: any[]): Promise<void>;
+  getNFLPlayerStats(): Promise<any[]>;
 }
 
 export class DbStorage implements IStorage {
@@ -621,6 +621,7 @@ export class DbStorage implements IStorage {
             .update(users)
             .set({
               ...userData,
+              hybridSubscription: userData.hybridSubscription as any, // Type cast to handle schema mismatch
               updatedAt: new Date(),
             })
             .where(eq(users.email, userData.email))
@@ -637,6 +638,7 @@ export class DbStorage implements IStorage {
           target: users.id,
           set: {
             ...userData,
+            hybridSubscription: userData.hybridSubscription as any, // Type cast to handle schema mismatch
             updatedAt: new Date(),
           },
         })
@@ -906,7 +908,7 @@ export class DbStorage implements IStorage {
   async deleteClientConfiguration(id: string): Promise<boolean> {
     try {
       const result = await this.db.delete(clientConfigurations).where(eq(clientConfigurations.id, id));
-      return result.rowCount > 0;
+      return (result.rowCount ?? 0) > 0;
     } catch (error) {
       console.error("Database error:", error);
       return false;
@@ -975,7 +977,7 @@ export class DbStorage implements IStorage {
   async deletePage(id: string): Promise<boolean> {
     try {
       const result = await this.db.delete(pages).where(eq(pages.id, id));
-      return result.rowCount > 0;
+      return (result.rowCount ?? 0) > 0;
     } catch (error) {
       console.error("Database error:", error);
       return false;
@@ -1046,7 +1048,7 @@ export class DbStorage implements IStorage {
   async deleteTeamRegistration(id: string): Promise<boolean> {
     try {
       const result = await this.db.delete(teamRegistrations).where(eq(teamRegistrations.id, id));
-      return result.rowCount > 0;
+      return (result.rowCount ?? 0) > 0;
     } catch (error) {
       console.error("Database error:", error);
       return false;
@@ -1107,7 +1109,7 @@ export class DbStorage implements IStorage {
   async deleteTeamMember(id: string): Promise<boolean> {
     try {
       const result = await this.db.delete(jerseyTeamMembers).where(eq(jerseyTeamMembers.id, id));
-      return result.rowCount > 0;
+      return (result.rowCount ?? 0) > 0;
     } catch (error) {
       console.error("Database error:", error);
       return false;
@@ -1115,42 +1117,6 @@ export class DbStorage implements IStorage {
   }
 
   // Team payment methods
-  async createTeamPayment(payment: any): Promise<any> {
-    try {
-      const result = await this.db.insert(jerseyTeamPayments).values(payment).returning();
-      return result[0];
-    } catch (error) {
-      console.error("Database error:", error);
-      throw new Error("Failed to create team payment");
-    }
-  }
-
-  async getTeamPayments(teamId: string): Promise<any[]> {
-    try {
-      const result = await this.db
-        .select()
-        .from(jerseyTeamPayments)
-        .where(eq(jerseyTeamPayments.teamRegistrationId, teamId));
-      return result;
-    } catch (error) {
-      console.error("Database error:", error);
-      return [];
-    }
-  }
-
-  async updateTeamPayment(id: string, updates: any): Promise<any> {
-    try {
-      const result = await this.db
-        .update(jerseyTeamPayments)
-        .set({ ...updates, updatedAt: new Date() })
-        .where(eq(jerseyTeamPayments.id, id))
-        .returning();
-      return result[0];
-    } catch (error) {
-      console.error("Database error:", error);
-      return undefined;
-    }
-  }
   async createTeamPayment(payment: any): Promise<any> {
     try {
       const paymentData = {
@@ -1590,7 +1556,7 @@ export class DbStorage implements IStorage {
   async deleteScorekeeperAssignment(id: string): Promise<boolean> {
     try {
       const result = await this.db.delete(scorekeeperAssignments).where(eq(scorekeeperAssignments.id, id));
-      return result.rowCount > 0;
+      return (result.rowCount ?? 0) > 0;
     } catch (error) {
       console.error("Database error:", error);
       return false;
@@ -1661,7 +1627,7 @@ export class DbStorage implements IStorage {
   async deleteEventScore(id: string): Promise<boolean> {
     try {
       const result = await this.db.delete(eventScores).where(eq(eventScores.id, id));
-      return result.rowCount > 0;
+      return (result.rowCount ?? 0) > 0;
     } catch (error) {
       console.error("Database error:", error);
       return false;
@@ -1732,7 +1698,7 @@ export class DbStorage implements IStorage {
   async deleteSchoolEventAssignment(id: string): Promise<boolean> {
     try {
       const result = await this.db.delete(schoolEventAssignments).where(eq(schoolEventAssignments.id, id));
-      return result.rowCount > 0;
+      return (result.rowCount ?? 0) > 0;
     } catch (error) {
       console.error("Database error:", error);
       return false;
@@ -1803,7 +1769,7 @@ export class DbStorage implements IStorage {
   async deleteCoachEventAssignment(id: string): Promise<boolean> {
     try {
       const result = await this.db.delete(coachEventAssignments).where(eq(coachEventAssignments.id, id));
-      return result.rowCount > 0;
+      return (result.rowCount ?? 0) > 0;
     } catch (error) {
       console.error("Database error:", error);
       return false;
@@ -1861,8 +1827,7 @@ export class DbStorage implements IStorage {
       const result = await this.db
         .select()
         .from(tournaments)
-        .where(eq(tournaments.status, 'draft'))
-        .where(eq(tournaments.userId, userId))
+        .where(and(eq(tournaments.status, 'draft'), eq(tournaments.userId, userId)))
         .orderBy(desc(tournaments.updatedAt));
       return result;
     } catch (error) {
@@ -2061,7 +2026,7 @@ export class DbStorage implements IStorage {
   async deleteTournament(id: string): Promise<boolean> {
     try {
       const result = await this.db.delete(tournaments).where(eq(tournaments.id, id));
-      return result.rowCount > 0;
+      return (result.rowCount ?? 0) > 0;
     } catch (error) {
       console.error("Database error:", error);
       return false;
@@ -2118,7 +2083,7 @@ export class DbStorage implements IStorage {
   async deleteMatch(id: string): Promise<boolean> {
     try {
       const result = await this.db.delete(matches).where(eq(matches.id, id));
-      return result.rowCount > 0;
+      return (result.rowCount ?? 0) > 0;
     } catch (error) {
       console.error("Database error:", error);
       return false;
@@ -3357,6 +3322,317 @@ export class DbStorage implements IStorage {
   async getNFLPlayerStats(): Promise<any[]> {
     const cached = this.nflDataCache.get('nfl_player_stats');
     return cached ? cached.data : [];
+  }
+
+  // Tournament Registration Form methods - Smart linking system
+  async createTournamentRegistrationForm(form: InsertTournamentRegistrationForm): Promise<TournamentRegistrationForm> {
+    try {
+      const result = await this.db.insert(tournamentRegistrationForms).values(form).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to create tournament registration form");
+    }
+  }
+
+  async getTournamentRegistrationForm(id: string): Promise<TournamentRegistrationForm | undefined> {
+    try {
+      const result = await this.db.select().from(tournamentRegistrationForms).where(eq(tournamentRegistrationForms.id, id));
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async getTournamentRegistrationFormsByTournament(tournamentId: string): Promise<TournamentRegistrationForm[]> {
+    try {
+      const result = await this.db
+        .select()
+        .from(tournamentRegistrationForms)
+        .where(eq(tournamentRegistrationForms.tournamentId, tournamentId));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async getTournamentRegistrationFormsByOrganizer(organizerId: string): Promise<TournamentRegistrationForm[]> {
+    try {
+      const result = await this.db
+        .select()
+        .from(tournamentRegistrationForms)
+        .where(eq(tournamentRegistrationForms.organizerId, organizerId));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async updateTournamentRegistrationForm(id: string, updates: Partial<TournamentRegistrationForm>): Promise<TournamentRegistrationForm | undefined> {
+    try {
+      const result = await this.db
+        .update(tournamentRegistrationForms)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(tournamentRegistrationForms.id, id))
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async deleteTournamentRegistrationForm(id: string): Promise<boolean> {
+    try {
+      const result = await this.db.delete(tournamentRegistrationForms).where(eq(tournamentRegistrationForms.id, id));
+      return (result.rowCount ?? 0) > 0;
+    } catch (error) {
+      console.error("Database error:", error);
+      return false;
+    }
+  }
+
+  // Registration Submission methods - Smart participant management
+  async createRegistrationSubmission(submission: InsertRegistrationSubmission): Promise<RegistrationSubmission> {
+    try {
+      const result = await this.db.insert(registrationSubmissions).values(submission).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to create registration submission");
+    }
+  }
+
+  async getRegistrationSubmission(id: string): Promise<RegistrationSubmission | undefined> {
+    try {
+      const result = await this.db.select().from(registrationSubmissions).where(eq(registrationSubmissions.id, id));
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async getRegistrationSubmissionsByForm(formId: string): Promise<RegistrationSubmission[]> {
+    try {
+      const result = await this.db
+        .select()
+        .from(registrationSubmissions)
+        .where(eq(registrationSubmissions.formId, formId));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async getRegistrationSubmissionsByTournament(tournamentId: string): Promise<RegistrationSubmission[]> {
+    try {
+      const result = await this.db
+        .select()
+        .from(registrationSubmissions)
+        .where(eq(registrationSubmissions.tournamentId, tournamentId));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async updateRegistrationSubmission(id: string, updates: Partial<RegistrationSubmission>): Promise<RegistrationSubmission | undefined> {
+    try {
+      const result = await this.db
+        .update(registrationSubmissions)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(registrationSubmissions.id, id))
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async deleteRegistrationSubmission(id: string): Promise<boolean> {
+    try {
+      const result = await this.db.delete(registrationSubmissions).where(eq(registrationSubmissions.id, id));
+      return (result.rowCount ?? 0) > 0;
+    } catch (error) {
+      console.error("Database error:", error);
+      return false;
+    }
+  }
+
+  // Smart Assignment methods - Automatic participant placement (stub implementations)
+  async assignSubmissionToTarget(submissionId: string, targetType: 'division' | 'event', targetId: string, reason: string): Promise<RegistrationSubmission | undefined> {
+    try {
+      const result = await this.db
+        .update(registrationSubmissions)
+        .set({ 
+          assignedToType: targetType,
+          assignedToId: targetId,
+          status: 'assigned',
+          updatedAt: new Date()
+        })
+        .where(eq(registrationSubmissions.id, submissionId))
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async getCapacityStatus(tournamentId: string): Promise<{
+    divisions: Array<{ id: string; name: string; current: number; max: number; waitlist: number }>;
+    events: Array<{ id: string; name: string; current: number; max: number; waitlist: number }>;
+  }> {
+    // Stub implementation - in a real system this would query actual capacity data
+    return { divisions: [], events: [] };
+  }
+
+  async processSubmissionAssignment(submissionId: string): Promise<RegistrationSubmission | undefined> {
+    // Stub implementation - in a real system this would run assignment logic
+    return this.getRegistrationSubmission(submissionId);
+  }
+
+  // Atomic capacity management - Thread-safe capacity operations (stub implementations)
+  async reserveCapacity(targetType: 'division' | 'event', targetId: string, count?: number): Promise<boolean> {
+    // Stub implementation - in a real system this would use database locks
+    return true;
+  }
+
+  async releaseCapacity(targetType: 'division' | 'event', targetId: string, count?: number): Promise<boolean> {
+    // Stub implementation
+    return true;
+  }
+
+  async checkCapacityAvailable(targetType: 'division' | 'event', targetId: string, requiredCount?: number): Promise<boolean> {
+    // Stub implementation
+    return true;
+  }
+
+  // Status transition helpers - Safe state management
+  async transitionSubmissionStatus(submissionId: string, newStatus: 'pending' | 'assigned' | 'confirmed' | 'waitlisted' | 'rejected'): Promise<RegistrationSubmission | undefined> {
+    try {
+      const result = await this.db
+        .update(registrationSubmissions)
+        .set({ 
+          status: newStatus,
+          updatedAt: new Date()
+        })
+        .where(eq(registrationSubmissions.id, submissionId))
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async transitionAssignmentStatus(submissionId: string, newStatus: 'pending' | 'assigned' | 'confirmed' | 'waitlisted' | 'rejected'): Promise<RegistrationSubmission | undefined> {
+    return this.transitionSubmissionStatus(submissionId, newStatus);
+  }
+
+  // Assignment Log methods - Track smart matching decisions
+  async createRegistrationAssignmentLog(log: InsertRegistrationAssignmentLog): Promise<RegistrationAssignmentLog> {
+    try {
+      const result = await this.db.insert(registrationAssignmentLog).values(log).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to create registration assignment log");
+    }
+  }
+
+  async getRegistrationAssignmentLogsBySubmission(submissionId: string): Promise<RegistrationAssignmentLog[]> {
+    try {
+      const result = await this.db
+        .select()
+        .from(registrationAssignmentLog)
+        .where(eq(registrationAssignmentLog.submissionId, submissionId));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async getRegistrationAssignmentLogsByTournament(tournamentId: string): Promise<RegistrationAssignmentLog[]> {
+    try {
+      const result = await this.db
+        .select()
+        .from(registrationAssignmentLog)
+        .where(eq(registrationAssignmentLog.tournamentId, tournamentId));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  // Professional Player methods
+  async createProfessionalPlayer(player: InsertProfessionalPlayer): Promise<ProfessionalPlayer> {
+    try {
+      const result = await this.db.insert(professionalPlayers).values(player).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to create professional player");
+    }
+  }
+
+  async getProfessionalPlayer(id: string): Promise<ProfessionalPlayer | undefined> {
+    try {
+      const result = await this.db.select().from(professionalPlayers).where(eq(professionalPlayers.id, id));
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async getProfessionalPlayersBySport(sport: string): Promise<ProfessionalPlayer[]> {
+    try {
+      const result = await this.db
+        .select()
+        .from(professionalPlayers)
+        .where(eq(professionalPlayers.sport, sport));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async getProfessionalPlayersByTeam(teamAbbreviation: string): Promise<ProfessionalPlayer[]> {
+    try {
+      const result = await this.db
+        .select()
+        .from(professionalPlayers)
+        .where(eq(professionalPlayers.teamAbbreviation, teamAbbreviation));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async updateProfessionalPlayer(id: string, updates: Partial<ProfessionalPlayer>): Promise<ProfessionalPlayer | undefined> {
+    try {
+      const result = await this.db
+        .update(professionalPlayers)
+        .set({ ...updates, lastUpdated: new Date() })
+        .where(eq(professionalPlayers.id, id))
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
   }
 }
 
