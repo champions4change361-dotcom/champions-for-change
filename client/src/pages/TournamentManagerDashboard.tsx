@@ -569,7 +569,7 @@ export default function TournamentManagerDashboard() {
                       <CardTitle className="flex items-center gap-2">
                         <Trophy className="h-5 w-5 text-blue-600" />
                         <a 
-                          href={`/tournament/${tournament.id}`}
+                          href={`/tournaments/${tournament.id}`}
                           className="text-blue-700 hover:text-red-600 hover:underline cursor-pointer font-semibold transition-colors"
                           data-testid={`link-tournament-${tournament.id}`}
                         >
@@ -602,7 +602,7 @@ export default function TournamentManagerDashboard() {
                       <span className="font-medium">Format:</span> {tournament.tournamentType}
                     </div>
                     <div>
-                      <span className="font-medium">Team Size:</span> {tournament.teamSize} players
+                      <span className="font-medium">Teams:</span> {tournament.teams?.length || tournament.teamSize} teams
                     </div>
                     <div>
                       <span className="font-medium">Entry Fee:</span> ${tournament.entryFee || "Free"}
