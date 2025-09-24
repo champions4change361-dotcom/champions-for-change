@@ -867,7 +867,7 @@ export function registerTournamentRoutes(app: Express) {
       const ffaGenerateSchema = z.object({
         tournamentId: z.string(),
         tournamentType: z.enum(['multi-heat-racing', 'battle-royale', 'point-accumulation', 'time-trials', 'survival-elimination']),
-        participants: z.array(z.object({
+        teams: z.array(z.object({
           id: z.string(),
           name: z.string(),
           email: z.string().optional(),
@@ -882,7 +882,7 @@ export function registerTournamentRoutes(app: Express) {
       // Generate FFA tournament using storage method
       const tournament = await storage.generateFFATournament(validatedData.tournamentId, {
         tournamentType: validatedData.tournamentType,
-        teams: validatedData.teams || validatedData.participants || [],
+        teams: validatedData.teams || [],
         formatConfig: validatedData.formatConfig
       });
 
@@ -950,8 +950,8 @@ export function registerTournamentRoutes(app: Express) {
       res.json({
         tournament,
         leaderboard,
-        participants: tournament.participants || [],
-        heatAssignments: tournament.heatAssignments || [],
+        participants: tournament.teams || [],
+        heatAssignments: tournament.ffaConfig?.heatAssignments || [],
         ffaConfig: tournament.ffaConfig || {}
       });
     } catch (error) {

@@ -613,8 +613,15 @@ export class BracketGenerator {
    * Build a complete 64-team double elimination bracket with proper losers routing
    */
   static buildDoubleElim64(teams: string[], tournamentId: string): DoubleElimStructure {
-    if (teams.length !== 64) {
-      throw new Error(`Expected exactly 64 teams, got ${teams.length}`);
+    if (teams.length < 4 || teams.length > 64) {
+      throw new Error(`Double elimination supports 4-64 teams, got ${teams.length}`);
+    }
+    
+    // Pad teams to next power of 2 if needed for proper bracket structure
+    const paddedTeams = [...teams];
+    const nextPowerOf2 = Math.pow(2, Math.ceil(Math.log2(teams.length)));
+    while (paddedTeams.length < nextPowerOf2) {
+      paddedTeams.push(`BYE-${paddedTeams.length}`);
     }
 
     const winnersMatches: MatchData[] = [];
@@ -624,9 +631,9 @@ export class BracketGenerator {
     
     let matchIdCounter = 1;
     
-    // Build Winners Bracket (6 rounds: 64→32→16→8→4→2→1)
-    const winnersRounds = 6;
-    let currentTeams = [...teams];
+    // Build Winners Bracket (flexible rounds based on team count)
+    const winnersRounds = Math.log2(paddedTeams.length);
+    let currentTeams = [...paddedTeams];
     
     for (let round = 1; round <= winnersRounds; round++) {
       const matchesInRound = currentTeams.length / 2;
@@ -1800,10 +1807,11 @@ export class BracketGenerator {
         }
         
       case 'double':
-        if (validTeams.length === 64) {
+        // Support flexible team counts for double elimination
+        if (validTeams.length >= 4 && validTeams.length <= 64) {
           return this.buildDoubleElim64(validTeams, tournamentId);
         } else {
-          throw new Error(`Double elimination currently only supports exactly 64 teams. Got ${validTeams.length} teams.`);
+          throw new Error(`Double elimination supports 4-64 teams. Got ${validTeams.length} teams.`);
         }
         
       case 'swiss-system':

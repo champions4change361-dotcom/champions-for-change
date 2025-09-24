@@ -2191,7 +2191,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Create the tournament (let storage generate the ID)
       // Filter out fields that may not exist in the database
-      const { ffaConfig, heatAssignments, ...tournamentDataForDb } = validatedData;
+      const { ffaConfig, ...tournamentDataForDb } = validatedData;
       
       const tournament = await storage.createTournament({
         ...tournamentDataForDb,

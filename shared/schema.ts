@@ -1495,42 +1495,6 @@ export const tournaments = pgTable("tournaments", {
       }>;
     };
   }>(),
-  
-  // Individual participants for FFA tournaments (replaces teams array for individual competition)
-  participants: jsonb("participants").$type<{
-    id: string;
-    name: string;
-    email?: string;
-    seedNumber?: number;
-    division?: string;
-    skillLevel?: string;
-    registrationData?: Record<string, any>;
-    performanceHistory?: {
-      round: number;
-      result: number;
-      ranking: number;
-      eliminated?: boolean;
-      advancedToNextRound?: boolean;
-    }[];
-    currentStatus: 'registered' | 'active' | 'eliminated' | 'advanced' | 'finished';
-    finalRanking?: number;
-    finalScore?: number;
-  }[]>().default([]),
-  
-  // Heat assignments and management for racing formats
-  heatAssignments: jsonb("heat_assignments").$type<{
-    heatNumber: number;
-    heatName?: string;
-    participants: string[]; // participant IDs
-    startTime?: string;
-    status: 'upcoming' | 'in-progress' | 'completed';
-    results?: {
-      participantId: string;
-      result: number;
-      ranking: number;
-      qualified?: boolean;
-    }[];
-  }[]>().default([]),
 
   // ACTIVITY STATUS
   isActive: boolean("is_active").default(true),

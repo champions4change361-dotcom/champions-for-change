@@ -256,7 +256,7 @@ export interface IStorage {
   // FFA Tournament methods
   generateFFATournament(tournamentId: string, config: {
     tournamentType: 'multi-heat-racing' | 'battle-royale' | 'point-accumulation' | 'time-trials' | 'survival-elimination';
-    participants: Array<{ id: string; name: string; email?: string; seedNumber?: number; skillLevel?: string; }>;
+    teams: Array<{ id: string; name: string; email?: string; seedNumber?: number; skillLevel?: string; }>;
     formatConfig: Record<string, any>;
   }): Promise<Tournament | undefined>;
   updateFFAParticipants(tournamentId: string, participants: any[]): Promise<Tournament | undefined>;
@@ -2039,7 +2039,7 @@ export class DbStorage implements IStorage {
   // FFA Tournament method implementations
   async generateFFATournament(tournamentId: string, config: {
     tournamentType: 'multi-heat-racing' | 'battle-royale' | 'point-accumulation' | 'time-trials' | 'survival-elimination';
-    participants: Array<{ id: string; name: string; email?: string; seedNumber?: number; skillLevel?: string; }>;
+    teams: Array<{ id: string; name: string; email?: string; seedNumber?: number; skillLevel?: string; }>;
     formatConfig: Record<string, any>;
   }): Promise<Tournament | undefined> {
     try {
@@ -2047,7 +2047,7 @@ export class DbStorage implements IStorage {
       if (!tournament) return undefined;
 
       // Extract participant names for BracketGenerator
-      const participantNames = config.participants.map(p => p.name);
+      const participantNames = config.teams.map(p => p.name);
 
       // Generate FFA bracket structure using proper BracketGenerator
       const bracketStructure = BracketGenerator.generateBracket(
@@ -2058,7 +2058,7 @@ export class DbStorage implements IStorage {
       );
 
       // Convert participants to FFA format with proper structure
-      const ffaParticipants = config.participants.map((p, index) => ({
+      const ffaParticipants = config.teams.map((p, index) => ({
         id: p.id,
         name: p.name,
         email: p.email,
@@ -2073,8 +2073,8 @@ export class DbStorage implements IStorage {
       // Extract configuration from generated bracket structure
       let ffaConfig: Record<string, any> = {
         participantStructure: 'individual',
-        maxParticipants: config.participants.length,
-        minParticipants: Math.min(2, config.participants.length),
+        maxParticipants: config.teams.length,
+        minParticipants: Math.min(2, config.teams.length),
         scoringMethodology: this.getFFAScoringMethodology(config.tournamentType),
         rankingCriteria: this.getFFARankingCriteria(config.tournamentType),
         tieBreakingRules: ["best_performance", "head_to_head", "random"],
@@ -2130,16 +2130,18 @@ export class DbStorage implements IStorage {
       // Merge format-specific configuration
       ffaConfig = { ...ffaConfig, ...config.formatConfig };
 
+      // Store heat assignments within ffaConfig instead of as separate column
+      if (heatAssignments.length > 0) {
+        ffaConfig.heatAssignments = heatAssignments;
+      }
+
       // Update tournament with generated FFA structure
       return await this.updateTournament(tournamentId, {
         tournamentType: config.tournamentType,
         competitionFormat: this.getFFACompetitionFormat(config.tournamentType),
         ffaConfig,
-        participants: ffaParticipants,
-        heatAssignments,
-        bracketData: bracketStructure, // Store the full bracket structure for reference
-        totalRounds: bracketStructure.totalRounds || 1,
-        currentRound: 1,
+        teams: ffaParticipants,
+        bracket: bracketStructure, // Store the full bracket structure for reference
         status: 'active'
       });
     } catch (error) {
@@ -2150,7 +2152,7 @@ export class DbStorage implements IStorage {
 
   async updateFFAParticipants(tournamentId: string, participants: any[]): Promise<Tournament | undefined> {
     try {
-      return await this.updateTournament(tournamentId, { participants });
+      return await this.updateTournament(tournamentId, { teams: participants });
     } catch (error) {
       console.error("Error updating FFA participants:", error);
       return undefined;
@@ -2159,7 +2161,11 @@ export class DbStorage implements IStorage {
 
   async updateFFAHeatAssignments(tournamentId: string, heatAssignments: any[]): Promise<Tournament | undefined> {
     try {
-      return await this.updateTournament(tournamentId, { heatAssignments });
+      const tournament = await this.getTournament(tournamentId);
+      if (!tournament) return undefined;
+      
+      const updatedFFAConfig = { ...tournament.ffaConfig, heatAssignments };
+      return await this.updateTournament(tournamentId, { ffaConfig: updatedFFAConfig });
     } catch (error) {
       console.error("Error updating FFA heat assignments:", error);
       return undefined;
@@ -2169,10 +2175,10 @@ export class DbStorage implements IStorage {
   async updateFFARoundResults(tournamentId: string, roundNumber: number, results: any[]): Promise<Tournament | undefined> {
     try {
       const tournament = await this.getTournament(tournamentId);
-      if (!tournament || !tournament.participants) return undefined;
+      if (!tournament || !tournament.teams) return undefined;
 
       // Update participant performance history
-      const updatedParticipants = tournament.participants.map((participant: any) => {
+      const updatedParticipants = tournament.teams.map((participant: any) => {
         const result = results.find(r => r.participantId === participant.id);
         if (result) {
           const performanceHistory = participant.performanceHistory || [];
@@ -2195,7 +2201,7 @@ export class DbStorage implements IStorage {
         return participant;
       });
 
-      return await this.updateTournament(tournamentId, { participants: updatedParticipants });
+      return await this.updateTournament(tournamentId, { teams: updatedParticipants });
     } catch (error) {
       console.error("Error updating FFA round results:", error);
       return undefined;
@@ -2205,10 +2211,10 @@ export class DbStorage implements IStorage {
   async getFFALeaderboard(tournamentId: string): Promise<any[]> {
     try {
       const tournament = await this.getTournament(tournamentId);
-      if (!tournament || !tournament.participants) return [];
+      if (!tournament || !tournament.teams) return [];
 
       // Generate leaderboard based on current performance
-      return tournament.participants
+      return tournament.teams
         .map((participant: any) => ({
           participantId: participant.id,
           participantName: participant.name,
@@ -2227,9 +2233,9 @@ export class DbStorage implements IStorage {
   async getFFAParticipantPerformance(tournamentId: string, participantId: string): Promise<any | undefined> {
     try {
       const tournament = await this.getTournament(tournamentId);
-      if (!tournament || !tournament.participants) return undefined;
+      if (!tournament || !tournament.teams) return undefined;
 
-      const participant = tournament.participants.find((p: any) => p.id === participantId);
+      const participant = tournament.teams.find((p: any) => p.id === participantId);
       if (!participant) return undefined;
 
       return {
