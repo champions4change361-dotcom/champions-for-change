@@ -75,9 +75,10 @@ export default function DoubleEliminationBracket({ tournament }: DoubleEliminati
     );
   }
 
-  // Separate matches by bracket
-  const winnersMatches = matches.filter(m => m.bracket === 'winners');
-  const losersMatches = matches.filter(m => m.bracket === 'losers');
+  // Separate matches by bracket - for now, Round 1 goes to winners bracket
+  // TODO: Implement proper bracket assignment when losers bracket is needed
+  const winnersMatches = matches.filter(m => m.round === 1); // All Round 1 matches go to winners bracket
+  const losersMatches = matches.filter(m => m.round > 1 && (m.bracket === 'losers' || !m.bracket)); // Future losers bracket matches
   const championshipMatches = matches.filter(m => m.bracket === 'championship');
 
   // Group by rounds
