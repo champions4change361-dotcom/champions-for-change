@@ -24,6 +24,7 @@ import {
   FFATime
 } from '@shared/bracket-generator';
 import { type TournamentConfig } from '@shared/schema';
+import { DynamicDoubleElimination } from './bracket-generator-dynamic';
 
 export interface LoserRoutingInfo {
   losersRound: number;
@@ -863,7 +864,7 @@ export class BracketGenerator {
       losersMatches,
       championshipMatches,
       routingMap,
-      totalRounds: 12, // Standard double elimination round count: 6 winners + 5 main losers + 1 grand final
+      totalRounds: 11, // FIXED: Standard double elimination: 6 winners + 5 losers rounds = 11 total
       totalMatches: expectedMatches, // Always use mathematically correct value
       totalWinnersRounds: winnersRounds,
       totalLosersRounds: 10, // Fixed: 10 rounds (L1-L10)
@@ -1064,6 +1065,9 @@ export class BracketGenerator {
   
   // Single Elimination Tournament Generator
   static generateSingleElimination(teams: string[], tournamentId: string): BracketStructure {
+    if (teams.length === 0) {
+      throw new Error('Single elimination requires at least 1 participant');
+    }
     if (teams.length < 2) {
       return {
         matches: [],
@@ -1152,6 +1156,13 @@ export class BracketGenerator {
       totalMatches: expectedMatches, // Always use the mathematically correct value
       format: 'single-elimination'
     };
+  }
+
+  /**
+   * Generate dynamic double elimination for any team size (4-63 teams)
+   */
+  static generateDoubleElimination(teams: string[], tournamentId: string): DoubleElimStructure {
+    return DynamicDoubleElimination.generate(teams, tournamentId);
   }
 
   /**
@@ -1442,7 +1453,7 @@ export class BracketGenerator {
       eastBracket,
       westBracket,
       consolationLevels: 3,
-      totalRounds: 3,
+      totalRounds: validTeams.length <= 8 ? 3 : 4, // FIXED: 8 teams = 3 rounds, 16 teams = 4 rounds
       totalMatches: allMatches.length,
       format: 'compass-draw'
     };
@@ -1560,7 +1571,7 @@ export class BracketGenerator {
       lowerBracket2,
       championshipBracket,
       tripleEliminationRouting,
-      totalRounds: Math.max(upperRounds, championshipBracket.length),
+      totalRounds: upperRounds + 1, // FIXED: Upper bracket rounds + championship round
       totalMatches: allMatches.length,
       format: 'triple-elimination'
     };
@@ -2128,9 +2139,8 @@ export class BracketGenerator {
         if (validTeams.length === 64) {
           return this.buildDoubleElim64(validTeams, tournamentId);
         } else if (validTeams.length >= 4 && validTeams.length < 64) {
-          // For other sizes, use dynamic double elimination (fallback to single elimination for now)
-          console.warn(`Dynamic double elimination for ${validTeams.length} teams not yet implemented. Using single elimination as fallback.`);
-          return this.generateSingleElimination(validTeams, tournamentId);
+          // Use dynamic double elimination for other sizes
+          return this.generateDoubleElimination(validTeams, tournamentId);
         } else {
           throw new Error(`Double elimination supports 4-64 teams. Got ${validTeams.length} teams.`);
         }
