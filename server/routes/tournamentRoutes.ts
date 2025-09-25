@@ -1,6 +1,6 @@
 import type { Express } from "express";
 import { storage } from "../storage";
-import { insertTournamentSchema, tournamentConfigSchema } from "@shared/schema";
+import { insertTournamentSchema, tournamentConfigSchema, type TournamentConfig } from "@shared/schema";
 import { BracketGenerator } from "../utils/bracket-generator";
 import { z } from "zod";
 import type {
@@ -383,6 +383,24 @@ export function registerTournamentRoutes(app: Express) {
     }
   });
 
+  // Helper function to extract bracket generation parameters from TournamentConfig
+  const getBracketParamsFromConfig = (config: TournamentConfig) => {
+    const firstStage = config.stages[0];
+    const tournamentType = firstStage?.engine || 'single';
+    const participantCount = config.meta.participantCount || 8;
+    const competitionName = config.meta.name || 'Competition';
+    
+    console.log('🔧 getBracketParamsFromConfig - config.meta:', JSON.stringify(config.meta, null, 2));
+    console.log('🔧 getBracketParamsFromConfig - extracted participantCount:', participantCount);
+    
+    return {
+      tournamentType,
+      participantCount,
+      competitionName,
+      participantType: config.meta.participantType
+    };
+  };
+
   // Create a new tournament
   app.post("/api/tournaments", async (req: any, res) => {
     try {
@@ -406,40 +424,36 @@ export function registerTournamentRoutes(app: Express) {
 
       // Check tournament creation limits based on subscription
       const existingTournaments = await storage.getTournaments();
-      // Filter by user_id OR created_by since we might have both fields
       const userTournaments = existingTournaments.filter((t: any) => 
         t.user_id === userId
       );
       
-      // Only count tournaments that have been actually run (not just created)
-      // Consider tournaments "run" if they have matches with results or status beyond 'upcoming'
       const activeTournaments = userTournaments.filter((t: any) => 
         t.status !== 'upcoming' && t.status !== 'draft'
       );
       
       const getTournamentLimit = (plan: string, status: string) => {
-        if (status !== 'active') return 1; // Inactive accounts get 1 tournament
+        if (status !== 'active') return 1;
         
         switch (plan) {
           case 'starter':
           case 'free':
-            return 3; // 3 tournaments per month
+            return 3;
           case 'tournament-organizer':
-            return 25; // 25 tournaments per month
+            return 25;
           case 'business-enterprise':
-            return 100; // 100 tournaments per month
+            return 100;
           case 'district_enterprise':
           case 'enterprise':
           case 'annual-pro':
-            return -1; // Unlimited
+            return -1;
           default:
-            return 2; // Default fallback
+            return 2;
         }
       };
 
       const limit = getTournamentLimit(user?.subscriptionPlan || 'starter', user?.subscriptionStatus || 'inactive');
       
-      // For enterprise accounts, skip limit checking entirely
       if (user?.subscriptionPlan === 'district_enterprise' || user?.subscriptionPlan === 'enterprise' || user?.subscriptionPlan === 'annual-pro') {
         console.log(`✅ Enterprise user ${userId} creating tournament - unlimited access`);
       } else if (limit !== -1 && activeTournaments.length >= limit) {
@@ -453,99 +467,126 @@ export function registerTournamentRoutes(app: Express) {
         });
       }
 
-      // Parse and validate the incoming data
       console.log("Raw tournament data received:", JSON.stringify(req.body, null, 2));
       
-      // Validate TournamentConfig if present (new configuration-driven approach)
-      let validatedConfig = null;
+      // CONFIGURATION-DRIVEN APPROACH: Primary validation with TournamentConfig
+      let validatedConfig: TournamentConfig | null = null;
+      let bracketParams: any = null;
+      
+      // Check if we have a configuration-driven tournament
       if (req.body.config) {
         try {
           validatedConfig = tournamentConfigSchema.parse(req.body.config);
           console.log('✓ TournamentConfig validation successful:', JSON.stringify(validatedConfig, null, 2));
+          console.log('🔧 About to call getBracketParamsFromConfig with:', JSON.stringify(validatedConfig, null, 2));
+          bracketParams = getBracketParamsFromConfig(validatedConfig);
+          console.log('🔧 bracketParams result:', JSON.stringify(bracketParams, null, 2));
         } catch (configError) {
-          console.error('✗ TournamentConfig validation failed:', configError);
+          console.error('✗ TournamentConfig validation or bracket params extraction failed:', configError);
           return res.status(400).json({
             message: "Invalid tournament configuration",
             errors: configError instanceof z.ZodError ? configError.errors : [configError]
           });
         }
+      } else {
+        // LEGACY SUPPORT: Fall back to sport-specific validation for backward compatibility
+        console.log('⚠️ No TournamentConfig provided, using legacy validation for backward compatibility');
+        bracketParams = {
+          tournamentType: req.body.tournamentType || 'single',
+          participantCount: req.body.teamSize || req.body.participantCount || 8,
+          competitionName: req.body.sport || 'Competition',
+          participantType: req.body.participantType || 'team'
+        };
       }
       
-      // Extract teams and generate bracket structure for backward compatibility
+      // Extract participants and generate participant names
       const teams = Array.isArray(req.body.teams) ? req.body.teams : [];
-      let teamNames = teams.map((team: any) => typeof team === 'string' ? team : team.teamName || team.name);
+      let participantNames = teams.map((team: any) => typeof team === 'string' ? team : team.teamName || team.name);
       
-      // If no team names provided, generate placeholders based on config or fallback
-      if (teamNames.length === 0 || teamNames.every((name: string) => !name || name.trim() === '')) {
-        const teamSize = validatedConfig?.meta?.participantCount || req.body.teamSize || req.body.participantCount || 8;
-        const isLeaderboard = req.body.competitionFormat === 'leaderboard' || 
-                             (validatedConfig?.stages?.[0]?.engine === 'leaderboard');
-        teamNames = Array.from({ length: teamSize }, (_, i) => 
-          isLeaderboard ? `Participant ${i + 1}` : `Team ${i + 1}`
-        );
+      // Generate placeholder names if none provided
+      if (participantNames.length === 0 || participantNames.every((name: string) => !name || name.trim() === '')) {
+        const isIndividual = bracketParams.participantType === 'individual';
+        const isLeaderboard = bracketParams.tournamentType === 'leaderboard';
+        
+        participantNames = Array.from({ length: bracketParams.participantCount }, (_, i) => {
+          if (isIndividual || isLeaderboard) {
+            return `Participant ${i + 1}`;
+          }
+          return `Team ${i + 1}`;
+        });
       }
       
-      // Generate bracket structure
+      // Generate bracket structure using config-driven parameters
       const bracketStructure = BracketGenerator.generateBracket(
-        teamNames,
+        participantNames,
         '',  // Tournament ID will be set after creation
-        req.body.tournamentType || 'single',
-        req.body.sport || validatedConfig?.meta?.name || 'Competition'
+        bracketParams.tournamentType,
+        bracketParams.competitionName
       );
       
-      // Prepare data for legacy validation while including TournamentConfig
-      const dataWithBracketAndConfig = {
-        ...req.body,
-        bracket: bracketStructure,
-        // Include validated config if present
-        ...(validatedConfig && { config: validatedConfig })
-      };
-      
-      // Validate with insertTournamentSchema for legacy compatibility
-      let validatedData;
-      try {
-        validatedData = insertTournamentSchema.parse(dataWithBracketAndConfig);
-        console.log("Legacy validation successful - tournament data:", JSON.stringify(validatedData, null, 2));
-      } catch (legacyError) {
-        console.error('✗ Legacy validation failed:', legacyError);
+      // Ensure we have valid bracketParams before proceeding
+      if (!bracketParams || bracketParams.participantCount === undefined) {
+        console.error('❌ bracketParams is invalid:', bracketParams);
         return res.status(400).json({
-          message: "Invalid tournament data",
-          errors: legacyError instanceof z.ZodError ? legacyError.errors : [legacyError]
+          message: "Failed to extract tournament parameters",
+          bracketParams: bracketParams
         });
       }
 
-      // Create tournament with generated bracket and user association
-      // Sanitize numeric fields to prevent empty string errors
-      const sanitizeNumericField = (value: any, defaultValue: any = null) => {
-        if (value === "" || value === null || value === undefined) {
-          return defaultValue;
-        }
-        return value;
-      };
+      console.log('✅ Valid bracketParams confirmed:', JSON.stringify(bracketParams, null, 2));
 
-      const sanitizedData = {
-        ...validatedData,
-        entryFee: sanitizeNumericField(validatedData.entryFee, "0"),
-        donationGoal: sanitizeNumericField(validatedData.donationGoal, "0"),
-        maxParticipants: sanitizeNumericField(validatedData.maxParticipants, null),
-        teamSize: sanitizeNumericField(validatedData.teamSize, 8),
-        seriesLength: sanitizeNumericField(validatedData.seriesLength, 7),
-        currentStage: sanitizeNumericField(validatedData.currentStage, 1),
-        totalStages: sanitizeNumericField(validatedData.totalStages, 1),
-        maxTeamSize: sanitizeNumericField(validatedData.maxTeamSize, null),
-        minTeamSize: sanitizeNumericField(validatedData.minTeamSize, null)
-      };
-      
-      console.log("Sanitized tournament data:", JSON.stringify(sanitizedData, null, 2));
-
+      // Prepare tournament data with config-driven approach
       const tournamentData = {
-        ...sanitizedData,
+        // Core tournament fields
+        name: req.body.name || bracketParams.competitionName,
+        description: req.body.description || '',
+        location: req.body.location || '',
+        tournamentDate: req.body.tournamentDate || new Date().toISOString(),
+        
+        // Configuration data - store the validated config
+        config: validatedConfig,
+        
+        // Legacy fields for backward compatibility - proper semantic mapping
+        sport: bracketParams.competitionName,
+        tournamentType: bracketParams.tournamentType,
+        participantType: bracketParams.participantType,
+        
+        // SEMANTIC CORRECTNESS FIX:
+        // - participantCount = total number of participants/teams entering tournament
+        // - teamSize = number of players per team (only relevant for team competitions)  
+        // - maxParticipants = total number of individual participants
+        // - teamsCount = number of teams (for team-based tournaments)
+        maxParticipants: Number(bracketParams.participantCount),
+        teamsCount: validatedConfig?.meta.participantType === 'team' ? Number(bracketParams.participantCount) : undefined,
+        teamSize: validatedConfig?.meta.teamSize || undefined, // Only if specified in config
+        
+        // Optional fields with defaults
+        entryFee: req.body.entryFee || "0",
+        donationGoal: req.body.donationGoal || "0",
+        seriesLength: req.body.seriesLength || 7,
+        currentStage: req.body.currentStage || 1,
+        totalStages: req.body.totalStages || 1,
+        
+        // Bracket and user association
         bracket: bracketStructure,
         status: 'upcoming' as const,
-        userId: userId // Set user association
+        userId: userId
       };
 
-      const tournament = await storage.createTournament(tournamentData);
+      // Validate with insertTournamentSchema for database compatibility
+      let validatedTournamentData;
+      try {
+        validatedTournamentData = insertTournamentSchema.parse(tournamentData);
+        console.log("Tournament data validation successful");
+      } catch (validationError) {
+        console.error('✗ Tournament data validation failed:', validationError);
+        return res.status(400).json({
+          message: "Invalid tournament data",
+          errors: validationError instanceof z.ZodError ? validationError.errors : [validationError]
+        });
+      }
+
+      const tournament = await storage.createTournament(validatedTournamentData);
       
       // Create matches for the tournament
       if (bracketStructure.matches.length > 0) {
@@ -564,7 +605,12 @@ export function registerTournamentRoutes(app: Express) {
         }
       }
 
-      res.status(201).json({ tournament });
+      res.status(201).json({ 
+        tournament,
+        message: validatedConfig ? 
+          'Tournament created with configuration-driven approach' : 
+          'Tournament created with legacy compatibility mode'
+      });
     } catch (error) {
       console.error("Error creating tournament:", error);
       if (error instanceof z.ZodError) {
@@ -892,10 +938,12 @@ export function registerTournamentRoutes(app: Express) {
         return res.status(401).json({ message: "Authentication required" });
       }
 
-      // Validate request body using Zod
+      // Configuration-driven FFA validation - supports any tournament type through config
       const ffaGenerateSchema = z.object({
         tournamentId: z.string(),
-        tournamentType: z.enum(['multi-heat-racing', 'battle-royale', 'point-accumulation', 'time-trials', 'survival-elimination']),
+        // Accept either legacy tournamentType or derive from config
+        tournamentType: z.string().optional(), // Made optional and flexible
+        config: tournamentConfigSchema.optional(), // Accept TournamentConfig for new approach
         teams: z.array(z.object({
           id: z.string(),
           name: z.string(),
@@ -908,11 +956,24 @@ export function registerTournamentRoutes(app: Express) {
 
       const validatedData = ffaGenerateSchema.parse(req.body);
 
+      // Determine tournament type from config or legacy field
+      let tournamentType = validatedData.tournamentType;
+      if (validatedData.config) {
+        // Configuration-driven approach - derive tournament type from config
+        const firstStage = validatedData.config.stages[0];
+        tournamentType = firstStage?.engine || 'leaderboard'; // Default to leaderboard for FFA
+      } else if (!tournamentType) {
+        // Legacy fallback with flexible support
+        console.log('⚠️ No tournament type specified, defaulting to leaderboard for FFA');
+        tournamentType = 'leaderboard';
+      }
+
       // Generate FFA tournament using storage method
       const tournament = await storage.generateFFATournament(validatedData.tournamentId, {
-        tournamentType: validatedData.tournamentType,
+        tournamentType: tournamentType,
         teams: validatedData.teams || [],
-        formatConfig: validatedData.formatConfig
+        formatConfig: validatedData.formatConfig,
+        config: validatedData.config // Pass config for future use
       });
 
       if (!tournament) {
@@ -968,9 +1029,24 @@ export function registerTournamentRoutes(app: Express) {
         return res.status(403).json({ message: "Access denied. You can only view tournaments you own." });
       }
 
-      // Ensure it's an FFA tournament
-      if (!tournament.tournamentType || !['multi-heat-racing', 'battle-royale', 'point-accumulation', 'time-trials', 'survival-elimination'].includes(tournament.tournamentType)) {
-        return res.status(400).json({ message: "Tournament is not an FFA tournament" });
+      // Configuration-driven FFA tournament validation
+      const isFFATournament = () => {
+        // Check if tournament has a config and it's FFA-compatible
+        if (tournament.config?.stages) {
+          const firstStage = tournament.config.stages[0];
+          return firstStage?.engine === 'leaderboard' || 
+                 ['multi-heat-racing', 'battle-royale', 'point-accumulation', 'time-trials', 'survival-elimination'].includes(firstStage?.engine);
+        }
+        
+        // Legacy check for backward compatibility
+        return tournament.tournamentType && 
+               ['multi-heat-racing', 'battle-royale', 'point-accumulation', 'time-trials', 'survival-elimination', 'leaderboard'].includes(tournament.tournamentType);
+      };
+
+      if (!isFFATournament()) {
+        return res.status(400).json({ 
+          message: "Tournament does not support FFA format. Use tournament configuration with leaderboard or FFA-compatible stage engines." 
+        });
       }
 
       // Get additional FFA data

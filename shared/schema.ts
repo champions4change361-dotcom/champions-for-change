@@ -1346,7 +1346,7 @@ export const paymentPlanInstallments = pgTable("payment_plan_installments", {
 export const tournaments = pgTable("tournaments", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
-  teamSize: integer("team_size").notNull(),
+  teamSize: integer("team_size"), // Optional - only for team competitions where players per team matters
   tournamentType: text("tournament_type", { enum: ["single", "double", "pool-play", "round-robin", "swiss-system", "double-stage", "match-play", "stroke-play", "scramble", "best-ball", "alternate-shot", "modified-stableford", "playoff-bracket", "conference-championship", "dual-meet", "triangular-meet", "weight-class-bracket", "multi-event-scoring", "preliminary-finals", "heat-management", "skills-competition", "draw-management", "group-stage-knockout", "home-away-series", "prediction-bracket", "compass-draw", "triple-elimination", "game-guarantee", "march-madness", "free-for-all", "multi-heat-racing", "battle-royale", "point-accumulation", "time-trials", "survival-elimination"] }).notNull().default("single"),
   competitionFormat: text("competition_format", { enum: ["bracket", "leaderboard", "series", "bracket-to-series", "multi-stage", "round-robin-pools", "elimination-pools", "consolation-bracket", "team-vs-individual", "portfolio-review", "oral-competition", "written-test", "judged-performance", "timed-competition", "scoring-average", "advancement-ladder", "rating-system", "prediction-scoring", "multiple-bracket-system", "three-bracket-system", "guarantee-system", "regional-bracket", "individual-leaderboard", "heat-progression", "elimination-rounds", "performance-ranking", "cumulative-scoring", "time-based-ranking"] }).notNull().default("bracket"),
   status: text("status", { enum: ["draft", "upcoming", "stage-1", "stage-2", "stage-3", "completed"] }).notNull().default("draft"),
@@ -1370,7 +1370,8 @@ export const tournaments = pgTable("tournaments", {
   userId: varchar("user_id").references(() => users.id), // Tournament owner
   whitelabelConfigId: varchar("whitelabel_config_id").references(() => whitelabelConfigs.id), // White-label client
   entryFee: numeric("entry_fee").default("0"), // Tournament entry fee
-  maxParticipants: integer("max_participants"),
+  maxParticipants: integer("max_participants"), // Total number of individual participants
+  teamsCount: integer("teams_count"), // Number of teams (for team-based tournaments)
   registrationDeadline: timestamp("registration_deadline"),
   tournamentDate: timestamp("tournament_date", { mode: 'string' }),
   location: text("location"),
@@ -5260,7 +5261,8 @@ export const createTournamentSchema = insertTournamentSchema.omit({
   ffaConfig: true, // Omit ffaConfig as it may not exist in database
 }).extend({
   name: z.string().min(3, "Tournament name must be at least 3 characters").max(100, "Name too long"),
-  teamSize: z.number().int().min(1, "Team size must be at least 1").max(128, "Team size too large"),
+  teamSize: z.number().int().min(1, "Team size must be at least 1").max(128, "Team size too large").optional(),
+  teamsCount: z.number().int().min(1, "Teams count must be at least 1").max(10000, "Too many teams").optional(),
   maxParticipants: z.number().int().min(2, "Need at least 2 participants").max(10000, "Too many participants").optional(),
   entryFee: z.coerce.number().min(0, "Entry fee cannot be negative").optional(),
   // Make these completely optional strings to avoid enum validation issues
@@ -5277,6 +5279,16 @@ export const createTournamentSchema = insertTournamentSchema.omit({
     errorMap: () => ({ message: "Invalid registration deadline format" })
   }).optional(),
 }).superRefine((data, ctx) => {
+  // 0. TeamSize validation - required for legacy tournaments, optional for config-driven ones
+  const hasConfig = Boolean(data.config);
+  if (!hasConfig && !data.teamSize) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Team size is required for legacy tournaments without config",
+      path: ["teamSize"]
+    });
+  }
+  
   // 1. Registration deadline must be in the future
   if (data.registrationDeadline) {
     const now = new Date();
