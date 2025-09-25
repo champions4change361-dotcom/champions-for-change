@@ -23,6 +23,7 @@ import {
   FFAAttempt,
   FFATime
 } from '@shared/bracket-generator';
+import { type TournamentConfig } from '@shared/schema';
 
 export interface LoserRoutingInfo {
   losersRound: number;
@@ -1786,8 +1787,43 @@ export class BracketGenerator {
     };
   }
 
-  // Main bracket generation method
-  static generateBracket(
+  /**
+   * Main config-driven bracket generation method
+   * @param config - TournamentConfig defining the tournament structure
+   * @param participants - Array of participant names
+   * @param tournamentId - Tournament identifier
+   * @param options - Additional options
+   */
+  static generateFromConfig(
+    config: TournamentConfig, 
+    participants: string[], 
+    tournamentId: string,
+    options: any = {}
+  ): BracketStructure | DoubleElimStructure | SwissSystemStructure | PredictionBracketStructure | CompassDrawStructure | TripleEliminationStructure | GameGuaranteeStructure | MarchMadnessBracket | MultiHeatRacingStructure | BattleRoyaleStructure | PointAccumulationStructure | TimeTrialsStructure | SurvivalEliminationStructure {
+    
+    // Filter out empty participant names
+    const validParticipants = participants.filter(participant => participant && participant.trim() !== '');
+    
+    // Extract stage configuration (using first stage for now)
+    const stage = config.stages[0];
+    if (!stage) {
+      throw new Error('Tournament configuration must have at least one stage');
+    }
+    
+    // Map stage engine to tournament type and generate bracket
+    const tournamentType = this.mapEngineToTournamentType(stage.engine);
+    
+    // Use stage-specific configuration
+    const stageOptions = {
+      ...options,
+      stageConfig: stage
+    };
+    
+    return this.generateBracket(validParticipants, tournamentId, tournamentType, config.meta.name || 'Tournament', stageOptions);
+  }
+
+  // Internal bracket generation method (kept for backward compatibility)
+  private static generateBracket(
     teams: string[], 
     tournamentId: string, 
     tournamentType: string = 'single', 
@@ -1851,6 +1887,89 @@ export class BracketGenerator {
       case 'single':
       default:
         return this.generateSingleElimination(validTeams, tournamentId);
+    }
+  }
+  
+  /**
+   * Map TournamentConfig engine types to internal tournament types
+   * This enables the existing sophisticated tournament mathematics to work with flexible configuration
+   */
+  private static mapEngineToTournamentType(engine: string): string {
+    switch (engine) {
+      case 'single':
+        return 'single';
+      case 'double':
+        return 'double';
+      case 'round_robin':
+        return 'round-robin';
+      case 'swiss':
+        return 'swiss-system';
+      case 'leaderboard':
+        return 'free-for-all';
+      default:
+        return 'single';
+    }
+  }
+  
+  /**
+   * Legacy method for backward compatibility
+   * @deprecated Use generateFromConfig with TournamentConfig instead
+   */
+  static generateBracketLegacy(
+    teams: string[], 
+    tournamentId: string, 
+    tournamentType: string = 'single', 
+    sport: string = 'Basketball',
+    options: any = {}
+  ): BracketStructure | DoubleElimStructure | SwissSystemStructure | PredictionBracketStructure | CompassDrawStructure | TripleEliminationStructure | GameGuaranteeStructure | MarchMadnessBracket | MultiHeatRacingStructure | BattleRoyaleStructure | PointAccumulationStructure | TimeTrialsStructure | SurvivalEliminationStructure {
+    
+    // Create a minimal TournamentConfig for legacy calls
+    const legacyConfig: TournamentConfig = {
+      meta: {
+        name: sport || 'Legacy Tournament',
+        participantType: 'team',
+        participantCount: teams.length
+      },
+      divisions: [{
+        name: 'Main Division',
+        eligibility: {},
+        genderPolicy: 'open'
+      }],
+      stages: [{
+        engine: this.mapTournamentTypeToEngine(tournamentType) as any,
+        size: teams.length
+      }],
+      seeding: {
+        method: 'random'
+      }
+    };
+    
+    // Use the new config-driven approach
+    return this.generateFromConfig(legacyConfig, teams, tournamentId, options);
+  }
+  
+  /**
+   * Map legacy tournament types back to engine types
+   */
+  private static mapTournamentTypeToEngine(tournamentType: string): string {
+    switch (tournamentType) {
+      case 'single':
+        return 'single';
+      case 'double':
+        return 'double';
+      case 'round-robin':
+        return 'round_robin';
+      case 'swiss-system':
+        return 'swiss';
+      case 'free-for-all':
+      case 'multi-heat-racing':
+      case 'battle-royale':
+      case 'point-accumulation':
+      case 'time-trials':
+      case 'survival-elimination':
+        return 'leaderboard';
+      default:
+        return 'single';
     }
   }
 }

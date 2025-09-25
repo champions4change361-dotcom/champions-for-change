@@ -8,6 +8,31 @@ import type {
   FFALeaderboardEntry
 } from "@shared/bracket-generator";
 
+/**
+ * Map legacy tournament types to engine types for TournamentConfig
+ */
+function mapTournamentTypeToEngine(tournamentType: string): 'single' | 'double' | 'round_robin' | 'swiss' | 'leaderboard' {
+  switch (tournamentType) {
+    case 'single':
+      return 'single';
+    case 'double':
+      return 'double';
+    case 'round-robin':
+      return 'round_robin';
+    case 'swiss-system':
+      return 'swiss';
+    case 'free-for-all':
+    case 'multi-heat-racing':
+    case 'battle-royale':
+    case 'point-accumulation':
+    case 'time-trials':
+    case 'survival-elimination':
+      return 'leaderboard';
+    default:
+      return 'single';
+  }
+}
+
 export function registerTournamentRoutes(app: Express) {
   // Sport Events API Routes
   app.get("/api/sports/:sportId/events", async (req, res) => {
@@ -516,13 +541,49 @@ export function registerTournamentRoutes(app: Express) {
         });
       }
       
-      // Generate bracket structure using config-driven parameters
-      const bracketStructure = BracketGenerator.generateBracket(
-        participantNames,
-        '',  // Tournament ID will be set after creation
-        bracketParams.tournamentType,
-        bracketParams.competitionName
-      );
+      // Generate bracket structure using TournamentConfig - NOW FULLY CONFIGURATION-DRIVEN!
+      let bracketStructure;
+      if (validatedConfig) {
+        // Use new configuration-driven approach
+        bracketStructure = BracketGenerator.generateFromConfig(
+          validatedConfig, // Pass the complete TournamentConfig
+          participantNames,
+          '',  // Tournament ID will be set after creation
+          {
+            formatConfig: bracketParams.formatConfig || {}
+          }
+        );
+      } else {
+        // Create minimal TournamentConfig for backward compatibility
+        const compatibilityConfig: TournamentConfig = {
+          meta: {
+            name: bracketParams.competitionName || 'Universal Competition',
+            participantType: bracketParams.participantType === 'individual' ? 'individual' : 'team',
+            participantCount: bracketParams.participantCount
+          },
+          divisions: [{
+            name: 'Main Division',
+            eligibility: {},
+            genderPolicy: 'open'
+          }],
+          stages: [{
+            engine: mapTournamentTypeToEngine(bracketParams.tournamentType || 'single'),
+            size: bracketParams.participantCount
+          }],
+          seeding: {
+            method: 'random'
+          }
+        };
+        
+        bracketStructure = BracketGenerator.generateFromConfig(
+          compatibilityConfig,
+          participantNames,
+          '',  // Tournament ID will be set after creation
+          {
+            formatConfig: bracketParams.formatConfig || {}
+          }
+        );
+      }
       
       // Ensure we have valid bracketParams before proceeding
       if (!bracketParams || bracketParams.participantCount === undefined) {

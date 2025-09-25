@@ -1,8 +1,33 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { Request, Response } from 'express';
 import { storage } from './storage';
-import { insertTournamentSchema } from '@shared/schema';
+import { insertTournamentSchema, type TournamentConfig } from '@shared/schema';
 import { BracketGenerator } from './utils/bracket-generator';
+
+/**
+ * Map legacy tournament types to engine types for TournamentConfig
+ */
+function mapTournamentTypeToEngine(tournamentType: string): 'single' | 'double' | 'round_robin' | 'swiss' | 'leaderboard' {
+  switch (tournamentType) {
+    case 'single':
+      return 'single';
+    case 'double':
+      return 'double';
+    case 'round-robin':
+      return 'round_robin';
+    case 'swiss-system':
+      return 'swiss';
+    case 'free-for-all':
+    case 'multi-heat-racing':
+    case 'battle-royale':
+    case 'point-accumulation':
+    case 'time-trials':
+    case 'survival-elimination':
+      return 'leaderboard';
+    default:
+      return 'single';
+  }
+}
 
 /*
 <important_code_snippet_instructions>
@@ -100,12 +125,32 @@ async function createTournamentWithAI(
       teams = Array.from({ length: tournamentDetails.teamCount }, (_, i) => `Team ${i + 1}`);
     }
 
-    // Generate bracket structure
-    const bracketStructure = BracketGenerator.generateBracket(
+    // Generate bracket structure using config-driven approach
+    const tournamentConfig: TournamentConfig = {
+      meta: {
+        name: tournamentDetails.name || `${tournamentDetails.sport} Tournament`,
+        participantType: 'team',
+        participantCount: teams.length,
+        teamSize: tournamentDetails.teamSize
+      },
+      divisions: [{
+        name: 'Main Division',
+        eligibility: {},
+        genderPolicy: 'open'
+      }],
+      stages: [{
+        engine: mapTournamentTypeToEngine(tournamentDetails.tournamentType || 'single'),
+        size: teams.length
+      }],
+      seeding: {
+        method: 'random'
+      }
+    };
+
+    const bracketStructure = BracketGenerator.generateFromConfig(
+      tournamentConfig,
       teams,
-      '',
-      tournamentDetails.tournamentType || 'single',
-      tournamentDetails.sport || 'Basketball'
+      ''
     );
 
     // Handle divisions - split teams into divisions if specified
@@ -267,7 +312,7 @@ Otherwise, respond conversationally to help gather the needed information.`;
       tournament: null,
       conversation_state: null,
       ai_provider: 'anthropic',
-      error: error.message
+      error: error instanceof Error ? error.message : String(error)
     });
   }
 }

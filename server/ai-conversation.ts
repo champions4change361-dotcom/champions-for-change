@@ -1,7 +1,32 @@
 import type { Request, Response } from 'express';
 import { storage } from './storage';
-import { insertTournamentSchema } from '@shared/schema';
+import { insertTournamentSchema, type TournamentConfig } from '@shared/schema';
 import { BracketGenerator } from './utils/bracket-generator';
+
+/**
+ * Map legacy tournament types to engine types for TournamentConfig
+ */
+function mapTournamentTypeToEngine(tournamentType: string): 'single' | 'double' | 'round_robin' | 'swiss' | 'leaderboard' {
+  switch (tournamentType) {
+    case 'single':
+      return 'single';
+    case 'double':
+      return 'double';
+    case 'round-robin':
+      return 'round_robin';
+    case 'swiss-system':
+      return 'swiss';
+    case 'free-for-all':
+    case 'multi-heat-racing':
+    case 'battle-royale':
+    case 'point-accumulation':
+    case 'time-trials':
+    case 'survival-elimination':
+      return 'leaderboard';
+    default:
+      return 'single';
+  }
+}
 
 interface ConversationMessage {
   role: 'user' | 'assistant';
@@ -81,15 +106,36 @@ async function createTournamentForUser(
       };
     }
 
-    // Generate bracket structure first
+    // Generate bracket structure using config-driven approach
     const teams = Array.isArray(tournamentDetails.teams) ? tournamentDetails.teams : [];
     const teamNames = teams.map((team: any) => typeof team === 'string' ? team : team.teamName);
     
-    const bracketStructure = BracketGenerator.generateBracket(
+    // Create TournamentConfig for AI-driven creation
+    const tournamentConfig: TournamentConfig = {
+      meta: {
+        name: tournamentDetails.name || `${tournamentDetails.sport} Tournament`,
+        participantType: 'team',
+        participantCount: teamNames.length,
+        teamSize: tournamentDetails.teamSize
+      },
+      divisions: [{
+        name: 'Main Division',
+        eligibility: {},
+        genderPolicy: 'open'
+      }],
+      stages: [{
+        engine: mapTournamentTypeToEngine(tournamentDetails.tournamentType || 'single'),
+        size: teamNames.length
+      }],
+      seeding: {
+        method: 'random'
+      }
+    };
+
+    const bracketStructure = BracketGenerator.generateFromConfig(
+      tournamentConfig,
       teamNames,
-      '',
-      tournamentDetails.tournamentType || 'single',
-      tournamentDetails.sport || 'Basketball'
+      ''
     );
 
     // Add bracket to tournament data

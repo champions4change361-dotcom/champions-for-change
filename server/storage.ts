@@ -2089,12 +2089,32 @@ export class DbStorage implements IStorage {
       // Extract participant names for BracketGenerator
       const participantNames = config.teams.map(p => p.name);
 
-      // Generate FFA bracket structure using proper BracketGenerator
-      const bracketStructure = BracketGenerator.generateBracket(
+      // Generate FFA bracket structure using config-driven approach
+      const tournamentConfig = {
+        meta: {
+          name: 'FFA Competition',
+          participantType: 'individual' as const,
+          participantCount: participantNames.length
+        },
+        divisions: [{
+          name: 'Main Division',
+          eligibility: {},
+          genderPolicy: 'open' as const
+        }],
+        stages: [{
+          engine: 'leaderboard' as const, // FFA tournaments use leaderboard engine
+          size: participantNames.length
+        }],
+        seeding: {
+          method: 'random' as const
+        }
+      };
+
+      const bracketStructure = BracketGenerator.generateFromConfig(
+        tournamentConfig,
         participantNames,
-        config.tournamentType,
         tournamentId,
-        JSON.stringify(config.formatConfig)
+        config.formatConfig
       );
 
       // Convert participants to FFA format with proper structure
