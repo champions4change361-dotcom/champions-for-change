@@ -29,6 +29,7 @@ interface LeaderboardEntry {
   eventName?: string;
   measurement: string;
   unit: string;
+  scoringDirection?: 'higher-better' | 'lower-better';
   status: 'active' | 'completed' | 'disqualified';
   personalBest?: boolean;
   seasonBest?: boolean;
@@ -141,13 +142,20 @@ export default function SportSpecificLeaderboard({ tournament }: SportSpecificLe
     return acc;
   }, {} as Record<string, LeaderboardEntry[]>);
 
-  // Sort entries based on sport configuration
+  // Sort entries using universal scoring direction logic
   Object.keys(groupedEntries).forEach(eventKey => {
     groupedEntries[eventKey].sort((a, b) => {
-      if (sportConfig.sortDirection === 'asc') {
-        return a.score - b.score; // Lower is better (time, golf score)
+      // Check if we have event-specific scoring direction
+      const eventScoringDirection = entries.find(e => e.eventName === eventKey)?.scoringDirection;
+      
+      // Use event-specific direction, fallback to sport config, then default to higher-better
+      const shouldLowerWin = eventScoringDirection === 'lower-better' || 
+                           (eventScoringDirection === undefined && sportConfig.sortDirection === 'asc');
+      
+      if (shouldLowerWin) {
+        return a.score - b.score; // Lower is better (time, golf closest-to-pin)
       } else {
-        return b.score - a.score; // Higher is better (points, weight)
+        return b.score - a.score; // Higher is better (distance, points)
       }
     });
 
@@ -293,13 +301,16 @@ export default function SportSpecificLeaderboard({ tournament }: SportSpecificLe
 
             <div>
               <Input
-                placeholder={`Result (${sportConfig.unit})`}
+                placeholder={`Result (${sportConfig.unit} - decimal format)`}
                 value={newScore}
                 onChange={(e) => setNewScore(e.target.value)}
                 type="number"
                 step="0.01"
                 data-testid="input-score"
               />
+              <p className="text-xs text-gray-600 mt-1">
+                {sportConfig.sortDirection === 'asc' ? '⬇️ Lower is better' : '⬆️ Higher is better'} • Use decimal format (e.g., 12.50 ft or 11.24 sec)
+              </p>
             </div>
 
             <Button 

@@ -365,8 +365,15 @@ export default function TrackFieldTournament({ tournamentId, tournamentName }: T
                   id="result"
                   value={newParticipant.result}
                   onChange={(e) => setNewParticipant(prev => ({ ...prev, result: e.target.value }))}
-                  placeholder="Enter result"
+                  placeholder="Enter result (decimal format)"
+                  type="number"
+                  step="0.01"
                 />
+                <p className="text-xs text-gray-600 mt-1">
+                  {trackEvents.find(e => e.id === selectedEvent)?.scoringMethod === 'time' 
+                    ? '⬇️ Lower time is better' 
+                    : '⬆️ Higher distance/height is better'} • Use decimal format (e.g., 12.50 ft or 11.24 sec)
+                </p>
               </div>
             </div>
             <div className="flex gap-2 mt-4">

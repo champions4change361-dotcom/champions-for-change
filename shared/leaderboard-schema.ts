@@ -28,6 +28,7 @@ export const tournamentEvents = pgTable("tournament_events", {
   eventCategory: text("event_category"), // "Track", "Field", "Distance", etc.
   scoringMethod: text("scoring_method").notNull(), // "time", "distance", "points"
   unit: text("unit"), // "seconds", "meters", "points"
+  scoringDirection: text("scoring_direction", { enum: ["higher-better", "lower-better"] }).notNull().default("higher-better"), // Universal scoring logic
   maxAttempts: integer("max_attempts").default(1),
   isCompleted: integer("is_completed").default(0), // Use integer for SQLite compatibility
   startTime: timestamp("start_time"),
@@ -44,6 +45,7 @@ export const insertLeaderboardEntrySchema = createInsertSchema(leaderboardEntrie
 export const insertTournamentEventSchema = createInsertSchema(tournamentEvents, {
   eventName: z.string().min(1),
   scoringMethod: z.enum(["time", "distance", "points"]),
+  scoringDirection: z.enum(["higher-better", "lower-better"]),
 }).omit({
   id: true,
 });

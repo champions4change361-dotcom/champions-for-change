@@ -127,13 +127,16 @@ export default function LeaderboardView({ tournament }: LeaderboardViewProps) {
               data-testid="input-participant-name"
             />
             <Input
-              placeholder="Score"
+              placeholder="Score (decimal format)"
               value={newScore}
               onChange={(e) => setNewScore(e.target.value)}
               type="number"
               step="0.01"
               data-testid="input-score"
             />
+            <div className="text-xs text-gray-600 mt-1">
+              ⬆️ Higher scores rank better • Use decimal format (e.g., 12.50, 11.24)
+            </div>
             <Button 
               onClick={handleAddEntry}
               disabled={addEntryMutation.isPending}
