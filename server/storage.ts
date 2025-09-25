@@ -1935,6 +1935,12 @@ export class DbStorage implements IStorage {
       }
       if (insertTournament.donationDescription !== undefined) coreTournamentData.donationDescription = insertTournament.donationDescription;
 
+      // CRITICAL: Handle TournamentConfig validation and persistence
+      if (insertTournament.config !== undefined) {
+        coreTournamentData.config = insertTournament.config;
+        console.log('✓ TournamentConfig persisted to database:', typeof insertTournament.config);
+      }
+
       // Step 2: Create core tournament record
       const [createdTournament] = await tx.insert(tournaments).values(coreTournamentData).returning();
 

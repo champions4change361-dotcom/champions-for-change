@@ -21,12 +21,22 @@ import { insertTournamentSchema } from "@shared/schema";
 import TeamManagement from "@/components/team-management";
 import { type TeamData } from "@/utils/csv-utils";
 import AddressAutocomplete from "@/components/AddressAutocomplete";
-import { getEventsForSport, type SportEventDefinition } from "@shared/sportEvents";
+import { tournamentConfigSchema, type TournamentConfig } from "@shared/schema";
 import { generateRandomNames } from "@/utils/name-generator";
-import { ComprehensiveTournamentFormatSelector, SportSpecificConfig, allTournamentFormats, type TournamentFormatConfig } from "./comprehensive-tournament-formats";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
-const formSchema = insertTournamentSchema.extend({
-  teamSize: z.number().min(1).max(128), // Support 1-128 teams for flexibility
+// Form schema that aligns with TournamentConfig structure but uses flat fields for UI
+const formSchema = z.object({
+  // Meta fields from TournamentConfig.meta
+  name: z.string().min(1, "Tournament name is required"),
+  participantType: z.enum(["individual", "team"]).default("individual"),
+  teamSize: z.number().min(1).max(128).optional(),
+  participantCount: z.number().min(1).optional(),
+  
+  // Tournament structure configuration  
   tournamentType: z.enum([
     "single", "double", "double-stage", "pool-play", "round-robin", "swiss-system",
     "match-play", "stroke-play", "scramble", "best-ball", "alternate-shot", "modified-stableford",
@@ -34,26 +44,47 @@ const formSchema = insertTournamentSchema.extend({
     "multi-event-scoring", "preliminary-finals", "heat-management", "skills-competition", "draw-management",
     "group-stage-knockout", "home-away-series", "prediction-bracket", "compass-draw", "triple-elimination", 
     "game-guarantee", "march-madness", "free-for-all", "multi-heat-racing", "battle-royale", 
-    "point-accumulation", "time-trials", "survival-elimination"
+    "point-accumulation", "time-trials", "survival-elimination", "ladder"
   ]).default("single"),
-  competitionFormat: z.enum([
-    "bracket", "leaderboard", "series", "bracket-to-series", "multi-stage",
-    "round-robin-pools", "elimination-pools", "consolation-bracket", "team-vs-individual",
-    "portfolio-review", "oral-competition", "written-test", "judged-performance", 
-    "timed-competition", "scoring-average", "advancement-ladder", "rating-system",
-    "prediction-scoring", "multiple-bracket-system", "three-bracket-system", "guarantee-system", "regional-bracket"
-  ]).default("bracket"),
-  ageGroup: z.string().optional(),
-  genderDivision: z.string().optional(),
-  skillLevel: z.string().optional(), // Add skillLevel field
-  entryFee: z.string().optional(), // Convert to string for numeric database field
-  tournamentDate: z.string().optional(), // ISO string for date field
-  // Calendar discoverability fields
+  
+  // Scoring method configuration
+  scoringMethod: z.enum([
+    "head-to-head", "performance-score", "fastest-time", "greatest-distance", 
+    "points-accumulated", "judged-performance", "custom"
+  ]).default("head-to-head"),
+  
+  // Division configuration
+  hasDivisions: z.boolean().default(false),
+  divisionType: z.enum(["age", "skill", "weight", "grade", "custom"]).optional(),
+  
+  // Event structure
+  eventStructure: z.enum(["single-event", "multi-event"]).default("single-event"),
+  
+  // Tournament settings (from insertTournamentSchema for legacy compatibility)
+  sport: z.string().optional(),
+  description: z.string().optional(),
+  location: z.string().optional(),
+  maxParticipants: z.number().optional(),
+  entryFee: z.string().optional(),
+  tournamentDate: z.string().optional(),
+  registrationDeadline: z.string().optional(),
+  status: z.enum(["draft", "published", "registration_open", "registration_closed", "active", "completed", "cancelled"]).default("draft"),
+  
+  // Calendar visibility settings
   isPublicCalendarVisible: z.boolean().optional(),
   calendarRegion: z.string().optional(),
   calendarCity: z.string().optional(),
   calendarStateCode: z.string().optional(),
   calendarTags: z.array(z.string()).optional(),
+}).refine((data) => {
+  // Conditional validation: teamSize required for team competitions
+  if (data.participantType === "team" && !data.teamSize) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Team size is required for team competitions",
+  path: ["teamSize"]
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -64,18 +95,18 @@ interface EnhancedTournamentWizardProps {
   userType?: 'district' | 'enterprise' | 'free' | 'general';
 }
 
-type WizardStep = 'sport' | 'events' | 'settings' | 'launch';
+type WizardStep = 'configuration' | 'structure' | 'settings' | 'launch';
 
 const stepTitles = {
-  sport: 'Choose Sport & Format',
-  events: 'Select Events & Results Recorders',
+  configuration: 'Competition Configuration',
+  structure: 'Tournament Structure',
   settings: 'Tournament Settings',
   launch: 'Launch Tournament'
 };
 
 const stepDescriptions = {
-  sport: 'Select your sport and competition format',
-  events: 'Choose events and assign Results Recorders for each',
+  configuration: 'Define your competition and participant structure',
+  structure: 'Choose tournament format and divisions',
   settings: 'Configure tournament details and registration settings',
   launch: 'Tournament is ready for participant registration!'
 };
@@ -89,216 +120,250 @@ export default function EnhancedTournamentWizard({
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const generateFFATournament = useGenerateFFATournament();
-  const [currentStep, setCurrentStep] = useState<WizardStep>('sport');
-  const [selectedEvents, setSelectedEvents] = useState<SportEventDefinition[]>([]);
-  const [eventRecorders, setEventRecorders] = useState<Record<string, string>>({});
-  const [selectedSkillLevel, setSelectedSkillLevel] = useState<string>('');
+  const [currentStep, setCurrentStep] = useState<WizardStep>('configuration');
   const [createdTournament, setCreatedTournament] = useState<any>(null);
   const [isDraftSaving, setIsDraftSaving] = useState(false);
   const [autoSaveStatus, setAutoSaveStatus] = useState<'saved' | 'saving' | 'error' | null>(null);
   
-  // COMPREHENSIVE TOURNAMENT FORMAT STATE
-  const [selectedTournamentFormat, setSelectedTournamentFormat] = useState<TournamentFormatConfig | null>(null);
-  const [sportSpecificConfig, setSportSpecificConfig] = useState<Record<string, any>>({});
+  // CONFIGURATION-DRIVEN STATE
+  const [tournamentConfig, setTournamentConfig] = useState<Partial<TournamentConfig>>({});
+  const [divisions, setDivisions] = useState<Array<{
+    name: string;
+    eligibility: {
+      ageBand?: { min?: number; max?: number };
+      gradeBand?: { min?: number; max?: number };
+      weightClassKg?: { min?: number; max?: number };
+      openText?: string;
+    };
+    genderPolicy: 'male' | 'female' | 'mixed' | 'coed' | 'open';
+  }>>([]);
+  const [customEvents, setCustomEvents] = useState<Array<{
+    name: string;
+    measureType: string;
+    unit: string;
+    maxParticipants?: number;
+  }>>([]);
+
+  // CONFIGURATION OPTIONS FOR FLEXIBLE TOURNAMENTS
+  const participantTypeOptions = [
+    { value: 'individual', label: 'Individual Competitors', description: 'Single participants competing against each other' },
+    { value: 'team', label: 'Team Competition', description: 'Groups of participants competing as teams' }
+  ];
   
-  // Stage format configuration
-  const [stage1Format, setStage1Format] = useState<string>('round-robin');
-  const [stage2Format, setStage2Format] = useState<string>('single-elimination');
+  const scoringMethodOptions = [
+    { value: 'head-to-head', label: 'Head-to-Head Matches', description: 'Direct competition between participants/teams' },
+    { value: 'performance-score', label: 'Best Performance/Score', description: 'Highest score wins (points, ratings, etc.)' },
+    { value: 'fastest-time', label: 'Fastest Time', description: 'Shortest completion time wins' },
+    { value: 'greatest-distance', label: 'Greatest Distance', description: 'Longest distance wins' },
+    { value: 'points-accumulated', label: 'Most Points Accumulated', description: 'Total points across multiple rounds/events' },
+    { value: 'judged-performance', label: 'Judged Performance', description: 'Panel of judges scores performances' },
+    { value: 'custom', label: 'Custom Scoring', description: 'Define your own scoring method' }
+  ];
+  
+  const divisionTypeOptions = [
+    { value: 'age', label: 'Age Groups', description: 'Divide by age ranges' },
+    { value: 'skill', label: 'Skill Level', description: 'Beginner, Intermediate, Advanced, etc.' },
+    { value: 'weight', label: 'Weight Classes', description: 'Weight-based divisions' },
+    { value: 'grade', label: 'Grade Level', description: 'School grade-based divisions' },
+    { value: 'custom', label: 'Custom Categories', description: 'Create your own division types' }
+  ];
 
-  // Cascading dropdown state
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
-  const [selectedSubcategory, setSelectedSubcategory] = useState<string>('');
-
-  // Comprehensive sport categories system
-  const sportCategories = {
-    athletic: {
-      name: 'Athletic',
-      subcategories: {
-        team_sports: {
-          name: 'Team Sports',
-          sports: [
-            'Basketball (Boys)', 'Basketball (Girls)', 'Football', 'Soccer (Boys)', 'Soccer (Girls)',
-            'Volleyball (Boys)', 'Volleyball (Girls)', 'Baseball', 'Softball', 'Hockey',
-            'Rugby', 'Ultimate Frisbee', 'Water Polo', 'Field Hockey', 'Lacrosse (Boys)', 
-            'Lacrosse (Girls)', 'Team Handball', 'Flag Football', 'Futsal'
-          ]
-        },
-        individual_sports: {
-          name: 'Individual Sports',
-          sports: [
-            'Track & Field', 'Swimming & Diving', 'Cross Country', 'Tennis (Boys)',
-            'Tennis (Girls)', 'Golf (Boys)', 'Golf (Girls)', 'Wrestling', 'Gymnastics',
-            'Archery', 'Bowling', 'Martial Arts', 'Cycling', 'Fencing', 'Badminton',
-            'Table Tennis', 'Squash', 'Racquetball', 'Rock Climbing', 'Triathlon'
-          ]
-        },
-        winter_sports: {
-          name: 'Winter Sports',
-          sports: [
-            'Alpine Skiing', 'Nordic Skiing', 'Snowboarding', 'Ice Hockey', 'Figure Skating', 
-            'Curling', 'Speed Skating', 'Biathlon', 'Ski Jumping', 'Cross Country Skiing',
-            'Ice Dancing', 'Bobsled', 'Luge', 'Skeleton'
-          ]
-        },
-        emerging_sports: {
-          name: 'Emerging Sports',
-          sports: [
-            'Esports', 'Drone Racing', 'Parkour', 'Surfing', 'Skateboarding', 'Sport Climbing',
-            'Breakdancing', 'Mixed Martial Arts', 'Obstacle Course Racing', 'Spikeball',
-            'Cornhole', 'Disc Golf', 'Pickleball', 'Axe Throwing', 'Stand-Up Paddleboard'
-          ]
-        },
-        adaptive_sports: {
-          name: 'Adaptive & Inclusive Sports',
-          sports: [
-            'Wheelchair Basketball', 'Wheelchair Racing', 'Sitting Volleyball', 'Goalball',
-            'Boccia', 'Powerlifting (Adaptive)', 'Swimming (Adaptive)', 'Archery (Adaptive)',
-            'Table Tennis (Adaptive)', 'Unified Sports', 'Special Olympics Events',
-            'Blind Soccer', 'Wheelchair Tennis', 'Para Athletics', 'Sledge Hockey'
-          ]
-        }
+  // Configuration-driven tournament format selection
+  const [selectedTournamentFormat, setSelectedTournamentFormat] = useState<any>(null);
+  
+  // Get available tournament formats based on configuration
+  const getAvailableTournamentFormats = () => {
+    const competitionName = form.watch("name") || "";
+    const participantType = form.watch("participantType");
+    const scoringMethod = form.watch("scoringMethod");
+    
+    // Return comprehensive tournament formats based on configuration
+    // This replaces sport-specific format selection with configuration-driven selection
+    return [
+      {
+        id: "single-elimination",
+        name: "Single Elimination",
+        description: "Teams compete head-to-head, losers are eliminated",
+        tournamentType: "single",
+        suitable: ["head-to-head"]
+      },
+      {
+        id: "double-elimination", 
+        name: "Double Elimination",
+        description: "Teams get a second chance in losers bracket",
+        tournamentType: "double",
+        suitable: ["head-to-head"]
+      },
+      {
+        id: "round-robin",
+        name: "Round Robin", 
+        description: "Everyone plays everyone, most fair format",
+        tournamentType: "round-robin",
+        suitable: ["head-to-head", "performance-score"]
+      },
+      {
+        id: "swiss-system",
+        name: "Swiss System",
+        description: "Smart pairing based on performance, no elimination",
+        tournamentType: "swiss-system", 
+        suitable: ["head-to-head", "performance-score", "points-accumulated"]
+      },
+      {
+        id: "pool-play",
+        name: "Pool Play + Bracket",
+        description: "Group stage followed by elimination bracket",
+        tournamentType: "pool-play",
+        suitable: ["head-to-head"]
+      },
+      {
+        id: "leaderboard",
+        name: "Leaderboard Competition",
+        description: "Individual scoring, ranked by performance",
+        tournamentType: "point-accumulation",
+        suitable: ["performance-score", "fastest-time", "greatest-distance", "points-accumulated", "judged-performance"]
+      },
+      {
+        id: "multi-event",
+        name: "Multi-Event Competition",
+        description: "Multiple events with combined scoring",
+        tournamentType: "multi-event-scoring",
+        suitable: ["performance-score", "points-accumulated"]
+      },
+      {
+        id: "time-trials",
+        name: "Time Trials",
+        description: "Individual time-based competition with best attempts",
+        tournamentType: "time-trials",
+        suitable: ["fastest-time"]
+      },
+      {
+        id: "battle-royale",
+        name: "Battle Royale",
+        description: "Large field elimination with progressive rounds", 
+        tournamentType: "battle-royale",
+        suitable: ["head-to-head", "performance-score"]
+      },
+      {
+        id: "skills-competition",
+        name: "Skills Competition",
+        description: "Multiple skill-based events and challenges",
+        tournamentType: "skills-competition",
+        suitable: ["performance-score", "judged-performance"]
+      },
+      {
+        id: "ladder-tournament",
+        name: "Ladder Tournament",
+        description: "Challenge-based ranking system over time",
+        tournamentType: "ladder",
+        suitable: ["head-to-head"]
       }
-    },
-    academic: {
-      name: 'Academic',
-      subcategories: {
-        uil_academic: {
-          name: 'UIL Academic Competitions',
-          sports: [
-            'Accounting', 'Calculator Applications', 'Computer Applications', 'Computer Science',
-            'Current Issues & Events', 'Economics', 'Literary Criticism', 'Mathematics',
-            'Number Sense', 'Science', 'Social Studies', 'Spelling & Vocabulary'
-          ]
-        },
-        speech_debate: {
-          name: 'Speech & Debate',
-          sports: [
-            'Cross Examination Debate', 'Lincoln-Douglas Debate', 'Informative Speaking',
-            'Persuasive Speaking', 'Poetry Interpretation', 'Prose Interpretation',
-            'Extemporaneous Speaking', 'Original Oratory'
-          ]
-        },
-        stem_competitions: {
-          name: 'STEM Competitions',
-          sports: [
-            'Science Olympiad', 'Math Olympiad', 'Robotics Competition', 'Engineering Challenge',
-            'Programming Competition', 'Quiz Bowl', 'Academic Decathlon', 'Destination Imagination'
-          ]
-        }
-      }
-    },
-    fine_arts: {
-      name: 'Fine Arts',
-      subcategories: {
-        music: {
-          name: 'Music',
-          sports: [
-            'Concert Band', 'Marching Band', 'Jazz Band', 'Orchestra', 'Choir',
-            'Solo & Ensemble', 'All-State Auditions', 'Piano Competition'
-          ]
-        },
-        visual_arts: {
-          name: 'Visual Arts',
-          sports: [
-            'Art Competition', 'Photography', 'Digital Art', 'Sculpture',
-            'Painting', 'Drawing', 'Ceramics', 'Graphic Design'
-          ]
-        },
-        performing_arts: {
-          name: 'Performing Arts',
-          sports: [
-            'One Act Play', 'Musical Theater', 'Dance Competition', 'Drama',
-            'Improvisation', 'Monologue Competition', 'Technical Theater'
-          ]
-        }
-      }
-    }
+    ].filter(format => {
+      // Filter formats based on scoring method compatibility
+      if (!scoringMethod) return true;
+      return format.suitable.includes(scoringMethod);
+    });
   };
 
-  const { data: sports = [] } = useQuery<any[]>({
-    queryKey: ["/api/sports"],
-  });
-
-  // Get available sports based on selected category and subcategory
-  const getAvailableSports = () => {
-    if (!selectedCategory || !selectedSubcategory) return [];
-    
-    const category = sportCategories[selectedCategory as keyof typeof sportCategories];
-    if (!category) return [];
-    
-    const subcategory = (category.subcategories as any)[selectedSubcategory];
-    return subcategory ? subcategory.sports : [];
+  // Helper functions for configuration-driven tournaments
+  const addDivision = () => {
+    setDivisions(prev => [...prev, {
+      name: '',
+      eligibility: {},
+      genderPolicy: 'mixed' as 'male' | 'female' | 'mixed' | 'coed' | 'open'
+    }]);
+  };
+  
+  const removeDivision = (index: number) => {
+    setDivisions(prev => prev.filter((_, i) => i !== index));
+  };
+  
+  const updateDivision = (index: number, field: string, value: any) => {
+    setDivisions(prev => prev.map((div, i) => 
+      i === index ? { ...div, [field]: value } : div
+    ));
+  };
+  
+  const addCustomEvent = () => {
+    setCustomEvents(prev => [...prev, {
+      name: '',
+      measureType: 'score',
+      unit: '',
+      maxParticipants: undefined
+    }]);
+  };
+  
+  const removeCustomEvent = (index: number) => {
+    setCustomEvents(prev => prev.filter((_, i) => i !== index));
+  };
+  
+  const getTeamSizeSuggestions = (competitionName: string) => {
+    const name = competitionName.toLowerCase();
+    if (name.includes('cornhole')) return { min: 2, max: 2, suggested: 2 };
+    if (name.includes('trivia') || name.includes('quiz')) return { min: 1, max: 6, suggested: 4 };
+    if (name.includes('basketball')) return { min: 5, max: 12, suggested: 8 };
+    if (name.includes('volleyball')) return { min: 6, max: 12, suggested: 9 };
+    if (name.includes('soccer') || name.includes('football')) return { min: 11, max: 20, suggested: 16 };
+    if (name.includes('debate')) return { min: 2, max: 4, suggested: 2 };
+    if (name.includes('academic')) return { min: 1, max: 8, suggested: 4 };
+    return { min: 1, max: 10, suggested: 4 };
   };
 
-  // Reset selections when category changes
-  const handleCategoryChange = (category: string) => {
-    setSelectedCategory(category);
-    setSelectedSubcategory('');
-    form.setValue("sport", "");
-  };
-
-  // Reset sport when subcategory changes
-  const handleSubcategoryChange = (subcategory: string) => {
-    setSelectedSubcategory(subcategory);
-    form.setValue("sport", "");
-  };
-
-  // Get smart age group options based on selected sport
-  const getAgeGroupsForSport = (sport: string): string[] => {
-    if (!sport) return ['Elementary', 'Middle School', 'High School', 'College', 'Adult', 'Masters', 'Senior'];
-    
-    // Sports that use "U" (Under) age designations
-    if (sport.includes('Basketball') || sport.includes('Soccer') || sport.includes('Baseball') || sport.includes('Softball') || sport.includes('Hockey')) {
-      return ['8U', '10U', '12U', '14U', '16U', '18U', 'High School JV', 'High School Varsity', 'College', 'Adult', 'Masters (35+)', 'Senior (50+)'];
+  // Convert tournament type to engine type for TournamentConfig
+  const getTournamentEngine = (tournamentType: string): 'single' | 'double' | 'round_robin' | 'swiss' | 'point_accumulation' => {
+    switch (tournamentType) {
+      case 'single-elimination':
+      case 'single':
+        return 'single';
+      case 'double-elimination':
+      case 'double':
+      case 'double-stage':
+        return 'double';
+      case 'round-robin':
+        return 'round_robin';
+      case 'swiss-system':
+        return 'swiss';
+      case 'pool-play':
+        return 'round_robin'; // Pool play uses round robin in groups
+      case 'leaderboard':
+      case 'point-accumulation':
+      case 'multi-event':
+      case 'multi-event-scoring':
+      case 'time-trials':
+      case 'skills-competition':
+        return 'point_accumulation';
+      case 'battle-royale':
+      case 'survival-elimination':
+        return 'single'; // Uses single elimination structure
+      case 'ladder':
+        return 'swiss'; // Ladder uses swiss-like pairing
+      // Additional tournament types from enum
+      case 'match-play':
+      case 'stroke-play':
+      case 'scramble':
+      case 'best-ball':
+      case 'alternate-shot':
+      case 'modified-stableford':
+      case 'playoff-bracket':
+      case 'conference-championship':
+      case 'dual-meet':
+      case 'triangular-meet':
+      case 'weight-class-bracket':
+      case 'preliminary-finals':
+      case 'heat-management':
+      case 'draw-management':
+      case 'group-stage-knockout':
+      case 'home-away-series':
+      case 'prediction-bracket':
+      case 'compass-draw':
+      case 'triple-elimination':
+      case 'game-guarantee':
+      case 'march-madness':
+      case 'free-for-all':
+      case 'multi-heat-racing':
+        return 'single'; // Most specialized formats use single elimination base
+      default:
+        return 'single';
     }
-    
-    // Football uses grade/school-based divisions
-    if (sport.includes('Football')) {
-      return ['Youth (6-8)', 'Youth (9-11)', 'Middle School', 'Freshman', 'JV', 'Varsity', 'College', 'Semi-Pro', 'Adult'];
-    }
-    
-    // Wrestling uses weight classes AND age groups
-    if (sport.includes('Wrestling')) {
-      return ['Youth', 'Middle School', 'High School', 'College', 'Open/Senior', 'Masters (35+)', 'Veterans (50+)'];
-    }
-    
-    // Swimming uses age ranges
-    if (sport.includes('Swimming') || sport.includes('Diving')) {
-      return ['8 & Under', '9-10', '11-12', '13-14', '15-16', '17-18', 'College', 'Open', 'Masters (25+)', 'Senior (50+)'];
-    }
-    
-    // Track & Field uses school/age divisions
-    if (sport.includes('Track') || sport.includes('Field') || sport.includes('Cross Country')) {
-      return ['Youth (Under 12)', 'Youth (12-14)', 'Youth (15-17)', 'High School', 'College', 'Open', 'Masters (35+)', 'Senior (50+)'];
-    }
-    
-    // Golf and Tennis use skill-based and age divisions
-    if (sport.includes('Golf') || sport.includes('Tennis')) {
-      return ['Junior (Under 12)', 'Junior (12-14)', 'Junior (15-18)', 'High School', 'College', 'Open', 'Senior (50+)', 'Super Senior (65+)'];
-    }
-    
-    // Academic competitions use grade levels
-    if (['Academic', 'STEM', 'Speech & Debate', 'Music', 'Visual Arts', 'Theater'].some(cat => sport.includes(cat))) {
-      return ['2nd Grade', '3rd Grade', '4th Grade', '5th Grade', '6th Grade', '7th Grade', '8th Grade', '9th Grade', '10th Grade', '11th Grade', '12th Grade', 'College'];
-    }
-    
-    // Emerging sports often exclude elementary
-    if (['Esports', 'Drone Racing', 'Mixed Martial Arts', 'Axe Throwing'].includes(sport)) {
-      return ['High School', 'College', 'Adult', 'Masters'];
-    }
-    
-    // Winter sports typically need more facilities
-    if (sport.includes('Skiing') || sport.includes('Snowboard') || sport.includes('Ice') || sport.includes('Curling')) {
-      return ['Middle School', 'High School', 'College', 'Adult', 'Masters'];
-    }
-    
-    // Adaptive sports emphasize inclusion
-    if (sport.includes('Wheelchair') || sport.includes('Adaptive') || sport.includes('Special Olympics')) {
-      return ['Elementary', 'Middle School', 'High School', 'College', 'Adult', 'Masters', 'Senior', 'All Ages'];
-    }
-    
-    // Most traditional sports use school-based divisions
-    return ['Elementary', 'Middle School', 'High School', 'College', 'Adult', 'Masters'];
   };
 
   // Get appropriate description for age groups
@@ -835,11 +900,26 @@ export default function EnhancedTournamentWizard({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      teamSize: 8,
+      participantType: "individual",
+      teamSize: 4,
+      participantCount: 8,
       tournamentType: "single",
-      competitionFormat: "bracket",
-      status: "upcoming",
-      bracket: {},
+      scoringMethod: "head-to-head",
+      hasDivisions: false,
+      eventStructure: "single-event",
+      status: "draft",
+      sport: "",
+      description: "",
+      location: "",
+      maxParticipants: undefined,
+      entryFee: "",
+      tournamentDate: "",
+      registrationDeadline: "",
+      isPublicCalendarVisible: false,
+      calendarRegion: "",
+      calendarCity: "",
+      calendarStateCode: "",
+      calendarTags: [],
     },
   });
 
@@ -929,34 +1009,161 @@ export default function EnhancedTournamentWizard({
 
   const createTournamentMutation = useMutation({
     mutationFn: async (data: FormData & { teams: TeamData[] }) => {
-      // Transform data to match database schema
-      const transformedData = {
-        ...data,
-        teams: data.teams,
-        entryFee: data.entryFee ? String(data.entryFee) : "0", // Convert to string for numeric field
-        tournamentDate: data.tournamentDate ? (typeof data.tournamentDate === 'string' ? data.tournamentDate : String(data.tournamentDate)) : null, // Ensure string format
-        scoringMethod: selectedSport?.scoringMethod || "wins",
-        isGuestCreated: !user, // Mark as guest-created for tournaments created without login
-        // Configure double-stage tournaments to use multi-stage format
-        competitionFormat: data.tournamentType === 'double-stage' ? 'multi-stage' : (data.competitionFormat || 'bracket'),
-        totalStages: data.tournamentType === 'double-stage' ? 2 : 1,
-        stageConfiguration: data.tournamentType === 'double-stage' ? {
-          stage1: {
-            name: getStage1Name(stage1Format),
-            format: stage1Format,
-            description: getStage1Description(stage1Format)
-          },
-          stage2: {
-            name: getStage2Name(stage2Format), 
-            format: stage2Format,
-            description: getStage2Description(stage2Format)
-          }
-        } : null
+      // Map selectedTournamentFormat to tournamentType before processing
+      const effectiveTournamentType = selectedTournamentFormat?.tournamentType || data.tournamentType || 'single';
+      const engineType = getTournamentEngine(effectiveTournamentType);
+      const participantCount = data.teams?.length || data.participantCount || 8;
+
+      // Build stages configuration with proper engine-specific fields
+      let stageConfig;
+      switch (engineType) {
+        case 'single':
+          stageConfig = {
+            engine: 'single' as const,
+            size: participantCount,
+            thirdPlace: false
+          };
+          break;
+        case 'double':
+          stageConfig = {
+            engine: 'double' as const,
+            size: participantCount,
+            finals: 'single' as const,
+            minGamesGuaranteed: 2
+          };
+          break;
+        case 'round_robin':
+          stageConfig = {
+            engine: 'round_robin' as const,
+            groups: 1,
+            groupSize: participantCount,
+            points: { win: 3, draw: 1, loss: 0 },
+            tiebreakers: ['head_to_head', 'goal_difference', 'goals_for']
+          };
+          break;
+        case 'swiss':
+          stageConfig = {
+            engine: 'swiss' as const,
+            rounds: Math.ceil(Math.log2(participantCount)),
+            pairing: 'seed' as const,
+            tiebreakers: ['wins', 'opponent_strength']
+          };
+          break;
+        case 'point_accumulation':
+          stageConfig = {
+            engine: 'leaderboard' as const,
+            events: customEvents.length > 0 ? customEvents.map((event) => ({
+              name: event.name,
+              measureType: event.measureType,
+              unit: event.unit,
+              maxParticipants: event.maxParticipants,
+            })) : [{
+              name: "Main Event",
+              measureType: data.scoringMethod === 'fastest-time' ? 'time' : 
+                          data.scoringMethod === 'greatest-distance' ? 'distance' : 'score',
+              unit: data.scoringMethod === 'fastest-time' ? 'seconds' : 
+                    data.scoringMethod === 'greatest-distance' ? 'meters' : 'points'
+            }]
+          };
+          break;
+        default:
+          stageConfig = {
+            engine: 'single' as const,
+            size: participantCount,
+            thirdPlace: false
+          };
+      }
+
+      // Generate complete TournamentConfig with ALL required fields
+      const tournamentConfig: TournamentConfig = {
+        meta: {
+          name: data.name || "Unnamed Tournament",
+          participantType: data.participantType || 'individual',
+          participantCount: participantCount,
+          teamSize: data.participantType === 'team' ? (data.teamSize || 1) : undefined,
+        },
+        divisions: divisions.length > 0 ? divisions.map((division) => ({
+          name: division.name,
+          eligibility: division.eligibility,
+          genderPolicy: division.genderPolicy || 'mixed' as const,
+        })) : [{
+          name: "Open Division",
+          eligibility: {},
+          genderPolicy: 'mixed' as const,
+        }],
+        stages: [stageConfig],
+        seeding: {
+          method: 'random' as const,
+          ratingField: undefined
+        },
+        scheduling: {
+          venues: data.location ? [data.location] : undefined,
+          timeWindows: data.tournamentDate ? [{
+            start: data.tournamentDate + 'T09:00:00',
+            end: data.tournamentDate + 'T17:00:00'
+          }] : undefined,
+          minRestMinutes: 15
+        }
+      };
+
+      // Validate the complete TournamentConfig object
+      let validatedConfig;
+      try {
+        validatedConfig = tournamentConfigSchema.parse(tournamentConfig);
+        console.log('✓ TournamentConfig validation successful:', validatedConfig);
+      } catch (validationError) {
+        console.error('✗ TournamentConfig validation failed:', validationError);
+        throw new Error(`Tournament configuration is invalid: ${validationError instanceof Error ? validationError.message : validationError}`);
+      }
+
+      // Prepare final data payload with TournamentConfig as primary structure
+      const tournamentData = {
+        // Map selectedTournamentFormat to tournamentType
+        tournamentType: effectiveTournamentType,
+        config: validatedConfig, // The validated TournamentConfig
+        
+        // Legacy fields for backward compatibility
+        name: data.name,
+        participantType: data.participantType,
+        teamSize: data.teamSize,
+        sport: data.sport,
+        description: data.description,
+        location: data.location,
+        maxParticipants: data.maxParticipants,
+        entryFee: data.entryFee ? String(data.entryFee) : "0",
+        tournamentDate: data.tournamentDate ? (typeof data.tournamentDate === 'string' ? data.tournamentDate : String(data.tournamentDate)) : null,
+        registrationDeadline: data.registrationDeadline,
+        status: data.status || 'draft',
+        scoringMethod: data.scoringMethod || "head-to-head",
+        isGuestCreated: !user,
+        teams: data.teams || [],
+        
+        // Calendar settings
+        isPublicCalendarVisible: data.isPublicCalendarVisible || false,
+        calendarRegion: data.calendarRegion,
+        calendarCity: data.calendarCity,
+        calendarStateCode: data.calendarStateCode,
+        calendarTags: data.calendarTags || [],
       };
       
-      // Create the basic tournament first
-      const response = await apiRequest("/api/tournaments", "POST", transformedData);
-      const tournament = await response.json();
+      console.log('🚀 Submitting tournament with TournamentConfig:', {
+        tournamentType: effectiveTournamentType,
+        configStructure: {
+          meta: validatedConfig.meta,
+          divisionsCount: validatedConfig.divisions.length,
+          stagesCount: validatedConfig.stages.length,
+          hasScheduling: !!validatedConfig.scheduling
+        }
+      });
+      
+      // Send request to backend with TournamentConfig structure
+      const response = await apiRequest("/api/tournaments", "POST", tournamentData);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP ${response.status}: Failed to create tournament`);
+      }
+      const result = await response.json();
+      return result;
 
       // For FFA tournaments, generate the FFA-specific structure
       if (isFFATournamentType(data.tournamentType)) {
@@ -992,21 +1199,20 @@ export default function EnhancedTournamentWizard({
     },
     onSuccess: (data) => {
       setCreatedTournament(data.tournament);
-      // Stay on launch step to show success message
-      // setCurrentStep('launch'); // Keep on current step
+      setCurrentStep('launch'); // Advance to Launch step on success
       toast({
         title: "Tournament Created Successfully!",
-        description: `${data.tournament.name} has been created successfully with ${selectedEvents.length} event${selectedEvents.length !== 1 ? 's' : ''}.`,
+        description: `${data.tournament.name} has been created successfully as a ${selectedTournamentFormat?.name || 'tournament'}.`,
       });
       
       // Clear draft data on successful creation
       localStorage.removeItem('tournamentDraft');
       setAutoSaveStatus(null);
       
-      // Invalidate tournament queries
+      // Proper cache invalidation with correct queryKey format
       queryClient.invalidateQueries({ queryKey: ["/api/tournaments"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/my-tournaments"] });
       
+      // Call callback if provided
       if (onTournamentCreated) {
         onTournamentCreated(data.tournament);
       }
@@ -1062,21 +1268,21 @@ export default function EnhancedTournamentWizard({
     },
   });
 
-  const steps: WizardStep[] = ['sport', 'events', 'settings', 'launch'];
+  const steps: WizardStep[] = ['configuration', 'structure', 'settings', 'launch'];
   const currentStepIndex = steps.indexOf(currentStep);
   const progress = ((currentStepIndex + 1) / steps.length) * 100;
 
   const canProceedFromStep = (step: WizardStep): boolean => {
     switch (step) {
-      case 'sport':
-        return !!(form.watch("sport") && form.watch("competitionFormat"));
-      case 'events':
-        return selectedEvents.length > 0;
+      case 'configuration':
+        return !!(form.watch("name") && form.watch("participantType") && form.watch("scoringMethod"));
+      case 'structure':
+        return !!(form.watch("name") && form.watch("tournamentType"));
       case 'settings':
         return !!(form.watch("name"));
       case 'launch':
         // For launch step, check that all required data is present (not that tournament already exists)
-        return !!(form.watch("name") && form.watch("sport") && selectedEvents.length > 0 && !createdTournament);
+        return !!(form.watch("name") && form.watch("tournamentType") && !createdTournament);
       default:
         return false;
     }
@@ -1223,203 +1429,369 @@ export default function EnhancedTournamentWizard({
       {/* Step Content */}
       <Card>
         <CardContent className="pt-6">
-          {currentStep === 'sport' && (
+          {currentStep === 'configuration' && (
             <div className="space-y-6">
-              {/* COMPREHENSIVE SPORT & FORMAT SELECTION */}
-              {!selectedTournamentFormat ? (
-                <div className="space-y-6">
-                  {/* Seasonal Recommendations Section */}
-                  <div className="mb-6 p-4 bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg">
-                    <h4 className="font-medium text-green-900 mb-3 flex items-center gap-2">
-                      🌟 {getSeasonalRecommendations().season} Season Recommendations
-                    </h4>
-                    <p className="text-sm text-green-700 mb-3">
-                      {getSeasonalRecommendations().description}
-                    </p>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <h5 className="font-medium text-green-800 mb-2">🏃 Popular Sports</h5>
-                        <div className="text-sm text-green-700 space-y-1">
-                          {getSeasonalRecommendations().primarySports.slice(0, 4).map((sport, index) => (
-                            <div key={index} className="flex items-center gap-2">
-                              <span className="text-green-500">•</span>
-                              {sport}
-                            </div>
-                          ))}
-                          {getSeasonalRecommendations().primarySports.length > 4 && (
-                            <div className="text-xs text-green-600 mt-1">
-                              +{getSeasonalRecommendations().primarySports.length - 4} more sports
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <h5 className="font-medium text-green-800 mb-2">🎓 Academic Events</h5>
-                        <div className="text-sm text-green-700 space-y-1">
-                          {getSeasonalRecommendations().academicEvents.map((event, index) => (
-                            <div key={index} className="flex items-center gap-2">
-                              <span className="text-green-500">•</span>
-                              {event}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="mt-3 text-xs text-green-600 bg-green-100 p-2 rounded">
-                      💡 <strong>Tip:</strong> Sports marked with ⭐ are currently in season and may have higher participation rates.
-                    </div>
-                  </div>
-
-                  {/* Step 1: Category Selection */}
-                  <div>
-                    <Label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
-                      Competition Category *
-                    </Label>
-                    <select 
-                      value={selectedCategory}
-                      onChange={(e) => handleCategoryChange(e.target.value)}
-                      className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                      data-testid="select-category"
-                    >
-                      <option value="">Select broader category</option>
-                      {Object.entries(sportCategories).map(([key, category]) => (
-                        <option key={key} value={key}>
-                          {category.name}
-                        </option>
-                      ))}
-                    </select>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Choose from Athletic, Academic, or Fine Arts competitions
-                    </p>
-                  </div>
-
-                  {/* Step 2: Subcategory Selection */}
-                  {selectedCategory && (
-                    <div>
-                      <Label htmlFor="subcategory" className="block text-sm font-medium text-gray-700 mb-2">
-                        Specific Area *
-                      </Label>
-                      <select 
-                        value={selectedSubcategory}
-                        onChange={(e) => handleSubcategoryChange(e.target.value)}
-                        className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                        data-testid="select-subcategory"
-                      >
-                        <option value="">Select specific area</option>
-                        {Object.entries(sportCategories[selectedCategory as keyof typeof sportCategories].subcategories).map(([key, subcategory]) => (
-                          <option key={key} value={key}>
-                            {subcategory.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
-
-                  {/* Step 3: Sport Selection */}
-                  {selectedCategory && selectedSubcategory && (
-                    <div>
-                      <Label htmlFor="sport" className="block text-sm font-medium text-gray-700 mb-2">
-                        Specific Competition *
-                      </Label>
-                      <select 
-                        onChange={(e) => handleSportChange(e.target.value)} 
-                        value={form.watch("sport") || ""}
-                        className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                        data-testid="select-sport"
-                      >
-                        <option value="">Choose specific competition</option>
-                        {getAvailableSports().map((sport: string, index: number) => (
-                          <option key={index} value={sport}>
-                            {isSportInSeason(sport) ? '⭐ ' : ''}{sport}
-                            {isSportInSeason(sport) ? ' (In Season)' : ''}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
-
-                  {/* Help text showing selection path */}
-                  {selectedCategory && selectedSubcategory && form.watch("sport") && (
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                      <div className="flex items-center text-sm text-green-700">
-                        <CheckCircle className="h-4 w-4 mr-2" />
-                        <span className="font-medium">Selection Complete:</span>
-                      </div>
-                      <p className="text-sm text-green-600 mt-1">
-                        {(sportCategories as any)[selectedCategory].name} → {" "}
-                        {(sportCategories as any)[selectedCategory].subcategories[selectedSubcategory].name} → {" "}
-                        {form.watch("sport")}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* COMPREHENSIVE TOURNAMENT FORMAT SELECTOR */}
-                  {form.watch("sport") && (
-                    <div className="mt-6">
-                      <ComprehensiveTournamentFormatSelector
-                        sport={form.watch("sport") || ""}
-                        onFormatSelect={(format) => {
-                          setSelectedTournamentFormat(format);
-                          form.setValue("tournamentType", format.tournamentType as any);
-                          form.setValue("competitionFormat", format.competitionFormat as any);
-                        }}
-                        selectedFormat={(selectedTournamentFormat as TournamentFormatConfig | null)?.format ?? undefined}
-                      />
-                    </div>
-                  )}
-
-                  {/* SPORT-SPECIFIC CONFIGURATION */}
-                  {selectedTournamentFormat && (
-                    <div className="mt-6">
-                      <SportSpecificConfig
-                        format={selectedTournamentFormat}
-                        onConfigChange={(config) => setSportSpecificConfig(config)}
-                        currentConfig={sportSpecificConfig}
-                      />
-                    </div>
-                  )}
+              {/* CONFIGURATION QUESTIONS FLOW */}
+              <div className="space-y-6">
+                {/* Welcome Message */}
+                <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg">
+                  <h4 className="font-medium text-blue-900 mb-3 flex items-center gap-2">
+                    🏆 Competition Configuration
+                  </h4>
+                  <p className="text-sm text-blue-700 mb-3">
+                    Configure your tournament for ANY competition type - from sports to bar trivia, academic competitions to cornhole tournaments.
+                  </p>
                 </div>
-              ) : (
-                // Show comprehensive format selector if format is already selected
-                <div className="space-y-6">
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <div className="flex items-center text-sm text-blue-700 mb-3">
-                      <Trophy className="h-4 w-4 mr-2" />
-                      <span className="font-medium">Selected Tournament Format</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-gray-900">{selectedTournamentFormat.sport}</p>
-                        <p className="text-sm text-gray-600">{selectedTournamentFormat.description}</p>
-                      </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedTournamentFormat(null);
-                          setSportSpecificConfig({});
-                        }}
-                        data-testid="button-change-format"
-                      >
-                        Change Format
-                      </Button>
-                    </div>
-                  </div>
 
-                  {/* SPORT-SPECIFIC CONFIGURATION */}
-                  <SportSpecificConfig
-                    format={selectedTournamentFormat}
-                    onConfigChange={(config) => setSportSpecificConfig(config)}
-                    currentConfig={sportSpecificConfig}
+                {/* 1. Competition Name */}
+                <div>
+                  <Label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                    What's your competition called? *
+                  </Label>
+                  <Input
+                    {...form.register("name")}
+                    placeholder="e.g., Bar Trivia Championship, Cornhole Tournament, Academic Bowl, Basketball League"
+                    className="w-full"
+                    data-testid="input-competition-name"
                   />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Enter any competition name - not limited to traditional sports
+                  </p>
                 </div>
-              )}
 
-              {/* TRADITIONAL SETTINGS (if no comprehensive format selected) */}
-              {!selectedTournamentFormat && form.watch("sport") && (
+                {/* 2. Participant Type */}
+                <div>
+                  <Label className="block text-sm font-medium text-gray-700 mb-3">
+                    Individual competitors or teams? *
+                  </Label>
+                  <RadioGroup 
+                    value={form.watch("participantType") || "individual"}
+                    onValueChange={(value) => form.setValue("participantType", value as "individual" | "team")}
+                    className="space-y-3"
+                  >
+                    {participantTypeOptions.map((option) => (
+                      <div key={option.value} className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50">
+                        <RadioGroupItem value={option.value} id={option.value} data-testid={`radio-${option.value}`} />
+                        <div className="flex-1">
+                          <Label htmlFor={option.value} className="font-medium cursor-pointer">
+                            {option.label}
+                          </Label>
+                          <p className="text-xs text-gray-500 mt-1">{option.description}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </RadioGroup>
+                </div>
+
+                {/* 3. Team Size (if teams selected) */}
+                {form.watch("participantType") === "team" && (
+                  <div>
+                    <Label htmlFor="teamSize" className="block text-sm font-medium text-gray-700 mb-2">
+                      How many people per team? *
+                    </Label>
+                    <div className="flex items-center gap-4">
+                      <Input
+                        type="number"
+                        min="1"
+                        max="20"
+                        {...form.register("teamSize", { valueAsNumber: true })}
+                        className="w-32"
+                        data-testid="input-team-size"
+                      />
+                      <div className="text-xs text-gray-500">
+                        {form.watch("competitionName") && (
+                          <div>
+                            <strong>Suggested:</strong> {getTeamSizeSuggestions(form.watch("competitionName") || "").suggested} players
+                            <div className="mt-1">
+                              Range: {getTeamSizeSuggestions(form.watch("competitionName") || "").min}-{getTeamSizeSuggestions(form.watch("competitionName") || "").max} players
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 4. Scoring Method */}
+                <div>
+                  <Label className="block text-sm font-medium text-gray-700 mb-3">
+                    How do you determine winners? *
+                  </Label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {scoringMethodOptions.map((method) => (
+                      <div 
+                        key={method.value}
+                        className={`p-3 border-2 rounded-lg cursor-pointer transition-all ${
+                          form.watch("scoringMethod") === method.value 
+                            ? 'border-blue-500 bg-blue-50' 
+                            : 'border-gray-200 hover:border-blue-300'
+                        }`}
+                        onClick={() => form.setValue("scoringMethod", method.value as any)}
+                        data-testid={`card-scoring-${method.value}`}
+                      >
+                        <div className="font-medium">{method.label}</div>
+                        <div className="text-xs text-gray-500 mt-1">{method.description}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 5. Divisions/Categories */}
+                <div>
+                  <div className="flex items-center gap-3 mb-3">
+                    <Label className="block text-sm font-medium text-gray-700">
+                      Do you need divisions/categories?
+                    </Label>
+                    <Switch 
+                      checked={form.watch("hasDivisions") || false}
+                      onCheckedChange={(checked) => form.setValue("hasDivisions", checked)}
+                      data-testid="switch-divisions"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 mb-3">
+                    Use divisions to separate participants by age, skill level, weight class, etc.
+                  </p>
+
+                  {form.watch("hasDivisions") && (
+                    <div className="space-y-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                      <div>
+                        <Label className="block text-sm font-medium text-gray-700 mb-2">
+                          What do you base divisions on?
+                        </Label>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                          {divisionTypeOptions.map((option) => (
+                            <div 
+                              key={option.value}
+                              className={`p-2 border rounded cursor-pointer text-sm ${
+                                form.watch("divisionType") === option.value 
+                                  ? 'border-blue-500 bg-blue-50' 
+                                  : 'border-gray-200 hover:border-blue-300'
+                              }`}
+                              onClick={() => form.setValue("divisionType", option.value as any)}
+                              data-testid={`card-division-${option.value}`}
+                            >
+                              <div className="font-medium">{option.label}</div>
+                              <div className="text-xs text-gray-500">{option.description}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Dynamic Division Creation */}
+                      {form.watch("divisionType") && (
+                        <div>
+                          <div className="flex items-center justify-between mb-2">
+                            <Label className="text-sm font-medium text-gray-700">
+                              Create Divisions
+                            </Label>
+                            <Button 
+                              type="button" 
+                              size="sm" 
+                              variant="outline" 
+                              onClick={addDivision}
+                              data-testid="button-add-division"
+                            >
+                              Add Division
+                            </Button>
+                          </div>
+                          <div className="space-y-2">
+                            {divisions.map((division, index) => (
+                              <div key={index} className="flex items-center gap-2 p-2 border border-gray-200 rounded">
+                                <Input 
+                                  placeholder="Division name (e.g., 'Under 18', 'Beginner', '150-170 lbs')"
+                                  value={division.name}
+                                  onChange={(e) => updateDivision(index, 'name', e.target.value)}
+                                  className="flex-1"
+                                  data-testid={`input-division-${index}`}
+                                />
+                                <Button 
+                                  type="button" 
+                                  size="sm" 
+                                  variant="destructive"
+                                  onClick={() => removeDivision(index)}
+                                  data-testid={`button-remove-division-${index}`}
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* 6. Event Structure */}
+                <div>
+                  <Label className="block text-sm font-medium text-gray-700 mb-3">
+                    Single event or multiple events? *
+                  </Label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div 
+                      className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                        form.watch("eventStructure") === "single-event" 
+                          ? 'border-blue-500 bg-blue-50' 
+                          : 'border-gray-200 hover:border-blue-300'
+                      }`}
+                      onClick={() => form.setValue("eventStructure", "single-event")}
+                      data-testid="card-single-event"
+                    >
+                      <div className="font-medium flex items-center gap-2">
+                        <Target className="h-4 w-4" />
+                        Single Event
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        One competition format (e.g., bracket tournament, round robin)
+                      </div>
+                    </div>
+                    <div 
+                      className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                        form.watch("eventStructure") === "multi-event" 
+                          ? 'border-blue-500 bg-blue-50' 
+                          : 'border-gray-200 hover:border-blue-300'
+                      }`}
+                      onClick={() => form.setValue("eventStructure", "multi-event")}
+                      data-testid="card-multi-event"
+                    >
+                      <div className="font-medium flex items-center gap-2">
+                        <Activity className="h-4 w-4" />
+                        Multiple Events
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        Multiple competitions with combined scoring (e.g., swimming meet, track meet)
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Multi-Event Configuration */}
+                  {form.watch("eventStructure") === "multi-event" && (
+                    <div className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                      <div className="flex items-center justify-between mb-2">
+                        <Label className="text-sm font-medium text-gray-700">
+                          Create Events
+                        </Label>
+                        <Button 
+                          type="button" 
+                          size="sm" 
+                          variant="outline" 
+                          onClick={addCustomEvent}
+                          data-testid="button-add-event"
+                        >
+                          Add Event
+                        </Button>
+                      </div>
+                      <div className="space-y-2">
+                        {customEvents.map((event, index) => (
+                          <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-2 p-2 border border-gray-200 rounded bg-white">
+                            <Input 
+                              placeholder="Event name"
+                              value={event.name}
+                              onChange={(e) => {
+                                const newEvents = [...customEvents];
+                                newEvents[index].name = e.target.value;
+                                setCustomEvents(newEvents);
+                              }}
+                              data-testid={`input-event-name-${index}`}
+                            />
+                            <Select 
+                              value={event.measureType}
+                              onValueChange={(value) => {
+                                const newEvents = [...customEvents];
+                                newEvents[index].measureType = value;
+                                setCustomEvents(newEvents);
+                              }}
+                            >
+                              <SelectTrigger data-testid={`select-measure-type-${index}`}>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="score">Score</SelectItem>
+                                <SelectItem value="time">Time</SelectItem>
+                                <SelectItem value="distance">Distance</SelectItem>
+                                <SelectItem value="points">Points</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <Input 
+                              placeholder="Unit (e.g., points, seconds, meters)"
+                              value={event.unit}
+                              onChange={(e) => {
+                                const newEvents = [...customEvents];
+                                newEvents[index].unit = e.target.value;
+                                setCustomEvents(newEvents);
+                              }}
+                              data-testid={`input-event-unit-${index}`}
+                            />
+                            <Button 
+                              type="button" 
+                              size="sm" 
+                              variant="destructive"
+                              onClick={() => removeCustomEvent(index)}
+                              data-testid={`button-remove-event-${index}`}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Configuration Summary */}
+                {form.watch("competitionName") && (
+                  <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <h4 className="font-medium text-green-900 mb-2">Configuration Summary</h4>
+                    <div className="text-sm text-green-700 space-y-1">
+                      <div><strong>Competition:</strong> {form.watch("competitionName")}</div>
+                      <div><strong>Participants:</strong> {form.watch("participantType") === "team" ? `Teams of ${form.watch("teamSize")}` : "Individual competitors"}</div>
+                      <div><strong>Scoring:</strong> {scoringMethodOptions.find(m => m.value === form.watch("scoringMethod"))?.label}</div>
+                      <div><strong>Divisions:</strong> {form.watch("hasDivisions") ? `Yes (${form.watch("divisionType")}-based)` : "No divisions"}</div>
+                      <div><strong>Structure:</strong> {form.watch("eventStructure") === "multi-event" ? `Multiple events (${customEvents.length})` : "Single event"}</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <>
+                {/* SPORT-SPECIFIC CONFIGURATION */}
+                {selectedTournamentFormat && (
+                  <div className="mt-6 space-y-6">
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <div className="flex items-center text-sm text-blue-700 mb-3">
+                        <Trophy className="h-4 w-4 mr-2" />
+                        <span className="font-medium">Selected Tournament Format</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900">{selectedTournamentFormat.sport}</p>
+                          <p className="text-sm text-gray-600">{selectedTournamentFormat.description}</p>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedTournamentFormat(null);
+                            setSportSpecificConfig({});
+                          }}
+                          data-testid="button-change-format"
+                        >
+                          Change Format
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* SPORT-SPECIFIC CONFIGURATION */}
+                    <SportSpecificConfig
+                      format={selectedTournamentFormat}
+                      onConfigChange={(config) => setSportSpecificConfig(config)}
+                      currentConfig={sportSpecificConfig}
+                    />
+                  </div>
+                )}
+
+                {/* TRADITIONAL SETTINGS (if no comprehensive format selected) */}
+                {!selectedTournamentFormat && form.watch("sport") && (
                 <div className="space-y-6">
                   <div>
                     <Label htmlFor="competitionFormat" className="block text-sm font-medium text-gray-700 mb-2">
@@ -1653,81 +2025,242 @@ export default function EnhancedTournamentWizard({
               )}
                 </div>
               )}
+              </>
             </div>
           )}
 
-          {currentStep === 'events' && (
+          {currentStep === 'structure' && (
             <div className="space-y-6">
-              {form.watch("sport") ? (
-                getEventsForSport(form.watch("sport") || "").length > 0 ? (
-                <div className="space-y-6">
-                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <h4 className="font-medium text-blue-900 mb-3 flex items-center gap-2">
-                      <Target className="h-4 w-4" />
-                      {form.watch("sport")} Events ({selectedEvents.length} of {getEventsForSport(form.watch("sport") || "").length} selected)
-                    </h4>
-                    
-                    <div className="space-y-2 max-h-48 overflow-y-auto">
-                      {getEventsForSport(form.watch("sport") || "").map((event, index) => {
-                        const isSelected = selectedEvents.some(e => e.eventName === event.eventName);
-                        return (
-                          <div key={index} className={`flex items-center justify-between p-2 rounded border ${
-                            isSelected ? 'bg-white border-blue-200' : 'bg-gray-50 border-gray-200'
+              {/* CONFIGURATION-DRIVEN TOURNAMENT FORMAT SELECTION */}
+              <div className="space-y-6">
+                <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg">
+                  <h4 className="font-medium text-blue-900 mb-3 flex items-center gap-2">
+                    🏆 Tournament Format Selection
+                  </h4>
+                  <p className="text-sm text-blue-700 mb-3">
+                    Choose the tournament format that works best for your <strong>{form.watch("competitionName") || "competition"}</strong> with <strong>{form.watch("participantType") === "team" ? `teams of ${form.watch("teamSize")}` : "individual competitors"}</strong>.
+                  </p>
+                  <div className="text-xs text-blue-600 bg-blue-100 p-2 rounded">
+                    Formats are filtered based on your scoring method: <strong>{scoringMethodOptions.find(m => m.value === form.watch("scoringMethod"))?.label}</strong>
+                  </div>
+                </div>
+
+                {/* Tournament Format Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {getAvailableTournamentFormats().map((format) => {
+                    const isSelected = form.watch("tournamentType") === format.tournamentType;
+                    return (
+                      <div 
+                        key={format.id}
+                        className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                          isSelected 
+                            ? 'border-blue-500 bg-blue-50 shadow-md' 
+                            : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
+                        }`}
+                        onClick={() => {
+                          form.setValue("tournamentType", format.tournamentType as any);
+                          setSelectedTournamentFormat(format);
+                        }}
+                        data-testid={`format-card-${format.id}`}
+                      >
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className={`p-2 rounded-lg ${
+                            isSelected ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-600'
                           }`}>
-                            <div className="flex items-center gap-2">
-                              <Checkbox
-                                checked={isSelected}
-                                onCheckedChange={(checked) => {
-                                  if (checked) {
-                                    setSelectedEvents(prev => [...prev, event]);
-                                  } else {
-                                    setSelectedEvents(prev => prev.filter(e => e.eventName !== event.eventName));
-                                  }
-                                }}
-                              />
-                              <span className={`font-medium ${
-                                isSelected ? 'text-gray-900' : 'text-gray-500'
-                              }`}>{event.eventName}</span>
-                            </div>
-                            
-                            <div className="flex items-center gap-2">
-                              <Badge variant={isSelected ? "default" : "secondary"} className="text-xs">
-                                {event.eventType}
-                              </Badge>
-                              <span className="text-xs text-gray-500">
-                                {event.scoringUnit}
-                              </span>
-                            </div>
+                            <Trophy className="h-4 w-4" />
                           </div>
-                        );
-                      })}
-                    </div>
+                          <div>
+                            <h5 className="font-medium text-gray-900">{format.name}</h5>
+                            <Badge variant={isSelected ? "default" : "outline"} className="text-xs">
+                              {format.tournamentType}
+                            </Badge>
+                          </div>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-3">{format.description}</p>
+                        <div className="text-xs text-gray-500">
+                          <span className="font-medium">Best for:</span> {format.suitable.map(s => 
+                            scoringMethodOptions.find(opt => opt.value === s)?.label
+                          ).filter(Boolean).join(", ")}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Selected Format Configuration */}
+                {selectedTournamentFormat && (
+                  <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <h4 className="font-medium text-green-900 mb-3 flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4" />
+                      Selected: {selectedTournamentFormat.name}
+                    </h4>
+                    <p className="text-sm text-green-700 mb-4">
+                      {selectedTournamentFormat.description}
+                    </p>
                     
-                    <div className="mt-3 flex items-center justify-between">
-                      <div className="text-sm text-blue-700">
-                        <p>Choose which events to include in your tournament</p>
+                    {/* Format-specific configuration options */}
+                    {selectedTournamentFormat.tournamentType === 'pool-play' && (
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <Label className="text-sm font-medium text-green-800">Pool Size</Label>
+                            <Select defaultValue="4">
+                              <SelectTrigger className="w-full">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="3">3 teams per pool</SelectItem>
+                                <SelectItem value="4">4 teams per pool</SelectItem>
+                                <SelectItem value="5">5 teams per pool</SelectItem>
+                                <SelectItem value="6">6 teams per pool</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label className="text-sm font-medium text-green-800">Advance from Pools</Label>
+                            <Select defaultValue="2">
+                              <SelectTrigger className="w-full">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="1">Top 1 from each pool</SelectItem>
+                                <SelectItem value="2">Top 2 from each pool</SelectItem>
+                                <SelectItem value="3">Top 3 from each pool</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setSelectedEvents(getEventsForSport(form.watch("sport") || ""))}
-                          className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
-                        >
-                          Select All
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setSelectedEvents([])}
-                          className="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
-                        >
-                          Clear All
-                        </button>
+                    )}
+                    
+                    {selectedTournamentFormat.tournamentType === 'swiss-system' && (
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <Label className="text-sm font-medium text-green-800">Number of Rounds</Label>
+                            <Select defaultValue="5">
+                              <SelectTrigger className="w-full">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="3">3 rounds</SelectItem>
+                                <SelectItem value="4">4 rounds</SelectItem>
+                                <SelectItem value="5">5 rounds</SelectItem>
+                                <SelectItem value="6">6 rounds</SelectItem>
+                                <SelectItem value="7">7 rounds</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label className="text-sm font-medium text-green-800">Pairing Method</Label>
+                            <Select defaultValue="swiss-perfect">
+                              <SelectTrigger className="w-full">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="swiss-perfect">Swiss Perfect</SelectItem>
+                                <SelectItem value="swiss-accelerated">Swiss Accelerated</SelectItem>
+                                <SelectItem value="random-initial">Random Initial</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
                       </div>
+                    )}
+                    
+                    {selectedTournamentFormat.tournamentType === 'time-trials' && (
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <Label className="text-sm font-medium text-green-800">Attempts per Participant</Label>
+                            <Select defaultValue="3">
+                              <SelectTrigger className="w-full">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="1">1 attempt</SelectItem>
+                                <SelectItem value="2">2 attempts</SelectItem>
+                                <SelectItem value="3">3 attempts</SelectItem>
+                                <SelectItem value="5">5 attempts</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label className="text-sm font-medium text-green-800">Scoring Method</Label>
+                            <Select defaultValue="best-time">
+                              <SelectTrigger className="w-full">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="best-time">Best Time</SelectItem>
+                                <SelectItem value="average-time">Average Time</SelectItem>
+                                <SelectItem value="cumulative-time">Cumulative Time</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {/* Division Configuration */}
+                {form.watch("hasDivisions") && divisions.length > 0 && (
+                  <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <h4 className="font-medium text-yellow-900 mb-3 flex items-center gap-2">
+                      <Users className="h-4 w-4" />
+                      Division Configuration ({divisions.length} divisions)
+                    </h4>
+                    <p className="text-sm text-yellow-700 mb-4">
+                      Your tournament will be organized into the following divisions:
+                    </p>
+                    <div className="space-y-2">
+                      {divisions.map((division, index) => (
+                        <div key={index} className="flex items-center justify-between p-2 bg-white border border-yellow-200 rounded">
+                          <span className="font-medium text-yellow-900">{division.name}</span>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-xs">
+                              {form.watch("divisionType")}
+                            </Badge>
+                            <Badge variant="secondary" className="text-xs">
+                              {division.genderPolicy}
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
+                )}
+                
+                {/* Multi-Event Configuration */}
+                {form.watch("eventStructure") === "multi-event" && customEvents.length > 0 && (
+                  <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                    <h4 className="font-medium text-orange-900 mb-3 flex items-center gap-2">
+                      <Target className="h-4 w-4" />
+                      Event Configuration ({customEvents.length} events)
+                    </h4>
+                    <p className="text-sm text-orange-700 mb-4">
+                      Your multi-event competition will include:
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {customEvents.map((event, index) => (
+                        <div key={index} className="flex items-center justify-between p-2 bg-white border border-orange-200 rounded">
+                          <span className="font-medium text-orange-900">{event.name}</span>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-xs">
+                              {event.measureType}
+                            </Badge>
+                            <span className="text-xs text-orange-600">{event.unit}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
                   
                   {/* Results Recorder Assignment - Enhanced Google Sheets Style */}
-                  {selectedEvents.length > 0 && (
+                  {selectedEvents.length > 0 ? (
                     <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
                       <h4 className="font-medium text-green-900 mb-3 flex items-center gap-2">
                         <Users className="h-4 w-4" />
@@ -1811,9 +2344,7 @@ export default function EnhancedTournamentWizard({
                         </div>
                       </div>
                     </div>
-                  )}
-                </div>
-              ) : (
+                  ) : form.watch("sport") ? (
                 // For sports without specific events defined, show simple confirmation
                 <div className="space-y-6">
                   <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
@@ -1826,7 +2357,7 @@ export default function EnhancedTournamentWizard({
                     </p>
                   </div>
                 </div>
-              )) : (
+              ) : (
                 <div className="text-center py-8">
                   <Target className="h-12 w-12 text-gray-400 mx-auto mb-3" />
                   <p className="text-gray-600">Please select a sport first to configure events</p>
@@ -1889,225 +2420,8 @@ export default function EnhancedTournamentWizard({
                 </div>
               </div>
 
-              {/* Smart Venue Requirements Section */}
-              {form.watch("sport") && getVenueRequirementsForSport(form.watch("sport") || '') && (
-                <div className="space-y-4 p-4 bg-orange-50 rounded-lg border border-orange-200">
-                  <h4 className="font-medium text-orange-900 flex items-center gap-2">
-                    🏟️ Venue Requirements for {form.watch("sport")}
-                  </h4>
-                  <p className="text-sm text-orange-700 mb-4">
-                    Based on your sport selection, here are the recommended venue requirements to ensure a successful tournament:
-                  </p>
-                  
-                  {(() => {
-                    const requirements = getVenueRequirementsForSport(form.watch("sport") || '');
-                    if (!requirements) return null;
-                    
-                    return (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* Facilities */}
-                        {requirements.facilities.length > 0 && (
-                          <div className="bg-white p-3 rounded border border-orange-200">
-                            <h5 className="font-medium text-orange-800 mb-2 flex items-center gap-1">
-                              🏢 Essential Facilities
-                            </h5>
-                            <ul className="text-sm text-orange-700 space-y-1">
-                              {requirements.facilities.map((facility, index) => (
-                                <li key={index} className="flex items-start gap-2">
-                                  <span className="text-orange-500 mt-0.5">•</span>
-                                  {facility}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                        
-                        {/* Equipment */}
-                        {requirements.equipment.length > 0 && (
-                          <div className="bg-white p-3 rounded border border-orange-200">
-                            <h5 className="font-medium text-orange-800 mb-2 flex items-center gap-1">
-                              ⚙️ Required Equipment
-                            </h5>
-                            <ul className="text-sm text-orange-700 space-y-1">
-                              {requirements.equipment.map((equipment, index) => (
-                                <li key={index} className="flex items-start gap-2">
-                                  <span className="text-orange-500 mt-0.5">•</span>
-                                  {equipment}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                        
-                        {/* Safety */}
-                        {requirements.safety.length > 0 && (
-                          <div className="bg-white p-3 rounded border border-orange-200">
-                            <h5 className="font-medium text-orange-800 mb-2 flex items-center gap-1">
-                              🛡️ Safety Requirements
-                            </h5>
-                            <ul className="text-sm text-orange-700 space-y-1">
-                              {requirements.safety.map((safety, index) => (
-                                <li key={index} className="flex items-start gap-2">
-                                  <span className="text-orange-500 mt-0.5">•</span>
-                                  {safety}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                        
-                        {/* Accessibility */}
-                        {requirements.accessibility.length > 0 && (
-                          <div className="bg-white p-3 rounded border border-orange-200">
-                            <h5 className="font-medium text-orange-800 mb-2 flex items-center gap-1">
-                              ♿ Accessibility Features
-                            </h5>
-                            <ul className="text-sm text-orange-700 space-y-1">
-                              {requirements.accessibility.map((access, index) => (
-                                <li key={index} className="flex items-start gap-2">
-                                  <span className="text-orange-500 mt-0.5">•</span>
-                                  {access}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                        
-                        {/* Special Requirements */}
-                        {requirements.special.length > 0 && (
-                          <div className="bg-white p-3 rounded border border-orange-200 md:col-span-2">
-                            <h5 className="font-medium text-orange-800 mb-2 flex items-center gap-1">
-                              ⭐ Special Considerations
-                            </h5>
-                            <ul className="text-sm text-orange-700 space-y-1">
-                              {requirements.special.map((special, index) => (
-                                <li key={index} className="flex items-start gap-2">
-                                  <span className="text-orange-500 mt-0.5">•</span>
-                                  {special}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })()}
-                  
-                  <div className="text-xs text-orange-600 bg-orange-100 p-2 rounded">
-                    <strong>💡 Pro Tip:</strong> Share this checklist with your venue coordinator to ensure all requirements are met before tournament day.
-                  </div>
-                </div>
-              )}
 
-              {/* Smart Equipment Requirements Section */}
-              {form.watch("sport") && getEquipmentRequirements(form.watch("sport") || '', selectedEvents).length > 0 && (
-                <div className="space-y-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <h4 className="font-medium text-blue-900 flex items-center gap-2">
-                    ⚙️ Equipment Requirements for {form.watch("sport")}
-                  </h4>
-                  <p className="text-sm text-blue-700 mb-4">
-                    Essential and recommended equipment for your tournament. Required items are marked with ⭐.
-                  </p>
-                  
-                  {getEquipmentRequirements(form.watch("sport") || '', selectedEvents).map((category, categoryIndex) => (
-                    <div key={categoryIndex} className="bg-white p-3 rounded border border-blue-200">
-                      <h5 className="font-medium text-blue-800 mb-3 flex items-center gap-2">
-                        📦 {category.category}
-                      </h5>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        {category.items.map((item, itemIndex) => (
-                          <div key={itemIndex} className="flex items-start gap-2 p-2 border border-gray-100 rounded">
-                            <span className={`text-sm mt-0.5 ${item.required ? 'text-red-500' : 'text-blue-500'}`}>
-                              {item.required ? '⭐' : '💙'}
-                            </span>
-                            <div className="flex-1">
-                              <span className={`text-sm font-medium ${item.required ? 'text-red-800' : 'text-blue-800'}`}>
-                                {item.name}
-                              </span>
-                              {item.description && (
-                                <p className="text-xs text-gray-600 mt-1">{item.description}</p>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                  
-                  <div className="text-xs text-blue-600 bg-blue-100 p-2 rounded">
-                    <strong>📋 Equipment Checklist:</strong> Use this list to coordinate with your venue and ensure all necessary equipment is available on tournament day.
-                  </div>
-                </div>
-              )}
 
-              {/* Golf-Specific Cut Configuration */}
-              {form.watch("sport")?.includes('Golf') && (
-                <div className="space-y-4 p-4 bg-green-50 rounded-lg border border-green-200">
-                  <h4 className="font-medium text-green-900 flex items-center gap-2">
-                    ⛳ Golf Tournament Cut Configuration
-                  </h4>
-                  <p className="text-sm text-green-700 mb-4">
-                    Configure if and when to make a cut to reduce the field size for final rounds.
-                  </p>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Cut After Round
-                      </label>
-                      <select
-                        className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                        data-testid="select-cut-round"
-                      >
-                        <option value="">No Cut (All players finish)</option>
-                        <option value="1">After Round 1 (36-hole tournament)</option>
-                        <option value="2">After Round 2 (Traditional 72-hole cut)</option>
-                        <option value="3">After Round 3 (4-round tournament)</option>
-                      </select>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Most professional tournaments cut after round 2
-                      </p>
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Cut to Top Players
-                      </label>
-                      <select
-                        className="w-full h-10 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                        data-testid="select-cut-number"
-                      >
-                        <option value="70">Top 70 and ties (PGA Tour standard)</option>
-                        <option value="60">Top 60 and ties</option>
-                        <option value="50">Top 50 and ties</option>
-                        <option value="40">Top 40 and ties</option>
-                        <option value="30">Top 30 and ties</option>
-                        <option value="20">Top 20 and ties</option>
-                        <option value="16">Top 16 and ties</option>
-                        <option value="custom">Custom number</option>
-                      </select>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Players tied at cut line all advance
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-white p-3 rounded border border-green-200">
-                    <h5 className="font-medium text-green-800 mb-2">Cut Rules & Guidelines</h5>
-                    <div className="text-sm text-green-700 space-y-1">
-                      <p>• <strong>Ties:</strong> All players tied at the cut line advance to subsequent rounds</p>
-                      <p>• <strong>Minimum:</strong> At least 20 players advance even if more are needed due to ties</p>
-                      <p>• <strong>Weather:</strong> Cut numbers may be adjusted if rounds are shortened due to weather</p>
-                      <p>• <strong>Scoring:</strong> Cut is typically made based on total strokes, lowest scores advance</p>
-                    </div>
-                  </div>
-                  
-                  <div className="text-xs text-green-600 bg-green-100 p-2 rounded">
-                    <strong>💡 Tip:</strong> Most amateur tournaments don't use cuts to ensure all players get full tournament experience. Professional tournaments typically cut after round 2 to top 70 players.
-                  </div>
-                </div>
-              )}
 
               {/* Registration Fee & Payment Settings */}
               <div className="space-y-4 p-4 bg-blue-50 rounded-lg border border-blue-200">

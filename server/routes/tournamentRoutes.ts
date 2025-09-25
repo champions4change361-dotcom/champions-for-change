@@ -1,6 +1,6 @@
 import type { Express } from "express";
 import { storage } from "../storage";
-import { insertTournamentSchema } from "@shared/schema";
+import { insertTournamentSchema, tournamentConfigSchema } from "@shared/schema";
 import { BracketGenerator } from "../utils/bracket-generator";
 import { z } from "zod";
 import type {
@@ -453,37 +453,66 @@ export function registerTournamentRoutes(app: Express) {
         });
       }
 
-      // Parse the data directly - but bracket will be generated before final validation
+      // Parse and validate the incoming data
       console.log("Raw tournament data received:", JSON.stringify(req.body, null, 2));
       
-      // First extract teams and generate bracket structure
+      // Validate TournamentConfig if present (new configuration-driven approach)
+      let validatedConfig = null;
+      if (req.body.config) {
+        try {
+          validatedConfig = tournamentConfigSchema.parse(req.body.config);
+          console.log('✓ TournamentConfig validation successful:', JSON.stringify(validatedConfig, null, 2));
+        } catch (configError) {
+          console.error('✗ TournamentConfig validation failed:', configError);
+          return res.status(400).json({
+            message: "Invalid tournament configuration",
+            errors: configError instanceof z.ZodError ? configError.errors : [configError]
+          });
+        }
+      }
+      
+      // Extract teams and generate bracket structure for backward compatibility
       const teams = Array.isArray(req.body.teams) ? req.body.teams : [];
       let teamNames = teams.map((team: any) => typeof team === 'string' ? team : team.teamName || team.name);
       
-      // If no team names provided, generate placeholders
+      // If no team names provided, generate placeholders based on config or fallback
       if (teamNames.length === 0 || teamNames.every((name: string) => !name || name.trim() === '')) {
-        const teamSize = req.body.teamSize || 8;
-        const isLeaderboard = req.body.competitionFormat === 'leaderboard';
+        const teamSize = validatedConfig?.meta?.participantCount || req.body.teamSize || req.body.participantCount || 8;
+        const isLeaderboard = req.body.competitionFormat === 'leaderboard' || 
+                             (validatedConfig?.stages?.[0]?.engine === 'leaderboard');
         teamNames = Array.from({ length: teamSize }, (_, i) => 
           isLeaderboard ? `Participant ${i + 1}` : `Team ${i + 1}`
         );
       }
       
-      // Generate proper bracket structure
+      // Generate bracket structure
       const bracketStructure = BracketGenerator.generateBracket(
         teamNames,
         '',  // Tournament ID will be set after creation
         req.body.tournamentType || 'single',
-        req.body.sport || 'Basketball'
+        req.body.sport || validatedConfig?.meta?.name || 'Competition'
       );
       
-      // Now validate the complete data including the generated bracket
-      const dataWithBracket = {
+      // Prepare data for legacy validation while including TournamentConfig
+      const dataWithBracketAndConfig = {
         ...req.body,
-        bracket: bracketStructure
+        bracket: bracketStructure,
+        // Include validated config if present
+        ...(validatedConfig && { config: validatedConfig })
       };
-      const validatedData = insertTournamentSchema.parse(dataWithBracket);
-      console.log("Validated tournament data:", JSON.stringify(validatedData, null, 2));
+      
+      // Validate with insertTournamentSchema for legacy compatibility
+      let validatedData;
+      try {
+        validatedData = insertTournamentSchema.parse(dataWithBracketAndConfig);
+        console.log("Legacy validation successful - tournament data:", JSON.stringify(validatedData, null, 2));
+      } catch (legacyError) {
+        console.error('✗ Legacy validation failed:', legacyError);
+        return res.status(400).json({
+          message: "Invalid tournament data",
+          errors: legacyError instanceof z.ZodError ? legacyError.errors : [legacyError]
+        });
+      }
 
       // Create tournament with generated bracket and user association
       // Sanitize numeric fields to prevent empty string errors
