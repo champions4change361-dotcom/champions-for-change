@@ -143,6 +143,10 @@ export default function EnhancedTournamentWizard({
     unit: string;
     maxParticipants?: number;
   }>>([]);
+  
+  // Missing state variables for events and event recorders
+  const [selectedEvents, setSelectedEvents] = useState<Array<any>>([]);
+  const [eventRecorders, setEventRecorders] = useState<Record<string, any>>({});
 
   // CONFIGURATION OPTIONS FOR FLEXIBLE TOURNAMENTS
   const participantTypeOptions = [
