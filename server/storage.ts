@@ -653,7 +653,7 @@ export class DbStorage implements IStorage {
             .update(users)
             .set({
               ...userData,
-              hybridSubscription: userData.hybridSubscription as any, // Type cast to handle schema mismatch
+              hybridSubscription: userData.hybridSubscription as any,
               updatedAt: new Date(),
             })
             .where(eq(users.email, userData.email))
@@ -665,12 +665,12 @@ export class DbStorage implements IStorage {
       // No existing user found, create new one
       const result = await this.db
         .insert(users)
-        .values(userData)
+        .values([userData])
         .onConflictDoUpdate({
           target: users.id,
           set: {
             ...userData,
-            hybridSubscription: userData.hybridSubscription as any, // Type cast to handle schema mismatch
+            hybridSubscription: userData.hybridSubscription as any,
             updatedAt: new Date(),
           },
         })
@@ -813,14 +813,22 @@ export class DbStorage implements IStorage {
 
   async getComplianceAuditLogs(userId?: string, limit: number = 100): Promise<ComplianceAuditLog[]> {
     try {
-      let query = this.db.select().from(complianceAuditLog).orderBy(desc(complianceAuditLog.createdAt)).limit(limit);
-      
       if (userId) {
-        query = query.where(eq(complianceAuditLog.userId, userId));
+        const result = await this.db
+          .select()
+          .from(complianceAuditLog)
+          .where(eq(complianceAuditLog.userId, userId))
+          .orderBy(desc(complianceAuditLog.createdAt))
+          .limit(limit);
+        return result;
+      } else {
+        const result = await this.db
+          .select()
+          .from(complianceAuditLog)
+          .orderBy(desc(complianceAuditLog.createdAt))
+          .limit(limit);
+        return result;
       }
-      
-      const result = await query;
-      return result;
     } catch (error) {
       console.error("Compliance audit log retrieval error:", error);
       return [];
@@ -970,12 +978,19 @@ export class DbStorage implements IStorage {
 
   async getPageBySlug(slug: string, userId?: string): Promise<Page | undefined> {
     try {
-      let query = this.db.select().from(pages).where(eq(pages.slug, slug));
       if (userId) {
-        query = query.where(eq(pages.userId, userId));
+        const result = await this.db
+          .select()
+          .from(pages)
+          .where(and(eq(pages.slug, slug), eq(pages.userId, userId)));
+        return result[0];
+      } else {
+        const result = await this.db
+          .select()
+          .from(pages)
+          .where(eq(pages.slug, slug));
+        return result[0];
       }
-      const result = await query;
-      return result[0];
     } catch (error) {
       console.error("Database error:", error);
       return undefined;
@@ -1157,13 +1172,13 @@ export class DbStorage implements IStorage {
         payerEmail: payment.payerEmail,
         paymentAmount: payment.amount.toString(),
         paymentType: payment.paymentType || 'team_captain',
-        paymentMethod: 'stripe',
+        paymentMethod: 'stripe' as const,
         stripePaymentIntentId: payment.stripePaymentIntentId,
         coversMembers: payment.playersIncluded || [],
         allocationNotes: `Payment for ${payment.paymentType}: ${payment.playersIncluded?.length || 0} players`
       };
 
-      const result = await this.db.insert(jerseyTeamPayments).values(paymentData).returning();
+      const result = await this.db.insert(jerseyTeamPayments).values([paymentData]).returning();
       return result[0];
     } catch (error) {
       console.error("Database error:", error);
@@ -1208,7 +1223,7 @@ export class DbStorage implements IStorage {
         updatedAt: new Date()
       };
       
-      const result = await this.db.insert(teams).values(teamWithId).returning();
+      const result = await this.db.insert(teams).values([teamWithId]).returning();
       return result[0];
     } catch (error) {
       console.error("Database error:", error);
@@ -1283,6 +1298,7 @@ export class DbStorage implements IStorage {
         .update(teams)
         .set({ 
           ...subscriptionData, 
+          subscriptionStatus: subscriptionData.subscriptionStatus as any,
           updatedAt: new Date() 
         })
         .where(eq(teams.id, id))
@@ -1303,7 +1319,7 @@ export class DbStorage implements IStorage {
         updatedAt: new Date()
       };
       
-      const result = await this.db.insert(teamPlayers).values(playerWithId).returning();
+      const result = await this.db.insert(teamPlayers).values([playerWithId]).returning();
       return result[0];
     } catch (error) {
       console.error("Database error:", error);
@@ -1810,16 +1826,14 @@ export class DbStorage implements IStorage {
 
   async getTournaments(userId?: string): Promise<Tournament[]> {
     try {
-      let query = this.db.select().from(tournaments).orderBy(desc(tournaments.createdAt));
-      if (userId) {
-        query = query.where(eq(tournaments.userId, userId));
-      }
-      const tournamentResults = await query;
+      const tournamentResults = userId 
+        ? await this.db.select().from(tournaments).where(eq(tournaments.userId, userId)).orderBy(desc(tournaments.createdAt))
+        : await this.db.select().from(tournaments).orderBy(desc(tournaments.createdAt));
       
       // Join sport configs for ALL tournaments to maintain consistent shape
       const tournamentsWithConfigs = await Promise.all(
         tournamentResults.map(async (tournament) => {
-          const sportConfig = await this.getSportConfig(tournament.id, tournament.sportCategory);
+          const sportConfig = await this.getSportConfig(tournament.id, tournament.sportCategory || undefined);
           return {
             ...tournament,
             ...sportConfig
@@ -1841,7 +1855,7 @@ export class DbStorage implements IStorage {
       if (!tournament) return undefined;
 
       // Join with sport-specific config for consistent shape
-      const sportConfig = await this.getSportConfig(tournament.id, tournament.sportCategory);
+      const sportConfig = await this.getSportConfig(tournament.id, tournament.sportCategory || undefined);
       
       // Return merged response (consistent with createTournament)
       return {
@@ -1874,8 +1888,9 @@ export class DbStorage implements IStorage {
       // Step 1: WHITELIST core tournament fields (safe approach) - ONLY include fields that exist in tournaments table
       const coreTournamentData: any = {};
       
-      // Core tournament fields that exist in DB
+      // Core tournament fields that exist in DB  
       if (insertTournament.id !== undefined) coreTournamentData.id = insertTournament.id;
+      if (!coreTournamentData.id) coreTournamentData.id = randomUUID();
       if (insertTournament.name !== undefined) coreTournamentData.name = insertTournament.name;
       if (insertTournament.teamSize !== undefined) coreTournamentData.teamSize = insertTournament.teamSize;
       if (insertTournament.description !== undefined) coreTournamentData.description = insertTournament.description;
@@ -1959,7 +1974,7 @@ export class DbStorage implements IStorage {
     }
     
     // Add common configurations
-    if (data.selectedEvents) config.events = data.selectedEvents;
+    if ((data as any).selectedEvents) config.events = (data as any).selectedEvents;
     if (data.scoringMethod) config.scoringMethod = data.scoringMethod;
     
     // Insert into unified sport_configs table with JSONB
@@ -2073,7 +2088,7 @@ export class DbStorage implements IStorage {
         participantNames,
         config.tournamentType,
         tournamentId,
-        config.formatConfig
+        JSON.stringify(config.formatConfig)
       );
 
       // Convert participants to FFA format with proper structure
@@ -2156,12 +2171,12 @@ export class DbStorage implements IStorage {
 
       // Update tournament with generated FFA structure
       return await this.updateTournament(tournamentId, {
-        tournamentType: config.tournamentType,
-        competitionFormat: this.getFFACompetitionFormat(config.tournamentType),
-        ffaConfig,
-        teams: ffaParticipants,
-        bracket: bracketStructure, // Store the full bracket structure for reference
-        status: 'active'
+        tournamentType: config.tournamentType as any,
+        competitionFormat: this.getFFACompetitionFormat(config.tournamentType) as any,
+        ffaConfig: ffaConfig as any,
+        teams: ffaParticipants as any,
+        bracket: bracketStructure as any, // Store the full bracket structure for reference
+        status: 'active' as any
       });
     } catch (error) {
       console.error("Error generating FFA tournament:", error);
@@ -2183,7 +2198,7 @@ export class DbStorage implements IStorage {
       const tournament = await this.getTournament(tournamentId);
       if (!tournament) return undefined;
       
-      const updatedFFAConfig = { ...tournament.ffaConfig, heatAssignments };
+      const updatedFFAConfig = { ...(tournament.ffaConfig || {}), heatAssignments };
       return await this.updateTournament(tournamentId, { ffaConfig: updatedFFAConfig });
     } catch (error) {
       console.error("Error updating FFA heat assignments:", error);
@@ -3254,7 +3269,7 @@ export class DbStorage implements IStorage {
       if (!ticket || !ticket.isActive) return false;
 
       if (ticket.totalAvailable) {
-        return (ticket.sold + quantity) <= ticket.totalAvailable;
+        return ((ticket.sold || 0) + quantity) <= ticket.totalAvailable;
       }
 
       return true; // No limit set
@@ -3275,19 +3290,14 @@ export class DbStorage implements IStorage {
     organizationRevenue: number;
   }> {
     try {
-      let query = this.db.select().from(merchandiseOrders)
-        .where(eq(merchandiseOrders.organizationId, organizationId));
-
+      const conditions = [eq(merchandiseOrders.organizationId, organizationId)];
+      
       if (startDate && endDate) {
-        query = query.where(
-          and(
-            gte(merchandiseOrders.createdAt, startDate),
-            lte(merchandiseOrders.createdAt, endDate)
-          )
-        );
+        conditions.push(gte(merchandiseOrders.createdAt, startDate));
+        conditions.push(lte(merchandiseOrders.createdAt, endDate));
       }
 
-      const orders = await query;
+      const orders = await this.db.select().from(merchandiseOrders).where(and(...conditions));
       const totalOrders = orders.length;
       const totalRevenue = orders.reduce((sum, order) => sum + parseFloat(order.totalAmount.toString()), 0);
       
@@ -3314,19 +3324,14 @@ export class DbStorage implements IStorage {
     organizationRevenue: number;
   }> {
     try {
-      let query = this.db.select().from(ticketOrders)
-        .where(eq(ticketOrders.organizationId, organizationId));
-
+      const conditions = [eq(ticketOrders.organizationId, organizationId)];
+      
       if (startDate && endDate) {
-        query = query.where(
-          and(
-            gte(ticketOrders.createdAt, startDate),
-            lte(ticketOrders.createdAt, endDate)
-          )
-        );
+        conditions.push(gte(ticketOrders.createdAt, startDate));
+        conditions.push(lte(ticketOrders.createdAt, endDate));
       }
 
-      const orders = await query;
+      const orders = await this.db.select().from(ticketOrders).where(and(...conditions));
       const totalOrders = orders.length;
       const totalRevenue = orders.reduce((sum, order) => sum + parseFloat(order.totalAmount.toString()), 0);
       
@@ -3975,6 +3980,155 @@ export class DbStorage implements IStorage {
     } catch (error) {
       console.error("Database error:", error);
       return undefined;
+    }
+  }
+
+  // Event Template methods
+  async getEventTemplates(): Promise<EventTemplate[]> {
+    try {
+      const result = await this.db.select().from(eventTemplates);
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async getEventTemplate(id: string): Promise<EventTemplate | undefined> {
+    try {
+      const result = await this.db.select().from(eventTemplates).where(eq(eventTemplates.id, id));
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async getEventTemplatesByCategory(category: string): Promise<EventTemplate[]> {
+    try {
+      const result = await this.db
+        .select()
+        .from(eventTemplates)
+        .where(eq(eventTemplates.category, category));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async createEventTemplate(template: InsertEventTemplate): Promise<EventTemplate> {
+    try {
+      const result = await this.db.insert(eventTemplates).values(template).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to create event template");
+    }
+  }
+
+  async updateEventTemplate(id: string, updates: Partial<EventTemplate>): Promise<EventTemplate | undefined> {
+    try {
+      const result = await this.db
+        .update(eventTemplates)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(eventTemplates.id, id))
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async deleteEventTemplate(id: string): Promise<boolean> {
+    try {
+      const result = await this.db.delete(eventTemplates).where(eq(eventTemplates.id, id));
+      return (result.rowCount ?? 0) > 0;
+    } catch (error) {
+      console.error("Database error:", error);
+      return false;
+    }
+  }
+
+  // Scoring Policy methods
+  async getScoringPolicies(): Promise<ScoringPolicy[]> {
+    try {
+      const result = await this.db.select().from(scoringPolicies);
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async getScoringPolicy(id: string): Promise<ScoringPolicy | undefined> {
+    try {
+      const result = await this.db.select().from(scoringPolicies).where(eq(scoringPolicies.id, id));
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async getScoringPoliciesByType(policyType: string): Promise<ScoringPolicy[]> {
+    try {
+      const result = await this.db
+        .select()
+        .from(scoringPolicies)
+        .where(eq(scoringPolicies.policyType, policyType));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async getScoringPoliciesByEngine(engine: string): Promise<ScoringPolicy[]> {
+    try {
+      const result = await this.db
+        .select()
+        .from(scoringPolicies)
+        .where(eq(scoringPolicies.engine, engine));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async createScoringPolicy(policy: InsertScoringPolicy): Promise<ScoringPolicy> {
+    try {
+      const result = await this.db.insert(scoringPolicies).values(policy).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to create scoring policy");
+    }
+  }
+
+  async updateScoringPolicy(id: string, updates: Partial<ScoringPolicy>): Promise<ScoringPolicy | undefined> {
+    try {
+      const result = await this.db
+        .update(scoringPolicies)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(scoringPolicies.id, id))
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async deleteScoringPolicy(id: string): Promise<boolean> {
+    try {
+      const result = await this.db.delete(scoringPolicies).where(eq(scoringPolicies.id, id));
+      return (result.rowCount ?? 0) > 0;
+    } catch (error) {
+      console.error("Database error:", error);
+      return false;
     }
   }
 }
