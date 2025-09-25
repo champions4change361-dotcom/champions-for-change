@@ -21,7 +21,9 @@ import {
   type EventTicket, type InsertEventTicket, type TicketOrder, type InsertTicketOrder,
   type TournamentRegistrationForm, type InsertTournamentRegistrationForm, type RegistrationSubmission, type InsertRegistrationSubmission, type RegistrationAssignmentLog, type InsertRegistrationAssignmentLog,
   type FantasyProfile, type InsertFantasyProfile,
-  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, teams, teamPlayers, medicalHistory, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog, taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices, supportTeams, supportTeamMembers, supportTeamInjuries, supportTeamAiConsultations, jerseyTeamMembers, jerseyTeamPayments, tournamentSubscriptions, clientConfigurations, guestParticipants, passwordResetTokens, showdownContests, showdownEntries, showdownLeaderboards, professionalPlayers, merchandiseProducts, merchandiseOrders, eventTickets, ticketOrders, tournamentRegistrationForms, registrationSubmissions, registrationAssignmentLog, fantasyProfiles, athleticConfigs, academicConfigs, fineArtsConfigs
+  type EventTemplate, type InsertEventTemplate, type ScoringPolicy, type InsertScoringPolicy,
+  type TournamentConfig, type DivisionPolicy, type StageConfig,
+  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, teams, teamPlayers, medicalHistory, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog, taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices, supportTeams, supportTeamMembers, supportTeamInjuries, supportTeamAiConsultations, jerseyTeamMembers, jerseyTeamPayments, tournamentSubscriptions, clientConfigurations, guestParticipants, passwordResetTokens, showdownContests, showdownEntries, showdownLeaderboards, professionalPlayers, merchandiseProducts, merchandiseOrders, eventTickets, ticketOrders, tournamentRegistrationForms, registrationSubmissions, registrationAssignmentLog, fantasyProfiles, athleticConfigs, academicConfigs, fineArtsConfigs, eventTemplates, scoringPolicies
 } from "@shared/schema";
 
 type SportCategory = typeof sportCategories.$inferSelect;
@@ -264,6 +266,23 @@ export interface IStorage {
   updateFFARoundResults(tournamentId: string, roundNumber: number, results: any[]): Promise<Tournament | undefined>;
   getFFALeaderboard(tournamentId: string): Promise<any[]>;
   getFFAParticipantPerformance(tournamentId: string, participantId: string): Promise<any | undefined>;
+
+  // Event Template methods - Reusable event configurations
+  getEventTemplates(): Promise<EventTemplate[]>;
+  getEventTemplate(id: string): Promise<EventTemplate | undefined>;
+  getEventTemplatesByCategory(category: string): Promise<EventTemplate[]>;
+  createEventTemplate(template: InsertEventTemplate): Promise<EventTemplate>;
+  updateEventTemplate(id: string, updates: Partial<EventTemplate>): Promise<EventTemplate | undefined>;
+  deleteEventTemplate(id: string): Promise<boolean>;
+
+  // Scoring Policy methods - Flexible scoring rules
+  getScoringPolicies(): Promise<ScoringPolicy[]>;
+  getScoringPolicy(id: string): Promise<ScoringPolicy | undefined>;
+  getScoringPoliciesByType(policyType: string): Promise<ScoringPolicy[]>;
+  getScoringPoliciesByEngine(engine: string): Promise<ScoringPolicy[]>;
+  createScoringPolicy(policy: InsertScoringPolicy): Promise<ScoringPolicy>;
+  updateScoringPolicy(id: string, updates: Partial<ScoringPolicy>): Promise<ScoringPolicy | undefined>;
+  deleteScoringPolicy(id: string): Promise<boolean>;
   
   // Tournament Registration Form methods - Smart linking system
   createTournamentRegistrationForm(form: InsertTournamentRegistrationForm): Promise<TournamentRegistrationForm>;

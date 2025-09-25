@@ -1499,11 +1499,18 @@ export const tournaments = pgTable("tournaments", {
   // ACTIVITY STATUS
   isActive: boolean("is_active").default(true),
 
+  // FLEXIBLE TOURNAMENT CONFIGURATION SYSTEM
+  // Uses a generic JSON type here, will be validated with TournamentConfig schema
+  config: jsonb("config"),
+
   // NOTE: Sport-specific fields have been moved to separate config tables:
   // - athletic_configs (basketball, soccer, tennis, golf, etc.)
   // - academic_configs (UIL academic competitions, debate, etc.)  
   // - fine_arts_configs (band, choir, theater, art competitions, etc.)
   // This eliminates the "god table" antipattern and enables clean architecture
+  //
+  // Legacy fields are kept temporarily for migration. New tournaments should use
+  // the config JSONB field with the TournamentConfig schema instead.
 });
 
 // ENHANCED EVENT MANAGEMENT SYSTEM 
@@ -5382,6 +5389,260 @@ export const insertFantasyProfileSchema = createInsertSchema(fantasyProfiles).om
 
 export type InsertFantasyProfile = z.infer<typeof insertFantasyProfileSchema>;
 export type FantasyProfile = typeof fantasyProfiles.$inferSelect;
+
+// =============================================================================
+// FLEXIBLE TOURNAMENT CONFIGURATION SYSTEM
+// =============================================================================
+
+// Tournament Configuration Types - replaces sport-specific constraints
+export const tournamentConfigSchema = z.object({
+  meta: z.object({
+    name: z.string(),
+    participantType: z.enum(['team', 'individual']),
+    participantCount: z.number().optional(),
+    teamSize: z.number().optional(),
+  }),
+  divisions: z.array(z.object({
+    name: z.string(),
+    eligibility: z.object({
+      ageBand: z.object({
+        min: z.number().optional(),
+        max: z.number().optional(),
+      }).optional(),
+      gradeBand: z.object({
+        min: z.number().optional(), 
+        max: z.number().optional(),
+      }).optional(),
+      weightClassKg: z.object({
+        min: z.number().optional(),
+        max: z.number().optional(),
+      }).optional(),
+      openText: z.string().optional(),
+    }),
+    genderPolicy: z.enum(['male', 'female', 'mixed', 'coed', 'open']),
+  })),
+  stages: z.array(z.discriminatedUnion('engine', [
+    z.object({
+      engine: z.literal('single'),
+      size: z.number(),
+      thirdPlace: z.boolean().optional(),
+    }),
+    z.object({
+      engine: z.literal('double'),
+      size: z.number(),
+      finals: z.enum(['single', 'best_of_n', 'if_necessary']),
+      minGamesGuaranteed: z.number().optional(),
+    }),
+    z.object({
+      engine: z.literal('round_robin'),
+      groups: z.number(),
+      groupSize: z.number().optional(),
+      points: z.object({
+        win: z.number(),
+        draw: z.number().optional(),
+        loss: z.number().optional(),
+      }),
+      tiebreakers: z.array(z.string()),
+    }),
+    z.object({
+      engine: z.literal('swiss'),
+      rounds: z.number(),
+      pairing: z.enum(['seed', 'elo', 'random']),
+      tiebreakers: z.array(z.string()),
+    }),
+    z.object({
+      engine: z.literal('leaderboard'),
+      events: z.array(z.object({
+        templateId: z.string().optional(),
+        name: z.string().optional(),
+        measureType: z.string(),
+        unit: z.string(),
+        maxParticipants: z.number().optional(),
+      })),
+    }),
+  ])),
+  seeding: z.object({
+    method: z.enum(['manual', 'random', 'rating', 'previous_stage']),
+    ratingField: z.string().optional(),
+  }),
+  scheduling: z.object({
+    venues: z.array(z.string()).optional(),
+    timeWindows: z.array(z.object({
+      start: z.string(),
+      end: z.string(),
+    })).optional(),
+    minRestMinutes: z.number().optional(),
+  }).optional(),
+});
+
+// Individual types for easier use
+export const divisionPolicySchema = z.object({
+  name: z.string(),
+  eligibility: z.object({
+    ageBand: z.object({
+      min: z.number().optional(),
+      max: z.number().optional(),
+    }).optional(),
+    gradeBand: z.object({
+      min: z.number().optional(), 
+      max: z.number().optional(),
+    }).optional(),
+    weightClassKg: z.object({
+      min: z.number().optional(),
+      max: z.number().optional(),
+    }).optional(),
+    openText: z.string().optional(),
+  }),
+  genderPolicy: z.enum(['male', 'female', 'mixed', 'coed', 'open']),
+});
+
+export const stageConfigSchema = z.discriminatedUnion('engine', [
+  z.object({
+    engine: z.literal('single'),
+    size: z.number(),
+    thirdPlace: z.boolean().optional(),
+  }),
+  z.object({
+    engine: z.literal('double'),
+    size: z.number(),
+    finals: z.enum(['single', 'best_of_n', 'if_necessary']),
+    minGamesGuaranteed: z.number().optional(),
+  }),
+  z.object({
+    engine: z.literal('round_robin'),
+    groups: z.number(),
+    groupSize: z.number().optional(),
+    points: z.object({
+      win: z.number(),
+      draw: z.number().optional(),
+      loss: z.number().optional(),
+    }),
+    tiebreakers: z.array(z.string()),
+  }),
+  z.object({
+    engine: z.literal('swiss'),
+    rounds: z.number(),
+    pairing: z.enum(['seed', 'elo', 'random']),
+    tiebreakers: z.array(z.string()),
+  }),
+  z.object({
+    engine: z.literal('leaderboard'),
+    events: z.array(z.object({
+      templateId: z.string().optional(),
+      name: z.string().optional(),
+      measureType: z.string(),
+      unit: z.string(),
+      maxParticipants: z.number().optional(),
+    })),
+  }),
+]);
+
+// Export TypeScript types
+export type TournamentConfig = z.infer<typeof tournamentConfigSchema>;
+export type DivisionPolicy = z.infer<typeof divisionPolicySchema>;
+export type StageConfig = z.infer<typeof stageConfigSchema>;
+
+// =============================================================================
+// NEW DATABASE TABLES FOR FLEXIBLE CONFIGURATION
+// =============================================================================
+
+// Event Templates - Reusable event configurations
+export const eventTemplates = pgTable("event_templates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  measureType: varchar("measure_type").notNull(), // "time", "distance", "score", etc.
+  unit: varchar("unit").notNull(), // "seconds", "meters", "points", etc.
+  category: varchar("category"), // "track", "field", "academic", etc.
+  defaultMaxParticipants: integer("default_max_participants"),
+  defaultMinParticipants: integer("default_min_participants"),
+  isPublic: boolean("is_public").default(true),
+  createdBy: varchar("created_by").references(() => users.id),
+  configuration: jsonb("configuration").$type<{
+    judging?: {
+      judgeCount: number;
+      scoringCriteria: Array<{
+        criterion: string;
+        weight: number;
+        maxScore: number;
+      }>;
+    };
+    timing?: {
+      precision: 'millisecond' | 'second' | 'minute';
+      laps?: number;
+      splits?: boolean;
+    };
+    equipment?: string[];
+    rules?: string[];
+    customFields?: Array<{
+      name: string;
+      type: 'string' | 'number' | 'boolean';
+      required: boolean;
+    }>;
+  }>(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Scoring Policies - Flexible scoring rules
+export const scoringPolicies = pgTable("scoring_policies", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  policyType: varchar("policy_type").notNull(), // "tournament", "stage", "event"
+  scoringRules: jsonb("scoring_rules").$type<{
+    pointsSystem?: {
+      win: number;
+      draw?: number;
+      loss?: number;
+      bonus?: Array<{
+        condition: string;
+        points: number;
+      }>;
+    };
+    rankingSystem?: {
+      method: 'points' | 'wins' | 'rating' | 'time' | 'score';
+      direction: 'ascending' | 'descending';
+      tiebreakers: Array<{
+        field: string;
+        direction: 'ascending' | 'descending';
+      }>;
+    };
+    advancementRules?: {
+      method: 'top_n' | 'percentage' | 'threshold';
+      value: number;
+      stage?: string;
+    };
+  }>(),
+  applicableEngines: jsonb("applicable_engines").$type<string[]>(), // ["single", "double", "round_robin", etc.]
+  isPublic: boolean("is_public").default(true),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Add indexes for JSON path queries (will be created via database migration after tables are created)
+// export const eventTemplatesIndex = index("event_templates_category_idx").on(eventTemplates.category);
+// export const scoringPoliciesTypeIndex = index("scoring_policies_type_idx").on(scoringPolicies.policyType);
+
+// Drizzle-zod schemas for the new tables
+export const insertEventTemplateSchema = createInsertSchema(eventTemplates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertScoringPolicySchema = createInsertSchema(scoringPolicies).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Type exports for new tables
+export type EventTemplate = typeof eventTemplates.$inferSelect;
+export type InsertEventTemplate = z.infer<typeof insertEventTemplateSchema>;
+export type ScoringPolicy = typeof scoringPolicies.$inferSelect;
+export type InsertScoringPolicy = z.infer<typeof insertScoringPolicySchema>;
 
 // SPORT-SPECIFIC CONFIGURATION TABLES
 // Import and re-export sport configuration tables
