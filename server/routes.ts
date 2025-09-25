@@ -13,6 +13,7 @@ import NBADepthChartParser from './nba-depth-chart-parser';
 import { stripe } from "./nonprofitStripeConfig";
 import { registerDomainRoutes } from "./domainRoutes";
 import { registerTournamentRoutes } from "./routes/tournamentRoutes";
+import { registerMigrationRoutes } from "./routes/migrationRoutes";
 import { tournamentSubscriptions, insertTournamentSubscriptionSchema, type InsertTournamentSubscription, insertRegistrationSubmissionSchema, insertTeamSchema, insertTeamPlayerSchema, insertMedicalHistorySchema, type InsertTeam, type InsertTeamPlayer, type InsertMedicalHistory, type Team, type TeamPlayer, type MedicalHistory, updateTeamSubscriptionSchema, type User } from "@shared/schema";
 import { GameLockoutService } from "./game-lockout-service.js";
 
@@ -7995,6 +7996,7 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
 
   // Tournament management routes
   registerTournamentRoutes(app);
+  registerMigrationRoutes(app);
 
   // Event Assignment Routes - Google Sheets Style Scorekeeper System
   
