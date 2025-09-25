@@ -24,7 +24,7 @@ import AddressAutocomplete from "@/components/AddressAutocomplete";
 import { tournamentConfigSchema, type TournamentConfig } from "@shared/schema";
 import { generateRandomNames } from "@/utils/name-generator";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+// Removed custom Select imports - using native HTML selects instead
 import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
@@ -1704,24 +1704,22 @@ export default function EnhancedTournamentWizard({
                               }}
                               data-testid={`input-event-name-${index}`}
                             />
-                            <Select 
+                            <select 
                               value={event.measureType}
-                              onValueChange={(value) => {
+                              onChange={(e) => {
                                 const newEvents = [...customEvents];
-                                newEvents[index].measureType = value;
+                                newEvents[index].measureType = e.target.value;
                                 setCustomEvents(newEvents);
                               }}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                              data-testid={`select-measure-type-${index}`}
                             >
-                              <SelectTrigger data-testid={`select-measure-type-${index}`}>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="score">Score</SelectItem>
-                                <SelectItem value="time">Time</SelectItem>
-                                <SelectItem value="distance">Distance</SelectItem>
-                                <SelectItem value="points">Points</SelectItem>
-                              </SelectContent>
-                            </Select>
+                              <option value="">Select measure type</option>
+                              <option value="score">Score</option>
+                              <option value="time">Time</option>
+                              <option value="distance">Distance</option>
+                              <option value="points">Points</option>
+                            </select>
                             <Input 
                               placeholder="Unit (e.g., points, seconds, meters)"
                               value={event.unit}
@@ -2114,30 +2112,26 @@ export default function EnhancedTournamentWizard({
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
                             <Label className="text-sm font-medium text-green-800">Pool Size</Label>
-                            <Select defaultValue="4">
-                              <SelectTrigger className="w-full">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="3">3 teams per pool</SelectItem>
-                                <SelectItem value="4">4 teams per pool</SelectItem>
-                                <SelectItem value="5">5 teams per pool</SelectItem>
-                                <SelectItem value="6">6 teams per pool</SelectItem>
-                              </SelectContent>
-                            </Select>
+                            <select 
+                              defaultValue="4"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                            >
+                              <option value="3">3 teams per pool</option>
+                              <option value="4">4 teams per pool</option>
+                              <option value="5">5 teams per pool</option>
+                              <option value="6">6 teams per pool</option>
+                            </select>
                           </div>
                           <div>
                             <Label className="text-sm font-medium text-green-800">Advance from Pools</Label>
-                            <Select defaultValue="2">
-                              <SelectTrigger className="w-full">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="1">Top 1 from each pool</SelectItem>
-                                <SelectItem value="2">Top 2 from each pool</SelectItem>
-                                <SelectItem value="3">Top 3 from each pool</SelectItem>
-                              </SelectContent>
-                            </Select>
+                            <select 
+                              defaultValue="2"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                            >
+                              <option value="1">Top 1 from each pool</option>
+                              <option value="2">Top 2 from each pool</option>
+                              <option value="3">Top 3 from each pool</option>
+                            </select>
                           </div>
                         </div>
                       </div>
@@ -2148,31 +2142,27 @@ export default function EnhancedTournamentWizard({
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
                             <Label className="text-sm font-medium text-green-800">Number of Rounds</Label>
-                            <Select defaultValue="5">
-                              <SelectTrigger className="w-full">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="3">3 rounds</SelectItem>
-                                <SelectItem value="4">4 rounds</SelectItem>
-                                <SelectItem value="5">5 rounds</SelectItem>
-                                <SelectItem value="6">6 rounds</SelectItem>
-                                <SelectItem value="7">7 rounds</SelectItem>
-                              </SelectContent>
-                            </Select>
+                            <select 
+                              defaultValue="5"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                            >
+                              <option value="3">3 rounds</option>
+                              <option value="4">4 rounds</option>
+                              <option value="5">5 rounds</option>
+                              <option value="6">6 rounds</option>
+                              <option value="7">7 rounds</option>
+                            </select>
                           </div>
                           <div>
                             <Label className="text-sm font-medium text-green-800">Pairing Method</Label>
-                            <Select defaultValue="swiss-perfect">
-                              <SelectTrigger className="w-full">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="swiss-perfect">Swiss Perfect</SelectItem>
-                                <SelectItem value="swiss-accelerated">Swiss Accelerated</SelectItem>
-                                <SelectItem value="random-initial">Random Initial</SelectItem>
-                              </SelectContent>
-                            </Select>
+                            <select 
+                              defaultValue="swiss-perfect"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                            >
+                              <option value="swiss-perfect">Swiss Perfect</option>
+                              <option value="swiss-accelerated">Swiss Accelerated</option>
+                              <option value="random-initial">Random Initial</option>
+                            </select>
                           </div>
                         </div>
                       </div>
@@ -2183,30 +2173,26 @@ export default function EnhancedTournamentWizard({
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
                             <Label className="text-sm font-medium text-green-800">Attempts per Participant</Label>
-                            <Select defaultValue="3">
-                              <SelectTrigger className="w-full">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="1">1 attempt</SelectItem>
-                                <SelectItem value="2">2 attempts</SelectItem>
-                                <SelectItem value="3">3 attempts</SelectItem>
-                                <SelectItem value="5">5 attempts</SelectItem>
-                              </SelectContent>
-                            </Select>
+                            <select 
+                              defaultValue="3"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                            >
+                              <option value="1">1 attempt</option>
+                              <option value="2">2 attempts</option>
+                              <option value="3">3 attempts</option>
+                              <option value="5">5 attempts</option>
+                            </select>
                           </div>
                           <div>
                             <Label className="text-sm font-medium text-green-800">Scoring Method</Label>
-                            <Select defaultValue="best-time">
-                              <SelectTrigger className="w-full">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="best-time">Best Time</SelectItem>
-                                <SelectItem value="average-time">Average Time</SelectItem>
-                                <SelectItem value="cumulative-time">Cumulative Time</SelectItem>
-                              </SelectContent>
-                            </Select>
+                            <select 
+                              defaultValue="best-time"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                            >
+                              <option value="best-time">Best Time</option>
+                              <option value="average-time">Average Time</option>
+                              <option value="cumulative-time">Cumulative Time</option>
+                            </select>
                           </div>
                         </div>
                       </div>
