@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, ArrowRight, Check, CheckCircle, Play, Trophy, Users, Settings, DollarSign, X, Target } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, CheckCircle, Play, Trophy, Users, Settings, DollarSign, X, Target, Activity } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { insertTournamentSchema } from "@shared/schema";
 import TeamManagement from "@/components/team-management";
