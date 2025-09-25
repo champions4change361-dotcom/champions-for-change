@@ -969,9 +969,15 @@ export default function EnhancedTournamentWizard({
     return () => subscription.unsubscribe();
   }, [form, selectedEvents, eventRecorders, currentStep]);
 
-  const selectedSport = sports.find(sport => sport.sportName === form.watch("sport"));
-  const isLeaderboardSport = selectedSport?.competitionType === "leaderboard";
-  const competitionFormat = form.watch("competitionFormat");
+  // Determine if this is a leaderboard-style competition based on tournament type
+  const tournamentType = form.watch("tournamentType");
+  const isLeaderboardSport = tournamentType === "free-for-all" || 
+                            tournamentType === "multi-heat-racing" || 
+                            tournamentType === "battle-royale" ||
+                            tournamentType === "point-accumulation" ||
+                            tournamentType === "time-trials" ||
+                            tournamentType === "survival-elimination";
+  const competitionFormat = form.watch("tournamentType");
   const teamSize = form.watch("teamSize");
 
   // Helper functions for stage configuration
