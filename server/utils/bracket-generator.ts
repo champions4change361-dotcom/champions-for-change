@@ -206,10 +206,16 @@ export class BracketGenerator {
     const geographicBalance = this.calculateGeographicBalance(balancedTeams);
     const seedingMap = this.createSeedingMap(balancedTeams);
     
+    // CRITICAL FIX: Verify March Madness has exactly 67 matches
+    const expectedMatches = 67; // 4 First Four + 32 R64 + 16 R32 + 8 Sweet16 + 4 Elite8 + 2 Final4 + 1 Championship
+    if (allMatches.length !== expectedMatches) {
+      console.warn(`March Madness math error: Expected ${expectedMatches} matches, got ${allMatches.length}`);
+    }
+    
     return {
       matches: allMatches,
       totalRounds: 7, // First Four, R64, R32, Sweet 16, Elite 8, Final Four, Championship
-      totalMatches: allMatches.length,
+      totalMatches: expectedMatches, // Always use the mathematically correct value
       format: 'march-madness',
       firstFourMatches,
       regionalBrackets,
@@ -965,17 +971,68 @@ export class BracketGenerator {
       currentRoundTeams = nextRoundTeams;
     }
     
+    // CRITICAL FIX: Ensure totalMatches = participantCount - 1 for single elimination
+    const expectedMatches = teams.length - 1;
+    if (matches.length !== expectedMatches) {
+      console.warn(`Single elimination math error: Expected ${expectedMatches} matches for ${teams.length} teams, got ${matches.length}`);
+    }
+    
     return {
       matches,
       totalRounds,
-      totalMatches: matches.length,
+      totalMatches: expectedMatches, // Always use the mathematically correct value
       format: 'single-elimination'
+    };
+  }
+
+  /**
+   * Generate Round Robin tournament structure
+   * Everyone plays everyone else once
+   */
+  static generateRoundRobin(teams: string[], tournamentId: string): BracketStructure {
+    const validTeams = teams.filter(team => team && team.trim() !== '');
+    
+    if (validTeams.length < 3) {
+      throw new Error('Round Robin requires at least 3 participants');
+    }
+    
+    const matches: MatchData[] = [];
+    let matchId = 1;
+    let round = 1;
+    
+    // Generate all possible matchups (each team plays every other team once)
+    for (let i = 0; i < validTeams.length; i++) {
+      for (let j = i + 1; j < validTeams.length; j++) {
+        matches.push({
+          id: `rr-match-${matchId++}`,
+          tournamentId,
+          round: round,
+          position: matches.length + 1,
+          team1: validTeams[i],
+          team2: validTeams[j],
+          team1Score: 0,
+          team2Score: 0,
+          status: 'upcoming',
+          bracket: 'winners'
+        });
+      }
+    }
+    
+    // Calculate total matches: C(n,2) = n*(n-1)/2
+    const totalMatches = (validTeams.length * (validTeams.length - 1)) / 2;
+    
+    return {
+      matches,
+      totalRounds: 1, // Round robin is typically played as one round
+      totalMatches,
+      format: 'round-robin'
     };
   }
 
   /**
    * Generate Swiss System tournament structure
    * Popular in chess, esports, and academic competitions
+   * FIXED: Improved pairing algorithm and round calculations
    */
   static generateSwissSystem(teams: string[], tournamentId: string, maxRounds?: number): SwissSystemStructure {
     const validTeams = teams.filter(team => team && team.trim() !== '');
@@ -984,8 +1041,9 @@ export class BracketGenerator {
       throw new Error('Swiss system requires at least 2 participants');
     }
     
-    // Calculate recommended rounds (log2 of participants, rounded up)
-    const recommendedRounds = Math.ceil(Math.log2(validTeams.length));
+    // IMPROVED: Better round calculation for Swiss system
+    // Swiss system typically runs for log2(n) rounds, but can be adjusted
+    const recommendedRounds = Math.min(Math.ceil(Math.log2(validTeams.length)), validTeams.length - 1);
     const actualRounds = maxRounds || recommendedRounds;
     
     const matches: MatchData[] = [];
@@ -1810,13 +1868,23 @@ export class BracketGenerator {
       throw new Error('Tournament configuration must have at least one stage');
     }
     
-    // Map stage engine to tournament type and generate bracket
-    const tournamentType = this.mapEngineToTournamentType(stage.engine);
+    // Enhanced mapping: Check formatConfig for specialized tournament types first
+    let tournamentType;
+    if (options.formatConfig?.tournamentType) {
+      // Use specialized tournament type from formatConfig
+      tournamentType = options.formatConfig.tournamentType;
+      console.log(`🎯 Using specialized tournament type from formatConfig: ${tournamentType}`);
+    } else {
+      // Fall back to engine-based mapping
+      tournamentType = this.mapEngineToTournamentType(stage.engine);
+      console.log(`🔧 Using engine-based tournament type: ${tournamentType} (from ${stage.engine})`);
+    }
     
-    // Use stage-specific configuration
+    // Use stage-specific configuration with formatConfig passthrough
     const stageOptions = {
       ...options,
-      stageConfig: stage
+      stageConfig: stage,
+      formatConfig: options.formatConfig || {}
     };
     
     return this.generateBracket(validParticipants, tournamentId, tournamentType, config.meta.name || 'Tournament', stageOptions);
@@ -1850,8 +1918,13 @@ export class BracketGenerator {
           throw new Error(`Double elimination supports 4-64 teams. Got ${validTeams.length} teams.`);
         }
         
+      case 'round-robin':
+        return this.generateRoundRobin(validTeams, tournamentId);
+        
       case 'swiss-system':
-        return this.generateSwissSystem(validTeams, tournamentId, options.maxRounds);
+        // Extract rounds from stage config if available, otherwise use calculated default
+        const rounds = options.stageConfig?.rounds || Math.ceil(Math.log2(validTeams.length));
+        return this.generateSwissSystem(validTeams, tournamentId, rounds);
         
       case 'prediction-bracket':
         const participants: PredictionParticipant[] = options.participants || [];

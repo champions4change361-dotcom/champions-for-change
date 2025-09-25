@@ -2230,23 +2230,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Validate the tournament data - make optional fields more flexible
       const validAgeGroups = ["Elementary", "Middle School", "High School", "College", "Adult", "Masters", "Senior", "All Ages"];
+      // CRITICAL FIX: createTournamentSchema omits ageGroup and genderDivision
+      // So we should not include them in the validation data
       const { ageGroup: rawAgeGroup, genderDivision: rawGenderDivision, skillLevel: rawSkillLevel, ...bodyWithoutProblematicFields } = req.body;
+      
       const tournamentData = {
         ...bodyWithoutProblematicFields,
         bracket: bracketStructure, // Include generated bracket
-        // Make these fields optional if they're empty or not in expected format
-        ageGroup: rawAgeGroup && rawAgeGroup.trim() !== '' && validAgeGroups.includes(rawAgeGroup) ? (rawAgeGroup as "Elementary" | "Middle School" | "High School" | "College" | "Adult" | "Masters" | "Senior" | "All Ages") : null,
-        genderDivision: rawGenderDivision && rawGenderDivision.trim() !== '' ? rawGenderDivision : undefined,
         skillLevel: rawSkillLevel && rawSkillLevel.trim() !== '' ? rawSkillLevel : undefined,
       };
       
       const validatedData = createTournamentSchema.parse(tournamentData);
       
       // Create the tournament (let storage generate the ID)
+      // CRITICAL FIX: Add default values for legacy fields that storage expects
       const tournament = await storage.createTournament({
         ...validatedData,
         status: 'draft' as any,
-        isActive: true
+        isActive: true,
+        ageGroup: "All Ages", // Storage layer expects this field
+        genderDivision: "Mixed" // Storage layer expects this field
       });
       
       console.log('✅ Tournament created successfully:', tournament.id);

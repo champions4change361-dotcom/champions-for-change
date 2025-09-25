@@ -1371,7 +1371,7 @@ export const tournaments = pgTable("tournaments", {
   whitelabelConfigId: varchar("whitelabel_config_id").references(() => whitelabelConfigs.id), // White-label client
   entryFee: numeric("entry_fee").default("0"), // Tournament entry fee
   maxParticipants: integer("max_participants"), // Total number of individual participants
-  teamsCount: integer("teams_count"), // Number of teams (for team-based tournaments)
+  // teamsCount: integer("teams_count"), // Number of teams (for team-based tournaments) - Removed to fix database compatibility
   registrationDeadline: timestamp("registration_deadline"),
   tournamentDate: timestamp("tournament_date", { mode: 'string' }),
   location: text("location"),
@@ -2140,6 +2140,12 @@ export const insertTournamentSchema = createInsertSchema(tournaments).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  // Make legacy fields optional when using config-driven creation
+  ageGroup: z.string().optional(),
+  genderDivision: z.string().optional(),
+  // Allow tournamentType to be derived from config
+  tournamentType: z.string().optional(),
 });
 
 export const insertSportCategorySchema = createInsertSchema(sportCategories).omit({

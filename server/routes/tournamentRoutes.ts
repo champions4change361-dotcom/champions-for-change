@@ -33,6 +33,26 @@ function mapTournamentTypeToEngine(tournamentType: string): 'single' | 'double' 
   }
 }
 
+/**
+ * Map engine types back to legacy tournament types for database compatibility
+ */
+function mapEngineToTournamentType(engine: string): string {
+  switch (engine) {
+    case 'single':
+      return 'single';
+    case 'double':
+      return 'double';
+    case 'round_robin':
+      return 'round-robin';
+    case 'swiss':
+      return 'swiss-system';
+    case 'leaderboard':
+      return 'free-for-all'; // Default leaderboard type
+    default:
+      return 'single';
+  }
+}
+
 export function registerTournamentRoutes(app: Express) {
   // Sport Events API Routes
   app.get("/api/sports/:sportId/events", async (req, res) => {
@@ -609,17 +629,21 @@ export function registerTournamentRoutes(app: Express) {
         
         // Legacy fields for backward compatibility - proper semantic mapping
         sport: bracketParams.competitionName,
-        tournamentType: bracketParams.tournamentType,
+        tournamentType: validatedConfig ? 
+          mapEngineToTournamentType(validatedConfig.stages[0].engine) : 
+          (bracketParams.tournamentType || 'single'),
         participantType: bracketParams.participantType,
         
         // SEMANTIC CORRECTNESS FIX:
         // - participantCount = total number of participants/teams entering tournament
         // - teamSize = number of players per team (only relevant for team competitions)  
         // - maxParticipants = total number of individual participants
-        // - teamsCount = number of teams (for team-based tournaments)
         maxParticipants: Number(bracketParams.participantCount),
-        teamsCount: validatedConfig?.meta.participantType === 'team' ? Number(bracketParams.participantCount) : undefined,
         teamSize: validatedConfig?.meta.teamSize || undefined, // Only if specified in config
+        
+        // Legacy fields with proper defaults (derived from config if available)
+        ageGroup: req.body.ageGroup || "All Ages",
+        genderDivision: req.body.genderDivision || "Mixed",
         
         // Optional fields with defaults
         entryFee: req.body.entryFee || "0",
@@ -1286,6 +1310,211 @@ export function registerTournamentRoutes(app: Express) {
     } catch (error) {
       console.error("Error fetching FFA leaderboard:", error);
       res.status(500).json({ message: "Failed to fetch FFA leaderboard" });
+    }
+  });
+
+  // DEDICATED CONFIG-DRIVEN TOURNAMENT CREATION ENDPOINT
+  // This endpoint is specifically for comprehensive E2E testing of all tournament types
+  app.post("/api/tournaments/create-from-config", async (req: any, res) => {
+    try {
+      console.log('🎯 Config-driven tournament creation started');
+      
+      // SECURITY FIX: Proper authentication with environment-based testing mode
+      let userId = req.user?.claims?.sub;
+      let isAuthenticated = false;
+
+      // Check OAuth authentication first
+      if (req.isAuthenticated && req.isAuthenticated()) {
+        isAuthenticated = true;
+        userId = req.user?.claims?.sub;
+        console.log('✅ Using OAuth authentication, userId:', userId);
+      }
+      // Fallback to session-based authentication
+      else if (req.session?.user) {
+        isAuthenticated = true;
+        userId = req.session.user.id;
+        console.log('✅ Using session-based authentication, userId:', userId);
+      }
+
+      // SECURITY: Only allow unauthenticated access in development/testing environments
+      if (!isAuthenticated) {
+        const isDevelopment = process.env.NODE_ENV === 'development' || process.env.ALLOW_TESTING_MODE === 'true';
+        
+        if (!isDevelopment) {
+          console.log('❌ Authentication required in production environment');
+          return res.status(401).json({ 
+            message: "Authentication required. This endpoint requires authentication in production environments.",
+            environment: process.env.NODE_ENV,
+            testingModeAllowed: false
+          });
+        }
+        
+        // Development/testing mode only
+        userId = 'test-user-id';
+        console.log('⚠️ Using testing mode - development environment only');
+      }
+
+      // Parse and validate the TournamentConfig
+      const { config, participants = [] } = req.body;
+      
+      if (!config) {
+        return res.status(400).json({
+          message: "TournamentConfig is required",
+          example: {
+            config: {
+              meta: { name: "Test Tournament", participantType: "team", participantCount: 8 },
+              divisions: [{ name: "Main Division", eligibility: {}, genderPolicy: "open" }],
+              stages: [{ engine: "single", size: 8 }],
+              seeding: { method: "random" }
+            },
+            participants: ["Team 1", "Team 2", "Team 3", "Team 4", "Team 5", "Team 6", "Team 7", "Team 8"]
+          }
+        });
+      }
+      
+      let validatedConfig;
+      try {
+        validatedConfig = tournamentConfigSchema.parse(config);
+        console.log('✅ TournamentConfig validation successful');
+      } catch (validationError) {
+        console.error('❌ TournamentConfig validation failed:', validationError);
+        return res.status(400).json({
+          message: "Invalid TournamentConfig",
+          errors: validationError instanceof z.ZodError ? validationError.errors : [validationError]
+        });
+      }
+
+      // Generate participant names if not provided
+      const participantCount = config.meta.participantCount || participants.length || 8;
+      const participantNames = participants.length > 0 ? 
+        participants : 
+        Array.from({ length: participantCount }, (_, i) => `${config.meta.participantType === 'individual' ? 'Player' : 'Team'} ${i + 1}`);
+      
+      console.log(`🏆 Creating ${config.meta.name} with ${participantNames.length} participants using ${config.stages[0].engine} engine`);
+
+      // Generate bracket structure from config
+      let bracketStructure;
+      try {
+        bracketStructure = BracketGenerator.generateFromConfig(
+          validatedConfig,
+          participantNames,
+          '', // Tournament ID will be set after creation
+          {
+            formatConfig: req.body.formatConfig || {}
+          }
+        );
+        console.log(`📊 Bracket generated: ${bracketStructure.totalMatches} matches, ${bracketStructure.totalRounds} rounds`);
+      } catch (bracketError) {
+        console.error('❌ Bracket generation failed:', bracketError);
+        return res.status(500).json({
+          message: "Failed to generate bracket structure",
+          error: (bracketError as Error).message,
+          config: validatedConfig
+        });
+      }
+
+      // Prepare tournament data with semantic correctness
+      const tournamentData = {
+        name: config.meta.name,
+        description: req.body.description || `${config.meta.name} - ${config.stages[0].engine} tournament`,
+        location: req.body.location || 'Test Venue',
+        tournamentDate: req.body.tournamentDate || new Date().toISOString(),
+        
+        // Store the full validated config
+        config: validatedConfig,
+        
+        // Legacy compatibility fields - semantic mapping
+        sport: config.meta.name,
+        tournamentType: mapEngineToTournamentType(config.stages[0].engine),
+        participantType: config.meta.participantType,
+        
+        // Participant counting with semantic correctness
+        maxParticipants: Number(participantCount),
+        teamSize: config.meta.teamSize || undefined, // Maps to team_size in database
+        
+        // Additional fields with defaults
+        ageGroup: req.body.ageGroup || "Open",
+        genderDivision: req.body.genderDivision || "Open",
+        entryFee: req.body.entryFee || "0",
+        donationGoal: req.body.donationGoal || "0",
+        seriesLength: req.body.seriesLength || 7,
+        currentStage: req.body.currentStage || 1,
+        totalStages: req.body.totalStages || 1,
+        
+        // Bracket structure and metadata
+        bracket: bracketStructure,
+        status: 'upcoming' as const,
+        userId: userId
+      };
+
+      // Validate tournament data for database insertion
+      let validatedTournamentData;
+      try {
+        validatedTournamentData = insertTournamentSchema.parse(tournamentData);
+        console.log("✅ Tournament data validation successful");
+      } catch (validationError) {
+        console.error('❌ Tournament data validation failed:', validationError);
+        return res.status(400).json({
+          message: "Invalid tournament data for database insertion",
+          errors: validationError instanceof z.ZodError ? validationError.errors : [validationError]
+        });
+      }
+
+      // Create tournament in database
+      const tournament = await storage.createTournament(validatedTournamentData);
+      console.log(`🎯 Tournament created with ID: ${tournament.id}`);
+      
+      // Create matches for the tournament
+      const createdMatches = [];
+      if (bracketStructure.matches && bracketStructure.matches.length > 0) {
+        for (const match of bracketStructure.matches) {
+          const createdMatch = await storage.createMatch({
+            tournamentId: tournament.id,
+            round: match.round,
+            position: match.position,
+            team1: match.team1 || null,
+            team2: match.team2 || null,
+            team1Score: match.team1Score || 0,
+            team2Score: match.team2Score || 0,
+            winner: match.winner || null,
+            status: match.status
+          });
+          createdMatches.push(createdMatch);
+        }
+        console.log(`📋 Created ${createdMatches.length} matches`);
+      }
+
+      // Prepare comprehensive response for testing validation
+      const response = {
+        success: true,
+        tournament,
+        bracketStructure: {
+          format: bracketStructure.format,
+          totalMatches: bracketStructure.totalMatches,
+          totalRounds: bracketStructure.totalRounds,
+          matchCount: bracketStructure.matches?.length || 0,
+          participants: participantNames.length,
+        },
+        validation: {
+          configEngine: config.stages[0].engine,
+          tournamentType: tournamentData.tournamentType,
+          participantCount: participantNames.length,
+          expectedMatches: bracketStructure.totalMatches,
+          actualMatches: createdMatches.length,
+          mathematicsCorrect: bracketStructure.totalMatches === createdMatches.length
+        },
+        message: `Tournament '${config.meta.name}' created successfully with ${config.stages[0].engine} engine`
+      };
+
+      res.status(201).json(response);
+      
+    } catch (error) {
+      console.error("❌ Error in config-driven tournament creation:", error);
+      res.status(500).json({ 
+        message: "Failed to create tournament from config",
+        error: (error as Error).message,
+        stack: process.env.NODE_ENV === 'development' ? (error as Error).stack : undefined
+      });
     }
   });
 }
