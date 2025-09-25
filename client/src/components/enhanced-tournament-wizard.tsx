@@ -1720,16 +1720,40 @@ export default function EnhancedTournamentWizard({
                               <option value="distance">Distance</option>
                               <option value="points">Points</option>
                             </select>
-                            <Input 
-                              placeholder="Unit (e.g., points, seconds, meters)"
+                            <select 
                               value={event.unit}
                               onChange={(e) => {
                                 const newEvents = [...customEvents];
                                 newEvents[index].unit = e.target.value;
                                 setCustomEvents(newEvents);
                               }}
-                              data-testid={`input-event-unit-${index}`}
-                            />
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                              data-testid={`select-event-unit-${index}`}
+                            >
+                              <option value="">Select unit</option>
+                              {event.measureType === 'time' && (
+                                <>
+                                  <option value="seconds">seconds</option>
+                                  <option value="minutes">minutes</option>
+                                </>
+                              )}
+                              {event.measureType === 'distance' && (
+                                <>
+                                  <option value="meters">meters</option>
+                                  <option value="feet">feet</option>
+                                  <option value="yards">yards</option>
+                                </>
+                              )}
+                              {(event.measureType === 'score' || event.measureType === 'points') && (
+                                <>
+                                  <option value="points">points</option>
+                                  <option value="score">score</option>
+                                </>
+                              )}
+                              {!event.measureType && (
+                                <option value="" disabled>Select measure type first</option>
+                              )}
+                            </select>
                             <Button 
                               type="button" 
                               size="sm" 
