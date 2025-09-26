@@ -53,16 +53,12 @@ export default function TrantorLanding() {
             {/* Center: Enlarged Action Buttons */}
             <div className="flex flex-col space-y-2 lg:justify-center lg:items-center">
               <Button 
-                onClick={() => setLocation(
-                  billingPeriod === 'monthly'
-                    ? '/trial-signup?plan=multi-tournament&billing=monthly&price=45'
-                    : '/trial-signup?plan=multi-tournament&billing=annual&price=468'
-                )}
+                onClick={() => setLocation('/signup')}
                 className="bg-yellow-600 hover:bg-yellow-700 text-slate-900 font-semibold h-12 lg:h-14 px-6 lg:px-8 text-base lg:text-lg rounded-xl shadow-xl w-full lg:w-auto"
                 data-testid="button-start-trial-trantor"
               >
                 <Zap className="mr-2 h-4 w-4 lg:h-5 lg:w-5" />
-                {billingPeriod === 'monthly' ? 'Start Trial - $45/month' : 'Start Trial - $468/year'}
+                Start 14 Day Free Trial
               </Button>
               <Button 
                 onClick={(e) => {

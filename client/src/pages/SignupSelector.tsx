@@ -69,13 +69,13 @@ export default function SignupSelector() {
               </div>
               
               <div className="text-center mb-6">
-                <div className="text-3xl font-bold text-white mb-2">$39/month</div>
-                <div className="text-blue-200 text-sm">or $399/year (save 2 months)</div>
+                <div className="text-3xl font-bold text-white mb-2">$10/month</div>
+                <div className="text-blue-200 text-sm">or $99/year (save $21)</div>
               </div>
 
               <Button 
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold"
-                onClick={() => setLocation("/pricing?type=education#tournament-organizer")}
+                onClick={() => setLocation("/trial-signup?plan=annual-tournament&billing=monthly&price=10")}
                 data-testid="button-select-organizer"
               >
                 Select Tournament Organizer
@@ -116,16 +116,16 @@ export default function SignupSelector() {
               </div>
               
               <div className="text-center mb-6">
-                <div className="text-3xl font-bold text-white mb-2">$149/month</div>
-                <div className="text-green-200 text-sm">or $1,499/year (save 2 months)</div>
+                <div className="text-3xl font-bold text-white mb-2">$45/month</div>
+                <div className="text-green-200 text-sm">or $468/year (save $72)</div>
               </div>
 
               <Button 
                 className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold"
-                onClick={() => setLocation("/pricing?type=business#business-enterprise")}
+                onClick={() => setLocation("/trial-signup?plan=multi-tournament&billing=monthly&price=45")}
                 data-testid="button-select-business"
               >
-                Select Business Enterprise
+                Start Free Trial
               </Button>
             </CardContent>
           </Card>
