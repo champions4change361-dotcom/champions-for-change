@@ -174,7 +174,6 @@ function AuthenticatedRoutes() {
         <Route path="/tournament/:id" component={Tournament} />
         <Route path="/embed/tournament/:id" component={EmbedTournament} />
         <Route path="/tournaments/:tournamentId/register" component={TournamentRegistration} />
-        <Route path="/contact" component={Contact} />
         <Route path="/contacts" component={Contacts} />
         <Route path="/store" component={MerchandiseStore} />
         <Route path="/merchandise" component={MerchandiseStore} />
@@ -367,6 +366,7 @@ function AppRouter() {
       
       <Route path="/trial-signup" component={TrialSignup} />
       <Route path="/team-signup" component={TeamSignupPage} />
+      <Route path="/contact" component={Contact} />
       <Route path="/donate" component={DonationFlow} />
       <Route path="/payment-methods" component={PaymentMethods} />
       <Route path="/checkout" component={Checkout} />
