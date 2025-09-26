@@ -186,16 +186,14 @@ export default function SignupSelector() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
-                variant="outline"
-                className="border-slate-600 text-white hover:bg-slate-700 hover:text-white"
+                className="bg-slate-600 hover:bg-slate-500 text-white border-slate-500"
                 onClick={() => setLocation("/contact")}
-                data-testid="button-contact-sales"
+                data-testid="button-contact-us"
               >
-                Contact Sales Team
+                Contact Us
               </Button>
               <Button 
-                variant="outline"
-                className="border-slate-600 text-white hover:bg-slate-700 hover:text-white"
+                className="bg-slate-600 hover:bg-slate-500 text-white border-slate-500"
                 onClick={() => setLocation("/pricing")}
                 data-testid="button-view-all-pricing"
               >

@@ -124,6 +124,7 @@ import StaffRoles from './pages/StaffRoles';
 import DistrictOverview from './pages/DistrictOverview';
 import AthleticTrainerDemo from './pages/AthleticTrainerDemo';
 import SignupSelector from './pages/SignupSelector';
+import Contact from './pages/Contact';
 import SmartSignup from './pages/SmartSignup';
 import { StaffOnboarding } from './components/StaffOnboarding';
 import TournamentRegistration from './pages/TournamentRegistration';
@@ -173,6 +174,7 @@ function AuthenticatedRoutes() {
         <Route path="/tournament/:id" component={Tournament} />
         <Route path="/embed/tournament/:id" component={EmbedTournament} />
         <Route path="/tournaments/:tournamentId/register" component={TournamentRegistration} />
+        <Route path="/contact" component={Contact} />
         <Route path="/contacts" component={Contacts} />
         <Route path="/store" component={MerchandiseStore} />
         <Route path="/merchandise" component={MerchandiseStore} />
