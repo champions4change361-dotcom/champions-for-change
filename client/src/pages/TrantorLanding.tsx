@@ -334,7 +334,7 @@ export default function TrantorLanding() {
                     <Badge className="bg-blue-500 text-white px-3 py-1">Most Popular</Badge>
                   </div>
                   <h4 className="text-lg font-bold text-blue-300 mb-2 mt-2">Growing Team</h4>
-                  <div className="text-2xl font-bold text-blue-400 mb-1">$39<span className="text-sm text-blue-300">/month</span></div>
+                  <div className="text-2xl font-bold text-blue-400 mb-1">$39<span className="text-sm text-blue-300">/year</span></div>
                   <p className="text-xs text-blue-200 mb-3">Paid annually ($468/year)</p>
                   <ul className="text-sm text-blue-100 space-y-1 mb-4">
                     <li>• Up to 35 players</li>
@@ -579,7 +579,7 @@ export default function TrantorLanding() {
                   </div>
                   <Badge className="bg-orange-600 text-white">Most Popular</Badge>
                 </div>
-                <div className="text-4xl font-bold text-orange-400 mt-4">$39<span className="text-lg text-orange-300">/month</span></div>
+                <div className="text-4xl font-bold text-orange-400 mt-4">$468<span className="text-lg text-orange-300">/year</span></div>
                 <p className="text-sm text-orange-300">For organizers running multiple tournaments</p>
               </CardHeader>
               <CardContent className="space-y-3">
