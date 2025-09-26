@@ -28,107 +28,67 @@ export default function SignupSelector() {
         {/* Hero Section */}
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Choose Your Registration Path
+            Fund Student Education, Get Tournament Management
           </h1>
           <p className="text-xl text-slate-300 max-w-3xl mx-auto">
-            Select the registration type that matches your organization and role. Each path is optimized for different needs and provides the right features for your tournament management.
+            Our donation-based platform funds educational opportunities for underprivileged students while providing you with professional tournament management tools. Choose your path below.
           </p>
         </div>
 
         {/* Registration Type Cards */}
-        <div className="grid lg:grid-cols-3 gap-8 mb-12">
-          {/* Tournament Organizer */}
-          <Card className="bg-gradient-to-br from-blue-800 to-blue-900 border-blue-500/30 text-white hover:border-blue-400/50 transition-all cursor-pointer group">
-            <CardHeader className="text-center">
-              <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-500/30 transition-all">
-                <Trophy className="h-8 w-8 text-blue-400" />
-              </div>
-              <CardTitle className="text-2xl mb-2">Tournament Organizer</CardTitle>
-              <CardDescription className="text-blue-200">
-                Individual coaches and tournament organizers
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3 mb-6">
-                <div className="flex items-center text-blue-100">
-                  <Users className="h-4 w-4 mr-3" />
-                  Individual coaches & organizers
-                </div>
-                <div className="flex items-center text-blue-100">
-                  <Trophy className="h-4 w-4 mr-3" />
-                  Single school tournaments
-                </div>
-                <div className="flex items-center text-blue-100">
-                  <Zap className="h-4 w-4 mr-3" />
-                  AI-powered tournament creation
-                </div>
-                <div className="flex items-center text-blue-100">
-                  <Target className="h-4 w-4 mr-3" />
-                  65+ sports supported
-                </div>
-              </div>
-              
-              <div className="text-center mb-6">
-                <div className="text-3xl font-bold text-white mb-2">$10/month</div>
-                <div className="text-blue-200 text-sm">or $99/year (save $21)</div>
-              </div>
-
-              <Button 
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold"
-                onClick={() => setLocation("/trial-signup?plan=annual-tournament&billing=monthly&price=10")}
-                data-testid="button-select-organizer"
-              >
-                Select Tournament Organizer
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Business Enterprise */}
+        <div className="grid lg:grid-cols-2 gap-8 mb-12 max-w-5xl mx-auto">
+          {/* Tournament Management - Donation Based */}
           <Card className="bg-gradient-to-br from-green-800 to-green-900 border-green-500/30 text-white hover:border-green-400/50 transition-all cursor-pointer group border-2 border-yellow-400">
             <CardHeader className="text-center">
-              <Badge className="bg-yellow-400 text-green-800 mb-3 mx-auto">Most Popular</Badge>
+              <Badge className="bg-yellow-400 text-green-800 mb-3 mx-auto">💚 Supports Students</Badge>
               <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-green-500/30 transition-all">
-                <Building className="h-8 w-8 text-green-400" />
+                <Trophy className="h-8 w-8 text-green-400" />
               </div>
-              <CardTitle className="text-2xl mb-2">Business Enterprise</CardTitle>
+              <CardTitle className="text-2xl mb-2">Tournament Management</CardTitle>
               <CardDescription className="text-green-200">
-                Corporate and organizational tournaments
+                Full-featured tournament platform for everyone
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3 mb-6">
                 <div className="flex items-center text-green-100">
-                  <Building className="h-4 w-4 mr-3" />
-                  Corporate team building events
+                  <Trophy className="h-4 w-4 mr-3" />
+                  All tournament features
                 </div>
                 <div className="flex items-center text-green-100">
                   <Users className="h-4 w-4 mr-3" />
-                  Multi-organization tournaments
-                </div>
-                <div className="flex items-center text-green-100">
-                  <CreditCard className="h-4 w-4 mr-3" />
-                  Flexible billing options
+                  Unlimited tournaments
                 </div>
                 <div className="flex items-center text-green-100">
                   <Zap className="h-4 w-4 mr-3" />
-                  Advanced AI features
+                  AI-powered creation
+                </div>
+                <div className="flex items-center text-green-100">
+                  <Building className="h-4 w-4 mr-3" />
+                  White-label branding
+                </div>
+                <div className="flex items-center text-green-100">
+                  <GraduationCap className="h-4 w-4 mr-3" />
+                  Funds student education
                 </div>
               </div>
               
               <div className="text-center mb-6">
-                <div className="text-3xl font-bold text-white mb-2">$45/month</div>
-                <div className="text-green-200 text-sm">or $468/year (save $72)</div>
+                <div className="text-3xl font-bold text-white mb-2">$50/month</div>
+                <div className="text-green-200 text-sm">suggested donation • pay what feels right</div>
+                <div className="text-xs text-green-300 mt-2">100% tax-deductible charitable donation</div>
               </div>
 
               <Button 
                 className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold"
-                onClick={() => setLocation("/trial-signup?plan=multi-tournament&billing=monthly&price=45")}
-                data-testid="button-select-business"
+                onClick={() => setLocation("/trial-signup?plan=donation-based&billing=monthly&price=50")}
+                data-testid="button-select-organizer"
               >
-                Start Free Trial
+                Start 14-Day Free Trial
               </Button>
             </CardContent>
           </Card>
+
 
           {/* District Enterprise */}
           <Card className="bg-gradient-to-br from-purple-800 to-purple-900 border-purple-500/30 text-white hover:border-purple-400/50 transition-all cursor-pointer group">
@@ -180,9 +140,9 @@ export default function SignupSelector() {
         {/* Additional Information */}
         <div className="bg-slate-800 border border-slate-700 rounded-2xl p-8">
           <div className="text-center">
-            <h3 className="text-2xl font-bold text-white mb-4">Not sure which option is right for you?</h3>
+            <h3 className="text-2xl font-bold text-white mb-4">Questions about our donation-based model?</h3>
             <p className="text-slate-300 mb-6 max-w-2xl mx-auto">
-              Contact our team for personalized recommendations based on your organization's needs and tournament requirements.
+              Learn more about how your donations fund student educational opportunities, or get help determining the right donation amount for your organization.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
