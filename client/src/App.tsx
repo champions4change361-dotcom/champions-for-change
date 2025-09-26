@@ -125,6 +125,7 @@ import DistrictOverview from './pages/DistrictOverview';
 import AthleticTrainerDemo from './pages/AthleticTrainerDemo';
 import SignupSelector from './pages/SignupSelector';
 import Contact from './pages/Contact';
+import FAQ from './pages/FAQ';
 import SmartSignup from './pages/SmartSignup';
 import { StaffOnboarding } from './components/StaffOnboarding';
 import TournamentRegistration from './pages/TournamentRegistration';
@@ -367,6 +368,7 @@ function AppRouter() {
       <Route path="/trial-signup" component={TrialSignup} />
       <Route path="/team-signup" component={TeamSignupPage} />
       <Route path="/contact" component={Contact} />
+      <Route path="/faq" component={FAQ} />
       <Route path="/donate" component={DonationFlow} />
       <Route path="/payment-methods" component={PaymentMethods} />
       <Route path="/checkout" component={Checkout} />

@@ -45,85 +45,33 @@ export default function TrialSignup() {
 
   // Get plan details from URL params
   const urlParams = new URLSearchParams(window.location.search);
-  const planType = urlParams.get('plan') || 'monthly';
-  const planPrice = urlParams.get('price') || '39';
+  const planType = urlParams.get('plan') || 'donation-based';
+  const planPrice = urlParams.get('price') || '50';
 
   const planDetails: Record<string, PlanDetails> = {
-    // Team Management Plans
-    starter: {
-      name: 'Starter Team',
-      price: '$23',
-      period: 'month',
-      description: 'Everything Jersey Watch offers + professional tournament hosting',
+    'donation-based': {
+      name: 'Tournament Management Platform',
+      price: '$50',
+      period: 'month suggested donation',
+      description: 'Fund student education while getting professional tournament management',
       features: [
-        'Up to 20 players',
-        '1 professional tournament per year included',
-        'Additional tournaments: $25 each (vs $50+ elsewhere)',
-        'Module-based website builder (Jersey Watch alternative)',
-        '400 communications/month',
-        'Smart seeding algorithm (not random brackets)'
-      ]
-    },
-    growing: {
-      name: 'Growing Team',
-      price: '$39',
-      period: 'month', 
-      description: 'Complete team platform + professional tournament business tools',
-      features: [
-        'Up to 35 players',
-        '5 professional tournaments per year included',
-        'Additional tournaments: $25 each (50% less than competitors)',
-        'Advanced module builder + tournament formats',
-        '4,000 communications/month',
-        'Pool Play, Double Elimination, Round Robin (vs basic brackets)'
-      ]
-    },
-    elite: {
-      name: 'Elite Program',
-      price: '$63',
-      period: 'month',
-      description: 'Enterprise-grade team management + unlimited tournament hosting',
-      features: [
-        'Unlimited players & teams',
-        '10 professional tournaments per year included',
-        'Additional tournaments: $25 each (enterprise pricing for everyone)',
-        'Premium module builder + all tournament formats',
-        '16,000 communications/month',
-        'Swiss System, Leaderboards, Multi-division management'
-      ]
-    },
-    // Tournament Organizer Plans
-    annual: {
-      name: 'Annual Tournament Organizer',
-      price: '$99',
-      period: 'year',
-      description: 'Enterprise tournament tools at 1/10th the cost of competitors',
-      features: [
-        'One professional tournament (vs basic Challonge brackets)',
-        'Smart skill-based seeding algorithm (not random placement)',
-        'Multiple formats: Single/Double/Pool/Round Robin/Swiss',
-        'Module-based website builder (easy start)',
-        'Automatic bye handling + tiebreaker systems',
-        'Professional registration + payment processing'
-      ]
-    },
-    monthly: {
-      name: 'Multi-Tournament Organizer',
-      price: '$39',
-      period: 'month',
-      description: 'Complete tournament business platform with growth path',
-      features: [
-        'Unlimited professional tournaments',
-        'All tournament formats + smart seeding (enterprise-grade)',
-        'CHOICE: Module-based OR White-label building',
-        'Custom domains + complete branding control',
-        'Skills-based progression: Start simple → Go advanced',
-        'Everything enterprise companies get (no feature restrictions)'
+        '💚 All donations fund student educational opportunities',
+        '🏆 Unlimited professional tournaments',
+        '🎨 Complete white-label branding & custom domains',
+        '⚡ AI-powered tournament creation and optimization', 
+        '👥 Unlimited teams and players',
+        '📊 All tournament formats (Single/Double/Round Robin/Swiss)',
+        '💳 Integrated payment processing via Stripe',
+        '📱 Mobile-responsive tournament management',
+        '🔒 Enterprise-grade security and data backup',
+        '💯 100% tax-deductible charitable donation',
+        '🤝 Pay what feels right for your organization',
+        '📈 Help subsidize smaller community groups'
       ]
     }
   };
 
-  const selectedPlan = planDetails[planType] || planDetails.monthly;
+  const selectedPlan = planDetails[planType] || planDetails['donation-based'];
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -206,41 +154,40 @@ export default function TrialSignup() {
           {/* Plan Summary */}
           <div>
             <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">Start Your 14-Day Free Trial</h1>
+              <h1 className="text-3xl font-bold text-gray-900 mb-4">Fund Student Education • Get Tournament Tools</h1>
               <p className="text-lg text-gray-600">
-                Full platform access • No credit card charged until trial ends
+                Start your 14-day free trial • No credit card required • 100% tax-deductible donations
               </p>
             </div>
 
-            {/* Trial Benefits */}
+            {/* Donation Impact & Trial Benefits */}
             <Card className="mb-8 border-green-200 bg-green-50">
               <CardHeader>
                 <CardTitle className="flex items-center text-green-800">
-                  <Shield className="h-5 w-5 mr-2" />
-                  14-Day Trial Benefits
+                  💚 Champions for Change Mission
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3">
                   <li className="flex items-center text-green-700">
                     <Check className="h-4 w-4 mr-3 text-green-600" />
-                    Full platform access with no limitations
+                    Every donation funds student educational opportunities
                   </li>
                   <li className="flex items-center text-green-700">
                     <Check className="h-4 w-4 mr-3 text-green-600" />
-                    Professional tournament features vs basic brackets
+                    100% tax-deductible charitable contributions
                   </li>
                   <li className="flex items-center text-green-700">
                     <Check className="h-4 w-4 mr-3 text-green-600" />
-                    Smart seeding algorithm + multiple tournament formats
+                    Full enterprise features for everyone - no tiers
                   </li>
                   <li className="flex items-center text-green-700">
                     <Check className="h-4 w-4 mr-3 text-green-600" />
-                    Integrated payment processing
+                    Pay what feels right for your organization
                   </li>
                   <li className="flex items-center text-green-700">
                     <Check className="h-4 w-4 mr-3 text-green-600" />
-                    Module-based or white-label website building
+                    Help subsidize smaller community groups
                   </li>
                 </ul>
               </CardContent>
@@ -289,8 +236,8 @@ export default function TrialSignup() {
                     <span className="text-lg text-gray-600">{selectedPlan.period}</span>
                   </div>
                   <div className="text-right">
-                    <div className="text-sm text-gray-500">After trial</div>
-                    <div className="text-sm font-medium text-gray-700">Cancel anytime</div>
+                    <div className="text-sm text-gray-500">Suggested donation</div>
+                    <div className="text-sm font-medium text-green-700">Pay what feels right</div>
                   </div>
                 </div>
                 
@@ -311,11 +258,10 @@ export default function TrialSignup() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <Zap className="h-5 w-5 mr-2" />
-                  Start Your 14-Day Free Trial
+                  💚 Fund Students, Get Tournament Tools
                 </CardTitle>
                 <CardDescription>
-                  No credit card required • Start immediately • Full platform access
+                  14-day free trial • No credit card required • 100% tax-deductible donations
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -378,17 +324,16 @@ export default function TrialSignup() {
 
                   <Separator />
 
-                  {/* Trial Benefits */}
+                  {/* Donation Impact */}
                   <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                     <div className="flex items-center mb-2">
-                      <Shield className="h-5 w-5 text-green-600 mr-2" />
-                      <h3 className="font-semibold text-green-800">Your Free Trial Includes:</h3>
+                      🎓 <h3 className="font-semibold text-green-800 ml-2">Your Impact:</h3>
                     </div>
                     <ul className="text-sm text-green-700 space-y-1">
-                      <li>• Full access to all tournament management features</li>
-                      <li>• Smart seeding algorithms and professional formats</li>
-                      <li>• No restrictions during your 14-day trial period</li>
-                      <li>• Cancel anytime - no credit card required to start</li>
+                      <li>• Every donation funds student travel and educational opportunities</li>
+                      <li>• Help underprivileged youth access competition experiences</li>
+                      <li>• Support Champions for Change educational mission</li>
+                      <li>• Your organization gets full enterprise tournament tools</li>
                     </ul>
                   </div>
 
@@ -397,12 +342,12 @@ export default function TrialSignup() {
                     <div className="flex items-start space-x-3">
                       <Clock className="h-5 w-5 text-blue-600 mt-0.5" />
                       <div className="text-sm">
-                        <p className="font-medium text-blue-900 mb-2">Trial Terms:</p>
+                        <p className="font-medium text-blue-900 mb-2">Free Trial Terms:</p>
                         <ul className="space-y-1 text-blue-800">
                           <li>• Your 14-day free trial starts immediately</li>
-                          <li>• No charge until {new Date(Date.now() + 14*24*60*60*1000).toLocaleDateString()}</li>
-                          <li>• Cancel anytime during trial with no charge</li>
-                          <li>• Full platform access during trial period</li>
+                          <li>• No donation requested until {new Date(Date.now() + 14*24*60*60*1000).toLocaleDateString()}</li>
+                          <li>• After trial, choose your monthly donation amount</li>
+                          <li>• Full platform access with all enterprise features</li>
                         </ul>
                       </div>
                     </div>
@@ -410,21 +355,21 @@ export default function TrialSignup() {
 
                   <Button 
                     type="submit" 
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                    className="w-full bg-green-600 hover:bg-green-700 text-white"
                     size="lg"
                     disabled={isLoading}
                     data-testid="button-start-trial"
                   >
                     {isLoading ? (
-                      "Starting Your Trial..."
+                      "Starting Your Mission-Driven Trial..."
                     ) : (
-                      "Start My 14-Day Free Trial"
+                      "💚 Start My 14-Day Free Trial"
                     )}
                   </Button>
 
                   <p className="text-xs text-gray-500 text-center">
-                    By starting your trial, you agree to our Terms of Service and Privacy Policy. 
-                    You can cancel anytime during your trial period.
+                    By starting your trial, you agree to support Champions for Change's educational mission. 
+                    After your free trial, choose a donation amount that feels right for your organization.
                   </p>
                 </form>
               </CardContent>
