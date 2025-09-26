@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import { Trophy, Users, Zap, Globe, CreditCard, Star, Target, Building, CheckCircle, BarChart3, Clock, Smartphone, Calendar, GraduationCap, Heart, Repeat } from "lucide-react";
 import { SiGoogle } from "react-icons/si";
 import { useLocation } from "wouter";
@@ -13,6 +14,7 @@ import LanguageSelector from "@/components/LanguageSelector";
 export default function TrantorLanding() {
   const [, setLocation] = useLocation();
   const [isRegistrationAssistantOpen, setIsRegistrationAssistantOpen] = useState(false);
+  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'annual'>('monthly');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
@@ -51,12 +53,16 @@ export default function TrantorLanding() {
             {/* Center: Enlarged Action Buttons */}
             <div className="flex flex-col space-y-2 lg:justify-center lg:items-center">
               <Button 
-                onClick={() => setLocation('/trial-signup?plan=monthly&price=39')}
+                onClick={() => setLocation(
+                  billingPeriod === 'monthly'
+                    ? '/trial-signup?plan=multi-tournament&billing=monthly&price=45'
+                    : '/trial-signup?plan=multi-tournament&billing=annual&price=468'
+                )}
                 className="bg-yellow-600 hover:bg-yellow-700 text-slate-900 font-semibold h-12 lg:h-14 px-6 lg:px-8 text-base lg:text-lg rounded-xl shadow-xl w-full lg:w-auto"
                 data-testid="button-start-trial-trantor"
               >
                 <Zap className="mr-2 h-4 w-4 lg:h-5 lg:w-5" />
-                Start 14-Day Free Trial
+                {billingPeriod === 'monthly' ? 'Start Trial - $45/month' : 'Start Trial - $468/year'}
               </Button>
               <Button 
                 onClick={(e) => {
@@ -281,18 +287,26 @@ export default function TrantorLanding() {
               <p className="text-yellow-100 mb-4">Full platform access • No credit card charged until trial ends</p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Button 
-                  onClick={() => setLocation('/trial-signup?plan=annual&price=99')}
+                  onClick={() => setLocation(
+                    billingPeriod === 'monthly'
+                      ? '/trial-signup?plan=annual-tournament&billing=monthly&price=10'
+                      : '/trial-signup?plan=annual-tournament&billing=annual&price=99'
+                  )}
                   className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3"
                   data-testid="button-annual-trial"
                 >
-                  Annual Tournament - $99/year
+                  {billingPeriod === 'monthly' ? 'Annual Tournament - $10/month' : 'Annual Tournament - $99/year'}
                 </Button>
                 <Button 
-                  onClick={() => setLocation('/trial-signup?plan=monthly&price=39')}
+                  onClick={() => setLocation(
+                    billingPeriod === 'monthly'
+                      ? '/trial-signup?plan=multi-tournament&billing=monthly&price=45'
+                      : '/trial-signup?plan=multi-tournament&billing=annual&price=468'
+                  )}
                   className="bg-orange-600 hover:bg-orange-700 text-white font-semibold px-6 py-3"
                   data-testid="button-monthly-trial"
                 >
-                  Multi-Tournament - $39/month
+                  {billingPeriod === 'monthly' ? 'Multi-Tournament - $45/month' : 'Multi-Tournament - $468/year'}
                 </Button>
               </div>
               
@@ -526,6 +540,19 @@ export default function TrantorLanding() {
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-white mb-4">Simple, Transparent Pricing</h2>
             <p className="text-orange-200 text-lg">Choose your plan based on tournament frequency - Start with 14-day free trial</p>
+            
+            {/* Billing Toggle */}
+            <div className="flex items-center justify-center gap-4 mt-6 mb-6">
+              <span className={`text-lg ${billingPeriod === 'monthly' ? 'text-white font-semibold' : 'text-orange-300'}`}>Monthly</span>
+              <Switch 
+                checked={billingPeriod === 'annual'}
+                onCheckedChange={(checked) => setBillingPeriod(checked ? 'annual' : 'monthly')}
+                className="data-[state=checked]:bg-green-600"
+              />
+              <span className={`text-lg ${billingPeriod === 'annual' ? 'text-white font-semibold' : 'text-orange-300'}`}>Annual</span>
+              <Badge className="bg-green-600 text-white ml-2">Save with annual billing</Badge>
+            </div>
+            
             <div className="mt-4 bg-green-600/20 border border-green-500/50 rounded-lg p-4 max-w-md mx-auto">
               <p className="text-green-300 font-semibold">🛡️ No Hidden Fees • Cancel Anytime • Full Access During Trial</p>
             </div>
@@ -535,8 +562,23 @@ export default function TrantorLanding() {
               <CardHeader>
                 <CardTitle className="text-2xl text-white">Annual Tournament</CardTitle>
                 <CardDescription className="text-blue-200">Perfect for organizations running one tournament per year</CardDescription>
-                <div className="text-4xl font-bold text-blue-400 mt-4">$99<span className="text-lg text-blue-300">/year</span></div>
-                <p className="text-sm text-blue-300">Just $8.25/month • Year-round hosting included</p>
+                <div className="space-y-2">
+                  {billingPeriod === 'monthly' ? (
+                    <>
+                      <div className="text-4xl font-bold text-blue-400">$10<span className="text-lg text-blue-300">/month</span></div>
+                      <div className="bg-blue-600/20 border border-blue-500/50 rounded px-3 py-2">
+                        <p className="text-xs text-blue-300">$120/year - Switch to annual to save $21</p>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="text-4xl font-bold text-blue-400">$99<span className="text-lg text-blue-300">/year</span></div>
+                      <div className="bg-green-600/20 border border-green-500/50 rounded px-3 py-2">
+                        <p className="text-xs text-green-300 font-semibold">💰 SAVE $21: Just $8.25/month when paid annually</p>
+                      </div>
+                    </>
+                  )}
+                </div>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex items-center text-blue-200">
@@ -561,7 +603,11 @@ export default function TrantorLanding() {
                 </div>
                 <div className="pt-4">
                   <Button 
-                    onClick={() => setLocation('/trial-signup?plan=annual&price=99')}
+                    onClick={() => setLocation(
+                      billingPeriod === 'monthly' 
+                        ? '/trial-signup?plan=annual-tournament&billing=monthly&price=10' 
+                        : '/trial-signup?plan=annual-tournament&billing=annual&price=99'
+                    )}
                     className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold"
                     data-testid="button-start-annual-trial-2"
                   >
@@ -579,8 +625,24 @@ export default function TrantorLanding() {
                   </div>
                   <Badge className="bg-orange-600 text-white">Most Popular</Badge>
                 </div>
-                <div className="text-4xl font-bold text-orange-400 mt-4">$468<span className="text-lg text-orange-300">/year</span></div>
-                <p className="text-sm text-orange-300">For organizers running multiple tournaments</p>
+                <div className="space-y-2">
+                  {billingPeriod === 'monthly' ? (
+                    <>
+                      <div className="text-4xl font-bold text-orange-400">$45<span className="text-lg text-orange-300">/month</span></div>
+                      <div className="bg-orange-600/20 border border-orange-500/50 rounded px-3 py-2">
+                        <p className="text-xs text-orange-300">$540/year - Switch to annual to save $72</p>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="text-4xl font-bold text-orange-400">$468<span className="text-lg text-orange-300">/year</span></div>
+                      <div className="bg-green-600/20 border border-green-500/50 rounded px-3 py-2">
+                        <p className="text-xs text-green-300 font-semibold">💰 SAVE $72: Just $39/month when paid annually</p>
+                      </div>
+                    </>
+                  )}
+                  <p className="text-sm text-orange-300">For organizers running multiple tournaments</p>
+                </div>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex items-center text-orange-200">
@@ -605,7 +667,11 @@ export default function TrantorLanding() {
                 </div>
                 <div className="pt-4">
                   <Button 
-                    onClick={() => setLocation('/trial-signup?plan=monthly&price=39')}
+onClick={() => setLocation(
+                      billingPeriod === 'monthly'
+                        ? '/trial-signup?plan=multi-tournament&billing=monthly&price=45'
+                        : '/trial-signup?plan=multi-tournament&billing=annual&price=468'
+                    )}
                     className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold"
                     data-testid="button-start-monthly-trial-2"
                   >
