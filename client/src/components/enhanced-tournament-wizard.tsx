@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { SportSpecificConfig } from "@/components/comprehensive-tournament-formats";
 import { apiRequest } from "@/lib/queryClient";
 import { useGenerateFFATournament, isFFATournamentType } from "@/hooks/useFFATournaments";
 import { Button } from "@/components/ui/button";
@@ -123,6 +124,14 @@ export default function EnhancedTournamentWizard({
   const [currentStep, setCurrentStep] = useState<WizardStep>('configuration');
   const [createdTournament, setCreatedTournament] = useState<any>(null);
   const [isDraftSaving, setIsDraftSaving] = useState(false);
+
+  // Add missing sports data query
+  const { data: sports = [] } = useQuery<any[]>({
+    queryKey: ["/api/sports"],
+  });
+
+  // Add missing selectedSport logic
+  const selectedSport = sports.find(sport => sport.sportName === form.watch("sport"));
   const [autoSaveStatus, setAutoSaveStatus] = useState<'saved' | 'saving' | 'error' | null>(null);
   
   // CONFIGURATION-DRIVEN STATE
@@ -1142,7 +1151,11 @@ export default function EnhancedTournamentWizard({
         maxParticipants: data.maxParticipants,
         entryFee: data.entryFee ? String(data.entryFee) : "0",
         tournamentDate: data.tournamentDate ? (typeof data.tournamentDate === 'string' ? data.tournamentDate : String(data.tournamentDate)) : null,
-        registrationDeadline: data.registrationDeadline,
+        registrationDeadline: data.registrationDeadline && data.registrationDeadline.trim() !== '' 
+          ? data.registrationDeadline 
+          : data.tournamentDate 
+            ? new Date(new Date(data.tournamentDate).getTime() - 2 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16)
+            : undefined,
         status: data.status || 'draft',
         scoringMethod: data.scoringMethod || "head-to-head",
         isGuestCreated: !user,
@@ -1245,6 +1258,11 @@ export default function EnhancedTournamentWizard({
         status: 'draft',
         entryFee: data.entryFee ? String(data.entryFee) : "0", // Convert to string for numeric field
         tournamentDate: data.tournamentDate ? (typeof data.tournamentDate === 'string' ? data.tournamentDate : String(data.tournamentDate)) : null, // Ensure string format
+        registrationDeadline: data.registrationDeadline && data.registrationDeadline.trim() !== '' 
+          ? data.registrationDeadline 
+          : data.tournamentDate 
+            ? new Date(new Date(data.tournamentDate).getTime() - 2 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16)
+            : undefined,
         scoringMethod: selectedSport?.scoringMethod || "wins",
         isGuestCreated: !user,
       };
@@ -1466,6 +1484,37 @@ export default function EnhancedTournamentWizard({
                   />
                   <p className="text-xs text-gray-500 mt-1">
                     Enter any competition name - not limited to traditional sports
+                  </p>
+                </div>
+
+                {/* Sport Selection Cards */}
+                <div>
+                  <Label className="block text-sm font-medium text-gray-700 mb-3">
+                    Choose Sport/Competition Type
+                  </Label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {sports.map((sport) => (
+                      <div
+                        key={sport.id}
+                        onClick={() => form.setValue("sport", sport.sportName)}
+                        className={`cursor-pointer p-4 border-2 rounded-lg transition-all ${
+                          form.watch("sport") === sport.sportName
+                            ? 'border-blue-500 bg-blue-50'
+                            : 'border-gray-200 hover:border-blue-300'
+                        }`}
+                        data-testid={`sport-card-${sport.id}`}
+                      >
+                        <h3 className="font-medium text-gray-900">{sport.sportName}</h3>
+                        <p className="text-sm text-gray-600 mt-1">
+                          {sport.competitionType === "leaderboard" ? "Individual Rankings" : 
+                           sport.competitionType === "bracket" ? "Head-to-Head Brackets" :
+                           sport.competitionType === "both" ? "Multiple Formats" : "Tournament"}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">
+                    Select the sport or competition type that matches your tournament
                   </p>
                 </div>
 
@@ -2383,7 +2432,7 @@ export default function EnhancedTournamentWizard({
                   <p className="text-gray-600">Please select a sport first to configure events</p>
                   <Button
                     variant="outline"
-                    onClick={() => setCurrentStep('sport')}
+                    onClick={() => setCurrentStep('configuration')}
                     className="mt-3"
                   >
                     Go Back to Sport Selection
@@ -2675,7 +2724,7 @@ export default function EnhancedTournamentWizard({
                     <div><strong>Name:</strong> {form.watch("name")}</div>
                     <div><strong>Sport:</strong> {form.watch("sport")}</div>
                     <div><strong>Format:</strong> {competitionFormat}</div>
-                    <div><strong>Events:</strong> {selectedEvents.length} selected</div>
+                    <div><strong>Events:</strong> {form.watch("eventStructure") === "multi-event" ? customEvents.length : selectedEvents.length} selected</div>
                     {form.watch("ageGroup") && <div><strong>Age Group:</strong> {form.watch("ageGroup")}</div>}
                     {form.watch("genderDivision") && <div><strong>Division:</strong> {form.watch("genderDivision")}</div>}
                     {form.watch("tournamentDate") && (
@@ -2691,12 +2740,21 @@ export default function EnhancedTournamentWizard({
                 <div className="space-y-4">
                   <h3 className="font-semibold text-lg">Selected Events</h3>
                   <div className="max-h-48 overflow-y-auto space-y-1">
-                    {selectedEvents.map((event, index) => (
-                      <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded text-sm">
-                        <span className="font-medium">{event.eventName}</span>
-                        <Badge variant="secondary" className="text-xs">{event.eventType}</Badge>
-                      </div>
-                    ))}
+                    {form.watch("eventStructure") === "multi-event" ? (
+                      customEvents.map((event, index) => (
+                        <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded text-sm">
+                          <span className="font-medium">{event.name}</span>
+                          <Badge variant="secondary" className="text-xs">{event.measureType} ({event.unit})</Badge>
+                        </div>
+                      ))
+                    ) : (
+                      selectedEvents.map((event, index) => (
+                        <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded text-sm">
+                          <span className="font-medium">{event.eventName}</span>
+                          <Badge variant="secondary" className="text-xs">{event.eventType}</Badge>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
               </div>
