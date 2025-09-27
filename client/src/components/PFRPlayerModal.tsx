@@ -31,8 +31,10 @@ export function PFRPlayerModal({
   onDraftPlayer,
   slotPosition 
 }: PFRPlayerModalProps) {
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
+  const [showEmbed, setShowEmbed] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [embedError, setEmbedError] = useState(false);
+  const iframeRef = React.useRef<HTMLIFrameElement>(null);
 
   if (!player) return null;
 
@@ -68,13 +70,39 @@ export function PFRPlayerModal({
 
   const handleIframeLoad = () => {
     setIsLoading(false);
-    setHasError(false);
+    setEmbedError(false);
   };
 
   const handleIframeError = () => {
     setIsLoading(false);
-    setHasError(true);
+    setEmbedError(true);
   };
+
+  const openInNewTab = () => {
+    if (pfrUrl) {
+      const newWindow = window.open(pfrUrl, '_blank', 'noopener,noreferrer');
+      if (newWindow) {
+        newWindow.opener = null;
+      }
+      // Auto-close modal after opening PFR in new tab
+      setTimeout(() => onClose(), 500);
+    }
+  };
+
+  const tryEmbedding = () => {
+    setShowEmbed(true);
+    setIsLoading(true);
+    setEmbedError(false);
+  };
+
+  // Reset states when modal opens
+  React.useEffect(() => {
+    if (isOpen) {
+      setShowEmbed(false);
+      setIsLoading(false);
+      setEmbedError(false);
+    }
+  }, [isOpen]);
 
   const getStatusBadge = () => {
     if (!player.injuryStatus || player.injuryStatus === 'healthy') return null;
@@ -137,7 +165,7 @@ export function PFRPlayerModal({
 
         {/* Pro Football Reference Content */}
         <div className="flex-1 relative">
-          {isLoading && (
+          {isLoading && showEmbed && (
             <div className="absolute inset-0 flex items-center justify-center bg-gray-50 z-20">
               <div className="text-center">
                 <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
@@ -146,49 +174,87 @@ export function PFRPlayerModal({
             </div>
           )}
           
-          {hasError && (
-            <div className="absolute inset-0 flex items-center justify-center bg-gray-50 z-20 p-8">
-              <Alert className="max-w-md">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  <div className="space-y-3">
-                    <p>Unable to load player data from Pro Football Reference.</p>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => window.open(pfrUrl, '_blank')}
-                        className="flex items-center gap-1"
-                      >
-                        <ExternalLink className="h-3 w-3" />
-                        Open in New Tab
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          setHasError(false);
-                          setIsLoading(true);
-                        }}
-                        size="sm"
-                      >
-                        Retry
-                      </Button>
-                    </div>
-                  </div>
-                </AlertDescription>
-              </Alert>
+          {/* Default view - always show direct access to PFR */}
+          {!showEmbed && (
+            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 p-8">
+              <div className="max-w-md text-center space-y-4">
+                <div className="w-16 h-16 mx-auto bg-blue-600 rounded-full flex items-center justify-center mb-4">
+                  <ExternalLink className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">
+                  View {player.name} on Pro Football Reference
+                </h3>
+                <p className="text-gray-600">
+                  Access complete player stats, game logs, advanced metrics, and injury reports 
+                  to make informed fantasy decisions.
+                </p>
+                
+                <div className="space-y-3">
+                  <Button
+                    onClick={openInNewTab}
+                    size="lg"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3"
+                    data-testid="button-open-pfr"
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Open {player.name} on Pro Football Reference
+                  </Button>
+                  
+                  <Button
+                    onClick={tryEmbedding}
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    data-testid="button-try-embedding"
+                  >
+                    Try Embedding (May Not Work)
+                  </Button>
+                </div>
+              </div>
             </div>
           )}
           
-          {pfrUrl ? (
-            <iframe
-              src={pfrUrl}
-              className="w-full h-full border-0"
-              title={`${player.name} - Pro Football Reference`}
-              onLoad={handleIframeLoad}
-              onError={handleIframeError}
-              sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
-            />
-          ) : (
+          {/* Embed attempt view */}
+          {showEmbed && (
+            <>
+              {embedError && (
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-50 z-20 p-8">
+                  <Alert className="max-w-md">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      <div className="space-y-3">
+                        <p className="font-medium">Embedding failed</p>
+                        <p className="text-sm text-gray-600">
+                          Pro Football Reference blocks embedding. Click below to view player data in a new tab.
+                        </p>
+                        <Button
+                          onClick={openInNewTab}
+                          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                          Open on Pro Football Reference
+                        </Button>
+                      </div>
+                    </AlertDescription>
+                  </Alert>
+                </div>
+              )}
+              
+              {pfrUrl && (
+                <iframe
+                  ref={iframeRef}
+                  src={pfrUrl}
+                  className="w-full h-full border-0"
+                  title={`${player.name} - Pro Football Reference`}
+                  onLoad={handleIframeLoad}
+                  onError={handleIframeError}
+                  sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
+                />
+              )}
+            </>
+          )}
+          
+          {!pfrUrl && (
             <div className="absolute inset-0 flex items-center justify-center bg-gray-50 z-20">
               <Alert className="max-w-md">
                 <AlertCircle className="h-4 w-4" />
