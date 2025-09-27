@@ -278,34 +278,50 @@ export default function TrantorLanding() {
             <p className="text-xl text-orange-100 max-w-3xl mx-auto mb-6">
               Professional tournament management and sports administration platform. Complete system for schools, organizations, and tournament directors to manage events, participants, scheduling, and operations.
             </p>
-            <div className="bg-yellow-600/20 border border-yellow-500/50 rounded-xl p-6 mb-8 max-w-2xl mx-auto">
-              <h3 className="text-2xl font-bold text-yellow-300 mb-2">🎯 Start Your 14-Day Free Trial</h3>
-              <p className="text-yellow-100 mb-4">Full platform access • No credit card charged until trial ends</p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Button 
-                  onClick={() => setLocation(
-                    billingPeriod === 'monthly'
-                      ? '/trial-signup?plan=annual-tournament&billing=monthly&price=10'
-                      : '/trial-signup?plan=annual-tournament&billing=annual&price=99'
-                  )}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3"
-                  data-testid="button-annual-trial"
-                >
-                  {billingPeriod === 'monthly' ? 'Annual Tournament - $10/month' : 'Annual Tournament - $99/year'}
-                </Button>
-                <Button 
-                  onClick={() => setLocation(
-                    billingPeriod === 'monthly'
-                      ? '/trial-signup?plan=multi-tournament&billing=monthly&price=45'
-                      : '/trial-signup?plan=multi-tournament&billing=annual&price=468'
-                  )}
-                  className="bg-orange-600 hover:bg-orange-700 text-white font-semibold px-6 py-3"
-                  data-testid="button-monthly-trial"
-                >
-                  {billingPeriod === 'monthly' ? 'Multi-Tournament - $45/month' : 'Multi-Tournament - $468/year'}
-                </Button>
+            <div className="bg-gradient-to-r from-green-600/30 via-blue-600/30 to-purple-600/30 border-2 border-yellow-500/60 rounded-xl p-8 mb-8 max-w-3xl mx-auto">
+              <div className="text-center mb-6">
+                <div className="flex items-center justify-center mb-3">
+                  <GraduationCap className="h-6 w-6 text-yellow-300 mr-2" />
+                  <Badge className="bg-yellow-500 text-slate-900 px-4 py-1 text-sm font-bold">
+                    🎓 Champions for Change Tournament Management
+                  </Badge>
+                  <Heart className="h-6 w-6 text-red-300 ml-2" />
+                </div>
+                <h3 className="text-3xl font-bold text-white mb-3">Support Student Education Through Tournament Management</h3>
+                <p className="text-lg text-blue-100 mb-2">Revolutionary donation-based platform - Full access for everyone</p>
+                <p className="text-yellow-200 font-semibold">Every tournament managed funds educational opportunities for students</p>
               </div>
               
+              <div className="text-center">
+                <div className="text-4xl font-bold text-yellow-300 mb-2">
+                  $50<span className="text-xl text-yellow-200">/month suggested</span>
+                </div>
+                <p className="text-sm text-green-200 mb-6 font-semibold">Pay-what-feels-right • 100% Tax-Deductible • EIN: 81-3834471</p>
+                
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div className="bg-white/10 rounded-lg p-3">
+                    <CheckCircle className="h-5 w-5 text-green-400 mx-auto mb-2" />
+                    <div className="text-white font-bold text-sm">Unlimited Tournaments</div>
+                  </div>
+                  <div className="bg-white/10 rounded-lg p-3">
+                    <CheckCircle className="h-5 w-5 text-green-400 mx-auto mb-2" />
+                    <div className="text-white font-bold text-sm">Educational Impact</div>
+                  </div>
+                </div>
+                
+                <Button 
+                  onClick={() => setLocation('/signup')}
+                  className="bg-yellow-600 hover:bg-yellow-700 text-slate-900 font-bold px-8 py-4 text-lg shadow-xl"
+                  data-testid="button-support-students-hero"
+                >
+                  <Heart className="mr-2 h-5 w-5" />
+                  Support Students & Start Managing
+                </Button>
+                
+                <p className="text-xs text-green-200 mt-4 italic">
+                  Built by coaches who fund student educational trips through tournament management
+                </p>
+              </div>
             </div>
 
             {/* Champions for Change Team Management */}
@@ -522,38 +538,33 @@ export default function TrantorLanding() {
         </div>
       </div>
 
-      {/* Pricing Plans */}
-      <div className="py-16 bg-orange-800/30">
+      {/* Champions for Change - Unified Donation Model */}
+      <div className="py-16 bg-gradient-to-r from-green-800/40 via-blue-800/40 to-purple-800/40">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-white mb-4">Simple, Transparent Pricing</h2>
-            <p className="text-orange-200 text-lg">Choose your plan based on tournament frequency - Start with 14-day free trial</p>
-            
-            {/* Billing Toggle */}
-            <div className="flex items-center justify-center gap-4 mt-6 mb-6">
-              <span className={`text-lg ${billingPeriod === 'monthly' ? 'text-white font-semibold' : 'text-orange-300'}`}>Monthly</span>
-              <Switch 
-                checked={billingPeriod === 'annual'}
-                onCheckedChange={(checked) => setBillingPeriod(checked ? 'annual' : 'monthly')}
-                className="data-[state=checked]:bg-green-600"
-              />
-              <span className={`text-lg ${billingPeriod === 'annual' ? 'text-white font-semibold' : 'text-orange-300'}`}>Annual</span>
-              <Badge className="bg-green-600 text-white ml-2">Save with annual billing</Badge>
+            <div className="flex items-center justify-center mb-4">
+              <GraduationCap className="h-8 w-8 text-yellow-300 mr-3" />
+              <Badge className="bg-yellow-500 text-slate-900 px-6 py-2 text-lg font-bold">
+                🎓 Revolutionary Donation-Based Model
+              </Badge>
+              <Heart className="h-8 w-8 text-red-300 ml-3" />
             </div>
+            <h2 className="text-4xl font-bold text-white mb-4">No Tiers • No Limits • Just Educational Impact</h2>
+            <p className="text-green-200 text-xl max-w-3xl mx-auto">Every donation directly funds educational opportunities for underprivileged student competitors</p>
             
-            <div className="mt-4 bg-green-600/20 border border-green-500/50 rounded-lg p-4 max-w-md mx-auto">
-              <p className="text-green-300 font-semibold">🛡️ No Hidden Fees • Cancel Anytime • Full Access During Trial</p>
+            <div className="mt-8 bg-gradient-to-r from-green-600/30 via-blue-600/30 to-purple-600/30 border-2 border-yellow-500/60 rounded-lg p-6 max-w-2xl mx-auto">
+              <p className="text-white font-semibold text-lg">💡 Same enterprise features for everyone • 100% tax-deductible • EIN: 81-3834471</p>
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             <Card className="bg-blue-900/50 border-blue-600/30">
               <CardHeader>
-                <CardTitle className="text-2xl text-white">Annual Tournament</CardTitle>
-                <CardDescription className="text-blue-200">Perfect for organizations running one tournament per year</CardDescription>
+                <CardTitle className="text-2xl text-white">Champions for Change</CardTitle>
+                <CardDescription className="text-green-200">Support student education through tournament management</CardDescription>
                 <div className="space-y-2">
                   {billingPeriod === 'monthly' ? (
                     <>
-                      <div className="text-4xl font-bold text-blue-400">$10<span className="text-lg text-blue-300">/month</span></div>
+                      <div className="text-4xl font-bold text-yellow-300">$50<span className="text-lg text-yellow-200">/month suggested</span></div>
                       <div className="bg-blue-600/20 border border-blue-500/50 rounded px-3 py-2">
                         <p className="text-xs text-blue-300">$120/year - Switch to annual to save $21</p>
                       </div>
@@ -592,9 +603,7 @@ export default function TrantorLanding() {
                 <div className="pt-4">
                   <Button 
                     onClick={() => setLocation(
-                      billingPeriod === 'monthly' 
-                        ? '/trial-signup?plan=annual-tournament&billing=monthly&price=10' 
-                        : '/trial-signup?plan=annual-tournament&billing=annual&price=99'
+                      '/signup'
                     )}
                     className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold"
                     data-testid="button-start-annual-trial-2"
@@ -608,15 +617,15 @@ export default function TrantorLanding() {
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div>
-                    <CardTitle className="text-2xl text-white">Multi-Tournament</CardTitle>
-                    <CardDescription className="text-orange-200">For active tournament organizers</CardDescription>
+                    <CardTitle className="text-2xl text-white">Champions for Change</CardTitle>
+                    <CardDescription className="text-green-200">Support student education through tournament management</CardDescription>
                   </div>
                   <Badge className="bg-orange-600 text-white">Most Popular</Badge>
                 </div>
                 <div className="space-y-2">
                   {billingPeriod === 'monthly' ? (
                     <>
-                      <div className="text-4xl font-bold text-orange-400">$45<span className="text-lg text-orange-300">/month</span></div>
+                      <div className="text-4xl font-bold text-yellow-300">$50<span className="text-lg text-yellow-200">/month suggested</span></div>
                       <div className="bg-orange-600/20 border border-orange-500/50 rounded px-3 py-2">
                         <p className="text-xs text-orange-300">$540/year - Switch to annual to save $72</p>
                       </div>
@@ -656,9 +665,7 @@ export default function TrantorLanding() {
                 <div className="pt-4">
                   <Button 
 onClick={() => setLocation(
-                      billingPeriod === 'monthly'
-                        ? '/trial-signup?plan=multi-tournament&billing=monthly&price=45'
-                        : '/trial-signup?plan=multi-tournament&billing=annual&price=468'
+                      '/signup'
                     )}
                     className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold"
                     data-testid="button-start-monthly-trial-2"
