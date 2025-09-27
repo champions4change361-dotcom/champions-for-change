@@ -732,68 +732,76 @@ export default function AdminManagement() {
             </Card>
           </TabsContent>
 
-          {/* Platform Access Tab */}
+          {/* Unified Platform Access Tab */}
           <TabsContent value="platform-access">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="border-blue-200">
-                <CardHeader className="text-center">
-                  <Users className="h-8 w-8 text-blue-600 mx-auto" />
-                  <CardTitle className="text-blue-900">District Platform</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <p className="text-sm text-slate-600">Full access to district management features</p>
-                  <Button 
-                    className="w-full bg-blue-600 hover:bg-blue-700" 
-                    data-testid="button-access-district"
-                    onClick={() => navigate('/dashboard')}
-                  >
-                    Access District Features
-                  </Button>
-                </CardContent>
-              </Card>
+            <div className="space-y-6">
+              <div className="text-center bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-lg border">
+                <h2 className="text-2xl font-bold text-slate-900 mb-2">Champions for Change Platform</h2>
+                <p className="text-slate-600 mb-4">Enterprise-level features for all organizations - $50/month suggested donation</p>
+                <Badge className="bg-green-600 text-white">Unified Access Model</Badge>
+              </div>
 
-              <Card className="border-purple-200">
-                <CardHeader className="text-center">
-                  <Trophy className="h-8 w-8 text-purple-600 mx-auto" />
-                  <CardTitle className="text-purple-900">Tournament Platform</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <p className="text-sm text-slate-600">Professional tournament management tools</p>
-                  <div className="space-y-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <Card className="border-blue-200">
+                  <CardHeader className="text-center">
+                    <Users className="h-8 w-8 text-blue-600 mx-auto" />
+                    <CardTitle className="text-blue-900">User Management</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <p className="text-sm text-slate-600">Manage districts, schools, teams, and participants</p>
                     <Button 
-                      className="w-full bg-purple-600 hover:bg-purple-700" 
-                      data-testid="button-access-tournament"
-                      onClick={() => navigate('/create-tournament')}
+                      className="w-full bg-blue-600 hover:bg-blue-700" 
+                      data-testid="button-user-management"
+                      onClick={() => navigate('/dashboard')}
                     >
-                      Access Tournament Features (No Auth)
+                      Access User Dashboard
                     </Button>
-                    <Button 
-                      className="w-full bg-purple-500 hover:bg-purple-600" 
-                      data-testid="button-fantasy-tournaments"
-                      onClick={() => navigate('/fantasy-tournaments')}
-                    >
-                      Fantasy Sports Testing
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
 
-              <Card className="border-slate-200">
-                <CardHeader className="text-center">
-                  <Building2 className="h-8 w-8 text-slate-600 mx-auto" />
-                  <CardTitle className="text-slate-900">Business Platform</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <p className="text-sm text-slate-600">Enterprise-grade business solutions</p>
-                  <Button 
-                    className="w-full bg-slate-600 hover:bg-slate-700" 
-                    data-testid="button-access-business"
-                    onClick={() => navigate('/corporate-competitions')}
-                  >
-                    Access Business Features
-                  </Button>
-                </CardContent>
-              </Card>
+                <Card className="border-purple-200">
+                  <CardHeader className="text-center">
+                    <Trophy className="h-8 w-8 text-purple-600 mx-auto" />
+                    <CardTitle className="text-purple-900">Tournament Tools</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <p className="text-sm text-slate-600">Professional tournament and event management</p>
+                    <div className="space-y-2">
+                      <Button 
+                        className="w-full bg-purple-600 hover:bg-purple-700" 
+                        data-testid="button-tournament-tools"
+                        onClick={() => navigate('/create-tournament')}
+                      >
+                        Tournament Creator
+                      </Button>
+                      <Button 
+                        className="w-full bg-purple-500 hover:bg-purple-600" 
+                        data-testid="button-fantasy-tools"
+                        onClick={() => navigate('/fantasy-tournaments')}
+                      >
+                        Fantasy Sports Tools
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-green-200">
+                  <CardHeader className="text-center">
+                    <Shield className="h-8 w-8 text-green-600 mx-auto" />
+                    <CardTitle className="text-green-900">Health & Safety</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <p className="text-sm text-slate-600">AI-powered injury prediction and athletic training</p>
+                    <Button 
+                      className="w-full bg-green-600 hover:bg-green-700" 
+                      data-testid="button-health-safety"
+                      onClick={() => navigate('/athletic-trainer')}
+                    >
+                      Athletic Trainer Dashboard
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </TabsContent>
 
