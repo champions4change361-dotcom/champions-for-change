@@ -809,22 +809,32 @@ export default function AdminManagement() {
           <TabsContent value="analytics">
             <Card>
               <CardHeader>
-                <CardTitle>Platform Analytics</CardTitle>
-                <CardDescription>Overview of user activity and platform usage</CardDescription>
+                <CardTitle>Champions for Change Analytics</CardTitle>
+                <CardDescription>Platform impact and user engagement metrics</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="text-center p-4 bg-green-50 rounded-lg">
+                    <h3 className="text-2xl font-bold text-green-600">{Array.isArray(users) ? users.length : 0}</h3>
+                    <p className="text-sm text-slate-600">Total Champions</p>
+                    <p className="text-xs text-slate-500">All platform supporters</p>
+                  </div>
                   <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <h3 className="text-2xl font-bold text-blue-600">{Array.isArray(users) ? users.filter((u: any) => u.subscriptionPlan === 'district_enterprise').length : 0}</h3>
-                    <p className="text-sm text-slate-600">District Users</p>
+                    <h3 className="text-2xl font-bold text-blue-600">{Array.isArray(users) ? users.filter((u: any) => u.organizationType === 'district' || u.organizationType === 'school').length : 0}</h3>
+                    <p className="text-sm text-slate-600">Educational Orgs</p>
+                    <p className="text-xs text-slate-500">Districts & schools served</p>
                   </div>
                   <div className="text-center p-4 bg-purple-50 rounded-lg">
-                    <h3 className="text-2xl font-bold text-purple-600">{Array.isArray(users) ? users.filter((u: any) => u.subscriptionPlan === 'professional').length : 0}</h3>
-                    <p className="text-sm text-slate-600">Tournament Organizers</p>
+                    <h3 className="text-2xl font-bold text-purple-600">{Array.isArray(users) ? users.filter((u: any) => u.organizationType === 'nonprofit' || u.organizationType === 'sports_club').length : 0}</h3>
+                    <p className="text-sm text-slate-600">Community Groups</p>
+                    <p className="text-xs text-slate-500">Nonprofits & clubs</p>
                   </div>
-                  <div className="text-center p-4 bg-slate-50 rounded-lg">
-                    <h3 className="text-2xl font-bold text-slate-600">{Array.isArray(users) ? users.filter((u: any) => u.subscriptionPlan === 'enterprise').length : 0}</h3>
-                    <p className="text-sm text-slate-600">Business Users</p>
+                </div>
+                
+                <div className="mt-6 p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border">
+                  <div className="text-center">
+                    <p className="text-sm font-medium text-slate-700">Unified Donation Model Impact</p>
+                    <p className="text-xs text-slate-600 mt-1">All organizations receive identical enterprise features through our $50/month suggested donation supporting educational programs</p>
                   </div>
                 </div>
               </CardContent>
