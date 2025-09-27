@@ -54,29 +54,10 @@ app.use((req, res, next) => {
   // Create server early to start listening immediately
   const server = await registerRoutes(app);
 
-  // Initialize NFL Injury Scraper for automated injury updates
-  const { nflInjuryScraper } = await import('./nfl-injury-scraper.js');
-  nflInjuryScraper.startScheduledUpdates();
-  console.log('🏥 NFL injury scraping system initialized');
-
-  // Initialize NFL Schedule Scraper for current week and matchup tracking
-  const { nflScheduleScraper } = await import('./nfl-schedule-scraper.js');
-  nflScheduleScraper.startScheduledUpdates();
-  console.log('🗓️ NFL schedule scraping system initialized');
-
-  // Initialize NFL Stats Scraper for Tuesday comprehensive player statistics
-  const { nflStatsService } = await import('./nfl-stats-scraper.js');
-  console.log('📊 NFL statistics scraping system initialized');
-  
-  // Schedule Tuesday stats updates (after Monday Night Football)
-  const cron = await import('node-cron');
-  cron.default.schedule('0 10 * * 2', () => {
-    console.log('🗓️ [Tuesday 10 AM CST] Starting weekly NFL player stats update...');
-    nflStatsService.updateAllStats().catch(console.error);
-  }, {
-    timezone: "America/Chicago"
-  });
-  console.log('🗓️ Scheduled Tuesday NFL stats updates (10 AM CST)');
+  // Initialize Pro Football Reference Integration (replaces all NFL scrapers)
+  const { pfrIntegration } = await import('./pro-football-reference-integration.js');
+  pfrIntegration.startScheduledUpdates();
+  console.log('🏈 Pro Football Reference integration initialized (replaces NFL.com scrapers)');
 
   // Setup Vite before starting server
   if (process.env.NODE_ENV === 'development') {

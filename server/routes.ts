@@ -4386,12 +4386,22 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
       const { sport } = req.params;
       
       if (sport === "nfl") {
-        // Get current week opponents from schedule scraper
-        const { nflScheduleScraper } = await import('./nfl-schedule-scraper.js');
+        // Use Pro Football Reference integration for comprehensive data
+        const { pfrIntegration } = await import('./pro-football-reference-integration.js');
         
-        // Create opponent lookup map
+        // Get latest data (or trigger update if needed)
+        let pfrData = pfrIntegration.getLatestData();
+        if (!pfrData) {
+          console.log('🔄 PFR data not available, triggering update...');
+          pfrData = await pfrIntegration.updateAllData('API Request Trigger');
+        }
+
+        // Create opponent lookup map from PFR schedule data (fallback to old scraper if needed)
         const opponents: Record<string, string> = {};
         try {
+          // Fallback to old schedule scraper for now
+          const { nflScheduleScraper } = await import('./nfl-schedule-scraper.js');
+          
           console.log('🔍 Attempting to get schedule data...');
           const schedule = nflScheduleScraper.getLatestSchedule();
           console.log('📊 Schedule result:', schedule ? 'found' : 'null', schedule ? `${Object.keys(schedule).join(', ')}` : '');

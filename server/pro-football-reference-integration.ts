@@ -38,7 +38,7 @@ export interface PFRPlayer {
   receivingTDs?: number;
   
   // Game context
-  opponent?: string;
+  opponent?: string | null;
   isHome: boolean;
   gameTime?: string;
   
@@ -231,7 +231,7 @@ export class ProFootballReferenceIntegration {
       console.log(`🎯 Detected current NFL week: ${currentWeek}`);
 
       // Get bye teams for current week
-      const byeTeams = await this.getByeTeams(currentWeek);
+      const byeTeams = await this.getByeTeamsForWeek(currentWeek);
       const gamesThisWeek = Math.floor((32 - byeTeams.length) / 2);
 
       return {
@@ -258,9 +258,9 @@ export class ProFootballReferenceIntegration {
   }
 
   /**
-   * 😴 Get bye teams for specific week
+   * 😴 Get bye teams for specific week from PFR
    */
-  private async getByeTeams(week: number): Promise<string[]> {
+  private async getByeTeamsForWeek(week: number): Promise<string[]> {
     try {
       const url = `${this.baseUrl}/years/2025/week_${week}.htm`;
       
