@@ -16,6 +16,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { insertTeamSchema, InsertTeam } from "@shared/schema";
 import { useAuth } from "@/hooks/useAuth";
+import { useTeamLinking } from "@/hooks/useTeamLinking";
 import { useState, useEffect } from "react";
 import EmailSignupForm from "@/components/EmailSignupForm";
 
@@ -48,6 +49,7 @@ export default function TeamSignupPage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { isAuthenticated, user } = useAuth();
+  const { isLinking, linkingError } = useTeamLinking();
   
   // 2-step flow state
   const [step, setStep] = useState(1); // 1 = Team Info, 2 = Authentication
@@ -177,9 +179,78 @@ export default function TeamSignupPage() {
     },
   });
 
-  // Quick fix: Add missing functions to resolve errors
+  // Handle team linking after OAuth authentication
   const createAuthenticatedTeam = (teamData: TeamSignupForm) => {
-    console.log('Creating team for authenticated user:', teamData);
+    console.log('🔄 Setting up team linking for authenticated user:', { 
+      teamName: teamData.teamName, 
+      hasUser: !!user 
+    });
+
+    // Get the pending team information that was stored during signup
+    const pendingTeamData = localStorage.getItem('pending_team_signup');
+    const linkToken = localStorage.getItem('team_link_token');
+
+    if (!pendingTeamData) {
+      console.error('🚨 No pending team data found - cannot link team');
+      toast({
+        title: "Team Linking Error",
+        description: "No pending team data found. Please create your team again.",
+        variant: "destructive",
+      });
+      sessionStorage.removeItem('team_signup_draft');
+      setLocation('/team-signup');
+      return;
+    }
+
+    if (!linkToken) {
+      console.error('🚨 No link token found - cannot securely link team');
+      toast({
+        title: "Security Error", 
+        description: "Missing security token. Please create your team again.",
+        variant: "destructive",
+      });
+      sessionStorage.removeItem('team_signup_draft');
+      localStorage.removeItem('pending_team_signup');
+      setLocation('/team-signup');
+      return;
+    }
+
+    try {
+      const pendingTeam = JSON.parse(pendingTeamData);
+      
+      console.log('🔗 Setting up team linking data:', {
+        teamId: pendingTeam.teamId,
+        teamName: pendingTeam.teamName,
+        hasToken: !!linkToken
+      });
+
+      // Set up the data that useTeamLinking hook expects
+      sessionStorage.setItem('pending_team_link', pendingTeam.teamId);
+      // linkToken is already in localStorage with the correct key
+
+      // Clean up the draft data
+      sessionStorage.removeItem('team_signup_draft');
+
+      // The useTeamLinking hook will automatically trigger the linking process
+      console.log('✅ Team linking data prepared - hook will handle automatic linking');
+      
+      toast({
+        title: "Welcome back!",
+        description: "Linking you to your team...",
+      });
+
+    } catch (error) {
+      console.error('🚨 Failed to parse pending team data:', error);
+      toast({
+        title: "Team Linking Error",
+        description: "Failed to process team data. Please create your team again.", 
+        variant: "destructive",
+      });
+      sessionStorage.removeItem('team_signup_draft');
+      localStorage.removeItem('pending_team_signup');
+      localStorage.removeItem('team_link_token');
+      setLocation('/team-signup');
+    }
   };
 
   const onTeamSubmit = (data: TeamSignupForm) => {
@@ -229,8 +300,15 @@ export default function TeamSignupPage() {
         hasSecureToken: !!team.linkToken // Track if token was properly received
       }));
       
-      // Redirect to login with team signup context
-      setLocation('/unified-login?action=complete-team-signup&team=' + team.id);
+      // Store team draft data for OAuth resume flow
+      const teamFormData = teamForm.getValues();
+      sessionStorage.setItem('team_signup_draft', JSON.stringify(teamFormData));
+      
+      // Set return URL for OAuth flow
+      sessionStorage.setItem('auth_return_url', `/team-signup?resume=1`);
+      
+      // Redirect to OAuth login (Google login specifically for team signup)
+      setLocation('/api/login?provider=google&user_type=team');
       
       // Invalidate teams cache
       queryClient.invalidateQueries({ queryKey: ['/api/teams'] });

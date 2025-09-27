@@ -81,10 +81,10 @@ export default function SignupSelector() {
 
               <Button 
                 className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold"
-                onClick={() => setLocation("/trial-signup?plan=donation-based&billing=monthly&price=50")}
+                onClick={() => setLocation("/donation-signup?plan=donation-based&billing=monthly&price=50")}
                 data-testid="button-select-organizer"
               >
-                Start 14-Day Free Trial
+                💚 Start Supporting Students Today
               </Button>
             </CardContent>
           </Card>
@@ -154,10 +154,10 @@ export default function SignupSelector() {
               </Button>
               <Button 
                 className="bg-slate-600 hover:bg-slate-500 text-white border-slate-500"
-                onClick={() => setLocation("/pricing")}
-                data-testid="button-view-all-pricing"
+                onClick={() => setLocation("/about-donations")}
+                data-testid="button-learn-more-donations"
               >
-                View All Pricing Options
+                Learn About Our Educational Mission
               </Button>
             </div>
           </div>

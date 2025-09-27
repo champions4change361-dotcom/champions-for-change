@@ -204,10 +204,11 @@ export async function setupAuth(app: Express) {
     
     // Try OAuth first if properly configured and requested
     if (supportedDomains.includes(req.hostname) && provider === 'google') {
-      console.log(`Attempting OAuth for provider: ${provider}`);
+      console.log(`Attempting OAuth for provider: ${provider}, user_type: ${userType}`);
       return passport.authenticate(strategyName, {
         prompt: "login consent",
         scope: ["openid", "email", "profile", "offline_access"],
+        state: userType, // Pass user_type as state parameter for callback detection
         // Ensure proper mobile redirect
         successReturnToOrRedirect: "/teams",
         failureRedirect: "/login?error=auth_failed",
@@ -313,9 +314,37 @@ export async function setupAuth(app: Express) {
       }
     }
     
-    passport.authenticate(strategyName, {
-      successRedirect: "/teams",
-      failureRedirect: "/login?error=callback_failed",
+    // Custom success handler to respect stored return URL for team signup flow
+    passport.authenticate(strategyName, (err, user, info) => {
+      if (err) {
+        console.error('OAuth authentication error:', err);
+        return res.redirect("/login?error=auth_error");
+      }
+      
+      if (!user) {
+        console.log('OAuth authentication failed - no user returned');
+        return res.redirect("/login?error=callback_failed");
+      }
+      
+      // Log the user in
+      req.logIn(user, (loginErr) => {
+        if (loginErr) {
+          console.error('Login error after OAuth:', loginErr);
+          return res.redirect("/login?error=login_failed");
+        }
+        
+        console.log('✅ OAuth authentication successful');
+        
+        // Check for team signup return URL in the user type parameter
+        const userType = req.query.state || req.query.user_type;
+        if (userType === 'team') {
+          console.log('🔄 Team signup OAuth flow detected - redirecting to resume flow');
+          return res.redirect("/team-signup?resume=1");
+        }
+        
+        // Default redirect for other authentication flows
+        return res.redirect("/teams");
+      });
     })(req, res, next);
   });
 

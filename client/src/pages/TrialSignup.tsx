@@ -83,20 +83,20 @@ export default function TrialSignup() {
     setIsLoading(true);
 
     try {
-      // TODO: Integrate with Stripe to create customer and payment method without charging
+      // TODO: Integrate with Stripe to set up donation subscription
       // For now, simulate the API call
       await new Promise(resolve => setTimeout(resolve, 2000));
 
       toast({
-        title: "Trial Started Successfully!",
-        description: "Your 14-day free trial has begun. You won't be charged until the trial ends.",
+        title: "Welcome to Champions for Change!",
+        description: "Your educational support has begun. Thank you for helping students achieve their dreams!",
       });
 
       // Redirect to dashboard or onboarding
       navigate('/tournament-design');
     } catch (error) {
       toast({
-        title: "Error Starting Trial",
+        title: "Error Setting Up Donation",
         description: "There was a problem processing your request. Please try again.",
         variant: "destructive",
       });
@@ -133,7 +133,7 @@ export default function TrialSignup() {
                 </div>
                 <div>
                   <h1 className="text-xl font-bold text-gray-900">Tournament Arena</h1>
-                  <p className="text-xs text-blue-600">Start Your Free Trial</p>
+                  <p className="text-xs text-blue-600">Fund Student Education</p>
                 </div>
               </Link>
             </div>
@@ -156,7 +156,7 @@ export default function TrialSignup() {
             <div className="mb-8">
               <h1 className="text-3xl font-bold text-gray-900 mb-4">Fund Student Education • Get Tournament Tools</h1>
               <p className="text-lg text-gray-600">
-                Start your 14-day free trial • No credit card required • 100% tax-deductible donations
+                Join Champions for Change • Pay what feels right • 100% tax-deductible donations
               </p>
             </div>
 
@@ -261,7 +261,7 @@ export default function TrialSignup() {
                   💚 Fund Students, Get Tournament Tools
                 </CardTitle>
                 <CardDescription>
-                  14-day free trial • No credit card required • 100% tax-deductible donations
+                  Suggested $50/month donation • Pay what feels right • 100% tax-deductible
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -337,17 +337,18 @@ export default function TrialSignup() {
                     </ul>
                   </div>
 
-                  {/* Trial Terms */}
+                  {/* Donation Terms */}
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <div className="flex items-start space-x-3">
                       <Clock className="h-5 w-5 text-blue-600 mt-0.5" />
                       <div className="text-sm">
-                        <p className="font-medium text-blue-900 mb-2">Free Trial Terms:</p>
+                        <p className="font-medium text-blue-900 mb-2">Donation Terms:</p>
                         <ul className="space-y-1 text-blue-800">
-                          <li>• Your 14-day free trial starts immediately</li>
-                          <li>• No donation requested until {new Date(Date.now() + 14*24*60*60*1000).toLocaleDateString()}</li>
-                          <li>• After trial, choose your monthly donation amount</li>
-                          <li>• Full platform access with all enterprise features</li>
+                          <li>• Your educational support starts immediately</li>
+                          <li>• Pay what feels right for your organization</li>
+                          <li>• Cancel anytime with 30-day notice</li>
+                          <li>• Full platform access from day one</li>
+                          <li>• Every dollar funds student educational opportunities</li>
                         </ul>
                       </div>
                     </div>
@@ -361,15 +362,15 @@ export default function TrialSignup() {
                     data-testid="button-start-trial"
                   >
                     {isLoading ? (
-                      "Starting Your Mission-Driven Trial..."
+                      "Setting Up Your Student Support..."
                     ) : (
-                      "💚 Start My 14-Day Free Trial"
+                      "💚 Start Supporting Students Today"
                     )}
                   </Button>
 
                   <p className="text-xs text-gray-500 text-center">
-                    By starting your trial, you agree to support Champions for Change's educational mission. 
-                    After your free trial, choose a donation amount that feels right for your organization.
+                    By joining Champions for Change, you agree to support our educational mission. 
+                    Your suggested $50/month donation can be adjusted to what feels right for your organization.
                   </p>
                 </form>
               </CardContent>
