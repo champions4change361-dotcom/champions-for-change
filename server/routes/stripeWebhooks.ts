@@ -79,7 +79,7 @@ async function handleSubscriptionCreated(subscription: any) {
     .set({
       stripeSubscriptionId: subscription.id,
       subscriptionStatus: subscription.status,
-      subscriptionPlan: 'donation-based',
+      subscriptionPlan: 'champion',
       updatedAt: new Date()
     })
     .where(eq(users.id, userId));
@@ -234,7 +234,7 @@ async function sendWelcomeEmail(user: any) {
     <small>EIN: 81-3834471 | 501(c)(3) Nonprofit Organization</small></p>
   `;
 
-  await emailService.sendEmail({
+  await emailService.send({
     to: user.email,
     subject: '🎉 Welcome to Champions for Change - Thank You for Supporting Students!',
     html: emailContent
@@ -257,7 +257,7 @@ async function sendSubscriptionReactivatedEmail(user: any, subscription: any) {
     <p>The Champions for Change Team</p>
   `;
 
-  await emailService.sendEmail({
+  await emailService.send({
     to: user.email,
     subject: '✅ Champions for Change Support Reactivated',
     html: emailContent
@@ -278,7 +278,7 @@ async function sendPaymentRetryEmail(user: any, subscription: any) {
     <p>The Champions for Change Team</p>
   `;
 
-  await emailService.sendEmail({
+  await emailService.send({
     to: user.email,
     subject: '⚠️ Payment Retry - Champions for Change',
     html: emailContent
@@ -315,7 +315,7 @@ async function sendPaymentReceiptEmail(user: any, invoice: any) {
     <small>501 N Water St, Corpus Christi, TX 78401</small></p>
   `;
 
-  await emailService.sendEmail({
+  await emailService.send({
     to: user.email,
     subject: `📧 Tax Receipt - $${donationAmount.toFixed(2)} Champions for Change Donation`,
     html: emailContent
@@ -338,7 +338,7 @@ async function sendPaymentFailedEmail(user: any, invoice: any) {
     <p>The Champions for Change Team</p>
   `;
 
-  await emailService.sendEmail({
+  await emailService.send({
     to: user.email,
     subject: '💳 Payment Update Needed - Champions for Change',
     html: emailContent
@@ -363,7 +363,7 @@ async function sendCancellationConfirmationEmail(user: any, subscription: any) {
     <p>The Champions for Change Team</p>
   `;
 
-  await emailService.sendEmail({
+  await emailService.send({
     to: user.email,
     subject: 'Cancellation Confirmed - Thank You for Your Support',
     html: emailContent
@@ -386,7 +386,7 @@ async function sendSubscriptionSuspendedEmail(user: any, subscription: any) {
     <p>The Champions for Change Team</p>
   `;
 
-  await emailService.sendEmail({
+  await emailService.send({
     to: user.email,
     subject: '⏸️ Account Suspended - Payment Update Needed',
     html: emailContent
@@ -416,7 +416,7 @@ async function sendFarewellEmail(user: any) {
     <p>The Champions for Change Team</p>
   `;
 
-  await emailService.sendEmail({
+  await emailService.send({
     to: user.email,
     subject: '🙏 Thank You for Supporting Champions for Change',
     html: emailContent
@@ -437,7 +437,7 @@ async function sendTrialEndingEmail(user: any, subscription: any) {
     <p>The Champions for Change Team</p>
   `;
 
-  await emailService.sendEmail({
+  await emailService.send({
     to: user.email,
     subject: '⏰ Trial Ending - Complete Your Champions for Change Setup',
     html: emailContent

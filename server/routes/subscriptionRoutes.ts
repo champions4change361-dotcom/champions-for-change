@@ -123,8 +123,8 @@ router.post('/api/subscriptions/create-donation-subscription', isAuthenticated, 
     await db.update(users)
       .set({
         stripeSubscriptionId: subscription.id,
-        subscriptionStatus: subscription.status,
-        subscriptionPlan: 'donation-based',
+        subscriptionStatus: subscription.status as "active" | "inactive" | "trialing" | "past_due" | "canceled" | "unpaid" | "pending" | "pending_approval",
+        subscriptionPlan: 'champion',
         updatedAt: new Date()
       })
       .where(eq(users.id, userId));
@@ -176,7 +176,7 @@ router.get('/api/subscriptions/status', isAuthenticated, async (req, res) => {
     // Update local database with current status
     await db.update(users)
       .set({
-        subscriptionStatus: subscription.status,
+        subscriptionStatus: subscription.status as "active" | "inactive" | "trialing" | "past_due" | "canceled" | "unpaid" | "pending" | "pending_approval",
         updatedAt: new Date()
       })
       .where(eq(users.id, userId));
@@ -191,8 +191,8 @@ router.get('/api/subscriptions/status', isAuthenticated, async (req, res) => {
       subscriptionId: subscription.id,
       status: subscription.status,
       donationAmount,
-      currentPeriodStart: subscription.current_period_start,
-      currentPeriodEnd: subscription.current_period_end,
+      currentPeriodStart: (subscription as any).current_period_start,
+      currentPeriodEnd: (subscription as any).current_period_end,
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
       message: subscription.status === 'active' 
         ? 'Thank you for supporting Champions for Change!' 

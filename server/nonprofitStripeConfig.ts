@@ -11,7 +11,7 @@ function getStripeInstance(): Stripe {
     }
     
     stripeInstance = new Stripe(secretKey, {
-      apiVersion: "2024-06-20", // Current stable API version instead of future beta
+      apiVersion: "2025-08-27.basil", // Current stable API version
     });
   }
   return stripeInstance;

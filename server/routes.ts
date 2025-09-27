@@ -3097,7 +3097,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Basic user authentication endpoint - modified to check passport authentication
   app.get("/api/auth/user", async (req: any, res) => {
     try {
-      console.log('Auth user check - Session ID:', req.sessionID);
+      // Security: Never log session IDs or sensitive tokens
+      console.log('Auth user check - Session exists:', !!req.sessionID);
       console.log('Auth user check - Session user:', req.session?.user ? 'present' : 'missing');
       console.log('Auth user check - OAuth user:', req.user ? 'present' : 'missing');
       console.log('Auth user check - isAuthenticated():', req.isAuthenticated ? req.isAuthenticated() : 'no method');

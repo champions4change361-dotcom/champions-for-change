@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices, organizations } from "@shared/schema";
+import { taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices, organizations } from "../shared/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
@@ -62,7 +62,7 @@ export class NonprofitBillingService {
   async createNonprofitSubscription(subscriptionData: {
     organizationId: string;
     billingContactUserId: string;
-    subscriptionTier: 'foundation' | 'champion' | 'enterprise' | 'district_enterprise';
+    subscriptionTier: 'starter' | 'champion' | 'enterprise' | 'district_enterprise';
     flatRateAmount: number;
     billingCycle: 'monthly' | 'quarterly' | 'annual';
     paymentMethod: 'check' | 'ach' | 'wire' | 'stripe';
@@ -79,7 +79,6 @@ export class NonprofitBillingService {
     const nextBillingDate = this.calculateNextBillingDate(subscriptionData.billingCycle);
     
     const [subscription] = await db.insert(nonprofitSubscriptions).values({
-      id: randomUUID(),
       organizationId: subscriptionData.organizationId,
       billingContactUserId: subscriptionData.billingContactUserId,
       subscriptionTier: subscriptionData.subscriptionTier,
