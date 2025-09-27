@@ -1,13 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { ArrowLeft, LogIn } from "lucide-react";
 import { useLocation } from "wouter";
+import { useToast } from "@/hooks/use-toast";
 import TrantorCoin from "@/components/TrantorCoin";
 
 export default function UnifiedLogin() {
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
+  const [showEmailLogin, setShowEmailLogin] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  });
   
   // Check if this is a team signup completion flow
   const urlParams = new URLSearchParams(window.location.search);
@@ -39,6 +49,52 @@ export default function UnifiedLogin() {
 
   const handleBackToHome = () => {
     setLocation('/');
+  };
+
+  const handleEmailLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+        credentials: 'include'
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        toast({
+          title: "Login Successful",
+          description: "Welcome to Champions for Change!",
+        });
+        
+        // Redirect based on admin role only
+        if (result.user.role === 'district_athletic_director' || result.user.email === 'champions4change361@gmail.com') {
+          window.location.href = '/admin';
+        } else {
+          window.location.href = '/dashboard';
+        }
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Login Failed",
+          description: error.message || "Invalid credentials",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Login Error",
+        description: "Unable to connect to authentication service",
+        variant: "destructive"
+      });
+    }
+
+    setIsLoading(false);
   };
 
   return (
@@ -100,15 +156,74 @@ export default function UnifiedLogin() {
                 </div>
               </div>
 
-              <Button 
-                onClick={() => setLocation('/legacy-login')}
-                variant="outline"
-                className="w-full border-slate-600 text-slate-300 hover:bg-slate-700 font-semibold py-3 text-base"
-                data-testid="button-login-email"
-              >
-                <LogIn className="mr-2 h-5 w-5" />
-                Sign in with Email
-              </Button>
+              {!showEmailLogin ? (
+                <Button 
+                  onClick={() => setShowEmailLogin(true)}
+                  variant="outline"
+                  className="w-full border-slate-600 text-slate-300 hover:bg-slate-700 font-semibold py-3 text-base"
+                  data-testid="button-login-email"
+                >
+                  <LogIn className="mr-2 h-5 w-5" />
+                  Sign in with Email
+                </Button>
+              ) : (
+                <form onSubmit={handleEmailLogin} className="space-y-4">
+                  <div>
+                    <Label htmlFor="email" className="text-slate-300">Email Address</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                      placeholder="Enter your email"
+                      required
+                      className="bg-slate-700 border-slate-600 text-white"
+                      data-testid="input-email"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="password" className="text-slate-300">Password</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={formData.password}
+                      onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                      placeholder="Enter your password"
+                      required
+                      className="bg-slate-700 border-slate-600 text-white"
+                      data-testid="input-password"
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button 
+                      type="submit"
+                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 text-base"
+                      disabled={isLoading}
+                      data-testid="button-email-login"
+                    >
+                      {isLoading ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Signing In...
+                        </>
+                      ) : (
+                        <>
+                          <LogIn className="mr-2 h-5 w-5" />
+                          Sign In
+                        </>
+                      )}
+                    </Button>
+                    <Button 
+                      type="button"
+                      onClick={() => setShowEmailLogin(false)}
+                      variant="outline"
+                      className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </form>
+              )}
             </div>
 
             {/* Status Badge */}
