@@ -423,12 +423,6 @@ function AppRouter() {
       {/* Password Reset Flow */}
       <Route path="/forgot-password" component={ForgotPassword} />
       <Route path="/reset-password" component={ResetPassword} />
-      {/* User Type Selection Portal */}
-      <Route path="/login-portal" component={LoginPortal} />
-      {/* User Type Login Portals */}
-      <Route path="/login/district" component={DistrictLogin} />
-      <Route path="/login/organizer" component={TournamentOrganizerLogin} />
-      <Route path="/login/business" component={BusinessLogin} />
       
       {/* Admin Management Portal */}
       <Route path="/admin" component={AdminManagement} />
