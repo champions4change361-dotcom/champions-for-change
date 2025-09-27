@@ -17,7 +17,8 @@ import {
   Filter,
   RefreshCw
 } from 'lucide-react';
-import { FantasyPlayerCard } from './FantasyPlayerCard';
+import { PlayerList } from './PlayerList';
+import { PFRPlayerModal } from './PFRPlayerModal';
 import { useQuery } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { fantasySalaryCalculator } from '@shared/fantasySalaryCalculator';
@@ -63,6 +64,8 @@ export function DailyFantasyLineupBuilder({
   const [filterPosition, setFilterPosition] = useState<string>('ALL');
   const [selectedPlayerForDetails, setSelectedPlayerForDetails] = useState<any>(null);
   const [showPlayerDetailsModal, setShowPlayerDetailsModal] = useState(false);
+  const [showPFRModal, setShowPFRModal] = useState(false);
+  const [selectedPlayerForPFR, setSelectedPlayerForPFR] = useState<any>(null);
 
   const salaryCap = 50000;
   const totalSalary = lineup.reduce((sum, slot) => sum + slot.salary, 0);
@@ -102,6 +105,39 @@ export function DailyFantasyLineupBuilder({
     
     return allPlayers.filter((player: any) => availableTeams.has(player.team));
   }, [allPlayers, availableTeams, sport, availableGamesData]);
+
+  // Apply search, position, and bye week filters
+  const filteredPlayers = React.useMemo(() => {
+    let filtered = availablePlayers;
+
+    // Apply search filter
+    if (searchTerm.trim()) {
+      filtered = filtered.filter((player: any) => 
+        player.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        player.team?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Apply position filter
+    if (filterPosition !== 'ALL') {
+      if (selectedPosition === 'FLEX') {
+        filtered = filtered.filter((player: any) => 
+          ['RB', 'WR', 'TE'].includes(player.position)
+        );
+      } else {
+        filtered = filtered.filter((player: any) => 
+          player.position === filterPosition
+        );
+      }
+    }
+
+    // 🏈 CRITICAL: Filter out players from teams on bye week
+    filtered = filtered.filter((player: any) => 
+      !byeTeams.includes(player.team)
+    );
+
+    return filtered;
+  }, [availablePlayers, searchTerm, selectedPosition, filterPosition, byeTeams]);
 
   const getPositionColor = (position: string) => {
     const colors = {
@@ -219,24 +255,6 @@ export function DailyFantasyLineupBuilder({
     setShowPlayerDetailsModal(true);
   };
 
-  const filteredPlayers = availablePlayers.filter((player: any) => {
-    const matchesSearch = player.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         player.team.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    let matchesPosition = true;
-    if (filterPosition !== 'ALL') {
-      if (selectedPosition === 'FLEX') {
-        matchesPosition = ['RB', 'WR', 'TE'].includes(player.position);
-      } else {
-        matchesPosition = player.position === filterPosition;
-      }
-    }
-    
-    // 🏈 CRITICAL: Filter out players from teams on bye week
-    const notOnByeWeek = !byeTeams.includes(player.team);
-    
-    return matchesSearch && matchesPosition && notOnByeWeek;
-  });
 
   const isLineupComplete = lineup.every(slot => slot.player !== null);
   const isLineupValid = totalSalary <= salaryCap && isLineupComplete;
@@ -277,15 +295,14 @@ export function DailyFantasyLineupBuilder({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {/* Data Source Disclaimer */}
+          {/* Data Source Attribution */}
           <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
             <div className="flex items-center gap-2 text-sm text-blue-800">
-              <span className="font-medium">📊 Data Source:</span>
-              <span>NFL.com | Professional DraftKings-Style Pricing</span>
+              <span className="font-medium">📊 Detailed stats powered by Pro Football Reference</span>
             </div>
             <div className="text-xs text-blue-600 mt-1">
-              💰 Salaries calculated using position scarcity, projected points, and injury adjustments.
-              Always verify player status on NFL.com before finalizing lineups!
+              💰 Support quality sports data. Click any player name for comprehensive Pro Football Reference analysis.
+              Always verify player status before finalizing lineups!
             </div>
           </div>
           
@@ -410,14 +427,14 @@ export function DailyFantasyLineupBuilder({
             <DialogTitle>
               Select {selectedPosition} Player - ${(remainingSalary/1000).toFixed(1)}K Available
             </DialogTitle>
-            {sport === 'nfl' && availableGamesData && (
+            {sport === 'nfl' && availableGamesData && (availableGamesData as any).games && (
               <div className="text-sm text-muted-foreground space-y-1">
                 <p>
                   {availablePlayers.length} players available from {availableTeams.size} teams 
                   ({allPlayers.length - availablePlayers.length} players locked due to game start times)
                 </p>
                 <p className="text-xs">
-                  Games lock 30 minutes before kickoff - {availableGamesData.availableGames} of {availableGamesData.totalGames} games available
+                  Games lock 30 minutes before kickoff - {(availableGamesData as any).availableGames || 0} of {(availableGamesData as any).totalGames || 0} games available
                 </p>
               </div>
             )}
@@ -451,7 +468,7 @@ export function DailyFantasyLineupBuilder({
               </select>
             </div>
 
-            {/* Player Grid */}
+            {/* Player List */}
             <ScrollArea className="h-[500px]">
               {playersLoading ? (
                 <div className="flex items-center justify-center h-40">
@@ -459,16 +476,25 @@ export function DailyFantasyLineupBuilder({
                   <span className="ml-3 text-gray-600">Loading players...</span>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-2">
-                  {filteredPlayers.map((player: any) => (
-                    <FantasyPlayerCard
-                      key={player.id}
-                      player={player}
-                      onPlayerSelect={() => selectPlayer(player)}
-                      onPlayerDrillDown={() => openPlayerDetailsModal(player)}
-                      isSelected={false}
-                    />
-                  ))}
+                <div className="space-y-4">
+                  {(['QB', 'RB', 'WR', 'TE', 'DEF'] as const).map(position => {
+                    if (filterPosition !== 'ALL' && filterPosition !== position) return null;
+                    if (selectedPosition !== 'FLEX' && selectedPosition !== position && selectedPosition !== 'ALL') return null;
+                    if (selectedPosition === 'FLEX' && !['RB', 'WR', 'TE'].includes(position)) return null;
+                    
+                    return (
+                      <PlayerList
+                        key={position}
+                        players={filteredPlayers}
+                        position={position}
+                        title={`Available ${position}s - Week ${contestWeek}`}
+                        onPlayerClick={(player) => {
+                          setSelectedPlayerForPFR(player);
+                          setShowPFRModal(true);
+                        }}
+                      />
+                    );
+                  })}
                 </div>
               )}
             </ScrollArea>
@@ -571,6 +597,15 @@ export function DailyFantasyLineupBuilder({
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Pro Football Reference Player Modal */}
+      <PFRPlayerModal
+        player={selectedPlayerForPFR}
+        isOpen={showPFRModal}
+        onClose={() => setShowPFRModal(false)}
+        onDraftPlayer={(player) => selectPlayer(player)}
+        slotPosition={selectedPosition}
+      />
     </div>
   );
 }
