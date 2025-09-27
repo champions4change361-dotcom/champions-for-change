@@ -11,8 +11,7 @@ import { Link } from "wouter";
 export default function Login() {
   const [formData, setFormData] = useState({
     email: '',
-    password: '',
-    userType: 'team'
+    password: ''
   });
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -41,7 +40,7 @@ export default function Login() {
           description: "Welcome to Champions for Change!",
         });
         
-        // Redirect based on user type and role
+        // Redirect based on admin role only
         if (result.user.role === 'district_athletic_director' || result.user.email === 'champions4change361@gmail.com') {
           window.location.href = '/admin';
         } else {
@@ -89,25 +88,11 @@ export default function Login() {
           <CardHeader className="text-center space-y-2 p-4 lg:p-6">
             <CardTitle className="text-xl lg:text-2xl text-slate-900">Platform Access</CardTitle>
             <CardDescription className="text-sm lg:text-base">
-              Choose your platform type and enter credentials to access your dashboard
+              Enter your credentials to access your dashboard
             </CardDescription>
           </CardHeader>
           <CardContent className="p-4 lg:p-6">
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* User Type Selection */}
-              <div>
-                <Label htmlFor="userType">Platform Type</Label>
-                <select
-                  id="userType"
-                  value={formData.userType}
-                  onChange={(e) => setFormData(prev => ({ ...prev, userType: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-                  data-testid="select-usertype"
-                >
-                  <option value="team">Team Management</option>
-                  <option value="organizer">Tournament Organizer</option>
-                </select>
-              </div>
 
               {/* Email Input */}
               <div>
