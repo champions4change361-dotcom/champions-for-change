@@ -361,8 +361,31 @@ export class ProFootballReferenceIntegration {
       const players: PFRPlayer[] = [];
       let count = 0;
 
-      // Parse stats table
-      $('#stats tbody tr').each((i, row) => {
+      // Debug: Log available tables 
+      console.log(`🔍 Debugging ${position} page: ${fullUrl}`);
+      const tables = $('table');
+      console.log(`📊 Found ${tables.length} tables on the page`);
+      
+      // Try multiple table selectors that PFR might use
+      let foundTable = false;
+      const possibleSelectors = [
+        '#stats tbody tr',
+        '#passing tbody tr', 
+        '#rushing tbody tr',
+        '#receiving tbody tr',
+        '#kicking tbody tr',
+        'table tbody tr',
+        '.stats_table tbody tr'
+      ];
+
+      for (const selector of possibleSelectors) {
+        const rows = $(selector);
+        if (rows.length > 0) {
+          console.log(`✅ Found ${rows.length} rows with selector: ${selector}`);
+          foundTable = true;
+          
+          // Parse the first table that has data
+          rows.each((i, row) => {
         if (count >= limit) return false;
 
         const $row = $(row);
@@ -372,6 +395,11 @@ export class ProFootballReferenceIntegration {
           const playerLink = cells.eq(0).find('a');
           const playerName = playerLink.length > 0 ? playerLink.text().trim() : cells.eq(0).text().trim();
           const teamAbbr = cells.eq(1).text().trim();
+          
+          // Debug the first few rows
+          if (count < 3) {
+            console.log(`🔍 Row ${count}: cells=${cells.length}, name="${playerName}", team="${teamAbbr}", valid=${this.isValidNFLTeam(teamAbbr)}`);
+          }
           
           if (playerName && teamAbbr && this.isValidNFLTeam(teamAbbr)) {
             // Calculate fantasy salary based on position and performance
@@ -417,9 +445,21 @@ export class ProFootballReferenceIntegration {
           }
         }
       });
+      
+      break; // Exit after finding the first working selector
+    }
+  }
 
-      console.log(`📊 Found ${players.length} ${position} players`);
-      return players;
+  if (!foundTable) {
+    console.log(`❌ No data tables found for ${position} at ${fullUrl}`);
+    // Log first few table elements for debugging
+    $('table').slice(0, 3).each((i, table) => {
+      console.log(`Table ${i}: ${$(table).attr('id') || 'no-id'} - ${$(table).find('tr').length} rows`);
+    });
+  }
+
+  console.log(`📊 Found ${players.length} ${position} players`);
+  return players;
 
     } catch (error) {
       console.error(`❌ Error fetching ${position} players:`, error);
