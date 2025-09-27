@@ -83,21 +83,46 @@ export default function TrialSignup() {
     setIsLoading(true);
 
     try {
-      // TODO: Integrate with Stripe to set up donation subscription
-      // For now, simulate the API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Create actual Stripe subscription for Champions for Change donation
+      const response = await fetch('/api/subscriptions/create-donation-subscription', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', // Include auth cookies
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          organizationName: formData.organizationName,
+          donationAmount: parseInt(planPrice), // Use the plan price from URL
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to create subscription');
+      }
+
+      if (result.clientSecret) {
+        // For now, we'll show success and let the webhook handle completion
+        // In a full implementation, you'd use Stripe Elements here for payment confirmation
+        console.log('Subscription created successfully:', result.subscriptionId);
+      }
 
       toast({
         title: "Welcome to Champions for Change!",
-        description: "Your educational support has begun. Thank you for helping students achieve their dreams!",
+        description: `Your $${planPrice}/month educational support has begun. Thank you for helping students achieve their dreams!`,
       });
 
       // Redirect to dashboard or onboarding
       navigate('/tournament-design');
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Subscription creation error:', error);
       toast({
         title: "Error Setting Up Donation",
-        description: "There was a problem processing your request. Please try again.",
+        description: error.message || "There was a problem processing your request. Please try again.",
         variant: "destructive",
       });
     } finally {

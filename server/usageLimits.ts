@@ -8,13 +8,14 @@ import { users } from '@shared/schema';
 // Simplified service for unified donation model
 export class UsageLimitService {
   
-  // Check if user can create a tournament - simplified for donation model
+  // Check if user can create a tournament - based on real subscription status
   static async canCreateTournament(userId: string): Promise<{
     allowed: boolean;
     reason?: string;
     suggestedAction?: string;
     unlimited: boolean;
     donationBased: boolean;
+    subscriptionStatus?: string;
   }> {
     const [user] = await db.select().from(users).where(eq(users.id, userId));
     if (!user) {
@@ -26,7 +27,7 @@ export class UsageLimitService {
       };
     }
     
-    // Check if user is a Champions for Change supporter (has any donation/subscription)
+    // Check if user is a Champions for Change supporter (has real active subscription)
     const isSupporter = this.isChampionsForChangeSupporter(user);
     
     if (isSupporter) {
@@ -34,7 +35,32 @@ export class UsageLimitService {
       return { 
         allowed: true,
         unlimited: true,
-        donationBased: true
+        donationBased: true,
+        subscriptionStatus: user.subscriptionStatus
+      };
+    }
+    
+    // Check for past_due status - still allow with warning
+    if (user.stripeSubscriptionId && user.subscriptionStatus === 'past_due') {
+      return {
+        allowed: true,
+        reason: 'Payment past due - please update your payment method',
+        suggestedAction: 'Update payment method to continue uninterrupted access',
+        unlimited: true,
+        donationBased: true,
+        subscriptionStatus: user.subscriptionStatus
+      };
+    }
+    
+    // Check for canceled/unpaid status
+    if (user.stripeSubscriptionId && ['canceled', 'unpaid'].includes(user.subscriptionStatus || '')) {
+      return {
+        allowed: false,
+        reason: `Subscription ${user.subscriptionStatus} - Champions for Change support needed`,
+        suggestedAction: 'Restart your educational support to regain access',
+        unlimited: false,
+        donationBased: true,
+        subscriptionStatus: user.subscriptionStatus
       };
     }
     
@@ -42,25 +68,36 @@ export class UsageLimitService {
     return {
       allowed: false,
       reason: 'Join Champions for Change to get unlimited tournament access',
-      suggestedAction: 'Support our educational mission with a donation to unlock all features',
+      suggestedAction: 'Support our educational mission with a donation (pay what feels right) to unlock all features',
       unlimited: false,
-      donationBased: true
+      donationBased: true,
+      subscriptionStatus: user.subscriptionStatus || 'none'
     };
   }
 
   // Check if user supports Champions for Change educational mission
   static isChampionsForChangeSupporter(user: any): boolean {
-    // User has any active subscription/donation
-    if (user.subscriptionPlan && user.subscriptionPlan !== 'free') {
+    // Check for real Stripe subscription with active status
+    if (user.stripeSubscriptionId && user.subscriptionStatus === 'active') {
       return true;
     }
     
-    // User has donation-based subscription
+    // Check for trialing status (still counts as support)
+    if (user.stripeSubscriptionId && user.subscriptionStatus === 'trialing') {
+      return true;
+    }
+    
+    // Legacy support: User has any active subscription/donation
+    if (user.subscriptionPlan && user.subscriptionPlan !== 'free' && user.subscriptionStatus === 'active') {
+      return true;
+    }
+    
+    // Legacy support: User has donation-based subscription
     if (user.donationSubscription && user.donationSubscription.active) {
       return true;
     }
     
-    // User has hybrid subscription (legacy)
+    // Legacy support: User has hybrid subscription (legacy)
     if (user.hybridSubscription) {
       return true;
     }

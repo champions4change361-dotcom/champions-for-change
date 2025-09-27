@@ -14,6 +14,8 @@ import { stripe } from "./nonprofitStripeConfig";
 import { registerDomainRoutes } from "./domainRoutes";
 import { registerTournamentRoutes } from "./routes/tournamentRoutes";
 import { registerMigrationRoutes } from "./routes/migrationRoutes";
+import subscriptionRoutes from "./routes/subscriptionRoutes";
+import stripeWebhooks from "./routes/stripeWebhooks";
 import { tournamentSubscriptions, insertTournamentSubscriptionSchema, type InsertTournamentSubscription, insertRegistrationSubmissionSchema, insertTeamSchema, insertTeamPlayerSchema, insertMedicalHistorySchema, type InsertTeam, type InsertTeamPlayer, type InsertMedicalHistory, type Team, type TeamPlayer, type MedicalHistory, updateTeamSubscriptionSchema, type User } from "@shared/schema";
 import { GameLockoutService } from "./game-lockout-service.js";
 
@@ -9270,6 +9272,14 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
   });
 
   console.log('🎨 White-label client configuration management enabled');
+
+  // Stripe subscription management routes  
+  app.use('/', subscriptionRoutes);
+  console.log('💳 Stripe subscription management routes registered');
+
+  // Stripe webhook handlers (must use raw body for signature verification)
+  app.use('/', stripeWebhooks);
+  console.log('🔗 Stripe webhook handlers registered');
 
   // Create and return server
   const server = createServer(app);

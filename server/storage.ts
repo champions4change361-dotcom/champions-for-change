@@ -653,7 +653,16 @@ export class DbStorage implements IStorage {
             .update(users)
             .set({
               ...userData,
-              hybridSubscription: userData.hybridSubscription as any,
+              hybridSubscription: userData.hybridSubscription ? {
+                baseType: userData.hybridSubscription.baseType as 'team' | 'organizer' | 'district',
+                teamTier: userData.hybridSubscription.teamTier as 'starter' | 'growing' | 'elite' | undefined,
+                organizerPlan: userData.hybridSubscription.organizerPlan as 'annual' | 'monthly' | undefined,
+                addons: {
+                  tournamentPerEvent: Boolean(userData.hybridSubscription.addons?.tournamentPerEvent),
+                  teamManagement: Boolean(userData.hybridSubscription.addons?.teamManagement)
+                },
+                pricing: userData.hybridSubscription.pricing
+              } : null,
               updatedAt: new Date(),
             })
             .where(eq(users.email, userData.email))
@@ -670,7 +679,16 @@ export class DbStorage implements IStorage {
           target: users.id,
           set: {
             ...userData,
-            hybridSubscription: userData.hybridSubscription as any,
+            hybridSubscription: userData.hybridSubscription ? {
+              baseType: userData.hybridSubscription.baseType as 'team' | 'organizer' | 'district',
+              teamTier: userData.hybridSubscription.teamTier as 'starter' | 'growing' | 'elite' | undefined,
+              organizerPlan: userData.hybridSubscription.organizerPlan as 'annual' | 'monthly' | undefined,
+              addons: {
+                tournamentPerEvent: Boolean(userData.hybridSubscription.addons?.tournamentPerEvent),
+                teamManagement: Boolean(userData.hybridSubscription.addons?.teamManagement)
+              },
+              pricing: userData.hybridSubscription.pricing
+            } : null,
             updatedAt: new Date(),
           },
         })
@@ -1297,8 +1315,9 @@ export class DbStorage implements IStorage {
       const result = await this.db
         .update(teams)
         .set({ 
-          ...subscriptionData, 
-          subscriptionStatus: subscriptionData.subscriptionStatus as any,
+          subscriptionStatus: subscriptionData.subscriptionStatus as "active" | "past_due" | "canceled" | "unpaid" | "free",
+          subscriptionTier: subscriptionData.subscriptionTier as "basic" | "premium" | "enterprise", 
+          stripeSubscriptionId: subscriptionData.stripeSubscriptionId,
           updatedAt: new Date() 
         })
         .where(eq(teams.id, id))
@@ -2103,7 +2122,16 @@ export class DbStorage implements IStorage {
         }],
         stages: [{
           engine: 'leaderboard' as const, // FFA tournaments use leaderboard engine
-          size: participantNames.length
+          size: participantNames.length,
+          events: [
+            {
+              unit: 'points',
+              measureType: 'score',
+              name: 'Competition Score',
+              templateId: 'default-score',
+              maxParticipants: participantNames.length
+            }
+          ]
         }],
         seeding: {
           method: 'random' as const
@@ -2224,7 +2252,22 @@ export class DbStorage implements IStorage {
       const tournament = await this.getTournament(tournamentId);
       if (!tournament) return undefined;
       
-      const updatedFFAConfig = { ...(tournament.ffaConfig || {}), heatAssignments };
+      const updatedFFAConfig = { 
+        ...(tournament.ffaConfig as Record<string, any> || {}), 
+        heatAssignments,
+        participantStructure: tournament.ffaConfig?.participantStructure || 'individual' as const,
+        maxParticipants: tournament.ffaConfig?.maxParticipants || heatAssignments.length,
+        minParticipants: tournament.ffaConfig?.minParticipants || 2,
+        scoringMethodology: tournament.ffaConfig?.scoringMethodology || 'points-based',
+        rankingCriteria: tournament.ffaConfig?.rankingCriteria || ['points', 'wins'],
+        tieBreakingRules: tournament.ffaConfig?.tieBreakingRules || ['head_to_head', 'points'],
+        performanceTracking: tournament.ffaConfig?.performanceTracking || {
+          trackIndividualStats: true,
+          recordPersonalBests: true,
+          performanceMetrics: ['points', 'ranking'],
+          allowMultipleAttempts: false
+        }
+      };
       return await this.updateTournament(tournamentId, { ffaConfig: updatedFFAConfig });
     } catch (error) {
       console.error("Error updating FFA heat assignments:", error);
@@ -2238,7 +2281,8 @@ export class DbStorage implements IStorage {
       if (!tournament || !tournament.teams) return undefined;
 
       // Update participant performance history
-      const updatedParticipants = tournament.teams.map((participant: any) => {
+      const teams = tournament.teams as any[] || [];
+      const updatedParticipants = teams.map((participant: any) => {
         const result = results.find(r => r.participantId === participant.id);
         if (result) {
           const performanceHistory = participant.performanceHistory || [];
@@ -2274,7 +2318,8 @@ export class DbStorage implements IStorage {
       if (!tournament || !tournament.teams) return [];
 
       // Generate leaderboard based on current performance
-      return tournament.teams
+      const teams = tournament.teams as any[] || [];
+      return teams
         .map((participant: any) => ({
           participantId: participant.id,
           participantName: participant.name,
@@ -2295,7 +2340,8 @@ export class DbStorage implements IStorage {
       const tournament = await this.getTournament(tournamentId);
       if (!tournament || !tournament.teams) return undefined;
 
-      const participant = tournament.teams.find((p: any) => p.id === participantId);
+      const teams = tournament.teams as any[] || [];
+      const participant = teams.find((p: any) => p.id === participantId);
       if (!participant) return undefined;
 
       return {
@@ -2549,7 +2595,7 @@ export class DbStorage implements IStorage {
 
   async getSportCategories(): Promise<SportCategory[]> {
     try {
-      return await this.db.select().from(sportCategories).orderBy(sportCategories.sortOrder);
+      return await this.db.select().from(sportCategories);
     } catch (error) {
       console.error("Database error:", error);
       return [];
@@ -2558,7 +2604,7 @@ export class DbStorage implements IStorage {
 
   async getSportOptions(): Promise<SportOption[]> {
     try {
-      return await this.db.select().from(sportOptions).orderBy(sportOptions.sortOrder);
+      return await this.db.select().from(sportOptions);
     } catch (error) {
       console.error("Database error:", error);
       return [];
@@ -2567,7 +2613,7 @@ export class DbStorage implements IStorage {
 
   async getTournamentStructures(): Promise<TournamentStructure[]> {
     try {
-      return await this.db.select().from(tournamentStructures).orderBy(tournamentStructures.sortOrder);
+      return await this.db.select().from(tournamentStructures);
     } catch (error) {
       console.error("Database error:", error);
       return [];
@@ -2576,7 +2622,7 @@ export class DbStorage implements IStorage {
 
   async getTrackEvents(): Promise<TrackEvent[]> {
     try {
-      return await this.db.select().from(trackEvents).orderBy(trackEvents.sortOrder);
+      return await this.db.select().from(trackEvents);
     } catch (error) {
       console.error("Database error:", error);
       return [];
@@ -3216,7 +3262,7 @@ export class DbStorage implements IStorage {
     try {
       const result = await this.db
         .update(ticketOrders)
-        .set({ ticketStatus: status, updatedAt: new Date() })
+        .set({ ticketStatus: status as "active" | "refunded" | "used" | "cancelled", updatedAt: new Date() })
         .where(eq(ticketOrders.id, id))
         .returning();
       return result[0];
@@ -3236,12 +3282,13 @@ export class DbStorage implements IStorage {
       if (!product) return false;
 
       let newInventory: number;
+      const currentInventory = product.inventory || 0;
       switch (operation) {
         case 'add':
-          newInventory = product.inventory + quantity;
+          newInventory = currentInventory + quantity;
           break;
         case 'subtract':
-          newInventory = Math.max(0, product.inventory - quantity);
+          newInventory = Math.max(0, currentInventory - quantity);
           break;
         case 'set':
           newInventory = quantity;
@@ -3263,7 +3310,7 @@ export class DbStorage implements IStorage {
       const ticket = await this.getEventTicket(ticketId);
       if (!ticket) return false;
 
-      const newSold = ticket.sold + quantity;
+      const newSold = (ticket.sold || 0) + quantity;
       await this.updateEventTicket(ticketId, { sold: newSold });
       return true;
     } catch (error) {
@@ -3277,12 +3324,12 @@ export class DbStorage implements IStorage {
       const product = await this.getMerchandiseProduct(productId);
       if (!product || !product.isActive) return false;
 
-      if (variantId && product.variants.length > 0) {
+      if (variantId && product.variants && product.variants.length > 0) {
         const variant = product.variants.find(v => v.id === variantId);
         return variant ? variant.inventory >= quantity : false;
       }
 
-      return product.inventory >= quantity;
+      return (product.inventory || 0) >= quantity;
     } catch (error) {
       console.error("Database error:", error);
       return false;
@@ -3456,8 +3503,8 @@ export class DbStorage implements IStorage {
       const newEntry = {
         id,
         ...entry,
-        createdAt: now,
-        updatedAt: now
+        submissionTime: now,
+        lastUpdated: now
       };
       
       const result = await this.db.insert(showdownEntries).values(newEntry).returning();
@@ -3482,7 +3529,7 @@ export class DbStorage implements IStorage {
     try {
       const result = await this.db.select().from(showdownEntries)
         .where(eq(showdownEntries.contestId, contestId))
-        .orderBy(desc(showdownEntries.createdAt));
+        .orderBy(desc(showdownEntries.submissionTime));
       return result;
     } catch (error) {
       console.error("Database error:", error);
@@ -3494,7 +3541,7 @@ export class DbStorage implements IStorage {
     try {
       const result = await this.db.select().from(showdownEntries)
         .where(eq(showdownEntries.userId, userId))
-        .orderBy(desc(showdownEntries.createdAt));
+        .orderBy(desc(showdownEntries.submissionTime));
       return result;
     } catch (error) {
       console.error("Database error:", error);
@@ -3506,7 +3553,7 @@ export class DbStorage implements IStorage {
     try {
       const updatedData = {
         ...updates,
-        updatedAt: new Date()
+        lastUpdated: new Date()
       };
       
       const result = await this.db.update(showdownEntries)
@@ -3533,10 +3580,8 @@ export class DbStorage implements IStorage {
     return await this.db.transaction(async (tx) => {
       try {
         // Create tournament first
-        const createdTournament = await tx.insert(tournaments)
-          .values(tournament)
-          .returning()
-          .then(rows => rows[0]);
+        // Create tournament using createTournament to handle all validation
+        const createdTournament = await this.createTournament(tournament);
         
         // Create matches with tournament ID
         const matchesWithTournamentId = matchInputs.map(match => ({
@@ -3846,9 +3891,10 @@ export class DbStorage implements IStorage {
       const result = await this.db
         .update(registrationSubmissions)
         .set({ 
-          assignedToType: targetType,
-          assignedToId: targetId,
-          status: 'assigned',
+          assignedDivisionId: targetType === 'division' ? targetId : null,
+          assignedEventIds: targetType === 'event' ? [targetId] : null,
+          assignmentStatus: 'assigned',
+          processedAt: new Date(),
           updatedAt: new Date()
         })
         .where(eq(registrationSubmissions.id, submissionId))
@@ -3895,7 +3941,7 @@ export class DbStorage implements IStorage {
       const result = await this.db
         .update(registrationSubmissions)
         .set({ 
-          status: newStatus,
+          assignmentStatus: newStatus,
           updatedAt: new Date()
         })
         .where(eq(registrationSubmissions.id, submissionId))
@@ -3914,7 +3960,7 @@ export class DbStorage implements IStorage {
   // Assignment Log methods - Track smart matching decisions
   async createRegistrationAssignmentLog(log: InsertRegistrationAssignmentLog): Promise<RegistrationAssignmentLog> {
     try {
-      const result = await this.db.insert(registrationAssignmentLog).values(log).returning();
+      const result = await this.db.insert(registrationAssignmentLog).values([log]).returning();
       return result[0];
     } catch (error) {
       console.error("Database error:", error);
@@ -4045,7 +4091,7 @@ export class DbStorage implements IStorage {
 
   async createEventTemplate(template: InsertEventTemplate): Promise<EventTemplate> {
     try {
-      const result = await this.db.insert(eventTemplates).values(template).returning();
+      const result = await this.db.insert(eventTemplates).values([template]).returning();
       return result[0];
     } catch (error) {
       console.error("Database error:", error);
@@ -4116,7 +4162,7 @@ export class DbStorage implements IStorage {
       const result = await this.db
         .select()
         .from(scoringPolicies)
-        .where(eq(scoringPolicies.engine, engine));
+        .where(sql`${scoringPolicies.applicableEngines} @> ${JSON.stringify([engine])}`);
       return result;
     } catch (error) {
       console.error("Database error:", error);
@@ -4126,7 +4172,7 @@ export class DbStorage implements IStorage {
 
   async createScoringPolicy(policy: InsertScoringPolicy): Promise<ScoringPolicy> {
     try {
-      const result = await this.db.insert(scoringPolicies).values(policy).returning();
+      const result = await this.db.insert(scoringPolicies).values([policy]).returning();
       return result[0];
     } catch (error) {
       console.error("Database error:", error);
@@ -4169,21 +4215,21 @@ export class MemStorage implements IStorage {
   private sportEvents: Map<string, any>; // For swimming/track sub-events
   private tournamentStructures: Map<string, TournamentStructure>;
   private trackEvents: Map<string, TrackEvent>;
-  private trackEventTiming: Map<string, TrackEventTiming>;
+  private trackEventTiming: Map<string, any>; // TrackEventTiming type not available
   private sportDivisionRules: Map<string, SportDivisionRules>;
-  private tournamentFormatConfigs: Map<string, TournamentFormatConfig>;
-  private bracketTemplates: Map<string, BracketTemplate>;
-  private tournamentGenerationLog: Map<string, TournamentGenerationLog>;
-  private competitionFormatTemplates: Map<string, CompetitionFormatTemplate>;
-  private gameLengthTemplates: Map<string, GameLengthTemplate>;
-  private seriesTemplates: Map<string, SeriesTemplate>;
+  private tournamentFormatConfigs: Map<string, any>; // TournamentFormatConfig type not available  
+  private bracketTemplates: Map<string, any>; // BracketTemplate type not available
+  private tournamentGenerationLog: Map<string, any>; // TournamentGenerationLog type not available
+  private competitionFormatTemplates: Map<string, any>; // CompetitionFormatTemplate type not available
+  private gameLengthTemplates: Map<string, any>; // GameLengthTemplate type not available
+  private seriesTemplates: Map<string, any>; // SeriesTemplate type not available
   
   // KRAKEN MULTI-DIVISION SYSTEM - THE TENTACLES OF POWER! 🐙💥
-  private tournamentDivisions: Map<string, TournamentDivision>;
-  private divisionParticipants: Map<string, DivisionParticipant>;
-  private divisionTemplates: Map<string, DivisionTemplate>;
-  private divisionGenerationRules: Map<string, DivisionGenerationRule>;
-  private divisionScheduling: Map<string, DivisionScheduling>;
+  private tournamentDivisions: Map<string, any>; // TournamentDivision type not available
+  private divisionParticipants: Map<string, any>; // DivisionParticipant type not available
+  private divisionTemplates: Map<string, any>; // DivisionTemplate type not available  
+  private divisionGenerationRules: Map<string, any>; // DivisionGenerationRule type not available
+  private divisionScheduling: Map<string, any>; // DivisionScheduling type not available
   
   // TOURNAMENT EMPIRE ROLE-BASED SYSTEM! 👑⚡
   private dashboardConfigs: Map<string, any>;
@@ -4385,11 +4431,12 @@ export class MemStorage implements IStorage {
   async upsertUser(userData: UpsertUser): Promise<User> {
     const now = new Date();
     const user: User = {
+      id: userData.id || randomUUID(),
       ...userData,
       createdAt: userData.createdAt || now,
       updatedAt: now,
       subscriptionStatus: userData.subscriptionStatus || "inactive",
-      subscriptionPlan: userData.subscriptionPlan || "free",
+      subscriptionPlan: userData.subscriptionPlan || "starter",
       isWhitelabelClient: userData.isWhitelabelClient || false,
     };
     this.users.set(user.id, user);
