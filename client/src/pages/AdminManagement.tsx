@@ -400,32 +400,6 @@ export default function AdminManagement() {
                     <div className="space-y-4">
                       <h3 className="font-semibold text-slate-900 text-sm md:text-base">Platform & Access</h3>
                       
-                      <div>
-                        <Label htmlFor="userType" className="text-sm">Platform Type</Label>
-                        <select
-                          id="userType"
-                          value={newUser.userType}
-                          onChange={(e) => {
-                            const value = e.target.value as 'district' | 'organizer' | 'business' | 'general';
-                            const defaults = getDefaultsForUserType(value);
-                            setNewUser({ 
-                              ...newUser, 
-                              userType: value, 
-                              userRole: defaults.userRole, 
-                              complianceRole: defaults.complianceRole,
-                              subscriptionPlan: defaults.subscriptionPlan,
-                              organizationType: defaults.organizationType
-                            });
-                          }}
-                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-                          data-testid="select-usertype"
-                        >
-                          <option value="district">District Platform</option>
-                          <option value="organizer">Tournament Organizer</option>
-                          <option value="business">Business Enterprise</option>
-                          <option value="general">General User</option>
-                        </select>
-                      </div>
 
                       <div>
                         <Label htmlFor="userRole">User Role</Label>
