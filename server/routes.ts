@@ -3915,177 +3915,85 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
         const { ESPNApiService } = await import('./espn-api');
         const { YahooSportsAPI } = await import('./yahooSportsAPI');
         
-        // Get base player data (revert to working depth chart while ESPN is enhanced)
-        const { NFLDepthChartParser } = await import('./nfl-depth-chart-parser');
-        const allPlayers = NFLDepthChartParser.getAllPlayers();
+        // 🏈 Get comprehensive player data from Pro Football Reference integration
+        const { ProFootballReferenceIntegration } = await import('./pro-football-reference-integration');
+        const pfrIntegration = ProFootballReferenceIntegration.getInstance();
+        
+        // Get all active players with current week filtering (removes bye teams automatically)
+        let allPlayers = pfrIntegration.getActivePlayers();
+        
+        // Filter by position if specified
         let filteredPlayers = position ? 
-          allPlayers.filter(p => (p.position || '').toLowerCase() === position.toLowerCase()) : 
+          allPlayers.filter(p => p.position.toLowerCase() === position.toLowerCase()) : 
           allPlayers;
         
-        // Get current injury data from NFL.com official injury reports
-        const { nflInjuryScraper, NFLInjuryScraper } = await import('./nfl-injury-scraper');
-        const nflReport = nflInjuryScraper.getLatestReport();
+        console.log(`📊 PFR Players: ${allPlayers.length} total active, ${filteredPlayers.length} after position filtering`);
+        console.log(`📰 Current Week: ${pfrIntegration.getCurrentWeek()}, Bye teams: ${pfrIntegration.getByeTeams().join(', ')}`);
         
-        // Create lookup map for robust player matching from NFL.com data
-        const injuryByNameTeam = new Map();
-        if (nflReport) {
-          nflReport.injuries.forEach(inj => {
-            const key = `${inj.playerName?.toLowerCase().trim()}_${inj.team?.toLowerCase()}`;
-            injuryByNameTeam.set(key, {
-              playerName: inj.playerName,
-              team: inj.team,
-              injuryStatus: NFLInjuryScraper.convertToInjuryStatus(inj.gameStatus),
-              injuryType: inj.injury,
-              description: `${inj.injury} - ${inj.practiceStatus}`,
-              severity: inj.gameStatus === 'Out' ? 'high' : inj.gameStatus === 'Doubtful' ? 'medium' : 'low',
-              gameTimeDecision: inj.gameStatus === 'Questionable',
-              dateUpdated: inj.lastUpdated
-            });
-          });
-        }
-        
-        console.log(`🏥 Loaded ${injuryByNameTeam.size} NFL.com injury reports for status enhancement`);
-        console.log(`📊 NFL Report Status: Week ${nflReport?.week || 'N/A'}, ${nflReport?.totalPlayers || 0} total injured players`);
-        
-        // Show sample of current injury data
-        const sampleInjuries = Array.from(injuryByNameTeam.values()).slice(0, 5);
-        console.log(`🔍 Sample NFL.com injury data:`, sampleInjuries.map(inj => ({
-          name: inj.playerName,
-          team: inj.team,
-          status: inj.injuryStatus,
-          gameStatus: inj.description
+        // Sample of players with injury/news data  
+        const samplePlayers = filteredPlayers.slice(0, 3);
+        console.log(`🔍 Sample PFR player data:`, samplePlayers.map(p => ({
+          name: p.playerName,
+          team: p.teamAbbreviation, 
+          position: p.position,
+          status: p.injuryStatus,
+          news: p.latestNews?.substring(0, 50) + '...'
         })));
         
-        // 🐛 DEBUG: Show actual lookup keys being generated  
-        console.log(`🔑 Sample NFL.com lookup keys:`, Array.from(injuryByNameTeam.keys()).slice(0, 5));
+        // 📊 Pro Football Reference data already includes injury status and latest news
+        console.log(`🏈 Using Pro Football Reference data - no additional injury lookup needed`);
         
-        // 🚨 MANUAL INJURY OVERRIDES - For current injuries not yet in NFL.com reports or urgent updates
-        const manualInjuryOverrides = new Map([
-          // Week 1 2025 NFL Season - Current as of Sept 21, 2025
-          ['brock purdy_sf', { 
-            injuryStatus: 'out', 
-            injuryType: 'Shoulder', 
-            description: 'Shoulder injury', 
-            severity: 'high',
-            gameTimeDecision: false,
-            dateUpdated: '2025-09-21T18:00:00Z'
-          }],
-          ['joe burrow_cin', {
-            injuryStatus: 'out',
-            injuryType: 'Wrist',
-            description: 'Wrist injury',
-            severity: 'high', 
-            gameTimeDecision: false,
-            dateUpdated: '2025-09-21T18:00:00Z'
-          }],
-          // Add more current injuries as needed
-        ]);
-        
-        console.log(`⚡ Manual injury overrides active: ${manualInjuryOverrides.size} players`);
-        
-        // Add fantasy projections, injury status, and enhanced data
-        const yahooAPI = new YahooSportsAPI();
-        const enhancedPlayers = await Promise.all(
-          filteredPlayers.map(async (player: any) => { // Full player pool - all 32 teams
-            try {
-              // Generate realistic projected points based on position and depth
-              const projectedPoints = generateProjectedPoints(player.position, player.depth, player.status);
-              const confidence = generateConfidence(player.position, player.depth, player.status);
-              const opponent = generateOpponent(player.team);
-              
-              // Get injury data for this player using NFL.com official data + manual overrides
-              let injuryData = null;
-              
-              // Strategy 1: Match by name + team combination with NFL.com data
-              if (player.name && player.team) {
-                const lookupKey = `${player.name.toLowerCase().trim()}_${player.team.toLowerCase()}`;
-                injuryData = injuryByNameTeam.get(lookupKey);
-                
-                // 🚨 FALLBACK: If no team match, try name-only lookup for scraped players with missing teams
-                if (!injuryData) {
-                  const nameOnlyKey = `${player.name.toLowerCase().trim()}_`;
-                  injuryData = injuryByNameTeam.get(nameOnlyKey);
-                  if (injuryData) {
-                    console.log(`📍 Name-only match found for ${player.name}: ${injuryData.injuryStatus}`);
-                  }
-                }
-              }
-              
-              // Strategy 2: Check manual overrides (for current injuries not in NFL.com yet or urgent updates)
-              if (player.name && player.team) {
-                const overrideKey = `${player.name.toLowerCase().trim()}_${player.team.toLowerCase()}`;
-                const manualOverride = manualInjuryOverrides.get(overrideKey);
-                if (manualOverride) {
-                  injuryData = {
-                    ...manualOverride,
-                    playerName: player.name,
-                    team: player.team,
-                    playerId: `manual_${overrideKey}`
-                  };
-                  console.log(`⚡ Applied manual injury override for ${player.name}: ${manualOverride.injuryStatus}`);
-                }
-              }
-              
-              // Debug logging for key players
-              if (player.name?.toLowerCase().includes('purdy') || player.name?.toLowerCase().includes('brock')) {
-                console.log(`🔍 BROCK PURDY DEBUG:`, {
-                  playerName: player.name,
-                  team: player.team,
-                  espnId: player.espnId,
-                  lookupKey: `${player.name.toLowerCase().trim()}_${player.team.toLowerCase()}`,
-                  injuryFound: !!injuryData,
-                  injuryStatus: injuryData?.injuryStatus || 'none'
-                });
-              }
-              
-              // Adjust projections based on injury status
-              const adjustedProjections = adjustProjectionsForInjury(projectedPoints, injuryData);
-              
-              // 🚨 CRITICAL: Override player status based on injury status for DraftKings-like experience
-              let finalStatus = player.status || 'backup';
-              let finalDepth = player.depth || 3;
-              
-              if (injuryData?.injuryStatus === 'out') {
-                finalStatus = 'out';  // Override to show OUT status
-                finalDepth = 999;     // Move to bottom of depth chart
-              } else if (injuryData?.injuryStatus === 'doubtful') {
-                finalStatus = 'doubtful';
-              } else if (injuryData?.injuryStatus === 'questionable') {
-                finalStatus = 'questionable';
-              }
-              
-              return {
-                ...player,
-                // 🚨 Override status and depth based on injury 
-                status: finalStatus,
-                depth: finalDepth,
-                projectedPoints: adjustedProjections.points,
-                confidence: adjustedProjections.confidence,
-                opponent,
-                fantasyRelevant: true,
-                // 🏥 Enhanced injury status data
-                injuryStatus: injuryData?.injuryStatus || 'active',
-                injuryType: injuryData?.injuryType || null,
-                injuryDescription: injuryData?.description || null,
-                gameTimeDecision: injuryData?.gameTimeDecision || false,
-                injurySeverity: injuryData?.severity || 'low',
-                lastUpdated: injuryData?.dateUpdated || new Date().toISOString(),
-                // 📊 Status indicators for UI
-                statusIcon: getStatusIcon(injuryData?.injuryStatus || 'active'),
-                statusColor: getStatusColor(injuryData?.injuryStatus || 'active'),
-                fantasyImpact: calculateFantasyImpact(injuryData)
-              };
-            } catch (error: any) {
-              console.log(`⚠️ Projection failed for ${player.name}, using base data`);
-              return {
-                ...player,
-                projectedPoints: generateProjectedPoints(player.position, player.depth, player.status),
-                confidence: 65,
-                opponent: 'TBD'
-              };
-            }
-          })
-        );
+        // 🏈 Pro Football Reference data already includes comprehensive fantasy data
+        const enhancedPlayers = filteredPlayers.map((pfrPlayer: any) => {
+          // Convert PFR player structure to frontend format
+          return {
+            id: pfrPlayer.id,
+            name: pfrPlayer.playerName,
+            position: pfrPlayer.position,
+            team: pfrPlayer.teamAbbreviation,
+            number: pfrPlayer.jerseyNumber?.toString() || '0',
+            
+            // Fantasy data (already calculated by PFR)
+            projectedPoints: pfrPlayer.projectedPoints,
+            confidence: Math.round(85 - (pfrPlayer.fantasyRank * 0.5)), // Calculate confidence from rank
+            opponent: pfrPlayer.opponent || 'TBD',
+            salary: pfrPlayer.salary,
+            fantasyRank: pfrPlayer.fantasyRank,
+            
+            // Injury status and news (directly from PFR)
+            status: pfrPlayer.injuryStatus,
+            injuryStatus: pfrPlayer.injuryStatus,
+            injuryType: pfrPlayer.injuryStatus !== 'healthy' ? 'Minor' : null,
+            injuryDescription: pfrPlayer.injuryStatus !== 'healthy' ? `${pfrPlayer.injuryStatus} status` : null,
+            gameTimeDecision: pfrPlayer.injuryStatus === 'questionable',
+            injurySeverity: pfrPlayer.injuryStatus === 'out' ? 'high' : pfrPlayer.injuryStatus === 'doubtful' ? 'medium' : 'low',
+            lastUpdated: pfrPlayer.lastUpdated,
+            
+            // Latest news (directly from PFR)
+            latestNews: pfrPlayer.latestNews,
+            newsDate: pfrPlayer.newsDate,
+            
+            // Team context
+            isHome: pfrPlayer.isHome,
+            teamName: pfrPlayer.teamName,
+            isActive: pfrPlayer.isActive,
+            
+            // Stats (from PFR)
+            passingYards: pfrPlayer.passingYards,
+            passingTDs: pfrPlayer.passingTDs,
+            rushingYards: pfrPlayer.rushingYards,
+            rushingTDs: pfrPlayer.rushingTDs,
+            receptions: pfrPlayer.receptions,
+            receivingYards: pfrPlayer.receivingYards,
+            receivingTDs: pfrPlayer.receivingTDs,
+            
+            fantasyRelevant: true,
+            // UI indicators
+            statusIcon: getStatusIcon(pfrPlayer.injuryStatus),
+            statusColor: getStatusColor(pfrPlayer.injuryStatus),
+            fantasyImpact: pfrPlayer.injuryStatus === 'out' ? 'high' : pfrPlayer.injuryStatus === 'doubtful' ? 'medium' : 'low'
+          };
+        });
         
         console.log(`✅ Fantasy Cards: Found ${enhancedPlayers.length} enhanced NFL players`);
         

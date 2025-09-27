@@ -17,6 +17,13 @@ interface FantasyPlayerCardProps {
     opponent?: string;
     depth?: number;
     status?: string;
+    // Pro Football Reference data
+    latestNews?: string;
+    newsDate?: string;
+    injuryStatus?: string;
+    injuryDescription?: string;
+    salary?: number;
+    fantasyRank?: number;
   };
   onPlayerSelect: (player: string, position: string, team: string) => void;
   onPlayerDrillDown?: (player: any) => void;
@@ -203,6 +210,29 @@ export function FantasyPlayerCard({ player, onPlayerSelect, onPlayerDrillDown, i
             </Badge>
           )}
         </div>
+        
+        {/* Latest News Section - Powered by Pro Football Reference */}
+        {player.latestNews && player.latestNews !== 'No recent news' && (
+          <div className="mb-3 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+            <div className="flex items-center gap-2 mb-1">
+              <Activity className="w-4 h-4 text-blue-600" />
+              <span className="text-xs font-semibold text-blue-800 uppercase tracking-wide">Latest Update</span>
+              <span className="text-xs text-blue-600">
+                {player.newsDate ? new Date(player.newsDate).toLocaleDateString() : 'Recently'}
+              </span>
+            </div>
+            <p className="text-sm text-blue-700 leading-relaxed">
+              {player.latestNews.length > 120 ? 
+                `${player.latestNews.substring(0, 120)}...` : 
+                player.latestNews
+              }
+            </p>
+            <div className="mt-2 text-xs text-blue-500 flex items-center gap-1">
+              <span>📊</span>
+              <span className="font-medium">Powered by Pro Football Reference</span>
+            </div>
+          </div>
+        )}
         
         {/* Action Buttons */}
         <div className="flex gap-2">
