@@ -5,13 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Switch } from "@/components/ui/switch";
-import { Trophy, Users, MessageSquare, Calendar, CheckCircle, ArrowLeft, Mail, Globe, ArrowRight, Eye, EyeOff, Settings, Calculator } from "lucide-react";
+import { Trophy, Users, CheckCircle, ArrowLeft, Mail, Globe, ArrowRight, Eye, EyeOff, GraduationCap, Heart } from "lucide-react";
 import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { insertTeamSchema, InsertTeam } from "@shared/schema";
@@ -23,8 +22,6 @@ import EmailSignupForm from "@/components/EmailSignupForm";
 const teamSignupSchema = insertTeamSchema.extend({
   sport: z.string().min(1, "Please select a sport"),
   teamSize: z.coerce.number().int().min(1, "Please estimate your team size"),
-  subscriptionTier: z.string(),
-  price: z.string(),
 });
 
 // Email/password signup schema for embedded authentication
@@ -57,17 +54,8 @@ export default function TeamSignupPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Hybrid subscription state
-  const [addons, setAddons] = useState({
-    tournamentPerEvent: false,
-    teamManagement: false
-  });
-  const [livePricing, setLivePricing] = useState<any>(null);
-
-  // Get plan and price from URL params
+  // Get resume status from URL params
   const urlParams = new URLSearchParams(window.location.search);
-  const plan = urlParams.get('plan') || 'growing';
-  const price = urlParams.get('price') || '39';
   const resume = urlParams.get('resume') === '1';
   
   // Handle OAuth resume flow
@@ -93,63 +81,25 @@ export default function TeamSignupPage() {
     }
   }, [resume, isAuthenticated, user]);
 
-  // Plan configurations
-  const planConfig = {
-    starter: {
-      name: "Starter Team",
-      price: "$23",
-      period: "/month",
-      description: "Perfect for small teams getting started",
-      features: ["Up to 20 players", "5 tournaments/month included", "400 communications/month", "Basic roster management", "Tournament registration"],
-      color: "green",
-      maxPlayers: 20,
-      communications: 400,
-      popular: false
-    },
-    growing: {
-      name: "Growing Team", 
-      price: "$39",
-      period: "/month",
-      description: "Most popular choice for active teams",
-      features: ["Up to 35 players", "15 tournaments/month included", "4,000 communications/month", "Advanced scheduling", "Parent portal access"],
-      color: "blue",
-      maxPlayers: 35,
-      communications: 4000,
-      popular: true
-    },
-    elite: {
-      name: "Elite Program",
-      price: "$63", 
-      period: "/month",
-      description: "Complete solution for large organizations",
-      features: ["Unlimited players & teams", "50 tournaments/month included", "16,000 communications/month", "Full organization management", "Multi-team coordination"],
-      color: "purple",
-      maxPlayers: "unlimited",
-      communications: 16000,
-      popular: false
-    }
+  // Champions for Change donation configuration
+  const donationConfig = {
+    suggestedAmount: 50,
+    description: "Support student education while getting complete tournament management tools",
+    features: [
+      "Unlimited professional tournaments",
+      "All tournament formats (Single/Double/Round Robin/Swiss)", 
+      "Complete white-label branding & custom domains",
+      "AI-powered tournament creation & optimization",
+      "Unlimited teams, players, and events",
+      "Integrated payment processing via Stripe",
+      "Professional webstore with custom merchandise",
+      "Event ticket sales & revenue tracking",
+      "Mobile-responsive tournament management",
+      "Enterprise-grade security and data backup",
+      "Advanced analytics & reporting suite",
+      "Priority support & training included"
+    ]
   };
-
-  const currentPlan = planConfig[plan as keyof typeof planConfig] || planConfig.growing;
-
-  // Live pricing calculator API call
-  const { data: pricingData, refetch: recalculatePrice } = useQuery({
-    queryKey: ['pricing-calculator', plan, addons],
-    queryFn: async () => {
-      const response = await apiRequest('/api/pricing/calculate', 'POST', {
-        baseType: 'team',
-        teamTier: plan as 'starter' | 'growing' | 'elite',
-        addons: addons
-      });
-      return response;
-    },
-    enabled: true
-  });
-
-  // Update live pricing when addons change
-  useEffect(() => {
-    recalculatePrice();
-  }, [addons, recalculatePrice]);
 
   // Team information form
   const teamForm = useForm<TeamSignupForm>({
@@ -162,8 +112,6 @@ export default function TeamSignupPage() {
       coachPhone: "",
       sport: "",
       teamSize: 0,
-      subscriptionTier: plan,
-      price: price,
     },
   });
 
@@ -269,17 +217,15 @@ export default function TeamSignupPage() {
         coachPhone: data.coachPhone,
         sport: data.sport,
         teamSize: data.teamSize,
-        subscriptionTier: data.subscriptionTier === 'starter' ? 'basic' : 
-                         data.subscriptionTier === 'growing' ? 'premium' : 
-                         data.subscriptionTier === 'elite' ? 'enterprise' : 'premium', // Map to schema values
-        subscriptionStatus: 'free', // Start with free status
+        subscriptionTier: 'supporter', // Champions for Change supporter
+        subscriptionStatus: 'active', // Active supporter status
       });
       return response.json();
     },
     onSuccess: (team) => {
       toast({
-        title: "Team created successfully!",
-        description: "Your 14-day free trial has started. Please sign in to access your dashboard.",
+        title: "Welcome to Champions for Change!",
+        description: "Your team is ready! Please sign in to complete your donation setup and access your dashboard.",
       });
       
       // SECURITY: Store secure linkToken for team linking verification
@@ -342,9 +288,16 @@ export default function TeamSignupPage() {
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Home
             </Button>
-            <Badge className="bg-blue-600 text-white">
-              14-Day Free Trial • No Credit Card Required
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Badge className="bg-green-600 text-white flex items-center gap-1">
+                <GraduationCap className="h-3 w-3" />
+                Champions for Change
+              </Badge>
+              <Badge className="bg-blue-600 text-white flex items-center gap-1">
+                <Heart className="h-3 w-3" />
+                Tax-Deductible Donation
+              </Badge>
+            </div>
           </div>
         </div>
       </div>
@@ -356,170 +309,123 @@ export default function TeamSignupPage() {
           {/* Plan Summary */}
           <div>
             <div className="mb-6">
-              <h1 className="text-3xl font-bold text-white mb-2">Create Your Team</h1>
-              <p className="text-slate-300">Get started with professional team management</p>
+              <h1 className="text-3xl font-bold text-white mb-2">Support Student Education</h1>
+              <p className="text-slate-300">Get complete tournament management tools while funding educational opportunities for underprivileged students</p>
+              <div className="mt-4 flex items-center gap-2 text-green-300">
+                <Heart className="h-4 w-4" />
+                <span className="text-sm">Every donation directly supports student educational programs in Corpus Christi, Texas</span>
+              </div>
             </div>
 
-            {/* Selected Plan Card */}
-            <Card className={`${currentPlan.color === 'green' ? 'bg-green-900/40 border-green-500/40' : currentPlan.color === 'blue' ? 'bg-blue-900/40 border-blue-500/40' : 'bg-purple-900/40 border-purple-500/40'} relative`}>
-              {currentPlan.popular && (
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <Badge className="bg-blue-500 text-white">Most Popular</Badge>
+            {/* Champions for Change Donation Card */}
+            <Card className="bg-gradient-to-br from-green-900/40 to-blue-900/40 border-green-500/40 relative">
+              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                <Badge className="bg-green-500 text-white flex items-center gap-1">
+                  <Heart className="h-3 w-3" />
+                  Champions for Change
+                </Badge>
+              </div>
+              <CardHeader className="text-center pb-4 mt-2">
+                <div className="mx-auto mb-4 p-3 bg-green-100 rounded-full w-fit">
+                  <GraduationCap className="h-8 w-8 text-green-600" />
                 </div>
-              )}
-              <CardHeader className="text-center pb-4">
-                <CardTitle className={`text-2xl ${currentPlan.color === 'green' ? 'text-green-300' : currentPlan.color === 'blue' ? 'text-blue-300' : 'text-purple-300'} ${currentPlan.popular ? 'mt-2' : ''}`}>
-                  {currentPlan.name}
+                <CardTitle className="text-2xl text-green-300">
+                  Complete Tournament Management Platform
                 </CardTitle>
-                <div className={`text-4xl font-bold ${currentPlan.color === 'green' ? 'text-green-400' : currentPlan.color === 'blue' ? 'text-blue-400' : 'text-purple-400'}`}>
-                  {currentPlan.price}
-                  <span className={`text-lg ${currentPlan.color === 'green' ? 'text-green-300' : currentPlan.color === 'blue' ? 'text-blue-300' : 'text-purple-300'}`}>{currentPlan.period}</span>
+                <div className="text-4xl font-bold text-green-400">
+                  ${donationConfig.suggestedAmount}
+                  <span className="text-lg text-green-300">/month</span>
                 </div>
-                <CardDescription className={`${currentPlan.color === 'green' ? 'text-green-200' : currentPlan.color === 'blue' ? 'text-blue-200' : 'text-purple-200'}`}>
-                  {currentPlan.description}
+                <CardDescription className="text-green-200">
+                  {donationConfig.description}
                 </CardDescription>
+                <div className="mt-3">
+                  <Badge className="bg-yellow-100 text-yellow-800 text-sm px-3 py-1">
+                    💚 100% Tax-Deductible Charitable Donation
+                  </Badge>
+                </div>
               </CardHeader>
               <CardContent>
-                <ul className={`space-y-2 ${currentPlan.color === 'green' ? 'text-green-100' : currentPlan.color === 'blue' ? 'text-blue-100' : 'text-purple-100'}`}>
-                  {currentPlan.features.map((feature, index) => (
+                <ul className="space-y-2 text-green-100">
+                  {donationConfig.features.map((feature, index) => (
                     <li key={index} className="flex items-center">
-                      <CheckCircle className="h-4 w-4 text-green-400 mr-2" />
-                      {feature}
+                      <CheckCircle className="h-4 w-4 text-green-400 mr-2 flex-shrink-0" />
+                      <span className="text-sm">{feature}</span>
                     </li>
                   ))}
                 </ul>
                 
-                <div className="mt-6 p-4 bg-green-600/20 border border-green-500/50 rounded-lg">
+                <div className="mt-6 p-4 bg-blue-600/20 border border-blue-500/50 rounded-lg">
                   <div className="text-center">
-                    <div className="text-green-300 font-semibold">🎯 Promotional Pricing</div>
-                    <div className="text-sm text-green-200 mt-1">
-                      First month: <strong>FREE</strong> • Second month: <strong>$19</strong> • Then {currentPlan.price}{currentPlan.period}
+                    <div className="text-blue-300 font-semibold flex items-center justify-center gap-2">
+                      <Heart className="h-4 w-4" />
+                      Educational Impact
+                    </div>
+                    <div className="text-sm text-blue-200 mt-1">
+                      <strong>Every donation</strong> funds educational trips and opportunities for underprivileged students in <strong>Corpus Christi, Texas</strong>
                     </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Hybrid Subscription Add-ons */}
-            <Card className="mt-6 bg-slate-800/50 border-slate-600/50">
+            {/* Donation Flexibility */}
+            <Card className="mt-6 bg-blue-900/20 border-blue-500/40">
               <CardHeader className="pb-4">
                 <CardTitle className="text-white flex items-center">
-                  <Settings className="h-5 w-5 mr-2" />
-                  Add Tournament Features
+                  <Heart className="h-5 w-5 mr-2 text-blue-400" />
+                  Flexible Donation Options
                 </CardTitle>
-                <CardDescription className="text-slate-400">
-                  Enhance your subscription with tournament organizing capabilities
+                <CardDescription className="text-blue-200">
+                  Support our educational mission at a level that works for your organization
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Tournament Per-Event Add-on */}
-                <div className="flex items-center justify-between p-4 bg-slate-700/30 rounded-lg border border-slate-600/30">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3">
-                      <Trophy className="h-5 w-5 text-yellow-400" />
-                      <div>
-                        <h4 className="font-semibold text-white">Tournament Hosting</h4>
-                        <p className="text-sm text-slate-400">Host tournaments with $50 per event fee</p>
-                      </div>
+                <div className="p-4 bg-blue-800/30 rounded-lg border border-blue-600/30">
+                  <div className="text-center">
+                    <div className="text-lg font-semibold text-blue-200 mb-2">💡 Suggested Monthly Donation</div>
+                    <div className="text-3xl font-bold text-blue-300 mb-1">${donationConfig.suggestedAmount}</div>
+                    <div className="text-sm text-blue-200 mb-3">Adjust up or down based on your capacity to support our mission</div>
+                    <div className="text-xs text-blue-300 bg-blue-900/40 px-3 py-2 rounded-lg">
+                      ✨ Complete platform access regardless of donation amount
                     </div>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <span className="text-slate-300 font-medium">$50/event</span>
-                    <Switch
-                      checked={addons.tournamentPerEvent}
-                      onCheckedChange={(checked) => 
-                        setAddons(prev => ({ ...prev, tournamentPerEvent: checked }))
-                      }
-                      data-testid="switch-tournament-addon"
-                    />
                   </div>
                 </div>
-
-                {/* Team Management Add-on (for future organizers) */}
-                <div className="flex items-center justify-between p-4 bg-slate-700/30 rounded-lg border border-slate-600/30 opacity-60">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3">
-                      <Users className="h-5 w-5 text-blue-400" />
-                      <div>
-                        <h4 className="font-semibold text-white">Advanced Team Management</h4>
-                        <p className="text-sm text-slate-400">Additional team coordination tools (Future)</p>
-                      </div>
-                    </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
+                  <div className="p-3 bg-green-800/20 rounded-lg border border-green-600/30">
+                    <div className="text-green-300 font-semibold">Small Organization</div>
+                    <div className="text-green-200 text-sm">$25-35/month</div>
                   </div>
-                  <div className="flex items-center space-x-3">
-                    <span className="text-slate-300 font-medium">$20/month</span>
-                    <Switch
-                      checked={false}
-                      disabled={true}
-                      data-testid="switch-team-addon"
-                    />
+                  <div className="p-3 bg-blue-800/20 rounded-lg border border-blue-600/30">
+                    <div className="text-blue-300 font-semibold">Medium Organization</div>
+                    <div className="text-blue-200 text-sm">$50/month</div>
+                  </div>
+                  <div className="p-3 bg-purple-800/20 rounded-lg border border-purple-600/30">
+                    <div className="text-purple-300 font-semibold">Large Organization</div>
+                    <div className="text-purple-200 text-sm">$75+/month</div>
                   </div>
                 </div>
-
-                {/* Live Pricing Calculator */}
-                {pricingData && (
-                  <div className="mt-4 p-4 bg-blue-900/20 border border-blue-500/30 rounded-lg">
-                    <div className="flex items-center justify-between mb-3">
-                      <h4 className="font-semibold text-white flex items-center">
-                        <Calculator className="h-4 w-4 mr-2" />
-                        Live Pricing Calculator
-                      </h4>
-                    </div>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between text-slate-300">
-                        <span>Base Subscription ({currentPlan.name}):</span>
-                        <span className="font-medium">${(pricingData as any).breakdown?.baseSubscription || currentPlan.price.replace('$', '')}/month</span>
-                      </div>
-                      {addons.tournamentPerEvent && (
-                        <div className="flex justify-between text-slate-300">
-                          <span>Tournament Hosting:</span>
-                          <span className="font-medium">${(pricingData as any).breakdown?.perTournamentFee || 50}/event</span>
-                        </div>
-                      )}
-                      {(pricingData as any).totals?.recurringAddons > 0 && (
-                        <div className="flex justify-between text-slate-300">
-                          <span>Monthly Add-ons:</span>
-                          <span className="font-medium">${(pricingData as any).totals.recurringAddons}/month</span>
-                        </div>
-                      )}
-                      <hr className="border-slate-600/50 my-2" />
-                      <div className="flex justify-between text-white font-semibold text-base">
-                        <span>Monthly Total:</span>
-                        <span className="text-blue-400">${(pricingData as any).totals?.monthly || currentPlan.price.replace('$', '')}/month</span>
-                      </div>
-                      {addons.tournamentPerEvent && (
-                        <div className="text-xs text-slate-400 mt-2">
-                          * Plus ${(pricingData as any).totals?.perEventFee || 50} per tournament you host
-                        </div>
-                      )}
-                      {(pricingData as any).totals?.annualSavings > 0 && (
-                        <div className="text-xs text-green-400 mt-2">
-                          💰 Save ${(pricingData as any).totals.annualSavings} with annual billing
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
               </CardContent>
             </Card>
 
-            {/* Benefits */}
+            {/* Educational Impact */}
             <div className="mt-6 space-y-3">
               <div className="flex items-center text-slate-300">
+                <GraduationCap className="h-5 w-5 text-green-400 mr-3" />
+                <span>Fund educational trips for underprivileged students</span>
+              </div>
+              <div className="flex items-center text-slate-300">
+                <Heart className="h-5 w-5 text-red-400 mr-3" />
+                <span>100% tax-deductible charitable donation</span>
+              </div>
+              <div className="flex items-center text-slate-300">
                 <Trophy className="h-5 w-5 text-yellow-400 mr-3" />
-                <span>Professional team management platform</span>
+                <span>Complete enterprise tournament platform</span>
               </div>
               <div className="flex items-center text-slate-300">
                 <Users className="h-5 w-5 text-blue-400 mr-3" />
-                <span>Join any tournament with your team</span>
-              </div>
-              <div className="flex items-center text-slate-300">
-                <MessageSquare className="h-5 w-5 text-green-400 mr-3" />
-                <span>Communication limits scale with team size</span>
-              </div>
-              <div className="flex items-center text-slate-300">
-                <Calendar className="h-5 w-5 text-purple-400 mr-3" />
-                <span>No tournament experience required</span>
+                <span>No feature restrictions regardless of donation amount</span>
               </div>
             </div>
           </div>

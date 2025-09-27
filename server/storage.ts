@@ -653,16 +653,6 @@ export class DbStorage implements IStorage {
             .update(users)
             .set({
               ...userData,
-              hybridSubscription: userData.hybridSubscription ? {
-                baseType: userData.hybridSubscription.baseType as 'team' | 'organizer' | 'district',
-                teamTier: userData.hybridSubscription.teamTier as 'starter' | 'growing' | 'elite' | undefined,
-                organizerPlan: userData.hybridSubscription.organizerPlan as 'annual' | 'monthly' | undefined,
-                addons: {
-                  tournamentPerEvent: Boolean(userData.hybridSubscription.addons?.tournamentPerEvent),
-                  teamManagement: Boolean(userData.hybridSubscription.addons?.teamManagement)
-                },
-                pricing: userData.hybridSubscription.pricing
-              } : null,
               updatedAt: new Date(),
             })
             .where(eq(users.email, userData.email))
@@ -679,16 +669,6 @@ export class DbStorage implements IStorage {
           target: users.id,
           set: {
             ...userData,
-            hybridSubscription: userData.hybridSubscription ? {
-              baseType: userData.hybridSubscription.baseType as 'team' | 'organizer' | 'district',
-              teamTier: userData.hybridSubscription.teamTier as 'starter' | 'growing' | 'elite' | undefined,
-              organizerPlan: userData.hybridSubscription.organizerPlan as 'annual' | 'monthly' | undefined,
-              addons: {
-                tournamentPerEvent: Boolean(userData.hybridSubscription.addons?.tournamentPerEvent),
-                teamManagement: Boolean(userData.hybridSubscription.addons?.teamManagement)
-              },
-              pricing: userData.hybridSubscription.pricing
-            } : null,
             updatedAt: new Date(),
           },
         })
