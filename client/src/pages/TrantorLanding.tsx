@@ -308,85 +308,77 @@ export default function TrantorLanding() {
               
             </div>
 
-            {/* Team Management Section - NEW */}
-            <div className="bg-blue-600/20 border border-blue-500/50 rounded-xl p-6 mb-8 max-w-4xl mx-auto mt-12">
+            {/* Champions for Change Team Management */}
+            <div className="bg-gradient-to-r from-green-600/20 via-blue-600/20 to-purple-600/20 border-2 border-yellow-500/60 rounded-xl p-8 mb-8 max-w-4xl mx-auto mt-12">
               <div className="text-center mb-6">
-                <h3 className="text-2xl font-bold text-blue-300 mb-2">🏆 Team Management & Communication</h3>
-                <p className="text-blue-100 mb-1">For Coaches & Team Managers - No Tournament Experience Required</p>
-                <p className="text-sm text-blue-200">Pricing based on team size & communication needs • Tournament hosting included with optional $50/tournament unlimited add-on</p>
+                <div className="flex items-center justify-center mb-3">
+                  <GraduationCap className="h-6 w-6 text-yellow-300 mr-2" />
+                  <Badge className="bg-yellow-500 text-slate-900 px-4 py-1 text-sm font-bold">
+                    🎓 Champions for Change Team Management
+                  </Badge>
+                  <Heart className="h-6 w-6 text-red-300 ml-2" />
+                </div>
+                <h3 className="text-3xl font-bold text-white mb-3">Support Student Education Through Team Management</h3>
+                <p className="text-lg text-blue-100 mb-2">Revolutionary donation-based platform - No tiers, no limits, just impact</p>
+                <p className="text-yellow-200 font-semibold">Every dollar supports educational opportunities for underprivileged students</p>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl mx-auto">
-                {/* Starter Team */}
-                <div className="bg-green-900/30 border border-green-500/40 rounded-lg p-5 text-center">
-                  <h4 className="text-lg font-bold text-green-300 mb-2">Starter Team</h4>
-                  <div className="text-2xl font-bold text-green-400 mb-1">$23<span className="text-sm text-green-300">/month</span></div>
-                  <p className="text-xs text-green-200 mb-3">Paid annually ($276/year)</p>
-                  <ul className="text-sm text-green-100 space-y-1 mb-4">
-                    <li>• Up to 20 players</li>
-                    <li>• 1 professional tournament per year included</li>
-                    <li>• Additional tournaments: $25 each (vs $50+ elsewhere)</li>
-                    <li>• 400 communications/month</li>
-                    <li>• Smart seeding algorithm (not random brackets)</li>
-                  </ul>
-                  <Button 
-                    onClick={() => setLocation('/team-signup?plan=starter&price=23')}
-                    className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2"
-                    data-testid="button-starter-team"
-                  >
-                    Start Team Trial
-                  </Button>
+              <div className="bg-gradient-to-r from-green-500/30 via-blue-500/30 to-purple-500/30 border-2 border-yellow-400/50 rounded-lg p-6 text-center backdrop-blur-sm">
+                <div className="flex items-center justify-center mb-4">
+                  <Trophy className="h-8 w-8 text-yellow-300 mr-3" />
+                  <h4 className="text-2xl font-bold text-white">Unified Access - Equal Enterprise Features</h4>
+                  <Heart className="h-8 w-8 text-red-300 ml-3" />
                 </div>
-
-                {/* Growing Team */}
-                <div className="bg-blue-900/40 border-2 border-blue-400/60 rounded-lg p-5 text-center relative">
-                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                    <Badge className="bg-blue-500 text-white px-3 py-1">Most Popular</Badge>
+                
+                <div className="text-3xl font-bold text-yellow-300 mb-2">
+                  $50<span className="text-lg text-yellow-200">/month suggested</span>
+                </div>
+                <p className="text-sm text-green-200 mb-4 font-semibold">Pay-what-feels-right • 100% Tax-Deductible • EIN: 81-3834471</p>
+                
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                  <div className="bg-white/10 rounded-lg p-3">
+                    <div className="text-white font-bold">Unlimited</div>
+                    <div className="text-xs text-blue-200">Players & Teams</div>
                   </div>
-                  <h4 className="text-lg font-bold text-blue-300 mb-2 mt-2">Growing Team</h4>
-                  <div className="text-2xl font-bold text-blue-400 mb-1">$39<span className="text-sm text-blue-300">/year</span></div>
-                  <p className="text-xs text-blue-200 mb-3">Paid annually ($468/year)</p>
-                  <ul className="text-sm text-blue-100 space-y-1 mb-4">
-                    <li>• Up to 35 players</li>
-                    <li>• 5 professional tournaments per year included</li>
-                    <li>• Additional tournaments: $25 each (50% less than competitors)</li>
-                    <li>• 4,000 communications/month</li>
-                    <li>• Pool Play, Double Elimination, Round Robin formats</li>
-                  </ul>
-                  <Button 
-                    onClick={() => setLocation('/team-signup?plan=growing&price=39')}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2"
-                    data-testid="button-growing-team"
-                  >
-                    Start Team Trial
-                  </Button>
+                  <div className="bg-white/10 rounded-lg p-3">
+                    <div className="text-white font-bold">All Sports</div>
+                    <div className="text-xs text-blue-200">Full Feature Parity</div>
+                  </div>
+                  <div className="bg-white/10 rounded-lg p-3">
+                    <div className="text-white font-bold">Enterprise</div>
+                    <div className="text-xs text-blue-200">Management Tools</div>
+                  </div>
+                  <div className="bg-white/10 rounded-lg p-3">
+                    <div className="text-white font-bold">Educational</div>
+                    <div className="text-xs text-blue-200">Mission Impact</div>
+                  </div>
                 </div>
-
-                {/* Elite Program */}
-                <div className="bg-purple-900/30 border border-purple-500/40 rounded-lg p-5 text-center">
-                  <h4 className="text-lg font-bold text-purple-300 mb-2">Elite Program</h4>
-                  <div className="text-2xl font-bold text-purple-400 mb-1">$63<span className="text-sm text-purple-300">/month</span></div>
-                  <p className="text-xs text-purple-200 mb-3">Annual only ($756/year)</p>
-                  <ul className="text-sm text-purple-100 space-y-1 mb-4">
-                    <li>• Unlimited players & teams</li>
-                    <li>• 10 professional tournaments per year included</li>
-                    <li>• Additional tournaments: $25 each (enterprise pricing for everyone)</li>
-                    <li>• 16,000 communications/month</li>
-                    <li>• Swiss System, Leaderboards, Multi-division management</li>
-                  </ul>
-                  <Button 
-                    onClick={() => setLocation('/team-signup?plan=elite&price=63')}
-                    className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2"
-                    data-testid="button-elite-program"
-                  >
-                    Start Team Trial
-                  </Button>
-                </div>
+                
+                <ul className="text-sm text-white space-y-2 mb-6 max-w-2xl mx-auto text-left">
+                  <li className="flex items-center"><CheckCircle className="h-4 w-4 text-green-400 mr-2" />Complete tournament management system</li>
+                  <li className="flex items-center"><CheckCircle className="h-4 w-4 text-green-400 mr-2" />Player roster & communication tools</li>
+                  <li className="flex items-center"><CheckCircle className="h-4 w-4 text-green-400 mr-2" />Equipment tracking & medical forms</li>
+                  <li className="flex items-center"><CheckCircle className="h-4 w-4 text-green-400 mr-2" />Professional scheduling & bracketing</li>
+                  <li className="flex items-center"><CheckCircle className="h-4 w-4 text-green-400 mr-2" />Every donation funds student educational trips</li>
+                </ul>
+                
+                <Button 
+                  onClick={() => setLocation('/signup')}
+                  className="bg-yellow-600 hover:bg-yellow-700 text-slate-900 font-bold px-8 py-4 text-lg shadow-xl"
+                  data-testid="button-support-students"
+                >
+                  <Heart className="mr-2 h-5 w-5" />
+                  Support Students & Start Managing
+                </Button>
+                
+                <p className="text-xs text-green-200 mt-4 italic">
+                  Built by coaches who understand both tournament needs and student funding challenges
+                </p>
               </div>
               
               <div className="text-center mt-6">
-                <p className="text-sm text-blue-200">
-                  💡 <strong>20% less than competitors</strong> • Communication limits scale with team size • Cancel anytime
+                <p className="text-sm text-yellow-200">
+                  💡 <strong>Revolutionary Model:</strong> Same enterprise features for everyone • Your contribution directly funds student travel experiences • Tax-deductible charitable donation
                 </p>
               </div>
             </div>

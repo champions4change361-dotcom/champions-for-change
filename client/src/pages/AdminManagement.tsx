@@ -276,9 +276,9 @@ export default function AdminManagement() {
         ];
       case 'organizer':
         return [
-          { value: 'hybrid-starter', label: 'Hybrid: Starter Team ($23/month)' },
-          { value: 'hybrid-growing', label: 'Hybrid: Growing Team ($39/month)' },
-          { value: 'hybrid-elite', label: 'Hybrid: Elite Program ($63/month)' },
+          { value: 'supporter-donation', label: 'Champions for Change Supporter ($50/month suggested)' },
+          { value: 'supporter-basic', label: 'Champions for Change Basic Supporter ($25/month)' },
+          { value: 'supporter-premium', label: 'Champions for Change Premium Supporter ($75/month)' },
           { value: 'hybrid-organizer-annual', label: 'Hybrid: Organizer Annual ($99/year)' },
           { value: 'hybrid-organizer-monthly', label: 'Hybrid: Organizer Monthly ($39/month)' },
           { value: 'tournament-organizer', label: 'Tournament Organizer ($39/month) - Legacy' },
@@ -292,9 +292,9 @@ export default function AdminManagement() {
         ];
       default:
         return [
-          { value: 'hybrid-starter', label: 'Hybrid: Starter Team ($23/month)' },
-          { value: 'hybrid-growing', label: 'Hybrid: Growing Team ($39/month)' },
-          { value: 'hybrid-elite', label: 'Hybrid: Elite Program ($63/month)' },
+          { value: 'supporter-donation', label: 'Champions for Change Supporter ($50/month suggested)' },
+          { value: 'supporter-basic', label: 'Champions for Change Basic Supporter ($25/month)' },
+          { value: 'supporter-premium', label: 'Champions for Change Premium Supporter ($75/month)' },
         ];
     }
   };
@@ -563,9 +563,9 @@ export default function AdminManagement() {
                                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
                                   data-testid="select-team-tier"
                                 >
-                                  <option value="starter">Starter Team ($23/month)</option>
-                                  <option value="growing">Growing Team ($39/month)</option>
-                                  <option value="elite">Elite Program ($63/month)</option>
+                                  <option value="supporter">Champions for Change Supporter (Pay-what-feels-right)</option>
+                                  <option value="supporter-basic">Basic Supporter ($25/month)</option>
+                                  <option value="supporter-premium">Premium Supporter ($75/month)</option>
                                 </select>
                               </div>
                             )}

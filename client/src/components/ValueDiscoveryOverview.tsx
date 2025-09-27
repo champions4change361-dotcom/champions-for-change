@@ -138,8 +138,8 @@ export default function ValueDiscoveryOverview({
 
   const getPlanName = (plan: string) => {
     switch (plan) {
-      case 'starter': return 'Starter Team';
-      case 'growing': return 'Growing Team';
+      case 'supporter': return 'Champions for Change Supporter';
+      case 'supporter-basic': return 'Basic Supporter';
       case 'elite': return 'Elite Program';
       case 'annual': return 'Annual Tournament Organizer';
       case 'monthly': return 'Multi-Tournament Organizer';
