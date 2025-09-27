@@ -4410,8 +4410,9 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
           console.log('⚠️ Could not load opponents from schedule, error:', error);
         }
 
-        // Sample NFL players for survivor pool with real opponent data
+        // Comprehensive NFL player pool for fantasy contests with salary ranges
         const nflPlayers = [
+          // TIER 1 QUARTERBACKS (Premium $9000+)
           { 
             id: "1", 
             playerName: "Patrick Mahomes", 
@@ -4451,6 +4452,77 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
             isActive: true,
             opponent: opponents["BAL"] || null
           },
+          
+          // TIER 2 QUARTERBACKS (Mid-Range $7000-8900)
+          { 
+            id: "9", 
+            playerName: "Dak Prescott", 
+            teamName: "Dallas Cowboys",
+            teamAbbreviation: "DAL", 
+            position: "QB",
+            sport: "nfl",
+            jerseyNumber: 4,
+            salary: 8800,
+            injuryStatus: "healthy",
+            isActive: true,
+            opponent: opponents["DAL"] || null
+          },
+          { 
+            id: "10", 
+            playerName: "Joe Burrow", 
+            teamName: "Cincinnati Bengals",
+            teamAbbreviation: "CIN", 
+            position: "QB",
+            sport: "nfl",
+            jerseyNumber: 9,
+            salary: 8600,
+            injuryStatus: "healthy",
+            isActive: true,
+            opponent: opponents["CIN"] || null
+          },
+          { 
+            id: "11", 
+            playerName: "Tua Tagovailoa", 
+            teamName: "Miami Dolphins",
+            teamAbbreviation: "MIA", 
+            position: "QB",
+            sport: "nfl",
+            jerseyNumber: 1,
+            salary: 7800,
+            injuryStatus: "questionable",
+            isActive: true,
+            opponent: opponents["MIA"] || null
+          },
+          
+          // VALUE QUARTERBACKS ($6000-7500)
+          { 
+            id: "12", 
+            playerName: "Geno Smith", 
+            teamName: "Seattle Seahawks",
+            teamAbbreviation: "SEA", 
+            position: "QB",
+            sport: "nfl",
+            jerseyNumber: 7,
+            salary: 7200,
+            injuryStatus: "healthy",
+            isActive: true,
+            opponent: opponents["SEA"] || null
+          },
+          { 
+            id: "13", 
+            playerName: "Baker Mayfield", 
+            teamName: "Tampa Bay Buccaneers",
+            teamAbbreviation: "TB", 
+            position: "QB",
+            sport: "nfl",
+            jerseyNumber: 6,
+            salary: 6800,
+            injuryStatus: "healthy",
+            isActive: true,
+            opponent: opponents["TB"] || null
+          },
+
+          // TIER 1 RUNNING BACKS (Premium $8500+)
           { 
             id: "4", 
             playerName: "Christian McCaffrey", 
@@ -4463,19 +4535,6 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
             injuryStatus: "healthy",
             isActive: true,
             opponent: opponents["SF"] || null
-          },
-          { 
-            id: "5", 
-            playerName: "Stefon Diggs", 
-            teamName: "Buffalo Bills",
-            teamAbbreviation: "BUF", 
-            position: "WR",
-            sport: "nfl",
-            jerseyNumber: 14,
-            salary: 8800,
-            injuryStatus: "healthy",
-            isActive: true,
-            opponent: opponents["BUF"] || null
           },
           { 
             id: "6", 
@@ -4491,6 +4550,252 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
             opponent: opponents["PHI"] || null
           },
           { 
+            id: "8", 
+            playerName: "Derrick Henry", 
+            teamName: "Baltimore Ravens",
+            teamAbbreviation: "BAL", 
+            position: "RB",
+            sport: "nfl",
+            jerseyNumber: 22,
+            salary: 8200,
+            injuryStatus: "healthy",
+            isActive: true,
+            opponent: opponents["BAL"] || null
+          },
+
+          // TIER 2 RUNNING BACKS (Mid-Range $6500-8400)
+          { 
+            id: "14", 
+            playerName: "Josh Jacobs", 
+            teamName: "Green Bay Packers",
+            teamAbbreviation: "GB", 
+            position: "RB",
+            sport: "nfl",
+            jerseyNumber: 28,
+            salary: 7800,
+            injuryStatus: "healthy",
+            isActive: true,
+            opponent: opponents["GB"] || null
+          },
+          { 
+            id: "15", 
+            playerName: "Kenneth Walker III", 
+            teamName: "Seattle Seahawks",
+            teamAbbreviation: "SEA", 
+            position: "RB",
+            sport: "nfl",
+            jerseyNumber: 9,
+            salary: 7400,
+            injuryStatus: "healthy",
+            isActive: true,
+            opponent: opponents["SEA"] || null
+          },
+          { 
+            id: "16", 
+            playerName: "Tony Pollard", 
+            teamName: "Tennessee Titans",
+            teamAbbreviation: "TEN", 
+            position: "RB",
+            sport: "nfl",
+            jerseyNumber: 1,
+            salary: 6800,
+            injuryStatus: "healthy",
+            isActive: true,
+            opponent: opponents["TEN"] || null
+          },
+          { 
+            id: "17", 
+            playerName: "James Conner", 
+            teamName: "Arizona Cardinals",
+            teamAbbreviation: "ARI", 
+            position: "RB",
+            sport: "nfl",
+            jerseyNumber: 6,
+            salary: 6600,
+            injuryStatus: "healthy",
+            isActive: true,
+            opponent: opponents["ARI"] || null
+          },
+
+          // VALUE RUNNING BACKS ($5000-6400)
+          { 
+            id: "18", 
+            playerName: "Raheem Mostert", 
+            teamName: "Miami Dolphins",
+            teamAbbreviation: "MIA", 
+            position: "RB",
+            sport: "nfl",
+            jerseyNumber: 31,
+            salary: 6200,
+            injuryStatus: "healthy",
+            isActive: true,
+            opponent: opponents["MIA"] || null
+          },
+          { 
+            id: "19", 
+            playerName: "Chuba Hubbard", 
+            teamName: "Carolina Panthers",
+            teamAbbreviation: "CAR", 
+            position: "RB",
+            sport: "nfl",
+            jerseyNumber: 30,
+            salary: 5600,
+            injuryStatus: "healthy",
+            isActive: true,
+            opponent: opponents["CAR"] || null
+          },
+
+          // TIER 1 WIDE RECEIVERS (Premium $8000+)
+          { 
+            id: "5", 
+            playerName: "Stefon Diggs", 
+            teamName: "Houston Texans",
+            teamAbbreviation: "HOU", 
+            position: "WR",
+            sport: "nfl",
+            jerseyNumber: 1,
+            salary: 8800,
+            injuryStatus: "healthy",
+            isActive: true,
+            opponent: opponents["HOU"] || null
+          },
+          { 
+            id: "20", 
+            playerName: "Tyreek Hill", 
+            teamName: "Miami Dolphins",
+            teamAbbreviation: "MIA", 
+            position: "WR",
+            sport: "nfl",
+            jerseyNumber: 10,
+            salary: 8600,
+            injuryStatus: "healthy",
+            isActive: true,
+            opponent: opponents["MIA"] || null
+          },
+          { 
+            id: "21", 
+            playerName: "CeeDee Lamb", 
+            teamName: "Dallas Cowboys",
+            teamAbbreviation: "DAL", 
+            position: "WR",
+            sport: "nfl",
+            jerseyNumber: 88,
+            salary: 8400,
+            injuryStatus: "healthy",
+            isActive: true,
+            opponent: opponents["DAL"] || null
+          },
+          { 
+            id: "22", 
+            playerName: "A.J. Brown", 
+            teamName: "Philadelphia Eagles",
+            teamAbbreviation: "PHI", 
+            position: "WR",
+            sport: "nfl",
+            jerseyNumber: 11,
+            salary: 8200,
+            injuryStatus: "healthy",
+            isActive: true,
+            opponent: opponents["PHI"] || null
+          },
+
+          // TIER 2 WIDE RECEIVERS (Mid-Range $6500-7900)
+          { 
+            id: "23", 
+            playerName: "Amon-Ra St. Brown", 
+            teamName: "Detroit Lions",
+            teamAbbreviation: "DET", 
+            position: "WR",
+            sport: "nfl",
+            jerseyNumber: 14,
+            salary: 7600,
+            injuryStatus: "healthy",
+            isActive: true,
+            opponent: opponents["DET"] || null
+          },
+          { 
+            id: "24", 
+            playerName: "DK Metcalf", 
+            teamName: "Seattle Seahawks",
+            teamAbbreviation: "SEA", 
+            position: "WR",
+            sport: "nfl",
+            jerseyNumber: 14,
+            salary: 7200,
+            injuryStatus: "healthy",
+            isActive: true,
+            opponent: opponents["SEA"] || null
+          },
+          { 
+            id: "25", 
+            playerName: "DeVonta Smith", 
+            teamName: "Philadelphia Eagles",
+            teamAbbreviation: "PHI", 
+            position: "WR",
+            sport: "nfl",
+            jerseyNumber: 6,
+            salary: 6800,
+            injuryStatus: "healthy",
+            isActive: true,
+            opponent: opponents["PHI"] || null
+          },
+          { 
+            id: "26", 
+            playerName: "Terry McLaurin", 
+            teamName: "Washington Commanders",
+            teamAbbreviation: "WAS", 
+            position: "WR",
+            sport: "nfl",
+            jerseyNumber: 17,
+            salary: 6600,
+            injuryStatus: "healthy",
+            isActive: true,
+            opponent: opponents["WAS"] || null
+          },
+
+          // VALUE WIDE RECEIVERS ($5000-6400)
+          { 
+            id: "27", 
+            playerName: "Tyler Lockett", 
+            teamName: "Seattle Seahawks",
+            teamAbbreviation: "SEA", 
+            position: "WR",
+            sport: "nfl",
+            jerseyNumber: 16,
+            salary: 6000,
+            injuryStatus: "healthy",
+            isActive: true,
+            opponent: opponents["SEA"] || null
+          },
+          { 
+            id: "28", 
+            playerName: "DJ Moore", 
+            teamName: "Chicago Bears",
+            teamAbbreviation: "CHI", 
+            position: "WR",
+            sport: "nfl",
+            jerseyNumber: 2,
+            salary: 5800,
+            injuryStatus: "healthy",
+            isActive: true,
+            opponent: opponents["CHI"] || null
+          },
+          { 
+            id: "29", 
+            playerName: "Xavier Worthy", 
+            teamName: "Kansas City Chiefs",
+            teamAbbreviation: "KC", 
+            position: "WR",
+            sport: "nfl",
+            jerseyNumber: 1,
+            salary: 5200,
+            injuryStatus: "healthy",
+            isActive: true,
+            opponent: opponents["KC"] || null
+          },
+
+          // TIER 1 TIGHT ENDS (Premium $7500+)
+          { 
             id: "7", 
             playerName: "Travis Kelce", 
             teamName: "Kansas City Chiefs",
@@ -4504,17 +4809,153 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
             opponent: opponents["KC"] || null
           },
           { 
-            id: "8", 
-            playerName: "Derrick Henry", 
+            id: "30", 
+            playerName: "Mark Andrews", 
             teamName: "Baltimore Ravens",
             teamAbbreviation: "BAL", 
-            position: "RB",
+            position: "TE",
             sport: "nfl",
-            jerseyNumber: 22,
-            salary: 8200,
+            jerseyNumber: 89,
+            salary: 7800,
             injuryStatus: "healthy",
             isActive: true,
             opponent: opponents["BAL"] || null
+          },
+          { 
+            id: "31", 
+            playerName: "George Kittle", 
+            teamName: "San Francisco 49ers",
+            teamAbbreviation: "SF", 
+            position: "TE",
+            sport: "nfl",
+            jerseyNumber: 85,
+            salary: 7600,
+            injuryStatus: "healthy",
+            isActive: true,
+            opponent: opponents["SF"] || null
+          },
+
+          // TIER 2 TIGHT ENDS (Mid-Range $5500-7400)
+          { 
+            id: "32", 
+            playerName: "Brock Bowers", 
+            teamName: "Las Vegas Raiders",
+            teamAbbreviation: "LV", 
+            position: "TE",
+            sport: "nfl",
+            jerseyNumber: 89,
+            salary: 6800,
+            injuryStatus: "healthy",
+            isActive: true,
+            opponent: opponents["LV"] || null
+          },
+          { 
+            id: "33", 
+            playerName: "Trey McBride", 
+            teamName: "Arizona Cardinals",
+            teamAbbreviation: "ARI", 
+            position: "TE",
+            sport: "nfl",
+            jerseyNumber: 85,
+            salary: 6400,
+            injuryStatus: "healthy",
+            isActive: true,
+            opponent: opponents["ARI"] || null
+          },
+          { 
+            id: "34", 
+            playerName: "Kyle Pitts", 
+            teamName: "Atlanta Falcons",
+            teamAbbreviation: "ATL", 
+            position: "TE",
+            sport: "nfl",
+            jerseyNumber: 8,
+            salary: 6000,
+            injuryStatus: "healthy",
+            isActive: true,
+            opponent: opponents["ATL"] || null
+          },
+
+          // VALUE TIGHT ENDS ($4000-5400)
+          { 
+            id: "35", 
+            playerName: "Cole Kmet", 
+            teamName: "Chicago Bears",
+            teamAbbreviation: "CHI", 
+            position: "TE",
+            sport: "nfl",
+            jerseyNumber: 85,
+            salary: 5200,
+            injuryStatus: "healthy",
+            isActive: true,
+            opponent: opponents["CHI"] || null
+          },
+          { 
+            id: "36", 
+            playerName: "Noah Fant", 
+            teamName: "Seattle Seahawks",
+            teamAbbreviation: "SEA", 
+            position: "TE",
+            sport: "nfl",
+            jerseyNumber: 87,
+            salary: 4800,
+            injuryStatus: "healthy",
+            isActive: true,
+            opponent: opponents["SEA"] || null
+          },
+
+          // DEFENSES (Special Teams/DST)
+          { 
+            id: "37", 
+            playerName: "49ers Defense", 
+            teamName: "San Francisco 49ers",
+            teamAbbreviation: "SF", 
+            position: "DST",
+            sport: "nfl",
+            jerseyNumber: null,
+            salary: 3800,
+            injuryStatus: "healthy",
+            isActive: true,
+            opponent: opponents["SF"] || null
+          },
+          { 
+            id: "38", 
+            playerName: "Ravens Defense", 
+            teamName: "Baltimore Ravens",
+            teamAbbreviation: "BAL", 
+            position: "DST",
+            sport: "nfl",
+            jerseyNumber: null,
+            salary: 3600,
+            injuryStatus: "healthy",
+            isActive: true,
+            opponent: opponents["BAL"] || null
+          },
+          { 
+            id: "39", 
+            playerName: "Bills Defense", 
+            teamName: "Buffalo Bills",
+            teamAbbreviation: "BUF", 
+            position: "DST",
+            sport: "nfl",
+            jerseyNumber: null,
+            salary: 3400,
+            injuryStatus: "healthy",
+            isActive: true,
+            opponent: opponents["BUF"] || null
+          },
+          { 
+            id: "40", 
+            playerName: "Steelers Defense", 
+            teamName: "Pittsburgh Steelers",
+            teamAbbreviation: "PIT", 
+            position: "DST",
+            sport: "nfl",
+            jerseyNumber: null,
+            salary: 3200,
+            injuryStatus: "healthy",
+            isActive: true,
+            opponent: opponents["PIT"] || null
           }
         ];
         
