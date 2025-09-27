@@ -3,6 +3,10 @@
  * Single source for all NFL data - replaces multiple scrapers
  * Champions for Change Fantasy Platform
  * 
+ * 📊 POWERED BY PRO FOOTBALL REFERENCE 📊
+ * This integration uses Pro Football Reference's comprehensive NFL statistics
+ * with proper attribution as encouraged by their data democratization policy.
+ * 
  * Data Sources:
  * - Player stats from all 32 teams
  * - Current week detection  
@@ -394,11 +398,44 @@ export class ProFootballReferenceIntegration {
         if (cells.length >= 4) {
           const playerLink = cells.eq(0).find('a');
           const playerName = playerLink.length > 0 ? playerLink.text().trim() : cells.eq(0).text().trim();
-          const teamAbbr = cells.eq(1).text().trim();
           
-          // Debug the first few rows
+          // Try multiple columns and methods to get team info
+          let teamAbbr = '';
+          
+          // Try standard team column (usually column 1)
+          let candidateTeam = cells.eq(1).text().trim();
+          if (this.isValidNFLTeam(candidateTeam)) {
+            teamAbbr = candidateTeam;
+          }
+          
+          // If not found, try looking for team links
+          if (!teamAbbr) {
+            const teamLink = cells.eq(1).find('a');
+            if (teamLink.length > 0) {
+              const href = teamLink.attr('href');
+              if (href) {
+                const match = href.match(/\/teams\/(\w+)\//);
+                if (match && this.isValidNFLTeam(match[1])) {
+                  teamAbbr = match[1];
+                }
+              }
+            }
+          }
+          
+          // If still not found, try other columns
+          if (!teamAbbr) {
+            for (let col = 2; col <= 4; col++) {
+              candidateTeam = cells.eq(col).text().trim();
+              if (this.isValidNFLTeam(candidateTeam)) {
+                teamAbbr = candidateTeam;
+                break;
+              }
+            }
+          }
+          
+          // Enhanced debug for first few rows
           if (count < 3) {
-            console.log(`🔍 Row ${count}: cells=${cells.length}, name="${playerName}", team="${teamAbbr}", valid=${this.isValidNFLTeam(teamAbbr)}`);
+            console.log(`🔍 Row ${count}: name="${playerName}", team="${teamAbbr}", cols=[${Array.from({length: Math.min(5, cells.length)}, (_, i) => `"${cells.eq(i).text().trim()}"`).join(', ')}]`);
           }
           
           if (playerName && teamAbbr && this.isValidNFLTeam(teamAbbr)) {
@@ -535,10 +572,18 @@ export class ProFootballReferenceIntegration {
    */
   private getAllNFLTeams(): string[] {
     return [
+      // Standard abbreviations
       'ARI', 'ATL', 'BAL', 'BUF', 'CAR', 'CHI', 'CIN', 'CLE',
-      'DAL', 'DEN', 'DET', 'GB', 'HOU', 'IND', 'JAX', 'KC',
-      'LV', 'LAC', 'LAR', 'MIA', 'MIN', 'NE', 'NO', 'NYG',
-      'NYJ', 'PHI', 'PIT', 'SF', 'SEA', 'TB', 'TEN', 'WAS'
+      'DAL', 'DEN', 'DET', 'HOU', 'IND', 'JAX', 'MIA', 'MIN', 
+      'NYG', 'NYJ', 'PHI', 'PIT', 'SEA', 'TEN', 'WAS', 'LAC', 'LAR',
+      // Pro Football Reference specific abbreviations
+      'GNB', 'GB',    // Green Bay Packers
+      'KAN', 'KC',    // Kansas City Chiefs  
+      'LVR', 'LV',    // Las Vegas Raiders
+      'NWE', 'NE',    // New England Patriots
+      'NOR', 'NO',    // New Orleans Saints
+      'SFO', 'SF',    // San Francisco 49ers
+      'TAM', 'TB'     // Tampa Bay Buccaneers
     ];
   }
 
@@ -554,17 +599,24 @@ export class ProFootballReferenceIntegration {
    */
   private getFullTeamName(abbr: string): string {
     const teamMap: Record<string, string> = {
+      // Standard abbreviations
       'ARI': 'Arizona Cardinals', 'ATL': 'Atlanta Falcons', 'BAL': 'Baltimore Ravens',
       'BUF': 'Buffalo Bills', 'CAR': 'Carolina Panthers', 'CHI': 'Chicago Bears',
       'CIN': 'Cincinnati Bengals', 'CLE': 'Cleveland Browns', 'DAL': 'Dallas Cowboys',
-      'DEN': 'Denver Broncos', 'DET': 'Detroit Lions', 'GB': 'Green Bay Packers',
-      'HOU': 'Houston Texans', 'IND': 'Indianapolis Colts', 'JAX': 'Jacksonville Jaguars',
-      'KC': 'Kansas City Chiefs', 'LV': 'Las Vegas Raiders', 'LAC': 'Los Angeles Chargers',
-      'LAR': 'Los Angeles Rams', 'MIA': 'Miami Dolphins', 'MIN': 'Minnesota Vikings',
-      'NE': 'New England Patriots', 'NO': 'New Orleans Saints', 'NYG': 'New York Giants',
-      'NYJ': 'New York Jets', 'PHI': 'Philadelphia Eagles', 'PIT': 'Pittsburgh Steelers',
-      'SF': 'San Francisco 49ers', 'SEA': 'Seattle Seahawks', 'TB': 'Tampa Bay Buccaneers',
-      'TEN': 'Tennessee Titans', 'WAS': 'Washington Commanders'
+      'DEN': 'Denver Broncos', 'DET': 'Detroit Lions', 'HOU': 'Houston Texans',
+      'IND': 'Indianapolis Colts', 'JAX': 'Jacksonville Jaguars', 'MIA': 'Miami Dolphins',
+      'MIN': 'Minnesota Vikings', 'NYG': 'New York Giants', 'NYJ': 'New York Jets',
+      'PHI': 'Philadelphia Eagles', 'PIT': 'Pittsburgh Steelers', 'SEA': 'Seattle Seahawks',
+      'TEN': 'Tennessee Titans', 'WAS': 'Washington Commanders', 'LAC': 'Los Angeles Chargers',
+      'LAR': 'Los Angeles Rams',
+      // Pro Football Reference variations
+      'GNB': 'Green Bay Packers', 'GB': 'Green Bay Packers',
+      'KAN': 'Kansas City Chiefs', 'KC': 'Kansas City Chiefs',
+      'LVR': 'Las Vegas Raiders', 'LV': 'Las Vegas Raiders', 
+      'NWE': 'New England Patriots', 'NE': 'New England Patriots',
+      'NOR': 'New Orleans Saints', 'NO': 'New Orleans Saints',
+      'SFO': 'San Francisco 49ers', 'SF': 'San Francisco 49ers',
+      'TAM': 'Tampa Bay Buccaneers', 'TB': 'Tampa Bay Buccaneers'
     };
 
     return teamMap[abbr.toUpperCase()] || `${abbr} Team`;
