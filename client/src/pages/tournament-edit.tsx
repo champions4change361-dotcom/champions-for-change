@@ -95,7 +95,7 @@ export default function TournamentEditPage() {
   // Update tournament mutation
   const updateMutation = useMutation({
     mutationFn: async (updates: any) => {
-      return await apiRequest('PUT', `/api/tournaments/${id}`, updates);
+      return await apiRequest(`/api/tournaments/${id}`, 'PUT', updates);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/tournaments', id] });
