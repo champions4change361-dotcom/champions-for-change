@@ -33,9 +33,10 @@ export function setupSecurity(app: express.Application) {
   }));
 
   // 2. Rate Limiting - Multiple tiers for different endpoints
+  // More generous limits for development/testing
   const generalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 1000, // Limit each IP to 1000 requests per windowMs
+    max: 5000, // Increased from 1000 for testing
     message: {
       error: 'Too many requests from this IP, please try again later.',
       retryAfter: '15 minutes'
@@ -46,7 +47,7 @@ export function setupSecurity(app: express.Application) {
 
   const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 20, // Limit auth attempts
+    max: 100, // Increased from 20 for testing
     message: {
       error: 'Too many authentication attempts, please try again later.',
       retryAfter: '15 minutes'
@@ -57,7 +58,7 @@ export function setupSecurity(app: express.Application) {
 
   const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 500, // Limit API calls
+    max: 2500, // Increased from 500 for testing
     message: {
       error: 'Too many API requests, please try again later.',
       retryAfter: '15 minutes'
