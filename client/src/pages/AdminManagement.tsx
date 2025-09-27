@@ -711,15 +711,19 @@ export default function AdminManagement() {
                   <div className="space-y-4">
                     {Array.isArray(users) && users.length ? (
                       users.map((user: any) => (
-                        <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <h4 className="font-semibold">{user.firstName} {user.lastName}</h4>
-                            <p className="text-sm text-slate-600">{user.email}</p>
+                        <div key={user.id} className="p-4 border rounded-lg space-y-3">
+                          <div className="space-y-1">
+                            <h4 className="font-semibold text-slate-900">{user.firstName} {user.lastName}</h4>
+                            <p className="text-sm text-slate-600 break-all">{user.email}</p>
                             <p className="text-xs text-slate-500">{user.organizationName}</p>
                           </div>
-                          <div className="flex space-x-2">
-                            <Badge variant="outline">{user.complianceRole || user.userRole}</Badge>
-                            <Badge variant="secondary">{user.subscriptionPlan}</Badge>
+                          <div className="flex flex-wrap gap-2">
+                            <Badge variant="outline" className="text-xs">
+                              {user.complianceRole || user.userRole}
+                            </Badge>
+                            <Badge variant="secondary" className="text-xs">
+                              {user.subscriptionPlan}
+                            </Badge>
                           </div>
                         </div>
                       ))
