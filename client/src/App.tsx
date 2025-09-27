@@ -189,7 +189,6 @@ function AuthenticatedRoutes() {
         <Route path="/webpage-builder" component={AdvancedPageBuilder} />
         <Route path="/modular-builder" component={EnhancedModularBuilder} />
         <Route path="/page-manager" component={PageManager} />
-        <Route path="/corporate-competitions" component={CorporateCompetitions} />
         <Route path="/athlete-analytics" component={() => <AthleteAnalytics isCoachView={true} />} />
         <Route path="/corporate-analytics" component={() => <CorporateAnalytics isPublic={true} />} />
 
