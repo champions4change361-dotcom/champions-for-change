@@ -46,18 +46,6 @@ interface FantasyLeague {
   status: string;
 }
 
-interface ProfessionalPlayer {
-  id: string;
-  playerName: string;
-  teamName: string;
-  teamAbbreviation: string;
-  position: string;
-  sport: string;
-  jerseyNumber?: number;
-  salary: number;
-  injuryStatus: string;
-  isActive: boolean;
-}
 
 export default function FantasyTournaments() {
   const [showCreateLeague, setShowCreateLeague] = useState(false);
@@ -66,7 +54,6 @@ export default function FantasyTournaments() {
   
   const { fantasyUser, isFantasyAuthenticated, loginFantasyUser } = useFantasyAuth();
   const [location, setLocation] = useLocation();
-  const [selectedSport, setSelectedSport] = useState("nfl");
   const [selectedFormat, setSelectedFormat] = useState("survivor");
 
   // Fetch Fantasy system status
@@ -89,11 +76,6 @@ export default function FantasyTournaments() {
     queryKey: ["/api/fantasy/leagues"],
   });
 
-  // Fetch professional players by sport
-  const { data: professionalPlayers, isLoading: playersLoading } = useQuery<{ success: boolean; players: ProfessionalPlayer[]; count: number }>({
-    queryKey: ["/api/fantasy/players/sport", selectedSport],
-    enabled: !!selectedSport,
-  });
 
   if (statusLoading) {
     return (
@@ -579,62 +561,6 @@ export default function FantasyTournaments() {
         </Card>
       )}
 
-      {/* Professional Players Display */}
-      {professionalPlayers && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Users className="w-5 h-5" />
-              <span>{selectedSport.toUpperCase()} Professional Players</span>
-            </CardTitle>
-            <CardDescription>
-              Sample professional athletes from {selectedSport.toUpperCase()} for demo purposes
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {playersLoading ? (
-              <div className="text-center py-4">
-                <div className="animate-spin w-6 h-6 border-4 border-primary border-t-transparent rounded-full mx-auto" />
-                <p className="text-sm text-muted-foreground mt-2">Loading players...</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {professionalPlayers.players.slice(0, 8).map((player) => (
-                  <Card key={player.id} className="border hover:border-blue-300 transition-colors">
-                    <CardContent className="p-4">
-                      <div className="text-center space-y-2">
-                        <h3 className="font-bold">{player.playerName}</h3>
-                        <div className="flex justify-center space-x-2">
-                          <Badge variant="outline">{player.teamAbbreviation}</Badge>
-                          <Badge variant="secondary">{player.position}</Badge>
-                        </div>
-                        {player.jerseyNumber && (
-                          <p className="text-sm text-muted-foreground">#{player.jerseyNumber}</p>
-                        )}
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm font-medium">Salary:</span>
-                          <span className="text-green-600 font-bold">${player.salary}</span>
-                        </div>
-                        <Badge variant={player.injuryStatus === "healthy" ? "default" : "destructive"}>
-                          {player.injuryStatus.toUpperCase()}
-                        </Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-            
-            {professionalPlayers && professionalPlayers.players.length > 8 && (
-              <div className="text-center mt-4">
-                <p className="text-sm text-muted-foreground">
-                  Showing 8 of {professionalPlayers.count} professional players
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
 
       {/* Key Features */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
