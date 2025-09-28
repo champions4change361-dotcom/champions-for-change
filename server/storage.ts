@@ -908,6 +908,29 @@ export interface IStorage {
   getGame(id: string, user: SecureUserContext): Promise<any>;
   getPractice(id: string, user: SecureUserContext): Promise<any>;
   getAcademicCompetition(id: string, user: SecureUserContext): Promise<any>;
+
+  // Health Communication methods - RBAC Protected
+  getCoachPlayerHealthStatus(userId: string): Promise<any[]>;
+  getCoachHealthAlerts(userId: string): Promise<any[]>;
+  getCoachTrainerCommunications(userId: string): Promise<any[]>;
+  getTrainerStudents(userId: string): Promise<any[]>;
+  getTrainerActiveAlerts(userId: string): Promise<any[]>;
+  getTrainerPendingClearances(userId: string): Promise<any[]>;
+  getTrainerCoachCommunications(userId: string): Promise<any[]>;
+  getHealthCommunicationThreads(userId: string): Promise<any[]>;
+  verifyThreadAccess(userId: string, threadId: string): Promise<boolean>;
+  getHealthCommunicationMessages(threadId: string): Promise<any[]>;
+  createHealthCommunicationMessage(message: any): Promise<any>;
+  createHealthAlert(alert: any): Promise<any>;
+  ensureHealthCommunicationThread(data: any): Promise<any>;
+  updatePlayerHealthStatus(data: any): Promise<any>;
+
+  // Scheduling and Conflict Detection methods - RBAC Protected
+  getUnresolvedConflicts(user: SecureUserContext): Promise<any[]>;
+  getTeamsByCoach(coachId: string, user: SecureUserContext): Promise<any[]>;
+  getGamesByDateRange(startDate: string, endDate: string, user: SecureUserContext): Promise<any[]>;
+  getPracticesByDateRange(startDate: string, endDate: string, user: SecureUserContext): Promise<any[]>;
+  getFacilityReservationsByDateRange(startDate: string, endDate: string, user: SecureUserContext): Promise<any[]>;
 }
 
 export class DbStorage implements IStorage {

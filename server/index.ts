@@ -77,41 +77,28 @@ app.use((req, res, next) => {
   espnScoringService.startRealTimeScoring();
   console.log('✅ ESPN real-time scoring service initialized');
 
-  // 🏆 Initialize Tournament Real-Time WebSocket (after server is available)
-  console.log('🔄 Initializing tournament real-time scoring...');
+  // 🚀 Initialize Unified WebSocket Service (after server is available)
+  console.log('🔄 Initializing comprehensive real-time WebSocket system...');
   try {
-    const socketio = await import('socket.io');
-    const io = new socketio.Server(server, {
-      cors: {
-        origin: "*",
-        methods: ["GET", "POST"]
-      }
-    });
+    const { unifiedWebSocketService } = await import('./unified-websocket-service');
     
-    // Store io instance globally for tournament services to use
-    (global as any).tournamentIO = io;
+    // Initialize unified service with the server
+    unifiedWebSocketService.initialize(server);
     
-    io.on('connection', (socket) => {
-      console.log('🔗 Tournament client connected:', socket.id);
-      
-      socket.on('join-tournament', (tournamentId: string) => {
-        socket.join(`tournament-${tournamentId}`);
-        console.log(`📡 Client joined tournament ${tournamentId}`);
-      });
-      
-      socket.on('leave-tournament', (tournamentId: string) => {
-        socket.leave(`tournament-${tournamentId}`);
-        console.log(`📡 Client left tournament ${tournamentId}`);
-      });
-      
-      socket.on('disconnect', () => {
-        console.log('🔌 Tournament client disconnected:', socket.id);
-      });
-    });
+    // Store unified service globally for other services to use
+    (global as any).unifiedWebSocketService = unifiedWebSocketService;
     
-    console.log('✅ Tournament real-time scoring WebSocket initialized on main server');
+    console.log('✅ Unified WebSocket service initialized - all modules ready for real-time updates');
+    console.log('📡 Available real-time features:');
+    console.log('   • Tournament live scoring and bracket progression');
+    console.log('   • Athletic trainer health alerts and communications'); 
+    console.log('   • Smart scheduling conflict detection and notifications');
+    console.log('   • Academic competition real-time results');
+    console.log('   • Cross-module RBAC-compliant event broadcasting');
+    
   } catch (error) {
-    console.error('❌ Failed to initialize tournament WebSocket:', error);
+    console.error('❌ Failed to initialize unified WebSocket service:', error);
+    console.error('⚠️  Platform will continue without real-time features');
   }
 
   // Initialize Pro Football Reference Integration (replaces all NFL scrapers)

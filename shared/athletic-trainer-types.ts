@@ -5,15 +5,44 @@
 
 export interface AthleteProfile {
   id: string;
-  personalInfo: {
+  // Core roster information aligned with athleteRoster table
+  trainerId: string;
+  athleteId: string;
+  organizationId: string;
+  sport?: string;
+  season?: string;
+  grade?: string;
+  status: 'active' | 'injured' | 'cleared' | 'suspended';
+  dateAdded: Date | string;
+  lastUpdated: Date | string;
+  
+  // Expanded contact information
+  parentContacts?: Array<{
+    name: string;
+    relationship: string;
+    phone: string;
+    email: string;
+    isPrimary: boolean;
+  }>;
+  
+  // Medical alerts from database structure
+  medicalAlerts: Array<{
+    condition: string;
+    severity: "low" | "medium" | "high" | "critical";
+    description: string;
+    medications?: string[];
+    emergencyProcedure?: string;
+  }>;
+  
+  // Extended profile information for compatibility
+  personalInfo?: {
     firstName: string;
     lastName: string;
     dateOfBirth?: string;
     gender?: string;
-    grade?: string;
     studentId?: string;
   };
-  contactInfo: {
+  contactInfo?: {
     email?: string;
     phone?: string;
     emergencyContact?: {
@@ -28,7 +57,7 @@ export interface AthleteProfile {
       email?: string;
     };
   };
-  sportsInfo: {
+  sportsInfo?: {
     primarySport?: string;
     secondarySports?: string[];
     position?: string;
@@ -37,8 +66,7 @@ export interface AthleteProfile {
     lastPhysicalDate?: string;
     nextPhysicalDue?: string;
   };
-  healthInfo: {
-    medicalAlerts: string[];
+  healthInfo?: {
     currentInjuries: string[];
     injuryHistory: Array<{
       date: string;
@@ -53,12 +81,12 @@ export interface AthleteProfile {
     lastRiskAssessment?: string;
     riskScore?: number;
   };
-  performanceTracking: {
+  performanceTracking?: {
     fitnessLevel?: 'excellent' | 'good' | 'fair' | 'poor';
     lastAssessmentDate?: string;
     notes?: string;
   };
-  complianceInfo: {
+  complianceInfo?: {
     hipaaConsent: boolean;
     ferpaConsent: boolean;
     lastConsentUpdate?: string;
@@ -83,6 +111,7 @@ export interface SchedulingSlot {
 export interface EquipmentItem {
   id: string;
   name: string;
+  itemName: string; // Aligned with database schema
   category: 'treatment' | 'diagnostic' | 'safety' | 'rehabilitation' | 'emergency';
   serialNumber?: string;
   status: 'available' | 'in_use' | 'maintenance' | 'broken' | 'retired';
@@ -91,6 +120,12 @@ export interface EquipmentItem {
   location: string;
   assignedTo?: string;
   notes?: string;
+  // Additional properties for inventory tracking
+  current?: number; // Current stock level
+  minimum?: number; // Minimum stock level
+  organizationId: string;
+  managedBy: string;
+  lastUpdated: Date | null;
 }
 
 export interface InventoryItem {
@@ -110,6 +145,54 @@ export interface InventoryItem {
     message: string;
     date: string;
   }>;
+}
+
+// Health Communication interface with frontend-expected properties
+export interface HealthCommunication {
+  id: string;
+  priority: "low" | "normal" | "high" | "urgent" | null;
+  message: string;
+  fromUserId: string;
+  toUserId: string;
+  athleteId: string | null;
+  messageType: "injury_report" | "clearance_update" | "parent_notification" | "coach_update" | "doctor_communication" | "general_message" | "emergency_alert";
+  subject: string;
+  isRead: boolean;
+  requiresResponse: boolean;
+  responseReceived: boolean;
+  sentAt: Date | null;
+  readAt: Date | null;
+  respondedAt: Date | null;
+  // Frontend-expected properties
+  unread: boolean;
+  from: string;
+  preview: string;
+  time: string;
+}
+
+// Equipment Check interface aligned with database schema
+export interface EquipmentCheckInterface {
+  id: string;
+  organizationId: string;
+  performedBy: string;
+  equipmentType: "aed" | "emergency_bags" | "ice_machines" | "treatment_tables" | "rehabilitation_equipment" | "protective_gear" | "emergency_phones" | "first_aid_kits";
+  equipmentId: string | null;
+  checkType: "daily" | "weekly" | "monthly" | "annual" | "post_incident" | "maintenance";
+  checkDate: Date | null;
+  nextCheckDue: Date | null;
+  status: "passed" | "failed" | "needs_maintenance" | "needs_replacement";
+  issues: Array<{
+    issue: string;
+    severity: "low" | "medium" | "high" | "critical";
+    actionTaken?: string;
+    followUpRequired: boolean;
+  }> | null;
+  notes: string | null;
+  createdAt: Date | null;
+  // Frontend-expected properties
+  equipment: string; // Maps to equipmentId for display
+  type: string; // Maps to checkType
+  due: string; // Maps to nextCheckDue formatted
 }
 
 export interface AthleticTrainerService {

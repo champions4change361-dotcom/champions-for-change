@@ -8,7 +8,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { AthleteRoster, TrainerCommunication, MedicalSupply, EquipmentCheck, InsertAthleteRoster } from "@shared/schema";
 import { insertAthleteRosterSchema } from "@shared/athleticTrainerSchema";
-import type { AthleteProfile } from "@shared/athletic-trainer-types";
+import type { AthleteProfile, HealthCommunication, EquipmentCheckInterface } from "@shared/athletic-trainer-types";
 import { z } from "zod";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -88,13 +88,13 @@ export default function AthleticTrainerDashboard() {
   });
 
   // Query for recent trainer communications - STRONGLY TYPED
-  const { data: recentMessages = [], isLoading: messagesLoading } = useQuery<TrainerCommunication[]>({
+  const { data: recentMessages = [], isLoading: messagesLoading } = useQuery<HealthCommunication[]>({
     queryKey: ["/api/athletic-trainer/communications", { limit: 5, unreadOnly: true }],
     enabled: !!user?.id
   });
 
   // Query for upcoming equipment checks - STRONGLY TYPED
-  const { data: upcomingChecks = [], isLoading: checksLoading } = useQuery<EquipmentCheck[]>({
+  const { data: upcomingChecks = [], isLoading: checksLoading } = useQuery<EquipmentCheckInterface[]>({
     queryKey: ["/api/athletic-trainer/equipment-checks", { upcoming: true, limit: 5 }],
     enabled: !!user?.id
   });
@@ -221,7 +221,7 @@ export default function AthleticTrainerDashboard() {
                     <div className="w-8 h-6 bg-slate-200 animate-pulse rounded"></div>
                   ) : (
                     <p className="text-2xl font-bold" data-testid="stat-current-injuries">
-                      {athletes.filter(athlete => athlete.healthInfo?.currentInjuries?.length > 0).length}
+                      {athletes.filter(athlete => (athlete.healthInfo?.currentInjuries?.length || 0) > 0 || (athlete.medicalAlerts?.length || 0) > 0).length}
                     </p>
                   )}
                 </div>
@@ -1188,20 +1188,20 @@ export default function AthleticTrainerDashboard() {
 
                 <div className="space-y-2">
                   {lowStockItems.map((item, index) => (
-                    <Card key={index} className={`${item.status === 'critical' ? 'border-red-200 bg-red-50' : 'border-orange-200 bg-orange-50'}`}>
+                    <Card key={index} className={`${item.isLowStock || item.needsReorder ? 'border-red-200 bg-red-50' : 'border-orange-200 bg-orange-50'}`}>
                       <CardContent className="p-4">
                         <div className="flex justify-between items-center">
                           <div>
-                            <h4 className="font-medium">{item.item}</h4>
+                            <h4 className="font-medium">{item.itemName}</h4>
                             <p className="text-sm text-slate-600">
-                              Current: {item.current} | Minimum: {item.minimum}
+                              Current: {item.currentStock} | Minimum: {item.minimumStock}
                             </p>
                           </div>
                           <div className="flex items-center space-x-2">
-                            <Badge variant={item.status === 'critical' ? 'destructive' : 'secondary'}>
-                              {item.status === 'critical' ? 'Critical' : 'Low Stock'}
+                            <Badge variant={item.needsReorder ? 'destructive' : 'secondary'}>
+                              {item.needsReorder ? 'Critical' : 'Low Stock'}
                             </Badge>
-                            <Button size="sm" data-testid={`button-reorder-${item.item.toLowerCase().replace(' ', '-')}`}>
+                            <Button size="sm" data-testid={`button-reorder-${item.itemName.toLowerCase().replace(' ', '-')}`}>
                               Reorder
                             </Button>
                           </div>
@@ -1299,16 +1299,16 @@ export default function AthleticTrainerDashboard() {
 
                 <div className="space-y-2">
                   {upcomingChecks.map((check, index) => (
-                    <Card key={index} className={check.status === 'pending' ? 'border-orange-200 bg-orange-50' : ''}>
+                    <Card key={index} className={check.status === 'needs_maintenance' ? 'border-orange-200 bg-orange-50' : ''}>
                       <CardContent className="p-4">
                         <div className="flex justify-between items-center">
                           <div>
-                            <h4 className="font-medium">{check.equipment}</h4>
-                            <p className="text-sm text-slate-600">{check.type}</p>
-                            <p className="text-sm text-slate-600">Due: {check.due}</p>
+                            <h4 className="font-medium">{check.equipmentId || check.equipmentType}</h4>
+                            <p className="text-sm text-slate-600">{check.checkType}</p>
+                            <p className="text-sm text-slate-600">Due: {check.nextCheckDue ? new Date(check.nextCheckDue).toLocaleDateString() : 'N/A'}</p>
                           </div>
                           <div className="flex items-center space-x-2">
-                            <Badge variant={check.status === 'pending' ? 'secondary' : 'default'}>
+                            <Badge variant={check.status === 'needs_maintenance' ? 'secondary' : 'default'}>
                               {check.status}
                             </Badge>
                             <Button size="sm" data-testid={`button-perform-check-${index}`}>
@@ -2527,7 +2527,7 @@ export default function AthleticTrainerDashboard() {
                   />
                   <FormField
                     control={createAthleteForm.control}
-                    name="status"
+                    name="grade"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Status</FormLabel>

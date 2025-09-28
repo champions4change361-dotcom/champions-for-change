@@ -30,8 +30,12 @@ import {
   Users,
   Shield,
   Zap,
-  Medal
+  Medal,
+  Activity
 } from 'lucide-react';
+
+// ScoreIcon component
+const ScoreIcon = Activity;
 
 // Using shared Match type from schema for consistency
 type LiveMatch = Match;
@@ -87,19 +91,42 @@ export function LiveScoring({
     enabled: !!tournamentId,
   });
 
-  // WebSocket connection for real-time updates
+  // SECURITY: Enhanced WebSocket connection with authentication
   useEffect(() => {
     if (!tournamentId) return;
 
     const newSocket = io({
       path: '/socket.io',
-      transports: ['websocket', 'polling']
+      transports: ['websocket', 'polling'],
+      withCredentials: true, // SECURITY: Include credentials for authentication
+      autoConnect: false // Wait for manual connection after auth setup
+    });
+
+    // SECURITY: Handle authentication success/failure
+    newSocket.on('authenticated', (authData) => {
+      console.log('✅ WebSocket authenticated:', authData);
+      setIsConnected(true);
+      
+      // Join tournament room with proper authorization
+      newSocket.emit('join-room', {
+        room: `tournament:${tournamentId}`,
+        context: { module: 'tournaments', action: 'live_scoring' }
+      });
+    });
+
+    newSocket.on('auth_error', (error) => {
+      console.error('❌ WebSocket authentication failed:', error);
+      setIsConnected(false);
+      toast({
+        title: "Connection Failed",
+        description: "Failed to authenticate WebSocket connection",
+        variant: "destructive"
+      });
     });
 
     newSocket.on('connect', () => {
       console.log('🔗 Connected to live scoring WebSocket');
-      setIsConnected(true);
-      newSocket.emit('join-tournament', tournamentId);
+      // Connection is established, but wait for authentication
     });
 
     newSocket.on('disconnect', () => {
@@ -107,8 +134,26 @@ export function LiveScoring({
       setIsConnected(false);
     });
 
-    // Listen for score updates
-    newSocket.on('score-update', (data) => {
+    // Handle room join success/failure
+    newSocket.on('room_joined', (data) => {
+      console.log('🏆 Joined tournament room:', data);
+      toast({
+        title: "Connected",
+        description: `Connected to tournament: ${tournamentName}`,
+      });
+    });
+
+    newSocket.on('room_error', (error) => {
+      console.error('❌ Failed to join tournament room:', error);
+      toast({
+        title: "Access Denied",
+        description: `Cannot access tournament: ${error.reason || 'Insufficient permissions'}`,
+        variant: "destructive"
+      });
+    });
+
+    // SECURITY: Listen for standardized event names with backward compatibility
+    newSocket.on('score_updated', (data) => {
       console.log('📊 Received score update:', data);
       // Invalidate queries to refresh match data
       queryClient.invalidateQueries({ queryKey: ['/api/tournaments', tournamentId, 'matches'] });
@@ -118,8 +163,19 @@ export function LiveScoring({
       });
     });
 
-    // Listen for match completion
-    newSocket.on('match-completed', (data) => {
+    // LEGACY SUPPORT: Still listen for old event names for backward compatibility
+    newSocket.on('score-update', (data) => {
+      console.log('📊 Received legacy score update:', data);
+      // Handle the same way as score_updated
+      queryClient.invalidateQueries({ queryKey: ['/api/tournaments', tournamentId, 'matches'] });
+      toast({
+        title: "Score Updated",
+        description: `Match score has been updated in real-time`,
+      });
+    });
+
+    // Listen for match completion (standardized name)
+    newSocket.on('match_completed', (data) => {
       console.log('🏆 Match completed:', data);
       queryClient.invalidateQueries({ queryKey: ['/api/tournaments', tournamentId, 'matches'] });
       toast({
@@ -128,13 +184,17 @@ export function LiveScoring({
       });
     });
 
+    // Connect and authenticate
+    newSocket.connect();
     setSocket(newSocket);
 
     return () => {
-      newSocket.emit('leave-tournament', tournamentId);
-      newSocket.disconnect();
+      if (newSocket.connected) {
+        newSocket.emit('leave-room', { room: `tournament:${tournamentId}` });
+        newSocket.disconnect();
+      }
     };
-  }, [tournamentId, queryClient, toast]);
+  }, [tournamentId, queryClient, toast, tournamentName]);
 
   // Score update mutation
   const scoreUpdateMutation = useMutation({
@@ -194,8 +254,9 @@ export function LiveScoring({
     
     // Scorekeepers can only update their assigned venues
     if (userRole === 'scorekeeper') {
-      const hasVenueAccess = match.venue ? assignedVenues.includes(match.venue) : true;
-      return hasVenueAccess;
+      // For now, allow scorekeeper to update any match in their assigned venues
+      // Could add venue property to match schema in future
+      return assignedVenues.length === 0 || assignedVenues.includes('default');
     }
     
     return false;
@@ -215,9 +276,9 @@ export function LiveScoring({
     // Determine winner if match is completed
     if (matchStatus === 'completed') {
       if (scoreData.team1Score! > scoreData.team2Score!) {
-        scoreData.winner = match.team1;
+        scoreData.winner = match.team1 || undefined;
       } else if (scoreData.team2Score! > scoreData.team1Score!) {
-        scoreData.winner = match.team2;
+        scoreData.winner = match.team2 || undefined;
       }
       // No winner set for ties
     }
@@ -234,7 +295,7 @@ export function LiveScoring({
     
     const performanceContext = {
       matchId: match.id,
-      result: targetParticipant === 'team1' 
+      result: targetParticipant === 'participant1' || targetParticipant === 'team1'
         ? `${match.team1Score || 0} points`
         : `${match.team2Score || 0} points`,
       placement: determineCurrentPlacement(match, targetParticipant)
@@ -267,12 +328,16 @@ export function LiveScoring({
     const score1 = match.team1Score || 0;
     const score2 = match.team2Score || 0;
     
-    if (participant === 'team1') return score1 > score2 ? 1 : 2;
+    if (participant === 'participant1' || participant === 'team1') return score1 > score2 ? 1 : 2;
     return score2 > score1 ? 1 : 2;
   };
 
-  const formatScore = (score?: number) => {
-    return score?.toString() || '0';
+  const formatScore = (score?: number, scoreType?: string, scoreUnit?: string) => {
+    const baseScore = score?.toString() || '0';
+    if (scoreUnit) {
+      return `${baseScore} ${scoreUnit}`;
+    }
+    return baseScore;
   };
 
   const getStatusColor = (status: string) => {
@@ -362,18 +427,18 @@ export function LiveScoring({
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <ScoreIcon className="h-4 w-4" />
-                    <span className="font-medium text-sm">{match.eventName}</span>
+                    <span className="font-medium text-sm">Match {match.round}-{match.position}</span>
                   </div>
                   
                   <div className="flex items-center gap-2">
-                    <Badge variant={match.isLive ? "default" : "secondary"} className="text-xs">
-                      {match.isLive ? (
+                    <Badge variant={match.status === 'in-progress' ? "default" : "secondary"} className="text-xs">
+                      {match.status === 'in-progress' ? (
                         <>
                           <Play className="h-3 w-3 mr-1" />
                           LIVE
                         </>
                       ) : (
-                        match.matchStatus.toUpperCase()
+                        match.status.toUpperCase()
                       )}
                     </Badge>
                   </div>
@@ -381,7 +446,7 @@ export function LiveScoring({
                 
                 <div className="flex items-center gap-2 text-xs text-gray-600">
                   <MapPin className="h-3 w-3" />
-                  {match.venue} - {match.field}
+                  {match.bracket ? `${match.bracket} bracket` : 'Tournament match'}
                 </div>
               </CardHeader>
               
@@ -389,17 +454,17 @@ export function LiveScoring({
                 {/* Participants and Scores */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="font-medium">{match.participant1Name}</span>
+                    <span className="font-medium">{match.team1 || 'TBD'}</span>
                     <span className="text-lg font-bold text-blue-600">
-                      {formatScore(match.participant1Score, match.scoreType, match.scoreUnit)}
+                      {formatScore(match.team1Score || 0)}
                     </span>
                   </div>
                   
-                  {match.participant2Name && (
+                  {match.team2 && (
                     <div className="flex items-center justify-between">
-                      <span className="font-medium">{match.participant2Name}</span>
+                      <span className="font-medium">{match.team2}</span>
                       <span className="text-lg font-bold text-green-600">
-                        {formatScore(match.participant2Score || 0, match.scoreType, match.scoreUnit)}
+                        {formatScore(match.team2Score || 0)}
                       </span>
                     </div>
                   )}
@@ -423,7 +488,7 @@ export function LiveScoring({
                         variant="outline"
                         size="sm"
                         onClick={() => {
-                          setTargetParticipant('participant1');
+                          setTargetParticipant('team1');
                           setShowMessagePanel(true);
                           setSelectedMatch(match);
                         }}
@@ -445,34 +510,34 @@ export function LiveScoring({
       {selectedMatch && !showMessagePanel && (
         <Card>
           <CardHeader>
-            <CardTitle>Update Score - {selectedMatch.eventName}</CardTitle>
+            <CardTitle>Update Score - Match {selectedMatch.round}-{selectedMatch.position}</CardTitle>
             <CardDescription>
-              {selectedMatch.venue} - {selectedMatch.field}
+              {selectedMatch.bracket ? `${selectedMatch.bracket} bracket` : 'Tournament match'}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <Label>{selectedMatch.participant1Name}</Label>
+                <Label>{selectedMatch.team1 || 'Team 1'}</Label>
                 <Input
                   type="number"
                   step="0.01"
                   value={newScore1}
                   onChange={(e) => setNewScore1(e.target.value)}
-                  placeholder={`Current: ${selectedMatch.participant1Score} ${selectedMatch.scoreUnit}`}
+                  placeholder={`Current: ${selectedMatch.team1Score || 0}`}
                   data-testid="input-score-1"
                 />
               </div>
               
-              {selectedMatch.participant2Name && (
+              {selectedMatch.team2 && (
                 <div>
-                  <Label>{selectedMatch.participant2Name}</Label>
+                  <Label>{selectedMatch.team2}</Label>
                   <Input
                     type="number"
                     step="0.01"
                     value={newScore2}
                     onChange={(e) => setNewScore2(e.target.value)}
-                    placeholder={`Current: ${selectedMatch.participant2Score} ${selectedMatch.scoreUnit}`}
+                    placeholder={`Current: ${selectedMatch.team2Score || 0}`}
                     data-testid="input-score-2"
                   />
                 </div>
@@ -486,10 +551,9 @@ export function LiveScoring({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="scheduled">Scheduled</SelectItem>
-                  <SelectItem value="in_progress">In Progress</SelectItem>
+                  <SelectItem value="upcoming">Upcoming</SelectItem>
+                  <SelectItem value="in-progress">In Progress</SelectItem>
                   <SelectItem value="completed">Completed</SelectItem>
-                  <SelectItem value="postponed">Postponed</SelectItem>
                   <SelectItem value="cancelled">Cancelled</SelectItem>
                 </SelectContent>
               </Select>
@@ -545,9 +609,9 @@ export function LiveScoring({
                     <SelectValue placeholder="Select participant" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="participant1">{selectedMatch.participant1Name}</SelectItem>
-                    {selectedMatch.participant2Name && (
-                      <SelectItem value="participant2">{selectedMatch.participant2Name}</SelectItem>
+                    <SelectItem value="participant1">{selectedMatch.team1 || 'Team 1'}</SelectItem>
+                    {selectedMatch.team2 && (
+                      <SelectItem value="participant2">{selectedMatch.team2}</SelectItem>
                     )}
                   </SelectContent>
                 </Select>
@@ -577,7 +641,7 @@ export function LiveScoring({
                 onChange={(e) => setMessageContent(e.target.value)}
                 placeholder={
                   messageType === 'encouragement' 
-                    ? "Great job! Keep working on technique - it's your first year and we can work on it later."
+                    ? "Great job! Keep up the great work!"
                     : "Type your message here..."
                 }
                 rows={3}
@@ -594,10 +658,10 @@ export function LiveScoring({
               <Alert>
                 <Medal className="h-4 w-4" />
                 <AlertDescription>
-                  <strong>Performance Context:</strong> {selectedMatch.eventName} - Current result: {' '}
+                  <strong>Performance Context:</strong> Match {selectedMatch.round}-{selectedMatch.position} - Current result: {' '}
                   {targetParticipant === 'participant1' 
-                    ? formatScore(selectedMatch.participant1Score, selectedMatch.scoreType, selectedMatch.scoreUnit)
-                    : formatScore(selectedMatch.participant2Score || 0, selectedMatch.scoreType, selectedMatch.scoreUnit)
+                    ? formatScore(selectedMatch.team1Score || 0)
+                    : formatScore(selectedMatch.team2Score || 0)
                   } (Currently in {determineCurrentPlacement(selectedMatch, targetParticipant)} place)
                 </AlertDescription>
               </Alert>

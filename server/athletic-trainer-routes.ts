@@ -102,6 +102,22 @@ export function registerAthleticTrainerRoutes(app: Express): void {
 
         const profile = await athleticTrainerService.createAthleteProfile(athleteProfileData, user);
         
+        // Broadcast real-time athlete profile creation
+        const unifiedService = (global as any).unifiedWebSocketService;
+        if (unifiedService) {
+          await unifiedService.publishAthleticTrainerEvent(
+            'athlete_profile_created',
+            { 
+              athleteId: profile.id,
+              athleteName: `${profile.personalInfo.firstName} ${profile.personalInfo.lastName}`,
+              sport: profile.sportsInfo?.primarySport,
+              clearanceStatus: profile.sportsInfo?.clearanceStatus
+            },
+            user.organizationId || 'default',
+            user.id
+          );
+        }
+        
         res.status(201).json(profile);
       } catch (error: any) {
         console.error("Create athlete profile error:", error);

@@ -87,15 +87,34 @@ export function TournamentDashboard({ tournamentId }: TournamentDashboardProps) 
   useEffect(() => {
     if (!finalTournamentId) return;
 
+    // SECURITY: Enhanced WebSocket connection with authentication
     const newSocket = io({
       path: '/socket.io',
-      transports: ['websocket', 'polling']
+      transports: ['websocket', 'polling'],
+      withCredentials: true, // SECURITY: Include credentials for authentication
+      autoConnect: false // Wait for manual connection after auth setup
+    });
+
+    // SECURITY: Handle authentication success/failure
+    newSocket.on('authenticated', (authData) => {
+      console.log('✅ Tournament WebSocket authenticated:', authData);
+      setIsConnected(true);
+      
+      // Join tournament room with proper authorization
+      newSocket.emit('join-room', {
+        room: `tournament:${finalTournamentId}`,
+        context: { module: 'tournaments', action: 'dashboard' }
+      });
+    });
+
+    newSocket.on('auth_error', (error) => {
+      console.error('❌ Tournament WebSocket authentication failed:', error);
+      setIsConnected(false);
     });
 
     newSocket.on('connect', () => {
       console.log('🔗 Connected to tournament WebSocket');
-      setIsConnected(true);
-      newSocket.emit('join-tournament', finalTournamentId);
+      // Connection is established, but wait for authentication
     });
 
     newSocket.on('disconnect', () => {
@@ -103,9 +122,33 @@ export function TournamentDashboard({ tournamentId }: TournamentDashboardProps) 
       setIsConnected(false);
     });
 
-    // Listen for real-time tournament updates
+    // Handle room join success/failure
+    newSocket.on('room_joined', (data) => {
+      console.log('🏆 Joined tournament room:', data);
+    });
+
+    newSocket.on('room_error', (error) => {
+      console.error('❌ Failed to join tournament room:', error);
+    });
+
+    // SECURITY: Listen for standardized event names
+    newSocket.on('score_updated', (data) => {
+      console.log('📊 Live score update (standardized):', data);
+      setLiveUpdates(prev => [...prev.slice(-9), { type: 'score', data, timestamp: new Date() }]);
+      
+      // Invalidate relevant queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ["/api/tournaments", finalTournamentId, "matches"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/tournaments", finalTournamentId, "statistics"] });
+      
+      toast({
+        title: "Live Update",
+        description: `Match score updated: ${data.scoreUpdate?.team1Score} - ${data.scoreUpdate?.team2Score}`,
+      });
+    });
+
+    // LEGACY SUPPORT: Still listen for old event names for backward compatibility
     newSocket.on('score-update', (data) => {
-      console.log('📊 Live score update:', data);
+      console.log('📊 Live score update (legacy):', data);
       setLiveUpdates(prev => [...prev.slice(-9), { type: 'score', data, timestamp: new Date() }]);
       
       // Invalidate relevant queries to refresh data
@@ -131,8 +174,9 @@ export function TournamentDashboard({ tournamentId }: TournamentDashboardProps) 
       });
     });
 
-    newSocket.on('bracket-progression', (data) => {
-      console.log('🔄 Bracket progression:', data);
+    // Handle bracket progression (standardized)
+    newSocket.on('bracket_progressed', (data) => {
+      console.log('🔄 Bracket progression (standardized):', data);
       setLiveUpdates(prev => [...prev.slice(-9), { type: 'bracket', data, timestamp: new Date() }]);
       
       // Refresh tournament and matches data
@@ -144,18 +188,45 @@ export function TournamentDashboard({ tournamentId }: TournamentDashboardProps) 
       });
     });
 
-    newSocket.on('tournament-status', (data) => {
-      console.log('📅 Tournament status update:', data);
+    // LEGACY SUPPORT: Old bracket progression event
+    newSocket.on('bracket-progression', (data) => {
+      console.log('🔄 Bracket progression (legacy):', data);
+      setLiveUpdates(prev => [...prev.slice(-9), { type: 'bracket', data, timestamp: new Date() }]);
+      
+      // Refresh tournament and matches data
+      queryClient.invalidateQueries({ queryKey: ["/api/tournaments", finalTournamentId] });
+      
+      toast({
+        title: "Bracket Updated",
+        description: "Tournament bracket has been updated with new matches",
+      });
+    });
+
+    // Handle tournament status updates (standardized)
+    newSocket.on('tournament_status_changed', (data) => {
+      console.log('📅 Tournament status update (standardized):', data);
       setLiveUpdates(prev => [...prev.slice(-9), { type: 'status', data, timestamp: new Date() }]);
       
       queryClient.invalidateQueries({ queryKey: ["/api/tournaments", finalTournamentId] });
     });
 
+    // LEGACY SUPPORT: Old tournament status event
+    newSocket.on('tournament-status', (data) => {
+      console.log('📅 Tournament status update (legacy):', data);
+      setLiveUpdates(prev => [...prev.slice(-9), { type: 'status', data, timestamp: new Date() }]);
+      
+      queryClient.invalidateQueries({ queryKey: ["/api/tournaments", finalTournamentId] });
+    });
+
+    // Connect and authenticate
+    newSocket.connect();
     setSocket(newSocket);
 
     return () => {
-      newSocket.emit('leave-tournament', finalTournamentId);
-      newSocket.disconnect();
+      if (newSocket.connected) {
+        newSocket.emit('leave-room', { room: `tournament:${finalTournamentId}` });
+        newSocket.disconnect();
+      }
     };
   }, [finalTournamentId, queryClient, toast]);
 
@@ -286,7 +357,7 @@ export function TournamentDashboard({ tournamentId }: TournamentDashboardProps) 
                 </div>
                 <Badge className={getStatusColor(tournament.status)} data-testid="status-tournament">
                   {tournament.status === 'upcoming' ? 'Upcoming' : 
-                   tournament.status === 'in-progress' ? 'In Progress' : 'Completed'}
+                   tournament.status === 'stage-1' || tournament.status === 'stage-2' || tournament.status === 'stage-3' ? 'In Progress' : 'Completed'}
                 </Badge>
               </div>
 
@@ -312,7 +383,7 @@ export function TournamentDashboard({ tournamentId }: TournamentDashboardProps) 
                       </Button>
                     )}
                     
-                    {tournament.status === 'in-progress' && (
+                    {(tournament.status === 'stage-1' || tournament.status === 'stage-2' || tournament.status === 'stage-3') && (
                       <Button
                         variant="outline"
                         onClick={() => pauseTournamentMutation.mutate()}
@@ -547,11 +618,11 @@ export function TournamentDashboard({ tournamentId }: TournamentDashboardProps) 
               </CardHeader>
               <CardContent>
                 <ChallongeStyleBracket 
-                  tournament={{...tournament, sport: tournament.sport || 'Unknown'}} 
+                  tournament={{...tournament, sport: tournament.sport || 'Unknown', teamSize: tournament.teamSize || 0}} 
                   matches={matches.map(match => ({
                     ...match, 
-                    team1: match.team1 || undefined,
-                    team2: match.team2 || undefined
+                    team1: match.team1 || null,
+                    team2: match.team2 || null
                   }))} 
                 />
               </CardContent>
@@ -576,6 +647,7 @@ export function TournamentDashboard({ tournamentId }: TournamentDashboardProps) 
                     assignedEvents={[]}
                     assignedVenues={[]}
                     tournamentName={tournament.name}
+                    tournamentId={finalTournamentId!}
                   />
                 ) : (
                   <Alert>

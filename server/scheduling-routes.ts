@@ -119,6 +119,27 @@ router.post('/calendar/events',
       // All event types are now supported natively in both create and update operations
       const createdEvent = await calendarManagementService.createEvent(eventData, req.user!);
 
+      // Broadcast real-time schedule update using unified WebSocket service
+      const unifiedService = (global as any).unifiedWebSocketService;
+      if (unifiedService) {
+        await unifiedService.publishSchedulingEvent(
+          'schedule_event_created',
+          {
+            eventId: createdEvent.id,
+            title: createdEvent.title,
+            eventType: createdEvent.eventType,
+            startDateTime: createdEvent.startDateTime,
+            endDateTime: createdEvent.endDateTime,
+            location: createdEvent.location,
+            visibility: createdEvent.visibility,
+            importance: createdEvent.importance,
+            attendees: createdEvent.attendees
+          },
+          req.user!.organizationId || 'default',
+          req.user!.id
+        );
+      }
+
       res.status(201).json({
         success: true,
         data: createdEvent
@@ -382,8 +403,7 @@ router.get('/conflicts',
         {
           includeResolved: status === 'detected' ? false : includeResolved === 'true',
           severityFilter: severityFilter ? (Array.isArray(severityFilter) ? severityFilter as any[] : [severityFilter]) : undefined,
-          typeFilter: typeFilter ? (Array.isArray(typeFilter) ? typeFilter as string[] : [typeFilter as string]) : undefined,
-          status: status as string
+          typeFilter: typeFilter ? (Array.isArray(typeFilter) ? typeFilter as string[] : [typeFilter as string]) : undefined
         }
       );
 
@@ -570,7 +590,7 @@ router.get('/facilities',
       
       if (req.query['availability.date'] && req.query['availability.startTime'] && req.query['availability.endTime']) {
         filters.availability = {
-          date: (req.query['availability.date'] as Date).toISOString().split('T')[0],
+          date: new Date(req.query['availability.date'] as string).toISOString().split('T')[0],
           startTime: req.query['availability.startTime'] as string,
           endTime: req.query['availability.endTime'] as string
         };

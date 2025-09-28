@@ -549,7 +549,7 @@ export class AcademicCompetitionService {
       
       const dashboard: AcademicDashboard = {
         userId: user.id,
-        userRole: user.role || 'user',
+        userRole: user.userRole || 'user',
         dashboardData
       };
 
@@ -678,7 +678,7 @@ export class AcademicCompetitionService {
       ]
     };
 
-    const userRole = user.role || 'user';
+    const userRole = user.userRole || 'user';
     return roleActions[userRole as keyof typeof roleActions] || [];
   }
 

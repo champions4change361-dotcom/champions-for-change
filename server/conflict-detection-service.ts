@@ -364,9 +364,9 @@ export class ConflictDetectionService {
       await logComplianceAction(
         user.id,
         'data_modification',
-        'schedule_conflict',
+        'administrative_data',
         conflictId,
-        { ip: 'system' } as any,
+        undefined,
         `Conflict resolved using ${resolution.type}: ${resolution.description}`
       );
 
@@ -397,7 +397,7 @@ export class ConflictDetectionService {
 
       // Get unresolved conflicts that meet criteria
       const conflicts = await storage.getUnresolvedConflicts(user);
-      const eligibleConflicts = conflicts.filter(conflict => {
+      const eligibleConflicts = conflicts.filter((conflict: any) => {
         if (criteria?.maxSeverity && 
             this.getSeverityLevel(conflict.severity) > this.getSeverityLevel(criteria.maxSeverity)) {
           return false;
@@ -466,8 +466,7 @@ export class ConflictDetectionService {
       const conflicts = await storage.getScheduleConflictsByDateRange(
         startDate,
         endDate,
-        user,
-        organizationId
+        user
       );
 
       const analytics: ConflictAnalytics = {
@@ -570,9 +569,9 @@ export class ConflictDetectionService {
       await logComplianceAction(
         user.id,
         'data_modification',
-        'conflict_rule',
+        'administrative_data',
         newRule.id,
-        { ip: 'system' } as any,
+        undefined,
         `Conflict detection rule added: ${newRule.name}`
       );
 
@@ -607,9 +606,9 @@ export class ConflictDetectionService {
       await logComplianceAction(
         user.id,
         'data_modification',
-        'conflict_rule',
+        'administrative_data',
         ruleId,
-        { ip: 'system' } as any,
+        undefined,
         `Conflict detection rule updated: ${updatedRule.name}`
       );
 
@@ -794,10 +793,10 @@ export class ConflictDetectionService {
     );
 
     // Convert to common format
-    events.push(...calendarEvents.map(e => this.convertToConflictingEvent(e, 'calendar_event')));
-    events.push(...games.map(e => this.convertToConflictingEvent(e, 'game')));
-    events.push(...practices.map(e => this.convertToConflictingEvent(e, 'practice')));
-    events.push(...reservations.map(e => this.convertToConflictingEvent(e, 'facility_reservation')));
+    events.push(...calendarEvents.map((e: any) => this.convertToConflictingEvent(e, 'calendar_event')));
+    events.push(...games.map((e: any) => this.convertToConflictingEvent(e, 'game')));
+    events.push(...practices.map((e: any) => this.convertToConflictingEvent(e, 'practice')));
+    events.push(...reservations.map((e: any) => this.convertToConflictingEvent(e, 'facility_reservation')));
 
     // Filter out excluded event
     return events.filter(e => e.id !== excludeEventId);
@@ -1244,7 +1243,7 @@ export class ConflictDetectionService {
     if (resolvedConflicts.length === 0) return 0;
 
     const totalTime = resolvedConflicts.reduce((acc, conflict) => {
-      const detected = new Date(conflict.detectedAt).getTime();
+      const detected = new Date(conflict.detectedAt || new Date()).getTime();
       const resolved = new Date(conflict.resolvedAt!).getTime();
       return acc + (resolved - detected);
     }, 0);

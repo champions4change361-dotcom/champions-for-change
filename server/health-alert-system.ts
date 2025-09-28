@@ -521,6 +521,29 @@ export class HealthAlertServiceImpl implements HealthAlertService {
         this.scheduleAlertEscalation(healthAlert);
       }
 
+      // Broadcast real-time health alert using unified WebSocket service
+      const unifiedService = (global as any).unifiedWebSocketService;
+      if (unifiedService) {
+        await unifiedService.publishAthleticTrainerEvent(
+          'health_alert_created',
+          {
+            alertId: healthAlert.id,
+            athleteId: healthAlert.athleteId,
+            athleteName: healthAlert.athleteName,
+            alertType: healthAlert.alertType,
+            severity: healthAlert.severity,
+            priority: healthAlert.priority,
+            title: healthAlert.title,
+            message: healthAlert.message,
+            immediateActions: healthAlert.immediateActions,
+            isEmergency: healthAlert.isEmergency,
+            requiresImmedateAttention: healthAlert.requiresImmedateAttention
+          },
+          healthAlert.organizationId,
+          user.id
+        );
+      }
+
       return healthAlert;
 
     } catch (error: any) {

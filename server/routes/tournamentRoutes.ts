@@ -89,10 +89,16 @@ export function registerTournamentRoutes(app: Express) {
       
       const liveScore = await LiveScoringService.startLiveScoring(matchId, user.id, user);
       
-      // Broadcast to tournament room
-      const io = (global as any).tournamentIO;
-      if (io) {
-        io.to(`tournament-${tournamentId}`).emit('match-started', { matchId, liveScore });
+      // Broadcast live scoring start using unified WebSocket service
+      const unifiedService = (global as any).unifiedWebSocketService;
+      if (unifiedService) {
+        await unifiedService.publishTournamentEvent(
+          'match_started',
+          tournamentId,
+          { matchId, liveScore, tournament: tournamentId },
+          user.organizationId || 'default',
+          user.id
+        );
       }
       
       res.json(liveScore);
@@ -136,23 +142,52 @@ export function registerTournamentRoutes(app: Express) {
         user
       );
       
-      // Broadcast real-time update with progression info
-      const io = (global as any).tournamentIO;
-      if (io) {
-        io.to(`tournament-${tournamentId}`).emit('score-update', { 
-          matchId, 
-          tournamentId, 
-          scoreUpdate: updatedMatch,
-          progressUpdate 
-        });
+      // Broadcast real-time updates using unified WebSocket service
+      const unifiedService = (global as any).unifiedWebSocketService;
+      if (unifiedService) {
+        // Broadcast score update
+        await unifiedService.publishTournamentEvent(
+          'score_updated',
+          tournamentId,
+          { 
+            matchId, 
+            scoreUpdate: updatedMatch,
+            team1Score: updatedMatch.team1Score,
+            team2Score: updatedMatch.team2Score,
+            winner: updatedMatch.winner
+          },
+          user.organizationId || 'default',
+          user.id
+        );
         
         // If bracket progression occurred, broadcast that too
         if (progressUpdate.newMatches.length > 0 || progressUpdate.advancedTeams.length > 0) {
-          io.to(`tournament-${tournamentId}`).emit('bracket-progression', {
+          await unifiedService.publishTournamentEvent(
+            'bracket_progressed',
             tournamentId,
-            progressUpdate,
-            updatedMatch
-          });
+            {
+              progressUpdate,
+              newMatches: progressUpdate.newMatches,
+              advancedTeams: progressUpdate.advancedTeams,
+              eliminatedTeams: progressUpdate.eliminatedTeams || []
+            },
+            user.organizationId || 'default',
+            user.id
+          );
+        }
+        
+        // If tournament is completed, send completion event
+        if (updatedMatch.status === 'completed' && progressUpdate.tournamentComplete) {
+          await unifiedService.publishTournamentEvent(
+            'tournament_completed',
+            tournamentId,
+            {
+              winner: progressUpdate.winner,
+              finalStandings: progressUpdate.finalStandings
+            },
+            user.organizationId || 'default',
+            user.id
+          );
         }
       }
       

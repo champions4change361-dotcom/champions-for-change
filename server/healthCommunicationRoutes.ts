@@ -40,7 +40,8 @@ export function registerHealthCommunicationRoutes(app: Express) {
       const storage = await getStorage();
       
       // Get teams where user is head coach or assistant coach
-      const teams = await storage.getTeamsByCoach(userId);
+      const userObj = { id: userId } as any;
+      const teams = await storage.getTeamsByCoach(userId, userObj);
       
       res.json(teams);
     } catch (error) {
@@ -170,7 +171,7 @@ export function registerHealthCommunicationRoutes(app: Express) {
       const userRole = req.user.claims.userRole || 'fan';
       const storage = await getStorage();
       
-      const threads = await storage.getHealthCommunicationThreads(userId, userRole);
+      const threads = await storage.getHealthCommunicationThreads(userId);
       
       res.json(threads);
     } catch (error) {

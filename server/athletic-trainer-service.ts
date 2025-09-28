@@ -52,12 +52,21 @@ export class AthleticTrainerServiceImpl implements AthleticTrainerService {
       // Build comprehensive profile
       const profile: AthleteProfile = {
         id: athlete.id,
+        trainerId: user.id,
+        athleteId: athlete.id,
+        organizationId: user.organizationId || '',
+        sport: Array.isArray(athlete.primarySports) && athlete.primarySports.length > 0 ? athlete.primarySports[0] : undefined,
+        season: undefined,
+        grade: athlete.grade?.toString() || undefined,
+        status: athlete.eligibilityStatus === 'eligible' ? 'active' : athlete.eligibilityStatus === 'medically_ineligible' ? 'injured' : 'cleared',
+        dateAdded: new Date(),
+        lastUpdated: new Date(),
+        medicalAlerts: [], // To be populated from separate medical data
         personalInfo: {
           firstName: athlete.firstName,
           lastName: athlete.lastName,
           dateOfBirth: athlete.dateOfBirth || undefined,
           gender: athlete.gender || undefined,
-          grade: athlete.grade?.toString() || undefined,
           studentId: athlete.studentDataId || undefined,
         },
         contactInfo: {
@@ -85,7 +94,6 @@ export class AthleticTrainerServiceImpl implements AthleticTrainerService {
           nextPhysicalDue: athlete.medicalClearanceExpires || undefined,
         },
         healthInfo: {
-          medicalAlerts: [], // To be populated from separate medical data
           currentInjuries: [], // Will be populated from injury incidents
           injuryHistory: [], // Will be populated from injury incidents
           medications: [], // To be populated from separate medical data
@@ -108,7 +116,7 @@ export class AthleticTrainerServiceImpl implements AthleticTrainerService {
       };
 
       // Log compliance action
-      await logComplianceAction(user.id, 'data_access', 'student_data', athleteId, {});
+      await logComplianceAction(user.id, 'data_access', 'student_data', athleteId, undefined);
 
       return profile;
     } catch (error) {
@@ -133,7 +141,7 @@ export class AthleticTrainerServiceImpl implements AthleticTrainerService {
         lastName: athlete.personalInfo?.lastName || '',
         dateOfBirth: athlete.personalInfo?.dateOfBirth,
         gender: athlete.personalInfo?.gender as "male" | "female" | "non_binary" | "prefer_not_to_say" | null | undefined,
-        grade: athlete.personalInfo?.grade ? parseInt(athlete.personalInfo.grade.toString()) : undefined,
+        grade: athlete.grade ? parseInt(athlete.grade.toString()) : undefined,
         studentId: athlete.personalInfo?.studentId,
         email: athlete.contactInfo?.email,
         phone: athlete.contactInfo?.phone,
@@ -146,7 +154,7 @@ export class AthleticTrainerServiceImpl implements AthleticTrainerService {
         clearanceStatus: athlete.sportsInfo?.clearanceStatus || 'not_cleared',
         lastPhysicalDate: athlete.sportsInfo?.lastPhysicalDate,
         nextPhysicalDue: athlete.sportsInfo?.nextPhysicalDue,
-        medicalAlerts: athlete.healthInfo?.medicalAlerts || [],
+        medicalAlerts: athlete.medicalAlerts || [],
         currentInjuries: athlete.healthInfo?.currentInjuries || [],
         injuryHistory: athlete.healthInfo?.injuryHistory || [],
         medications: athlete.healthInfo?.medications || [],
@@ -160,18 +168,15 @@ export class AthleticTrainerServiceImpl implements AthleticTrainerService {
         lastConsentUpdate: athlete.complianceInfo?.lastConsentUpdate,
         dataRetentionDate: athlete.complianceInfo?.dataRetentionDate,
         athleticTrainerId: user.id,
-        organizationId: user.organizationId,
-        schoolId: user.organizationId, // Assuming school level organization
-        districtId: user.organizationId, // Set district ID for database constraint
+        organizationId: user.organizationId || '',
+        schoolId: user.organizationId || '', // Assuming school level organization
+        districtId: user.organizationId || '', // Set district ID for database constraint
       };
 
       const createdAthlete = await storage.createAthlete(newAthleteData, user);
 
       // Log compliance action
-      await logComplianceAction(user.id, 'data_modification', 'student_data', createdAthlete.id, {
-        action: 'athlete_profile_created',
-        trainerId: user.id,
-      });
+      await logComplianceAction(user.id, 'data_modification', 'student_data', createdAthlete.id, undefined, 'athlete_profile_created');
 
       // Return full profile
       return await this.getAthleteProfile(createdAthlete.id, user) as AthleteProfile;
@@ -199,7 +204,7 @@ export class AthleticTrainerServiceImpl implements AthleticTrainerService {
           lastName: updates.personalInfo.lastName,
           dateOfBirth: updates.personalInfo.dateOfBirth,
           gender: updates.personalInfo.gender,
-          grade: updates.personalInfo.grade,
+          grade: updates.grade ? parseInt(updates.grade.toString()) : undefined,
           studentId: updates.personalInfo.studentId,
         });
       }
@@ -227,7 +232,7 @@ export class AthleticTrainerServiceImpl implements AthleticTrainerService {
 
       if (updates.healthInfo) {
         Object.assign(athleteUpdates, {
-          medicalAlerts: updates.healthInfo.medicalAlerts,
+          medicalAlerts: updates.medicalAlerts || [],
           currentInjuries: updates.healthInfo.currentInjuries,
           injuryHistory: updates.healthInfo.injuryHistory,
           medications: updates.healthInfo.medications,
@@ -256,11 +261,7 @@ export class AthleticTrainerServiceImpl implements AthleticTrainerService {
       await storage.updateAthlete(athleteId, athleteUpdates, user);
 
       // Log compliance action
-      await logComplianceAction(user.id, 'data_modification', 'student_data', athleteId, {
-        action: 'athlete_profile_updated',
-        trainerId: user.id,
-        updatedFields: Object.keys(athleteUpdates),
-      });
+      await logComplianceAction(user.id, 'data_modification', 'student_data', athleteId, undefined, 'athlete_profile_updated');
 
       // Return updated profile
       return await this.getAthleteProfile(athleteId, user) as AthleteProfile;
@@ -365,11 +366,7 @@ export class AthleticTrainerServiceImpl implements AthleticTrainerService {
       await storage.updateAthlete(athleteId, healthUpdate, user);
 
       // Log compliance action
-      await logComplianceAction(user.id, 'data_modification', 'health_data', athleteId, {
-        action: 'health_status_updated',
-        trainerId: user.id,
-        updateType: healthUpdate.type || 'general',
-      });
+      await logComplianceAction(user.id, 'data_modification', 'health_data', athleteId, undefined, 'health_status_updated');
     } catch (error) {
       console.error('Error updating health status:', error);
       throw error;
@@ -398,11 +395,7 @@ export class AthleticTrainerServiceImpl implements AthleticTrainerService {
       // await storage.updateAthlete(athleteId, { medicalAlerts: updatedAlerts }, user);
 
       // Log compliance action
-      await logComplianceAction(user.id, 'data_modification', 'health_data', athleteId, {
-        action: 'medical_alert_added',
-        trainerId: user.id,
-        alert: alert,
-      });
+      await logComplianceAction(user.id, 'data_modification', 'health_data', athleteId, undefined, 'medical_alert_added');
     } catch (error) {
       console.error('Error adding medical alert:', error);
       throw error;
@@ -431,11 +424,7 @@ export class AthleticTrainerServiceImpl implements AthleticTrainerService {
       // await storage.updateAthlete(athleteId, { medicalAlerts: updatedAlerts }, user);
 
       // Log compliance action
-      await logComplianceAction(user.id, 'data_modification', 'health_data', athleteId, {
-        action: 'medical_alert_removed',
-        trainerId: user.id,
-        alertId: alertId,
-      });
+      await logComplianceAction(user.id, 'data_modification', 'health_data', athleteId, undefined, 'medical_alert_removed');
     } catch (error) {
       console.error('Error removing medical alert:', error);
       throw error;
@@ -471,11 +460,7 @@ export class AthleticTrainerServiceImpl implements AthleticTrainerService {
       // await storage.updateAthlete(athleteId, { vitalSigns: updatedVitals }, user);
 
       // Log compliance action
-      await logComplianceAction(user.id, 'data_modification', 'health_data', athleteId, {
-        action: 'vital_signs_recorded',
-        trainerId: user.id,
-        vitalTypes: Object.keys(vitals),
-      });
+      await logComplianceAction(user.id, 'data_modification', 'health_data', athleteId, undefined, 'vital_signs_recorded');
     } catch (error) {
       console.error('Error recording vital signs:', error);
       throw error;
@@ -575,8 +560,8 @@ export class AthleticTrainerServiceImpl implements AthleticTrainerService {
     ];
     
     return healthRoles.includes(user.userRole || '') && 
-           user.hipaaTrainingCompleted && 
-           user.medicalDataAccess;
+           (user.hipaaTrainingCompleted || false) && 
+           (user.medicalDataAccess || false);
   }
 }
 
