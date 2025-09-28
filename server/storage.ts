@@ -848,7 +848,7 @@ export class DbStorage implements IStorage {
         commissionerId,
         registrationCode,
         liveConfig: template.templateConfig,
-        maxParticipants: template.estimatedParticipants,
+        entryLimit: template.estimatedParticipants,
         ...instanceData
       };
 

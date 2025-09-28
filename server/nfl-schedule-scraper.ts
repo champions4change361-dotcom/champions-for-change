@@ -152,11 +152,8 @@ export class NFLScheduleScraper {
       const games: NFLGame[] = [];
       const teamsPlaying: Set<string> = new Set();
 
-      // Calculate current week dynamically
-      const nflSeasonStart = new Date('2025-09-05'); 
-      const today = new Date();
-      const daysSinceStart = Math.floor((today.getTime() - nflSeasonStart.getTime()) / (1000 * 60 * 60 * 24));
-      let currentWeek = Math.max(1, Math.min(18, Math.ceil((daysSinceStart + 1) / 7)));
+      // Use the dynamic week calculation from above
+      let currentWeek = dynamicWeek;
       
       // Try multiple methods to find the correct current week
       const weekSelectors = [
@@ -176,19 +173,10 @@ export class NFLScheduleScraper {
         }
       }
       
-      // If still default, try URL-based detection
-      if (currentWeek === 3) {
-        const urlMatch = response.config?.url?.match(/reg(\d+)/);
-        if (urlMatch) {
-          currentWeek = parseInt(urlMatch[1]);
-          console.log(`🔗 Found current week ${currentWeek} in URL`);
-        }
-      }
-      
-      // Sanity check - if Week > 18, something's wrong, default to Week 3
+      // Sanity check - if Week > 18, something's wrong, use dynamic week
       if (currentWeek > 18) {
-        console.log(`⚠️ Detected week ${currentWeek} seems wrong, defaulting to Week 3`);
-        currentWeek = 3;
+        console.log(`⚠️ Detected week ${currentWeek} seems wrong, using dynamic calculation`);
+        currentWeek = dynamicWeek;
       }
 
       // Extract season year

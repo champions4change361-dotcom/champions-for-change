@@ -348,7 +348,8 @@ export default function AvailableGames() {
                     </div>
                     
                     <div className="flex items-center gap-2 text-sm text-gray-400">
-                      <Trophy className="h-4 w-4" /><span className="text-sm text-gray-400">{template.templateConfig.scoringSystem.toUpperCase()}</span>
+                      <Trophy className="h-4 w-4" />
+                      <span>{template.templateConfig.scoringSystem.toUpperCase()}</span>
                     </div>
                     
                     <div className="flex items-center gap-2 text-sm text-gray-400">

@@ -81,8 +81,8 @@ export const gameInstances = pgTable("game_instances", {
   }>(),
   
   // Participation
-  currentParticipants: integer("current_participants").default(0),
-  maxParticipants: integer("max_participants"),
+  currentEntries: integer("current_entries").default(0),
+  entryLimit: integer("entry_limit"),
   
   // Timing
   contestStartTime: timestamp("contest_start_time"),
