@@ -442,7 +442,7 @@ export function addDataFilters(req: Request, res: Response, next: NextFunction) 
   // Add organization filter based on user's scope
   req.dataFilters = {
     organizationId,
-    userRole: user.userRole || user.complianceRole,
+    userRole: user.userRole || user.complianceRole || 'fan',
     scope: dataScope?.organizationScope || 'individual',
     canAccessHealthData: RBACService.canAccessHealthData(user),
     canAccessBudgetData: RBACService.canAccessBudgetData(user),

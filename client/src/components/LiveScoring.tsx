@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +9,10 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import { io, type Socket } from 'socket.io-client';
+import { type Match } from "@shared/schema";
 import { 
   Trophy, 
   Timer, 
@@ -28,22 +33,15 @@ import {
   Medal
 } from 'lucide-react';
 
-interface LiveScore {
-  id: string;
-  tournamentId: string;
-  matchId: string;
-  eventName: string;
-  participant1Name: string;
-  participant1Score: number;
-  participant2Name?: string;
-  participant2Score?: number;
-  scoreType: 'points' | 'time' | 'distance' | 'games' | 'sets' | 'goals' | 'runs';
-  scoreUnit: string;
-  matchStatus: 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
-  venue: string;
-  field: string;
-  isLive: boolean;
-  lastScoreUpdate?: string;
+// Using shared Match type from schema for consistency
+type LiveMatch = Match;
+
+interface ScoreUpdateData {
+  team1Score?: number;
+  team2Score?: number;
+  status?: string;
+  winner?: string;
+  notes?: string;
 }
 
 interface LiveScoringProps {
@@ -53,6 +51,7 @@ interface LiveScoringProps {
   assignedEvents: string[];
   assignedVenues: string[];
   tournamentName: string;
+  tournamentId: string;
 }
 
 export function LiveScoring({
@@ -61,14 +60,20 @@ export function LiveScoring({
   canUpdateScores,
   assignedEvents,
   assignedVenues,
-  tournamentName
+  tournamentName,
+  tournamentId
 }: LiveScoringProps) {
-  const [scores, setScores] = useState<LiveScore[]>([]);
-  const [selectedMatch, setSelectedMatch] = useState<LiveScore | null>(null);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  
+  // State management
+  const [selectedMatch, setSelectedMatch] = useState<LiveMatch | null>(null);
   const [newScore1, setNewScore1] = useState('');
   const [newScore2, setNewScore2] = useState('');
-  const [matchStatus, setMatchStatus] = useState<string>('in_progress');
+  const [matchStatus, setMatchStatus] = useState<string>('in-progress');
   const [updateReason, setUpdateReason] = useState('');
+  const [socket, setSocket] = useState<Socket | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
   
   // Instant messaging state
   const [showMessagePanel, setShowMessagePanel] = useState(false);
@@ -76,8 +81,110 @@ export function LiveScoring({
   const [messageType, setMessageType] = useState<string>('encouragement');
   const [targetParticipant, setTargetParticipant] = useState('');
 
+  // Fetch matches for the tournament
+  const { data: matches = [], isLoading: matchesLoading, error: matchesError } = useQuery<LiveMatch[]>({
+    queryKey: ['/api/tournaments', tournamentId, 'matches'],
+    enabled: !!tournamentId,
+  });
+
+  // WebSocket connection for real-time updates
+  useEffect(() => {
+    if (!tournamentId) return;
+
+    const newSocket = io({
+      path: '/socket.io',
+      transports: ['websocket', 'polling']
+    });
+
+    newSocket.on('connect', () => {
+      console.log('🔗 Connected to live scoring WebSocket');
+      setIsConnected(true);
+      newSocket.emit('join-tournament', tournamentId);
+    });
+
+    newSocket.on('disconnect', () => {
+      console.log('🔌 Disconnected from live scoring WebSocket');
+      setIsConnected(false);
+    });
+
+    // Listen for score updates
+    newSocket.on('score-update', (data) => {
+      console.log('📊 Received score update:', data);
+      // Invalidate queries to refresh match data
+      queryClient.invalidateQueries({ queryKey: ['/api/tournaments', tournamentId, 'matches'] });
+      toast({
+        title: "Score Updated",
+        description: `Match score has been updated in real-time`,
+      });
+    });
+
+    // Listen for match completion
+    newSocket.on('match-completed', (data) => {
+      console.log('🏆 Match completed:', data);
+      queryClient.invalidateQueries({ queryKey: ['/api/tournaments', tournamentId, 'matches'] });
+      toast({
+        title: "Match Completed!",
+        description: `${data.match?.winner || 'A team'} has won the match`,
+      });
+    });
+
+    setSocket(newSocket);
+
+    return () => {
+      newSocket.emit('leave-tournament', tournamentId);
+      newSocket.disconnect();
+    };
+  }, [tournamentId, queryClient, toast]);
+
+  // Score update mutation
+  const scoreUpdateMutation = useMutation({
+    mutationFn: async ({ matchId, scoreData }: { matchId: string, scoreData: ScoreUpdateData }) => {
+      const response = await apiRequest(
+        `/api/tournaments/${tournamentId}/matches/${matchId}/score-update`, 
+        "POST", 
+        scoreData
+      );
+      return response.json();
+    },
+    onSuccess: (data, variables) => {
+      // Optimistic UI update - immediately update local cache
+      queryClient.setQueryData(
+        ['/api/tournaments', tournamentId, 'matches'],
+        (oldMatches: LiveMatch[] = []) => {
+          return oldMatches.map(match => 
+            match.id === variables.matchId 
+              ? { ...match, ...variables.scoreData }
+              : match
+          );
+        }
+      );
+      
+      // Invalidate queries to ensure fresh data
+      queryClient.invalidateQueries({ queryKey: ['/api/tournaments', tournamentId, 'matches'] });
+      
+      toast({
+        title: "Score Updated",
+        description: `Match score has been updated successfully`,
+      });
+      
+      // Clear form
+      setNewScore1('');
+      setNewScore2('');
+      setUpdateReason('');
+      setSelectedMatch(null);
+    },
+    onError: (error) => {
+      console.error('Failed to update score:', error);
+      toast({
+        title: "Update Failed",
+        description: error instanceof Error ? error.message : "Failed to update score",
+        variant: "destructive",
+      });
+    }
+  });
+
   // Access control check
-  const canUpdateThisMatch = (match: LiveScore) => {
+  const canUpdateThisMatch = (match: LiveMatch) => {
     if (!canUpdateScores) return false;
     
     // Tournament directors and athletic directors can update any match
@@ -85,75 +192,69 @@ export function LiveScoring({
       return true;
     }
     
-    // Scorekeepers can only update their assigned events/venues
+    // Scorekeepers can only update their assigned venues
     if (userRole === 'scorekeeper') {
-      const hasEventAccess = assignedEvents.includes(match.eventName);
-      const hasVenueAccess = assignedVenues.includes(match.venue) || assignedVenues.includes(match.field);
-      return hasEventAccess || hasVenueAccess;
+      const hasVenueAccess = match.venue ? assignedVenues.includes(match.venue) : true;
+      return hasVenueAccess;
     }
     
     return false;
   };
 
-  const handleScoreUpdate = (match: LiveScore) => {
+  const handleScoreUpdate = (match: LiveMatch) => {
     if (!canUpdateThisMatch(match)) return;
     
-    const updatedMatch = {
-      ...match,
-      participant1Score: parseFloat(newScore1) || match.participant1Score,
-      participant2Score: parseFloat(newScore2) || match.participant2Score,
-      matchStatus: matchStatus as any,
-      lastScoreUpdate: new Date().toISOString(),
-      liveUpdateCount: (match as any).liveUpdateCount + 1
+    // Prepare score update data
+    const scoreData: ScoreUpdateData = {
+      team1Score: parseFloat(newScore1) || match.team1Score || 0,
+      team2Score: parseFloat(newScore2) || match.team2Score || 0,
+      status: matchStatus as any,
+      notes: updateReason || undefined
     };
+
+    // Determine winner if match is completed
+    if (matchStatus === 'completed') {
+      if (scoreData.team1Score! > scoreData.team2Score!) {
+        scoreData.winner = match.team1;
+      } else if (scoreData.team2Score! > scoreData.team1Score!) {
+        scoreData.winner = match.team2;
+      }
+      // No winner set for ties
+    }
     
-    // Update local state
-    setScores(scores.map(s => s.id === match.id ? updatedMatch : s));
-    
-    // Log the update
-    console.log('Score update:', {
+    // Execute the mutation to update score via API
+    scoreUpdateMutation.mutate({
       matchId: match.id,
-      updatedBy: userId,
-      updateType: 'score_change',
-      previousData: {
-        participant1Score: match.participant1Score,
-        participant2Score: match.participant2Score,
-        matchStatus: match.matchStatus
-      },
-      newData: {
-        participant1Score: updatedMatch.participant1Score,
-        participant2Score: updatedMatch.participant2Score,
-        matchStatus: updatedMatch.matchStatus
-      },
-      updateReason
+      scoreData
     });
-    
-    // Clear form
-    setNewScore1('');
-    setNewScore2('');
-    setUpdateReason('');
-    setSelectedMatch(null);
   };
 
-  const sendInstantMessage = (match: LiveScore) => {
+  const sendInstantMessage = (match: LiveMatch) => {
     if (!messageContent.trim()) return;
     
     const performanceContext = {
-      eventName: match.eventName,
-      result: targetParticipant === 'participant1' 
-        ? `${match.participant1Score} ${match.scoreUnit}`
-        : `${match.participant2Score} ${match.scoreUnit}`,
+      matchId: match.id,
+      result: targetParticipant === 'team1' 
+        ? `${match.team1Score || 0} points`
+        : `${match.team2Score || 0} points`,
       placement: determineCurrentPlacement(match, targetParticipant)
     };
     
     console.log('Sending instant message:', {
-      liveScoreId: match.id,
+      matchId: match.id,
       senderId: userId,
       messageType,
       content: messageContent,
-      relatedParticipantId: targetParticipant,
+      relatedTeam: targetParticipant,
       performanceContext,
       deliveredViaPush: true
+    });
+    
+    // In a real implementation, this would make an API call
+    // For now, just simulate sending the message
+    toast({
+      title: "Message Sent",
+      description: `Message sent to ${targetParticipant}`,
     });
     
     // Clear message form
@@ -161,82 +262,38 @@ export function LiveScoring({
     setShowMessagePanel(false);
   };
 
-  const determineCurrentPlacement = (match: LiveScore, participant: string) => {
+  const determineCurrentPlacement = (match: LiveMatch, participant: string) => {
     // Simple placement logic - could be enhanced with tournament-wide data
-    if (match.scoreType === 'time') {
-      // Lower time is better
-      const score1 = match.participant1Score;
-      const score2 = match.participant2Score || 0;
-      if (participant === 'participant1') return score1 < score2 ? 1 : 2;
-      return score2 < score1 ? 1 : 2;
-    } else {
-      // Higher score is better
-      const score1 = match.participant1Score;
-      const score2 = match.participant2Score || 0;
-      if (participant === 'participant1') return score1 > score2 ? 1 : 2;
-      return score2 > score1 ? 1 : 2;
+    const score1 = match.team1Score || 0;
+    const score2 = match.team2Score || 0;
+    
+    if (participant === 'team1') return score1 > score2 ? 1 : 2;
+    return score2 > score1 ? 1 : 2;
+  };
+
+  const formatScore = (score?: number) => {
+    return score?.toString() || '0';
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'in-progress': return 'text-green-600';
+      case 'completed': return 'text-blue-600';
+      case 'scheduled': return 'text-gray-600';
+      case 'cancelled': return 'text-red-600';
+      default: return 'text-gray-600';
     }
   };
 
-  const getScoreTypeIcon = (scoreType: string) => {
-    switch (scoreType) {
-      case 'time': return Timer;
-      case 'distance': return Target;
-      case 'points': return Trophy;
-      default: return Trophy;
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'in-progress': return Play;
+      case 'completed': return CheckCircle;
+      case 'scheduled': return Clock;
+      case 'cancelled': return StopCircle;
+      default: return Clock;
     }
   };
-
-  const formatScore = (score: number, scoreType: string, scoreUnit: string) => {
-    if (scoreType === 'time') {
-      // Convert seconds to MM:SS format if needed
-      if (scoreUnit === 'seconds' && score >= 60) {
-        const minutes = Math.floor(score / 60);
-        const seconds = (score % 60).toFixed(2);
-        return `${minutes}:${seconds.padStart(5, '0')}`;
-      }
-    }
-    return `${score} ${scoreUnit}`;
-  };
-
-  // Mock data for demonstration
-  useEffect(() => {
-    setScores([
-      {
-        id: '1',
-        tournamentId: 'tourney-1',
-        matchId: 'match-1',
-        eventName: 'Shot Put',
-        participant1Name: 'Sarah Johnson',
-        participant1Score: 32.5,
-        participant2Name: 'Mike Chen',
-        participant2Score: 28.7,
-        scoreType: 'distance',
-        scoreUnit: 'feet',
-        matchStatus: 'in_progress',
-        venue: 'Field 1',
-        field: 'Throwing Circle A',
-        isLive: true,
-        lastScoreUpdate: new Date().toISOString()
-      },
-      {
-        id: '2',
-        tournamentId: 'tourney-1',
-        matchId: 'match-2',
-        eventName: '100m Dash',
-        participant1Name: 'Alex Rivera',
-        participant1Score: 12.45,
-        participant2Name: 'Jordan Smith',
-        participant2Score: 12.78,
-        scoreType: 'time',
-        scoreUnit: 'seconds',
-        matchStatus: 'completed',
-        venue: 'Track',
-        field: 'Lane 4-5',
-        isLive: false
-      }
-    ]);
-  }, []);
 
   return (
     <div className="space-y-6" data-testid="live-scoring">
@@ -272,14 +329,35 @@ export function LiveScoring({
         </CardHeader>
       </Card>
 
+      {/* Loading and Error States */}
+      {matchesLoading && (
+        <Alert data-testid="loading-matches">
+          <AlertDescription>Loading tournament matches...</AlertDescription>
+        </Alert>
+      )}
+
+      {matchesError && (
+        <Alert variant="destructive" data-testid="error-loading-matches">
+          <AlertDescription>
+            Failed to load tournament matches. Please check your authentication and try again.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* WebSocket Connection Status */}
+      <div className="flex items-center gap-2 text-sm text-gray-600">
+        <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
+        {isConnected ? 'Connected to live updates' : 'Connecting to live updates...'}
+      </div>
+
       {/* Live Scores Grid */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {scores.map((match) => {
-          const ScoreIcon = getScoreTypeIcon(match.scoreType);
+        {matches.map((match) => {
+          const StatusIcon = getStatusIcon(match.status);
           const canUpdate = canUpdateThisMatch(match);
           
           return (
-            <Card key={match.id} className={`${match.isLive ? 'border-green-500 shadow-lg' : ''}`}>
+            <Card key={match.id} className={`${match.status === 'in-progress' ? 'border-green-500 shadow-lg' : ''}`} data-testid={`match-card-${match.id}`}>
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">

@@ -59,11 +59,11 @@ export class TournamentRBACService {
 
     const role = user.userRole;
     const isOwner = tournament ? tournament.userId === user.id : false;
-    const isOrganizationAdmin = user.organizationRole === 'admin';
+    const isOrganizationAdmin = false; // TODO: Add organizationRole to user schema if needed
 
     // Role-based permission matrix
     switch (role) {
-      case 'super_admin':
+      case 'district_athletic_director': // Super admin equivalent
         return {
           canCreateTournament: true,
           canViewTournament: true,
@@ -138,7 +138,8 @@ export class TournamentRBACService {
           canManageStaff: false
         };
 
-      case 'coach':
+      case 'head_coach':
+      case 'assistant_coach':
         return {
           canCreateTournament: false,
           canViewTournament: true,
@@ -153,7 +154,7 @@ export class TournamentRBACService {
           canManageStaff: false
         };
 
-      case 'team_member':
+      case 'athlete':
         return {
           canCreateTournament: false,
           canViewTournament: true,
@@ -238,8 +239,8 @@ export class TournamentRBACService {
   ): Promise<Tournament[]> {
     this.validateUserContext(user, 'filterTournamentsForUser');
 
-    // Super admins and district directors can see all tournaments
-    if (user.userRole === 'super_admin' || user.userRole === 'district_athletic_director') {
+    // District directors can see all tournaments
+    if (user.userRole === 'district_athletic_director') {
       return tournaments;
     }
 
@@ -252,15 +253,15 @@ export class TournamentRBACService {
     }
 
     // Coaches can see public tournaments and those they're registered for
-    if (user.userRole === 'coach') {
+    if (user.userRole === 'head_coach' || user.userRole === 'assistant_coach') {
       return tournaments.filter(tournament => 
         tournament.isPublic || 
         this.isUserRegisteredForTournament(user.id, tournament.id)
       );
     }
 
-    // Team members can see public tournaments
-    if (user.userRole === 'team_member') {
+    // Athletes can see public tournaments
+    if (user.userRole === 'athlete') {
       return tournaments.filter(tournament => tournament.isPublic);
     }
 
@@ -291,7 +292,7 @@ export class TournamentRBACService {
     }
 
     // Coaches can see matches involving their teams
-    if (user.userRole === 'coach') {
+    if (user.userRole === 'head_coach' || user.userRole === 'assistant_coach') {
       const userTeams = await this.getUserTeams(user.id);
       const teamIds = userTeams.map(team => team.id);
       
@@ -314,8 +315,8 @@ export class TournamentRBACService {
   ): Promise<boolean> {
     this.validateUserContext(user, 'canAccessRegistrationSubmission');
 
-    // Super admin and district director have full access
-    if (user.userRole === 'super_admin' || user.userRole === 'district_athletic_director') {
+    // District director has full access
+    if (user.userRole === 'district_athletic_director') {
       return true;
     }
 
@@ -329,7 +330,7 @@ export class TournamentRBACService {
     }
 
     // Users can access their own submissions
-    if (submission.userId === user.id) {
+    if (submission.submittedBy === user.id) {
       return true;
     }
 
@@ -346,7 +347,7 @@ export class TournamentRBACService {
     this.validateUserContext(user, 'canScoreMatch');
 
     try {
-      const match = await storage.getMatch(matchId, user);
+      const match = await storage.getMatch(matchId);
       if (!match) {
         return false;
       }
@@ -361,8 +362,7 @@ export class TournamentRBACService {
       if (match.status === 'completed') {
         // Only tournament managers and above can modify completed matches
         return user.userRole === 'tournament_manager' || 
-               user.userRole === 'district_athletic_director' || 
-               user.userRole === 'super_admin';
+               user.userRole === 'district_athletic_director';
       }
 
       return true;
@@ -379,7 +379,6 @@ export class TournamentRBACService {
 
     // Get tournaments based on user role
     switch (user.userRole) {
-      case 'super_admin':
       case 'district_athletic_director':
         return await storage.getTournaments();
 
@@ -388,12 +387,12 @@ export class TournamentRBACService {
         // Get tournaments owned by user or in their organization
         const allTournaments = await storage.getTournaments();
         return allTournaments.filter(tournament => 
-          tournament.userId === user.id ||
-          (user.organizationId && tournament.organizationId === user.organizationId)
+          tournament.userId === user.id
         );
 
-      case 'coach':
-      case 'team_member':
+      case 'head_coach':
+      case 'assistant_coach':
+      case 'athlete':
         // Get public tournaments and ones they're registered for
         const publicTournaments = await storage.getTournaments();
         return publicTournaments.filter(tournament => 
@@ -435,8 +434,8 @@ export class TournamentRBACService {
   // Private helper methods
 
   private static isTournamentStaff(user: SecureUserContext): boolean {
-    return ['tournament_manager', 'assistant_tournament_manager', 'scorekeeper', 'super_admin', 'district_athletic_director']
-      .includes(user.userRole);
+    return ['tournament_manager', 'assistant_tournament_manager', 'scorekeeper', 'district_athletic_director']
+      .includes(user.userRole || '');
   }
 
   private static isUserRegisteredForTournament(userId: string, tournamentId: string): boolean {

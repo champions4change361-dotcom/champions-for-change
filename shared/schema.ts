@@ -2061,7 +2061,7 @@ export const matches = pgTable("matches", {
   team1Score: integer("team1_score").default(0),
   team2Score: integer("team2_score").default(0),
   winner: text("winner"),
-  status: text("status", { enum: ["upcoming", "in-progress", "completed"] }).notNull().default("upcoming"),
+  status: text("status", { enum: ["upcoming", "in-progress", "completed", "cancelled"] }).notNull().default("upcoming"),
   bracket: text("bracket", { enum: ["winners", "losers", "championship"] }).default("winners"),
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
   updatedAt: timestamp("updated_at").notNull().default(sql`now()`),
@@ -6277,7 +6277,7 @@ export const budgetCategories = pgTable("budget_categories", {
     enum: ["athletics", "academics", "fine_arts", "operations", "facilities", "transportation", "technology", "general"]
   }).notNull(),
   description: text("description"),
-  parentCategoryId: varchar("parent_category_id").references(() => budgetCategories.id),
+  parentCategoryId: varchar("parent_category_id"),
   displayOrder: integer("display_order").default(0),
   isActive: boolean("is_active").default(true),
   

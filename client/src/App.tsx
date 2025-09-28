@@ -156,6 +156,8 @@ import TeamCreatePage from './pages/TeamCreatePage';
 import TeamDashboardPage from './pages/TeamDashboardPage';
 import TeamSignupPage from './pages/TeamSignupPage';
 import TournamentManagerDashboard from './pages/TournamentManagerDashboard';
+import TournamentDashboardPage from './pages/TournamentDashboardPage';
+import TournamentRegistrationPage from './pages/TournamentRegistrationPage';
 import ChampionsBanner from './components/ChampionsBanner';
 
 function AuthenticatedRoutes() {
@@ -174,6 +176,9 @@ function AuthenticatedRoutes() {
         <Route path="/tournaments" component={TournamentsPage} />
         <Route path="/drafts" component={Drafts} />
         <Route path="/tournaments/:id" component={TournamentDetailPage} />
+        <Route path="/tournaments/:id/dashboard" component={TournamentDashboardPage} />
+        <Route path="/tournaments/:id/register" component={TournamentRegistrationPage} />
+        <Route path="/tournaments/:id/register/:formId" component={TournamentRegistrationPage} />
         <Route path="/tournaments/:id/edit" component={TournamentEditPage} />
         <Route path="/create" component={CreateTournament} />
         <Route path="/tournament-manager" component={TournamentManagerDashboard} />

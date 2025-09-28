@@ -1,6 +1,6 @@
 import type { Express } from "express";
 import { storage } from "../storage";
-import { insertTournamentSchema, tournamentConfigSchema, type TournamentConfig } from "@shared/schema";
+import { insertTournamentSchema, tournamentConfigSchema, type TournamentConfig, updateMatchSchema } from "@shared/schema";
 import { BracketGenerator } from "../utils/bracket-generator";
 import { TournamentService } from "../tournament-service";
 import { TournamentRegistrationService } from "../tournament-registration-service";
@@ -10,6 +10,21 @@ import { TournamentRBACService } from "../tournament-rbac-service";
 import { loadUserContext, requirePermissions } from "../rbac-middleware";
 import { PERMISSIONS } from "../rbac-permissions";
 import { z } from "zod";
+
+// Zod schema for score update payloads
+const scoreUpdateSchema = z.object({
+  team1Score: z.number().min(0).optional(),
+  team2Score: z.number().min(0).optional(),
+  status: z.enum(["upcoming", "in-progress", "completed", "cancelled"]).optional(),
+  winner: z.string().optional(),
+  notes: z.string().optional()
+}).refine(
+  (data) => data.team1Score !== undefined || data.team2Score !== undefined,
+  {
+    message: "At least one score (team1Score or team2Score) must be provided",
+    path: ["team1Score", "team2Score"]
+  }
+);
 import type {
   FFAParticipant,
   FFALeaderboardEntry
@@ -87,37 +102,64 @@ export function registerTournamentRoutes(app: Express) {
     }
   });
   
-  // Update match score in real-time
+  // Update match score in real-time with proper validation and bracket progression
   app.post("/api/tournaments/:tournamentId/matches/:matchId/score-update", 
     TournamentRBACService.createTournamentAccessMiddleware('canScoreMatches'),
     async (req: any, res) => {
     try {
       const { tournamentId, matchId } = req.params;
       const user = req.secureUser;
-      const scoreUpdate = req.body;
       
-      // Validate score update
-      if (!scoreUpdate.team1Score && !scoreUpdate.team2Score) {
-        return res.status(400).json({ message: "Score update required" });
+      // Validate score update with Zod schema
+      const scoreUpdateResult = scoreUpdateSchema.safeParse(req.body);
+      if (!scoreUpdateResult.success) {
+        return res.status(400).json({ 
+          message: "Invalid score update data", 
+          errors: scoreUpdateResult.error.errors 
+        });
       }
       
-      const updatedMatch = await storage.updateMatch(matchId, {
-        team1Score: scoreUpdate.team1Score,
-        team2Score: scoreUpdate.team2Score,
-        status: scoreUpdate.status || 'in-progress'
-      }, user);
+      const scoreUpdate = scoreUpdateResult.data;
       
-      // Broadcast real-time update
+      // Use TournamentService.updateMatchResult to handle bracket progression
+      const matchResult = {
+        matchId,
+        team1Score: scoreUpdate.team1Score || 0,
+        team2Score: scoreUpdate.team2Score || 0,
+        winner: scoreUpdate.winner,
+        notes: scoreUpdate.notes
+      };
+      
+      const { match: updatedMatch, progressUpdate } = await TournamentService.updateMatchResult(
+        matchId,
+        matchResult,
+        user
+      );
+      
+      // Broadcast real-time update with progression info
       const io = (global as any).tournamentIO;
       if (io) {
         io.to(`tournament-${tournamentId}`).emit('score-update', { 
           matchId, 
           tournamentId, 
-          scoreUpdate: updatedMatch 
+          scoreUpdate: updatedMatch,
+          progressUpdate 
         });
+        
+        // If bracket progression occurred, broadcast that too
+        if (progressUpdate.newMatches.length > 0 || progressUpdate.advancedTeams.length > 0) {
+          io.to(`tournament-${tournamentId}`).emit('bracket-progression', {
+            tournamentId,
+            progressUpdate,
+            updatedMatch
+          });
+        }
       }
       
-      res.json(updatedMatch);
+      res.json({
+        match: updatedMatch,
+        progressUpdate
+      });
     } catch (error) {
       console.error("Error updating match score:", error);
       res.status(500).json({ message: "Failed to update score", error: (error as Error).message });
@@ -148,6 +190,25 @@ export function registerTournamentRoutes(app: Express) {
     }
   });
   
+  // Get tournament registration form (Frontend compatibility endpoint)
+  app.get("/api/tournament-registration-forms/:id", async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      
+      // Use the existing service to get registration form
+      const registrationForm = await storage.getTournamentRegistrationForm(id);
+      
+      if (!registrationForm) {
+        return res.status(404).json({ message: "Registration form not found" });
+      }
+      
+      res.json(registrationForm);
+    } catch (error) {
+      console.error("Error getting registration form:", error);
+      res.status(500).json({ message: "Failed to get registration form", error: (error as Error).message });
+    }
+  });
+
   // Submit team registration
   app.post("/api/tournament-registration/:formId/submit", async (req: any, res) => {
     try {
@@ -176,18 +237,23 @@ export function registerTournamentRoutes(app: Express) {
     }
   });
   
-  // Get tournament matches (with user filtering)
-  app.get("/api/tournaments/:id/matches", 
-    TournamentRBACService.createTournamentAccessMiddleware('canViewTournament'),
-    async (req: any, res) => {
+  // Get tournament matches (PUBLIC ACCESS - for viewing)
+  app.get("/api/tournaments/:id/matches", async (req: any, res) => {
     try {
       const { id } = req.params;
-      const user = req.secureUser;
+      
+      // Try to get user context if available, but don't require it
+      let user = null;
+      try {
+        user = TournamentRBACService.createSecureUserContext(req);
+      } catch (error) {
+        // User not authenticated - that's ok for public viewing
+        console.log('No user context for public tournament matches viewing');
+      }
       
       const matches = await storage.getMatchesByTournament(id);
-      const filteredMatches = await TournamentRBACService.filterMatchesForUser(user, matches, id);
       
-      res.json(filteredMatches);
+      res.json(matches);
     } catch (error) {
       console.error("Error fetching tournament matches:", error);
       res.status(500).json({ message: "Failed to fetch matches", error: (error as Error).message });
@@ -449,15 +515,23 @@ export function registerTournamentRoutes(app: Express) {
     }
   });
 
-  // Get a specific tournament by ID
-  app.get("/api/tournaments/:id", 
-    TournamentRBACService.createTournamentAccessMiddleware('canViewTournament'),
-    async (req: any, res) => {
+  // Get a specific tournament by ID (PUBLIC ACCESS - for viewing)
+  app.get("/api/tournaments/:id", async (req: any, res) => {
     try {
       const { id } = req.params;
-      const user = req.secureUser;
       
-      const tournament = await storage.getTournament(id, user);
+      // Try to get user context if available, but don't require it
+      let user = null;
+      try {
+        user = TournamentRBACService.createSecureUserContext(req);
+      } catch (error) {
+        // User not authenticated - that's ok for public viewing
+        console.log('No user context for public tournament viewing');
+      }
+      
+      const tournament = user 
+        ? await storage.getTournament(id, user)
+        : await storage.getTournamentPublic(id);
       
       if (!tournament) {
         return res.status(404).json({ message: "Tournament not found" });

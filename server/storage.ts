@@ -27,7 +27,8 @@ import {
   type EventTemplate, type InsertEventTemplate, type ScoringPolicy, type InsertScoringPolicy,
   type TournamentConfig, type DivisionPolicy, type StageConfig,
   type GameTemplate, type InsertGameTemplate, type GameInstance, type InsertGameInstance, type UserLineup, type InsertUserLineup, type PlayerPerformance, type InsertPlayerPerformance,
-  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, teams, teamPlayers, athletes, medicalHistory, healthRiskAssessments, injuryIncidents, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog, taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices, supportTeams, supportTeamMembers, supportTeamInjuries, supportTeamAiConsultations, jerseyTeamMembers, jerseyTeamPayments, tournamentSubscriptions, clientConfigurations, guestParticipants, passwordResetTokens, showdownContests, showdownEntries, showdownLeaderboards, professionalPlayers, merchandiseProducts, merchandiseOrders, eventTickets, ticketOrders, tournamentRegistrationForms, registrationSubmissions, registrationAssignmentLog, fantasyProfiles, athleticConfigs, academicConfigs, fineArtsConfigs, eventTemplates, scoringPolicies, gameTemplates, gameInstances, userLineups, playerPerformances, athleticCalendarEvents, games, practices, facilityReservations, scheduleConflicts, academicEvents, academicCompetitions, academicParticipants, academicResults, academicDistricts, academicMeets, schoolAcademicPrograms, academicTeams, academicOfficials
+  type BudgetCategory, type InsertBudgetCategory, type BudgetItem, type InsertBudgetItem, type BudgetAllocation, type InsertBudgetAllocation, type BudgetTransaction, type InsertBudgetTransaction, type BudgetApproval, type InsertBudgetApproval, type BudgetTemplate, type InsertBudgetTemplate,
+  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, teams, teamPlayers, athletes, medicalHistory, healthRiskAssessments, injuryIncidents, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog, taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices, supportTeams, supportTeamMembers, supportTeamInjuries, supportTeamAiConsultations, jerseyTeamMembers, jerseyTeamPayments, tournamentSubscriptions, clientConfigurations, guestParticipants, passwordResetTokens, showdownContests, showdownEntries, showdownLeaderboards, professionalPlayers, merchandiseProducts, merchandiseOrders, eventTickets, ticketOrders, tournamentRegistrationForms, registrationSubmissions, registrationAssignmentLog, fantasyProfiles, athleticConfigs, academicConfigs, fineArtsConfigs, eventTemplates, scoringPolicies, gameTemplates, gameInstances, userLineups, playerPerformances, athleticCalendarEvents, games, practices, facilityReservations, scheduleConflicts, academicEvents, academicCompetitions, academicParticipants, academicResults, academicDistricts, academicMeets, schoolAcademicPrograms, academicTeams, academicOfficials, budgetCategories, budgetItems, budgetAllocations, budgetTransactions, budgetApprovals, budgetTemplates
 } from "@shared/schema";
 
 type SportCategory = typeof sportCategories.$inferSelect;
@@ -311,6 +312,7 @@ export interface IStorage {
   // SECURITY: All tournament methods now REQUIRE user context (mandatory parameter)
   getTournaments(user: SecureUserContext): Promise<Tournament[]>;
   getTournament(id: string, user: SecureUserContext): Promise<Tournament | undefined>;
+  getTournamentPublic(id: string): Promise<Tournament | undefined>;
   getDraftTournaments(user: SecureUserContext): Promise<Tournament[]>;
   createTournament(tournament: InsertTournament, user: SecureUserContext): Promise<Tournament>;
   updateTournament(id: string, tournament: Partial<Tournament>, user: SecureUserContext): Promise<Tournament | undefined>;
@@ -2693,6 +2695,29 @@ export class DbStorage implements IStorage {
       // Get core tournament
       const [tournament] = await this.db.select().from(tournaments).where(eq(tournaments.id, id));
       if (!tournament) return undefined;
+
+      // Join with sport-specific config for consistent shape
+      const sportConfig = await this.getSportConfig(tournament.id, tournament.sportCategory || undefined);
+      
+      // Return merged response (consistent with createTournament)
+      return {
+        ...tournament,
+        ...sportConfig
+      } as Tournament;
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async getTournamentPublic(id: string): Promise<Tournament | undefined> {
+    try {
+      // Get core tournament
+      const [tournament] = await this.db.select().from(tournaments).where(eq(tournaments.id, id));
+      if (!tournament) return undefined;
+
+      // Only return public tournaments
+      if (!tournament.isPublic) return undefined;
 
       // Join with sport-specific config for consistent shape
       const sportConfig = await this.getSportConfig(tournament.id, tournament.sportCategory || undefined);
@@ -5813,6 +5838,13 @@ export class MemStorage implements IStorage {
     // Mirror DbStorage: return tournament with sport config for consistency  
     const tournament = this.tournaments.get(id);
     // In MemStorage, sport configs are already merged in tournaments
+    return tournament;
+  }
+
+  async getTournamentPublic(id: string): Promise<Tournament | undefined> {
+    const tournament = this.tournaments.get(id);
+    // Only return public tournaments
+    if (!tournament || !tournament.isPublic) return undefined;
     return tournament;
   }
 

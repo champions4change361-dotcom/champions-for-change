@@ -7,6 +7,7 @@ import { Trophy, Clock, Users, Play } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import MatchUpdateModal from './match-update-modal';
+import { type Match } from '@shared/schema';
 
 interface Tournament {
   id: string;
@@ -17,20 +18,7 @@ interface Tournament {
   status: string;
 }
 
-interface Match {
-  id: string;
-  tournamentId: string;
-  round: number;
-  position: number;
-  team1?: string;
-  team2?: string;
-  team1Score: number;
-  team2Score: number;
-  winner?: string;
-  status: 'upcoming' | 'in-progress' | 'completed';
-  createdAt: Date;
-  updatedAt: Date;
-}
+// Using shared Match type from schema for consistency
 
 interface BracketVisualizationProps {
   tournament: Tournament;
