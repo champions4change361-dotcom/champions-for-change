@@ -7102,7 +7102,7 @@ export class MemStorage implements IStorage {
         sportType: "college_football",
         leagueFormat: "weekly",
         dataSource: "espn_api",
-        ageRestriction: 21,
+        ageRestriction: 13,
         requiresAgeVerification: true,
         maxParticipants: 200,
         scoringConfig: {

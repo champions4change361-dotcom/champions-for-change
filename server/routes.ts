@@ -7269,7 +7269,7 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
           api_configurations_count: 4,
           supported_sports: ["nfl", "nba", "mlb", "nhl"],
           supported_formats: ["survivor", "daily_fantasy", "snake_draft", "head_to_head", "best_ball"],
-          min_age_requirement: 21
+          min_age_requirement: 13
         }
       };
       
@@ -7292,7 +7292,7 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
           leagueName: "NFL Survivor Challenge",
           sportType: "nfl",
           leagueFormat: "survivor",
-          ageRestriction: 21,
+          ageRestriction: 13,
           requiresAgeVerification: true,
           maxParticipants: 100,
           scoringConfig: {},
@@ -7308,7 +7308,7 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
           leagueName: "Weekly DFS Showdown",
           sportType: "nfl", 
           leagueFormat: "daily_fantasy",
-          ageRestriction: 21,
+          ageRestriction: 13,
           requiresAgeVerification: true,
           maxParticipants: 200,
           scoringConfig: {},
@@ -7387,9 +7387,9 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
         age--;
       }
 
-      if (age < 21) {
+      if (age < 13) {
         return res.status(403).json({ 
-          error: "Must be 21 or older to access fantasy features",
+          error: "Must be 13 or older to access fantasy features",
           age: age 
         });
       }

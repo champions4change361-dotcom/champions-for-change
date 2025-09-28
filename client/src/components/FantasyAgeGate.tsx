@@ -14,7 +14,7 @@ interface FantasyAgeGateProps {
 export function FantasyAgeGate({ 
   children, 
   platform = "Fantasy Sports Platform",
-  requiredAge = 21 
+  requiredAge = 13 
 }: FantasyAgeGateProps) {
   const { 
     mainUser,

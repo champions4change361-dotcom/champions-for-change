@@ -16,7 +16,7 @@ interface AgeVerificationProps {
 }
 
 export function AgeVerification({ 
-  requiredAge = 21, 
+  requiredAge = 13, 
   onVerified, 
   onDenied,
   platform = "Fantasy Sports Platform",
@@ -126,8 +126,8 @@ export function AgeVerification({
             <AlertTriangle className="h-8 w-8 text-orange-500" />
           </div>
           <h1 className="text-3xl font-bold text-red-700">Age Verification Required</h1>
-          <Badge className="bg-red-100 text-red-800 border-red-300 px-4 py-2 text-lg">
-            21+ Only Platform
+          <Badge className="bg-blue-100 text-blue-800 border-blue-300 px-4 py-2 text-lg">
+            13+ Platform
           </Badge>
         </div>
 
@@ -138,8 +138,7 @@ export function AgeVerification({
               Verify Your Age to Continue
             </CardTitle>
             <CardDescription className="text-base">
-              {platform} requires all users to be 21 years or older. This helps us comply with 
-              legal requirements across all jurisdictions.
+              {platform} requires all users to be 13 years or older to comply with COPPA regulations.
             </CardDescription>
           </CardHeader>
           
@@ -148,8 +147,8 @@ export function AgeVerification({
             <Alert className="border-amber-200 bg-amber-50">
               <Lock className="h-4 w-4 text-amber-600" />
               <AlertDescription className="text-amber-900 text-sm">
-                <strong>Legal Compliance:</strong> Age verification is required for fantasy sports platforms 
-                in multiple states and jurisdictions. Your information is not stored and is only used for verification.
+                <strong>Legal Compliance:</strong> Age verification ensures COPPA compliance for users under 13. 
+                Your information is not stored and is only used for verification.
               </AlertDescription>
             </Alert>
 
@@ -162,7 +161,7 @@ export function AgeVerification({
               <div className="space-y-2 text-sm text-red-700">
                 <div className="flex justify-between">
                   <span>• Minimum Age:</span>
-                  <span className="font-bold">21 Years Old</span>
+                  <span className="font-bold">13 Years Old</span>
                 </div>
                 <div className="flex justify-between">
                   <span>• Age Calculation:</span>
@@ -270,7 +269,7 @@ export function AgeVerification({
                 ) : (
                   <>
                     <CheckCircle className="h-5 w-5 mr-2" />
-                    Verify Age (21+)
+                    Verify Age (13+)
                   </>
                 )}
               </Button>

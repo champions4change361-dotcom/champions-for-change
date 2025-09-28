@@ -178,7 +178,7 @@ export default function FantasyTournaments() {
   };
 
   return (
-    <FantasyAgeGate platform="Fantasy Sports Platform" requiredAge={21}>
+    <FantasyAgeGate platform="Fantasy Sports Platform" requiredAge={13}>
       <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
       <div className="text-center space-y-4">
@@ -197,8 +197,8 @@ export default function FantasyTournaments() {
             <Badge variant="secondary" className="text-sm">
               Status: {fantasyStatus.fantasy_status}
             </Badge>
-            <Badge variant="outline" className="text-sm text-red-600">
-              Age 21+ Required
+            <Badge variant="outline" className="text-sm text-blue-600">
+              Age 13+ Required
             </Badge>
           </div>
         )}
@@ -209,7 +209,7 @@ export default function FantasyTournaments() {
           <div className="text-sm text-yellow-700 space-y-1">
             <p>Fantasy Authenticated: {isFantasyAuthenticated ? '✅ Yes' : '❌ No'}</p>
             <p>Fantasy User: {fantasyUser ? fantasyUser.email : '❌ None'}</p>
-            <p>Age Verified: {localStorage.getItem('ageVerified21Plus') === 'true' ? '✅ Yes' : '❌ No'}</p>
+            <p>Age Verified: {localStorage.getItem('ageVerified13Plus') === 'true' ? '✅ Yes' : '❌ No'}</p>
           </div>
           <Button 
             size="sm" 
@@ -418,8 +418,8 @@ export default function FantasyTournaments() {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            <p className="text-red-600 font-medium">
-              🔞 This platform is strictly for adults 21 years and older
+            <p className="text-blue-600 font-medium">
+              👦👧 This platform is for users 13 years and older
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
               <div className="flex items-center space-x-2">
@@ -479,7 +479,7 @@ export default function FantasyTournaments() {
                 <p className="text-sm text-muted-foreground">Sports Supported</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl font-bold text-red-600">21+</p>
+                <p className="text-2xl font-bold text-blue-600">13+</p>
                 <p className="text-sm text-muted-foreground">Age Requirement</p>
               </div>
             </div>
@@ -573,7 +573,7 @@ export default function FantasyTournaments() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-3">
-              Strict 21+ age verification with identity confirmation required for all participants
+              Age verification (13+) ensures COPPA compliance for safe youth access
             </p>
             <Badge variant="outline" className="text-red-600">
               ID Verification Required
