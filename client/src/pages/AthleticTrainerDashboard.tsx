@@ -1,4 +1,15 @@
 import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import type { AthleteRoster, TrainerCommunication, MedicalSupply, EquipmentCheck, InsertAthleteRoster } from "@shared/schema";
+import { insertAthleteRosterSchema } from "@shared/athleticTrainerSchema";
+import type { AthleteProfile } from "@shared/athletic-trainer-types";
+import { z } from "zod";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -52,6 +63,7 @@ export default function AthleticTrainerDashboard() {
   const [showCheerInjuryAssessment, setShowCheerInjuryAssessment] = useState(false);
   const [showOrgChartBuilder, setShowOrgChartBuilder] = useState(false);
   const [showSocialHub, setShowSocialHub] = useState(false);
+  const [showVideoAnalysis, setShowVideoAnalysis] = useState(false);
   const [consultation, setConsultation] = useState({
     athleteName: '',
     sport: '',
@@ -66,72 +78,76 @@ export default function AthleticTrainerDashboard() {
     injuryTime: ''
   });
 
-  // Mock data for demonstration
-  const athletes = [
-    {
-      id: "1",
-      name: "Sarah Johnson",
-      sport: "Basketball",
-      grade: "11th",
-      status: "active",
-      lastVisit: "2024-08-12",
-      medicalAlerts: ["Asthma", "Previous ACL injury"],
-      upcomingAppointments: 2
-    },
-    {
-      id: "2", 
-      name: "Marcus Williams",
-      sport: "Football",
-      grade: "12th",
-      status: "injured",
-      lastVisit: "2024-08-14",
-      medicalAlerts: ["Concussion protocol"],
-      upcomingAppointments: 1
-    },
-    {
-      id: "3",
-      name: "Emma Davis",
-      sport: "Track & Field",
-      grade: "10th", 
-      status: "cleared",
-      lastVisit: "2024-08-10",
-      medicalAlerts: [],
-      upcomingAppointments: 0
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Query for athletes under trainer's care - STRONGLY TYPED
+  const { data: athletes = [], isLoading: athletesLoading, error: athletesError } = useQuery<AthleteProfile[]>({
+    queryKey: ["/api/athletic-trainer/my-athletes"],
+    enabled: !!user?.id
+  });
+
+  // Query for recent trainer communications - STRONGLY TYPED
+  const { data: recentMessages = [], isLoading: messagesLoading } = useQuery<TrainerCommunication[]>({
+    queryKey: ["/api/athletic-trainer/communications", { limit: 5, unreadOnly: true }],
+    enabled: !!user?.id
+  });
+
+  // Query for upcoming equipment checks - STRONGLY TYPED
+  const { data: upcomingChecks = [], isLoading: checksLoading } = useQuery<EquipmentCheck[]>({
+    queryKey: ["/api/athletic-trainer/equipment-checks", { upcoming: true, limit: 5 }],
+    enabled: !!user?.id
+  });
+
+  // Query for low stock inventory items - STRONGLY TYPED
+  const { data: lowStockItems = [], isLoading: inventoryLoading } = useQuery<MedicalSupply[]>({
+    queryKey: ["/api/athletic-trainer/inventory", { lowStock: true }],
+    enabled: !!user?.id
+  });
+
+  // Create athlete form schema - SECURITY ALIGNED
+  const createAthleteSchema = z.object({
+    firstName: z.string().min(1, "First name is required"),
+    lastName: z.string().min(1, "Last name is required"),
+    sport: z.string().optional(),
+    grade: z.string().optional(),
+    season: z.string().optional().default("Fall 2024")
+  });
+
+  const createAthleteForm = useForm<z.infer<typeof createAthleteSchema>>({
+    resolver: zodResolver(createAthleteSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      sport: "",
+      grade: "",
+      season: "Fall 2024"
     }
-  ];
+  });
 
-  const recentMessages = [
-    {
-      id: "1",
-      from: "Dr. Smith",
-      subject: "Marcus Williams - MRI Results",
-      preview: "MRI shows significant improvement...",
-      priority: "high",
-      time: "2 hours ago",
-      unread: true
+  const createAthleteMutation = useMutation({
+    mutationFn: async (data: z.infer<typeof createAthleteSchema>) => {
+      // SECURITY: Do not send trainerId/organizationId - server derives from auth context
+      const response = await apiRequest("/api/athletic-trainer/athletes", "POST", data);
+      return response.json();
     },
-    {
-      id: "2",
-      from: "Coach Thompson",
-      subject: "Sarah Johnson - Return to Play Status",
-      preview: "When can Sarah return to full practice?",
-      priority: "normal",
-      time: "4 hours ago",
-      unread: true
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/athletic-trainer/my-athletes"] });
+      setShowAddAthlete(false);
+      createAthleteForm.reset();
+      toast({
+        title: "Success",
+        description: "Athlete added successfully"
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to add athlete",
+        variant: "destructive"
+      });
     }
-  ];
-
-  const upcomingChecks = [
-    { equipment: "AED Unit #1", type: "Monthly Check", due: "Tomorrow", status: "pending" },
-    { equipment: "Emergency Bag", type: "Weekly Inventory", due: "Aug 18", status: "pending" },
-    { equipment: "Ice Machine", type: "Maintenance", due: "Aug 20", status: "scheduled" }
-  ];
-
-  const lowStockItems = [
-    { item: "Elastic Bandages", current: 5, minimum: 10, status: "critical" },
-    { item: "Ice Packs", current: 8, minimum: 15, status: "low" },
-    { item: "Antiseptic Wipes", current: 12, minimum: 20, status: "low" }
-  ];
+  });
 
   return (
     <AuthenticatedLayout
@@ -185,7 +201,11 @@ export default function AthleticTrainerDashboard() {
                 <Users className="h-5 w-5 text-blue-600" />
                 <div>
                   <p className="text-sm text-slate-600">Active Athletes</p>
-                  <p className="text-2xl font-bold">24</p>
+                  {athletesLoading ? (
+                    <div className="w-8 h-6 bg-slate-200 animate-pulse rounded"></div>
+                  ) : (
+                    <p className="text-2xl font-bold" data-testid="stat-active-athletes">{athletes.length}</p>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -197,7 +217,13 @@ export default function AthleticTrainerDashboard() {
                 <AlertTriangle className="h-5 w-5 text-orange-600" />
                 <div>
                   <p className="text-sm text-slate-600">Current Injuries</p>
-                  <p className="text-2xl font-bold">3</p>
+                  {athletesLoading ? (
+                    <div className="w-8 h-6 bg-slate-200 animate-pulse rounded"></div>
+                  ) : (
+                    <p className="text-2xl font-bold" data-testid="stat-current-injuries">
+                      {athletes.filter(athlete => athlete.healthInfo?.currentInjuries?.length > 0).length}
+                    </p>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -209,7 +235,13 @@ export default function AthleticTrainerDashboard() {
                 <MessageSquare className="h-5 w-5 text-green-600" />
                 <div>
                   <p className="text-sm text-slate-600">Unread Messages</p>
-                  <p className="text-2xl font-bold">7</p>
+                  {messagesLoading ? (
+                    <div className="w-8 h-6 bg-slate-200 animate-pulse rounded"></div>
+                  ) : (
+                    <p className="text-2xl font-bold" data-testid="stat-unread-messages">
+                      {recentMessages.filter(msg => !msg.isRead).length}
+                    </p>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -221,7 +253,11 @@ export default function AthleticTrainerDashboard() {
                 <Package className="h-5 w-5 text-red-600" />
                 <div>
                   <p className="text-sm text-slate-600">Low Stock Items</p>
-                  <p className="text-2xl font-bold">3</p>
+                  {inventoryLoading ? (
+                    <div className="w-8 h-6 bg-slate-200 animate-pulse rounded"></div>
+                  ) : (
+                    <p className="text-2xl font-bold" data-testid="stat-low-stock-items">{lowStockItems.length}</p>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -343,66 +379,122 @@ export default function AthleticTrainerDashboard() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {athletes.map((athlete) => (
-                <Card key={athlete.id} className="cursor-pointer hover:shadow-md transition-shadow">
-                  <CardHeader className="pb-3">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <CardTitle className="text-lg">{athlete.name}</CardTitle>
-                        <CardDescription>{athlete.sport} • {athlete.grade}</CardDescription>
+            {athletesLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[...Array(6)].map((_, i) => (
+                  <Card key={i} className="animate-pulse">
+                    <CardHeader className="pb-3">
+                      <div className="flex justify-between items-start">
+                        <div className="space-y-2">
+                          <div className="h-5 bg-slate-200 rounded w-32"></div>
+                          <div className="h-4 bg-slate-200 rounded w-24"></div>
+                        </div>
+                        <div className="h-6 bg-slate-200 rounded w-16"></div>
                       </div>
-                      <Badge 
-                        variant={athlete.status === 'active' ? 'default' : 
-                                athlete.status === 'injured' ? 'destructive' : 'secondary'}
-                      >
-                        {athlete.status}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {athlete.medicalAlerts.length > 0 && (
-                      <div className="flex items-center space-x-2">
-                        <AlertTriangle className="h-4 w-4 text-orange-600" />
-                        <span className="text-sm text-orange-700">
-                          {athlete.medicalAlerts.length} alert(s)
-                        </span>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="h-4 bg-slate-200 rounded w-20"></div>
+                      <div className="h-4 bg-slate-200 rounded w-28"></div>
+                      <div className="flex gap-2">
+                        <div className="h-8 bg-slate-200 rounded flex-1"></div>
+                        <div className="h-8 bg-slate-200 rounded flex-1"></div>
                       </div>
-                    )}
-                    
-                    <div className="flex justify-between text-sm text-slate-600">
-                      <span>Last visit: {athlete.lastVisit}</span>
-                      {athlete.upcomingAppointments > 0 && (
-                        <span className="text-blue-600">
-                          {athlete.upcomingAppointments} upcoming
-                        </span>
-                      )}
-                    </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : athletesError ? (
+              <div className="text-center py-8">
+                <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-red-700">Failed to Load Athletes</h3>
+                <p className="text-red-600 mb-4">{athletesError.message}</p>
+                <Button onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/athletic-trainer/my-athletes"] })}>
+                  Retry
+                </Button>
+              </div>
+            ) : athletes.length === 0 ? (
+              <div className="text-center py-8">
+                <Users className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-slate-600">No Athletes Yet</h3>
+                <p className="text-slate-500 mb-4">Start by adding your first athlete to the system.</p>
+                <Button onClick={() => setShowAddAthlete(true)} data-testid="button-add-first-athlete">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add First Athlete
+                </Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {athletes.map((athlete) => {
+                  // Map backend AthleteRoster to expected frontend format
+                  const athleteName = athlete.athleteId ? `${athlete.athleteId} ${athlete.trainerId}` : 'Unknown Athlete';
+                  const medicalAlertsCount = athlete.medicalAlerts?.length || 0;
+                  
+                  return (
+                    <Card key={athlete.id} className="cursor-pointer hover:shadow-md transition-shadow">
+                      <CardHeader className="pb-3">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <CardTitle className="text-lg" data-testid={`athlete-name-${athlete.id}`}>
+                              {athleteName}
+                            </CardTitle>
+                            <CardDescription data-testid={`athlete-details-${athlete.id}`}>
+                              {athlete.sport || 'Unknown Sport'} • {athlete.grade || 'Unknown Grade'}
+                            </CardDescription>
+                          </div>
+                          <Badge 
+                            variant={athlete.status === 'active' ? 'default' : 
+                                    athlete.status === 'injured' ? 'destructive' : 'secondary'}
+                            data-testid={`athlete-status-${athlete.id}`}
+                          >
+                            {athlete.status || 'unknown'}
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        {medicalAlertsCount > 0 && (
+                          <div className="flex items-center space-x-2">
+                            <AlertTriangle className="h-4 w-4 text-orange-600" />
+                            <span className="text-sm text-orange-700" data-testid={`athlete-alerts-${athlete.id}`}>
+                              {medicalAlertsCount} alert(s)
+                            </span>
+                          </div>
+                        )}
+                        
+                        <div className="flex justify-between text-sm text-slate-600">
+                          <span data-testid={`athlete-last-updated-${athlete.id}`}>
+                            Added: {new Date(athlete.dateAdded || athlete.lastUpdated).toLocaleDateString()}
+                          </span>
+                          <span className="text-blue-600" data-testid={`athlete-season-${athlete.id}`}>
+                            {athlete.season || 'Current Season'}
+                          </span>
+                        </div>
 
-                    <div className="flex flex-col sm:flex-row gap-2">
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        className="flex-1 sm:flex-initial"
-                        data-testid={`button-view-athlete-${athlete.id}`}
-                      >
-                        <FileText className="h-4 w-4 mr-1" />
-                        View Profile
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        className="flex-1 sm:flex-initial"
-                        data-testid={`button-message-athlete-${athlete.id}`}
-                      >
-                        <MessageSquare className="h-4 w-4 mr-1" />
-                        Message
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                        <div className="flex flex-col sm:flex-row gap-2">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            className="flex-1 sm:flex-initial"
+                            data-testid={`button-view-athlete-${athlete.id}`}
+                          >
+                            <FileText className="h-4 w-4 mr-1" />
+                            View Profile
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            className="flex-1 sm:flex-initial"
+                            data-testid={`button-message-athlete-${athlete.id}`}
+                          >
+                            <MessageSquare className="h-4 w-4 mr-1" />
+                            Message
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
           </TabsContent>
 
           {/* Cheerleading & Athletic Support Teams Tab */}
@@ -2321,6 +2413,164 @@ export default function AthleticTrainerDashboard() {
           isOpen={showSocialHub}
           onClose={() => setShowSocialHub(false)}
         />
+
+        {/* Add Athlete Dialog */}
+        <Dialog open={showAddAthlete} onOpenChange={setShowAddAthlete}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Add New Athlete</DialogTitle>
+            </DialogHeader>
+            <Form {...createAthleteForm}>
+              <form onSubmit={createAthleteForm.handleSubmit((data) => createAthleteMutation.mutate(data))} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={createAthleteForm.control}
+                    name="firstName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>First Name *</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter first name" {...field} data-testid="input-athlete-first-name" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={createAthleteForm.control}
+                    name="lastName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Last Name *</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter last name" {...field} data-testid="input-athlete-last-name" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={createAthleteForm.control}
+                    name="sport"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Sport *</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger data-testid="select-athlete-sport">
+                              <SelectValue placeholder="Select sport" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="Football">Football</SelectItem>
+                            <SelectItem value="Basketball">Basketball</SelectItem>
+                            <SelectItem value="Baseball">Baseball</SelectItem>
+                            <SelectItem value="Softball">Softball</SelectItem>
+                            <SelectItem value="Track & Field">Track & Field</SelectItem>
+                            <SelectItem value="Cross Country">Cross Country</SelectItem>
+                            <SelectItem value="Soccer">Soccer</SelectItem>
+                            <SelectItem value="Tennis">Tennis</SelectItem>
+                            <SelectItem value="Volleyball">Volleyball</SelectItem>
+                            <SelectItem value="Swimming">Swimming</SelectItem>
+                            <SelectItem value="Wrestling">Wrestling</SelectItem>
+                            <SelectItem value="Golf">Golf</SelectItem>
+                            <SelectItem value="Cheerleading">Cheerleading</SelectItem>
+                            <SelectItem value="Dance Team">Dance Team</SelectItem>
+                            <SelectItem value="Other">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={createAthleteForm.control}
+                    name="grade"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Grade *</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger data-testid="select-athlete-grade">
+                              <SelectValue placeholder="Select grade" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="9th">9th Grade</SelectItem>
+                            <SelectItem value="10th">10th Grade</SelectItem>
+                            <SelectItem value="11th">11th Grade</SelectItem>
+                            <SelectItem value="12th">12th Grade</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={createAthleteForm.control}
+                    name="season"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Season</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Fall 2024" {...field} data-testid="input-athlete-season" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={createAthleteForm.control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Status</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger data-testid="select-athlete-status">
+                              <SelectValue />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="active">Active</SelectItem>
+                            <SelectItem value="injured">Injured</SelectItem>
+                            <SelectItem value="cleared">Cleared</SelectItem>
+                            <SelectItem value="suspended">Suspended</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                <div className="flex justify-end space-x-3 pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowAddAthlete(false)}
+                    data-testid="button-cancel-athlete"
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    disabled={createAthleteMutation.isPending}
+                    data-testid="button-save-athlete"
+                  >
+                    {createAthleteMutation.isPending ? "Adding..." : "Add Athlete"}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
       </div>
     </AuthenticatedLayout>
   );

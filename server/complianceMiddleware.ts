@@ -2,19 +2,19 @@ import { Request, Response, NextFunction } from 'express';
 import { getStorage } from './storage';
 import crypto from 'crypto';
 
-export interface ComplianceRequest extends Request {
-  user: {
-    claims: {
-      sub: string;
-      email: string;
-    };
-  };
-  complianceContext?: {
-    hasHipaaAccess: boolean;
-    hasFerpaAccess: boolean;
-    complianceRole: string;
-    medicalDataAccess: boolean;
-  };
+// Using standard Request interface with user extension from rbac-middleware.ts
+export interface ComplianceContext {
+  hasHipaaAccess: boolean;
+  hasFerpaAccess: boolean;
+  complianceRole: string;
+  medicalDataAccess: boolean;
+}
+
+// Extend Request interface to include compliance context
+declare module 'express-serve-static-core' {
+  interface Request {
+    complianceContext?: ComplianceContext;
+  }
 }
 
 // Generate tamper-evident integrity hash for audit log entry
@@ -54,7 +54,7 @@ export async function logComplianceAction(
       resourceType,
       resourceId: resourceId || null,
       ipAddress: req?.ip || req?.socket?.remoteAddress || 'unknown',
-      userAgent: req?.get('User-Agent') || 'unknown',
+      userAgent: (req && typeof req.get === 'function' ? req.get('User-Agent') : null) || 'unknown',
       complianceNotes: notes || null,
       createdAt: timestamp
     };
@@ -80,7 +80,7 @@ export async function logComplianceAction(
 }
 
 // Middleware to check HIPAA compliance for health data access
-export function requireHipaaCompliance(req: ComplianceRequest, res: Response, next: NextFunction) {
+export function requireHipaaCompliance(req: Request, res: Response, next: NextFunction) {
   if (!req.user?.claims?.sub) {
     return res.status(401).json({ 
       error: 'Authentication required for health data access',
@@ -92,7 +92,7 @@ export function requireHipaaCompliance(req: ComplianceRequest, res: Response, ne
   const checkHipaaCompliance = async () => {
     try {
       const storage = await getStorage();
-      const user = await storage.getUser(req.user.claims.sub);
+      const user = await storage.getUser(req.user!.claims.sub);
       
       if (!user) {
         return res.status(401).json({ 
@@ -188,7 +188,7 @@ export function requireHipaaCompliance(req: ComplianceRequest, res: Response, ne
 }
 
 // Middleware to check FERPA compliance for student data access
-export function requireFerpaCompliance(req: ComplianceRequest, res: Response, next: NextFunction) {
+export function requireFerpaCompliance(req: Request, res: Response, next: NextFunction) {
   if (!req.user?.claims?.sub) {
     return res.status(401).json({ 
       error: 'Authentication required for student data access',
@@ -199,7 +199,7 @@ export function requireFerpaCompliance(req: ComplianceRequest, res: Response, ne
   const checkFerpaCompliance = async () => {
     try {
       const storage = await getStorage();
-      const user = await storage.getUser(req.user.claims.sub);
+      const user = await storage.getUser(req.user!.claims.sub);
       
       if (!user) {
         return res.status(401).json({ 
@@ -273,7 +273,7 @@ export function requireFerpaCompliance(req: ComplianceRequest, res: Response, ne
 }
 
 // Combined middleware for routes requiring both HIPAA and FERPA compliance
-export function requireFullCompliance(req: ComplianceRequest, res: Response, next: NextFunction) {
+export function requireFullCompliance(req: Request, res: Response, next: NextFunction) {
   requireFerpaCompliance(req, res, (ferpaError) => {
     if (ferpaError) return;
     
@@ -285,7 +285,7 @@ export function requireFullCompliance(req: ComplianceRequest, res: Response, nex
 export function auditDataAccess(
   resourceType: 'student_data' | 'health_data' | 'tournament_data' | 'administrative_data'
 ) {
-  return async (req: ComplianceRequest, res: Response, next: NextFunction) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
     if (req.user?.claims?.sub) {
       await logComplianceAction(
         req.user.claims.sub,
@@ -302,7 +302,7 @@ export function auditDataAccess(
 
 // Middleware to enforce role-based access for different compliance levels
 export function requireComplianceRole(allowedRoles: string[]) {
-  return async (req: ComplianceRequest, res: Response, next: NextFunction) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
     if (!req.user?.claims?.sub) {
       return res.status(401).json({ 
         error: 'Authentication required',

@@ -12,14 +12,14 @@ const router = express.Router();
 
 // Development-only test user for verification
 const TEST_USER: User = {
-  id: 'test-user-verification-2025',
-  email: 'test-verification@example.com',
-  firstName: 'Test',
-  lastName: 'User',
+  id: 'test-athletic-trainer-2025',
+  email: 'athletic-trainer@example.com',
+  firstName: 'Athletic',
+  lastName: 'Trainer',
   profileImageUrl: null,
   subscriptionStatus: 'active',
   subscriptionPlan: 'district_enterprise',
-  userRole: 'district_athletic_coordinator',
+  userRole: 'athletic_trainer',
   organizationId: 'test-org',
   organizationName: 'Test Organization',
   mission: null,
@@ -43,12 +43,12 @@ const TEST_USER: User = {
   lifetimeUsageValue: "0",
   tournamentCredits: 0,
   creditsPurchased: "0",
-  hipaaTrainingCompleted: false,
-  hipaaTrainingDate: null,
-  ferpaAgreementSigned: false,
-  ferpaAgreementDate: null,
-  complianceRole: 'district_athletic_director',
-  medicalDataAccess: false,
+  hipaaTrainingCompleted: true,
+  hipaaTrainingDate: new Date('2025-01-01'),
+  ferpaAgreementSigned: true,
+  ferpaAgreementDate: new Date('2025-01-01'),
+  complianceRole: 'athletic_trainer',
+  medicalDataAccess: true,
   lastComplianceAudit: null,
   stripeCustomerId: null,
   stripeSubscriptionId: null,
@@ -200,6 +200,76 @@ function devAuthBypass(req: express.Request, res: express.Response, next: expres
 
   next();
 }
+
+/**
+ * Create authenticated session for test user
+ * POST /api/test/login
+ */
+router.post('/login', async (req, res) => {
+  try {
+    if (process.env.NODE_ENV !== 'development') {
+      return res.status(403).json({ 
+        error: 'Test login only available in development mode' 
+      });
+    }
+
+    console.log('🧪 Creating authenticated session for test user...');
+    
+    const storage = await getStorage();
+    
+    // Ensure test user exists
+    await storage.upsertUser(TEST_USER);
+    
+    // Create session user object that matches auth expectations
+    const sessionUser = {
+      claims: { 
+        sub: TEST_USER.id,
+        email: TEST_USER.email,
+        first_name: TEST_USER.firstName,
+        last_name: TEST_USER.lastName,
+        profile_image_url: TEST_USER.profileImageUrl
+      }
+    };
+    
+    // Use req.login to establish passport session
+    req.login(sessionUser, (err) => {
+      if (err) {
+        console.error("Test login error:", err);
+        return res.status(500).json({ error: "Test login failed" });
+      }
+      
+      console.log("✅ Test user authenticated successfully:", sessionUser.claims.email);
+      
+      // Force session save
+      req.session.save((saveErr) => {
+        if (saveErr) {
+          console.error("Session save error:", saveErr);
+        }
+        
+        res.json({
+          success: true,
+          message: 'Authenticated session established',
+          user: {
+            id: TEST_USER.id,
+            email: TEST_USER.email,
+            firstName: TEST_USER.firstName,
+            lastName: TEST_USER.lastName,
+            userRole: TEST_USER.userRole,
+            complianceRole: TEST_USER.complianceRole,
+            medicalDataAccess: TEST_USER.medicalDataAccess
+          }
+        });
+      });
+    });
+    
+  } catch (error) {
+    console.error('❌ Test login failed:', error);
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
 
 /**
  * Initialize test user and data

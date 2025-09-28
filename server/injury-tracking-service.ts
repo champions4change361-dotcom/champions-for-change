@@ -192,16 +192,15 @@ export class InjuryTrackingServiceImpl implements InjuryTrackingService {
 
       // Build injury incident data
       const injuryData: InsertInjuryIncident = {
-        id: randomUUID(),
         athleteId: incident.athleteId!,
         sportId: incident.sportId,
-        incidentDate: incident.incidentDate!,
+        incidentDate: incident.incidentDate ? new Date(incident.incidentDate) : new Date(),
         incidentTime: incident.incidentTime,
         location: incident.location!,
         injuryType: incident.injuryType!,
         injuryCategory: incident.injuryCategory!,
         bodyPartAffected: incident.bodyPartAffected!,
-        injurySeverity: incident.injurySeverity!,
+        injurySeverity: incident.injurySeverity === 'major' ? 'severe' : incident.injurySeverity!,
         mechanismOfInjury: incident.mechanismOfInjury,
         activityAtTimeOfInjury: incident.activityAtTimeOfInjury,
         immediateResponse: incident.immediateResponse,
@@ -213,14 +212,14 @@ export class InjuryTrackingServiceImpl implements InjuryTrackingService {
         notes: incident.notes,
         reportedBy: user.id,
         athleticTrainerId: user.id,
-        schoolId: user.organizationId,
+        schoolId: user.organizationId || 'unknown',
         weatherConditions: incident.weatherConditions,
         playingSurface: incident.playingSurface,
         protectiveEquipment: incident.protectiveEquipment,
         witnessPresent: incident.witnessPresent || false,
         parentNotified: incident.parentNotified || false,
         emergencyAction: incident.emergencyAction || false,
-        followUpRequired: incident.followUpRequired ?? true,
+        // followUpRequired is not part of InsertInjuryIncident - removed
         status: incident.status || 'active',
       };
 
@@ -322,7 +321,7 @@ export class InjuryTrackingServiceImpl implements InjuryTrackingService {
       // Convert updates to storage format
       const storageUpdates: Partial<InjuryIncident> = {
         ...updates,
-        updatedAt: new Date().toISOString(),
+        updatedAt: new Date(),
       };
 
       await storage.updateInjuryIncident(incidentId, storageUpdates, user);
@@ -407,10 +406,8 @@ export class InjuryTrackingServiceImpl implements InjuryTrackingService {
       }
 
       const followUpData: InsertInjuryFollowUp = {
-        id: randomUUID(),
         injuryIncidentId: followUp.injuryIncidentId!,
         followUpDate: followUp.followUpDate!,
-        followUpType: followUp.followUpType!,
         symptoms: followUp.symptoms,
         painLevel: followUp.painLevel,
         functionalStatus: followUp.functionalStatus,

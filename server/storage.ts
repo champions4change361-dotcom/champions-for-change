@@ -8,7 +8,7 @@ import {
   type Athlete, type InsertAthlete,
   type MedicalHistory, type InsertMedicalHistory,
   type HealthRiskAssessment, type InsertHealthRiskAssessment,
-  type InjuryIncident, type InsertInjuryIncident,
+  type InjuryIncident, type InsertInjuryIncident, type InjuryFollowUp, type InsertInjuryFollowUp,
   type ScorekeeperAssignment, type InsertScorekeeperAssignment, type EventScore, type InsertEventScore,
   type SchoolEventAssignment, type InsertSchoolEventAssignment, type CoachEventAssignment, type InsertCoachEventAssignment,
   type Contact, type InsertContact, type EmailCampaign, type InsertEmailCampaign, type CampaignRecipient, type InsertCampaignRecipient,
@@ -28,7 +28,8 @@ import {
   type TournamentConfig, type DivisionPolicy, type StageConfig,
   type GameTemplate, type InsertGameTemplate, type GameInstance, type InsertGameInstance, type UserLineup, type InsertUserLineup, type PlayerPerformance, type InsertPlayerPerformance,
   type BudgetCategory, type InsertBudgetCategory, type BudgetItem, type InsertBudgetItem, type BudgetAllocation, type InsertBudgetAllocation, type BudgetTransaction, type InsertBudgetTransaction, type BudgetApproval, type InsertBudgetApproval, type BudgetTemplate, type InsertBudgetTemplate,
-  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, teams, teamPlayers, athletes, medicalHistory, healthRiskAssessments, injuryIncidents, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog, taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices, supportTeams, supportTeamMembers, supportTeamInjuries, supportTeamAiConsultations, jerseyTeamMembers, jerseyTeamPayments, tournamentSubscriptions, clientConfigurations, guestParticipants, passwordResetTokens, showdownContests, showdownEntries, showdownLeaderboards, professionalPlayers, merchandiseProducts, merchandiseOrders, eventTickets, ticketOrders, tournamentRegistrationForms, registrationSubmissions, registrationAssignmentLog, fantasyProfiles, athleticConfigs, academicConfigs, fineArtsConfigs, eventTemplates, scoringPolicies, gameTemplates, gameInstances, userLineups, playerPerformances, athleticCalendarEvents, games, practices, facilityReservations, scheduleConflicts, academicEvents, academicCompetitions, academicParticipants, academicResults, academicDistricts, academicMeets, schoolAcademicPrograms, academicTeams, academicOfficials, budgetCategories, budgetItems, budgetAllocations, budgetTransactions, budgetApprovals, budgetTemplates
+  type AthleticCalendarEvent, type InsertAthleticCalendarEvent,
+  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, teams, teamPlayers, athletes, medicalHistory, healthRiskAssessments, injuryIncidents, injuryFollowUps, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog, taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices, supportTeams, supportTeamMembers, supportTeamInjuries, supportTeamAiConsultations, jerseyTeamMembers, jerseyTeamPayments, tournamentSubscriptions, clientConfigurations, guestParticipants, passwordResetTokens, showdownContests, showdownEntries, showdownLeaderboards, professionalPlayers, merchandiseProducts, merchandiseOrders, eventTickets, ticketOrders, tournamentRegistrationForms, registrationSubmissions, registrationAssignmentLog, fantasyProfiles, athleticConfigs, academicConfigs, fineArtsConfigs, eventTemplates, scoringPolicies, gameTemplates, gameInstances, userLineups, playerPerformances, athleticCalendarEvents, games, practices, facilityReservations, scheduleConflicts, academicEvents, academicCompetitions, academicParticipants, academicResults, academicDistricts, academicMeets, schoolAcademicPrograms, academicTeams, academicOfficials, budgetCategories, budgetItems, budgetAllocations, budgetTransactions, budgetApprovals, budgetTemplates
 } from "@shared/schema";
 
 type SportCategory = typeof sportCategories.$inferSelect;
@@ -202,8 +203,16 @@ export interface IStorage {
   // Injury Incident methods - RBAC Protected  
   createInjuryIncident(incident: any, user: SecureUserContext): Promise<any>;
   getInjuryIncident(incidentId: string, user: SecureUserContext): Promise<any>;
+  getInjuryIncidents(filters: any, user: SecureUserContext): Promise<any[]>;
   getInjuryIncidentsByAthlete(athleteId: string, user: SecureUserContext): Promise<any[]>;
+  getAthleteInjuries(athleteId: string, user: SecureUserContext): Promise<any[]>;
   updateInjuryIncident(incidentId: string, updates: any, user: SecureUserContext): Promise<any>;
+
+  // Injury Follow-up methods - RBAC Protected
+  createInjuryFollowUp(followUp: any, user: SecureUserContext): Promise<any>;
+  getInjuryFollowUp(followUpId: string, user: SecureUserContext): Promise<any>;
+  getInjuryFollowUps(incidentId: string, user: SecureUserContext): Promise<any[]>;
+  updateInjuryFollowUp(followUpId: string, updates: any, user: SecureUserContext): Promise<any>;
 
   // Medical history management methods - RBAC Protected
   // SECURITY: All health data methods now REQUIRE user context (mandatory parameter)

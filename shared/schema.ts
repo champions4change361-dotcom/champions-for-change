@@ -7716,3 +7716,4 @@ export type ScheduleConflict = typeof scheduleConflicts.$inferSelect;
 export type InsertScheduleConflict = z.infer<typeof insertScheduleConflictSchema>;
 
 export * from "./sport-configs-schema";
+export * from "./athleticTrainerSchema";

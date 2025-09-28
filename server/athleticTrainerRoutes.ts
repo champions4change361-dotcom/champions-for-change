@@ -471,7 +471,7 @@ export function registerAthleticTrainerRoutes(app: Express) {
           instruction: z.string(),
           frequency: z.string(),
           duration: z.string(),
-          notes: z.string().optional()
+          notes: z.string().default('')
         }))
       });
       
@@ -562,6 +562,10 @@ export function registerAthleticTrainerRoutes(app: Express) {
       const newDocument = {
         id: String(mockMedicalDocuments.length + 1),
         ...validatedData,
+        description: validatedData.description || 'No description provided',
+        doctorName: validatedData.doctorName || 'Unknown',
+        facilityName: validatedData.facilityName || 'Unknown',
+        dateOfService: validatedData.dateOfService || new Date().toISOString().split('T')[0],
         athleteName: athlete.name,
         fileSize: 2000000, // Mock file size
         uploadedAt: new Date().toISOString().split('T')[0],
@@ -698,7 +702,6 @@ export function registerAthleticTrainerRoutes(app: Express) {
         equipment: validatedData.equipmentType,
         type: validatedData.checkType,
         due: "Completed",
-        status: "completed",
         location: "Training Room",
         checkDate: new Date().toISOString().split('T')[0],
         ...validatedData
