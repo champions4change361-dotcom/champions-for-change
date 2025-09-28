@@ -2543,6 +2543,7 @@ export * from "./academicSchema";
 
 // Import commissioner schema for fantasy league management
 export * from './commissioner-schema';
+export * from './game-templates-schema';
 
 // Track Events types
 export type TrackEventData = typeof trackEvents.$inferSelect;

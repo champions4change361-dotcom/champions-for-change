@@ -42,6 +42,7 @@ import LeagueSettings from './pages/LeagueSettings';
 import CoachesLoungeLanding from './pages/CoachesLoungeLanding';
 import FantasyLanding from './pages/FantasyLanding';
 import FantasyCoaching from './pages/FantasyCoaching';
+import TemplateMarketplace from './pages/TemplateMarketplace';
 import PlatformOptions from './pages/PlatformOptions';
 import CommissionerDashboard from './pages/CommissionerDashboard';
 import PrivacyPolicy from './pages/PrivacyPolicy';
@@ -241,6 +242,11 @@ function AuthenticatedRoutes() {
         {/* Daily Fantasy Lineup Builder */}
         {isFeatureEnabled('fantasyLeagues') && (
           <Route path="/fantasy/league/:leagueId/lineup" component={DailyFantasyLineup} />
+        )}
+        
+        {/* Template Marketplace */}
+        {isFeatureEnabled('fantasyLeagues') && (
+          <Route path="/fantasy/templates" component={TemplateMarketplace} />
         )}
         
         {/* Fantasy League Creators */}

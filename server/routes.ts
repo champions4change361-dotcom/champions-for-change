@@ -7479,6 +7479,185 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
     }
   });
 
+  // GAME TEMPLATES API ENDPOINTS
+  
+  // Get all game templates (public browsing allowed)
+  app.get("/api/game-templates", async (req, res) => {
+    try {
+      const templates = await storage.getGameTemplates();
+      res.json(templates);
+    } catch (error: any) {
+      console.error("Get game templates error:", error);
+      res.status(500).json({ 
+        error: "Failed to fetch game templates",
+        details: error.message 
+      });
+    }
+  });
+
+  // Get specific game template
+  app.get("/api/game-templates/:id", checkAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const template = await storage.getGameTemplate(id);
+      
+      if (!template) {
+        return res.status(404).json({ error: "Game template not found" });
+      }
+      
+      res.json(template);
+    } catch (error: any) {
+      console.error("Get game template error:", error);
+      res.status(500).json({ 
+        error: "Failed to fetch game template",
+        details: error.message 
+      });
+    }
+  });
+
+  // Create game instance from template
+  app.post("/api/game-instances", checkAuth, async (req, res) => {
+    try {
+      const userId = req.user?.claims?.sub || req.session?.user?.id || req.user?.id;
+      const userEmail = req.user?.claims?.email || req.session?.user?.email || req.user?.email;
+      const userName = `${req.user?.claims?.firstName || req.session?.user?.firstName || ''} ${req.user?.claims?.lastName || req.session?.user?.lastName || ''}`.trim();
+      
+      // Validate request body with Zod schema  
+      const { templateId, instanceName, maxParticipants } = req.body;
+      
+      if (!templateId || typeof templateId !== 'string') {
+        return res.status(400).json({ error: "Valid template ID is required" });
+      }
+      
+      if (!instanceName || typeof instanceName !== 'string' || instanceName.trim().length === 0) {
+        return res.status(400).json({ error: "Valid instance name is required" });
+      }
+      
+      if (maxParticipants !== undefined && (!Number.isInteger(maxParticipants) || maxParticipants < 2 || maxParticipants > 1000)) {
+        return res.status(400).json({ error: "Max participants must be between 2 and 1000" });
+      }
+
+      // SECURITY: Always use authenticated user as commissioner - never trust client
+      const gameInstance = await storage.createGameInstance(templateId, userId, {
+        instanceName: instanceName.trim(),
+        maxParticipants: maxParticipants || 100,
+        commissionerId: userId, // Always use authenticated user
+        commissionerName: userName || userEmail
+      });
+
+      res.json({
+        success: true,
+        message: "Game instance created successfully",
+        gameInstance
+      });
+    } catch (error: any) {
+      console.error("Create game instance error:", error);
+      res.status(500).json({ 
+        error: "Failed to create game instance",
+        details: error.message 
+      });
+    }
+  });
+
+  // Get game instances (optionally filtered by commissioner)
+  app.get("/api/game-instances", checkAuth, async (req, res) => {
+    try {
+      const { commissionerId } = req.query;
+      const instances = await storage.getGameInstances(commissionerId as string);
+      res.json(instances);
+    } catch (error: any) {
+      console.error("Get game instances error:", error);
+      res.status(500).json({ 
+        error: "Failed to fetch game instances",
+        details: error.message 
+      });
+    }
+  });
+
+  // Get specific game instance
+  app.get("/api/game-instances/:id", checkAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const instance = await storage.getGameInstance(id);
+      
+      if (!instance) {
+        return res.status(404).json({ error: "Game instance not found" });
+      }
+      
+      res.json(instance);
+    } catch (error: any) {
+      console.error("Get game instance error:", error);
+      res.status(500).json({ 
+        error: "Failed to fetch game instance",
+        details: error.message 
+      });
+    }
+  });
+
+  // Join game instance
+  app.post("/api/game-instances/:id/join", checkAuth, async (req, res) => {
+    try {
+      const userId = req.user?.claims?.sub || req.session?.user?.id || req.user?.id;
+      const { id } = req.params;
+      
+      const result = await storage.joinGameInstance(id, userId);
+
+      res.json({
+        success: true,
+        message: "Successfully joined game",
+        result
+      });
+    } catch (error: any) {
+      console.error("Join game instance error:", error);
+      res.status(500).json({ 
+        error: "Failed to join game",
+        details: error.message 
+      });
+    }
+  });
+
+  // Submit lineup for game instance
+  app.post("/api/game-instances/:id/lineup", checkAuth, async (req, res) => {
+    try {
+      const userId = req.user?.claims?.sub || req.session?.user?.id || req.user?.id;
+      const { id } = req.params;
+      const { lineup } = req.body;
+      
+      if (!lineup || !Array.isArray(lineup)) {
+        return res.status(400).json({ error: "Valid lineup array is required" });
+      }
+
+      const result = await storage.submitLineup(id, userId, lineup);
+
+      res.json({
+        success: true,
+        message: "Lineup submitted successfully",
+        lineup: result
+      });
+    } catch (error: any) {
+      console.error("Submit lineup error:", error);
+      res.status(500).json({ 
+        error: "Failed to submit lineup",
+        details: error.message 
+      });
+    }
+  });
+
+  // Get all lineups for a game instance
+  app.get("/api/game-instances/:id/lineups", checkAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const lineups = await storage.getUserLineups(id);
+      res.json(lineups);
+    } catch (error: any) {
+      console.error("Get lineups error:", error);
+      res.status(500).json({ 
+        error: "Failed to fetch lineups",
+        details: error.message 
+      });
+    }
+  });
+
   // Showdown Contest routes
   app.post("/api/fantasy/showdown-contests", async (req, res) => {
     try {

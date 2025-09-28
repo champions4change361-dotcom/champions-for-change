@@ -23,7 +23,8 @@ import {
   type FantasyProfile, type InsertFantasyProfile,
   type EventTemplate, type InsertEventTemplate, type ScoringPolicy, type InsertScoringPolicy,
   type TournamentConfig, type DivisionPolicy, type StageConfig,
-  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, teams, teamPlayers, medicalHistory, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog, taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices, supportTeams, supportTeamMembers, supportTeamInjuries, supportTeamAiConsultations, jerseyTeamMembers, jerseyTeamPayments, tournamentSubscriptions, clientConfigurations, guestParticipants, passwordResetTokens, showdownContests, showdownEntries, showdownLeaderboards, professionalPlayers, merchandiseProducts, merchandiseOrders, eventTickets, ticketOrders, tournamentRegistrationForms, registrationSubmissions, registrationAssignmentLog, fantasyProfiles, athleticConfigs, academicConfigs, fineArtsConfigs, eventTemplates, scoringPolicies
+  type GameTemplate, type InsertGameTemplate, type GameInstance, type InsertGameInstance, type UserLineup, type InsertUserLineup, type PlayerPerformance, type InsertPlayerPerformance,
+  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, teams, teamPlayers, medicalHistory, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog, taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices, supportTeams, supportTeamMembers, supportTeamInjuries, supportTeamAiConsultations, jerseyTeamMembers, jerseyTeamPayments, tournamentSubscriptions, clientConfigurations, guestParticipants, passwordResetTokens, showdownContests, showdownEntries, showdownLeaderboards, professionalPlayers, merchandiseProducts, merchandiseOrders, eventTickets, ticketOrders, tournamentRegistrationForms, registrationSubmissions, registrationAssignmentLog, fantasyProfiles, athleticConfigs, academicConfigs, fineArtsConfigs, eventTemplates, scoringPolicies, gameTemplates, gameInstances, userLineups, playerPerformances
 } from "@shared/schema";
 
 type SportCategory = typeof sportCategories.$inferSelect;
@@ -64,6 +65,18 @@ export interface IStorage {
   upsertFantasyProfile(profile: InsertFantasyProfile): Promise<FantasyProfile>;
   setFantasyAgeVerification(userId: string, verifiedAt: Date, expiresAt: Date): Promise<FantasyProfile | undefined>;
   acceptFantasyTOS(userId: string): Promise<FantasyProfile | undefined>;
+
+  // Game Templates methods
+  getGameTemplates(): Promise<GameTemplate[]>;
+  getGameTemplate(id: string): Promise<GameTemplate | undefined>;
+  createGameInstance(templateId: string, commissionerId: string, instanceData: Partial<InsertGameInstance>): Promise<GameInstance>;
+  getGameInstances(commissionerId?: string): Promise<GameInstance[]>;
+  getGameInstance(id: string): Promise<GameInstance | undefined>;
+  joinGameInstance(gameInstanceId: string, userId: string): Promise<GameInstance | undefined>;
+  submitLineup(gameInstanceId: string, userId: string, lineup: Omit<InsertUserLineup, 'gameInstanceId' | 'userId'>): Promise<UserLineup>;
+  getUserLineups(gameInstanceId: string): Promise<UserLineup[]>;
+  getPlayerPerformances(gameInstanceId: string): Promise<PlayerPerformance[]>;
+  updatePlayerPerformance(playerId: string, stats: Partial<InsertPlayerPerformance>): Promise<PlayerPerformance | undefined>;
   
   // Compliance operations
   createComplianceAuditLog(log: ComplianceAuditLog): Promise<ComplianceAuditLog>;
@@ -787,6 +800,235 @@ export class DbStorage implements IStorage {
         })
         .where(eq(fantasyProfiles.userId, userId))
         .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  // Game Templates methods
+  async getGameTemplates(): Promise<GameTemplate[]> {
+    try {
+      const result = await this.db.select().from(gameTemplates).where(eq(gameTemplates.isActive, true));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async getGameTemplate(id: string): Promise<GameTemplate | undefined> {
+    try {
+      const result = await this.db.select().from(gameTemplates).where(eq(gameTemplates.id, id));
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async createGameInstance(templateId: string, commissionerId: string, instanceData: Partial<InsertGameInstance>): Promise<GameInstance> {
+    try {
+      // First get the template to copy its config
+      const template = await this.getGameTemplate(templateId);
+      if (!template) {
+        throw new Error("Template not found");
+      }
+
+      // Generate registration code
+      const registrationCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+
+      const newInstance: InsertGameInstance = {
+        templateId,
+        commissionerId,
+        registrationCode,
+        liveConfig: template.templateConfig,
+        maxParticipants: template.estimatedParticipants,
+        ...instanceData
+      };
+
+      const result = await this.db.insert(gameInstances).values(newInstance).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to create game instance");
+    }
+  }
+
+  async getGameInstances(commissionerId?: string): Promise<GameInstance[]> {
+    try {
+      if (commissionerId) {
+        const result = await this.db
+          .select()
+          .from(gameInstances)
+          .where(eq(gameInstances.commissionerId, commissionerId))
+          .orderBy(desc(gameInstances.createdAt));
+        return result;
+      } else {
+        const result = await this.db.select().from(gameInstances).orderBy(desc(gameInstances.createdAt));
+        return result;
+      }
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async getGameInstance(id: string): Promise<GameInstance | undefined> {
+    try {
+      const result = await this.db.select().from(gameInstances).where(eq(gameInstances.id, id));
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async joinGameInstance(gameInstanceId: string, userId: string): Promise<GameInstance | undefined> {
+    try {
+      // Get current instance
+      const instance = await this.getGameInstance(gameInstanceId);
+      if (!instance) return undefined;
+
+      // Check if user already joined
+      const existingLineup = await this.db
+        .select()
+        .from(userLineups)
+        .where(and(eq(userLineups.gameInstanceId, gameInstanceId), eq(userLineups.userId, userId)))
+        .limit(1);
+
+      if (existingLineup.length > 0) {
+        return instance; // Already joined
+      }
+
+      // Update participant count
+      const updatedInstance = await this.db
+        .update(gameInstances)
+        .set({ 
+          currentParticipants: (instance.currentParticipants || 0) + 1,
+          updatedAt: new Date()
+        })
+        .where(eq(gameInstances.id, gameInstanceId))
+        .returning();
+
+      return updatedInstance[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async submitLineup(gameInstanceId: string, userId: string, lineup: Omit<InsertUserLineup, 'gameInstanceId' | 'userId'>): Promise<UserLineup> {
+    try {
+      const lineupData: InsertUserLineup = {
+        ...lineup,
+        gameInstanceId,
+        userId,
+        isSubmitted: true,
+        submittedAt: new Date()
+      };
+
+      // Check if lineup already exists
+      const existing = await this.db
+        .select()
+        .from(userLineups)
+        .where(and(eq(userLineups.gameInstanceId, gameInstanceId), eq(userLineups.userId, userId)))
+        .limit(1);
+
+      let result;
+      if (existing.length > 0) {
+        // Update existing lineup
+        result = await this.db
+          .update(userLineups)
+          .set({ ...lineupData, updatedAt: new Date() })
+          .where(and(eq(userLineups.gameInstanceId, gameInstanceId), eq(userLineups.userId, userId)))
+          .returning();
+      } else {
+        // Create new lineup
+        result = await this.db.insert(userLineups).values(lineupData).returning();
+      }
+
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to submit lineup");
+    }
+  }
+
+  async getUserLineups(gameInstanceId: string): Promise<UserLineup[]> {
+    try {
+      const result = await this.db
+        .select()
+        .from(userLineups)
+        .where(eq(userLineups.gameInstanceId, gameInstanceId))
+        .orderBy(desc(userLineups.currentScore));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async getPlayerPerformances(gameInstanceId: string): Promise<PlayerPerformance[]> {
+    try {
+      // Get all unique player IDs from lineups in this game instance
+      const lineups = await this.getUserLineups(gameInstanceId);
+      const playerIds = new Set<string>();
+      
+      lineups.forEach(lineup => {
+        if (lineup.lineup) {
+          lineup.lineup.forEach(player => playerIds.add(player.playerId));
+        }
+      });
+
+      if (playerIds.size === 0) return [];
+
+      // Get performances for those players
+      const result = await this.db
+        .select()
+        .from(playerPerformances)
+        .where(
+          sql`${playerPerformances.playerId} = ANY(${Array.from(playerIds)})`
+        )
+        .orderBy(desc(playerPerformances.lastUpdated));
+
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async updatePlayerPerformance(playerId: string, stats: Partial<InsertPlayerPerformance>): Promise<PlayerPerformance | undefined> {
+    try {
+      // Check if performance record exists
+      const existing = await this.db
+        .select()
+        .from(playerPerformances)
+        .where(eq(playerPerformances.playerId, playerId))
+        .limit(1);
+
+      let result;
+      if (existing.length > 0) {
+        // Update existing performance
+        result = await this.db
+          .update(playerPerformances)
+          .set({ ...stats, lastUpdated: new Date() })
+          .where(eq(playerPerformances.playerId, playerId))
+          .returning();
+      } else {
+        // Create new performance record
+        const performanceData: InsertPlayerPerformance = {
+          playerId,
+          playerName: "",
+          team: "",
+          position: "",
+          ...stats
+        };
+        result = await this.db.insert(playerPerformances).values(performanceData).returning();
+      }
+
       return result[0];
     } catch (error) {
       console.error("Database error:", error);
@@ -4230,6 +4472,12 @@ export class MemStorage implements IStorage {
   private fantasyProfiles: Map<string, FantasyProfile>;
   private showdownContests: Map<string, ShowdownContest>;
   private showdownEntries: Map<string, ShowdownEntry>;
+  
+  // GAME TEMPLATES MAPS
+  private gameTemplates: Map<string, GameTemplate>;
+  private gameInstances: Map<string, GameInstance>;
+  private userLineups: Map<string, UserLineup>;
+  private playerPerformances: Map<string, PlayerPerformance>;
 
   constructor() {
     this.users = new Map();
@@ -4279,6 +4527,12 @@ export class MemStorage implements IStorage {
     this.showdownContests = new Map();
     this.showdownEntries = new Map();
     
+    // GAME TEMPLATES INITIALIZATION
+    this.gameTemplates = new Map();
+    this.gameInstances = new Map();
+    this.userLineups = new Map();
+    this.playerPerformances = new Map();
+    
     // Initialize with default tournament structures, sport division rules, track events, tournament integration, competition formats, and KRAKEN!
     this.initializeDefaultStructures();
     this.initializeSportDivisionRules();
@@ -4289,6 +4543,7 @@ export class MemStorage implements IStorage {
     this.initializeCompetitionFormatTemplates();
     this.initializeKrakenDivisionSystem();
     this.initializeTournamentEmpire();
+    this.initializeGameTemplates();
   }
 
   private initializeDefaultStructures() {
@@ -4517,6 +4772,158 @@ export class MemStorage implements IStorage {
       return updatedProfile;
     }
     return undefined;
+  }
+
+  // Game Templates methods
+  async getGameTemplates(): Promise<GameTemplate[]> {
+    return Array.from(this.gameTemplates.values()).filter(template => template.isActive);
+  }
+
+  async getGameTemplate(id: string): Promise<GameTemplate | undefined> {
+    return this.gameTemplates.get(id);
+  }
+
+  async createGameInstance(templateId: string, commissionerId: string, instanceData: Partial<InsertGameInstance>): Promise<GameInstance> {
+    const template = this.gameTemplates.get(templateId);
+    if (!template) {
+      throw new Error("Template not found");
+    }
+
+    // Generate registration code
+    const registrationCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+    
+    const id = randomUUID();
+    const now = new Date();
+    
+    const newInstance: GameInstance = {
+      id,
+      templateId,
+      commissionerId,
+      registrationCode,
+      liveConfig: template.templateConfig,
+      maxParticipants: template.estimatedParticipants,
+      currentParticipants: 0,
+      status: "open",
+      ...instanceData,
+      createdAt: now,
+      updatedAt: now
+    };
+
+    this.gameInstances.set(id, newInstance);
+    return newInstance;
+  }
+
+  async getGameInstances(commissionerId?: string): Promise<GameInstance[]> {
+    const instances = Array.from(this.gameInstances.values());
+    if (commissionerId) {
+      return instances.filter(instance => instance.commissionerId === commissionerId);
+    }
+    return instances.sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0));
+  }
+
+  async getGameInstance(id: string): Promise<GameInstance | undefined> {
+    return this.gameInstances.get(id);
+  }
+
+  async joinGameInstance(gameInstanceId: string, userId: string): Promise<GameInstance | undefined> {
+    const instance = this.gameInstances.get(gameInstanceId);
+    if (!instance) return undefined;
+
+    // Check if user already joined
+    const existingLineup = Array.from(this.userLineups.values()).find(
+      lineup => lineup.gameInstanceId === gameInstanceId && lineup.userId === userId
+    );
+
+    if (existingLineup) {
+      return instance; // Already joined
+    }
+
+    // Update participant count
+    const updatedInstance: GameInstance = {
+      ...instance,
+      currentParticipants: (instance.currentParticipants || 0) + 1,
+      updatedAt: new Date()
+    };
+
+    this.gameInstances.set(gameInstanceId, updatedInstance);
+    return updatedInstance;
+  }
+
+  async submitLineup(gameInstanceId: string, userId: string, lineup: Omit<InsertUserLineup, 'gameInstanceId' | 'userId'>): Promise<UserLineup> {
+    // Check if lineup already exists
+    const existingKey = Array.from(this.userLineups.entries()).find(
+      ([key, existingLineup]) => existingLineup.gameInstanceId === gameInstanceId && existingLineup.userId === userId
+    )?.[0];
+
+    const id = existingKey || randomUUID();
+    const now = new Date();
+
+    const lineupData: UserLineup = {
+      id,
+      gameInstanceId,
+      userId,
+      isSubmitted: true,
+      submittedAt: now,
+      ...lineup,
+      createdAt: existingKey ? this.userLineups.get(existingKey)?.createdAt || now : now,
+      updatedAt: now
+    };
+
+    this.userLineups.set(id, lineupData);
+    return lineupData;
+  }
+
+  async getUserLineups(gameInstanceId: string): Promise<UserLineup[]> {
+    return Array.from(this.userLineups.values())
+      .filter(lineup => lineup.gameInstanceId === gameInstanceId)
+      .sort((a, b) => parseFloat(b.currentScore || "0") - parseFloat(a.currentScore || "0"));
+  }
+
+  async getPlayerPerformances(gameInstanceId: string): Promise<PlayerPerformance[]> {
+    // Get all unique player IDs from lineups in this game instance
+    const lineups = await this.getUserLineups(gameInstanceId);
+    const playerIds = new Set<string>();
+    
+    lineups.forEach(lineup => {
+      if (lineup.lineup) {
+        lineup.lineup.forEach(player => playerIds.add(player.playerId));
+      }
+    });
+
+    if (playerIds.size === 0) return [];
+
+    // Get performances for those players
+    return Array.from(this.playerPerformances.values())
+      .filter(performance => playerIds.has(performance.playerId))
+      .sort((a, b) => (b.lastUpdated?.getTime() || 0) - (a.lastUpdated?.getTime() || 0));
+  }
+
+  async updatePlayerPerformance(playerId: string, stats: Partial<InsertPlayerPerformance>): Promise<PlayerPerformance | undefined> {
+    // Check if performance record exists
+    const existingKey = Array.from(this.playerPerformances.entries()).find(
+      ([key, performance]) => performance.playerId === playerId
+    )?.[0];
+
+    const id = existingKey || randomUUID();
+    const now = new Date();
+
+    const performanceData: PlayerPerformance = {
+      id,
+      playerId,
+      playerName: "",
+      team: "",
+      position: "",
+      fantasyPoints: "0",
+      pprFantasyPoints: "0",
+      halfPprFantasyPoints: "0",
+      gameStatus: "scheduled",
+      ...stats,
+      lastUpdated: now,
+      createdAt: existingKey ? this.playerPerformances.get(existingKey)?.createdAt || now : now
+    };
+
+    this.playerPerformances.set(id, performanceData);
+    return performanceData;
   }
 
   // White-label methods
@@ -7796,6 +8203,259 @@ export class MemStorage implements IStorage {
 
   async getNFLPlayerStats(): Promise<any[]> {
     return this.nflPlayerStats;
+  }
+
+  // Initialize default game templates for fantasy sports
+  private initializeGameTemplates() {
+    console.log("🎮 Initializing Game Templates for Fantasy Sports...");
+    
+    const now = new Date();
+    
+    const defaultTemplates: GameTemplate[] = [
+      {
+        id: "dfs-football-daily",
+        name: "Daily Fantasy Football",
+        gameType: "daily_fantasy",
+        sport: "nfl",
+        templateConfig: {
+          salaryCap: 50000,
+          rosterFormat: {
+            QB: 1,
+            RB: 2,
+            WR: 3,
+            TE: 1,
+            FLEX: 1,
+            DEF: 1,
+            K: 1
+          },
+          scoringSystem: "ppr",
+          maxEntries: 1,
+          contestDuration: "daily",
+          slateTime: "afternoon",
+          entryFee: 5,
+          isPublic: true
+        },
+        description: "Standard daily fantasy football with PPR scoring. Perfect for beginners looking to get into DFS.",
+        difficulty: "beginner",
+        estimatedParticipants: 1000,
+        isActive: true,
+        createdAt: now,
+        updatedAt: now
+      },
+      {
+        id: "weekly-league-football",
+        name: "Weekly League Football",
+        gameType: "weekly_league",
+        sport: "nfl",
+        templateConfig: {
+          salaryCap: 200,
+          rosterFormat: {
+            QB: 1,
+            RB: 2,
+            WR: 2,
+            TE: 1,
+            FLEX: 1,
+            DEF: 1,
+            K: 1
+          },
+          scoringSystem: "standard",
+          maxEntries: 1,
+          contestDuration: "weekly",
+          slateTime: "morning",
+          entryFee: 10,
+          isPublic: false
+        },
+        description: "Traditional weekly fantasy league format with season-long strategy and waiver wire management.",
+        difficulty: "intermediate",
+        estimatedParticipants: 12,
+        isActive: true,
+        createdAt: now,
+        updatedAt: now
+      },
+      {
+        id: "snake-draft-football",
+        name: "Snake Draft Football",
+        gameType: "snake_draft",
+        sport: "nfl",
+        templateConfig: {
+          salaryCap: 0, // No salary cap in snake draft
+          rosterFormat: {
+            QB: 1,
+            RB: 2,
+            WR: 2,
+            TE: 1,
+            FLEX: 2,
+            DEF: 1,
+            K: 1
+          },
+          scoringSystem: "half_ppr",
+          maxEntries: 1,
+          contestDuration: "season",
+          entryFee: 50,
+          isPublic: false
+        },
+        description: "Classic snake draft format where teams take turns selecting players in alternating order.",
+        difficulty: "intermediate",
+        estimatedParticipants: 10,
+        isActive: true,
+        createdAt: now,
+        updatedAt: now
+      },
+      {
+        id: "head-to-head-football",
+        name: "Head-to-Head Football",
+        gameType: "head_to_head",
+        sport: "nfl",
+        templateConfig: {
+          salaryCap: 60000,
+          rosterFormat: {
+            QB: 1,
+            RB: 2,
+            WR: 3,
+            TE: 1,
+            FLEX: 1,
+            DEF: 1
+          },
+          scoringSystem: "ppr",
+          maxEntries: 2,
+          contestDuration: "weekly",
+          slateTime: "evening",
+          entryFee: 20,
+          isPublic: true
+        },
+        description: "One-on-one fantasy matchups with higher stakes and simplified roster construction.",
+        difficulty: "advanced",
+        estimatedParticipants: 2,
+        isActive: true,
+        createdAt: now,
+        updatedAt: now
+      },
+      {
+        id: "captain-mode-football",
+        name: "Captain Mode Football",
+        gameType: "captain_mode",
+        sport: "nfl",
+        templateConfig: {
+          salaryCap: 50000,
+          rosterFormat: {
+            QB: 0,
+            RB: 0,
+            WR: 0,
+            TE: 0,
+            FLEX: 6, // 1 Captain (1.5x points) + 5 FLEX
+            DEF: 0
+          },
+          scoringSystem: "ppr",
+          maxEntries: 1,
+          contestDuration: "daily",
+          slateTime: "night",
+          entryFee: 3,
+          isPublic: true
+        },
+        description: "Select one captain (1.5x points) and 5 flex players from a single game. High-variance format.",
+        difficulty: "advanced",
+        estimatedParticipants: 500,
+        isActive: true,
+        createdAt: now,
+        updatedAt: now
+      },
+      {
+        id: "best-ball-football",
+        name: "Best Ball Football",
+        gameType: "best_ball",
+        sport: "nfl",
+        templateConfig: {
+          salaryCap: 0, // Draft-based, no salary cap
+          rosterFormat: {
+            QB: 2,
+            RB: 4,
+            WR: 4,
+            TE: 2,
+            FLEX: 0,
+            DEF: 2,
+            K: 1
+          },
+          scoringSystem: "half_ppr",
+          maxEntries: 1,
+          contestDuration: "season",
+          entryFee: 25,
+          isPublic: true
+        },
+        description: "Draft players once, then your optimal lineup is automatically set each week. No waiver wire management.",
+        difficulty: "beginner",
+        estimatedParticipants: 12,
+        isActive: true,
+        createdAt: now,
+        updatedAt: now
+      },
+      {
+        id: "dfs-basketball-daily",
+        name: "Daily Fantasy Basketball",
+        gameType: "daily_fantasy",
+        sport: "nba",
+        templateConfig: {
+          salaryCap: 50000,
+          rosterFormat: {
+            QB: 0, // PG
+            RB: 0, // SG  
+            WR: 0, // SF
+            TE: 0, // PF
+            FLEX: 8, // PG, SG, SF, PF, C, G, F, UTIL
+            DEF: 0,
+            K: 0
+          },
+          scoringSystem: "standard",
+          maxEntries: 1,
+          contestDuration: "daily",
+          slateTime: "evening",
+          entryFee: 5,
+          isPublic: true
+        },
+        description: "Daily fantasy basketball with standard NBA DFS scoring. Fast-paced action with multiple slates daily.",
+        difficulty: "intermediate",
+        estimatedParticipants: 750,
+        isActive: true,
+        createdAt: now,
+        updatedAt: now
+      },
+      {
+        id: "dfs-baseball-daily",
+        name: "Daily Fantasy Baseball",
+        gameType: "daily_fantasy",
+        sport: "mlb",
+        templateConfig: {
+          salaryCap: 35000,
+          rosterFormat: {
+            QB: 0, // C
+            RB: 0, // 1B
+            WR: 0, // 2B
+            TE: 0, // 3B
+            FLEX: 10, // C, 1B, 2B, 3B, SS, OF, OF, OF, P, P
+            DEF: 0,
+            K: 0
+          },
+          scoringSystem: "standard",
+          maxEntries: 1,
+          contestDuration: "daily",
+          slateTime: "afternoon",
+          entryFee: 3,
+          isPublic: true
+        },
+        description: "Daily fantasy baseball with pitching strategy and weather considerations. Multiple games daily.",
+        difficulty: "advanced",
+        estimatedParticipants: 400,
+        isActive: true,
+        createdAt: now,
+        updatedAt: now
+      }
+    ];
+
+    // Store templates in memory
+    defaultTemplates.forEach(template => {
+      this.gameTemplates.set(template.id, template);
+    });
+
+    console.log(`🎮 Initialized ${defaultTemplates.length} game templates: ${defaultTemplates.map(t => t.name).join(', ')}`);
   }
 }
 
