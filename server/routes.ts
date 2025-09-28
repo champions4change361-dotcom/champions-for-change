@@ -18,6 +18,7 @@ import { registerDomainRoutes } from "./domainRoutes";
 import { registerTournamentRoutes } from "./routes/tournamentRoutes";
 import { registerMigrationRoutes } from "./routes/migrationRoutes";
 import { registerAcademicRoutes } from "./academic-routes";
+import { registerBudgetRoutes } from "./budget-routes";
 import subscriptionRoutes from "./routes/subscriptionRoutes";
 import stripeWebhooks from "./routes/stripeWebhooks";
 import { tournamentSubscriptions, insertTournamentSubscriptionSchema, type InsertTournamentSubscription, insertRegistrationSubmissionSchema, insertTeamSchema, insertTeamPlayerSchema, insertMedicalHistorySchema, type InsertTeam, type InsertTeamPlayer, type InsertMedicalHistory, type Team, type TeamPlayer, type MedicalHistory, updateTeamSubscriptionSchema, type User } from "@shared/schema";
@@ -8143,6 +8144,10 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
   // Academic Competition System routes
   registerAcademicRoutes(app);
   console.log('🎓 Academic Competition System API routes registered');
+
+  // Excel-Style Budget Management System routes
+  registerBudgetRoutes(app);
+  console.log('🏦 Excel-Style Budget Management System API routes registered');
 
   // Athletic Trainer Dashboard routes
   registerAthleticTrainerRoutes(app);

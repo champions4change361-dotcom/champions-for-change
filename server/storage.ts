@@ -770,6 +770,88 @@ export interface IStorage {
   saveUserNotificationPreferences(preferences: any): Promise<void>;
   getNotificationHistory(startDate: string, endDate: string, organizationId?: string, user?: User): Promise<any[]>;
   saveNotificationHistory(history: any): Promise<void>;
+
+  // ===================================================================
+  // COMPREHENSIVE EXCEL-STYLE BUDGET MANAGEMENT SYSTEM
+  // RBAC-protected with District → School → Department access controls
+  // ===================================================================
+
+  // Budget Categories - Department/program categories management
+  createBudgetCategory(category: InsertBudgetCategory, user: SecureUserContext): Promise<BudgetCategory>;
+  getBudgetCategory(id: string, user: SecureUserContext): Promise<BudgetCategory | undefined>;
+  getBudgetCategoriesByDistrict(districtId: string, user: SecureUserContext): Promise<BudgetCategory[]>;
+  getBudgetCategoriesByType(categoryType: string, user: SecureUserContext): Promise<BudgetCategory[]>;
+  updateBudgetCategory(id: string, updates: Partial<BudgetCategory>, user: SecureUserContext): Promise<BudgetCategory | undefined>;
+  deleteBudgetCategory(id: string, user: SecureUserContext): Promise<boolean>;
+  getBudgetCategoryHierarchy(parentId?: string, user?: SecureUserContext): Promise<BudgetCategory[]>;
+
+  // Budget Items - Individual line items within categories
+  createBudgetItem(item: InsertBudgetItem, user: SecureUserContext): Promise<BudgetItem>;
+  getBudgetItem(id: string, user: SecureUserContext): Promise<BudgetItem | undefined>;
+  getBudgetItemsByCategory(categoryId: string, user: SecureUserContext): Promise<BudgetItem[]>;
+  getBudgetItemsByType(itemType: string, user: SecureUserContext): Promise<BudgetItem[]>;
+  updateBudgetItem(id: string, updates: Partial<BudgetItem>, user: SecureUserContext): Promise<BudgetItem | undefined>;
+  deleteBudgetItem(id: string, user: SecureUserContext): Promise<boolean>;
+  calculateBudgetItemFormulas(itemId: string, user: SecureUserContext): Promise<BudgetItem | undefined>;
+
+  // Budget Allocations - Budget assignments to schools/departments with Excel-style data
+  createBudgetAllocation(allocation: InsertBudgetAllocation, user: SecureUserContext): Promise<BudgetAllocation>;
+  getBudgetAllocation(id: string, user: SecureUserContext): Promise<BudgetAllocation | undefined>;
+  getBudgetAllocationsByItem(budgetItemId: string, user: SecureUserContext): Promise<BudgetAllocation[]>;
+  getBudgetAllocationsBySchool(schoolId: string, user: SecureUserContext): Promise<BudgetAllocation[]>;
+  getBudgetAllocationsByFiscalYear(fiscalYear: string, user: SecureUserContext): Promise<BudgetAllocation[]>;
+  updateBudgetAllocation(id: string, updates: Partial<BudgetAllocation>, user: SecureUserContext): Promise<BudgetAllocation | undefined>;
+  deleteBudgetAllocation(id: string, user: SecureUserContext): Promise<boolean>;
+  recalculateBudgetAllocation(id: string, user: SecureUserContext): Promise<BudgetAllocation | undefined>;
+  getBudgetAllocationSummary(filters: any, user: SecureUserContext): Promise<any>;
+
+  // Budget Transactions - Enhanced spending tracking and expense records
+  createBudgetTransaction(transaction: InsertBudgetTransaction, user: SecureUserContext): Promise<BudgetTransaction>;
+  getBudgetTransaction(id: string, user: SecureUserContext): Promise<BudgetTransaction | undefined>;
+  getBudgetTransactionsByAllocation(allocationId: string, user: SecureUserContext): Promise<BudgetTransaction[]>;
+  getBudgetTransactionsByDateRange(startDate: string, endDate: string, user: SecureUserContext): Promise<BudgetTransaction[]>;
+  getBudgetTransactionsByType(transactionType: string, user: SecureUserContext): Promise<BudgetTransaction[]>;
+  getBudgetTransactionsByStatus(approvalStatus: string, user: SecureUserContext): Promise<BudgetTransaction[]>;
+  updateBudgetTransaction(id: string, updates: Partial<BudgetTransaction>, user: SecureUserContext): Promise<BudgetTransaction | undefined>;
+  deleteBudgetTransaction(id: string, user: SecureUserContext): Promise<boolean>;
+  processBudgetTransactionApproval(id: string, approvedBy: string, notes?: string, user?: SecureUserContext): Promise<BudgetTransaction | undefined>;
+  getBudgetTransactionAnalytics(filters: any, user: SecureUserContext): Promise<any>;
+
+  // Budget Approvals - Approval workflow tracking
+  createBudgetApproval(approval: InsertBudgetApproval, user: SecureUserContext): Promise<BudgetApproval>;
+  getBudgetApproval(id: string, user: SecureUserContext): Promise<BudgetApproval | undefined>;
+  getBudgetApprovalsByType(approvalType: string, user: SecureUserContext): Promise<BudgetApproval[]>;
+  getBudgetApprovalsByEntity(relatedEntityId: string, user: SecureUserContext): Promise<BudgetApproval[]>;
+  getBudgetApprovalsByApprover(approverId: string, user: SecureUserContext): Promise<BudgetApproval[]>;
+  getBudgetApprovalsByStatus(workflowStatus: string, user: SecureUserContext): Promise<BudgetApproval[]>;
+  updateBudgetApproval(id: string, updates: Partial<BudgetApproval>, user: SecureUserContext): Promise<BudgetApproval | undefined>;
+  processBudgetApprovalStep(id: string, action: 'approved' | 'rejected' | 'delegated', notes?: string, user?: SecureUserContext): Promise<BudgetApproval | undefined>;
+  getBudgetApprovalWorkflow(entityId: string, user: SecureUserContext): Promise<BudgetApproval[]>;
+
+  // Budget Templates - Pre-built templates for different organization types
+  createBudgetTemplate(template: InsertBudgetTemplate, user: SecureUserContext): Promise<BudgetTemplate>;
+  getBudgetTemplate(id: string, user: SecureUserContext): Promise<BudgetTemplate | undefined>;
+  getBudgetTemplatesByType(organizationType: string, user: SecureUserContext): Promise<BudgetTemplate[]>;
+  getPublicBudgetTemplates(): Promise<BudgetTemplate[]>;
+  updateBudgetTemplate(id: string, updates: Partial<BudgetTemplate>, user: SecureUserContext): Promise<BudgetTemplate | undefined>;
+  deleteBudgetTemplate(id: string, user: SecureUserContext): Promise<boolean>;
+  applyBudgetTemplate(templateId: string, targetId: string, user: SecureUserContext): Promise<boolean>;
+  incrementTemplateUsage(templateId: string): Promise<BudgetTemplate | undefined>;
+
+  // Enhanced Budget Analysis and Reporting
+  getBudgetVarianceAnalysis(filters: any, user: SecureUserContext): Promise<any>;
+  getBudgetCashFlowProjections(fiscalYear: string, user: SecureUserContext): Promise<any>;
+  getBudgetPerformanceMetrics(filters: any, user: SecureUserContext): Promise<any>;
+  generateBudgetReport(reportType: string, filters: any, user: SecureUserContext): Promise<any>;
+  exportBudgetData(format: 'excel' | 'csv' | 'pdf', filters: any, user: SecureUserContext): Promise<any>;
+
+  // District → School → Department Budget Hierarchy Methods
+  getDistrictBudgetHierarchy(districtId: string, fiscalYear: string, user: SecureUserContext): Promise<any>;
+  getSchoolBudgetSummary(schoolId: string, fiscalYear: string, user: SecureUserContext): Promise<any>;
+  getDepartmentBudgetDetails(departmentId: string, fiscalYear: string, user: SecureUserContext): Promise<any>;
+  transferBudgetFunds(fromId: string, toId: string, amount: number, reason: string, user: SecureUserContext): Promise<any>;
+  freezeBudgetAllocation(allocationId: string, user: SecureUserContext): Promise<boolean>;
+  unfreezeBudgetAllocation(allocationId: string, user: SecureUserContext): Promise<boolean>;
 }
 
 export class DbStorage implements IStorage {
@@ -5123,6 +5205,14 @@ export class MemStorage implements IStorage {
   private userLineups: Map<string, UserLineup>;
   private playerPerformances: Map<string, PlayerPerformance>;
 
+  // BUDGET MANAGEMENT SYSTEM MAPS - Excel-Style Budget Management 🏦📊
+  private budgetCategories: Map<string, BudgetCategory>;
+  private budgetItems: Map<string, BudgetItem>;
+  private budgetAllocations: Map<string, BudgetAllocation>;
+  private budgetTransactions: Map<string, BudgetTransaction>;
+  private budgetApprovals: Map<string, BudgetApproval>;
+  private budgetTemplates: Map<string, BudgetTemplate>;
+
   constructor() {
     this.users = new Map();
     this.whitelabelConfigs = new Map();
@@ -5177,6 +5267,14 @@ export class MemStorage implements IStorage {
     this.userLineups = new Map();
     this.playerPerformances = new Map();
     
+    // BUDGET MANAGEMENT SYSTEM INITIALIZATION 🏦📊
+    this.budgetCategories = new Map();
+    this.budgetItems = new Map();
+    this.budgetAllocations = new Map();
+    this.budgetTransactions = new Map();
+    this.budgetApprovals = new Map();
+    this.budgetTemplates = new Map();
+    
     // Initialize with default tournament structures, sport division rules, track events, tournament integration, competition formats, and KRAKEN!
     this.initializeDefaultStructures();
     this.initializeSportDivisionRules();
@@ -5188,6 +5286,7 @@ export class MemStorage implements IStorage {
     this.initializeKrakenDivisionSystem();
     this.initializeTournamentEmpire();
     this.initializeGameTemplates();
+    this.initializeBudgetManagementSystem();
   }
 
   private initializeDefaultStructures() {
@@ -9491,6 +9590,903 @@ export class MemStorage implements IStorage {
     } catch (error) {
       console.error("MemStorage error:", error);
     }
+  }
+
+  // ===================================================================
+  // BUDGET MANAGEMENT SYSTEM IMPLEMENTATION 🏦📊
+  // ===================================================================
+
+  private initializeBudgetManagementSystem() {
+    console.log("🏦 Initializing Excel-style Budget Management System");
+    
+    // Initialize default budget categories
+    const defaultCategories = [
+      {
+        id: randomUUID(),
+        districtId: "default-district",
+        categoryName: "Athletics",
+        categoryCode: "ATH",
+        categoryType: "athletics" as const,
+        description: "Athletic programs and sports-related expenses",
+        parentCategoryId: undefined,
+        displayOrder: 1,
+        isActive: true,
+        backgroundColor: "#1e40af",
+        textColor: "#ffffff",
+        fontWeight: "bold",
+        createdBy: "system",
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: randomUUID(),
+        districtId: "default-district",
+        categoryName: "Academics", 
+        categoryCode: "ACD",
+        categoryType: "academics" as const,
+        description: "Academic programs and educational expenses",
+        parentCategoryId: undefined,
+        displayOrder: 2,
+        isActive: true,
+        backgroundColor: "#059669",
+        textColor: "#ffffff", 
+        fontWeight: "bold",
+        createdBy: "system",
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: randomUUID(),
+        districtId: "default-district",
+        categoryName: "Operations",
+        categoryCode: "OPS", 
+        categoryType: "operations" as const,
+        description: "Operational and administrative expenses",
+        parentCategoryId: undefined,
+        displayOrder: 3,
+        isActive: true,
+        backgroundColor: "#dc2626",
+        textColor: "#ffffff",
+        fontWeight: "bold", 
+        createdBy: "system",
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: randomUUID(),
+        districtId: "default-district",
+        categoryName: "Technology",
+        categoryCode: "TECH",
+        categoryType: "technology" as const,
+        description: "Technology infrastructure and equipment",
+        parentCategoryId: undefined,
+        displayOrder: 4,
+        isActive: true,
+        backgroundColor: "#7c3aed",
+        textColor: "#ffffff",
+        fontWeight: "bold",
+        createdBy: "system", 
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    ];
+
+    defaultCategories.forEach(category => {
+      this.budgetCategories.set(category.id, category as BudgetCategory);
+    });
+
+    // Initialize default budget templates
+    const defaultTemplates = [
+      {
+        id: randomUUID(),
+        templateName: "High School Athletic Department",
+        description: "Standard athletic department budget template for high schools",
+        organizationType: "high_school",
+        templateData: {
+          categories: [
+            { name: "Coaching Salaries", percentage: 45 },
+            { name: "Equipment", percentage: 25 },
+            { name: "Travel", percentage: 15 },
+            { name: "Facilities", percentage: 10 },
+            { name: "Officials", percentage: 5 }
+          ]
+        },
+        isPublic: true,
+        isSystemTemplate: true,
+        usageCount: 0,
+        createdBy: "system",
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        id: randomUUID(),
+        templateName: "Middle School Operations",
+        description: "Standard operations budget template for middle schools",
+        organizationType: "middle_school",
+        templateData: {
+          categories: [
+            { name: "Supplies", percentage: 35 },
+            { name: "Maintenance", percentage: 30 },
+            { name: "Utilities", percentage: 20 },
+            { name: "Equipment", percentage: 10 },
+            { name: "Other", percentage: 5 }
+          ]
+        },
+        isPublic: true,
+        isSystemTemplate: true,
+        usageCount: 0,
+        createdBy: "system",
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+    ];
+
+    defaultTemplates.forEach(template => {
+      this.budgetTemplates.set(template.id, template as BudgetTemplate);
+    });
+
+    console.log(`🏦 Budget Management System initialized with ${defaultCategories.length} categories and ${defaultTemplates.length} templates`);
+  }
+
+  // ===================================================================
+  // BUDGET CATEGORIES METHODS
+  // ===================================================================
+
+  async createBudgetCategory(category: InsertBudgetCategory, user: SecureUserContext): Promise<BudgetCategory> {
+    const id = randomUUID();
+    const now = new Date();
+    
+    const newCategory: BudgetCategory = {
+      id,
+      ...category,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    this.budgetCategories.set(id, newCategory);
+    console.log(`🏦 Created budget category: ${category.categoryName} (${id})`);
+    return newCategory;
+  }
+
+  async getBudgetCategory(id: string, user: SecureUserContext): Promise<BudgetCategory | undefined> {
+    return this.budgetCategories.get(id);
+  }
+
+  async getBudgetCategoriesByDistrict(districtId: string, user: SecureUserContext): Promise<BudgetCategory[]> {
+    return Array.from(this.budgetCategories.values()).filter(cat => 
+      cat.districtId === districtId && cat.isActive
+    );
+  }
+
+  async getBudgetCategoriesByType(categoryType: string, user: SecureUserContext): Promise<BudgetCategory[]> {
+    return Array.from(this.budgetCategories.values()).filter(cat => 
+      cat.categoryType === categoryType && cat.isActive
+    );
+  }
+
+  async updateBudgetCategory(id: string, updates: Partial<BudgetCategory>, user: SecureUserContext): Promise<BudgetCategory | undefined> {
+    const category = this.budgetCategories.get(id);
+    if (!category) return undefined;
+
+    const updated = { ...category, ...updates, updatedAt: new Date() };
+    this.budgetCategories.set(id, updated);
+    console.log(`🏦 Updated budget category: ${updated.categoryName} (${id})`);
+    return updated;
+  }
+
+  async deleteBudgetCategory(id: string, user: SecureUserContext): Promise<boolean> {
+    const deleted = this.budgetCategories.delete(id);
+    if (deleted) {
+      console.log(`🏦 Deleted budget category: ${id}`);
+    }
+    return deleted;
+  }
+
+  async getBudgetCategoryHierarchy(parentId?: string, user?: SecureUserContext): Promise<BudgetCategory[]> {
+    return Array.from(this.budgetCategories.values())
+      .filter(cat => cat.parentCategoryId === parentId && cat.isActive)
+      .sort((a, b) => a.displayOrder - b.displayOrder);
+  }
+
+  // ===================================================================
+  // BUDGET ITEMS METHODS  
+  // ===================================================================
+
+  async createBudgetItem(item: InsertBudgetItem, user: SecureUserContext): Promise<BudgetItem> {
+    const id = randomUUID();
+    const now = new Date();
+    
+    const newItem: BudgetItem = {
+      id,
+      ...item,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    this.budgetItems.set(id, newItem);
+    console.log(`🏦 Created budget item: ${item.itemName} (${id})`);
+    return newItem;
+  }
+
+  async getBudgetItem(id: string, user: SecureUserContext): Promise<BudgetItem | undefined> {
+    return this.budgetItems.get(id);
+  }
+
+  async getBudgetItemsByCategory(categoryId: string, user: SecureUserContext): Promise<BudgetItem[]> {
+    return Array.from(this.budgetItems.values())
+      .filter(item => item.categoryId === categoryId)
+      .sort((a, b) => a.displayOrder - b.displayOrder);
+  }
+
+  async getBudgetItemsByType(itemType: string, user: SecureUserContext): Promise<BudgetItem[]> {
+    return Array.from(this.budgetItems.values()).filter(item => item.itemType === itemType);
+  }
+
+  async updateBudgetItem(id: string, updates: Partial<BudgetItem>, user: SecureUserContext): Promise<BudgetItem | undefined> {
+    const item = this.budgetItems.get(id);
+    if (!item) return undefined;
+
+    const updated = { ...item, ...updates, updatedAt: new Date() };
+    this.budgetItems.set(id, updated);
+    console.log(`🏦 Updated budget item: ${updated.itemName} (${id})`);
+    return updated;
+  }
+
+  async deleteBudgetItem(id: string, user: SecureUserContext): Promise<boolean> {
+    const deleted = this.budgetItems.delete(id);
+    if (deleted) {
+      console.log(`🏦 Deleted budget item: ${id}`);
+    }
+    return deleted;
+  }
+
+  async calculateBudgetItemFormulas(itemId: string, user: SecureUserContext): Promise<BudgetItem | undefined> {
+    const item = this.budgetItems.get(itemId);
+    if (!item || !item.isCalculated || !item.formula) return item;
+
+    // Simple formula calculation - in production would use a proper formula parser
+    let calculatedAmount = item.budgetedAmount;
+    
+    // Basic SUM formula parsing (e.g., "=SUM(item1+item2)")
+    if (item.formula.includes('SUM')) {
+      // Mock calculation for demo
+      calculatedAmount = item.budgetedAmount * 1.1;
+    }
+
+    const updated = { 
+      ...item, 
+      budgetedAmount: calculatedAmount,
+      calculatedAt: new Date(),
+      updatedAt: new Date() 
+    };
+    
+    this.budgetItems.set(itemId, updated);
+    console.log(`🏦 Calculated formula for budget item: ${updated.itemName} = ${calculatedAmount}`);
+    return updated;
+  }
+
+  // ===================================================================
+  // BUDGET ALLOCATIONS METHODS
+  // ===================================================================
+
+  async createBudgetAllocation(allocation: InsertBudgetAllocation, user: SecureUserContext): Promise<BudgetAllocation> {
+    const id = randomUUID();
+    const now = new Date();
+    
+    const newAllocation: BudgetAllocation = {
+      id,
+      ...allocation,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    this.budgetAllocations.set(id, newAllocation);
+    console.log(`🏦 Created budget allocation: ${allocation.allocatedAmount} for ${allocation.targetType} (${id})`);
+    return newAllocation;
+  }
+
+  async getBudgetAllocation(id: string, user: SecureUserContext): Promise<BudgetAllocation | undefined> {
+    return this.budgetAllocations.get(id);
+  }
+
+  async getBudgetAllocationsByItem(budgetItemId: string, user: SecureUserContext): Promise<BudgetAllocation[]> {
+    return Array.from(this.budgetAllocations.values()).filter(alloc => alloc.budgetItemId === budgetItemId);
+  }
+
+  async getBudgetAllocationsBySchool(schoolId: string, user: SecureUserContext): Promise<BudgetAllocation[]> {
+    return Array.from(this.budgetAllocations.values()).filter(alloc => 
+      alloc.targetType === 'school' && alloc.targetId === schoolId
+    );
+  }
+
+  async getBudgetAllocationsByFiscalYear(fiscalYear: string, user: SecureUserContext): Promise<BudgetAllocation[]> {
+    return Array.from(this.budgetAllocations.values()).filter(alloc => alloc.fiscalYear === fiscalYear);
+  }
+
+  async updateBudgetAllocation(id: string, updates: Partial<BudgetAllocation>, user: SecureUserContext): Promise<BudgetAllocation | undefined> {
+    const allocation = this.budgetAllocations.get(id);
+    if (!allocation) return undefined;
+
+    const updated = { ...allocation, ...updates, updatedAt: new Date() };
+    this.budgetAllocations.set(id, updated);
+    console.log(`🏦 Updated budget allocation: ${updated.allocatedAmount} (${id})`);
+    return updated;
+  }
+
+  async deleteBudgetAllocation(id: string, user: SecureUserContext): Promise<boolean> {
+    const deleted = this.budgetAllocations.delete(id);
+    if (deleted) {
+      console.log(`🏦 Deleted budget allocation: ${id}`);
+    }
+    return deleted;
+  }
+
+  async recalculateBudgetAllocation(id: string, user: SecureUserContext): Promise<BudgetAllocation | undefined> {
+    const allocation = this.budgetAllocations.get(id);
+    if (!allocation) return undefined;
+
+    // Recalculate remaining amount based on spent amount
+    const remaining = allocation.allocatedAmount - allocation.spentAmount;
+    const utilizationRate = allocation.allocatedAmount > 0 ? 
+      (allocation.spentAmount / allocation.allocatedAmount) * 100 : 0;
+
+    const updated = { 
+      ...allocation, 
+      remainingAmount: remaining,
+      utilizationRate,
+      lastCalculated: new Date(),
+      updatedAt: new Date() 
+    };
+    
+    this.budgetAllocations.set(id, updated);
+    console.log(`🏦 Recalculated budget allocation: ${id} - Remaining: ${remaining}`);
+    return updated;
+  }
+
+  async getBudgetAllocationSummary(filters: any, user: SecureUserContext): Promise<any> {
+    const allocations = Array.from(this.budgetAllocations.values());
+    
+    // Apply filters
+    let filtered = allocations;
+    if (filters.fiscalYear) {
+      filtered = filtered.filter(a => a.fiscalYear === filters.fiscalYear);
+    }
+    if (filters.districtId) {
+      filtered = filtered.filter(a => a.districtId === filters.districtId);
+    }
+
+    // Calculate summary
+    const totalBudget = filtered.reduce((sum, a) => sum + a.allocatedAmount, 0);
+    const totalSpent = filtered.reduce((sum, a) => sum + a.spentAmount, 0);
+    const totalRemaining = totalBudget - totalSpent;
+    const pendingApprovals = filtered.filter(a => a.approvalStatus === 'pending').length;
+    const overdueItems = filtered.filter(a => a.spentAmount > a.allocatedAmount).length;
+
+    return {
+      totalBudget,
+      totalAllocated: totalBudget,
+      totalSpent,
+      remainingBudget: totalRemaining,
+      pendingApprovals,
+      overdueItems,
+      fiscalYear: filters.fiscalYear || "2024-2025"
+    };
+  }
+
+  // ===================================================================
+  // BUDGET TRANSACTIONS METHODS
+  // ===================================================================
+
+  async createBudgetTransaction(transaction: InsertBudgetTransaction, user: SecureUserContext): Promise<BudgetTransaction> {
+    const id = randomUUID();
+    const now = new Date();
+    
+    const newTransaction: BudgetTransaction = {
+      id,
+      ...transaction,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    this.budgetTransactions.set(id, newTransaction);
+    console.log(`🏦 Created budget transaction: ${transaction.amount} - ${transaction.description} (${id})`);
+    return newTransaction;
+  }
+
+  async getBudgetTransaction(id: string, user: SecureUserContext): Promise<BudgetTransaction | undefined> {
+    return this.budgetTransactions.get(id);
+  }
+
+  async getBudgetTransactionsByAllocation(allocationId: string, user: SecureUserContext): Promise<BudgetTransaction[]> {
+    return Array.from(this.budgetTransactions.values()).filter(txn => txn.allocationId === allocationId);
+  }
+
+  async getBudgetTransactionsByDateRange(startDate: string, endDate: string, user: SecureUserContext): Promise<BudgetTransaction[]> {
+    return Array.from(this.budgetTransactions.values()).filter(txn => {
+      const txnDate = new Date(txn.transactionDate);
+      return txnDate >= new Date(startDate) && txnDate <= new Date(endDate);
+    });
+  }
+
+  async getBudgetTransactionsByType(transactionType: string, user: SecureUserContext): Promise<BudgetTransaction[]> {
+    return Array.from(this.budgetTransactions.values()).filter(txn => txn.transactionType === transactionType);
+  }
+
+  async getBudgetTransactionsByStatus(approvalStatus: string, user: SecureUserContext): Promise<BudgetTransaction[]> {
+    return Array.from(this.budgetTransactions.values()).filter(txn => txn.approvalStatus === approvalStatus);
+  }
+
+  async updateBudgetTransaction(id: string, updates: Partial<BudgetTransaction>, user: SecureUserContext): Promise<BudgetTransaction | undefined> {
+    const transaction = this.budgetTransactions.get(id);
+    if (!transaction) return undefined;
+
+    const updated = { ...transaction, ...updates, updatedAt: new Date() };
+    this.budgetTransactions.set(id, updated);
+    console.log(`🏦 Updated budget transaction: ${updated.description} (${id})`);
+    return updated;
+  }
+
+  async deleteBudgetTransaction(id: string, user: SecureUserContext): Promise<boolean> {
+    const deleted = this.budgetTransactions.delete(id);
+    if (deleted) {
+      console.log(`🏦 Deleted budget transaction: ${id}`);
+    }
+    return deleted;
+  }
+
+  async processBudgetTransactionApproval(id: string, approvedBy: string, notes?: string, user?: SecureUserContext): Promise<BudgetTransaction | undefined> {
+    const transaction = this.budgetTransactions.get(id);
+    if (!transaction) return undefined;
+
+    const updated = { 
+      ...transaction, 
+      approvalStatus: 'approved' as const,
+      approvedBy,
+      approvedAt: new Date(),
+      approvalNotes: notes,
+      updatedAt: new Date() 
+    };
+    
+    this.budgetTransactions.set(id, updated);
+    console.log(`🏦 Approved budget transaction: ${updated.description} by ${approvedBy}`);
+    return updated;
+  }
+
+  async getBudgetTransactionAnalytics(filters: any, user: SecureUserContext): Promise<any> {
+    const transactions = Array.from(this.budgetTransactions.values());
+    
+    // Apply filters
+    let filtered = transactions;
+    if (filters.fiscalYear) {
+      filtered = filtered.filter(t => {
+        const year = new Date(t.transactionDate).getFullYear();
+        return filters.fiscalYear.includes(year.toString());
+      });
+    }
+
+    // Calculate analytics
+    const totalTransactions = filtered.length;
+    const totalAmount = filtered.reduce((sum, t) => sum + t.amount, 0);
+    const pendingTransactions = filtered.filter(t => t.approvalStatus === 'pending').length;
+    const approvedTransactions = filtered.filter(t => t.approvalStatus === 'approved').length;
+
+    // Monthly breakdown
+    const monthlyData = filtered.reduce((acc, t) => {
+      const month = new Date(t.transactionDate).toISOString().slice(0, 7);
+      if (!acc[month]) {
+        acc[month] = { month, amount: 0, count: 0 };
+      }
+      acc[month].amount += t.amount;
+      acc[month].count += 1;
+      return acc;
+    }, {} as Record<string, any>);
+
+    return {
+      totalTransactions,
+      totalAmount,
+      pendingTransactions,
+      approvedTransactions,
+      monthlyBreakdown: Object.values(monthlyData),
+      averageTransactionAmount: totalTransactions > 0 ? totalAmount / totalTransactions : 0
+    };
+  }
+
+  // ===================================================================
+  // BUDGET APPROVALS METHODS
+  // ===================================================================
+
+  async createBudgetApproval(approval: InsertBudgetApproval, user: SecureUserContext): Promise<BudgetApproval> {
+    const id = randomUUID();
+    const now = new Date();
+    
+    const newApproval: BudgetApproval = {
+      id,
+      ...approval,
+      submittedAt: now,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    this.budgetApprovals.set(id, newApproval);
+    console.log(`🏦 Created budget approval: ${approval.approvalType} for ${approval.relatedEntityId} (${id})`);
+    return newApproval;
+  }
+
+  async getBudgetApproval(id: string, user: SecureUserContext): Promise<BudgetApproval | undefined> {
+    return this.budgetApprovals.get(id);
+  }
+
+  async getBudgetApprovalsByType(approvalType: string, user: SecureUserContext): Promise<BudgetApproval[]> {
+    return Array.from(this.budgetApprovals.values()).filter(approval => approval.approvalType === approvalType);
+  }
+
+  async getBudgetApprovalsByEntity(relatedEntityId: string, user: SecureUserContext): Promise<BudgetApproval[]> {
+    return Array.from(this.budgetApprovals.values()).filter(approval => approval.relatedEntityId === relatedEntityId);
+  }
+
+  async getBudgetApprovalsByApprover(approverId: string, user: SecureUserContext): Promise<BudgetApproval[]> {
+    return Array.from(this.budgetApprovals.values()).filter(approval => 
+      approval.currentApproverId === approverId || approval.approvalChain?.some(step => step.approverId === approverId)
+    );
+  }
+
+  async getBudgetApprovalsByStatus(workflowStatus: string, user: SecureUserContext): Promise<BudgetApproval[]> {
+    return Array.from(this.budgetApprovals.values()).filter(approval => approval.workflowStatus === workflowStatus);
+  }
+
+  async updateBudgetApproval(id: string, updates: Partial<BudgetApproval>, user: SecureUserContext): Promise<BudgetApproval | undefined> {
+    const approval = this.budgetApprovals.get(id);
+    if (!approval) return undefined;
+
+    const updated = { ...approval, ...updates, updatedAt: new Date() };
+    this.budgetApprovals.set(id, updated);
+    console.log(`🏦 Updated budget approval: ${updated.approvalType} (${id})`);
+    return updated;
+  }
+
+  async processBudgetApprovalStep(id: string, action: 'approved' | 'rejected' | 'delegated', notes?: string, user?: SecureUserContext): Promise<BudgetApproval | undefined> {
+    const approval = this.budgetApprovals.get(id);
+    if (!approval) return undefined;
+
+    const updated = { 
+      ...approval, 
+      workflowStatus: action === 'approved' ? 'approved' : action === 'rejected' ? 'rejected' : 'pending',
+      approvedBy: action === 'approved' ? user?.id : undefined,
+      approvedAt: action === 'approved' ? new Date() : undefined,
+      rejectedBy: action === 'rejected' ? user?.id : undefined,
+      rejectedAt: action === 'rejected' ? new Date() : undefined,
+      approvalNotes: notes,
+      updatedAt: new Date() 
+    };
+    
+    this.budgetApprovals.set(id, updated);
+    console.log(`🏦 ${action} budget approval: ${updated.approvalType} by ${user?.id}`);
+    return updated;
+  }
+
+  async getBudgetApprovalWorkflow(entityId: string, user: SecureUserContext): Promise<BudgetApproval[]> {
+    return Array.from(this.budgetApprovals.values())
+      .filter(approval => approval.relatedEntityId === entityId)
+      .sort((a, b) => new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime());
+  }
+
+  // ===================================================================
+  // BUDGET TEMPLATES METHODS
+  // ===================================================================
+
+  async createBudgetTemplate(template: InsertBudgetTemplate, user: SecureUserContext): Promise<BudgetTemplate> {
+    const id = randomUUID();
+    const now = new Date();
+    
+    const newTemplate: BudgetTemplate = {
+      id,
+      ...template,
+      usageCount: 0,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    this.budgetTemplates.set(id, newTemplate);
+    console.log(`🏦 Created budget template: ${template.templateName} (${id})`);
+    return newTemplate;
+  }
+
+  async getBudgetTemplate(id: string, user: SecureUserContext): Promise<BudgetTemplate | undefined> {
+    return this.budgetTemplates.get(id);
+  }
+
+  async getBudgetTemplatesByType(organizationType: string, user: SecureUserContext): Promise<BudgetTemplate[]> {
+    return Array.from(this.budgetTemplates.values()).filter(template => 
+      template.organizationType === organizationType
+    );
+  }
+
+  async getPublicBudgetTemplates(): Promise<BudgetTemplate[]> {
+    return Array.from(this.budgetTemplates.values()).filter(template => template.isPublic);
+  }
+
+  async updateBudgetTemplate(id: string, updates: Partial<BudgetTemplate>, user: SecureUserContext): Promise<BudgetTemplate | undefined> {
+    const template = this.budgetTemplates.get(id);
+    if (!template) return undefined;
+
+    const updated = { ...template, ...updates, updatedAt: new Date() };
+    this.budgetTemplates.set(id, updated);
+    console.log(`🏦 Updated budget template: ${updated.templateName} (${id})`);
+    return updated;
+  }
+
+  async deleteBudgetTemplate(id: string, user: SecureUserContext): Promise<boolean> {
+    const deleted = this.budgetTemplates.delete(id);
+    if (deleted) {
+      console.log(`🏦 Deleted budget template: ${id}`);
+    }
+    return deleted;
+  }
+
+  async applyBudgetTemplate(templateId: string, targetId: string, user: SecureUserContext): Promise<boolean> {
+    const template = this.budgetTemplates.get(templateId);
+    if (!template) return false;
+
+    // Apply template logic would go here
+    console.log(`🏦 Applied budget template ${templateId} to ${targetId}`);
+    return true;
+  }
+
+  async incrementTemplateUsage(templateId: string): Promise<BudgetTemplate | undefined> {
+    const template = this.budgetTemplates.get(templateId);
+    if (!template) return undefined;
+
+    const updated = { ...template, usageCount: template.usageCount + 1, updatedAt: new Date() };
+    this.budgetTemplates.set(templateId, updated);
+    return updated;
+  }
+
+  // ===================================================================
+  // BUDGET ANALYSIS AND REPORTING METHODS
+  // ===================================================================
+
+  async getBudgetVarianceAnalysis(filters: any, user: SecureUserContext): Promise<any> {
+    const allocations = Array.from(this.budgetAllocations.values());
+    
+    const analysis = allocations.map(allocation => {
+      const variance = allocation.spentAmount - allocation.allocatedAmount;
+      const variancePercent = allocation.allocatedAmount > 0 ? 
+        (variance / allocation.allocatedAmount) * 100 : 0;
+      
+      return {
+        allocationId: allocation.id,
+        category: allocation.targetType,
+        budgeted: allocation.allocatedAmount,
+        actual: allocation.spentAmount,
+        variance,
+        variancePercent,
+        status: variancePercent > 10 ? 'over' : variancePercent < -10 ? 'under' : 'on-track'
+      };
+    });
+
+    return {
+      analysis,
+      summary: {
+        totalBudgeted: analysis.reduce((sum, a) => sum + a.budgeted, 0),
+        totalActual: analysis.reduce((sum, a) => sum + a.actual, 0),
+        overBudgetCount: analysis.filter(a => a.status === 'over').length,
+        underBudgetCount: analysis.filter(a => a.status === 'under').length
+      }
+    };
+  }
+
+  async getBudgetCashFlowProjections(fiscalYear: string, user: SecureUserContext): Promise<any> {
+    const transactions = Array.from(this.budgetTransactions.values())
+      .filter(t => t.fiscalYear === fiscalYear);
+
+    // Generate monthly projections
+    const monthlyProjections = [];
+    for (let month = 0; month < 12; month++) {
+      const monthDate = new Date(2024, month, 1);
+      const monthTransactions = transactions.filter(t => {
+        const txnDate = new Date(t.transactionDate);
+        return txnDate.getMonth() === month;
+      });
+
+      const income = monthTransactions
+        .filter(t => t.transactionType === 'income')
+        .reduce((sum, t) => sum + t.amount, 0);
+      
+      const expenses = monthTransactions
+        .filter(t => t.transactionType === 'expense')
+        .reduce((sum, t) => sum + t.amount, 0);
+
+      monthlyProjections.push({
+        month: monthDate.toLocaleString('default', { month: 'long' }),
+        plannedIncome: income,
+        actualIncome: income,
+        plannedExpenses: expenses,
+        actualExpenses: expenses,
+        netCashFlow: income - expenses
+      });
+    }
+
+    return {
+      fiscalYear,
+      monthlyProjections,
+      summary: {
+        totalIncome: monthlyProjections.reduce((sum, m) => sum + m.plannedIncome, 0),
+        totalExpenses: monthlyProjections.reduce((sum, m) => sum + m.plannedExpenses, 0),
+        netCashFlow: monthlyProjections.reduce((sum, m) => sum + m.netCashFlow, 0)
+      }
+    };
+  }
+
+  async getBudgetPerformanceMetrics(filters: any, user: SecureUserContext): Promise<any> {
+    const allocations = Array.from(this.budgetAllocations.values());
+    const transactions = Array.from(this.budgetTransactions.values());
+
+    const metrics = {
+      budgetUtilization: {
+        total: allocations.reduce((sum, a) => sum + a.allocatedAmount, 0),
+        spent: allocations.reduce((sum, a) => sum + a.spentAmount, 0),
+        remaining: allocations.reduce((sum, a) => sum + (a.allocatedAmount - a.spentAmount), 0)
+      },
+      transactionMetrics: {
+        totalTransactions: transactions.length,
+        pendingApprovals: transactions.filter(t => t.approvalStatus === 'pending').length,
+        averageTransactionAmount: transactions.length > 0 ? 
+          transactions.reduce((sum, t) => sum + t.amount, 0) / transactions.length : 0
+      },
+      categoryPerformance: this.getCategoryPerformanceMetrics(allocations, transactions)
+    };
+
+    return metrics;
+  }
+
+  private getCategoryPerformanceMetrics(allocations: any[], transactions: any[]) {
+    const categoryMap = new Map();
+    
+    allocations.forEach(allocation => {
+      const key = allocation.targetType;
+      if (!categoryMap.has(key)) {
+        categoryMap.set(key, {
+          category: key,
+          budgeted: 0,
+          spent: 0,
+          transactionCount: 0
+        });
+      }
+      
+      const category = categoryMap.get(key);
+      category.budgeted += allocation.allocatedAmount;
+      category.spent += allocation.spentAmount;
+    });
+
+    transactions.forEach(transaction => {
+      const allocation = allocations.find(a => a.id === transaction.allocationId);
+      if (allocation) {
+        const category = categoryMap.get(allocation.targetType);
+        if (category) {
+          category.transactionCount += 1;
+        }
+      }
+    });
+
+    return Array.from(categoryMap.values());
+  }
+
+  async generateBudgetReport(reportType: string, filters: any, user: SecureUserContext): Promise<any> {
+    const allocations = Array.from(this.budgetAllocations.values());
+    const transactions = Array.from(this.budgetTransactions.values());
+
+    const report = {
+      reportType,
+      generatedAt: new Date(),
+      generatedBy: user.id,
+      filters,
+      data: {
+        allocations: allocations.slice(0, 10), // Limit for demo
+        transactions: transactions.slice(0, 10),
+        summary: {
+          totalBudget: allocations.reduce((sum, a) => sum + a.allocatedAmount, 0),
+          totalSpent: allocations.reduce((sum, a) => sum + a.spentAmount, 0),
+          transactionCount: transactions.length
+        }
+      }
+    };
+
+    console.log(`🏦 Generated ${reportType} budget report for user ${user.id}`);
+    return report;
+  }
+
+  async exportBudgetData(format: 'excel' | 'csv' | 'pdf', filters: any, user: SecureUserContext): Promise<any> {
+    const data = await this.generateBudgetReport('export', filters, user);
+    
+    // Mock export implementation
+    const exportData = {
+      format,
+      fileName: `budget_export_${Date.now()}.${format}`,
+      data: data.data,
+      downloadUrl: `/api/budget/exports/${Date.now()}.${format}`,
+      generatedAt: new Date()
+    };
+
+    console.log(`🏦 Exported budget data in ${format} format for user ${user.id}`);
+    return exportData;
+  }
+
+  // ===================================================================
+  // BUDGET HIERARCHY METHODS
+  // ===================================================================
+
+  async getDistrictBudgetHierarchy(districtId: string, fiscalYear: string, user: SecureUserContext): Promise<any> {
+    const categories = await this.getBudgetCategoriesByDistrict(districtId, user);
+    const allocations = await this.getBudgetAllocationsByFiscalYear(fiscalYear, user);
+
+    return {
+      districtId,
+      fiscalYear,
+      categories,
+      allocations: allocations.filter(a => a.districtId === districtId),
+      totalBudget: allocations.reduce((sum, a) => sum + a.allocatedAmount, 0)
+    };
+  }
+
+  async getSchoolBudgetSummary(schoolId: string, fiscalYear: string, user: SecureUserContext): Promise<any> {
+    const allocations = await this.getBudgetAllocationsBySchool(schoolId, user);
+    const schoolAllocations = allocations.filter(a => a.fiscalYear === fiscalYear);
+
+    return {
+      schoolId,
+      fiscalYear,
+      totalAllocated: schoolAllocations.reduce((sum, a) => sum + a.allocatedAmount, 0),
+      totalSpent: schoolAllocations.reduce((sum, a) => sum + a.spentAmount, 0),
+      allocations: schoolAllocations
+    };
+  }
+
+  async getDepartmentBudgetDetails(departmentId: string, fiscalYear: string, user: SecureUserContext): Promise<any> {
+    const allocations = Array.from(this.budgetAllocations.values()).filter(a => 
+      a.targetId === departmentId && a.fiscalYear === fiscalYear
+    );
+
+    return {
+      departmentId,
+      fiscalYear,
+      allocations,
+      totalBudget: allocations.reduce((sum, a) => sum + a.allocatedAmount, 0),
+      totalSpent: allocations.reduce((sum, a) => sum + a.spentAmount, 0)
+    };
+  }
+
+  async transferBudgetFunds(fromId: string, toId: string, amount: number, reason: string, user: SecureUserContext): Promise<any> {
+    const fromAllocation = this.budgetAllocations.get(fromId);
+    const toAllocation = this.budgetAllocations.get(toId);
+
+    if (!fromAllocation || !toAllocation) {
+      throw new Error('Invalid allocation IDs for transfer');
+    }
+
+    if (fromAllocation.allocatedAmount - fromAllocation.spentAmount < amount) {
+      throw new Error('Insufficient funds available for transfer');
+    }
+
+    // Update allocations
+    fromAllocation.allocatedAmount -= amount;
+    toAllocation.allocatedAmount += amount;
+
+    this.budgetAllocations.set(fromId, fromAllocation);
+    this.budgetAllocations.set(toId, toAllocation);
+
+    // Create transfer record (if needed)
+    const transfer = {
+      id: randomUUID(),
+      fromId,
+      toId,
+      amount,
+      reason,
+      transferredBy: user.id,
+      transferredAt: new Date()
+    };
+
+    console.log(`🏦 Transferred ${amount} from ${fromId} to ${toId}: ${reason}`);
+    return transfer;
   }
 }
 

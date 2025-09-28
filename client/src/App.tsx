@@ -133,6 +133,14 @@ import FAQ from './pages/FAQ';
 import SmartSignup from './pages/SmartSignup';
 import { StaffOnboarding } from './components/StaffOnboarding';
 import TournamentRegistration from './pages/TournamentRegistration';
+
+// Budget Management System Components
+import BudgetDashboard from './pages/BudgetDashboard';
+import BudgetPlanning from './pages/BudgetPlanning';
+import BudgetAllocation from './pages/BudgetAllocation';
+import BudgetTracking from './pages/BudgetTracking';
+import BudgetReporting from './pages/BudgetReporting';
+import BudgetApproval from './pages/BudgetApproval';
 import DailyFantasyLineup from './pages/DailyFantasyLineup';
 import SnakeDraftCreator from './pages/SnakeDraftCreator';
 import DailyFantasyCreator from './pages/DailyFantasyCreator';
@@ -215,6 +223,14 @@ function AuthenticatedRoutes() {
         <Route path="/events/:eventId/manage" component={EventScorekeeperDashboard} />
         <Route path="/domains" component={DomainManager} />
         <Route path="/guest-registration-demo" component={GuestRegistrationDemo} />
+
+        {/* Budget Management System Routes */}
+        <Route path="/budget" component={BudgetDashboard} />
+        <Route path="/budget/planning" component={BudgetPlanning} />
+        <Route path="/budget/allocation" component={BudgetAllocation} />
+        <Route path="/budget/tracking" component={BudgetTracking} />
+        <Route path="/budget/reports" component={BudgetReporting} />
+        <Route path="/budget/approval" component={BudgetApproval} />
 
         <Route path="/bulk-registration" component={BulkRegistration} />
         <Route path="/staff-registration" component={StaffRegistration} />

@@ -6264,6 +6264,269 @@ export const budgetTransfers = pgTable("budget_transfers", {
 });
 
 // =============================================================================
+// COMPREHENSIVE EXCEL-STYLE BUDGET MANAGEMENT SYSTEM
+// =============================================================================
+
+// Budget Categories - Department/program categories for organization
+export const budgetCategories = pgTable("budget_categories", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  districtId: varchar("district_id").notNull().references(() => districts.id),
+  categoryName: varchar("category_name").notNull(), // "Athletics", "Academics", "Operations", "Facilities"
+  categoryCode: varchar("category_code").notNull(), // "ATH", "ACD", "OPS", "FAC"
+  categoryType: text("category_type", {
+    enum: ["athletics", "academics", "fine_arts", "operations", "facilities", "transportation", "technology", "general"]
+  }).notNull(),
+  description: text("description"),
+  parentCategoryId: varchar("parent_category_id").references(() => budgetCategories.id),
+  displayOrder: integer("display_order").default(0),
+  isActive: boolean("is_active").default(true),
+  
+  // Excel-style formatting options
+  backgroundColor: varchar("background_color").default("#ffffff"),
+  textColor: varchar("text_color").default("#000000"),
+  fontWeight: varchar("font_weight").default("normal"),
+  
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_budget_categories_district").on(table.districtId),
+  index("idx_budget_categories_type").on(table.categoryType)
+]);
+
+// Budget Items - Individual line items within categories
+export const budgetItems = pgTable("budget_items", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  categoryId: varchar("category_id").notNull().references(() => budgetCategories.id),
+  itemName: varchar("item_name").notNull(), // "Coaching Salaries", "Equipment", "Travel"
+  itemCode: varchar("item_code").notNull(), // "SAL001", "EQP001", "TRV001"
+  description: text("description"),
+  
+  // Item specifications
+  itemType: text("item_type", {
+    enum: ["salary", "equipment", "supplies", "travel", "facility_rental", "officials", "insurance", "utilities", "maintenance", "other"]
+  }).notNull(),
+  
+  // Excel-style properties
+  formula: text("formula"), // Excel-style formulas like "=SUM(B2:B10)"
+  isCalculated: boolean("is_calculated").default(false),
+  displayOrder: integer("display_order").default(0),
+  isEditable: boolean("is_editable").default(true),
+  isRequired: boolean("is_required").default(false),
+  
+  // Validation rules
+  minValue: decimal("min_value", { precision: 12, scale: 2 }),
+  maxValue: decimal("max_value", { precision: 12, scale: 2 }),
+  
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_budget_items_category").on(table.categoryId),
+  index("idx_budget_items_type").on(table.itemType)
+]);
+
+// Budget Allocations - Budget assignments to schools/departments with Excel-style data
+export const budgetAllocations = pgTable("budget_allocations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  budgetItemId: varchar("budget_item_id").notNull().references(() => budgetItems.id),
+  schoolId: varchar("school_id").references(() => schools.id),
+  departmentId: varchar("department_id"), // Generic department reference
+  
+  // Fiscal information
+  fiscalYear: varchar("fiscal_year").notNull(), // "2024-2025"
+  
+  // Budget allocation amounts
+  originalBudget: decimal("original_budget", { precision: 12, scale: 2 }).notNull(),
+  revisedBudget: decimal("revised_budget", { precision: 12, scale: 2 }),
+  currentBudget: decimal("current_budget", { precision: 12, scale: 2 }).notNull(),
+  encumbered: decimal("encumbered", { precision: 12, scale: 2 }).default("0"),
+  actualSpent: decimal("actual_spent", { precision: 12, scale: 2 }).default("0"),
+  remainingBalance: decimal("remaining_balance", { precision: 12, scale: 2 }),
+  
+  // Percentage calculations (Excel-style)
+  percentUsed: decimal("percent_used", { precision: 5, scale: 2 }).default("0"), // 0.00 to 100.00
+  percentRemaining: decimal("percent_remaining", { precision: 5, scale: 2 }).default("100"),
+  
+  // Status and approvals
+  allocationStatus: text("allocation_status", {
+    enum: ["draft", "pending_approval", "approved", "active", "frozen", "closed"]
+  }).default("draft"),
+  
+  // Quarterly projections for cash flow
+  q1Projection: decimal("q1_projection", { precision: 12, scale: 2 }).default("0"),
+  q2Projection: decimal("q2_projection", { precision: 12, scale: 2 }).default("0"),
+  q3Projection: decimal("q3_projection", { precision: 12, scale: 2 }).default("0"),
+  q4Projection: decimal("q4_projection", { precision: 12, scale: 2 }).default("0"),
+  
+  // Notes and tracking
+  notes: text("notes"),
+  lastRecalculated: timestamp("last_recalculated").defaultNow(),
+  
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_budget_allocations_item").on(table.budgetItemId),
+  index("idx_budget_allocations_school").on(table.schoolId),
+  index("idx_budget_allocations_fiscal_year").on(table.fiscalYear),
+  index("idx_budget_allocations_status").on(table.allocationStatus)
+]);
+
+// Budget Transactions - Enhanced spending tracking and expense records
+export const budgetTransactions = pgTable("budget_transactions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  allocationId: varchar("allocation_id").notNull().references(() => budgetAllocations.id),
+  
+  // Transaction details
+  transactionDate: date("transaction_date").notNull(),
+  transactionType: text("transaction_type", {
+    enum: ["expense", "encumbrance", "revenue", "transfer_in", "transfer_out", "adjustment"]
+  }).notNull(),
+  
+  // Financial amounts
+  amount: decimal("amount", { precision: 12, scale: 2 }).notNull(),
+  runningBalance: decimal("running_balance", { precision: 12, scale: 2 }),
+  
+  // Transaction details
+  vendor: varchar("vendor"),
+  description: text("description").notNull(),
+  referenceNumber: varchar("reference_number"), // PO number, check number, etc.
+  invoiceNumber: varchar("invoice_number"),
+  
+  // Approval workflow
+  approvalStatus: text("approval_status", {
+    enum: ["pending", "approved", "rejected", "paid", "cancelled"]
+  }).default("pending"),
+  approvedBy: varchar("approved_by").references(() => users.id),
+  approvalDate: timestamp("approval_date"),
+  approvalNotes: text("approval_notes"),
+  
+  // Payment tracking
+  paymentMethod: text("payment_method", {
+    enum: ["check", "credit_card", "ach", "wire_transfer", "purchase_order", "petty_cash"]
+  }),
+  paymentDate: date("payment_date"),
+  checkNumber: varchar("check_number"),
+  
+  // Categorization and tracking
+  isRecurring: boolean("is_recurring").default(false),
+  recurringFrequency: text("recurring_frequency", {
+    enum: ["weekly", "biweekly", "monthly", "quarterly", "annually"]
+  }),
+  nextRecurringDate: date("next_recurring_date"),
+  
+  // Audit trail
+  attachmentUrls: jsonb("attachment_urls").$type<string[]>().default([]),
+  auditNotes: text("audit_notes"),
+  
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_budget_transactions_allocation").on(table.allocationId),
+  index("idx_budget_transactions_date").on(table.transactionDate),
+  index("idx_budget_transactions_type").on(table.transactionType),
+  index("idx_budget_transactions_status").on(table.approvalStatus)
+]);
+
+// Budget Approvals - Approval workflow tracking
+export const budgetApprovals = pgTable("budget_approvals", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // What is being approved
+  approvalType: text("approval_type", {
+    enum: ["budget_allocation", "budget_transaction", "budget_transfer", "budget_revision"]
+  }).notNull(),
+  relatedEntityId: varchar("related_entity_id").notNull(), // ID of allocation, transaction, etc.
+  
+  // Approval workflow
+  currentStep: integer("current_step").default(1),
+  totalSteps: integer("total_steps").default(1),
+  workflowStatus: text("workflow_status", {
+    enum: ["pending", "in_review", "approved", "rejected", "cancelled"]
+  }).default("pending"),
+  
+  // Current approver
+  currentApproverId: varchar("current_approver_id").references(() => users.id),
+  approverRole: text("approver_role", {
+    enum: ["department_head", "principal", "superintendent", "school_board", "business_manager", "district_controller"]
+  }),
+  
+  // Approval details
+  requestedAmount: decimal("requested_amount", { precision: 12, scale: 2 }).notNull(),
+  approvedAmount: decimal("approved_amount", { precision: 12, scale: 2 }),
+  
+  // Timeline
+  submittedAt: timestamp("submitted_at").defaultNow(),
+  dueDate: date("due_date"),
+  approvedAt: timestamp("approved_at"),
+  rejectedAt: timestamp("rejected_at"),
+  
+  // Communications
+  requestNotes: text("request_notes"),
+  approvalNotes: text("approval_notes"),
+  rejectionReason: text("rejection_reason"),
+  
+  // Audit trail
+  approvalHistory: jsonb("approval_history").$type<{
+    step: number;
+    approverId: string;
+    action: 'approved' | 'rejected' | 'delegated';
+    timestamp: string;
+    notes?: string;
+  }[]>().default([]),
+  
+  submittedBy: varchar("submitted_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_budget_approvals_type").on(table.approvalType),
+  index("idx_budget_approvals_entity").on(table.relatedEntityId),
+  index("idx_budget_approvals_status").on(table.workflowStatus),
+  index("idx_budget_approvals_approver").on(table.currentApproverId)
+]);
+
+// Budget Templates - Pre-built templates for different organization types
+export const budgetTemplates = pgTable("budget_templates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  templateName: varchar("template_name").notNull(),
+  description: text("description"),
+  
+  // Template metadata
+  organizationType: text("organization_type", {
+    enum: ["elementary_school", "middle_school", "high_school", "district_office", "athletic_department"]
+  }).notNull(),
+  
+  // Template structure (Excel-like layout)
+  templateStructure: jsonb("template_structure").$type<{
+    categories: {
+      id: string;
+      name: string;
+      items: {
+        id: string;
+        name: string;
+        type: string;
+        formula?: string;
+        defaultAmount?: number;
+      }[];
+    }[];
+  }>(),
+  
+  // Usage and sharing
+  isPublic: boolean("is_public").default(false),
+  isActive: boolean("is_active").default(true),
+  usageCount: integer("usage_count").default(0),
+  
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_budget_templates_type").on(table.organizationType),
+  index("idx_budget_templates_public").on(table.isPublic)
+]);
+
+// =============================================================================
 // COMPREHENSIVE SCHEDULING SYSTEM
 // =============================================================================
 
@@ -7301,6 +7564,45 @@ export const insertBudgetTransferSchema = createInsertSchema(budgetTransfers).om
   createdAt: true,
 });
 
+// Comprehensive Excel-Style Budget Management Schemas
+export const insertBudgetCategorySchema = createInsertSchema(budgetCategories).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertBudgetItemSchema = createInsertSchema(budgetItems).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertBudgetAllocationSchema = createInsertSchema(budgetAllocations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  lastRecalculated: true,
+});
+
+export const insertBudgetTransactionSchema = createInsertSchema(budgetTransactions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertBudgetApprovalSchema = createInsertSchema(budgetApprovals).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  submittedAt: true,
+});
+
+export const insertBudgetTemplateSchema = createInsertSchema(budgetTemplates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Scheduling System Schemas
 export const insertGameSchema = createInsertSchema(games).omit({
   id: true,
@@ -7386,6 +7688,20 @@ export type ExpenseRecord = typeof expenseRecords.$inferSelect;
 export type InsertExpenseRecord = z.infer<typeof insertExpenseRecordSchema>;
 export type BudgetTransfer = typeof budgetTransfers.$inferSelect;
 export type InsertBudgetTransfer = z.infer<typeof insertBudgetTransferSchema>;
+
+// Comprehensive Excel-Style Budget Management Types
+export type BudgetCategory = typeof budgetCategories.$inferSelect;
+export type InsertBudgetCategory = z.infer<typeof insertBudgetCategorySchema>;
+export type BudgetItem = typeof budgetItems.$inferSelect;
+export type InsertBudgetItem = z.infer<typeof insertBudgetItemSchema>;
+export type BudgetAllocation = typeof budgetAllocations.$inferSelect;
+export type InsertBudgetAllocation = z.infer<typeof insertBudgetAllocationSchema>;
+export type BudgetTransaction = typeof budgetTransactions.$inferSelect;
+export type InsertBudgetTransaction = z.infer<typeof insertBudgetTransactionSchema>;
+export type BudgetApproval = typeof budgetApprovals.$inferSelect;
+export type InsertBudgetApproval = z.infer<typeof insertBudgetApprovalSchema>;
+export type BudgetTemplate = typeof budgetTemplates.$inferSelect;
+export type InsertBudgetTemplate = z.infer<typeof insertBudgetTemplateSchema>;
 
 // Scheduling System Types
 export type Game = typeof games.$inferSelect;
