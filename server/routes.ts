@@ -7364,37 +7364,45 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
     }
   });
 
-  // Set age verification for fantasy profile
+  // Set age verification for fantasy profile (simplified affirmation-based)
   app.post("/api/fantasy/profile/age-verify", checkAuth, async (req, res) => {
     try {
       // Support both OAuth and session authentication
       const userId = req.user?.claims?.sub || req.session?.user?.id || req.user?.id;
       const userEmail = req.user?.claims?.email || req.session?.user?.email || req.user?.email;
 
-      const { dateOfBirth } = req.body;
+      const { affirmed13Plus, dateOfBirth } = req.body;
       
-      if (!dateOfBirth) {
-        return res.status(400).json({ error: "Date of birth is required" });
+      // Accept either new affirmation format or legacy DOB format for compatibility
+      if (!affirmed13Plus && !dateOfBirth) {
+        return res.status(400).json({ error: "Age confirmation is required" });
       }
 
-      // Calculate age
-      const birthDate = new Date(dateOfBirth);
-      const today = new Date();
-      let age = today.getFullYear() - birthDate.getFullYear();
-      const monthDiff = today.getMonth() - birthDate.getMonth();
-      
-      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
+      // New simplified approach: just check affirmation
+      if (affirmed13Plus) {
+        // User affirmed they are 13+, no need for DOB calculation
+        console.log(`User ${userEmail} affirmed they are 13+ years old`);
+      } else if (dateOfBirth) {
+        // Legacy DOB approach (for compatibility)
+        const birthDate = new Date(dateOfBirth);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+          age--;
+        }
+
+        if (age < 13) {
+          return res.status(403).json({ 
+            error: "Must be 13 or older to access fantasy features",
+            age: age 
+          });
+        }
+        console.log(`User ${userEmail} verified age via DOB: ${age} years old`);
       }
 
-      if (age < 13) {
-        return res.status(403).json({ 
-          error: "Must be 13 or older to access fantasy features",
-          age: age 
-        });
-      }
-
-      // Set age verification (expires in 90 days)
+      // Set age verification (expires in 90 days) 
       const verifiedAt = new Date();
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + 90);
@@ -7403,9 +7411,10 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
 
       res.json({
         success: true,
-        message: "Age verification successful",
+        message: "Age verification successful - you're all set for fantasy sports!",
         profile: updatedProfile,
-        expiresAt: expiresAt.toISOString()
+        expiresAt: expiresAt.toISOString(),
+        verificationMethod: affirmed13Plus ? 'affirmation' : 'date_of_birth'
       });
     } catch (error: any) {
       console.error("Age verification error:", error);

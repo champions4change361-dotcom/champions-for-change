@@ -185,12 +185,12 @@ export default function FantasyTournaments() {
         <div className="flex items-center justify-center space-x-2">
           <GamepadIcon className="w-8 h-8 text-purple-500" />
           <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-            Adult Fantasy Sports
+            Fantasy Sports
           </h1>
           <Shield className="w-8 h-8 text-green-500" />
         </div>
         <p className="text-lg text-muted-foreground">
-          Age-Verified Professional Fantasy Sports Platform
+          Professional Fantasy Sports Platform
         </p>
         {fantasyStatus && (
           <div className="flex justify-center space-x-2">
