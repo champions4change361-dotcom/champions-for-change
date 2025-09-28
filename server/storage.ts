@@ -78,6 +78,10 @@ export interface IStorage {
   getPlayerPerformances(gameInstanceId: string): Promise<PlayerPerformance[]>;
   updatePlayerPerformance(playerId: string, stats: Partial<InsertPlayerPerformance>): Promise<PlayerPerformance | undefined>;
   
+  // ESPN Scoring methods
+  updateLineupScore(lineupId: string, newScore: number): Promise<void>;
+  getActiveGameInstances(): Promise<GameInstance[]>;
+  
   // Compliance operations
   createComplianceAuditLog(log: ComplianceAuditLog): Promise<ComplianceAuditLog>;
   getComplianceAuditLogs(userId?: string, limit?: number): Promise<ComplianceAuditLog[]>;
@@ -966,6 +970,31 @@ export class DbStorage implements IStorage {
       return result;
     } catch (error) {
       console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async updateLineupScore(lineupId: string, newScore: number): Promise<void> {
+    try {
+      await this.db
+        .update(userLineups)
+        .set({ currentScore: newScore.toString() })
+        .where(eq(userLineups.id, lineupId));
+    } catch (error) {
+      console.error("Error updating lineup score:", error);
+      throw error;
+    }
+  }
+
+  async getActiveGameInstances(): Promise<GameInstance[]> {
+    try {
+      const result = await this.db
+        .select()
+        .from(gameInstances)
+        .where(sql`${gameInstances.status} IN ('open', 'live', 'in_progress')`);
+      return result;
+    } catch (error) {
+      console.error("Error getting active game instances:", error);
       return [];
     }
   }
@@ -4877,6 +4906,19 @@ export class MemStorage implements IStorage {
     return Array.from(this.userLineups.values())
       .filter(lineup => lineup.gameInstanceId === gameInstanceId)
       .sort((a, b) => parseFloat(b.currentScore || "0") - parseFloat(a.currentScore || "0"));
+  }
+
+  async updateLineupScore(lineupId: string, newScore: number): Promise<void> {
+    const lineup = this.userLineups.get(lineupId);
+    if (lineup) {
+      lineup.currentScore = newScore.toString();
+      this.userLineups.set(lineupId, lineup);
+    }
+  }
+
+  async getActiveGameInstances(): Promise<GameInstance[]> {
+    return Array.from(this.gameInstances.values())
+      .filter(instance => ["open", "live", "in_progress"].includes(instance.status || ""));
   }
 
   async getPlayerPerformances(gameInstanceId: string): Promise<PlayerPerformance[]> {

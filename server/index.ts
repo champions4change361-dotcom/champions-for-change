@@ -54,6 +54,14 @@ app.use((req, res, next) => {
   // Create server early to start listening immediately
   const server = await registerRoutes(app);
 
+  // 🏈 Initialize ESPN Real-Time Scoring Service (after storage is available)
+  console.log('🏈 Starting ESPN real-time scoring service...');
+  const { ESPNScoringService } = await import('./espn-scoring-service');
+  const { default: storage } = await import('./storage');
+  const espnScoringService = new ESPNScoringService(storage);
+  espnScoringService.startRealTimeScoring();
+  console.log('✅ ESPN real-time scoring service initialized');
+
   // Initialize Pro Football Reference Integration (replaces all NFL scrapers)
   const { pfrIntegration } = await import('./pro-football-reference-integration.js');
   pfrIntegration.startScheduledUpdates();

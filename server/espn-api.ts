@@ -303,7 +303,7 @@ export class ESPNApiService {
   // Get live play-by-play data for coaching insights
   static async getPlayByPlay(gameId: string): Promise<any> {
     try {
-      const response = await fetch(`${this.prototype.baseUrl}/playbyplay?event=${gameId}`);
+      const response = await fetch(`${this.baseUrl}/playbyplay?event=${gameId}`);
       if (!response.ok) {
         throw new Error(`ESPN API error: ${response.status}`);
       }
