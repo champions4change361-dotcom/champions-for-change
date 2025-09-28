@@ -57,7 +57,8 @@ app.use((req, res, next) => {
   // 🏈 Initialize ESPN Real-Time Scoring Service (after storage is available)
   console.log('🏈 Starting ESPN real-time scoring service...');
   const { ESPNScoringService } = await import('./espn-scoring-service');
-  const { default: storage } = await import('./storage');
+  const { getStorage } = await import('./storage');
+  const storage = await getStorage();
   const espnScoringService = new ESPNScoringService(storage);
   espnScoringService.startRealTimeScoring();
   console.log('✅ ESPN real-time scoring service initialized');

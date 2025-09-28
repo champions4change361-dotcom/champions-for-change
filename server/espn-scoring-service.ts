@@ -72,7 +72,7 @@ export interface FantasyLineup {
     salary: number;
     projectedPoints?: number;
   }[] | null;
-  currentScore: string | number;
+  currentScore: string | number | null;
   isSubmitted: boolean;
   submittedAt?: Date | string | null;
 }

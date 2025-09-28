@@ -174,6 +174,10 @@ export default function AvailableGames() {
     }
   };
 
+  // Show templates and instances  
+  const allTemplates = (templates as GameTemplate[]) || [];
+  const allInstances = (gameInstances as GameInstance[]) || [];
+  
   const isLoading = templatesLoading || instancesLoading;
 
   if (isLoading) {
@@ -210,12 +214,7 @@ export default function AvailableGames() {
         </div>
       </div>
     </div>
-    );
-  }
-
-  // Show templates and instances  
-  const allTemplates = (templates as GameTemplate[]) || [];
-  const allInstances = (gameInstances as GameInstance[]) || [];
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
