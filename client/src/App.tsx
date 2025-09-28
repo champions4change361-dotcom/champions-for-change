@@ -43,6 +43,7 @@ import CoachesLoungeLanding from './pages/CoachesLoungeLanding';
 import FantasyLanding from './pages/FantasyLanding';
 import FantasyCoaching from './pages/FantasyCoaching';
 import TemplateMarketplace from './pages/TemplateMarketplace';
+import GameInstanceDetail from './pages/GameInstanceDetail';
 import PlatformOptions from './pages/PlatformOptions';
 import CommissionerDashboard from './pages/CommissionerDashboard';
 import PrivacyPolicy from './pages/PrivacyPolicy';
@@ -366,6 +367,9 @@ function AppRouter() {
       
       {/* League Settings - Commissioner Controls */}
       <Route path="/fantasy/league/:id/settings" component={LeagueSettings} />
+      
+      {/* Game Instance Detail - Live Competition View */}
+      <Route path="/fantasy/game/:instanceId" component={GameInstanceDetail} />
       
       {/* Platform Selection Page */}
       <Route path="/platform-options" component={PlatformOptions} />

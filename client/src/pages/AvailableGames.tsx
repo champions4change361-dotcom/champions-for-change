@@ -7,6 +7,7 @@ import { Clock, Users, Trophy, Calendar, MapPin, Star, Target, Zap } from 'lucid
 import { useToast } from '@/hooks/use-toast';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 import { useAuth } from '@/hooks/useAuth';
+import { useLocation } from 'wouter';
 
 interface GameTemplate {
   id: string;
@@ -55,6 +56,7 @@ export default function AvailableGames() {
   const { toast } = useToast();
   const { user, isAuthenticated } = useAuth();
   const [joining, setJoining] = useState<string | null>(null);
+  const [, setLocation] = useLocation();
 
   // Fetch available game templates
   const { data: templates, isLoading: templatesLoading } = useQuery({
@@ -276,14 +278,24 @@ export default function AvailableGames() {
                     </CardContent>
                     
                     <CardFooter>
-                      <Button 
-                        onClick={() => handleJoinGame(instance.id)}
-                        disabled={joining === instance.id || !isAuthenticated}
-                        className="w-full bg-green-600 hover:bg-green-700"
-                        data-testid={`button-join-${index}`}
-                      >
-                        {joining === instance.id ? 'Joining...' : isAuthenticated ? 'Join Game' : 'Login to Join'}
-                      </Button>
+                      <div className="grid grid-cols-2 gap-2 w-full">
+                        <Button 
+                          variant="outline"
+                          onClick={() => setLocation(`/fantasy/game/${instance.id}`)}
+                          className="w-full"
+                          data-testid={`button-view-game-${index}`}
+                        >
+                          View Game
+                        </Button>
+                        <Button 
+                          onClick={() => handleJoinGame(instance.id)}
+                          disabled={joining === instance.id || !isAuthenticated}
+                          className="w-full bg-green-600 hover:bg-green-700"
+                          data-testid={`button-join-${index}`}
+                        >
+                          {joining === instance.id ? 'Joining...' : isAuthenticated ? 'Join Game' : 'Login to Join'}
+                        </Button>
+                      </div>
                     </CardFooter>
                   </Card>
                 );
