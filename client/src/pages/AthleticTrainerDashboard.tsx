@@ -40,7 +40,6 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { CheerleadingInjuryAssessment } from "@/components/CheerleadingInjuryAssessment";
 import { OrgChartBuilder } from "@/components/OrgChartBuilder";
-import { AIVideoAnalysis } from "@/components/AIVideoAnalysis";
 import { SocialSharingHub } from "@/components/SocialSharingHub";
 import AuthenticatedLayout from "@/components/AuthenticatedLayout";
 
@@ -52,7 +51,6 @@ export default function AthleticTrainerDashboard() {
   const [showConsultant, setShowConsultant] = useState(false);
   const [showCheerInjuryAssessment, setShowCheerInjuryAssessment] = useState(false);
   const [showOrgChartBuilder, setShowOrgChartBuilder] = useState(false);
-  const [showVideoAnalysis, setShowVideoAnalysis] = useState(false);
   const [showSocialHub, setShowSocialHub] = useState(false);
   const [consultation, setConsultation] = useState({
     athleteName: '',
@@ -2318,11 +2316,6 @@ export default function AthleticTrainerDashboard() {
           }}
         />
 
-        <AIVideoAnalysis
-          isOpen={showVideoAnalysis}
-          onClose={() => setShowVideoAnalysis(false)}
-          sport="Basketball" // Could be dynamic based on context
-        />
 
         <SocialSharingHub
           isOpen={showSocialHub}

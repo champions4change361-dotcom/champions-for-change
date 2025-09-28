@@ -6,13 +6,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
-import { BarChart3, Trophy, Users, School, Calendar, MapPin, TrendingUp, AlertCircle, CheckCircle } from "lucide-react";
+import { BarChart3, Trophy, Users, School, Calendar, MapPin, TrendingUp, AlertCircle, CheckCircle, Plus } from "lucide-react";
 import { useLocation } from "wouter";
 import AuthenticatedLayout from "@/components/AuthenticatedLayout";
+import DistrictTournamentWizard from "@/components/DistrictTournamentWizard";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function DistrictOverview() {
   const { toast } = useToast();
   const [location, navigate] = useLocation();
+  const { user } = useAuth();
+  const [showTournamentCreator, setShowTournamentCreator] = useState(false);
 
   // Mock data for demonstration
   const districtStats = {
@@ -124,8 +128,9 @@ export default function DistrictOverview() {
         </div>
 
         <Tabs defaultValue="schools" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="schools">Schools</TabsTrigger>
+            <TabsTrigger value="tournaments">Tournaments</TabsTrigger>
             <TabsTrigger value="events">Events</TabsTrigger>
             <TabsTrigger value="health">Health & Safety</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
@@ -162,6 +167,103 @@ export default function DistrictOverview() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="tournaments" className="space-y-6">
+            {!showTournamentCreator ? (
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <Trophy className="h-5 w-5" />
+                        District Tournaments
+                      </CardTitle>
+                      <CardDescription>Create and manage district-wide tournaments</CardDescription>
+                    </div>
+                    <Button 
+                      onClick={() => setShowTournamentCreator(true)}
+                      className="flex items-center gap-2"
+                      data-testid="button-create-tournament"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Create Tournament
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {/* Mock tournament data for display */}
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-slate-900">District Basketball Championship</h3>
+                        <div className="flex gap-4 text-sm text-slate-600 mt-1">
+                          <span>8 teams</span>
+                          <span>Single Elimination</span>
+                          <span>Starts March 15, 2025</span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <Badge variant="default">Active</Badge>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-slate-900">Track & Field District Meet</h3>
+                        <div className="flex gap-4 text-sm text-slate-600 mt-1">
+                          <span>12 schools</span>
+                          <span>Multi-Event</span>
+                          <span>Starts April 1, 2025</span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <Badge variant="secondary">Upcoming</Badge>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-slate-900">Swimming Championships</h3>
+                        <div className="flex gap-4 text-sm text-slate-600 mt-1">
+                          <span>6 schools</span>
+                          <span>Time Trials</span>
+                          <span>Completed March 1, 2025</span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <Badge variant="outline">Completed</Badge>
+                      </div>
+                    </div>
+
+                    <div className="text-center py-8 text-slate-500">
+                      <Trophy className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <p className="text-lg font-medium mb-2">Ready to Create Your First Tournament?</p>
+                      <p className="text-sm">
+                        Use our simplified tournament wizard designed specifically for district coordinators.
+                        Set up single elimination, round robin, track meets, and more.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card>
+                <CardContent className="p-0">
+                  <DistrictTournamentWizard
+                    districtId={user?.organizationId || ""}
+                    onTournamentCreated={(tournament) => {
+                      toast({
+                        title: "Tournament Created",
+                        description: `${tournament.name} has been successfully created.`
+                      });
+                      setShowTournamentCreator(false);
+                    }}
+                    onCancel={() => setShowTournamentCreator(false)}
+                  />
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="events" className="space-y-6">

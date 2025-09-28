@@ -301,6 +301,210 @@ router.get('/:districtId/analytics', loadUserContext, async (req, res) => {
   }
 });
 
+// ========== DISTRICT TOURNAMENT MANAGEMENT ROUTES ==========
+
+/**
+ * POST /api/district/:districtId/tournaments
+ * Create a district-specific tournament using the existing tournament service
+ */
+router.post('/:districtId/tournaments', loadUserContext, async (req, res) => {
+  try {
+    const { districtId } = req.params;
+    const currentUser = getCurrentUser(req);
+    const { TournamentService } = await import('./tournament-service');
+    
+    // Validate district access
+    if (currentUser.organizationId !== districtId) {
+      return res.status(403).json({ error: 'Access denied to this district' });
+    }
+    
+    // Ensure user has district-level permissions
+    const allowedRoles = [
+      'district_athletic_director', 
+      'district_athletic_coordinator',
+      'school_athletic_director',
+      'school_athletic_coordinator'
+    ];
+    
+    if (!currentUser.userRole || !allowedRoles.includes(currentUser.userRole)) {
+      return res.status(403).json({ error: 'Insufficient permissions to create district tournaments' });
+    }
+    
+    // Create tournament with district-specific context
+    const tournamentOptions = {
+      ...req.body,
+      // Mark as district tournament
+      isDistrictTournament: true,
+      districtId: districtId,
+      organizationId: districtId
+    };
+    
+    const tournament = await TournamentService.createTournament(tournamentOptions, {
+      id: currentUser.id,
+      organizationId: districtId,
+      userRole: currentUser.userRole
+    });
+    
+    res.json(tournament);
+  } catch (error: any) {
+    console.error('Error creating district tournament:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * GET /api/district/:districtId/tournaments
+ * Get all tournaments for a specific district
+ */
+router.get('/:districtId/tournaments', loadUserContext, async (req, res) => {
+  try {
+    const { districtId } = req.params;
+    const currentUser = getCurrentUser(req);
+    const { storage } = await import('./storage');
+    
+    // Validate district access
+    if (currentUser.organizationId !== districtId) {
+      return res.status(403).json({ error: 'Access denied to this district' });
+    }
+    
+    const tournaments = await storage.getTournamentsByOrganization(districtId, currentUser);
+    res.json(tournaments);
+  } catch (error: any) {
+    console.error('Error getting district tournaments:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * GET /api/district/:districtId/tournaments/:tournamentId
+ * Get specific district tournament details
+ */
+router.get('/:districtId/tournaments/:tournamentId', loadUserContext, async (req, res) => {
+  try {
+    const { districtId, tournamentId } = req.params;
+    const currentUser = getCurrentUser(req);
+    const { storage } = await import('./storage');
+    
+    // Validate district access
+    if (currentUser.organizationId !== districtId) {
+      return res.status(403).json({ error: 'Access denied to this district' });
+    }
+    
+    const tournament = await storage.getTournament(tournamentId, currentUser);
+    
+    // Ensure tournament belongs to this district
+    if (tournament.organizationId !== districtId) {
+      return res.status(403).json({ error: 'Tournament does not belong to this district' });
+    }
+    
+    res.json(tournament);
+  } catch (error: any) {
+    console.error('Error getting district tournament:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * PUT /api/district/:districtId/tournaments/:tournamentId
+ * Update district tournament
+ */
+router.put('/:districtId/tournaments/:tournamentId', loadUserContext, async (req, res) => {
+  try {
+    const { districtId, tournamentId } = req.params;
+    const currentUser = getCurrentUser(req);
+    const { storage } = await import('./storage');
+    
+    // Validate district access and permissions
+    if (currentUser.organizationId !== districtId) {
+      return res.status(403).json({ error: 'Access denied to this district' });
+    }
+    
+    const allowedRoles = [
+      'district_athletic_director', 
+      'district_athletic_coordinator',
+      'school_athletic_director',
+      'school_athletic_coordinator'
+    ];
+    
+    if (!currentUser.userRole || !allowedRoles.includes(currentUser.userRole)) {
+      return res.status(403).json({ error: 'Insufficient permissions to update district tournaments' });
+    }
+    
+    const updatedTournament = await storage.updateTournament(tournamentId, req.body, currentUser);
+    res.json(updatedTournament);
+  } catch (error: any) {
+    console.error('Error updating district tournament:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * GET /api/district/:districtId/tournament-templates
+ * Get district-specific tournament templates and configurations
+ */
+router.get('/:districtId/tournament-templates', loadUserContext, async (req, res) => {
+  try {
+    const { districtId } = req.params;
+    const currentUser = getCurrentUser(req);
+    
+    // Validate district access
+    if (currentUser.organizationId !== districtId) {
+      return res.status(403).json({ error: 'Access denied to this district' });
+    }
+    
+    // Return district-appropriate tournament templates
+    const districtTemplates = {
+      singleElimination: {
+        name: 'Single Elimination',
+        description: 'Standard knockout tournament format',
+        tournamentType: 'single',
+        scoringMethod: 'head-to-head',
+        suitable: ['Basketball', 'Volleyball', 'Soccer', 'Tennis']
+      },
+      doubleElimination: {
+        name: 'Double Elimination',
+        description: 'Teams get a second chance in losers bracket',
+        tournamentType: 'double',
+        scoringMethod: 'head-to-head',
+        suitable: ['Baseball', 'Softball', 'Wrestling']
+      },
+      roundRobin: {
+        name: 'Round Robin',
+        description: 'Every team plays every other team',
+        tournamentType: 'round-robin',
+        scoringMethod: 'points-accumulated',
+        suitable: ['Small tournaments', 'Pool play', 'League format']
+      },
+      poolPlay: {
+        name: 'Pool Play + Playoffs',
+        description: 'Teams play in pools then advance to playoffs',
+        tournamentType: 'pool-play',
+        scoringMethod: 'performance-score',
+        suitable: ['Large tournaments', 'Multi-day events']
+      },
+      trackField: {
+        name: 'Track & Field Meet',
+        description: 'Individual and relay events with performance scoring',
+        tournamentType: 'multi-event-scoring',
+        scoringMethod: 'performance-score',
+        suitable: ['Track and Field', 'Swimming', 'Cross Country']
+      },
+      timeTrials: {
+        name: 'Time Trials',
+        description: 'Best time wins (lower scores better)',
+        tournamentType: 'time-trials',
+        scoringMethod: 'fastest-time',
+        suitable: ['Swimming', 'Track events', 'Cross Country']
+      }
+    };
+    
+    res.json(districtTemplates);
+  } catch (error: any) {
+    console.error('Error getting district tournament templates:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Error handling middleware for the district routes
 router.use((error: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('District routes error:', error);
