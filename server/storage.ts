@@ -101,6 +101,39 @@ export interface IStorage {
   // ESPN Scoring methods
   updateLineupScore(lineupId: string, newScore: number): Promise<void>;
   getActiveGameInstances(): Promise<GameInstance[]>;
+
+  // Fantasy League Management methods
+  createFantasyLeague(leagueData: InsertFantasyLeague): Promise<FantasyLeague>;
+  getUserFantasyLeagues(userId: string): Promise<FantasyLeague[]>;
+  getFantasyLeague(leagueId: string, userId: string): Promise<FantasyLeague | undefined>;
+  joinFantasyLeague(leagueId: string, teamData: InsertFantasyTeam, inviteCode?: string): Promise<FantasyTeam>;
+  getFantasyLeagueStandings(leagueId: string, userId: string): Promise<any[]>;
+
+  // Fantasy Team Management methods
+  getUserFantasyTeam(leagueId: string, userId: string): Promise<FantasyTeam | undefined>;
+  getFantasyTeamRoster(teamId: string, userId: string): Promise<FantasyRoster[]>;
+  setFantasyLineup(teamId: string, userId: string, week: number, lineup: any): Promise<any>;
+
+  // Fantasy Draft Management methods
+  startFantasyDraft(leagueId: string, draftSettings: any): Promise<FantasyDraft>;
+  getFantasyDraft(leagueId: string, userId: string): Promise<FantasyDraft | undefined>;
+  makeFantasyDraftPick(draftId: string, userId: string, playerId: string): Promise<any>;
+
+  // Fantasy Waiver Wire methods
+  submitWaiverClaim(claimData: InsertFantasyWaiverClaim, userId: string): Promise<FantasyWaiverClaim>;
+  getTeamWaiverClaims(teamId: string, userId: string): Promise<FantasyWaiverClaim[]>;
+
+  // Fantasy Trade methods
+  proposeFantasyTrade(tradeData: InsertFantasyTrade, userId: string): Promise<FantasyTrade>;
+  respondToFantasyTrade(tradeId: string, userId: string, action: string): Promise<FantasyTrade>;
+
+  // Fantasy Matchup and Scoring methods
+  getFantasyMatchups(leagueId: string, week: number, userId: string): Promise<FantasyMatchup[]>;
+  getFantasyLiveScores(leagueId: string, userId: string): Promise<any>;
+
+  // Fantasy Communication methods
+  postFantasyLeagueMessage(messageData: InsertFantasyLeagueMessage): Promise<FantasyLeagueMessage>;
+  getFantasyLeagueMessages(leagueId: string, userId: string): Promise<FantasyLeagueMessage[]>;
   
   // Compliance operations
   createComplianceAuditLog(log: ComplianceAuditLog): Promise<ComplianceAuditLog>;
@@ -1398,6 +1431,470 @@ export class DbStorage implements IStorage {
       return result;
     } catch (error) {
       console.error("Error getting active game instances:", error);
+      return [];
+    }
+  }
+
+  // =============================================================================
+  // COMPREHENSIVE FANTASY LEAGUE STORAGE IMPLEMENTATION
+  // =============================================================================
+
+  async createFantasyLeague(leagueData: InsertFantasyLeague): Promise<FantasyLeague> {
+    try {
+      const [result] = await this.db
+        .insert(fantasyLeagues)
+        .values(leagueData)
+        .returning();
+      return result;
+    } catch (error) {
+      console.error("Error creating fantasy league:", error);
+      throw error;
+    }
+  }
+
+  async getUserFantasyLeagues(userId: string): Promise<FantasyLeague[]> {
+    try {
+      // Get leagues where user is commissioner or has a team
+      const ownedLeagues = await this.db
+        .select()
+        .from(fantasyLeagues)
+        .where(eq(fantasyLeagues.commissionerId, userId));
+
+      const participantLeagues = await this.db
+        .select({
+          league: fantasyLeagues,
+        })
+        .from(fantasyTeams)
+        .innerJoin(fantasyLeagues, eq(fantasyTeams.leagueId, fantasyLeagues.id))
+        .where(eq(fantasyTeams.ownerId, userId));
+
+      // Combine and deduplicate
+      const allLeagues = [...ownedLeagues, ...participantLeagues.map(p => p.league)];
+      const uniqueLeagues = allLeagues.filter((league, index, self) => 
+        self.findIndex(l => l.id === league.id) === index
+      );
+
+      return uniqueLeagues;
+    } catch (error) {
+      console.error("Error getting user fantasy leagues:", error);
+      return [];
+    }
+  }
+
+  async getFantasyLeague(leagueId: string, userId: string): Promise<FantasyLeague | undefined> {
+    try {
+      // Verify user has access to this league
+      const userHasAccess = await this.db
+        .select()
+        .from(fantasyLeagues)
+        .where(
+          and(
+            eq(fantasyLeagues.id, leagueId),
+            sql`(${fantasyLeagues.commissionerId} = ${userId} OR 
+                 EXISTS(SELECT 1 FROM ${fantasyTeams} WHERE ${fantasyTeams.leagueId} = ${leagueId} AND ${fantasyTeams.ownerId} = ${userId}))`
+          )
+        )
+        .limit(1);
+
+      if (userHasAccess.length === 0) {
+        return undefined;
+      }
+
+      const [result] = await this.db
+        .select()
+        .from(fantasyLeagues)
+        .where(eq(fantasyLeagues.id, leagueId))
+        .limit(1);
+
+      return result;
+    } catch (error) {
+      console.error("Error getting fantasy league:", error);
+      return undefined;
+    }
+  }
+
+  async joinFantasyLeague(leagueId: string, teamData: InsertFantasyTeam, inviteCode?: string): Promise<FantasyTeam> {
+    try {
+      // Verify league exists and is joinable
+      const league = await this.db
+        .select()
+        .from(fantasyLeagues)
+        .where(eq(fantasyLeagues.id, leagueId))
+        .limit(1);
+
+      if (!league[0]) {
+        throw new Error("League not found");
+      }
+
+      // Check invite code if league is private
+      if (league[0].isPrivate && league[0].inviteCode !== inviteCode) {
+        throw new Error("Invalid invite code");
+      }
+
+      // Check if league is full
+      const currentTeams = await this.db
+        .select({ count: sql<number>`count(*)` })
+        .from(fantasyTeams)
+        .where(eq(fantasyTeams.leagueId, leagueId));
+
+      if (currentTeams[0].count >= league[0].maxTeams) {
+        throw new Error("League is full");
+      }
+
+      // Create team
+      const [newTeam] = await this.db
+        .insert(fantasyTeams)
+        .values(teamData)
+        .returning();
+
+      return newTeam;
+    } catch (error) {
+      console.error("Error joining fantasy league:", error);
+      throw error;
+    }
+  }
+
+  async getFantasyLeagueStandings(leagueId: string, userId: string): Promise<any[]> {
+    try {
+      // Verify user has access
+      const hasAccess = await this.getFantasyLeague(leagueId, userId);
+      if (!hasAccess) {
+        throw new Error("Access denied");
+      }
+
+      const standings = await this.db
+        .select({
+          team: fantasyTeams,
+          wins: sql<number>`COALESCE(SUM(CASE WHEN ${fantasyMatchups.homeTeamScore} > ${fantasyMatchups.awayTeamScore} AND ${fantasyMatchups.homeTeamId} = ${fantasyTeams.id} THEN 1 WHEN ${fantasyMatchups.awayTeamScore} > ${fantasyMatchups.homeTeamScore} AND ${fantasyMatchups.awayTeamId} = ${fantasyTeams.id} THEN 1 ELSE 0 END), 0)`,
+          losses: sql<number>`COALESCE(SUM(CASE WHEN ${fantasyMatchups.homeTeamScore} < ${fantasyMatchups.awayTeamScore} AND ${fantasyMatchups.homeTeamId} = ${fantasyTeams.id} THEN 1 WHEN ${fantasyMatchups.awayTeamScore} < ${fantasyMatchups.homeTeamScore} AND ${fantasyMatchups.awayTeamId} = ${fantasyTeams.id} THEN 1 ELSE 0 END), 0)`,
+          pointsFor: sql<number>`COALESCE(${fantasyTeams.totalPointsFor}, 0)`,
+          pointsAgainst: sql<number>`COALESCE(${fantasyTeams.totalPointsAgainst}, 0)`
+        })
+        .from(fantasyTeams)
+        .leftJoin(fantasyMatchups, 
+          sql`(${fantasyMatchups.homeTeamId} = ${fantasyTeams.id} OR ${fantasyMatchups.awayTeamId} = ${fantasyTeams.id}) AND ${fantasyMatchups.status} = 'completed'`
+        )
+        .where(eq(fantasyTeams.leagueId, leagueId))
+        .groupBy(fantasyTeams.id)
+        .orderBy(sql`wins DESC, pointsFor DESC`);
+
+      return standings;
+    } catch (error) {
+      console.error("Error getting fantasy league standings:", error);
+      return [];
+    }
+  }
+
+  async getUserFantasyTeam(leagueId: string, userId: string): Promise<FantasyTeam | undefined> {
+    try {
+      const [result] = await this.db
+        .select()
+        .from(fantasyTeams)
+        .where(
+          and(
+            eq(fantasyTeams.leagueId, leagueId),
+            eq(fantasyTeams.ownerId, userId)
+          )
+        )
+        .limit(1);
+
+      return result;
+    } catch (error) {
+      console.error("Error getting user fantasy team:", error);
+      return undefined;
+    }
+  }
+
+  async getFantasyTeamRoster(teamId: string, userId: string): Promise<FantasyRoster[]> {
+    try {
+      // Verify user owns this team
+      const team = await this.db
+        .select()
+        .from(fantasyTeams)
+        .where(eq(fantasyTeams.id, teamId))
+        .limit(1);
+
+      if (!team[0] || team[0].ownerId !== userId) {
+        throw new Error("Access denied");
+      }
+
+      const roster = await this.db
+        .select()
+        .from(fantasyRosters)
+        .where(eq(fantasyRosters.teamId, teamId));
+
+      return roster;
+    } catch (error) {
+      console.error("Error getting fantasy team roster:", error);
+      return [];
+    }
+  }
+
+  async setFantasyLineup(teamId: string, userId: string, week: number, lineup: any): Promise<any> {
+    try {
+      // Verify user owns this team
+      const team = await this.db
+        .select()
+        .from(fantasyTeams)
+        .where(eq(fantasyTeams.id, teamId))
+        .limit(1);
+
+      if (!team[0] || team[0].ownerId !== userId) {
+        throw new Error("Access denied");
+      }
+
+      // Update roster with new lineup positions
+      for (const position in lineup) {
+        const playerId = lineup[position];
+        if (playerId) {
+          await this.db
+            .update(fantasyRosters)
+            .set({ 
+              rosterPosition: position,
+              isStarting: position !== 'bench'
+            })
+            .where(
+              and(
+                eq(fantasyRosters.teamId, teamId),
+                eq(fantasyRosters.playerId, playerId)
+              )
+            );
+        }
+      }
+
+      return { success: true, week, lineup };
+    } catch (error) {
+      console.error("Error setting fantasy lineup:", error);
+      throw error;
+    }
+  }
+
+  async startFantasyDraft(leagueId: string, draftSettings: any): Promise<FantasyDraft> {
+    try {
+      const draftData: InsertFantasyDraft = {
+        leagueId,
+        draftType: draftSettings.draftType || 'snake',
+        draftOrder: draftSettings.draftOrder || [],
+        currentRound: 1,
+        currentPick: 1,
+        status: 'active',
+        timePerPick: draftSettings.timePerPick || 60,
+        autoPickEnabled: draftSettings.autoPickEnabled || true
+      };
+
+      const [result] = await this.db
+        .insert(fantasyDrafts)
+        .values(draftData)
+        .returning();
+
+      return result;
+    } catch (error) {
+      console.error("Error starting fantasy draft:", error);
+      throw error;
+    }
+  }
+
+  async getFantasyDraft(leagueId: string, userId: string): Promise<FantasyDraft | undefined> {
+    try {
+      // Verify user has access to this league
+      const hasAccess = await this.getFantasyLeague(leagueId, userId);
+      if (!hasAccess) {
+        return undefined;
+      }
+
+      const [result] = await this.db
+        .select()
+        .from(fantasyDrafts)
+        .where(eq(fantasyDrafts.leagueId, leagueId))
+        .orderBy(desc(fantasyDrafts.createdAt))
+        .limit(1);
+
+      return result;
+    } catch (error) {
+      console.error("Error getting fantasy draft:", error);
+      return undefined;
+    }
+  }
+
+  async makeFantasyDraftPick(draftId: string, userId: string, playerId: string): Promise<any> {
+    try {
+      // Implementation for draft pick logic would go here
+      // This is a complex feature that would need draft order management
+      throw new Error("Draft pick functionality not yet implemented");
+    } catch (error) {
+      console.error("Error making fantasy draft pick:", error);
+      throw error;
+    }
+  }
+
+  async submitWaiverClaim(claimData: InsertFantasyWaiverClaim, userId: string): Promise<FantasyWaiverClaim> {
+    try {
+      // Verify user owns the team
+      const team = await this.db
+        .select()
+        .from(fantasyTeams)
+        .where(eq(fantasyTeams.id, claimData.teamId))
+        .limit(1);
+
+      if (!team[0] || team[0].ownerId !== userId) {
+        throw new Error("Access denied");
+      }
+
+      const [result] = await this.db
+        .insert(fantasyWaiverClaims)
+        .values(claimData)
+        .returning();
+
+      return result;
+    } catch (error) {
+      console.error("Error submitting waiver claim:", error);
+      throw error;
+    }
+  }
+
+  async getTeamWaiverClaims(teamId: string, userId: string): Promise<FantasyWaiverClaim[]> {
+    try {
+      // Verify user owns this team
+      const team = await this.db
+        .select()
+        .from(fantasyTeams)
+        .where(eq(fantasyTeams.id, teamId))
+        .limit(1);
+
+      if (!team[0] || team[0].ownerId !== userId) {
+        throw new Error("Access denied");
+      }
+
+      const claims = await this.db
+        .select()
+        .from(fantasyWaiverClaims)
+        .where(eq(fantasyWaiverClaims.teamId, teamId))
+        .orderBy(desc(fantasyWaiverClaims.createdAt));
+
+      return claims;
+    } catch (error) {
+      console.error("Error getting team waiver claims:", error);
+      return [];
+    }
+  }
+
+  async proposeFantasyTrade(tradeData: InsertFantasyTrade, userId: string): Promise<FantasyTrade> {
+    try {
+      const [result] = await this.db
+        .insert(fantasyTrades)
+        .values(tradeData)
+        .returning();
+
+      return result;
+    } catch (error) {
+      console.error("Error proposing fantasy trade:", error);
+      throw error;
+    }
+  }
+
+  async respondToFantasyTrade(tradeId: string, userId: string, action: string): Promise<FantasyTrade> {
+    try {
+      const updateData: Partial<FantasyTrade> = {
+        status: action === 'accept' ? 'accepted' : 'rejected',
+        respondedAt: new Date()
+      };
+
+      if (action === 'accept') {
+        updateData.processedAt = new Date();
+      }
+
+      const [result] = await this.db
+        .update(fantasyTrades)
+        .set(updateData)
+        .where(eq(fantasyTrades.id, tradeId))
+        .returning();
+
+      return result;
+    } catch (error) {
+      console.error("Error responding to fantasy trade:", error);
+      throw error;
+    }
+  }
+
+  async getFantasyMatchups(leagueId: string, week: number, userId: string): Promise<FantasyMatchup[]> {
+    try {
+      // Verify user has access
+      const hasAccess = await this.getFantasyLeague(leagueId, userId);
+      if (!hasAccess) {
+        throw new Error("Access denied");
+      }
+
+      const matchups = await this.db
+        .select()
+        .from(fantasyMatchups)
+        .where(
+          and(
+            eq(fantasyMatchups.leagueId, leagueId),
+            eq(fantasyMatchups.week, week)
+          )
+        )
+        .orderBy(fantasyMatchups.matchupId);
+
+      return matchups;
+    } catch (error) {
+      console.error("Error getting fantasy matchups:", error);
+      return [];
+    }
+  }
+
+  async getFantasyLiveScores(leagueId: string, userId: string): Promise<any> {
+    try {
+      // Verify user has access
+      const hasAccess = await this.getFantasyLeague(leagueId, userId);
+      if (!hasAccess) {
+        throw new Error("Access denied");
+      }
+
+      // This would integrate with ESPN scoring service for live updates
+      // For now, return basic structure
+      return {
+        lastUpdated: new Date(),
+        scores: [],
+        gameStatus: "pending"
+      };
+    } catch (error) {
+      console.error("Error getting fantasy live scores:", error);
+      return { lastUpdated: new Date(), scores: [], gameStatus: "error" };
+    }
+  }
+
+  async postFantasyLeagueMessage(messageData: InsertFantasyLeagueMessage): Promise<FantasyLeagueMessage> {
+    try {
+      const [result] = await this.db
+        .insert(fantasyLeagueMessages)
+        .values(messageData)
+        .returning();
+
+      return result;
+    } catch (error) {
+      console.error("Error posting fantasy league message:", error);
+      throw error;
+    }
+  }
+
+  async getFantasyLeagueMessages(leagueId: string, userId: string): Promise<FantasyLeagueMessage[]> {
+    try {
+      // Verify user has access
+      const hasAccess = await this.getFantasyLeague(leagueId, userId);
+      if (!hasAccess) {
+        throw new Error("Access denied");
+      }
+
+      const messages = await this.db
+        .select()
+        .from(fantasyLeagueMessages)
+        .where(eq(fantasyLeagueMessages.leagueId, leagueId))
+        .orderBy(desc(fantasyLeagueMessages.createdAt))
+        .limit(100);
+
+      return messages;
+    } catch (error) {
+      console.error("Error getting fantasy league messages:", error);
       return [];
     }
   }
@@ -5811,6 +6308,16 @@ export class MemStorage implements IStorage {
   private userLineups: Map<string, UserLineup>;
   private playerPerformances: Map<string, PlayerPerformance>;
 
+  // FANTASY LEAGUE MAPS
+  private fantasyLeagues: Map<string, FantasyLeague>;
+  private fantasyTeams: Map<string, FantasyTeam>;
+  private fantasyRosters: Map<string, FantasyRoster>;
+  private fantasyDrafts: Map<string, FantasyDraft>;
+  private fantasyMatchups: Map<string, FantasyMatchup>;
+  private fantasyWaiverClaims: Map<string, FantasyWaiverClaim>;
+  private fantasyTrades: Map<string, FantasyTrade>;
+  private fantasyLeagueMessages: Map<string, FantasyLeagueMessage>;
+
   // BUDGET MANAGEMENT SYSTEM MAPS - Excel-Style Budget Management 🏦📊
   private budgetCategories: Map<string, BudgetCategory>;
   private budgetItems: Map<string, BudgetItem>;
@@ -5872,6 +6379,15 @@ export class MemStorage implements IStorage {
     this.gameInstances = new Map();
     this.userLineups = new Map();
     this.playerPerformances = new Map();
+
+    this.fantasyLeagues = new Map();
+    this.fantasyTeams = new Map();
+    this.fantasyRosters = new Map();
+    this.fantasyDrafts = new Map();
+    this.fantasyMatchups = new Map();
+    this.fantasyWaiverClaims = new Map();
+    this.fantasyTrades = new Map();
+    this.fantasyLeagueMessages = new Map();
     
     // BUDGET MANAGEMENT SYSTEM INITIALIZATION 🏦📊
     this.budgetCategories = new Map();

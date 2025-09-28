@@ -21,7 +21,7 @@ import { registerAcademicRoutes } from "./academic-routes";
 import { registerBudgetRoutes } from "./budget-routes";
 import subscriptionRoutes from "./routes/subscriptionRoutes";
 import stripeWebhooks from "./routes/stripeWebhooks";
-import { tournamentSubscriptions, insertTournamentSubscriptionSchema, type InsertTournamentSubscription, insertRegistrationSubmissionSchema, insertTeamSchema, insertTeamPlayerSchema, insertMedicalHistorySchema, type InsertTeam, type InsertTeamPlayer, type InsertMedicalHistory, type Team, type TeamPlayer, type MedicalHistory, updateTeamSubscriptionSchema, type User } from "@shared/schema";
+import { tournamentSubscriptions, insertTournamentSubscriptionSchema, type InsertTournamentSubscription, insertRegistrationSubmissionSchema, insertTeamSchema, insertTeamPlayerSchema, insertMedicalHistorySchema, type InsertTeam, type InsertTeamPlayer, type InsertMedicalHistory, type Team, type TeamPlayer, type MedicalHistory, updateTeamSubscriptionSchema, type User, type FantasyLeague, type InsertFantasyLeague, type FantasyTeam, type InsertFantasyTeam, type FantasyRoster, type InsertFantasyRoster, type FantasyDraft, type InsertFantasyDraft, type FantasyMatchup, type InsertFantasyMatchup, type FantasyWaiverClaim, type InsertFantasyWaiverClaim, type FantasyTrade, type InsertFantasyTrade, type FantasyLeagueMessage, type InsertFantasyLeagueMessage, insertFantasyLeagueSchema, insertFantasyTeamSchema, insertFantasyRosterSchema, insertFantasyDraftSchema, insertFantasyMatchupSchema, insertFantasyWaiverClaimSchema, insertFantasyTradeSchema, insertFantasyLeagueMessageSchema } from "@shared/schema";
 import { GameLockoutService } from "./game-lockout-service.js";
 import { registerAthleticTrainerRoutes } from "./athletic-trainer-routes";
 import districtRoutes from "./district-routes";
@@ -9436,6 +9436,430 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
   });
 
   console.log('🎨 White-label client configuration management enabled');
+
+  // =============================================================================
+  // COMPREHENSIVE FANTASY LEAGUE MANAGEMENT SYSTEM
+  // =============================================================================
+
+  // Fantasy League Management Routes
+  
+  // Create a new fantasy league
+  app.post("/api/fantasy/leagues", isAuthenticated, async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      // Validate request body
+      const leagueData = insertFantasyLeagueSchema.parse({
+        ...req.body,
+        commissionerId: userId,
+        inviteCode: Math.random().toString(36).substring(2, 10).toUpperCase(),
+        season: req.body.season || "2024-2025"
+      });
+
+      const league = await storage.createFantasyLeague(leagueData);
+      res.status(201).json(league);
+    } catch (error: any) {
+      console.error("Create fantasy league error:", error);
+      res.status(400).json({ 
+        error: "Failed to create fantasy league",
+        details: error.message 
+      });
+    }
+  });
+
+  // Get user's fantasy leagues
+  app.get("/api/fantasy/leagues", isAuthenticated, async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const leagues = await storage.getUserFantasyLeagues(userId);
+      res.json(leagues);
+    } catch (error: any) {
+      console.error("Get fantasy leagues error:", error);
+      res.status(500).json({ error: "Failed to fetch fantasy leagues" });
+    }
+  });
+
+  // Get specific fantasy league details
+  app.get("/api/fantasy/leagues/:leagueId", isAuthenticated, async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const league = await storage.getFantasyLeague(req.params.leagueId, userId);
+      if (!league) {
+        return res.status(404).json({ error: "Fantasy league not found" });
+      }
+
+      res.json(league);
+    } catch (error: any) {
+      console.error("Get fantasy league error:", error);
+      res.status(500).json({ error: "Failed to fetch fantasy league" });
+    }
+  });
+
+  // Join a fantasy league
+  app.post("/api/fantasy/leagues/:leagueId/join", isAuthenticated, async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const { teamName, inviteCode } = req.body;
+      
+      // Validate team data
+      const teamData = insertFantasyTeamSchema.parse({
+        leagueId: req.params.leagueId,
+        ownerId: userId,
+        teamName: teamName || `${req.user.firstName || 'Team'}'s Team`,
+        teamAbbreviation: teamName?.substring(0, 4).toUpperCase() || 'TEAM'
+      });
+
+      const team = await storage.joinFantasyLeague(req.params.leagueId, teamData, inviteCode);
+      res.status(201).json(team);
+    } catch (error: any) {
+      console.error("Join fantasy league error:", error);
+      res.status(400).json({ 
+        error: "Failed to join fantasy league",
+        details: error.message 
+      });
+    }
+  });
+
+  // Get league standings
+  app.get("/api/fantasy/leagues/:leagueId/standings", isAuthenticated, async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const standings = await storage.getFantasyLeagueStandings(req.params.leagueId, userId);
+      res.json(standings);
+    } catch (error: any) {
+      console.error("Get league standings error:", error);
+      res.status(500).json({ error: "Failed to fetch league standings" });
+    }
+  });
+
+  // Fantasy Team Management Routes
+
+  // Get user's team in a league
+  app.get("/api/fantasy/leagues/:leagueId/my-team", isAuthenticated, async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const team = await storage.getUserFantasyTeam(req.params.leagueId, userId);
+      if (!team) {
+        return res.status(404).json({ error: "No team found in this league" });
+      }
+
+      res.json(team);
+    } catch (error: any) {
+      console.error("Get user fantasy team error:", error);
+      res.status(500).json({ error: "Failed to fetch fantasy team" });
+    }
+  });
+
+  // Get team roster
+  app.get("/api/fantasy/teams/:teamId/roster", isAuthenticated, async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const roster = await storage.getFantasyTeamRoster(req.params.teamId, userId);
+      res.json(roster);
+    } catch (error: any) {
+      console.error("Get team roster error:", error);
+      res.status(500).json({ error: "Failed to fetch team roster" });
+    }
+  });
+
+  // Set weekly lineup
+  app.post("/api/fantasy/teams/:teamId/lineup", isAuthenticated, async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const { week, lineup } = req.body;
+      
+      const updatedLineup = await storage.setFantasyLineup(req.params.teamId, userId, week, lineup);
+      res.json(updatedLineup);
+    } catch (error: any) {
+      console.error("Set fantasy lineup error:", error);
+      res.status(400).json({ 
+        error: "Failed to set fantasy lineup",
+        details: error.message 
+      });
+    }
+  });
+
+  // Fantasy Draft Management Routes
+
+  // Start a draft
+  app.post("/api/fantasy/leagues/:leagueId/draft/start", isAuthenticated, async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      // Verify user is commissioner
+      const league = await storage.getFantasyLeague(req.params.leagueId, userId);
+      if (!league || league.commissionerId !== userId) {
+        return res.status(403).json({ error: "Only the commissioner can start the draft" });
+      }
+
+      const draft = await storage.startFantasyDraft(req.params.leagueId, req.body);
+      res.json(draft);
+    } catch (error: any) {
+      console.error("Start fantasy draft error:", error);
+      res.status(400).json({ 
+        error: "Failed to start fantasy draft",
+        details: error.message 
+      });
+    }
+  });
+
+  // Get draft status
+  app.get("/api/fantasy/leagues/:leagueId/draft", isAuthenticated, async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const draft = await storage.getFantasyDraft(req.params.leagueId, userId);
+      res.json(draft);
+    } catch (error: any) {
+      console.error("Get fantasy draft error:", error);
+      res.status(500).json({ error: "Failed to fetch draft status" });
+    }
+  });
+
+  // Make a draft pick
+  app.post("/api/fantasy/drafts/:draftId/pick", isAuthenticated, async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const { playerId } = req.body;
+      
+      const pick = await storage.makeFantasyDraftPick(req.params.draftId, userId, playerId);
+      res.json(pick);
+    } catch (error: any) {
+      console.error("Make draft pick error:", error);
+      res.status(400).json({ 
+        error: "Failed to make draft pick",
+        details: error.message 
+      });
+    }
+  });
+
+  // Fantasy Waiver Wire Routes
+
+  // Submit waiver claim
+  app.post("/api/fantasy/teams/:teamId/waiver-claims", isAuthenticated, async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const claimData = insertFantasyWaiverClaimSchema.parse({
+        ...req.body,
+        teamId: req.params.teamId
+      });
+
+      const claim = await storage.submitWaiverClaim(claimData, userId);
+      res.status(201).json(claim);
+    } catch (error: any) {
+      console.error("Submit waiver claim error:", error);
+      res.status(400).json({ 
+        error: "Failed to submit waiver claim",
+        details: error.message 
+      });
+    }
+  });
+
+  // Get team's waiver claims
+  app.get("/api/fantasy/teams/:teamId/waiver-claims", isAuthenticated, async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const claims = await storage.getTeamWaiverClaims(req.params.teamId, userId);
+      res.json(claims);
+    } catch (error: any) {
+      console.error("Get waiver claims error:", error);
+      res.status(500).json({ error: "Failed to fetch waiver claims" });
+    }
+  });
+
+  // Fantasy Trade Routes
+
+  // Propose a trade
+  app.post("/api/fantasy/leagues/:leagueId/trades", isAuthenticated, async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const tradeData = insertFantasyTradeSchema.parse({
+        ...req.body,
+        leagueId: req.params.leagueId
+      });
+
+      const trade = await storage.proposeFantasyTrade(tradeData, userId);
+      res.status(201).json(trade);
+    } catch (error: any) {
+      console.error("Propose trade error:", error);
+      res.status(400).json({ 
+        error: "Failed to propose trade",
+        details: error.message 
+      });
+    }
+  });
+
+  // Respond to trade proposal
+  app.patch("/api/fantasy/trades/:tradeId", isAuthenticated, async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const { action } = req.body; // 'accept' or 'reject'
+      
+      const trade = await storage.respondToFantasyTrade(req.params.tradeId, userId, action);
+      res.json(trade);
+    } catch (error: any) {
+      console.error("Respond to trade error:", error);
+      res.status(400).json({ 
+        error: "Failed to respond to trade",
+        details: error.message 
+      });
+    }
+  });
+
+  // Fantasy Matchup and Scoring Routes
+
+  // Get league matchups for a week
+  app.get("/api/fantasy/leagues/:leagueId/matchups/:week", isAuthenticated, async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const matchups = await storage.getFantasyMatchups(req.params.leagueId, parseInt(req.params.week), userId);
+      res.json(matchups);
+    } catch (error: any) {
+      console.error("Get fantasy matchups error:", error);
+      res.status(500).json({ error: "Failed to fetch fantasy matchups" });
+    }
+  });
+
+  // Get live scoring updates
+  app.get("/api/fantasy/leagues/:leagueId/live-scores", isAuthenticated, async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const liveScores = await storage.getFantasyLiveScores(req.params.leagueId, userId);
+      res.json(liveScores);
+    } catch (error: any) {
+      console.error("Get live scores error:", error);
+      res.status(500).json({ error: "Failed to fetch live scores" });
+    }
+  });
+
+  // Fantasy League Communication Routes
+
+  // Post message to league
+  app.post("/api/fantasy/leagues/:leagueId/messages", isAuthenticated, async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const messageData = insertFantasyLeagueMessageSchema.parse({
+        ...req.body,
+        leagueId: req.params.leagueId,
+        senderId: userId
+      });
+
+      const message = await storage.postFantasyLeagueMessage(messageData);
+      res.status(201).json(message);
+    } catch (error: any) {
+      console.error("Post league message error:", error);
+      res.status(400).json({ 
+        error: "Failed to post message",
+        details: error.message 
+      });
+    }
+  });
+
+  // Get league messages
+  app.get("/api/fantasy/leagues/:leagueId/messages", isAuthenticated, async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const messages = await storage.getFantasyLeagueMessages(req.params.leagueId, userId);
+      res.json(messages);
+    } catch (error: any) {
+      console.error("Get league messages error:", error);
+      res.status(500).json({ error: "Failed to fetch league messages" });
+    }
+  });
+
+  console.log('🏈 Comprehensive fantasy league management system enabled');
 
   // Stripe subscription management routes  
   app.use('/', subscriptionRoutes);

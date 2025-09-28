@@ -221,6 +221,366 @@ export const fantasyProfiles = pgTable("fantasy_profiles", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// =============================================================================
+// COMPREHENSIVE FANTASY LEAGUE SYSTEM
+// =============================================================================
+
+// Fantasy Leagues - Season-long fantasy leagues
+export const fantasyLeagues = pgTable("fantasy_leagues", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  commissionerId: varchar("commissioner_id").notNull().references(() => users.id),
+  
+  // League Basic Info
+  leagueName: varchar("league_name").notNull(),
+  leagueDescription: text("league_description"),
+  sport: text("sport", {
+    enum: ["nfl", "nba", "mlb", "nhl"]
+  }).notNull().default("nfl"),
+  season: varchar("season").notNull(), // "2024-2025"
+  
+  // League Configuration
+  teamCount: integer("team_count").notNull().default(10),
+  maxTeams: integer("max_teams").notNull().default(12),
+  draftType: text("draft_type", {
+    enum: ["snake", "linear", "auction"]
+  }).default("snake"),
+  
+  // League Settings
+  scoringType: text("scoring_type", {
+    enum: ["standard", "ppr", "half_ppr", "superflex", "custom"]
+  }).default("ppr"),
+  playoffTeams: integer("playoff_teams").default(4),
+  playoffWeeks: integer("playoff_weeks").default(3),
+  regularSeasonWeeks: integer("regular_season_weeks").default(14),
+  
+  // Roster Settings
+  rosterSettings: jsonb("roster_settings").$type<{
+    qb: number;
+    rb: number;
+    wr: number;
+    te: number;
+    flex: number;
+    def: number;
+    k: number;
+    bench: number;
+    ir: number;
+  }>().default({
+    qb: 1, rb: 2, wr: 2, te: 1, flex: 1, def: 1, k: 1, bench: 6, ir: 1
+  }),
+  
+  // League Status
+  status: text("status", {
+    enum: ["creating", "open", "drafting", "active", "playoffs", "completed", "archived"]
+  }).default("creating"),
+  
+  // League Privacy
+  isPrivate: boolean("is_private").default(false),
+  inviteCode: varchar("invite_code"),
+  password: varchar("password"),
+  
+  // League Dates
+  draftDate: timestamp("draft_date"),
+  seasonStart: date("season_start"),
+  seasonEnd: date("season_end"),
+  tradeDeadline: date("trade_deadline"),
+  
+  // League Rules
+  waiverPeriod: integer("waiver_period").default(2), // days
+  tradeDeadlineWeek: integer("trade_deadline_week").default(10),
+  maxKeepers: integer("max_keepers").default(0),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Fantasy Teams - Teams within fantasy leagues
+export const fantasyTeams = pgTable("fantasy_teams", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  leagueId: varchar("league_id").notNull().references(() => fantasyLeagues.id),
+  ownerId: varchar("owner_id").notNull().references(() => users.id),
+  
+  // Team Info
+  teamName: varchar("team_name").notNull(),
+  teamAbbreviation: varchar("team_abbreviation", { length: 4 }),
+  teamLogo: varchar("team_logo"),
+  
+  // Team Performance
+  wins: integer("wins").default(0),
+  losses: integer("losses").default(0),
+  ties: integer("ties").default(0),
+  pointsFor: decimal("points_for", { precision: 8, scale: 2 }).default("0"),
+  pointsAgainst: decimal("points_against", { precision: 8, scale: 2 }).default("0"),
+  
+  // Playoff Status
+  playoffSeed: integer("playoff_seed"),
+  isInPlayoffs: boolean("is_in_playoffs").default(false),
+  
+  // Draft Results
+  draftPosition: integer("draft_position"),
+  draftGrade: varchar("draft_grade"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Fantasy Team Rosters - Player ownership tracking
+export const fantasyRosters = pgTable("fantasy_rosters", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  teamId: varchar("team_id").notNull().references(() => fantasyTeams.id),
+  playerId: varchar("player_id").notNull().references(() => professionalPlayers.id),
+  
+  // Roster Status
+  rosterPosition: text("roster_position", {
+    enum: ["starter", "bench", "ir", "taxi"]
+  }).default("bench"),
+  lineupPosition: text("lineup_position", {
+    enum: ["QB", "RB", "WR", "TE", "FLEX", "DEF", "K", "BENCH", "IR"]
+  }),
+  
+  // Acquisition Info
+  acquisitionType: text("acquisition_type", {
+    enum: ["draft", "trade", "waiver", "free_agent", "keeper"]
+  }).notNull(),
+  acquisitionWeek: integer("acquisition_week"),
+  acquisitionCost: integer("acquisition_cost"), // FAAB or waiver priority
+  
+  // Performance Tracking
+  weeklyPoints: jsonb("weekly_points").$type<Array<{
+    week: number;
+    points: number;
+    started: boolean;
+  }>>().default([]),
+  totalPoints: decimal("total_points", { precision: 8, scale: 2 }).default("0"),
+  
+  // Contract Info (for keeper/dynasty leagues)
+  contractLength: integer("contract_length"),
+  keeperCost: integer("keeper_cost"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Fantasy Drafts - Draft management and tracking
+export const fantasyDrafts = pgTable("fantasy_drafts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  leagueId: varchar("league_id").notNull().references(() => fantasyLeagues.id),
+  
+  // Draft Info
+  draftType: text("draft_type", {
+    enum: ["snake", "linear", "auction"]
+  }).notNull(),
+  status: text("status", {
+    enum: ["scheduled", "active", "paused", "completed"]
+  }).default("scheduled"),
+  
+  // Draft Settings
+  rounds: integer("rounds").default(16),
+  timePerPick: integer("time_per_pick").default(90), // seconds
+  currentRound: integer("current_round").default(1),
+  currentPick: integer("current_pick").default(1),
+  
+  // Current Turn
+  currentTeamId: varchar("current_team_id").references(() => fantasyTeams.id),
+  pickDeadline: timestamp("pick_deadline"),
+  
+  // Draft Order
+  draftOrder: jsonb("draft_order").$type<Array<{
+    position: number;
+    teamId: string;
+    teamName: string;
+  }>>(),
+  
+  // Auction Settings (if auction draft)
+  startingBudget: integer("starting_budget").default(200),
+  minimumBid: integer("minimum_bid").default(1),
+  
+  // Draft Results
+  picks: jsonb("picks").$type<Array<{
+    round: number;
+    pick: number;
+    teamId: string;
+    playerId: string;
+    playerName: string;
+    position: string;
+    cost?: number; // for auction
+    pickTime: string;
+  }>>().default([]),
+  
+  startedAt: timestamp("started_at"),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Fantasy Matchups - Weekly head-to-head games
+export const fantasyMatchups = pgTable("fantasy_matchups", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  leagueId: varchar("league_id").notNull().references(() => fantasyLeagues.id),
+  
+  // Matchup Info
+  week: integer("week").notNull(),
+  season: varchar("season").notNull(),
+  matchupType: text("matchup_type", {
+    enum: ["regular_season", "playoff", "championship", "consolation"]
+  }).default("regular_season"),
+  
+  // Teams
+  team1Id: varchar("team1_id").notNull().references(() => fantasyTeams.id),
+  team2Id: varchar("team2_id").references(() => fantasyTeams.id), // null for bye week
+  
+  // Scores
+  team1Score: decimal("team1_score", { precision: 8, scale: 2 }).default("0"),
+  team2Score: decimal("team2_score", { precision: 8, scale: 2 }).default("0"),
+  
+  // Lineups
+  team1Lineup: jsonb("team1_lineup").$type<Array<{
+    playerId: string;
+    playerName: string;
+    position: string;
+    points: number;
+    started: boolean;
+  }>>(),
+  team2Lineup: jsonb("team2_lineup").$type<Array<{
+    playerId: string;
+    playerName: string;
+    position: string;
+    points: number;
+    started: boolean;
+  }>>(),
+  
+  // Matchup Status
+  status: text("status", {
+    enum: ["scheduled", "in_progress", "completed"]
+  }).default("scheduled"),
+  winnerId: varchar("winner_id").references(() => fantasyTeams.id),
+  
+  // Matchup Dates
+  gameDate: date("game_date"),
+  lineupLockTime: timestamp("lineup_lock_time"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Fantasy Waiver Claims - Waiver wire system
+export const fantasyWaiverClaims = pgTable("fantasy_waiver_claims", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  leagueId: varchar("league_id").notNull().references(() => fantasyLeagues.id),
+  teamId: varchar("team_id").notNull().references(() => fantasyTeams.id),
+  
+  // Claim Details
+  claimType: text("claim_type", {
+    enum: ["add", "drop", "add_drop"]
+  }).notNull(),
+  addPlayerId: varchar("add_player_id").references(() => professionalPlayers.id),
+  dropPlayerId: varchar("drop_player_id").references(() => professionalPlayers.id),
+  
+  // Waiver Info
+  priority: integer("priority").notNull(),
+  faabBid: integer("faab_bid"), // Free Agent Auction Budget
+  processWeek: integer("process_week").notNull(),
+  
+  // Claim Status
+  status: text("status", {
+    enum: ["pending", "successful", "failed", "cancelled"]
+  }).default("pending"),
+  failureReason: text("failure_reason"),
+  
+  // Processing
+  processedAt: timestamp("processed_at"),
+  processOrder: integer("process_order"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Fantasy Trades - Player trading system
+export const fantasyTrades = pgTable("fantasy_trades", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  leagueId: varchar("league_id").notNull().references(() => fantasyLeagues.id),
+  
+  // Trade Participants
+  proposingTeamId: varchar("proposing_team_id").notNull().references(() => fantasyTeams.id),
+  receivingTeamId: varchar("receiving_team_id").notNull().references(() => fantasyTeams.id),
+  
+  // Trade Details
+  proposingAssets: jsonb("proposing_assets").$type<{
+    players: Array<{
+      playerId: string;
+      playerName: string;
+      position: string;
+    }>;
+    faabAmount?: number;
+    draftPicks?: Array<{
+      round: number;
+      year: string;
+    }>;
+  }>(),
+  receivingAssets: jsonb("receiving_assets").$type<{
+    players: Array<{
+      playerId: string;
+      playerName: string;
+      position: string;
+    }>;
+    faabAmount?: number;
+    draftPicks?: Array<{
+      round: number;
+      year: string;
+    }>;
+  }>(),
+  
+  // Trade Status
+  status: text("status", {
+    enum: ["pending", "accepted", "rejected", "cancelled", "vetoed", "completed"]
+  }).default("pending"),
+  
+  // Trade Processing
+  proposedAt: timestamp("proposed_at").defaultNow(),
+  respondedAt: timestamp("responded_at"),
+  processedAt: timestamp("processed_at"),
+  vetoDeadline: timestamp("veto_deadline"),
+  
+  // League Review
+  requiresLeagueApproval: boolean("requires_league_approval").default(false),
+  vetoVotes: jsonb("veto_votes").$type<Array<{
+    teamId: string;
+    vote: 'veto' | 'approve';
+    timestamp: string;
+  }>>().default([]),
+  
+  // Trade Notes
+  proposingTeamNotes: text("proposing_team_notes"),
+  rejectionReason: text("rejection_reason"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Fantasy League Messages - League communication system
+export const fantasyLeagueMessages = pgTable("fantasy_league_messages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  leagueId: varchar("league_id").notNull().references(() => fantasyLeagues.id),
+  senderId: varchar("sender_id").notNull().references(() => users.id),
+  
+  // Message Content
+  messageType: text("message_type", {
+    enum: ["general", "trade_talk", "trash_talk", "announcement", "system"]
+  }).default("general"),
+  subject: varchar("subject"),
+  content: text("content").notNull(),
+  
+  // Message Targeting
+  isPublic: boolean("is_public").default(true),
+  recipientId: varchar("recipient_id").references(() => users.id), // for private messages
+  
+  // Message Status
+  edited: boolean("edited").default(false),
+  editedAt: timestamp("edited_at"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Enhanced HIPAA/FERPA Compliance Audit Trail with tamper-evidence
 export const complianceAuditLog = pgTable("compliance_audit_log", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -2654,31 +3014,7 @@ export const insertPermissionTemplateSchema = createInsertSchema(permissionTempl
   createdAt: true,
 });
 
-// ===================================================================
-// ADULT-ONLY FANTASY SYSTEM! 🎮⚡ 
-// DRAFTKINGS/FANDUEL COMPETITOR - LEGALLY BULLETPROOF!
-// ===================================================================
-
-// Fantasy leagues - age-gated and professional focus
-export const fantasyLeagues = pgTable("fantasy_leagues", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  leagueName: varchar("league_name").notNull(),
-  commissionerId: varchar("commissioner_id").notNull(),
-  sportType: varchar("sport_type").notNull(), // nfl, nba, mlb, nhl, esports, college
-  leagueFormat: varchar("league_format").notNull(), // survivor, draft, daily, season
-  dataSource: varchar("data_source").notNull(), // espn_api, nfl_api, manual_import, esports_api
-  ageRestriction: integer("age_restriction").default(18),
-  requiresAgeVerification: boolean("requires_age_verification").default(true),
-  maxParticipants: integer("max_participants").default(12),
-  entryRequirements: jsonb("entry_requirements"), // Age verification, location restrictions
-  scoringConfig: jsonb("scoring_config").notNull(),
-  prizeStructure: jsonb("prize_structure"), // Optional - we don't manage money
-  leagueSettings: jsonb("league_settings").notNull(),
-  status: varchar("status").default("open"), // open, closed, active, completed
-  startDate: timestamp("start_date"),
-  endDate: timestamp("end_date"),
-  createdAt: timestamp("created_at").defaultNow(),
-});
+// Note: Fantasy leagues table moved to earlier in file for better organization
 
 // Fantasy participants - verified adults only
 export const fantasyParticipants = pgTable("fantasy_participants", {
@@ -3036,11 +3372,7 @@ export type InsertApiConfiguration = typeof apiConfigurations.$inferInsert;
 export type ScoringAutomation = typeof scoringAutomations.$inferSelect;
 export type InsertScoringAutomation = typeof scoringAutomations.$inferInsert;
 
-// Fantasy insert schemas
-export const insertFantasyLeagueSchema = createInsertSchema(fantasyLeagues).omit({
-  id: true,
-  createdAt: true,
-});
+// Note: Fantasy league insert schemas moved to earlier in file for better organization
 
 export const insertFantasyParticipantSchema = createInsertSchema(fantasyParticipants).omit({
   id: true,
@@ -7603,6 +7935,62 @@ export const insertBudgetTemplateSchema = createInsertSchema(budgetTemplates).om
   updatedAt: true,
 });
 
+// Fantasy League System Schemas
+export const insertFantasyLeagueSchema = createInsertSchema(fantasyLeagues).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertFantasyTeamSchema = createInsertSchema(fantasyTeams).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertFantasyRosterSchema = createInsertSchema(fantasyRosters).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertFantasyDraftSchema = createInsertSchema(fantasyDrafts).omit({
+  id: true,
+  startedAt: true,
+  completedAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertFantasyMatchupSchema = createInsertSchema(fantasyMatchups).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertFantasyWaiverClaimSchema = createInsertSchema(fantasyWaiverClaims).omit({
+  id: true,
+  processedAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertFantasyTradeSchema = createInsertSchema(fantasyTrades).omit({
+  id: true,
+  proposedAt: true,
+  respondedAt: true,
+  processedAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertFantasyLeagueMessageSchema = createInsertSchema(fantasyLeagueMessages).omit({
+  id: true,
+  editedAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Scheduling System Schemas
 export const insertGameSchema = createInsertSchema(games).omit({
   id: true,
@@ -7714,6 +8102,24 @@ export type AthleticCalendarEvent = typeof athleticCalendarEvents.$inferSelect;
 export type InsertAthleticCalendarEvent = z.infer<typeof insertAthleticCalendarEventSchema>;
 export type ScheduleConflict = typeof scheduleConflicts.$inferSelect;
 export type InsertScheduleConflict = z.infer<typeof insertScheduleConflictSchema>;
+
+// Fantasy League System Types
+export type FantasyLeague = typeof fantasyLeagues.$inferSelect;
+export type InsertFantasyLeague = z.infer<typeof insertFantasyLeagueSchema>;
+export type FantasyTeam = typeof fantasyTeams.$inferSelect;
+export type InsertFantasyTeam = z.infer<typeof insertFantasyTeamSchema>;
+export type FantasyRoster = typeof fantasyRosters.$inferSelect;
+export type InsertFantasyRoster = z.infer<typeof insertFantasyRosterSchema>;
+export type FantasyDraft = typeof fantasyDrafts.$inferSelect;
+export type InsertFantasyDraft = z.infer<typeof insertFantasyDraftSchema>;
+export type FantasyMatchup = typeof fantasyMatchups.$inferSelect;
+export type InsertFantasyMatchup = z.infer<typeof insertFantasyMatchupSchema>;
+export type FantasyWaiverClaim = typeof fantasyWaiverClaims.$inferSelect;
+export type InsertFantasyWaiverClaim = z.infer<typeof insertFantasyWaiverClaimSchema>;
+export type FantasyTrade = typeof fantasyTrades.$inferSelect;
+export type InsertFantasyTrade = z.infer<typeof insertFantasyTradeSchema>;
+export type FantasyLeagueMessage = typeof fantasyLeagueMessages.$inferSelect;
+export type InsertFantasyLeagueMessage = z.infer<typeof insertFantasyLeagueMessageSchema>;
 
 export * from "./sport-configs-schema";
 export * from "./athleticTrainerSchema";

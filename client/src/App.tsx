@@ -148,6 +148,7 @@ import NFLKnockoutCreator from './pages/NFLKnockoutCreator';
 import HeadToHeadCreator from './pages/HeadToHeadCreator';
 import BestBallCreator from './pages/BestBallCreator';
 import FantasyDashboard from './pages/FantasyDashboard';
+import FantasyLeagueManagement from './pages/FantasyLeagueManagement';
 import AvailableGames from './pages/AvailableGames';
 import ContestDetail from './pages/ContestDetail';
 import PublicContests from './pages/PublicContests';
@@ -257,6 +258,10 @@ function AuthenticatedRoutes() {
         {/* Fantasy Dashboard */}
         {isFeatureEnabled('fantasyLeagues') && (
           <Route path="/fantasy" component={FantasyDashboard} />
+        )}
+        
+        {isFeatureEnabled('fantasyLeagues') && (
+          <Route path="/fantasy/leagues" component={FantasyLeagueManagement} />
         )}
         
         {/* Daily Fantasy Lineup Builder */}

@@ -77,6 +77,14 @@ app.use((req, res, next) => {
   espnScoringService.startRealTimeScoring();
   console.log('✅ ESPN real-time scoring service initialized');
 
+  // 🏆 Initialize Season-Long Fantasy Scoring Service (bridges ESPN to fantasy leagues)
+  console.log('🏈 Starting Season-Long Fantasy Scoring service...');
+  const { SeasonLongScoringService } = await import('./season-long-scoring-service');
+  const seasonLongScoringService = new SeasonLongScoringService(storage, espnScoringService);
+  seasonLongScoringService.startSeasonLongScoring();
+  console.log('✅ Season-Long Fantasy Scoring service initialized');
+  console.log('🔗 ESPN stats now connected to fantasy league scoring pipeline');
+
   // 🚀 Initialize Unified WebSocket Service (after server is available)
   console.log('🔄 Initializing comprehensive real-time WebSocket system...');
   try {
