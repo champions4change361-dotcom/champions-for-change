@@ -6695,7 +6695,7 @@ export const athleticCalendarEvents = pgTable("athletic_calendar_events", {
   // Event Details
   eventTitle: varchar("event_title").notNull(),
   eventType: text("event_type", {
-    enum: ["game", "practice", "meeting", "tournament", "academic_competition", "deadline", "training", "other"]
+    enum: ["game", "practice", "meeting", "tournament", "academic_competition", "deadline", "training", "other", "banquet", "fundraiser", "awards", "community"]
   }).notNull(),
   eventDate: date("event_date").notNull(),
   startTime: varchar("start_time"),

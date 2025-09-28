@@ -23,7 +23,7 @@ export interface CalendarView {
 export interface CalendarEvent {
   id: string;
   title: string;
-  eventType: 'game' | 'practice' | 'meeting' | 'tournament' | 'academic_competition' | 'deadline' | 'training' | 'other';
+  eventType: 'game' | 'practice' | 'meeting' | 'tournament' | 'academic_competition' | 'deadline' | 'training' | 'other' | 'banquet' | 'fundraiser' | 'awards' | 'community';
   startDateTime: string;
   endDateTime: string;
   allDay: boolean;
@@ -128,6 +128,7 @@ export class CalendarManagementService {
     user: User,
     filters?: {
       eventTypes?: string[];
+      sports?: string[];
       visibility?: string[];
       facilities?: string[];
       importance?: string[];
@@ -168,6 +169,7 @@ export class CalendarManagementService {
     user: User,
     filters?: {
       eventTypes?: string[];
+      sports?: string[];
       visibility?: string[];
       facilities?: string[];
       importance?: string[];
@@ -177,7 +179,7 @@ export class CalendarManagementService {
       const storage = await this.storage;
       
       // Apply RBAC filtering for organization access
-      const dataFilters = new RBACDataFilters(user);
+      const dataFilters = new RBACDataFilters();
       
       // Get calendar events
       const calendarEvents = await storage.getCalendarEventsByDateRange(
@@ -198,7 +200,7 @@ export class CalendarManagementService {
       await logComplianceAction(
         user.id,
         'data_access',
-        'calendar_data',
+        'tournament_data',
         `${startDate}_to_${endDate}`,
         { ip: 'system' } as any,
         `Calendar view accessed: ${startDate} to ${endDate}`
@@ -274,7 +276,7 @@ export class CalendarManagementService {
       await logComplianceAction(
         user.id,
         'data_modification',
-        'calendar_data',
+        'tournament_data',
         createdEvent.id,
         { ip: 'system' } as any,
         `Calendar event created: ${eventData.title}`
@@ -350,7 +352,7 @@ export class CalendarManagementService {
       await logComplianceAction(
         user.id,
         'data_modification',
-        'calendar_data',
+        'tournament_data',
         eventId,
         { ip: 'system' } as any,
         `Calendar event updated: ${updates.title || existingEvent.eventTitle}`
@@ -396,7 +398,7 @@ export class CalendarManagementService {
       await logComplianceAction(
         user.id,
         'data_modification',
-        'calendar_data',
+        'tournament_data',
         eventId,
         { ip: 'system' } as any,
         `Calendar event deleted: ${event.eventTitle}`
@@ -431,7 +433,7 @@ export class CalendarManagementService {
       await logComplianceAction(
         user.id,
         'data_modification',
-        'calendar_data',
+        'tournament_data',
         template.id,
         { ip: 'system' } as any,
         `Event template created: ${template.name}`
@@ -450,7 +452,17 @@ export class CalendarManagementService {
   async getEventTemplates(user: User): Promise<EventTemplate[]> {
     try {
       const storage = await this.storage;
-      return await storage.getEventTemplates(user);
+      const templates = await storage.getEventTemplates();
+      return templates.map((template: any): EventTemplate => ({
+        id: template.id,
+        name: template.name,
+        eventType: template.category || 'other',
+        defaultDuration: 60, // Default 1 hour
+        defaultLocation: template.description || undefined,
+        defaultReminders: [],
+        defaultAttendees: [],
+        recurrenceOptions: []
+      }));
     } catch (error) {
       console.error('Error getting event templates:', error);
       throw error;
@@ -468,10 +480,22 @@ export class CalendarManagementService {
     try {
       const storage = await this.storage;
 
-      const template = await storage.getEventTemplate(templateId, user);
-      if (!template) {
+      const templateResult = await storage.getEventTemplate(templateId);
+      if (!templateResult) {
         throw new Error('Template not found');
       }
+
+      // Convert storage template to EventTemplate format
+      const template: EventTemplate = {
+        id: templateResult.id,
+        name: templateResult.name,
+        eventType: templateResult.category || 'other',
+        defaultDuration: 60,
+        defaultLocation: templateResult.description || undefined,
+        defaultReminders: [],
+        defaultAttendees: [],
+        recurrenceOptions: []
+      };
 
       // Merge template defaults with provided data
       const mergedEventData: Partial<CalendarEvent> = {
@@ -520,7 +544,7 @@ export class CalendarManagementService {
       await logComplianceAction(
         user.id,
         'permission_change',
-        'calendar_data',
+        'tournament_data',
         calendarId,
         { ip: 'system' } as any,
         `Calendar shared with ${shareWith.length} users`
@@ -615,28 +639,28 @@ export class CalendarManagementService {
       id: event.id,
       startDateTime: `${event.eventDate}T${event.startTime || '00:00'}`,
       endDateTime: event.endTime ? `${event.eventDate}T${event.endTime}` : undefined,
-      location: event.location
+      location: event.location || undefined
     }, user, event.id);
 
     return {
       id: event.id,
       title: event.eventTitle,
-      eventType: event.eventType,
+      eventType: event.eventType as 'game' | 'practice' | 'meeting' | 'tournament' | 'academic_competition' | 'deadline' | 'training' | 'other',
       startDateTime: `${event.eventDate}T${event.startTime || '00:00'}`,
       endDateTime: event.endTime ? `${event.eventDate}T${event.endTime}` : `${event.eventDate}T23:59`,
-      allDay: event.allDay,
-      location: event.location,
-      description: event.description,
-      visibility: event.visibility,
-      importance: event.importanceLevel,
+      allDay: event.allDay ?? false,
+      location: event.location || undefined,
+      description: event.description || undefined,
+      visibility: event.visibility ?? 'school',
+      importance: event.importanceLevel ?? 'normal',
       attendees: [], // TODO: Get from related entity or attendee table
       reminders: this.parseReminderSettings(event.reminderSettings),
       recurrence: event.isRecurring ? {
         frequency: event.recurrencePattern as any,
         interval: 1,
-        endDate: event.recurrenceEndDate
+        endDate: event.recurrenceEndDate || undefined
       } : undefined,
-      relatedEntityId: event.gameId || event.practiceId || event.academicCompetitionId,
+      relatedEntityId: event.gameId || event.practiceId || event.academicCompetitionId || undefined,
       relatedEntityType: event.gameId ? 'game' : event.practiceId ? 'practice' : event.academicCompetitionId ? 'academic_competition' : undefined,
       conflict: conflicts.length > 0,
       conflictDetails: conflicts.map(c => c.message)
@@ -674,7 +698,8 @@ export class CalendarManagementService {
         const existingEvents = await storage.getCalendarEventsByDateRange(
           eventData.startDateTime.split('T')[0],
           eventData.endDateTime?.split('T')[0] || eventData.startDateTime.split('T')[0],
-          user
+          user,
+          {}
         );
 
         for (const existing of existingEvents) {
@@ -719,10 +744,10 @@ export class CalendarManagementService {
 
   private canManageEvent(event: AthleticCalendarEvent, user: User): boolean {
     // Check if user has admin permissions for the event's scope
-    return user.userRole?.includes('director') || 
-           user.userRole?.includes('coordinator') ||
-           user.complianceRole?.includes('director') ||
-           user.complianceRole?.includes('coordinator');
+    return (user.userRole?.includes('director') ?? false) || 
+           (user.userRole?.includes('coordinator') ?? false) ||
+           (user.complianceRole?.includes('director') ?? false) ||
+           (user.complianceRole?.includes('coordinator') ?? false);
   }
 
   private isSignificantChange(updates: Partial<CalendarEvent>): boolean {
@@ -753,7 +778,7 @@ export class CalendarManagementService {
       const conflicts = await storage.getScheduleConflictsByDateRange(startDate, endDate, user);
       
       // Group conflicts by date
-      const grouped = conflicts.reduce((acc, conflict) => {
+      const grouped = conflicts.reduce((acc: Record<string, ConflictSummary>, conflict: any) => {
         const date = conflict.conflictDate;
         if (!acc[date]) {
           acc[date] = {

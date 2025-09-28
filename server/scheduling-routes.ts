@@ -41,14 +41,15 @@ router.get('/calendar/view',
   query('viewType').isIn(['daily', 'weekly', 'monthly', 'agenda', 'yearly']),
   query('startDate').isISO8601(),
   query('endDate').isISO8601(),
-  query('eventTypes').optional().isArray(),
-  query('visibility').optional().isArray(),
-  query('facilities').optional().isArray(),
-  query('importance').optional().isArray(),
+  query('eventTypes').optional(),
+  query('sports').optional(),
+  query('visibility').optional(),
+  query('facilities').optional(),
+  query('importance').optional(),
   validateRequest,
   async (req, res) => {
     try {
-      const { viewType, startDate, endDate, eventTypes, visibility, facilities, importance } = req.query;
+      const { viewType, startDate, endDate, eventTypes, sports, visibility, facilities, importance } = req.query;
       
       const calendarView = await calendarManagementService.getCalendarView(
         viewType as any,
@@ -57,6 +58,7 @@ router.get('/calendar/view',
         req.user!,
         {
           eventTypes: eventTypes ? (Array.isArray(eventTypes) ? eventTypes as string[] : [eventTypes as string]) : undefined,
+          sports: sports ? (Array.isArray(sports) ? sports as string[] : [sports as string]) : undefined,
           visibility: visibility ? (Array.isArray(visibility) ? visibility as string[] : [visibility as string]) : undefined,
           facilities: facilities ? (Array.isArray(facilities) ? facilities as string[] : [facilities as string]) : undefined,
           importance: importance ? (Array.isArray(importance) ? importance as string[] : [importance as string]) : undefined
@@ -83,9 +85,13 @@ router.get('/calendar/view',
  */
 router.post('/calendar/events',
   requirePermissions([PERMISSIONS.TOURNAMENT_MANAGE]),
-  body('title').notEmpty().trim(),
-  body('eventType').isIn(['game', 'practice', 'meeting', 'tournament', 'academic_competition', 'deadline', 'training', 'other']),
-  body('startDateTime').isISO8601(),
+  body('title').optional().notEmpty().trim(),
+  body('eventTitle').optional().notEmpty().trim(),
+  body('eventType').optional().isIn(['game', 'practice', 'meeting', 'tournament', 'academic_competition', 'deadline', 'training', 'other', 'banquet', 'fundraiser', 'awards', 'community']),
+  body('startDateTime').optional().isISO8601(),
+  body('eventDate').optional().isISO8601().toDate(),
+  body('startTime').optional().isString(),
+  body('endTime').optional().isString(),
   body('endDateTime').optional().isISO8601(),
   body('allDay').optional().isBoolean(),
   body('location').optional().trim(),
@@ -99,6 +105,18 @@ router.post('/calendar/events',
   async (req, res) => {
     try {
       const eventData = req.body;
+      // Handle frontend payload mapping
+      if (eventData.eventTitle && !eventData.title) {
+        eventData.title = eventData.eventTitle;
+      }
+      if (eventData.eventDate && eventData.startTime) {
+        eventData.startDateTime = `${eventData.eventDate}T${eventData.startTime}:00`;
+      }
+      if (eventData.eventDate && eventData.endTime) {
+        eventData.endDateTime = `${eventData.eventDate}T${eventData.endTime}:00`;
+      }
+      // Preserve original event types for consistent frontend/backend communication
+      // All event types are now supported natively in both create and update operations
       const createdEvent = await calendarManagementService.createEvent(eventData, req.user!);
 
       res.status(201).json({
@@ -123,7 +141,7 @@ router.put('/calendar/events/:eventId',
   requirePermissions([PERMISSIONS.TOURNAMENT_MANAGE]),
   param('eventId').isUUID(),
   body('title').optional().notEmpty().trim(),
-  body('eventType').optional().isIn(['game', 'practice', 'meeting', 'tournament', 'academic_competition', 'deadline', 'training', 'other']),
+  body('eventType').optional().isIn(['game', 'practice', 'meeting', 'tournament', 'academic_competition', 'deadline', 'training', 'other', 'banquet', 'fundraiser', 'awards', 'community']),
   body('startDateTime').optional().isISO8601(),
   body('endDateTime').optional().isISO8601(),
   body('allDay').optional().isBoolean(),
@@ -192,8 +210,8 @@ router.get('/calendar/export',
   query('startDate').isISO8601(),
   query('endDate').isISO8601(),
   query('format').isIn(['ical', 'csv', 'json']),
-  query('eventTypes').optional().isArray(),
-  query('visibility').optional().isArray(),
+  query('eventTypes').optional(),
+  query('visibility').optional(),
   validateRequest,
   async (req, res) => {
     try {
@@ -309,6 +327,17 @@ router.post('/conflicts/detect',
     try {
       const { eventData, excludeEventId } = req.body;
       
+      // Handle frontend payload mapping (same as create route)
+      if (eventData.eventTitle && !eventData.title) {
+        eventData.title = eventData.eventTitle;
+      }
+      if (eventData.eventDate && eventData.startTime) {
+        eventData.startDateTime = `${eventData.eventDate}T${eventData.startTime}:00`;
+      }
+      if (eventData.eventDate && eventData.endTime) {
+        eventData.endDateTime = `${eventData.eventDate}T${eventData.endTime}:00`;
+      }
+      
       const conflicts = await conflictDetectionService.detectEventConflicts(
         eventData,
         req.user!,
@@ -340,19 +369,21 @@ router.get('/conflicts',
   query('includeResolved').optional().isBoolean(),
   query('severityFilter').optional().isArray(),
   query('typeFilter').optional().isArray(),
+  query('status').optional().isString(),
   validateRequest,
   async (req, res) => {
     try {
-      const { startDate, endDate, includeResolved, severityFilter, typeFilter } = req.query;
+      const { startDate, endDate, includeResolved, severityFilter, typeFilter, status } = req.query;
       
       const conflicts = await conflictDetectionService.detectConflictsInRange(
         startDate as string,
         endDate as string,
         req.user!,
         {
-          includeResolved: includeResolved === 'true',
+          includeResolved: status === 'detected' ? false : includeResolved === 'true',
           severityFilter: severityFilter ? (Array.isArray(severityFilter) ? severityFilter as any[] : [severityFilter]) : undefined,
-          typeFilter: typeFilter ? (Array.isArray(typeFilter) ? typeFilter as string[] : [typeFilter as string]) : undefined
+          typeFilter: typeFilter ? (Array.isArray(typeFilter) ? typeFilter as string[] : [typeFilter as string]) : undefined,
+          status: status as string
         }
       );
 

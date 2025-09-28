@@ -315,7 +315,7 @@ export async function setupAuth(app: Express) {
     }
     
     // Custom success handler to respect stored return URL for team signup flow
-    passport.authenticate(strategyName, (err, user, info) => {
+    passport.authenticate(strategyName, (err: any, user: any, info: any) => {
       if (err) {
         console.error('OAuth authentication error:', err);
         return res.redirect("/login?error=auth_error");

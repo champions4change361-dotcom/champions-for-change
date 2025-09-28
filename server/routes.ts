@@ -26,6 +26,7 @@ import { GameLockoutService } from "./game-lockout-service.js";
 import { registerAthleticTrainerRoutes } from "./athletic-trainer-routes";
 import districtRoutes from "./district-routes";
 import schedulingRoutes from "./scheduling-routes";
+import testHarnessRoutes from "./test-harness";
 
 // Type extensions to fix compilation issues
 declare module 'express-session' {
@@ -8159,6 +8160,12 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
   // Smart Scheduling System routes
   app.use('/api/scheduling', schedulingRoutes);
   console.log('📅 Smart Scheduling System API routes registered');
+
+  // Test Harness routes (development only)
+  if (process.env.NODE_ENV === 'development') {
+    app.use('/api/test', testHarnessRoutes);
+    console.log('🧪 Test Harness routes registered (development mode)');
+  }
 
   // Event Assignment Routes - Google Sheets Style Scorekeeper System
   

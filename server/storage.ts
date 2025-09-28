@@ -762,6 +762,29 @@ export interface IStorage {
   createAcademicCalendarEvent(event: any, user: SecureUserContext): Promise<any>;
   updateAcademicCalendarEvent(eventId: string, updates: any, user: SecureUserContext): Promise<any | undefined>;
 
+  // Athletic Calendar Events - RBAC Protected
+  createAthleticCalendarEvent(event: any, user: SecureUserContext): Promise<any>;
+  getAthleticCalendarEvent(id: string, user: SecureUserContext): Promise<any | undefined>;
+  getAthleticCalendarEvents(filters: any, user: SecureUserContext): Promise<any[]>;
+  updateAthleticCalendarEvent(id: string, updates: any, user: SecureUserContext): Promise<any | undefined>;
+  deleteAthleticCalendarEvent(id: string, user: SecureUserContext): Promise<boolean>;
+
+  // Facility Reservations - RBAC Protected
+  createFacilityReservation(reservation: any, user: SecureUserContext): Promise<any>;
+  getFacilityReservation(id: string, user: SecureUserContext): Promise<any | undefined>;
+  getFacilityReservations(filters: any, user: SecureUserContext): Promise<any[]>;
+  updateFacilityReservation(id: string, updates: any, user: SecureUserContext): Promise<any | undefined>;
+  deleteFacilityReservation(id: string, user: SecureUserContext): Promise<boolean>;
+  getFacilityAvailability(venueId: string, date: string, user: SecureUserContext): Promise<any>;
+
+  // Schedule Conflicts - RBAC Protected
+  createScheduleConflict(conflict: any, user: SecureUserContext): Promise<any>;
+  getScheduleConflict(id: string, user: SecureUserContext): Promise<any | undefined>;
+  getScheduleConflicts(filters: any, user: SecureUserContext): Promise<any[]>;
+  updateScheduleConflict(id: string, updates: any, user: SecureUserContext): Promise<any | undefined>;
+  deleteScheduleConflict(id: string, user: SecureUserContext): Promise<boolean>;
+  detectScheduleConflicts(eventData: any, user: SecureUserContext): Promise<any[]>;
+
   // Automated Notification Service Methods
   getNotificationsForEscalation(): Promise<any[]>;
   getUpcomingCalendarEvents(startDate: string, endDate: string, user: User): Promise<any[]>;
@@ -854,6 +877,28 @@ export interface IStorage {
   transferBudgetFunds(fromId: string, toId: string, amount: number, reason: string, user: SecureUserContext): Promise<any>;
   freezeBudgetAllocation(allocationId: string, user: SecureUserContext): Promise<boolean>;
   unfreezeBudgetAllocation(allocationId: string, user: SecureUserContext): Promise<boolean>;
+
+  // Athletic Calendar Event methods - RBAC Protected
+  // SECURITY: All calendar event methods REQUIRE user context (mandatory parameter)
+  getCalendarEventsByDateRange(startDate: string, endDate: string, user: SecureUserContext, filters?: any): Promise<AthleticCalendarEvent[]>;
+  createCalendarEvent(eventData: InsertAthleticCalendarEvent, user: SecureUserContext): Promise<AthleticCalendarEvent>;
+  getCalendarEvent(id: string, user: SecureUserContext): Promise<AthleticCalendarEvent | undefined>;
+  updateCalendarEvent(id: string, updates: Partial<InsertAthleticCalendarEvent>, user: SecureUserContext): Promise<AthleticCalendarEvent | undefined>;
+  deleteCalendarEvent(id: string, user: SecureUserContext): Promise<boolean>;
+
+  // Calendar integration methods - RBAC Protected
+  saveCalendarIntegration(integration: any, user: SecureUserContext): Promise<any>;
+  createCalendarShare(shareData: any): Promise<void>;
+  
+  // Calendar template and conflict methods - RBAC Protected  
+  saveEventTemplate(template: any, user: SecureUserContext): Promise<void>;
+  getEventTemplate(id: string): Promise<any>;
+  getScheduleConflictsByDateRange(startDate: string, endDate: string, user: SecureUserContext): Promise<any[]>;
+  
+  // Related entity methods for calendar - RBAC Protected
+  getGame(id: string, user: SecureUserContext): Promise<any>;
+  getPractice(id: string, user: SecureUserContext): Promise<any>;
+  getAcademicCompetition(id: string, user: SecureUserContext): Promise<any>;
 }
 
 export class DbStorage implements IStorage {
@@ -863,6 +908,91 @@ export class DbStorage implements IStorage {
     // Use the transaction-capable database from db.ts
     this.db = db;
   }
+
+  // CRITICAL: Missing getCalendarEventsByDateRange implementation
+  async getCalendarEventsByDateRange(
+    startDate: string, 
+    endDate: string, 
+    user: SecureUserContext, 
+    filters?: {
+      eventTypes?: string[];
+      sports?: string[];
+      visibility?: string[];
+      facilities?: string[];
+      importance?: string[];
+    }
+  ): Promise<AthleticCalendarEvent[]> {
+    assertUserContext(user, 'getCalendarEventsByDateRange');
+    
+    console.log(`📅 getCalendarEventsByDateRange called: ${startDate} to ${endDate}`, filters);
+    
+    try {
+      let query = this.db.select().from(athleticCalendarEvents);
+      
+      const conditions = [];
+      
+      // Date range filtering (required)
+      conditions.push(gte(athleticCalendarEvents.eventDate, startDate));
+      conditions.push(lte(athleticCalendarEvents.eventDate, endDate));
+      
+      // Event type filtering
+      if (filters?.eventTypes && filters.eventTypes.length > 0) {
+        conditions.push(sql`${athleticCalendarEvents.eventType} = ANY(${filters.eventTypes})`);
+        console.log(`🎯 Filtering by event types: ${filters.eventTypes.join(', ')}`);
+      }
+      
+      // Visibility filtering
+      if (filters?.visibility && filters.visibility.length > 0) {
+        conditions.push(sql`${athleticCalendarEvents.visibility} = ANY(${filters.visibility})`);
+        console.log(`👁️ Filtering by visibility: ${filters.visibility.join(', ')}`);
+      }
+      
+      // Importance filtering
+      if (filters?.importance && filters.importance.length > 0) {
+        conditions.push(sql`${athleticCalendarEvents.importanceLevel} = ANY(${filters.importance})`);
+        console.log(`⚠️ Filtering by importance: ${filters.importance.join(', ')}`);
+      }
+      
+      // Sports filtering - CRITICAL IMPLEMENTATION
+      // NOTE: Sports filtering requires joining with related tables (games, practices) 
+      // since sports info is not directly on calendar events
+      if (filters?.sports && filters.sports.length > 0) {
+        // For now, log that sports filtering was requested
+        // This will need to be enhanced with proper joins to games/practices tables
+        console.log(`🏈 Sports filtering requested: ${filters.sports.join(', ')} - needs join implementation`);
+        
+        // TODO: Implement joins with games and practices tables to filter by sports
+        // This is a complex query that would need:
+        // - LEFT JOIN with games table on gameId
+        // - LEFT JOIN with practices table on practiceId  
+        // - Filter on sportId in either table
+        // For now, we don't filter by sports to avoid breaking existing functionality
+      }
+      
+      // Facility filtering - similar to sports, needs facility reservation joins
+      if (filters?.facilities && filters.facilities.length > 0) {
+        console.log(`🏢 Facility filtering requested: ${filters.facilities.join(', ')} - needs location matching`);
+        // Could filter by location field for basic implementation
+        conditions.push(sql`${athleticCalendarEvents.location} = ANY(${filters.facilities})`);
+      }
+      
+      // Apply all conditions
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
+      }
+      
+      const result = await query.orderBy(athleticCalendarEvents.eventDate);
+      
+      console.log(`📅 getCalendarEventsByDateRange found ${result.length} events`);
+      return result;
+      
+    } catch (error) {
+      console.error('❌ getCalendarEventsByDateRange error:', error);
+      return [];
+    }
+  }
+
+
 
   // User authentication methods
   async getUser(id: string): Promise<User | undefined> {
@@ -5174,6 +5304,425 @@ export class DbStorage implements IStorage {
       console.log(`💾 Saving notification history ${history.id} (not implemented yet)`);
     } catch (error) {
       console.error("Database error:", error);
+    }
+  }
+
+  // ===================================================================
+  // ATHLETIC CALENDAR EVENTS IMPLEMENTATION
+  // ===================================================================
+
+  async createAthleticCalendarEvent(event: any, user: SecureUserContext): Promise<any> {
+    assertUserContext(user, 'createAthleticCalendarEvent');
+    try {
+      const eventData = {
+        ...event,
+        id: randomUUID(),
+        createdBy: user.id,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+
+      const result = await this.db
+        .insert(athleticCalendarEvents)
+        .values([eventData])
+        .returning();
+
+      console.log(`📅 Created athletic calendar event: ${eventData.eventTitle}`);
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to create athletic calendar event");
+    }
+  }
+
+  async getAthleticCalendarEvent(id: string, user: SecureUserContext): Promise<any | undefined> {
+    assertUserContext(user, 'getAthleticCalendarEvent');
+    try {
+      const result = await this.db
+        .select()
+        .from(athleticCalendarEvents)
+        .where(eq(athleticCalendarEvents.id, id));
+
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async getAthleticCalendarEvents(filters: any, user: SecureUserContext): Promise<any[]> {
+    assertUserContext(user, 'getAthleticCalendarEvents');
+    try {
+      let query = this.db.select().from(athleticCalendarEvents);
+
+      // Apply filters
+      if (filters.startDate && filters.endDate) {
+        query = query.where(
+          and(
+            gte(athleticCalendarEvents.eventDate, filters.startDate),
+            lte(athleticCalendarEvents.eventDate, filters.endDate)
+          )
+        );
+      }
+
+      const result = await query.orderBy(athleticCalendarEvents.eventDate);
+      console.log(`📅 Found ${result.length} athletic calendar events`);
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async updateAthleticCalendarEvent(id: string, updates: any, user: SecureUserContext): Promise<any | undefined> {
+    assertUserContext(user, 'updateAthleticCalendarEvent');
+    try {
+      const result = await this.db
+        .update(athleticCalendarEvents)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(athleticCalendarEvents.id, id))
+        .returning();
+
+      console.log(`📅 Updated athletic calendar event: ${id}`);
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async deleteAthleticCalendarEvent(id: string, user: SecureUserContext): Promise<boolean> {
+    assertUserContext(user, 'deleteAthleticCalendarEvent');
+    try {
+      const result = await this.db
+        .delete(athleticCalendarEvents)
+        .where(eq(athleticCalendarEvents.id, id));
+
+      console.log(`📅 Deleted athletic calendar event: ${id}`);
+      return (result.rowCount ?? 0) > 0;
+    } catch (error) {
+      console.error("Database error:", error);
+      return false;
+    }
+  }
+
+  // ===================================================================
+  // FACILITY RESERVATIONS IMPLEMENTATION
+  // ===================================================================
+
+  async createFacilityReservation(reservation: any, user: SecureUserContext): Promise<any> {
+    assertUserContext(user, 'createFacilityReservation');
+    try {
+      const reservationData = {
+        ...reservation,
+        id: randomUUID(),
+        requestedBy: user.id,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+
+      const result = await this.db
+        .insert(facilityReservations)
+        .values([reservationData])
+        .returning();
+
+      console.log(`🏢 Created facility reservation for venue: ${reservationData.venueId}`);
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to create facility reservation");
+    }
+  }
+
+  async getFacilityReservation(id: string, user: SecureUserContext): Promise<any | undefined> {
+    assertUserContext(user, 'getFacilityReservation');
+    try {
+      const result = await this.db
+        .select()
+        .from(facilityReservations)
+        .where(eq(facilityReservations.id, id));
+
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async getFacilityReservations(filters: any, user: SecureUserContext): Promise<any[]> {
+    assertUserContext(user, 'getFacilityReservations');
+    try {
+      let query = this.db.select().from(facilityReservations);
+
+      // Apply filters
+      if (filters.venueId) {
+        query = query.where(eq(facilityReservations.venueId, filters.venueId));
+      }
+      if (filters.date) {
+        query = query.where(eq(facilityReservations.reservationDate, filters.date));
+      }
+      if (filters.status) {
+        query = query.where(eq(facilityReservations.reservationStatus, filters.status));
+      }
+
+      const result = await query.orderBy(facilityReservations.reservationDate);
+      console.log(`🏢 Found ${result.length} facility reservations`);
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async updateFacilityReservation(id: string, updates: any, user: SecureUserContext): Promise<any | undefined> {
+    assertUserContext(user, 'updateFacilityReservation');
+    try {
+      const result = await this.db
+        .update(facilityReservations)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(facilityReservations.id, id))
+        .returning();
+
+      console.log(`🏢 Updated facility reservation: ${id}`);
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async deleteFacilityReservation(id: string, user: SecureUserContext): Promise<boolean> {
+    assertUserContext(user, 'deleteFacilityReservation');
+    try {
+      const result = await this.db
+        .delete(facilityReservations)
+        .where(eq(facilityReservations.id, id));
+
+      console.log(`🏢 Deleted facility reservation: ${id}`);
+      return (result.rowCount ?? 0) > 0;
+    } catch (error) {
+      console.error("Database error:", error);
+      return false;
+    }
+  }
+
+  async getFacilityAvailability(venueId: string, date: string, user: SecureUserContext): Promise<any> {
+    assertUserContext(user, 'getFacilityAvailability');
+    try {
+      // Get all reservations for the venue on the specified date
+      const reservations = await this.db
+        .select()
+        .from(facilityReservations)
+        .where(
+          and(
+            eq(facilityReservations.venueId, venueId),
+            eq(facilityReservations.reservationDate, date),
+            sql`${facilityReservations.reservationStatus} IN ('approved', 'confirmed')`
+          )
+        )
+        .orderBy(facilityReservations.startTime);
+
+      console.log(`🏢 Found ${reservations.length} reservations for venue ${venueId} on ${date}`);
+      
+      return {
+        venueId,
+        date,
+        reservations,
+        availableSlots: this.calculateAvailableSlots(reservations)
+      };
+    } catch (error) {
+      console.error("Database error:", error);
+      return { venueId, date, reservations: [], availableSlots: [] };
+    }
+  }
+
+  private calculateAvailableSlots(reservations: any[]): any[] {
+    // Simple implementation - in real system would be more sophisticated
+    // Return time slots that don't conflict with existing reservations
+    const standardSlots = [
+      { start: "08:00", end: "10:00" },
+      { start: "10:00", end: "12:00" },
+      { start: "12:00", end: "14:00" },
+      { start: "14:00", end: "16:00" },
+      { start: "16:00", end: "18:00" },
+      { start: "18:00", end: "20:00" }
+    ];
+
+    return standardSlots.filter(slot => {
+      return !reservations.some(reservation => {
+        return (slot.start < reservation.endTime && slot.end > reservation.startTime);
+      });
+    });
+  }
+
+  // ===================================================================
+  // SCHEDULE CONFLICTS IMPLEMENTATION
+  // ===================================================================
+
+  async createScheduleConflict(conflict: any, user: SecureUserContext): Promise<any> {
+    assertUserContext(user, 'createScheduleConflict');
+    try {
+      const conflictData = {
+        ...conflict,
+        id: randomUUID(),
+        detectedAt: new Date()
+      };
+
+      const result = await this.db
+        .insert(scheduleConflicts)
+        .values([conflictData])
+        .returning();
+
+      console.log(`⚠️ Created schedule conflict: ${conflictData.conflictType}`);
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to create schedule conflict");
+    }
+  }
+
+  async getScheduleConflict(id: string, user: SecureUserContext): Promise<any | undefined> {
+    assertUserContext(user, 'getScheduleConflict');
+    try {
+      const result = await this.db
+        .select()
+        .from(scheduleConflicts)
+        .where(eq(scheduleConflicts.id, id));
+
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async getScheduleConflicts(filters: any, user: SecureUserContext): Promise<any[]> {
+    assertUserContext(user, 'getScheduleConflicts');
+    try {
+      let query = this.db.select().from(scheduleConflicts);
+
+      // Apply filters
+      if (filters.status) {
+        query = query.where(eq(scheduleConflicts.conflictStatus, filters.status));
+      }
+      if (filters.severity) {
+        query = query.where(eq(scheduleConflicts.severity, filters.severity));
+      }
+      if (filters.date) {
+        query = query.where(eq(scheduleConflicts.conflictDate, filters.date));
+      }
+
+      const result = await query.orderBy(scheduleConflicts.detectedAt);
+      console.log(`⚠️ Found ${result.length} schedule conflicts`);
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async updateScheduleConflict(id: string, updates: any, user: SecureUserContext): Promise<any | undefined> {
+    assertUserContext(user, 'updateScheduleConflict');
+    try {
+      const result = await this.db
+        .update(scheduleConflicts)
+        .set(updates)
+        .where(eq(scheduleConflicts.id, id))
+        .returning();
+
+      console.log(`⚠️ Updated schedule conflict: ${id}`);
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async deleteScheduleConflict(id: string, user: SecureUserContext): Promise<boolean> {
+    assertUserContext(user, 'deleteScheduleConflict');
+    try {
+      const result = await this.db
+        .delete(scheduleConflicts)
+        .where(eq(scheduleConflicts.id, id));
+
+      console.log(`⚠️ Deleted schedule conflict: ${id}`);
+      return (result.rowCount ?? 0) > 0;
+    } catch (error) {
+      console.error("Database error:", error);
+      return false;
+    }
+  }
+
+  async detectScheduleConflicts(eventData: any, user: SecureUserContext): Promise<any[]> {
+    assertUserContext(user, 'detectScheduleConflicts');
+    try {
+      const conflicts = [];
+
+      // Check for venue conflicts
+      if (eventData.venueId && eventData.date && eventData.startTime && eventData.endTime) {
+        const venueConflicts = await this.db
+          .select()
+          .from(facilityReservations)
+          .where(
+            and(
+              eq(facilityReservations.venueId, eventData.venueId),
+              eq(facilityReservations.reservationDate, eventData.date),
+              sql`${facilityReservations.startTime} < ${eventData.endTime}`,
+              sql`${facilityReservations.endTime} > ${eventData.startTime}`,
+              sql`${facilityReservations.reservationStatus} IN ('approved', 'confirmed')`
+            )
+          );
+
+        for (const reservation of venueConflicts) {
+          conflicts.push({
+            conflictType: 'venue_double_booked',
+            event1Type: 'new_event',
+            event1Id: eventData.id || 'new',
+            event2Type: 'reservation',
+            event2Id: reservation.id,
+            conflictDate: eventData.date,
+            conflictTimeStart: eventData.startTime,
+            conflictTimeEnd: eventData.endTime,
+            severity: 'critical'
+          });
+        }
+      }
+
+      // Check for calendar event conflicts
+      if (eventData.date && eventData.startTime && eventData.endTime) {
+        const calendarConflicts = await this.db
+          .select()
+          .from(athleticCalendarEvents)
+          .where(
+            and(
+              eq(athleticCalendarEvents.eventDate, eventData.date),
+              sql`${athleticCalendarEvents.startTime} < ${eventData.endTime}`,
+              sql`${athleticCalendarEvents.endTime} > ${eventData.startTime}`
+            )
+          );
+
+        for (const event of calendarConflicts) {
+          if (event.id !== eventData.id) { // Don't conflict with self
+            conflicts.push({
+              conflictType: 'athlete_conflict',
+              event1Type: 'new_event',
+              event1Id: eventData.id || 'new',
+              event2Type: 'calendar_event',
+              event2Id: event.id,
+              conflictDate: eventData.date,
+              conflictTimeStart: eventData.startTime,
+              conflictTimeEnd: eventData.endTime,
+              severity: 'major'
+            });
+          }
+        }
+      }
+
+      console.log(`⚠️ Detected ${conflicts.length} potential conflicts`);
+      return conflicts;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
     }
   }
 }

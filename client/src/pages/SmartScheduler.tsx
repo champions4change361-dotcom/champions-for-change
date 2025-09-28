@@ -11,11 +11,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 
 interface ScheduleEvent {
   id: string;
   title: string;
-  type: 'practice' | 'game' | 'banquet' | 'meeting' | 'tournament' | 'fundraiser' | 'awards' | 'community';
+  type: 'practice' | 'game' | 'banquet' | 'meeting' | 'tournament' | 'fundraiser' | 'awards' | 'community' | 'academic_competition' | 'deadline' | 'training' | 'other';
   sport?: string;
   date: string;
   startTime: string;
@@ -53,7 +55,7 @@ interface ConflictDetection {
 
 export default function SmartScheduler() {
   const { user } = useAuth();
-  const [events, setEvents] = useState<ScheduleEvent[]>([]);
+  const queryClient = useQueryClient();
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [viewMode, setViewMode] = useState<'day' | 'week' | 'month'>('week');
   const [filterSport, setFilterSport] = useState<string>('all');
@@ -62,179 +64,226 @@ export default function SmartScheduler() {
   const [selectedEvent, setSelectedEvent] = useState<ScheduleEvent | null>(null);
   const [conflictAnalysis, setConflictAnalysis] = useState<ConflictDetection | null>(null);
 
-  // Sample events with realistic CCISD scheduling
-  useEffect(() => {
-    const sampleEvents: ScheduleEvent[] = [
-      {
-        id: '1',
-        title: 'Football Practice',
-        type: 'practice',
-        sport: 'Football',
-        date: '2024-08-21',
-        startTime: '15:30',
-        endTime: '17:30',
-        location: 'Miller Stadium Practice Field',
-        description: 'Conditioning and skill drills',
-        attendees: ['Varsity Team', 'JV Team'],
-        isRecurring: true,
-        recurringPattern: 'daily',
-        isPublic: false,
-        requiresPermission: false,
-        createdBy: 'Coach Thompson',
-        status: 'scheduled',
-        equipment: ['Practice Jerseys', 'Footballs', 'Cones', 'Water'],
-        transportation: false,
-        meals: false,
-        parentNotification: false
-      },
-      {
-        id: '2',
-        title: 'Miller vs Carroll - Varsity Football',
-        type: 'game',
-        sport: 'Football',
-        date: '2024-08-23',
-        startTime: '19:00',
-        endTime: '22:00',
-        location: 'Miller Stadium',
-        description: 'Season opener - Homecoming game',
-        attendees: ['Varsity Team', 'Band', 'Cheerleaders'],
-        opponent: 'Carroll High School',
-        homeAway: 'home',
-        isRecurring: false,
-        isPublic: true,
-        requiresPermission: false,
-        createdBy: 'Athletic Director',
-        status: 'confirmed',
-        equipment: ['Game Uniforms', 'Helmets', 'Pads', 'Footballs'],
-        transportation: false,
-        meals: true,
-        parentNotification: true,
-        aiSuggestions: ['Consider adding extra security for rivalry game', 'Coordinate with band for halftime show']
-      },
-      {
-        id: '3',
-        title: 'Athletic Banquet',
-        type: 'banquet',
-        date: '2024-08-25',
-        startTime: '18:00',
-        endTime: '21:00',
-        location: 'Miller High School Cafeteria',
-        description: 'Fall Sports Kickoff Banquet - All sports teams and families invited',
-        attendees: ['All Athletes', 'Parents', 'Staff', 'Coaches'],
-        isRecurring: false,
-        isPublic: true,
-        requiresPermission: true,
-        createdBy: 'Athletic Director',
-        status: 'scheduled',
-        transportation: false,
-        meals: true,
-        parentNotification: true,
-        conflicts: ['Cafeteria already reserved for band concert'],
-        aiSuggestions: ['Move to gymnasium due to cafeteria conflict', 'Coordinate catering with increased attendance']
-      },
-      {
-        id: '4',
-        title: 'Volleyball Practice',
-        type: 'practice',
-        sport: 'Volleyball',
-        date: '2024-08-21',
-        startTime: '16:00',
-        endTime: '18:00',
-        location: 'Miller Gymnasium',
-        description: 'Serve and spike drills',
-        attendees: ['Varsity Team', 'JV Team'],
-        isRecurring: true,
-        recurringPattern: 'daily',
-        isPublic: false,
-        requiresPermission: false,
-        createdBy: 'Coach Martinez',
-        status: 'scheduled',
-        equipment: ['Volleyballs', 'Net', 'Knee Pads'],
-        transportation: false,
-        meals: false,
-        parentNotification: false
-      },
-      {
-        id: '5',
-        title: 'Booster Club Meeting',
-        type: 'meeting',
-        date: '2024-08-22',
-        startTime: '19:00',
-        endTime: '20:30',
-        location: 'Miller High School Library',
-        description: 'Monthly booster club meeting - Fundraising discussion',
-        attendees: ['Booster Club Members', 'Athletic Director'],
-        isRecurring: true,
-        recurringPattern: 'monthly',
-        isPublic: true,
-        requiresPermission: false,
-        createdBy: 'Booster Club President',
-        status: 'scheduled',
-        transportation: false,
-        meals: false,
-        parentNotification: true
-      },
-      {
-        id: '6',
-        title: 'Cross Country at Ray Invitational',
-        type: 'tournament',
-        sport: 'Cross Country',
-        date: '2024-08-24',
-        startTime: '08:00',
-        endTime: '14:00',
-        location: 'Ray High School Cross Country Course',
-        description: 'District invitational meet',
-        attendees: ['Cross Country Team'],
-        opponent: 'Multiple Schools',
-        homeAway: 'away',
-        isRecurring: false,
-        isPublic: true,
-        requiresPermission: true,
-        createdBy: 'Coach Wilson',
-        status: 'scheduled',
-        equipment: ['Running Spikes', 'Team Tent', 'Coolers'],
-        transportation: true,
-        meals: true,
-        parentNotification: true,
-        aiSuggestions: ['Weather forecast shows rain - bring team tent', 'Schedule bus departure 30 minutes earlier for traffic']
-      }
-    ];
+  // Calculate date range for calendar view
+  const getDateRange = () => {
+    const date = new Date(selectedDate);
+    const startDate = new Date(date);
+    const endDate = new Date(date);
     
-    setEvents(sampleEvents);
+    if (viewMode === 'day') {
+      // Same day
+    } else if (viewMode === 'week') {
+      startDate.setDate(date.getDate() - date.getDay()); // Start of week
+      endDate.setDate(startDate.getDate() + 6); // End of week
+    } else if (viewMode === 'month') {
+      startDate.setDate(1); // Start of month
+      endDate.setMonth(date.getMonth() + 1);
+      endDate.setDate(0); // End of month
+    }
     
-    // Simulate AI conflict detection
-    const analysis: ConflictDetection = {
-      hasConflicts: true,
-      conflicts: [
-        {
-          type: 'facility_double_book',
-          severity: 'high',
-          message: 'Cafeteria double-booked: Athletic Banquet conflicts with Band Concert',
-          affectedEvents: ['3'],
-          suggestion: 'Move Athletic Banquet to Gymnasium or reschedule'
-        },
-        {
-          type: 'athlete_overload',
-          severity: 'medium',
-          message: 'Football players have 3 events in 4 days - potential fatigue risk',
-          affectedEvents: ['1', '2'],
-          suggestion: 'Consider lighter practice on day before game'
-        },
-        {
-          type: 'transportation_conflict',
-          severity: 'low',
-          message: 'Bus #3 requested for Cross Country same day as potential makeup game',
-          affectedEvents: ['6'],
-          suggestion: 'Reserve backup transportation or confirm game schedule'
-        }
-      ]
+    return {
+      startDate: startDate.toISOString().split('T')[0],
+      endDate: endDate.toISOString().split('T')[0]
     };
-    
-    setConflictAnalysis(analysis);
-  }, []);
+  };
+
+  // Fetch calendar events using TanStack Query
+  const { data: events = [], isLoading: eventsLoading, error: eventsError } = useQuery({
+    queryKey: ['/api/scheduling/calendar/view', viewMode, selectedDate, filterSport, filterType],
+    queryFn: async () => {
+      const { startDate, endDate } = getDateRange();
+      const params = new URLSearchParams({
+        viewType: viewMode === 'day' ? 'daily' : viewMode === 'week' ? 'weekly' : 'monthly',
+        startDate,
+        endDate
+      });
+      
+      if (filterSport !== 'all') {
+        params.append('sports', filterSport);
+      }
+      if (filterType !== 'all') {
+        params.append('eventTypes', filterType);
+      }
+      
+      const response = await fetch(`/api/scheduling/calendar/view?${params}`, {
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch calendar events');
+      }
+      
+      const result = await response.json();
+      // Backend returns calendarView object with nested events array
+      const rawEvents = result.data?.events || [];
+      
+      // Transform backend eventType field to frontend type field for consistent display
+      return rawEvents.map((event: any) => ({
+        ...event,
+        type: event.eventType || event.type, // Map eventType → type for frontend compatibility
+        title: event.eventTitle || event.title, // Also handle title mapping
+        date: event.eventDate || event.date // Also handle date mapping
+      }));
+    },
+    enabled: !!user,
+    refetchOnWindowFocus: false,
+    staleTime: 2 * 60 * 1000 // 2 minutes
+  });
+
+  // Fetch schedule conflicts
+  const { data: conflicts = [], isLoading: conflictsLoading } = useQuery({
+    queryKey: ['/api/scheduling/conflicts', selectedDate],
+    queryFn: async () => {
+      const { startDate, endDate } = getDateRange();
+      const params = new URLSearchParams({
+        startDate,
+        endDate,
+        status: 'detected'
+      });
+      
+      const response = await fetch(`/api/scheduling/conflicts?${params}`, {
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch conflicts');
+      }
+      
+      const result = await response.json();
+      return result.data || [];
+    },
+    enabled: !!user,
+    refetchOnWindowFocus: false,
+    staleTime: 1 * 60 * 1000 // 1 minute
+  });
+
+  // Create event mutation
+  const createEventMutation = useMutation({
+    mutationFn: async (eventData: any) => {
+      const response = await apiRequest('/api/scheduling/calendar/events', 'POST', eventData);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/scheduling/calendar/view'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/scheduling/conflicts'] });
+      setIsCreateDialogOpen(false);
+    },
+    onError: (error) => {
+      console.error('Failed to create event:', error);
+    }
+  });
+
+  // Update event mutation
+  const updateEventMutation = useMutation({
+    mutationFn: async ({ id, updates }: { id: string; updates: any }) => {
+      // Transform frontend type field to backend eventType field if present
+      const transformedUpdates = { ...updates };
+      if (updates.type && !updates.eventType) {
+        transformedUpdates.eventType = updates.type;
+        delete transformedUpdates.type;
+      }
+      
+      const response = await apiRequest(`/api/scheduling/calendar/events/${id}`, 'PUT', transformedUpdates);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/scheduling/calendar/view'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/scheduling/conflicts'] });
+      setSelectedEvent(null);
+    }
+  });
+
+  // Delete event mutation
+  const deleteEventMutation = useMutation({
+    mutationFn: async (eventId: string) => {
+      await apiRequest(`/api/scheduling/calendar/events/${eventId}`, 'DELETE');
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/scheduling/calendar/view'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/scheduling/conflicts'] });
+    }
+  });
+
+  // Conflict detection mutation
+  const detectConflictsMutation = useMutation({
+    mutationFn: async (eventData: any) => {
+      const response = await apiRequest('/api/scheduling/conflicts/detect', 'POST', eventData);
+      return response.json();
+    },
+    onSuccess: (result) => {
+      setConflictAnalysis(result.data);
+    }
+  });
+
+  // Handle event creation
+  const handleCreateEvent = (eventData: any) => {
+    // First detect conflicts
+    detectConflictsMutation.mutate(eventData);
+    // Then create the event
+    createEventMutation.mutate({
+      eventTitle: eventData.title,
+      eventType: eventData.type,
+      eventDate: eventData.date,
+      startTime: eventData.startTime,
+      endTime: eventData.endTime,
+      location: eventData.location,
+      description: eventData.description,
+      visibility: eventData.isPublic ? 'public' : 'school',
+      importanceLevel: 'normal'
+    });
+  };
+
+  // Helper function to format events for display
+  const formatEventForDisplay = (event: any): ScheduleEvent => {
+    return {
+      id: event.id,
+      title: event.eventTitle || event.title,
+      type: event.eventType || event.type,
+      sport: event.sport || '',
+      date: event.eventDate || event.date,
+      startTime: event.startTime,
+      endTime: event.endTime,
+      location: event.location || '',
+      description: event.description || '',
+      attendees: event.attendees || [],
+      isRecurring: event.isRecurring || false,
+      recurringPattern: event.recurringPattern,
+      isPublic: event.visibility === 'public',
+      requiresPermission: event.requiresPermission || false,
+      createdBy: event.createdBy || '',
+      status: event.status || 'scheduled',
+      equipment: event.equipment || [],
+      transportation: event.transportation || false,
+      meals: event.meals || false,
+      parentNotification: event.parentNotification || false,
+      conflicts: event.conflicts || [],
+      aiSuggestions: event.aiSuggestions || []
+    };
+  };
+
+  // Format events for display
+  const formattedEvents = events.map(formatEventForDisplay);
+
+  // Set up conflict analysis from real data
+  useEffect(() => {
+    if (conflicts.length > 0) {
+      setConflictAnalysis({
+        hasConflicts: true,
+        conflicts: conflicts.map((conflict: any) => ({
+          type: conflict.conflictType,
+          severity: conflict.severity,
+          message: conflict.description || `${conflict.conflictType} detected`,
+          affectedEvents: [conflict.event1Id, conflict.event2Id],
+          suggestion: conflict.resolutionMethod || 'Review and resolve manually'
+        }))
+      });
+    } else {
+      setConflictAnalysis({ hasConflicts: false, conflicts: [] });
+    }
+  }, [conflicts]);
 
   const getEventsByDate = (date: string) => {
-    return events.filter(event => event.date === date);
+    return formattedEvents.filter(event => event.date === date);
   };
 
   const getEventTypeIcon = (type: string) => {
@@ -329,118 +378,248 @@ export default function SmartScheduler() {
     return sportMatch && typeMatch;
   });
 
-  const handleCreateEvent = () => {
+  const handleOpenCreateDialog = () => {
     setIsCreateDialogOpen(true);
   };
 
-  const CreateEventDialog = () => (
-    <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>Create New Event</DialogTitle>
-        </DialogHeader>
-        <div className="grid grid-cols-2 gap-4 space-y-4">
-          <div className="col-span-2">
-            <Label htmlFor="title">Event Title</Label>
-            <Input id="title" placeholder="Enter event title" />
-          </div>
-          
-          <div>
-            <Label htmlFor="type">Event Type</Label>
-            <Select>
-              <SelectTrigger>
-                <SelectValue placeholder="Select type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="practice">Practice</SelectItem>
-                <SelectItem value="game">Game</SelectItem>
-                <SelectItem value="banquet">Banquet</SelectItem>
-                <SelectItem value="meeting">Meeting</SelectItem>
-                <SelectItem value="tournament">Tournament</SelectItem>
-                <SelectItem value="fundraiser">Fundraiser</SelectItem>
-                <SelectItem value="awards">Awards Ceremony</SelectItem>
-                <SelectItem value="community">Community Event</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div>
-            <Label htmlFor="sport">Sport (Optional)</Label>
-            <Select>
-              <SelectTrigger>
-                <SelectValue placeholder="Select sport" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Football">Football</SelectItem>
-                <SelectItem value="Volleyball">Volleyball</SelectItem>
-                <SelectItem value="Basketball">Basketball</SelectItem>
-                <SelectItem value="Track">Track & Field</SelectItem>
-                <SelectItem value="Cross Country">Cross Country</SelectItem>
-                <SelectItem value="Baseball">Baseball</SelectItem>
-                <SelectItem value="Soccer">Soccer</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div>
-            <Label htmlFor="date">Date</Label>
-            <Input id="date" type="date" />
-          </div>
-          
-          <div>
-            <Label htmlFor="location">Location</Label>
-            <Input id="location" placeholder="Enter location" />
-          </div>
-          
-          <div>
-            <Label htmlFor="startTime">Start Time</Label>
-            <Input id="startTime" type="time" />
-          </div>
-          
-          <div>
-            <Label htmlFor="endTime">End Time</Label>
-            <Input id="endTime" type="time" />
-          </div>
-          
-          <div className="col-span-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea id="description" placeholder="Event description..." />
-          </div>
-          
-          <div className="col-span-2 space-y-3">
-            <div className="flex items-center space-x-2">
-              <Switch id="recurring" />
-              <Label htmlFor="recurring">Recurring Event</Label>
+  const CreateEventDialog = () => {
+    const [formData, setFormData] = useState({
+      title: '',
+      type: '',
+      sport: '',
+      date: '',
+      location: '',
+      startTime: '',
+      endTime: '',
+      description: '',
+      isRecurring: false,
+      isPublic: false,
+      parentNotification: false,
+      transportation: false
+    });
+
+    const handleFormSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      
+      if (!formData.title || !formData.type || !formData.date || !formData.startTime || !formData.endTime) {
+        console.error('Please fill in all required fields');
+        return;
+      }
+
+      const eventData = {
+        title: formData.title,
+        type: formData.type,
+        sport: formData.sport,
+        date: formData.date,
+        startTime: formData.startTime,
+        endTime: formData.endTime,
+        location: formData.location,
+        description: formData.description,
+        isRecurring: formData.isRecurring,
+        isPublic: formData.isPublic,
+        parentNotification: formData.parentNotification,
+        transportation: formData.transportation
+      };
+
+      handleCreateEvent(eventData);
+      
+      // Reset form
+      setFormData({
+        title: '',
+        type: '',
+        sport: '',
+        date: '',
+        location: '',
+        startTime: '',
+        endTime: '',
+        description: '',
+        isRecurring: false,
+        isPublic: false,
+        parentNotification: false,
+        transportation: false
+      });
+    };
+
+    const handleInputChange = (field: string, value: any) => {
+      setFormData(prev => ({
+        ...prev,
+        [field]: value
+      }));
+    };
+
+    return (
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Create New Event</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleFormSubmit}>
+            <div className="grid grid-cols-2 gap-4 space-y-4">
+              <div className="col-span-2">
+                <Label htmlFor="title">Event Title *</Label>
+                <Input 
+                  id="title" 
+                  value={formData.title}
+                  onChange={(e) => handleInputChange('title', e.target.value)}
+                  placeholder="Enter event title" 
+                  required
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="type">Event Type *</Label>
+                <Select value={formData.type} onValueChange={(value) => handleInputChange('type', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="practice">Practice</SelectItem>
+                    <SelectItem value="game">Game</SelectItem>
+                    <SelectItem value="banquet">Banquet</SelectItem>
+                    <SelectItem value="meeting">Meeting</SelectItem>
+                    <SelectItem value="tournament">Tournament</SelectItem>
+                    <SelectItem value="fundraiser">Fundraiser</SelectItem>
+                    <SelectItem value="awards">Awards Ceremony</SelectItem>
+                    <SelectItem value="community">Community Event</SelectItem>
+                    <SelectItem value="academic_competition">Academic Competition</SelectItem>
+                    <SelectItem value="deadline">Deadline</SelectItem>
+                    <SelectItem value="training">Training</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Label htmlFor="sport">Sport (Optional)</Label>
+                <Select value={formData.sport} onValueChange={(value) => handleInputChange('sport', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select sport" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Football">Football</SelectItem>
+                    <SelectItem value="Volleyball">Volleyball</SelectItem>
+                    <SelectItem value="Basketball">Basketball</SelectItem>
+                    <SelectItem value="Track">Track & Field</SelectItem>
+                    <SelectItem value="Cross Country">Cross Country</SelectItem>
+                    <SelectItem value="Baseball">Baseball</SelectItem>
+                    <SelectItem value="Soccer">Soccer</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Label htmlFor="date">Date *</Label>
+                <Input 
+                  id="date" 
+                  type="date" 
+                  value={formData.date}
+                  onChange={(e) => handleInputChange('date', e.target.value)}
+                  required
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="location">Location</Label>
+                <Input 
+                  id="location" 
+                  value={formData.location}
+                  onChange={(e) => handleInputChange('location', e.target.value)}
+                  placeholder="Enter location" 
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="startTime">Start Time *</Label>
+                <Input 
+                  id="startTime" 
+                  type="time" 
+                  value={formData.startTime}
+                  onChange={(e) => handleInputChange('startTime', e.target.value)}
+                  required
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="endTime">End Time *</Label>
+                <Input 
+                  id="endTime" 
+                  type="time" 
+                  value={formData.endTime}
+                  onChange={(e) => handleInputChange('endTime', e.target.value)}
+                  required
+                />
+              </div>
+              
+              <div className="col-span-2">
+                <Label htmlFor="description">Description</Label>
+                <Textarea 
+                  id="description" 
+                  value={formData.description}
+                  onChange={(e) => handleInputChange('description', e.target.value)}
+                  placeholder="Event description..." 
+                />
+              </div>
+              
+              <div className="col-span-2 space-y-3">
+                <div className="flex items-center space-x-2">
+                  <Switch 
+                    id="recurring" 
+                    checked={formData.isRecurring}
+                    onCheckedChange={(checked) => handleInputChange('isRecurring', checked)}
+                  />
+                  <Label htmlFor="recurring">Recurring Event</Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Switch 
+                    id="public" 
+                    checked={formData.isPublic}
+                    onCheckedChange={(checked) => handleInputChange('isPublic', checked)}
+                  />
+                  <Label htmlFor="public">Public Event</Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Switch 
+                    id="parentNotify" 
+                    checked={formData.parentNotification}
+                    onCheckedChange={(checked) => handleInputChange('parentNotification', checked)}
+                  />
+                  <Label htmlFor="parentNotify">Notify Parents</Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Switch 
+                    id="transportation" 
+                    checked={formData.transportation}
+                    onCheckedChange={(checked) => handleInputChange('transportation', checked)}
+                  />
+                  <Label htmlFor="transportation">Transportation Required</Label>
+                </div>
+              </div>
+              
+              <div className="col-span-2 flex justify-end space-x-2">
+                <Button 
+                  type="button"
+                  variant="outline" 
+                  onClick={() => setIsCreateDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit"
+                  disabled={createEventMutation.isPending}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  {createEventMutation.isPending ? 'Creating...' : 'Create Event'}
+                </Button>
+              </div>
             </div>
-            
-            <div className="flex items-center space-x-2">
-              <Switch id="public" />
-              <Label htmlFor="public">Public Event</Label>
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <Switch id="parentNotify" />
-              <Label htmlFor="parentNotify">Notify Parents</Label>
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <Switch id="transportation" />
-              <Label htmlFor="transportation">Transportation Required</Label>
-            </div>
-          </div>
-          
-          <div className="col-span-2 flex justify-end space-x-2">
-            <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={() => setIsCreateDialogOpen(false)}>
-              Create Event
-            </Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
+          </form>
+        </DialogContent>
+      </Dialog>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
@@ -466,7 +645,7 @@ export default function SmartScheduler() {
             </div>
             
             <div className="flex items-center space-x-2">
-              <Button onClick={handleCreateEvent} className="bg-green-600 hover:bg-green-700">
+              <Button onClick={handleOpenCreateDialog} className="bg-green-600 hover:bg-green-700">
                 <Plus className="w-4 h-4 mr-2" />
                 Create Event
               </Button>
@@ -560,6 +739,13 @@ export default function SmartScheduler() {
                     <SelectItem value="banquet">Banquets</SelectItem>
                     <SelectItem value="meeting">Meetings</SelectItem>
                     <SelectItem value="tournament">Tournaments</SelectItem>
+                    <SelectItem value="fundraiser">Fundraisers</SelectItem>
+                    <SelectItem value="awards">Awards</SelectItem>
+                    <SelectItem value="community">Community</SelectItem>
+                    <SelectItem value="academic_competition">Academic</SelectItem>
+                    <SelectItem value="deadline">Deadlines</SelectItem>
+                    <SelectItem value="training">Training</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
