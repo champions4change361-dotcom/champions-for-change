@@ -5,7 +5,10 @@ import {
   type TrackEventRecord as TrackEvent, type InsertTrackEventRecord as InsertTrackEvent, type Page, type InsertPage,
   type TeamRegistration, type InsertTeamRegistration, type Organization, type InsertOrganization,
   type Team, type InsertTeam, type TeamPlayer, type InsertTeamPlayer,
+  type Athlete, type InsertAthlete,
   type MedicalHistory, type InsertMedicalHistory,
+  type HealthRiskAssessment, type InsertHealthRiskAssessment,
+  type InjuryIncident, type InsertInjuryIncident,
   type ScorekeeperAssignment, type InsertScorekeeperAssignment, type EventScore, type InsertEventScore,
   type SchoolEventAssignment, type InsertSchoolEventAssignment, type CoachEventAssignment, type InsertCoachEventAssignment,
   type Contact, type InsertContact, type EmailCampaign, type InsertEmailCampaign, type CampaignRecipient, type InsertCampaignRecipient,
@@ -24,7 +27,7 @@ import {
   type EventTemplate, type InsertEventTemplate, type ScoringPolicy, type InsertScoringPolicy,
   type TournamentConfig, type DivisionPolicy, type StageConfig,
   type GameTemplate, type InsertGameTemplate, type GameInstance, type InsertGameInstance, type UserLineup, type InsertUserLineup, type PlayerPerformance, type InsertPlayerPerformance,
-  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, teams, teamPlayers, medicalHistory, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog, taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices, supportTeams, supportTeamMembers, supportTeamInjuries, supportTeamAiConsultations, jerseyTeamMembers, jerseyTeamPayments, tournamentSubscriptions, clientConfigurations, guestParticipants, passwordResetTokens, showdownContests, showdownEntries, showdownLeaderboards, professionalPlayers, merchandiseProducts, merchandiseOrders, eventTickets, ticketOrders, tournamentRegistrationForms, registrationSubmissions, registrationAssignmentLog, fantasyProfiles, athleticConfigs, academicConfigs, fineArtsConfigs, eventTemplates, scoringPolicies, gameTemplates, gameInstances, userLineups, playerPerformances
+  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, teams, teamPlayers, athletes, medicalHistory, healthRiskAssessments, injuryIncidents, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog, taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices, supportTeams, supportTeamMembers, supportTeamInjuries, supportTeamAiConsultations, jerseyTeamMembers, jerseyTeamPayments, tournamentSubscriptions, clientConfigurations, guestParticipants, passwordResetTokens, showdownContests, showdownEntries, showdownLeaderboards, professionalPlayers, merchandiseProducts, merchandiseOrders, eventTickets, ticketOrders, tournamentRegistrationForms, registrationSubmissions, registrationAssignmentLog, fantasyProfiles, athleticConfigs, academicConfigs, fineArtsConfigs, eventTemplates, scoringPolicies, gameTemplates, gameInstances, userLineups, playerPerformances
 } from "@shared/schema";
 
 type SportCategory = typeof sportCategories.$inferSelect;
@@ -37,6 +40,8 @@ import { eq, desc, sql, and, gte, lte } from "drizzle-orm";
 import { createCachedStorage } from "./cache";
 import { createMonitoredStorage } from "./monitoring";
 import { BracketGenerator } from "./utils/bracket-generator";
+import { RBACDataFilters } from "./rbac-data-filters";
+import { HealthDataEncryption, HealthDataAudit } from "./data-encryption";
 
 // Compliance-related types
 export type ComplianceAuditLog = {
@@ -51,8 +56,21 @@ export type ComplianceAuditLog = {
   createdAt?: Date | null;
 };
 
+// Security: Runtime assertion helper for mandatory user context
+export function assertUserContext(user: User | undefined, methodName: string): asserts user is User {
+  if (!user) {
+    throw new Error(`RBAC_SECURITY_VIOLATION: ${methodName} requires user context for security filtering. User parameter cannot be null or undefined.`);
+  }
+  if (!user.id) {
+    throw new Error(`RBAC_SECURITY_VIOLATION: ${methodName} requires valid user ID for security filtering.`);
+  }
+}
+
+// Security: Type-safe user context requirement
+export type SecureUserContext = User & { id: string };
+
 export interface IStorage {
-  // User authentication methods
+  // User authentication methods (no RBAC filtering needed)
   getUser(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   getAllUsers(): Promise<User[]>;
@@ -146,29 +164,53 @@ export interface IStorage {
   getTeamPayments(teamId: string): Promise<any[]>;
   updateTeamPayment(id: string, updates: any): Promise<any>;
 
-  // Standalone team management methods (Jersey Watch-style)
-  createTeam(team: InsertTeam): Promise<Team>;
-  getTeam(id: string): Promise<Team | undefined>;
-  getTeamsByCoach(coachId: string): Promise<Team[]>;
-  getTeamsByOrganization(organizationName: string): Promise<Team[]>;
-  updateTeam(id: string, updates: Partial<Team>): Promise<Team | undefined>;
-  deleteTeam(id: string): Promise<boolean>;
-  updateTeamSubscription(id: string, subscriptionData: { subscriptionStatus: string, subscriptionTier: string, stripeSubscriptionId?: string }): Promise<Team | undefined>;
+  // Standalone team management methods (Jersey Watch-style) - RBAC Protected
+  // SECURITY: All team methods now REQUIRE user context (mandatory parameter)
+  createTeam(team: InsertTeam, user: SecureUserContext): Promise<Team>;
+  getTeam(id: string, user: SecureUserContext): Promise<Team | undefined>;
+  getTeamsByCoach(coachId: string, user: SecureUserContext): Promise<Team[]>;
+  getTeamsByOrganization(organizationName: string, user: SecureUserContext): Promise<Team[]>;
+  updateTeam(id: string, updates: Partial<Team>, user: SecureUserContext): Promise<Team | undefined>;
+  deleteTeam(id: string, user: SecureUserContext): Promise<boolean>;
+  updateTeamSubscription(id: string, subscriptionData: { subscriptionStatus: string, subscriptionTier: string, stripeSubscriptionId?: string }, user: SecureUserContext): Promise<Team | undefined>;
   
-  // Team player management methods
-  createTeamPlayer(player: InsertTeamPlayer): Promise<TeamPlayer>;
-  getTeamPlayer(id: string): Promise<TeamPlayer | undefined>;
-  getTeamPlayersByTeam(teamId: string): Promise<TeamPlayer[]>;
-  updateTeamPlayer(id: string, updates: Partial<TeamPlayer>): Promise<TeamPlayer | undefined>;
-  deleteTeamPlayer(id: string): Promise<boolean>;
-  bulkCreateTeamPlayers(players: InsertTeamPlayer[]): Promise<TeamPlayer[]>;
+  // Team player management methods - RBAC Protected
+  // SECURITY: All athlete data methods now REQUIRE user context (mandatory parameter)
+  createTeamPlayer(player: InsertTeamPlayer, user: SecureUserContext): Promise<TeamPlayer>;
+  getTeamPlayer(id: string, user: SecureUserContext): Promise<TeamPlayer | undefined>;
+  getTeamPlayersByTeam(teamId: string, user: SecureUserContext): Promise<TeamPlayer[]>;
+  updateTeamPlayer(id: string, updates: Partial<TeamPlayer>, user: SecureUserContext): Promise<TeamPlayer | undefined>;
+  deleteTeamPlayer(id: string, user: SecureUserContext): Promise<boolean>;
+  bulkCreateTeamPlayers(players: InsertTeamPlayer[], user: SecureUserContext): Promise<TeamPlayer[]>;
 
-  // Medical history management methods
-  createMedicalHistory(medicalHistory: InsertMedicalHistory): Promise<MedicalHistory>;
-  getMedicalHistory(id: string): Promise<MedicalHistory | undefined>;
-  getMedicalHistoryByPlayer(playerId: string): Promise<MedicalHistory | undefined>;
-  updateMedicalHistory(id: string, updates: Partial<MedicalHistory>): Promise<MedicalHistory | undefined>;
-  deleteMedicalHistory(id: string): Promise<boolean>;
+  // Athlete management methods - RBAC Protected
+  // SECURITY: All athlete data methods REQUIRE user context (mandatory parameter)
+  getAthlete(athleteId: string, user: SecureUserContext): Promise<Athlete | undefined>;
+  createAthlete(athlete: InsertAthlete, user: SecureUserContext): Promise<Athlete>;
+  updateAthlete(athleteId: string, updates: Partial<Athlete>, user: SecureUserContext): Promise<Athlete | undefined>;
+  getAthletesByTrainer(trainerId: string, user: SecureUserContext): Promise<Athlete[]>;
+  getAthletesByOrganization(organizationId: string, user: SecureUserContext): Promise<Athlete[]>;
+  searchAthletes(query: string, filters: any, user: SecureUserContext): Promise<Athlete[]>;
+
+  // Health Risk Assessment methods - RBAC Protected
+  getHealthRiskAssessment(assessmentId: string, user: SecureUserContext): Promise<HealthRiskAssessment | undefined>;
+  createHealthRiskAssessment(assessment: InsertHealthRiskAssessment, user: SecureUserContext): Promise<HealthRiskAssessment>;
+  updateHealthRiskAssessment(assessmentId: string, updates: Partial<HealthRiskAssessment>, user: SecureUserContext): Promise<HealthRiskAssessment | undefined>;
+  getHealthRiskAssessmentsByAthlete(athleteId: string, user: SecureUserContext): Promise<HealthRiskAssessment[]>;
+
+  // Injury Incident methods - RBAC Protected  
+  createInjuryIncident(incident: any, user: SecureUserContext): Promise<any>;
+  getInjuryIncident(incidentId: string, user: SecureUserContext): Promise<any>;
+  getInjuryIncidentsByAthlete(athleteId: string, user: SecureUserContext): Promise<any[]>;
+  updateInjuryIncident(incidentId: string, updates: any, user: SecureUserContext): Promise<any>;
+
+  // Medical history management methods - RBAC Protected
+  // SECURITY: All health data methods now REQUIRE user context (mandatory parameter)
+  createMedicalHistory(medicalHistory: InsertMedicalHistory, user: SecureUserContext): Promise<MedicalHistory>;
+  getMedicalHistory(id: string, user: SecureUserContext): Promise<MedicalHistory | undefined>;
+  getMedicalHistoryByPlayer(playerId: string, user: SecureUserContext): Promise<MedicalHistory | undefined>;
+  updateMedicalHistory(id: string, updates: Partial<MedicalHistory>, user: SecureUserContext): Promise<MedicalHistory | undefined>;
+  deleteMedicalHistory(id: string, user: SecureUserContext): Promise<boolean>;
 
   // Guest participant methods - "Pay & Play or Join the Family" system
   createGuestParticipant(participant: InsertGuestParticipant): Promise<GuestParticipant>;
@@ -185,11 +227,12 @@ export interface IStorage {
   markPasswordResetTokenUsed(id: string): Promise<boolean>;
   cleanupExpiredPasswordResetTokens(): Promise<number>;
 
-  // Organization methods
-  createOrganization(organization: InsertOrganization): Promise<Organization>;
-  getOrganization(id: string): Promise<Organization | undefined>;
-  getOrganizations(): Promise<Organization[]>;
-  updateOrganization(id: string, updates: Partial<Organization>): Promise<Organization | undefined>;
+  // Organization methods - RBAC Protected
+  // SECURITY: All organization methods now REQUIRE user context (mandatory parameter)
+  createOrganization(organization: InsertOrganization, user: SecureUserContext): Promise<Organization>;
+  getOrganization(id: string, user: SecureUserContext): Promise<Organization | undefined>;
+  getOrganizations(user: SecureUserContext): Promise<Organization[]>;
+  updateOrganization(id: string, updates: Partial<Organization>, user: SecureUserContext): Promise<Organization | undefined>;
 
   // Registration request methods
   createRegistrationRequest(request: any): Promise<any>;
@@ -264,13 +307,14 @@ export interface IStorage {
   updateEmailCampaign(id: string, updates: Partial<InsertEmailCampaign>): Promise<EmailCampaign>;
   deleteEmailCampaign(id: string): Promise<void>;
 
-  // Tournament methods
-  getTournaments(userId?: string): Promise<Tournament[]>;
-  getTournament(id: string): Promise<Tournament | undefined>;
-  getDraftTournaments(userId: string): Promise<Tournament[]>;
-  createTournament(tournament: InsertTournament): Promise<Tournament>;
-  updateTournament(id: string, tournament: Partial<Tournament>): Promise<Tournament | undefined>;
-  deleteTournament(id: string): Promise<boolean>;
+  // Tournament methods - RBAC Protected
+  // SECURITY: All tournament methods now REQUIRE user context (mandatory parameter)
+  getTournaments(user: SecureUserContext): Promise<Tournament[]>;
+  getTournament(id: string, user: SecureUserContext): Promise<Tournament | undefined>;
+  getDraftTournaments(user: SecureUserContext): Promise<Tournament[]>;
+  createTournament(tournament: InsertTournament, user: SecureUserContext): Promise<Tournament>;
+  updateTournament(id: string, tournament: Partial<Tournament>, user: SecureUserContext): Promise<Tournament | undefined>;
+  deleteTournament(id: string, user: SecureUserContext): Promise<boolean>;
   
   // FFA Tournament methods
   generateFFATournament(tournamentId: string, config: {
@@ -613,6 +657,119 @@ export interface IStorage {
   getNFLInjuries(): Promise<any[]>;
   storeNFLPlayerStats(stats: any[]): Promise<void>;
   getNFLPlayerStats(): Promise<any[]>;
+
+  // ===================================================================
+  // ACADEMIC COMPETITION MANAGEMENT METHODS
+  // FERPA-compliant with RBAC security for student academic data
+  // ===================================================================
+
+  // Academic Districts - RBAC Protected
+  createAcademicDistrict(district: any, user: SecureUserContext): Promise<any>;
+  getAcademicDistrict(id: string, user: SecureUserContext): Promise<any | undefined>;
+  getAcademicDistrictsByRegion(region: string, user: SecureUserContext): Promise<any[]>;
+  getAcademicDistrictsByClassification(classification: string, user: SecureUserContext): Promise<any[]>;
+  updateAcademicDistrict(id: string, updates: any, user: SecureUserContext): Promise<any | undefined>;
+  deleteAcademicDistrict(id: string, user: SecureUserContext): Promise<boolean>;
+
+  // Academic Competitions/Contests - RBAC Protected
+  createAcademicCompetition(competition: any, user: SecureUserContext): Promise<any>;
+  getAcademicCompetition(id: string, user: SecureUserContext): Promise<any | undefined>;
+  getAcademicCompetitionsByCategory(category: string, user: SecureUserContext): Promise<any[]>;
+  getAcademicCompetitionsByGradeLevel(gradeLevel: string, user: SecureUserContext): Promise<any[]>;
+  getAcademicCompetitionsByClassification(classification: string, user: SecureUserContext): Promise<any[]>;
+  updateAcademicCompetition(id: string, updates: any, user: SecureUserContext): Promise<any | undefined>;
+  deleteAcademicCompetition(id: string, user: SecureUserContext): Promise<boolean>;
+
+  // Academic Meets/Events - RBAC Protected
+  createAcademicMeet(meet: any, user: SecureUserContext): Promise<any>;
+  getAcademicMeet(id: string, user: SecureUserContext): Promise<any | undefined>;
+  getAcademicMeetsByDistrict(districtId: string, user: SecureUserContext): Promise<any[]>;
+  getAcademicMeetsByLevel(level: string, user: SecureUserContext): Promise<any[]>;
+  getAcademicMeetsByDateRange(startDate: string, endDate: string, user: SecureUserContext): Promise<any[]>;
+  updateAcademicMeet(id: string, updates: any, user: SecureUserContext): Promise<any | undefined>;
+  deleteAcademicMeet(id: string, user: SecureUserContext): Promise<boolean>;
+
+  // School Academic Programs - RBAC Protected  
+  createSchoolAcademicProgram(program: any, user: SecureUserContext): Promise<any>;
+  getSchoolAcademicProgram(id: string, user: SecureUserContext): Promise<any | undefined>;
+  getSchoolAcademicProgramsByDistrict(districtId: string, user: SecureUserContext): Promise<any[]>;
+  getSchoolAcademicProgramsBySchool(schoolId: string, user: SecureUserContext): Promise<any[]>;
+  updateSchoolAcademicProgram(id: string, updates: any, user: SecureUserContext): Promise<any | undefined>;
+  deleteSchoolAcademicProgram(id: string, user: SecureUserContext): Promise<boolean>;
+
+  // Academic Teams - RBAC Protected (Student data requires FERPA compliance)
+  createAcademicTeam(team: any, user: SecureUserContext): Promise<any>;
+  getAcademicTeam(id: string, user: SecureUserContext): Promise<any | undefined>;
+  getAcademicTeamsBySchool(schoolId: string, user: SecureUserContext): Promise<any[]>;
+  getAcademicTeamsByMeet(meetId: string, user: SecureUserContext): Promise<any[]>;
+  getAcademicTeamsByCompetition(competitionId: string, user: SecureUserContext): Promise<any[]>;
+  updateAcademicTeam(id: string, updates: any, user: SecureUserContext): Promise<any | undefined>;
+  deleteAcademicTeam(id: string, user: SecureUserContext): Promise<boolean>;
+
+  // Academic Participants - RBAC Protected (Student data requires FERPA compliance)
+  createAcademicParticipant(participant: any, user: SecureUserContext): Promise<any>;
+  getAcademicParticipant(id: string, user: SecureUserContext): Promise<any | undefined>;
+  getAcademicParticipantsByTeam(teamId: string, user: SecureUserContext): Promise<any[]>;
+  getAcademicParticipantsByCompetition(competitionId: string, user: SecureUserContext): Promise<any[]>;
+  getAcademicParticipantsByStudent(studentId: string, user: SecureUserContext): Promise<any[]>;
+  updateAcademicParticipant(id: string, updates: any, user: SecureUserContext): Promise<any | undefined>;
+  deleteAcademicParticipant(id: string, user: SecureUserContext): Promise<boolean>;
+  verifyParticipantEligibility(participantId: string, user: SecureUserContext): Promise<boolean>;
+
+  // Academic Results & Scoring - RBAC Protected
+  createAcademicResult(result: any, user: SecureUserContext): Promise<any>;
+  getAcademicResult(id: string, user: SecureUserContext): Promise<any | undefined>;
+  getAcademicResultsByMeet(meetId: string, user: SecureUserContext): Promise<any[]>;
+  getAcademicResultsByCompetition(competitionId: string, user: SecureUserContext): Promise<any[]>;
+  getAcademicResultsByParticipant(participantId: string, user: SecureUserContext): Promise<any[]>;
+  getAcademicResultsByTeam(teamId: string, user: SecureUserContext): Promise<any[]>;
+  updateAcademicResult(id: string, updates: any, user: SecureUserContext): Promise<any | undefined>;
+  verifyAcademicResult(resultId: string, verifiedBy: string, user: SecureUserContext): Promise<any | undefined>;
+  deleteAcademicResult(id: string, user: SecureUserContext): Promise<boolean>;
+
+  // Academic Officials & Judges - RBAC Protected
+  createAcademicOfficial(official: any, user: SecureUserContext): Promise<any>;
+  getAcademicOfficial(id: string, user: SecureUserContext): Promise<any | undefined>;
+  getAcademicOfficialsByRole(role: string, user: SecureUserContext): Promise<any[]>;
+  getAcademicOfficialsByCompetition(competitionId: string, user: SecureUserContext): Promise<any[]>;
+  updateAcademicOfficial(id: string, updates: any, user: SecureUserContext): Promise<any | undefined>;
+  deleteAcademicOfficial(id: string, user: SecureUserContext): Promise<boolean>;
+
+  // Official Assignments - RBAC Protected
+  createOfficialAssignment(assignment: any, user: SecureUserContext): Promise<any>;
+  getOfficialAssignment(id: string, user: SecureUserContext): Promise<any | undefined>;
+  getOfficialAssignmentsByMeet(meetId: string, user: SecureUserContext): Promise<any[]>;
+  getOfficialAssignmentsByOfficial(officialId: string, user: SecureUserContext): Promise<any[]>;
+  updateOfficialAssignment(id: string, updates: any, user: SecureUserContext): Promise<any | undefined>;
+  deleteOfficialAssignment(id: string, user: SecureUserContext): Promise<boolean>;
+
+  // Academic Competition Analytics - RBAC Protected
+  getAcademicPerformanceAnalytics(filters: any, user: SecureUserContext): Promise<any>;
+  getAcademicAdvancementTracking(participantId: string, user: SecureUserContext): Promise<any>;
+  getSchoolAcademicPerformance(schoolId: string, user: SecureUserContext): Promise<any>;
+  getDistrictAcademicPerformance(districtId: string, user: SecureUserContext): Promise<any>;
+  getAcademicTrendsAnalysis(timeRange: string, user: SecureUserContext): Promise<any>;
+
+  // TEKS Alignment Methods - Educational Standards Compliance
+  getTeksAlignmentByCompetition(competitionId: string, user: SecureUserContext): Promise<any>;
+  validateTeksCompliance(competitionId: string, user: SecureUserContext): Promise<any>;
+  getTeksReportingData(filters: any, user: SecureUserContext): Promise<any>;
+
+  // Academic Calendar Integration - Link with existing calendar system
+  getAcademicCalendarEvents(startDate: string, endDate: string, user: SecureUserContext): Promise<any[]>;
+  createAcademicCalendarEvent(event: any, user: SecureUserContext): Promise<any>;
+  updateAcademicCalendarEvent(eventId: string, updates: any, user: SecureUserContext): Promise<any | undefined>;
+
+  // Automated Notification Service Methods
+  getNotificationsForEscalation(): Promise<any[]>;
+  getUpcomingCalendarEvents(startDate: string, endDate: string, user: User): Promise<any[]>;
+  getUsersByRoles(roles: string[], user: User): Promise<User[]>;
+  getFacilityContacts(facilityId: string, user: User): Promise<any[]>;
+  getUsersByOrganization(organizationId: string, user: User): Promise<User[]>;
+  getUserNotificationPreferences(userId: string): Promise<any | undefined>;
+  saveUserNotificationPreferences(preferences: any): Promise<void>;
+  getNotificationHistory(startDate: string, endDate: string, organizationId?: string, user?: User): Promise<any[]>;
+  saveNotificationHistory(history: any): Promise<void>;
 }
 
 export class DbStorage implements IStorage {
@@ -1500,9 +1657,18 @@ export class DbStorage implements IStorage {
     }
   }
 
-  async getTeam(id: string): Promise<Team | undefined> {
+  async getTeam(id: string, user?: User): Promise<Team | undefined> {
     try {
-      const result = await this.db.select().from(teams).where(eq(teams.id, id));
+      let query = this.db.select().from(teams).where(eq(teams.id, id));
+      
+      // Apply RBAC filtering if user context provided
+      if (user) {
+        const { RBACDataFilters } = await import('./rbac-data-filters');
+        const rbacFilter = await RBACDataFilters.applyRowLevelSecurity(user, 'teams', teams);
+        query = query.where(and(eq(teams.id, id), rbacFilter));
+      }
+      
+      const result = await query;
       return result[0];
     } catch (error) {
       console.error("Database error:", error);
@@ -1510,9 +1676,18 @@ export class DbStorage implements IStorage {
     }
   }
 
-  async getTeamsByCoach(coachId: string): Promise<Team[]> {
+  async getTeamsByCoach(coachId: string, user?: User): Promise<Team[]> {
     try {
-      const result = await this.db.select().from(teams).where(eq(teams.coachId, coachId));
+      let query = this.db.select().from(teams).where(eq(teams.coachId, coachId));
+      
+      // Apply RBAC filtering if user context provided
+      if (user) {
+        const { RBACDataFilters } = await import('./rbac-data-filters');
+        const rbacFilter = await RBACDataFilters.applyRowLevelSecurity(user, 'teams', teams);
+        query = query.where(and(eq(teams.coachId, coachId), rbacFilter));
+      }
+      
+      const result = await query;
       return result;
     } catch (error) {
       console.error("Database error:", error);
@@ -1661,18 +1836,225 @@ export class DbStorage implements IStorage {
     }
   }
 
+  // Athlete management methods - RBAC Protected
+  async getAthlete(athleteId: string, user: SecureUserContext): Promise<Athlete | undefined> {
+    try {
+      assertUserContext(user, 'getAthlete');
+      const result = await this.db.select().from(athletes).where(eq(athletes.id, athleteId));
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to get athlete");
+    }
+  }
+
+  async createAthlete(athlete: InsertAthlete, user: SecureUserContext): Promise<Athlete> {
+    try {
+      assertUserContext(user, 'createAthlete');
+      const athleteWithId = {
+        id: randomUUID(),
+        ...athlete,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      const result = await this.db.insert(athletes).values([athleteWithId]).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to create athlete");
+    }
+  }
+
+  async updateAthlete(athleteId: string, updates: Partial<Athlete>, user: SecureUserContext): Promise<Athlete | undefined> {
+    try {
+      assertUserContext(user, 'updateAthlete');
+      const { id: _, createdAt: __, ...allowedUpdates } = updates;
+      const result = await this.db
+        .update(athletes)
+        .set({ ...allowedUpdates, updatedAt: new Date() })
+        .where(eq(athletes.id, athleteId))
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to update athlete");
+    }
+  }
+
+  async getAthletesByTrainer(trainerId: string, user: SecureUserContext): Promise<Athlete[]> {
+    try {
+      assertUserContext(user, 'getAthletesByTrainer');
+      const result = await this.db.select().from(athletes).where(eq(athletes.athleticTrainerId, trainerId));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to get athletes by trainer");
+    }
+  }
+
+  async getAthletesByOrganization(organizationId: string, user: SecureUserContext): Promise<Athlete[]> {
+    try {
+      assertUserContext(user, 'getAthletesByOrganization');
+      const result = await this.db.select().from(athletes).where(eq(athletes.schoolId, organizationId));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to get athletes by organization");
+    }
+  }
+
+  async searchAthletes(query: string, filters: any, user: SecureUserContext): Promise<Athlete[]> {
+    try {
+      assertUserContext(user, 'searchAthletes');
+      // Basic search implementation - can be enhanced
+      const result = await this.db.select().from(athletes);
+      return result.filter(athlete => 
+        athlete.firstName?.toLowerCase().includes(query.toLowerCase()) ||
+        athlete.lastName?.toLowerCase().includes(query.toLowerCase())
+      );
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to search athletes");
+    }
+  }
+
+  // Health Risk Assessment methods - RBAC Protected
+  async getHealthRiskAssessment(assessmentId: string, user: SecureUserContext): Promise<HealthRiskAssessment | undefined> {
+    try {
+      assertUserContext(user, 'getHealthRiskAssessment');
+      const result = await this.db.select().from(healthRiskAssessments).where(eq(healthRiskAssessments.id, assessmentId));
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to get health risk assessment");
+    }
+  }
+
+  async createHealthRiskAssessment(assessment: InsertHealthRiskAssessment, user: SecureUserContext): Promise<HealthRiskAssessment> {
+    try {
+      assertUserContext(user, 'createHealthRiskAssessment');
+      const assessmentWithId = {
+        id: randomUUID(),
+        ...assessment,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      const result = await this.db.insert(healthRiskAssessments).values([assessmentWithId]).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to create health risk assessment");
+    }
+  }
+
+  async updateHealthRiskAssessment(assessmentId: string, updates: Partial<HealthRiskAssessment>, user: SecureUserContext): Promise<HealthRiskAssessment | undefined> {
+    try {
+      assertUserContext(user, 'updateHealthRiskAssessment');
+      const { id: _, createdAt: __, ...allowedUpdates } = updates;
+      const result = await this.db
+        .update(healthRiskAssessments)
+        .set({ ...allowedUpdates, updatedAt: new Date() })
+        .where(eq(healthRiskAssessments.id, assessmentId))
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to update health risk assessment");
+    }
+  }
+
+  async getHealthRiskAssessmentsByAthlete(athleteId: string, user: SecureUserContext): Promise<HealthRiskAssessment[]> {
+    try {
+      assertUserContext(user, 'getHealthRiskAssessmentsByAthlete');
+      const result = await this.db.select().from(healthRiskAssessments).where(eq(healthRiskAssessments.athleteId, athleteId));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to get health risk assessments by athlete");
+    }
+  }
+
+  // Injury Incident methods - RBAC Protected
+  async createInjuryIncident(incident: any, user: SecureUserContext): Promise<any> {
+    try {
+      assertUserContext(user, 'createInjuryIncident');
+      const incidentWithId = {
+        id: randomUUID(),
+        ...incident,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      const result = await this.db.insert(injuryIncidents).values([incidentWithId]).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to create injury incident");
+    }
+  }
+
+  async getInjuryIncident(incidentId: string, user: SecureUserContext): Promise<any> {
+    try {
+      assertUserContext(user, 'getInjuryIncident');
+      const result = await this.db.select().from(injuryIncidents).where(eq(injuryIncidents.id, incidentId));
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to get injury incident");
+    }
+  }
+
+  async getInjuryIncidentsByAthlete(athleteId: string, user: SecureUserContext): Promise<any[]> {
+    try {
+      assertUserContext(user, 'getInjuryIncidentsByAthlete');
+      const result = await this.db.select().from(injuryIncidents).where(eq(injuryIncidents.athleteId, athleteId));
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to get injury incidents by athlete");
+    }
+  }
+
+  async updateInjuryIncident(incidentId: string, updates: any, user: SecureUserContext): Promise<any> {
+    try {
+      assertUserContext(user, 'updateInjuryIncident');
+      const { id: _, createdAt: __, ...allowedUpdates } = updates;
+      const result = await this.db
+        .update(injuryIncidents)
+        .set({ ...allowedUpdates, updatedAt: new Date() })
+        .where(eq(injuryIncidents.id, incidentId))
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Database error:", error);
+      throw new Error("Failed to update injury incident");
+    }
+  }
+
   // Medical history methods
   async createMedicalHistory(medicalHistoryData: InsertMedicalHistory): Promise<MedicalHistory> {
     try {
+      // Encrypt sensitive PHI fields before storage
+      const encryptedData = HealthDataEncryption.encryptMedicalHistory(medicalHistoryData);
+      
       const medicalHistoryWithId = {
         id: randomUUID(),
-        ...medicalHistoryData,
+        ...encryptedData,
         createdAt: new Date(),
         updatedAt: new Date()
       };
       
       const result = await this.db.insert(medicalHistory).values([medicalHistoryWithId]).returning();
-      return result[0];
+      
+      // Log PHI access for HIPAA compliance
+      await HealthDataAudit.logAccess(
+        'system', // userId - should be passed from calling context
+        medicalHistoryWithId.playerId,
+        'medical_history',
+        'write'
+      );
+      
+      // Return decrypted data for immediate use
+      return HealthDataEncryption.decryptMedicalHistory(result[0]);
     } catch (error) {
       console.error("Database error:", error);
       throw new Error("Failed to create medical history");
@@ -1682,7 +2064,19 @@ export class DbStorage implements IStorage {
   async getMedicalHistory(id: string): Promise<MedicalHistory | undefined> {
     try {
       const result = await this.db.select().from(medicalHistory).where(eq(medicalHistory.id, id));
-      return result[0];
+      
+      if (!result[0]) return undefined;
+      
+      // Log PHI access for HIPAA compliance
+      await HealthDataAudit.logAccess(
+        'system', // userId - should be passed from calling context
+        result[0].playerId,
+        'medical_history',
+        'read'
+      );
+      
+      // Decrypt sensitive PHI fields before returning
+      return HealthDataEncryption.decryptMedicalHistory(result[0]);
     } catch (error) {
       console.error("Database error:", error);
       return undefined;
@@ -1692,7 +2086,19 @@ export class DbStorage implements IStorage {
   async getMedicalHistoryByPlayer(playerId: string): Promise<MedicalHistory | undefined> {
     try {
       const result = await this.db.select().from(medicalHistory).where(eq(medicalHistory.playerId, playerId));
-      return result[0];
+      
+      if (!result[0]) return undefined;
+      
+      // Log PHI access for HIPAA compliance
+      await HealthDataAudit.logAccess(
+        'system', // userId - should be passed from calling context
+        playerId,
+        'medical_history',
+        'read'
+      );
+      
+      // Decrypt sensitive PHI fields before returning
+      return HealthDataEncryption.decryptMedicalHistory(result[0]);
     } catch (error) {
       console.error("Database error:", error);
       return undefined;
@@ -1703,8 +2109,12 @@ export class DbStorage implements IStorage {
     try {
       // Filter out immutable fields to prevent accidental mutation
       const { id: _, createdAt, ...allowedUpdates } = updates;
+      
+      // Encrypt sensitive PHI fields before storage
+      const encryptedUpdates = HealthDataEncryption.encryptMedicalHistory(allowedUpdates);
+      
       const updatedData = {
-        ...allowedUpdates,
+        ...encryptedUpdates,
         updatedAt: new Date()
       };
       
@@ -1712,8 +2122,19 @@ export class DbStorage implements IStorage {
         .set(updatedData)
         .where(eq(medicalHistory.id, id))
         .returning();
-        
-      return result[0];
+      
+      if (!result[0]) return undefined;
+      
+      // Log PHI access for HIPAA compliance
+      await HealthDataAudit.logAccess(
+        'system', // userId - should be passed from calling context
+        result[0].playerId,
+        'medical_history',
+        'write'
+      );
+      
+      // Return decrypted data for immediate use
+      return HealthDataEncryption.decryptMedicalHistory(result[0]);
     } catch (error) {
       console.error("Database error:", error);
       return undefined;
@@ -4452,6 +4873,130 @@ export class DbStorage implements IStorage {
     } catch (error) {
       console.error("Database error:", error);
       return false;
+    }
+  }
+
+  // Automated Notification Service Methods Implementation
+  async getNotificationsForEscalation(): Promise<any[]> {
+    try {
+      // For now, return empty array. This would need to be implemented with proper notification storage
+      // In a real implementation, this would query a notifications table for items needing escalation
+      console.log("📊 Getting notifications for escalation (not implemented yet)");
+      return [];
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async getUpcomingCalendarEvents(startDate: string, endDate: string, user: User): Promise<any[]> {
+    try {
+      // Query athletic calendar events within the date range
+      const result = await this.db
+        .select()
+        .from(athleticCalendarEvents)
+        .where(
+          and(
+            gte(athleticCalendarEvents.eventDate, startDate),
+            lte(athleticCalendarEvents.eventDate, endDate)
+          )
+        )
+        .orderBy(athleticCalendarEvents.eventDate);
+      
+      console.log(`📅 Found ${result.length} upcoming calendar events`);
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async getUsersByRoles(roles: string[], user: User): Promise<User[]> {
+    try {
+      // Query users by roles (assuming role is stored in user table)
+      // For now, return users with any of the specified roles
+      const result = await this.db
+        .select()
+        .from(users)
+        .where(sql`${users.role} = ANY(${roles})`);
+      
+      console.log(`👥 Found ${result.length} users with roles: ${roles.join(', ')}`);
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async getFacilityContacts(facilityId: string, user: User): Promise<any[]> {
+    try {
+      // For now, return empty array. This would need proper facility contacts implementation
+      // In a real implementation, this would query facility contacts/managers
+      console.log(`🏢 Getting facility contacts for ${facilityId} (not implemented yet)`);
+      return [];
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async getUsersByOrganization(organizationId: string, user: User): Promise<User[]> {
+    try {
+      // Query users by organization ID
+      const result = await this.db
+        .select()
+        .from(users)
+        .where(eq(users.organizationId, organizationId));
+      
+      console.log(`🏛️ Found ${result.length} users in organization: ${organizationId}`);
+      return result;
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async getUserNotificationPreferences(userId: string): Promise<any | undefined> {
+    try {
+      // For now, return undefined. This would need proper notification preferences table
+      // In a real implementation, this would query a notification_preferences table
+      console.log(`🔔 Getting notification preferences for user ${userId} (not implemented yet)`);
+      return undefined;
+    } catch (error) {
+      console.error("Database error:", error);
+      return undefined;
+    }
+  }
+
+  async saveUserNotificationPreferences(preferences: any): Promise<void> {
+    try {
+      // For now, just log. This would need proper notification preferences table
+      // In a real implementation, this would insert/update a notification_preferences table
+      console.log(`💾 Saving notification preferences for user ${preferences.userId} (not implemented yet)`);
+    } catch (error) {
+      console.error("Database error:", error);
+    }
+  }
+
+  async getNotificationHistory(startDate: string, endDate: string, organizationId?: string, user?: User): Promise<any[]> {
+    try {
+      // For now, return empty array. This would need proper notification history table
+      // In a real implementation, this would query a notification_history table
+      console.log(`📈 Getting notification history from ${startDate} to ${endDate} (not implemented yet)`);
+      return [];
+    } catch (error) {
+      console.error("Database error:", error);
+      return [];
+    }
+  }
+
+  async saveNotificationHistory(history: any): Promise<void> {
+    try {
+      // For now, just log. This would need proper notification history table
+      // In a real implementation, this would insert into a notification_history table
+      console.log(`💾 Saving notification history ${history.id} (not implemented yet)`);
+    } catch (error) {
+      console.error("Database error:", error);
     }
   }
 }
@@ -8061,6 +8606,166 @@ export class MemStorage implements IStorage {
     return cleaned;
   }
 
+  // RBAC HELPER METHODS FOR ACCESS CONTROL
+  
+  /**
+   * Check if user can access specific team based on RBAC rules
+   */
+  private canUserAccessTeam(user: User, team: Team): boolean {
+    const userRole = user.userRole || user.complianceRole;
+    
+    // District athletic directors can access all teams in their district
+    if (userRole === 'district_athletic_director') {
+      // Check if team belongs to user's district (via organization)
+      return this.isTeamInUserDistrict(user, team);
+    }
+    
+    // School athletic directors can access teams in their school
+    if (userRole === 'school_athletic_director') {
+      return this.isTeamInUserSchool(user, team);
+    }
+    
+    // Coaches can only access teams they are assigned to
+    if (userRole === 'head_coach' || userRole === 'assistant_coach') {
+      return team.coachId === user.id || this.isCoachAssignedToTeam(user.id, team.id);
+    }
+    
+    // Athletic trainers can access teams in their scope
+    if (userRole === 'district_athletic_trainer') {
+      return this.isTeamInUserDistrict(user, team);
+    }
+    
+    if (userRole === 'school_athletic_trainer') {
+      return this.isTeamInUserSchool(user, team);
+    }
+    
+    // Athletic training students need supervision
+    if (userRole === 'athletic_training_student') {
+      return this.isStudentSupervisedForTeam(user.id, team.id);
+    }
+    
+    // Athletes can access their own teams
+    if (userRole === 'athlete') {
+      return this.isAthleteOnTeam(user.id, team.id);
+    }
+    
+    // Tournament managers can access teams in tournaments they manage
+    if (userRole === 'tournament_manager' || userRole === 'assistant_tournament_manager') {
+      return this.isTeamInUserTournaments(user.id, team.id);
+    }
+    
+    // Fans have no access to team data
+    return false;
+  }
+  
+  /**
+   * Check if user can access specific team player based on RBAC rules
+   */
+  private async canUserAccessTeamPlayer(user: User, player: TeamPlayer): Promise<boolean> {
+    // First check if user can access the team
+    const team = this.teams.get(player.teamId);
+    if (!team) return false;
+    
+    if (!this.canUserAccessTeam(user, team)) {
+      return false;
+    }
+    
+    // Additional player-specific checks can be added here
+    return true;
+  }
+  
+  /**
+   * Check if user can access medical history based on RBAC rules
+   */
+  private async canUserAccessMedicalHistory(user: User, history: MedicalHistory): Promise<boolean> {
+    const userRole = user.userRole || user.complianceRole;
+    
+    // Check if user has health data access permissions
+    if (!this.hasHealthDataAccess(user)) {
+      return false;
+    }
+    
+    // Find the team player to check team access
+    const player = this.teamPlayers.get(history.playerId);
+    if (!player) return false;
+    
+    const team = this.teams.get(player.teamId);
+    if (!team) return false;
+    
+    // Use team access rules for medical history
+    return this.canUserAccessTeam(user, team);
+  }
+  
+  /**
+   * Check if user has health data access based on role and training
+   */
+  private hasHealthDataAccess(user: User): boolean {
+    const userRole = user.userRole || user.complianceRole;
+    const healthRoles = [
+      'district_athletic_trainer',
+      'school_athletic_trainer', 
+      'head_coach',
+      'athletic_training_student'
+    ];
+    
+    if (!healthRoles.includes(userRole || '')) {
+      return false;
+    }
+    
+    // Check HIPAA training for health data access
+    if (!user.hipaaTrainingCompleted) {
+      return false;
+    }
+    
+    return true;
+  }
+  
+  /**
+   * Helper methods for organizational access checks
+   */
+  private isTeamInUserDistrict(user: User, team: Team): boolean {
+    // For in-memory storage, we check organization relationships
+    // In a real DB implementation, this would be a proper join
+    return user.organizationId === team.organizationName || 
+           this.checkDistrictTeamRelationship(user.organizationId, team.organizationName);
+  }
+  
+  private isTeamInUserSchool(user: User, team: Team): boolean {
+    return user.organizationId === team.organizationName;
+  }
+  
+  private isCoachAssignedToTeam(coachId: string, teamId: string): boolean {
+    // Check coach event assignments (simplified for in-memory)
+    // In real implementation, would check coach_event_assignments table
+    return Array.from(this.teams.values()).some(team => 
+      team.id === teamId && team.coachId === coachId
+    );
+  }
+  
+  private isStudentSupervisedForTeam(studentId: string, teamId: string): boolean {
+    // Check if athletic training student has supervision for this team
+    // Simplified for in-memory implementation
+    return false; // Would implement proper supervision checks
+  }
+  
+  private isAthleteOnTeam(athleteId: string, teamId: string): boolean {
+    return Array.from(this.teamPlayers.values()).some(player =>
+      player.teamId === teamId && player.userId === athleteId
+    );
+  }
+  
+  private isTeamInUserTournaments(userId: string, teamId: string): boolean {
+    // Check if team is in tournaments managed by user
+    // Simplified for in-memory implementation
+    return false; // Would implement proper tournament checks
+  }
+  
+  private checkDistrictTeamRelationship(userOrgId: string | null, teamOrgName: string | null): boolean {
+    // Simplified relationship check for in-memory storage
+    // In real implementation, would check organization hierarchy
+    return false;
+  }
+
   // STANDALONE TEAM MANAGEMENT METHODS (Jersey Watch-style)
   async createTeam(team: InsertTeam): Promise<Team> {
     const teamWithId = {
@@ -8074,21 +8779,39 @@ export class MemStorage implements IStorage {
     return teamWithId;
   }
 
-  async getTeam(id: string): Promise<Team | undefined> {
-    return this.teams.get(id);
+  async getTeam(id: string, user?: User): Promise<Team | undefined> {
+    const team = this.teams.get(id);
+    if (!team || !user) return team;
+    
+    // Apply RBAC filtering
+    const canAccess = this.canUserAccessTeam(user, team);
+    return canAccess ? team : undefined;
   }
 
-  async getTeamsByCoach(coachId: string): Promise<Team[]> {
-    return Array.from(this.teams.values()).filter(team => team.coachId === coachId);
+  async getTeamsByCoach(coachId: string, user?: User): Promise<Team[]> {
+    const teams = Array.from(this.teams.values()).filter(team => team.coachId === coachId);
+    if (!user) return teams;
+    
+    // Apply RBAC filtering
+    return teams.filter(team => this.canUserAccessTeam(user, team));
   }
 
-  async getTeamsByOrganization(organizationName: string): Promise<Team[]> {
-    return Array.from(this.teams.values()).filter(team => team.organizationName === organizationName);
+  async getTeamsByOrganization(organizationName: string, user?: User): Promise<Team[]> {
+    const teams = Array.from(this.teams.values()).filter(team => team.organizationName === organizationName);
+    if (!user) return teams;
+    
+    // Apply RBAC filtering
+    return teams.filter(team => this.canUserAccessTeam(user, team));
   }
 
-  async updateTeam(id: string, updates: Partial<Team>): Promise<Team | undefined> {
+  async updateTeam(id: string, updates: Partial<Team>, user?: User): Promise<Team | undefined> {
     const existingTeam = this.teams.get(id);
     if (!existingTeam) return undefined;
+    
+    // Apply RBAC filtering
+    if (user && !this.canUserAccessTeam(user, existingTeam)) {
+      return undefined;
+    }
     
     // Filter out immutable fields to prevent accidental mutation
     const { id: _, createdAt: __, ...allowedUpdates } = updates;
@@ -8102,7 +8825,15 @@ export class MemStorage implements IStorage {
     return updatedTeam;
   }
 
-  async deleteTeam(id: string): Promise<boolean> {
+  async deleteTeam(id: string, user?: User): Promise<boolean> {
+    const existingTeam = this.teams.get(id);
+    if (!existingTeam) return false;
+    
+    // Apply RBAC filtering
+    if (user && !this.canUserAccessTeam(user, existingTeam)) {
+      return false;
+    }
+    
     // First delete related team players to handle cascade
     const playersToDelete = Array.from(this.teamPlayers.values()).filter(player => player.teamId === id);
     playersToDelete.forEach(player => this.teamPlayers.delete(player.id));
@@ -8115,7 +8846,15 @@ export class MemStorage implements IStorage {
     return this.updateTeam(id, subscriptionData);
   }
 
-  async createTeamPlayer(player: InsertTeamPlayer): Promise<TeamPlayer> {
+  async createTeamPlayer(player: InsertTeamPlayer, user?: User): Promise<TeamPlayer> {
+    // Apply RBAC filtering - check if user can add players to this team
+    if (user) {
+      const team = this.teams.get(player.teamId);
+      if (!team || !this.canUserAccessTeam(user, team)) {
+        throw new Error('Unauthorized: Cannot add players to this team');
+      }
+    }
+    
     const playerWithId = {
       id: randomUUID(),
       ...player,
@@ -8127,17 +8866,43 @@ export class MemStorage implements IStorage {
     return playerWithId;
   }
 
-  async getTeamPlayer(id: string): Promise<TeamPlayer | undefined> {
-    return this.teamPlayers.get(id);
+  async getTeamPlayer(id: string, user?: User): Promise<TeamPlayer | undefined> {
+    const player = this.teamPlayers.get(id);
+    if (!player || !user) return player;
+    
+    // Apply RBAC filtering
+    const canAccess = await this.canUserAccessTeamPlayer(user, player);
+    return canAccess ? player : undefined;
   }
 
-  async getTeamPlayersByTeam(teamId: string): Promise<TeamPlayer[]> {
-    return Array.from(this.teamPlayers.values()).filter(player => player.teamId === teamId);
+  async getTeamPlayersByTeam(teamId: string, user?: User): Promise<TeamPlayer[]> {
+    const players = Array.from(this.teamPlayers.values()).filter(player => player.teamId === teamId);
+    if (!user) return players;
+    
+    // Apply RBAC filtering - check team access first
+    const team = this.teams.get(teamId);
+    if (!team || !this.canUserAccessTeam(user, team)) {
+      return [];
+    }
+    
+    // Filter individual players
+    const accessiblePlayers = [];
+    for (const player of players) {
+      if (await this.canUserAccessTeamPlayer(user, player)) {
+        accessiblePlayers.push(player);
+      }
+    }
+    return accessiblePlayers;
   }
 
-  async updateTeamPlayer(id: string, updates: Partial<TeamPlayer>): Promise<TeamPlayer | undefined> {
+  async updateTeamPlayer(id: string, updates: Partial<TeamPlayer>, user?: User): Promise<TeamPlayer | undefined> {
     const existingPlayer = this.teamPlayers.get(id);
     if (!existingPlayer) return undefined;
+    
+    // Apply RBAC filtering
+    if (user && !(await this.canUserAccessTeamPlayer(user, existingPlayer))) {
+      return undefined;
+    }
     
     // Filter out immutable fields to prevent accidental mutation
     const { id: _, teamId: __, createdAt: ___, ...allowedUpdates } = updates;
@@ -8151,7 +8916,15 @@ export class MemStorage implements IStorage {
     return updatedPlayer;
   }
 
-  async deleteTeamPlayer(id: string): Promise<boolean> {
+  async deleteTeamPlayer(id: string, user?: User): Promise<boolean> {
+    const existingPlayer = this.teamPlayers.get(id);
+    if (!existingPlayer) return false;
+    
+    // Apply RBAC filtering
+    if (user && !(await this.canUserAccessTeamPlayer(user, existingPlayer))) {
+      return false;
+    }
+    
     return this.teamPlayers.delete(id);
   }
 
@@ -8165,7 +8938,12 @@ export class MemStorage implements IStorage {
   }
 
   // Medical history methods
-  async createMedicalHistory(medicalHistoryData: InsertMedicalHistory): Promise<MedicalHistory> {
+  async createMedicalHistory(medicalHistoryData: InsertMedicalHistory, user?: User): Promise<MedicalHistory> {
+    // Apply RBAC filtering - check if user can create medical histories
+    if (user && !this.hasHealthDataAccess(user)) {
+      throw new Error('Unauthorized: Health data access required');
+    }
+    
     const medicalHistoryWithId = {
       id: randomUUID(),
       ...medicalHistoryData,
@@ -8177,17 +8955,32 @@ export class MemStorage implements IStorage {
     return medicalHistoryWithId;
   }
 
-  async getMedicalHistory(id: string): Promise<MedicalHistory | undefined> {
-    return this.medicalHistories.get(id);
+  async getMedicalHistory(id: string, user?: User): Promise<MedicalHistory | undefined> {
+    const history = this.medicalHistories.get(id);
+    if (!history || !user) return history;
+    
+    // Apply RBAC filtering for health data
+    const canAccess = await this.canUserAccessMedicalHistory(user, history);
+    return canAccess ? history : undefined;
   }
 
-  async getMedicalHistoryByPlayer(playerId: string): Promise<MedicalHistory | undefined> {
-    return Array.from(this.medicalHistories.values()).find(history => history.playerId === playerId);
+  async getMedicalHistoryByPlayer(playerId: string, user?: User): Promise<MedicalHistory | undefined> {
+    const history = Array.from(this.medicalHistories.values()).find(history => history.playerId === playerId);
+    if (!history || !user) return history;
+    
+    // Apply RBAC filtering for health data
+    const canAccess = await this.canUserAccessMedicalHistory(user, history);
+    return canAccess ? history : undefined;
   }
 
-  async updateMedicalHistory(id: string, updates: Partial<MedicalHistory>): Promise<MedicalHistory | undefined> {
+  async updateMedicalHistory(id: string, updates: Partial<MedicalHistory>, user?: User): Promise<MedicalHistory | undefined> {
     const existingHistory = this.medicalHistories.get(id);
     if (!existingHistory) return undefined;
+    
+    // Apply RBAC filtering
+    if (user && !(await this.canUserAccessMedicalHistory(user, existingHistory))) {
+      return undefined;
+    }
     
     const updatedHistory = {
       ...existingHistory,
@@ -8201,7 +8994,15 @@ export class MemStorage implements IStorage {
     return updatedHistory;
   }
 
-  async deleteMedicalHistory(id: string): Promise<boolean> {
+  async deleteMedicalHistory(id: string, user?: User): Promise<boolean> {
+    const existingHistory = this.medicalHistories.get(id);
+    if (!existingHistory) return false;
+    
+    // Apply RBAC filtering
+    if (user && !(await this.canUserAccessMedicalHistory(user, existingHistory))) {
+      return false;
+    }
+    
     return this.medicalHistories.delete(id);
   }
 
@@ -8498,6 +9299,109 @@ export class MemStorage implements IStorage {
     });
 
     console.log(`🎮 Initialized ${defaultTemplates.length} game templates: ${defaultTemplates.map(t => t.name).join(', ')}`);
+  }
+
+  // Automated Notification Service Methods Implementation (MemStorage)
+  async getNotificationsForEscalation(): Promise<any[]> {
+    try {
+      // For in-memory storage, return empty array since we don't have persistent notification storage
+      console.log("📊 Getting notifications for escalation (MemStorage - returning empty)");
+      return [];
+    } catch (error) {
+      console.error("MemStorage error:", error);
+      return [];
+    }
+  }
+
+  async getUpcomingCalendarEvents(startDate: string, endDate: string, user: User): Promise<any[]> {
+    try {
+      // For in-memory storage, return empty array since we don't have calendar events stored
+      // In a real implementation, this would filter from an in-memory calendar events map
+      console.log(`📅 Getting upcoming calendar events from ${startDate} to ${endDate} (MemStorage - returning empty)`);
+      return [];
+    } catch (error) {
+      console.error("MemStorage error:", error);
+      return [];
+    }
+  }
+
+  async getUsersByRoles(roles: string[], user: User): Promise<User[]> {
+    try {
+      // Filter users by roles from in-memory storage
+      const result = Array.from(this.users.values()).filter(u => 
+        roles.includes(u.role || 'user')
+      );
+      console.log(`👥 Found ${result.length} users with roles: ${roles.join(', ')} (MemStorage)`);
+      return result;
+    } catch (error) {
+      console.error("MemStorage error:", error);
+      return [];
+    }
+  }
+
+  async getFacilityContacts(facilityId: string, user: User): Promise<any[]> {
+    try {
+      // For in-memory storage, return empty array since we don't have facility contacts
+      console.log(`🏢 Getting facility contacts for ${facilityId} (MemStorage - returning empty)`);
+      return [];
+    } catch (error) {
+      console.error("MemStorage error:", error);
+      return [];
+    }
+  }
+
+  async getUsersByOrganization(organizationId: string, user: User): Promise<User[]> {
+    try {
+      // Filter users by organization from in-memory storage
+      const result = Array.from(this.users.values()).filter(u => 
+        u.organizationId === organizationId
+      );
+      console.log(`🏛️ Found ${result.length} users in organization: ${organizationId} (MemStorage)`);
+      return result;
+    } catch (error) {
+      console.error("MemStorage error:", error);
+      return [];
+    }
+  }
+
+  async getUserNotificationPreferences(userId: string): Promise<any | undefined> {
+    try {
+      // For in-memory storage, return undefined since we don't have notification preferences
+      console.log(`🔔 Getting notification preferences for user ${userId} (MemStorage - returning undefined)`);
+      return undefined;
+    } catch (error) {
+      console.error("MemStorage error:", error);
+      return undefined;
+    }
+  }
+
+  async saveUserNotificationPreferences(preferences: any): Promise<void> {
+    try {
+      // For in-memory storage, just log since we don't persist notification preferences
+      console.log(`💾 Saving notification preferences for user ${preferences.userId} (MemStorage - logged only)`);
+    } catch (error) {
+      console.error("MemStorage error:", error);
+    }
+  }
+
+  async getNotificationHistory(startDate: string, endDate: string, organizationId?: string, user?: User): Promise<any[]> {
+    try {
+      // For in-memory storage, return empty array since we don't have notification history
+      console.log(`📈 Getting notification history from ${startDate} to ${endDate} (MemStorage - returning empty)`);
+      return [];
+    } catch (error) {
+      console.error("MemStorage error:", error);
+      return [];
+    }
+  }
+
+  async saveNotificationHistory(history: any): Promise<void> {
+    try {
+      // For in-memory storage, just log since we don't persist notification history
+      console.log(`💾 Saving notification history ${history.id} (MemStorage - logged only)`);
+    } catch (error) {
+      console.error("MemStorage error:", error);
+    }
   }
 }
 

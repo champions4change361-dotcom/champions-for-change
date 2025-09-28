@@ -43,6 +43,20 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // CRITICAL SECURITY CHECK: Ensure audit integrity key is set for HIPAA compliance
+  if (!process.env.AUDIT_INTEGRITY_KEY) {
+    if (process.env.NODE_ENV === 'production') {
+      console.error('🚨 CRITICAL: AUDIT_INTEGRITY_KEY environment variable is required for production!');
+      console.error('🚨 This is required for HIPAA compliance and audit log integrity.');
+      console.error('🚨 Application cannot start without this security requirement.');
+      process.exit(1);
+    } else {
+      console.warn('⚠️  DEVELOPMENT: AUDIT_INTEGRITY_KEY not set - using fallback for development only');
+      process.env.AUDIT_INTEGRITY_KEY = 'development-key-not-for-production';
+    }
+  }
+  console.log('✅ Security check passed: AUDIT_INTEGRITY_KEY is configured');
+
   // Set port immediately to ensure fast binding
   const port = parseInt(process.env.PORT || '5000', 10);
   
@@ -62,6 +76,43 @@ app.use((req, res, next) => {
   const espnScoringService = new ESPNScoringService(storage);
   espnScoringService.startRealTimeScoring();
   console.log('✅ ESPN real-time scoring service initialized');
+
+  // 🏆 Initialize Tournament Real-Time WebSocket (after server is available)
+  console.log('🔄 Initializing tournament real-time scoring...');
+  try {
+    const socketio = await import('socket.io');
+    const io = new socketio.Server(server, {
+      cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+      }
+    });
+    
+    // Store io instance globally for tournament services to use
+    (global as any).tournamentIO = io;
+    
+    io.on('connection', (socket) => {
+      console.log('🔗 Tournament client connected:', socket.id);
+      
+      socket.on('join-tournament', (tournamentId: string) => {
+        socket.join(`tournament-${tournamentId}`);
+        console.log(`📡 Client joined tournament ${tournamentId}`);
+      });
+      
+      socket.on('leave-tournament', (tournamentId: string) => {
+        socket.leave(`tournament-${tournamentId}`);
+        console.log(`📡 Client left tournament ${tournamentId}`);
+      });
+      
+      socket.on('disconnect', () => {
+        console.log('🔌 Tournament client disconnected:', socket.id);
+      });
+    });
+    
+    console.log('✅ Tournament real-time scoring WebSocket initialized on main server');
+  } catch (error) {
+    console.error('❌ Failed to initialize tournament WebSocket:', error);
+  }
 
   // Initialize Pro Football Reference Integration (replaces all NFL scrapers)
   const { pfrIntegration } = await import('./pro-football-reference-integration.js');

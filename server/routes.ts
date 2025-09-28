@@ -4,6 +4,9 @@ import { exec } from "child_process";
 import crypto from "crypto";
 import bcrypt from "bcrypt";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { loadUserContext, requireHealthDataAccess, requireBudgetDataAccess, requireAcademicDataAccess, requirePermissions, requireOrganizationAccess } from "./rbac-middleware";
+import { RBACDataFilters } from "./rbac-data-filters";
+import { PERMISSIONS } from "./rbac-permissions";
 import { nightlySportsIntelligence } from './nightly-sports-intelligence';
 import { getStorage, storage } from "./storage";
 import { emailService } from "./emailService";
@@ -14,10 +17,14 @@ import { stripe } from "./nonprofitStripeConfig";
 import { registerDomainRoutes } from "./domainRoutes";
 import { registerTournamentRoutes } from "./routes/tournamentRoutes";
 import { registerMigrationRoutes } from "./routes/migrationRoutes";
+import { registerAcademicRoutes } from "./academic-routes";
 import subscriptionRoutes from "./routes/subscriptionRoutes";
 import stripeWebhooks from "./routes/stripeWebhooks";
 import { tournamentSubscriptions, insertTournamentSubscriptionSchema, type InsertTournamentSubscription, insertRegistrationSubmissionSchema, insertTeamSchema, insertTeamPlayerSchema, insertMedicalHistorySchema, type InsertTeam, type InsertTeamPlayer, type InsertMedicalHistory, type Team, type TeamPlayer, type MedicalHistory, updateTeamSubscriptionSchema, type User } from "@shared/schema";
 import { GameLockoutService } from "./game-lockout-service.js";
+import { registerAthleticTrainerRoutes } from "./athletic-trainer-routes";
+import districtRoutes from "./district-routes";
+import schedulingRoutes from "./scheduling-routes";
 
 // Type extensions to fix compilation issues
 declare module 'express-session' {
@@ -302,7 +309,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // These are separate from tournament-specific team registrations
   
   // Team signup endpoint (no authentication required)
-  app.post('/api/teams/signup', async (req, res) => {
+  app.post('/api/teams/signup', loadUserContext, requirePermissions([PERMISSIONS.TEAM_DATA_WRITE]), async (req, res) => {
     try {
       // Validate request body with Zod schema (but allow missing coachId for signup)
       const signupSchema = insertTeamSchema.omit({ coachId: true });
@@ -350,7 +357,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // SECURE: Link authenticated user to a team using token verification (IDOR protection)
-  app.post('/api/teams/:teamId/link', isAuthenticated, async (req, res) => {
+  app.post('/api/teams/:teamId/link', loadUserContext, requirePermissions([PERMISSIONS.TEAM_DATA_WRITE]), async (req, res) => {
     try {
       const { teamId } = req.params;
       const { linkToken } = req.body;
@@ -450,7 +457,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get teams for current user (coach)
-  app.get('/api/teams', isAuthenticated, async (req, res) => {
+  app.get('/api/teams', loadUserContext, requirePermissions([PERMISSIONS.TEAM_DATA_READ]), async (req, res) => {
     try {
       // Support both OAuth and session authentication
       const userId = req.user?.claims?.sub || req.session?.user?.id || req.user?.id;
@@ -474,7 +481,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create new team
-  app.post('/api/teams', isAuthenticated, async (req, res) => {
+  app.post('/api/teams', loadUserContext, requirePermissions([PERMISSIONS.TEAM_DATA_WRITE]), async (req, res) => {
     try {
       // Support both OAuth and session authentication
       const userId = req.user?.claims?.sub || req.session?.user?.id || req.user?.id;
@@ -505,7 +512,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get specific team
-  app.get('/api/teams/:id', isAuthenticated, async (req, res) => {
+  app.get('/api/teams/:id', loadUserContext, requirePermissions([PERMISSIONS.TEAM_DATA_READ]), async (req, res) => {
     try {
       const { id } = req.params;
       // Support both OAuth and session authentication
@@ -536,7 +543,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
   // Update team
-  app.patch('/api/teams/:id', isAuthenticated, async (req, res) => {
+  app.patch('/api/teams/:id', loadUserContext, requirePermissions([PERMISSIONS.TEAM_DATA_WRITE]), async (req, res) => {
     try {
       const { id } = req.params;
       // Support both OAuth and session authentication
@@ -582,7 +589,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get team players/roster
-  app.get('/api/teams/:id/players', isAuthenticated, async (req, res) => {
+  app.get('/api/teams/:id/players', loadUserContext, requirePermissions([PERMISSIONS.ATHLETE_DATA_READ]), async (req, res) => {
     try {
       const { id } = req.params;
       // Support both OAuth and session authentication
@@ -618,7 +625,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Generate presigned URL for document uploads
-  app.post('/api/upload/presigned-url', isAuthenticated, async (req, res) => {
+  app.post('/api/upload/presigned-url', loadUserContext, async (req, res) => {
     try {
       const { fileType } = req.body;
       const userId = req.user?.claims?.sub || req.user?.id;
@@ -645,7 +652,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Add player to team
-  app.post('/api/teams/:id/players', isAuthenticated, async (req, res) => {
+  app.post('/api/teams/:id/players', loadUserContext, requirePermissions([PERMISSIONS.ATHLETE_DATA_WRITE]), async (req, res) => {
     try {
       const { id } = req.params;
       // Support both OAuth and session authentication
@@ -695,7 +702,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update player in team
-  app.put('/api/teams/:teamId/players/:playerId', isAuthenticated, async (req, res) => {
+  app.put('/api/teams/:teamId/players/:playerId', loadUserContext, requirePermissions([PERMISSIONS.ATHLETE_DATA_WRITE]), async (req, res) => {
     try {
       const { teamId, playerId } = req.params;
       const userId = req.user?.claims?.sub || req.user?.id;
@@ -749,7 +756,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Medical history endpoints for player registration
   
   // Get medical history for a player
-  app.get('/api/players/:playerId/medical-history', isAuthenticated, async (req, res) => {
+  app.get('/api/players/:playerId/medical-history', loadUserContext, requireHealthDataAccess, async (req, res) => {
     try {
       const { playerId } = req.params;
       const userId = req.user?.claims?.sub || req.user?.id;
@@ -797,7 +804,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create medical history for a player
-  app.post('/api/players/:playerId/medical-history', isAuthenticated, async (req, res) => {
+  app.post('/api/players/:playerId/medical-history', loadUserContext, requireHealthDataAccess, async (req, res) => {
     try {
       const { playerId } = req.params;
       const userId = req.user?.claims?.sub || req.user?.id;
@@ -860,7 +867,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update medical history for a player
-  app.put('/api/players/:playerId/medical-history', isAuthenticated, async (req, res) => {
+  app.put('/api/players/:playerId/medical-history', loadUserContext, requireHealthDataAccess, async (req, res) => {
     try {
       const { playerId } = req.params;
       const userId = req.user?.claims?.sub || req.user?.id;
@@ -925,7 +932,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete medical history for a player
-  app.delete('/api/players/:playerId/medical-history', isAuthenticated, async (req, res) => {
+  app.delete('/api/players/:playerId/medical-history', loadUserContext, requireHealthDataAccess, async (req, res) => {
     try {
       const { playerId } = req.params;
       const userId = req.user?.claims?.sub || req.user?.id;
@@ -981,7 +988,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Coach Dashboard API Endpoints
   
   // Get teams managed by coach
-  app.get('/api/coach/teams', isAuthenticated, async (req, res) => {
+  app.get('/api/coach/teams', loadUserContext, requirePermissions([PERMISSIONS.TEAM_DATA_READ]), async (req, res) => {
     try {
       const userId = req.user?.claims?.sub || req.user?.id;
       
@@ -1007,7 +1014,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get player health status summaries for coach
-  app.get('/api/coach/player-health-status', isAuthenticated, async (req, res) => {
+  app.get('/api/coach/player-health-status', loadUserContext, requireHealthDataAccess, async (req, res) => {
     try {
       const userId = req.user?.claims?.sub || req.user?.id;
       
@@ -1099,7 +1106,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get health alerts for coach's players
-  app.get('/api/coach/health-alerts', isAuthenticated, async (req, res) => {
+  app.get('/api/coach/health-alerts', loadUserContext, requireHealthDataAccess, async (req, res) => {
     try {
       const userId = req.user?.claims?.sub || req.user?.id;
       
@@ -1206,7 +1213,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get trainer communications for coach - HIPAA-compliant stub with RBAC
-  app.get('/api/coach/trainer-communications', isAuthenticated, async (req, res) => {
+  app.get('/api/coach/trainer-communications', loadUserContext, requireHealthDataAccess, async (req, res) => {
     try {
       const userId = req.user?.claims?.sub || req.user?.id;
       
@@ -1245,7 +1252,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Update team subscription
   // DELETE team endpoint
-  app.delete('/api/teams/:id', isAuthenticated, async (req, res) => {
+  app.delete('/api/teams/:id', loadUserContext, requirePermissions([PERMISSIONS.TEAM_DATA_DELETE]), async (req, res) => {
     try {
       const { id } = req.params;
       const userId = req.user?.claims?.sub || req.session?.user?.id || req.user?.id;
@@ -1281,7 +1288,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch('/api/teams/:id/subscription', isAuthenticated, async (req, res) => {
+  app.patch('/api/teams/:id/subscription', loadUserContext, requirePermissions([PERMISSIONS.TEAM_DATA_WRITE]), async (req, res) => {
     try {
       const { id } = req.params;
       const userId = req.user?.id;
@@ -1563,7 +1570,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Tournament Coordination Intelligence API endpoints
   
   // Get coordination data for a specific tournament
-  app.get('/api/tournaments/:id/coordination', async (req, res) => {
+  app.get('/api/tournaments/:id/coordination', loadUserContext, requirePermissions([PERMISSIONS.TOURNAMENT_VIEW]), async (req, res) => {
     try {
       const { id } = req.params;
       
@@ -1611,7 +1618,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get regional tournament analysis
-  app.get('/api/coordination/regional-analysis', async (req, res) => {
+  app.get('/api/coordination/regional-analysis', loadUserContext, requirePermissions([PERMISSIONS.ANALYTICS_DATA_READ]), async (req, res) => {
     try {
       const { region, sport, date } = req.query;
       
@@ -1654,7 +1661,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Tournament collaboration matching
-  app.post('/api/coordination/find-collaborators', async (req, res) => {
+  app.post('/api/coordination/find-collaborators', loadUserContext, requirePermissions([PERMISSIONS.COLLABORATION_DATA_READ]), async (req, res) => {
     try {
       const { tournamentId, collaborationType, radius = 50 } = req.body;
       
@@ -1697,7 +1704,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Tournament creation endpoint
-  app.post('/api/tournaments', async (req, res) => {
+  app.post('/api/tournaments', loadUserContext, requirePermissions([PERMISSIONS.TOURNAMENT_CREATE]), async (req, res) => {
     try {
       const storage = await getStorage();
       const { createTournamentSchema } = await import('@shared/schema');
@@ -1872,7 +1879,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Smart Signup API endpoint for streamlined registration
-  app.post('/api/registration/smart-signup', async (req, res) => {
+  app.post('/api/registration/smart-signup', loadUserContext, requirePermissions([PERMISSIONS.TEAM_REGISTRATION_WRITE]), async (req, res) => {
     console.log('📝 Smart signup request received:', {
       body: req.body,
       headers: req.headers['content-type']
@@ -2059,7 +2066,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Submit a registration to a form (smart assignment processing)
-  app.post('/api/registration-forms/:formId/submit', async (req, res) => {
+  app.post('/api/registration-forms/:formId/submit', loadUserContext, requirePermissions([PERMISSIONS.TEAM_REGISTRATION_WRITE]), async (req, res) => {
     try {
       const { SmartAssignmentService } = await import('./services/smartAssignment');
       const storage = await getStorage();
@@ -7955,9 +7962,9 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
     }
   });
 
-  // AI conversation routes - DISABLED for production
+  // AI conversation routes - SECURED with RBAC
   // TODO: Re-enable when AI system is ready for release
-  app.post('/api/ai-conversation', (req, res) => {
+  app.post('/api/ai-conversation', loadUserContext, requirePermissions([PERMISSIONS.ANALYTICS_DATA_READ]), (req, res) => {
     res.json({
       response: 'AI assistant is currently under development. Please use the regular tournament creation tools.',
       tournament_created: false,
@@ -7965,7 +7972,7 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
     });
   });
   
-  app.post('/api/keystone-consult', (req, res) => {
+  app.post('/api/keystone-consult', loadUserContext, requirePermissions([PERMISSIONS.ANALYTICS_DATA_READ]), (req, res) => {
     res.json({
       success: false,
       response: 'AI consultation is currently under development. Please use the standard tournament creation process.'
@@ -8115,8 +8122,38 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
   registerDomainRoutes(app);
 
   // Tournament management routes
+  // Initialize Tournament Services
+  console.log('🏆 Initializing tournament services...');
+  
+  // Import and initialize tournament services
+  const { TournamentService } = await import('./tournament-service');
+  const { TournamentRegistrationService } = await import('./tournament-registration-service');
+  const { TournamentDirectorService } = await import('./tournament-director-service');
+  const { TournamentRBACService } = await import('./tournament-rbac-service');
+  const { LiveScoringService } = await import('./live-scoring-service');
+  
+  console.log('✅ Tournament services loaded');
+  
+  // WebSocket initialization will be handled in server/index.ts after server creation
+  console.log('📋 Tournament WebSocket will be initialized after server creation');
+  
   registerTournamentRoutes(app);
   registerMigrationRoutes(app);
+
+  // Academic Competition System routes
+  registerAcademicRoutes(app);
+  console.log('🎓 Academic Competition System API routes registered');
+
+  // Athletic Trainer Dashboard routes
+  registerAthleticTrainerRoutes(app);
+
+  // District Management routes
+  app.use('/api/district', districtRoutes);
+  console.log('🏫 District Management API routes registered');
+
+  // Smart Scheduling System routes
+  app.use('/api/scheduling', schedulingRoutes);
+  console.log('📅 Smart Scheduling System API routes registered');
 
   // Event Assignment Routes - Google Sheets Style Scorekeeper System
   

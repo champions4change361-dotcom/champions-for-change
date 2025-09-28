@@ -2,6 +2,13 @@ import type { Express } from "express";
 import { storage } from "../storage";
 import { insertTournamentSchema, tournamentConfigSchema, type TournamentConfig } from "@shared/schema";
 import { BracketGenerator } from "../utils/bracket-generator";
+import { TournamentService } from "../tournament-service";
+import { TournamentRegistrationService } from "../tournament-registration-service";
+import { LiveScoringService } from "../live-scoring-service";
+import { TournamentDirectorService } from "../tournament-director-service";
+import { TournamentRBACService } from "../tournament-rbac-service";
+import { loadUserContext, requirePermissions } from "../rbac-middleware";
+import { PERMISSIONS } from "../rbac-permissions";
 import { z } from "zod";
 import type {
   FFAParticipant,
@@ -54,6 +61,138 @@ function mapEngineToTournamentType(engine: string): string {
 }
 
 export function registerTournamentRoutes(app: Express) {
+
+  // === LIVE SCORING ENDPOINTS ===
+  
+  // Start live scoring for a match
+  app.post("/api/tournaments/:tournamentId/matches/:matchId/live-scoring/start", 
+    TournamentRBACService.createTournamentAccessMiddleware('canScoreMatches'),
+    async (req: any, res) => {
+    try {
+      const { tournamentId, matchId } = req.params;
+      const user = req.secureUser;
+      
+      const liveScore = await LiveScoringService.startLiveScoring(matchId, user.id, user);
+      
+      // Broadcast to tournament room
+      const io = (global as any).tournamentIO;
+      if (io) {
+        io.to(`tournament-${tournamentId}`).emit('match-started', { matchId, liveScore });
+      }
+      
+      res.json(liveScore);
+    } catch (error) {
+      console.error("Error starting live scoring:", error);
+      res.status(500).json({ message: "Failed to start live scoring", error: (error as Error).message });
+    }
+  });
+  
+  // Update match score in real-time
+  app.post("/api/tournaments/:tournamentId/matches/:matchId/score-update", 
+    TournamentRBACService.createTournamentAccessMiddleware('canScoreMatches'),
+    async (req: any, res) => {
+    try {
+      const { tournamentId, matchId } = req.params;
+      const user = req.secureUser;
+      const scoreUpdate = req.body;
+      
+      // Validate score update
+      if (!scoreUpdate.team1Score && !scoreUpdate.team2Score) {
+        return res.status(400).json({ message: "Score update required" });
+      }
+      
+      const updatedMatch = await storage.updateMatch(matchId, {
+        team1Score: scoreUpdate.team1Score,
+        team2Score: scoreUpdate.team2Score,
+        status: scoreUpdate.status || 'in-progress'
+      }, user);
+      
+      // Broadcast real-time update
+      const io = (global as any).tournamentIO;
+      if (io) {
+        io.to(`tournament-${tournamentId}`).emit('score-update', { 
+          matchId, 
+          tournamentId, 
+          scoreUpdate: updatedMatch 
+        });
+      }
+      
+      res.json(updatedMatch);
+    } catch (error) {
+      console.error("Error updating match score:", error);
+      res.status(500).json({ message: "Failed to update score", error: (error as Error).message });
+    }
+  });
+  
+  // === REGISTRATION ENDPOINTS ===
+  
+  // Create tournament registration form
+  app.post("/api/tournaments/:id/registration-form", 
+    TournamentRBACService.createTournamentAccessMiddleware('canManageRegistrations'),
+    async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const user = req.secureUser;
+      const formData = req.body;
+      
+      const registrationForm = await TournamentRegistrationService.createRegistrationForm(
+        id, 
+        formData, 
+        user
+      );
+      
+      res.json(registrationForm);
+    } catch (error) {
+      console.error("Error creating registration form:", error);
+      res.status(500).json({ message: "Failed to create registration form", error: (error as Error).message });
+    }
+  });
+  
+  // Submit team registration
+  app.post("/api/tournament-registration/:formId/submit", async (req: any, res) => {
+    try {
+      const { formId } = req.params;
+      const registrationData = req.body;
+      
+      // Extract user context if available (registration can be public)
+      let user;
+      try {
+        user = TournamentRBACService.createSecureUserContext(req);
+      } catch (error) {
+        // Allow guest registrations
+        user = undefined;
+      }
+      
+      const result = await TournamentRegistrationService.submitTeamRegistration(
+        formId,
+        registrationData,
+        user
+      );
+      
+      res.json(result);
+    } catch (error) {
+      console.error("Error submitting registration:", error);
+      res.status(500).json({ message: "Failed to submit registration", error: (error as Error).message });
+    }
+  });
+  
+  // Get tournament matches (with user filtering)
+  app.get("/api/tournaments/:id/matches", 
+    TournamentRBACService.createTournamentAccessMiddleware('canViewTournament'),
+    async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const user = req.secureUser;
+      
+      const matches = await storage.getMatchesByTournament(id);
+      const filteredMatches = await TournamentRBACService.filterMatchesForUser(user, matches, id);
+      
+      res.json(filteredMatches);
+    } catch (error) {
+      console.error("Error fetching tournament matches:", error);
+      res.status(500).json({ message: "Failed to fetch matches", error: (error as Error).message });
+    }
+  });
   // Sport Events API Routes
   app.get("/api/sports/:sportId/events", async (req, res) => {
     try {
@@ -77,31 +216,16 @@ export function registerTournamentRoutes(app: Express) {
   });
   
   // Get all tournaments for the current user
-  app.get("/api/tournaments", async (req: any, res) => {
+  app.get("/api/tournaments", 
+    TournamentRBACService.createTournamentAccessMiddleware('canViewTournament'),
+    async (req: any, res) => {
     try {
-      // Hybrid authentication: OAuth or session-based
-      let isAuthenticated = false;
-      let userId = null;
+      // Use secure user context from RBAC middleware
+      const user = req.secureUser;
 
-      // Check OAuth authentication first
-      if (req.isAuthenticated && req.isAuthenticated()) {
-        isAuthenticated = true;
-        userId = req.user?.claims?.sub;
-        console.log('Using OAuth authentication');
-      }
-      // Fallback to session-based authentication
-      else if (req.session?.user) {
-        isAuthenticated = true;
-        userId = req.session.user.id;
-        console.log('Using session-based authentication');
-      }
-
-      if (!isAuthenticated) {
-        return res.status(401).json({ message: "Authentication required" });
-      }
-
-      const tournaments = await storage.getTournaments();
-      res.json(tournaments);
+      // Get filtered tournaments based on user permissions
+      const accessibleTournaments = await TournamentRBACService.getUserAccessibleTournaments(user);
+      res.json(accessibleTournaments);
     } catch (error) {
       console.error("Error fetching tournaments:", error);
       res.status(500).json({ message: "Failed to fetch tournaments" });
@@ -172,16 +296,15 @@ export function registerTournamentRoutes(app: Express) {
   });
 
   // Submit tournament for calendar approval
-  app.patch("/api/tournaments/:id/calendar-submit", async (req: any, res) => {
+  app.patch("/api/tournaments/:id/calendar-submit", 
+    TournamentRBACService.createTournamentAccessMiddleware('canEditTournament'),
+    async (req: any, res) => {
     try {
-      // Check authentication
-      if (!req.isAuthenticated || !req.isAuthenticated()) {
-        return res.status(401).json({ message: "Authentication required" });
-      }
-
       const { id } = req.params;
+      const user = req.secureUser;
       const { calendarRegion, calendarCity, calendarStateCode, calendarTags } = req.body;
-      const tournament = await storage.getTournament(id);
+      
+      const tournament = await storage.getTournament(id, user);
       
       if (!tournament) {
         return res.status(404).json({ message: "Tournament not found" });
@@ -196,7 +319,7 @@ export function registerTournamentRoutes(app: Express) {
         calendarCity,
         calendarStateCode,
         calendarTags: calendarTags || []
-      });
+      }, user);
 
       res.json({ message: "Tournament submitted for calendar approval" });
     } catch (error) {
@@ -327,10 +450,14 @@ export function registerTournamentRoutes(app: Express) {
   });
 
   // Get a specific tournament by ID
-  app.get("/api/tournaments/:id", async (req, res) => {
+  app.get("/api/tournaments/:id", 
+    TournamentRBACService.createTournamentAccessMiddleware('canViewTournament'),
+    async (req: any, res) => {
     try {
       const { id } = req.params;
-      const tournament = await storage.getTournament(id);
+      const user = req.secureUser;
+      
+      const tournament = await storage.getTournament(id, user);
       
       if (!tournament) {
         return res.status(404).json({ message: "Tournament not found" });
@@ -447,25 +574,13 @@ export function registerTournamentRoutes(app: Express) {
   };
 
   // Create a new tournament
-  app.post("/api/tournaments", async (req: any, res) => {
+  app.post("/api/tournaments", 
+    TournamentRBACService.createTournamentAccessMiddleware('canCreateTournament'),
+    async (req: any, res) => {
     try {
-      // TEMPORARY: Skip authentication for testing
-      // TODO: Re-enable authentication when ready for production
-      let userId = req.user?.claims?.sub;
-      let user = null;
-      
-      if (req.isAuthenticated && req.isAuthenticated()) {
-        user = await storage.getUser(userId);
-      } else {
-        // For testing without authentication, create a temporary user context
-        userId = 'test-user-id';
-        user = {
-          id: 'test-user-id',
-          subscriptionPlan: 'enterprise',
-          subscriptionStatus: 'active'
-        };
-        console.log('⚠️ Creating tournament without authentication - testing mode');
-      }
+      // Use secure user context from RBAC middleware
+      const user = req.secureUser;
+      const userId = user.id;
 
       // Check tournament creation limits based on subscription
       const existingTournaments = await storage.getTournaments();
@@ -1517,4 +1632,348 @@ export function registerTournamentRoutes(app: Express) {
       });
     }
   });
+
+  // ==========================================
+  // COMPREHENSIVE TOURNAMENT MANAGEMENT API
+  // Integrates all tournament services built
+  // ==========================================
+
+  // Tournament Service Endpoints
+
+  // Create comprehensive tournament with advanced configuration
+  app.post("/api/tournaments/comprehensive", async (req: any, res) => {
+    try {
+      const user = { id: req.user?.claims?.sub || req.session?.user?.id || 'test-user', userRole: 'tournament_manager' };
+      const tournament = await TournamentService.createTournament(req.body, user);
+      res.status(201).json(tournament);
+    } catch (error) {
+      console.error("Tournament creation failed:", error);
+      res.status(500).json({ message: "Failed to create tournament", error: (error as Error).message });
+    }
+  });
+
+  // Get comprehensive tournament statistics
+  app.get("/api/tournaments/:id/statistics", async (req: any, res) => {
+    try {
+      const user = { id: req.user?.claims?.sub || req.session?.user?.id || 'test-user', userRole: 'tournament_manager' };
+      const statistics = await TournamentService.getTournamentStatistics(req.params.id, user);
+      res.json(statistics);
+    } catch (error) {
+      console.error("Failed to get tournament statistics:", error);
+      res.status(500).json({ message: "Failed to get statistics", error: (error as Error).message });
+    }
+  });
+
+  // Clone tournament structure
+  app.post("/api/tournaments/:id/clone", async (req: any, res) => {
+    try {
+      const user = { id: req.user?.claims?.sub || req.session?.user?.id || 'test-user', userRole: 'tournament_manager' };
+      const { newName } = req.body;
+      const clonedTournament = await TournamentService.cloneTournament(req.params.id, newName, user);
+      res.status(201).json(clonedTournament);
+    } catch (error) {
+      console.error("Tournament cloning failed:", error);
+      res.status(500).json({ message: "Failed to clone tournament", error: (error as Error).message });
+    }
+  });
+
+  // Generate Swiss system pairings
+  app.post("/api/tournaments/:id/swiss-pairings", async (req: any, res) => {
+    try {
+      const user = { id: req.user?.claims?.sub || req.session?.user?.id || 'test-user', userRole: 'tournament_manager' };
+      const { roundNumber, options } = req.body;
+      const pairings = await TournamentService.generateSwissPairings(req.params.id, roundNumber, options, user);
+      res.json(pairings);
+    } catch (error) {
+      console.error("Swiss pairings generation failed:", error);
+      res.status(500).json({ message: "Failed to generate pairings", error: (error as Error).message });
+    }
+  });
+
+  // Calculate pool advancement
+  app.post("/api/tournaments/:id/pool-advancement", async (req: any, res) => {
+    try {
+      const user = { id: req.user?.claims?.sub || req.session?.user?.id || 'test-user', userRole: 'tournament_manager' };
+      const advancement = await TournamentService.calculatePoolAdvancement(req.params.id, req.body.rules, user);
+      res.json(advancement);
+    } catch (error) {
+      console.error("Pool advancement calculation failed:", error);
+      res.status(500).json({ message: "Failed to calculate advancement", error: (error as Error).message });
+    }
+  });
+
+  // Registration Service Endpoints
+
+  // Create registration form
+  app.post("/api/tournaments/:id/registration-forms", async (req: any, res) => {
+    try {
+      const user = { id: req.user?.claims?.sub || req.session?.user?.id || 'test-user', userRole: 'tournament_manager' };
+      const form = await TournamentRegistrationService.createRegistrationForm(req.params.id, req.body, user);
+      res.status(201).json(form);
+    } catch (error) {
+      console.error("Registration form creation failed:", error);
+      res.status(500).json({ message: "Failed to create registration form", error: (error as Error).message });
+    }
+  });
+
+  // Submit team registration
+  app.post("/api/registration-forms/:formId/submit", async (req: any, res) => {
+    try {
+      const user = req.user?.claims?.sub || req.session?.user?.id ? 
+        { id: req.user?.claims?.sub || req.session?.user?.id, userRole: 'team_member' } : undefined;
+      const submission = await TournamentRegistrationService.submitTeamRegistration(req.params.formId, req.body, user);
+      res.status(201).json(submission);
+    } catch (error) {
+      console.error("Team registration submission failed:", error);
+      res.status(500).json({ message: "Failed to submit registration", error: (error as Error).message });
+    }
+  });
+
+  // Process registration payment
+  app.post("/api/registration-submissions/:id/payment", async (req: any, res) => {
+    try {
+      const user = req.user?.claims?.sub || req.session?.user?.id ? 
+        { id: req.user?.claims?.sub || req.session?.user?.id, userRole: 'team_member' } : undefined;
+      const payment = await TournamentRegistrationService.processRegistrationPayment(req.params.id, req.body, user);
+      res.json(payment);
+    } catch (error) {
+      console.error("Payment processing failed:", error);
+      res.status(500).json({ message: "Failed to process payment", error: (error as Error).message });
+    }
+  });
+
+  // Update registration approval
+  app.patch("/api/registration-submissions/:id/approval", async (req: any, res) => {
+    try {
+      const user = { id: req.user?.claims?.sub || req.session?.user?.id || 'test-user', userRole: 'tournament_manager' };
+      const submission = await TournamentRegistrationService.updateRegistrationApproval(req.params.id, req.body, user);
+      res.json(submission);
+    } catch (error) {
+      console.error("Registration approval update failed:", error);
+      res.status(500).json({ message: "Failed to update approval", error: (error as Error).message });
+    }
+  });
+
+  // Update team roster
+  app.patch("/api/registration-submissions/:id/roster", async (req: any, res) => {
+    try {
+      const user = { id: req.user?.claims?.sub || req.session?.user?.id || 'test-user', userRole: 'team_member' };
+      const result = await TournamentRegistrationService.updateTeamRoster(req.params.id, req.body.roster, user);
+      res.json(result);
+    } catch (error) {
+      console.error("Roster update failed:", error);
+      res.status(500).json({ message: "Failed to update roster", error: (error as Error).message });
+    }
+  });
+
+  // Get registration statistics
+  app.get("/api/tournaments/:id/registration-stats", async (req: any, res) => {
+    try {
+      const user = { id: req.user?.claims?.sub || req.session?.user?.id || 'test-user', userRole: 'tournament_manager' };
+      const stats = await TournamentRegistrationService.getRegistrationStatistics(req.params.id, user);
+      res.json(stats);
+    } catch (error) {
+      console.error("Registration statistics failed:", error);
+      res.status(500).json({ message: "Failed to get statistics", error: (error as Error).message });
+    }
+  });
+
+  // Live Scoring Service Endpoints
+
+  // Start live scoring for a match
+  app.post("/api/matches/:id/start-scoring", async (req: any, res) => {
+    try {
+      const user = { id: req.user?.claims?.sub || req.session?.user?.id || 'test-user', userRole: 'scorekeeper' };
+      const { scorerId } = req.body;
+      const liveScore = await LiveScoringService.startLiveScoring(req.params.id, scorerId || user.id, user);
+      res.status(201).json(liveScore);
+    } catch (error) {
+      console.error("Live scoring start failed:", error);
+      res.status(500).json({ message: "Failed to start live scoring", error: (error as Error).message });
+    }
+  });
+
+  // Update live score
+  app.patch("/api/matches/:id/live-score", async (req: any, res) => {
+    try {
+      const user = { id: req.user?.claims?.sub || req.session?.user?.id || 'test-user', userRole: 'scorekeeper' };
+      const { scorerId, ...scoreUpdate } = req.body;
+      const result = await LiveScoringService.updateLiveScore(req.params.id, scoreUpdate, scorerId || user.id, user);
+      res.json(result);
+    } catch (error) {
+      console.error("Live score update failed:", error);
+      res.status(500).json({ message: "Failed to update score", error: (error as Error).message });
+    }
+  });
+
+  // Complete match with final result
+  app.post("/api/matches/:id/complete", async (req: any, res) => {
+    try {
+      const user = { id: req.user?.claims?.sub || req.session?.user?.id || 'test-user', userRole: 'scorekeeper' };
+      const { scorerId, ...finalResult } = req.body;
+      const result = await LiveScoringService.completeMatch(req.params.id, finalResult, scorerId || user.id, user);
+      res.json(result);
+    } catch (error) {
+      console.error("Match completion failed:", error);
+      res.status(500).json({ message: "Failed to complete match", error: (error as Error).message });
+    }
+  });
+
+  // Report scoring conflict
+  app.post("/api/matches/:id/conflict", async (req: any, res) => {
+    try {
+      const user = { id: req.user?.claims?.sub || req.session?.user?.id || 'test-user', userRole: 'scorekeeper' };
+      const { reporterId, ...conflict } = req.body;
+      const conflictReport = await LiveScoringService.reportScoringConflict({
+        ...conflict,
+        matchId: req.params.id
+      }, reporterId || user.id, user);
+      res.status(201).json(conflictReport);
+    } catch (error) {
+      console.error("Conflict reporting failed:", error);
+      res.status(500).json({ message: "Failed to report conflict", error: (error as Error).message });
+    }
+  });
+
+  // Get live tournament data
+  app.get("/api/tournaments/:id/live", async (req: any, res) => {
+    try {
+      const user = { id: req.user?.claims?.sub || req.session?.user?.id || 'test-user', userRole: 'tournament_manager' };
+      const liveData = await LiveScoringService.getLiveTournamentData(req.params.id, user);
+      res.json(liveData);
+    } catch (error) {
+      console.error("Live tournament data failed:", error);
+      res.status(500).json({ message: "Failed to get live data", error: (error as Error).message });
+    }
+  });
+
+  // Get scoring analytics
+  app.get("/api/tournaments/:id/scoring-analytics", async (req: any, res) => {
+    try {
+      const user = { id: req.user?.claims?.sub || req.session?.user?.id || 'test-user', userRole: 'tournament_manager' };
+      const options = {
+        includePlayerStats: req.query.includePlayerStats === 'true',
+        includeTeamStats: req.query.includeTeamStats === 'true',
+        includeMatchTrends: req.query.includeMatchTrends === 'true'
+      };
+      const analytics = await LiveScoringService.getScoringAnalytics(req.params.id, options, user);
+      res.json(analytics);
+    } catch (error) {
+      console.error("Scoring analytics failed:", error);
+      res.status(500).json({ message: "Failed to get analytics", error: (error as Error).message });
+    }
+  });
+
+  // Tournament Director Service Endpoints
+
+  // Get tournament director dashboard
+  app.get("/api/tournaments/:id/director-dashboard", async (req: any, res) => {
+    try {
+      const user = { id: req.user?.claims?.sub || req.session?.user?.id || 'test-user', userRole: 'tournament_manager' };
+      const dashboard = await TournamentDirectorService.getTournamentDashboard(req.params.id, user);
+      res.json(dashboard);
+    } catch (error) {
+      console.error("Director dashboard failed:", error);
+      res.status(500).json({ message: "Failed to get dashboard", error: (error as Error).message });
+    }
+  });
+
+  // Send tournament communication
+  app.post("/api/tournaments/:id/communicate", async (req: any, res) => {
+    try {
+      const user = { id: req.user?.claims?.sub || req.session?.user?.id || 'test-user', userRole: 'tournament_manager' };
+      const result = await TournamentDirectorService.sendTournamentCommunication(req.params.id, req.body, user);
+      res.json(result);
+    } catch (error) {
+      console.error("Tournament communication failed:", error);
+      res.status(500).json({ message: "Failed to send communication", error: (error as Error).message });
+    }
+  });
+
+  // Generate tournament report
+  app.post("/api/tournaments/:id/reports", async (req: any, res) => {
+    try {
+      const user = { id: req.user?.claims?.sub || req.session?.user?.id || 'test-user', userRole: 'tournament_manager' };
+      const report = await TournamentDirectorService.generateTournamentReport(req.params.id, req.body, user);
+      res.status(201).json(report);
+    } catch (error) {
+      console.error("Report generation failed:", error);
+      res.status(500).json({ message: "Failed to generate report", error: (error as Error).message });
+    }
+  });
+
+  // Execute tournament override (emergency controls)
+  app.post("/api/tournaments/:id/override", async (req: any, res) => {
+    try {
+      const user = { id: req.user?.claims?.sub || req.session?.user?.id || 'test-user', userRole: 'district_athletic_director' };
+      const result = await TournamentDirectorService.executeTournamentOverride(req.params.id, req.body, user);
+      res.json(result);
+    } catch (error) {
+      console.error("Tournament override failed:", error);
+      res.status(500).json({ message: "Failed to execute override", error: (error as Error).message });
+    }
+  });
+
+  // Get tournament control permissions
+  app.get("/api/tournaments/:id/control", async (req: any, res) => {
+    try {
+      const user = { id: req.user?.claims?.sub || req.session?.user?.id || 'test-user', userRole: 'tournament_manager' };
+      const control = await TournamentDirectorService.getTournamentControl(req.params.id, user);
+      res.json(control);
+    } catch (error) {
+      console.error("Tournament control check failed:", error);
+      res.status(500).json({ message: "Failed to get control permissions", error: (error as Error).message });
+    }
+  });
+
+  // Monitor tournament health
+  app.get("/api/tournaments/:id/health", async (req: any, res) => {
+    try {
+      const user = { id: req.user?.claims?.sub || req.session?.user?.id || 'test-user', userRole: 'tournament_manager' };
+      const health = await TournamentDirectorService.monitorTournamentHealth(req.params.id, user);
+      res.json(health);
+    } catch (error) {
+      console.error("Tournament health monitoring failed:", error);
+      res.status(500).json({ message: "Failed to monitor health", error: (error as Error).message });
+    }
+  });
+
+  // WebSocket Support for Live Updates
+  // Initialize WebSocket server for live scoring on startup
+  if (process.env.NODE_ENV !== 'test') {
+    try {
+      LiveScoringService.initializeWebSocketServer(parseInt(process.env.WS_PORT || '8080'));
+    } catch (error) {
+      console.error('Failed to initialize WebSocket server:', error);
+    }
+  }
+
+  // WebSocket subscription endpoint
+  app.get("/api/tournaments/:id/subscribe", async (req: any, res) => {
+    try {
+      res.json({
+        message: "WebSocket subscription available",
+        wsUrl: `ws://localhost:${process.env.WS_PORT || 8080}`,
+        tournamentId: req.params.id,
+        instructions: "Connect to WebSocket and send {'type': 'subscribe', 'tournamentId': '<id>'}"
+      });
+    } catch (error) {
+      console.error("WebSocket subscription info failed:", error);
+      res.status(500).json({ message: "Failed to get subscription info", error: (error as Error).message });
+    }
+  });
+
+  // Update match result with automatic bracket progression
+  app.patch("/api/matches/:id/result", async (req: any, res) => {
+    try {
+      const user = { id: req.user?.claims?.sub || req.session?.user?.id || 'test-user', userRole: 'scorekeeper' };
+      const result = await TournamentService.updateMatchResult(req.params.id, req.body, user);
+      res.json(result);
+    } catch (error) {
+      console.error("Match result update failed:", error);
+      res.status(500).json({ message: "Failed to update match result", error: (error as Error).message });
+    }
+  });
+
+  console.log("✅ Comprehensive Tournament Management API routes registered");
 }

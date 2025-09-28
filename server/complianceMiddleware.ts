@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { getStorage } from './storage';
+import crypto from 'crypto';
 
 export interface ComplianceRequest extends Request {
   user: {
@@ -16,7 +17,27 @@ export interface ComplianceRequest extends Request {
   };
 }
 
-// Log all compliance-related data access
+// Generate tamper-evident integrity hash for audit log entry
+function generateAuditIntegrityHash(logData: any): string {
+  const dataString = JSON.stringify({
+    userId: logData.userId,
+    actionType: logData.actionType,
+    resourceType: logData.resourceType,
+    resourceId: logData.resourceId,
+    timestamp: logData.createdAt?.toISOString() || new Date().toISOString(),
+    ipAddress: logData.ipAddress,
+    userAgent: logData.userAgent
+  });
+  
+  // Create HMAC with secret key for tamper detection
+  const secret = process.env.AUDIT_INTEGRITY_KEY;
+  if (!secret) {
+    throw new Error('AUDIT_INTEGRITY_KEY environment variable is required for HIPAA compliance');
+  }
+  return crypto.createHmac('sha256', secret).update(dataString).digest('hex');
+}
+
+// Enhanced compliance logging with tamper-evidence
 export async function logComplianceAction(
   userId: string,
   actionType: 'data_access' | 'data_modification' | 'export' | 'view' | 'login' | 'permission_change',
@@ -26,16 +47,32 @@ export async function logComplianceAction(
   notes?: string
 ) {
   try {
-    const storage = await getStorage();
-    await storage.createComplianceAuditLog({
+    const timestamp = new Date();
+    const logData = {
       userId,
       actionType,
       resourceType,
       resourceId: resourceId || null,
       ipAddress: req?.ip || req?.socket?.remoteAddress || 'unknown',
       userAgent: req?.get('User-Agent') || 'unknown',
-      complianceNotes: notes || null
+      complianceNotes: notes || null,
+      createdAt: timestamp
+    };
+    
+    // Generate integrity hash for tamper-evidence
+    const integrityHash = generateAuditIntegrityHash(logData);
+    
+    const storage = await getStorage();
+    await storage.createComplianceAuditLog({
+      ...logData,
+      complianceNotes: `${notes || ''} [INTEGRITY:${integrityHash}]`
     });
+    
+    // Log security-critical actions to console for immediate visibility
+    if (actionType === 'data_access' && resourceType === 'health_data') {
+      console.log(`🔒 HIPAA AUDIT: User ${userId} accessed ${resourceType} [${actionType}] - Integrity: ${integrityHash.substring(0, 8)}...`);
+    }
+    
   } catch (error) {
     console.error('Failed to log compliance action:', error);
     // Continue execution - don't fail requests due to audit logging issues
