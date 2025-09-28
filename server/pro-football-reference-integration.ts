@@ -7,17 +7,140 @@
  * This integration uses Pro Football Reference's comprehensive NFL statistics
  * with proper attribution as encouraged by their data democratization policy.
  * 
+ * 🤝 SPORTS REFERENCE APPROVAL & COMPLIANCE 🤝
+ * - Approved by Katie Sharp, Customer Success Manager, Sports Reference
+ * - Champions for Change nonprofit platform explicit permission
+ * - Rate Limited: Maximum 20 requests per minute (STRICTLY ENFORCED)
+ * - Proper User-Agent: Identifies as Champions for Change nonprofit
+ * - Full compliance with Sports Reference bot traffic policy
+ * 
+ * 📋 DATA ATTRIBUTION:
+ * All NFL statistics provided by Pro Football Reference (www.pro-football-reference.com)
+ * Sports Reference supports data democratization for nonprofit organizations
+ * Champions for Change fantasy platform operates under nonprofit guidelines
+ * 
  * Data Sources:
  * - Player stats from all 32 teams
  * - Current week detection  
  * - Fantasy rankings and salary recommendations
  * - Player news and injury updates
  * - Schedule and matchup data
+ * 
+ * ⚠️ IMPORTANT: This integration maintains strict compliance with Sports Reference
+ * terms of service and rate limiting requirements. Do not modify without ensuring
+ * continued compliance with their bot traffic policy.
  */
 
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 import cron from 'node-cron';
+
+/**
+ * 🚦 SPORTS REFERENCE COMPLIANCE RATE LIMITER
+ * Ensures we never exceed 20 requests per minute to Pro Football Reference
+ * Based on official approval from Sports Reference (Katie Sharp, Customer Success Manager)
+ */
+class SportsReferenceRateLimiter {
+  private requests: number[] = [];
+  private readonly maxRequestsPerMinute = 20;
+  private readonly timeWindow = 60000; // 1 minute in milliseconds
+  private requestCount = 0;
+  private lastResetTime = Date.now();
+
+  /**
+   * 📊 Check if we can make a request without violating rate limits
+   */
+  canMakeRequest(): boolean {
+    this.cleanOldRequests();
+    return this.requests.length < this.maxRequestsPerMinute;
+  }
+
+  /**
+   * 🔄 Clean old requests outside the time window
+   */
+  private cleanOldRequests(): void {
+    const now = Date.now();
+    this.requests = this.requests.filter(timestamp => now - timestamp < this.timeWindow);
+  }
+
+  /**
+   * ⏳ Wait until we can make a request (if necessary)
+   */
+  async waitForSlot(): Promise<void> {
+    this.cleanOldRequests();
+    
+    if (this.canMakeRequest()) {
+      return;
+    }
+
+    // Calculate wait time until oldest request expires
+    const oldestRequest = Math.min(...this.requests);
+    const waitTime = this.timeWindow - (Date.now() - oldestRequest) + 100; // +100ms buffer
+    
+    console.log(`⏳ Rate limit reached (${this.requests.length}/${this.maxRequestsPerMinute}). Waiting ${Math.round(waitTime/1000)}s to comply with Sports Reference policy...`);
+    
+    await new Promise(resolve => setTimeout(resolve, waitTime));
+    this.cleanOldRequests();
+  }
+
+  /**
+   * 📝 Record a new request
+   */
+  recordRequest(): void {
+    const now = Date.now();
+    this.requests.push(now);
+    this.requestCount++;
+    
+    // Reset daily counter at midnight
+    if (now - this.lastResetTime > 24 * 60 * 60 * 1000) {
+      this.requestCount = 1;
+      this.lastResetTime = now;
+    }
+
+    this.logComplianceStatus();
+  }
+
+  /**
+   * 📊 Log current compliance status
+   */
+  private logComplianceStatus(): void {
+    this.cleanOldRequests();
+    const currentRequests = this.requests.length;
+    const remaining = this.maxRequestsPerMinute - currentRequests;
+    
+    console.log(`🚦 [SPORTS REFERENCE COMPLIANCE] Requests: ${currentRequests}/${this.maxRequestsPerMinute} this minute, ${remaining} slots remaining`);
+    
+    if (currentRequests >= this.maxRequestsPerMinute * 0.8) {
+      console.warn(`⚠️ [COMPLIANCE WARNING] Approaching rate limit: ${currentRequests}/${this.maxRequestsPerMinute} requests this minute`);
+    }
+    
+    // Log daily usage
+    if (this.requestCount % 50 === 0) {
+      console.log(`📊 [DAILY USAGE] Total requests today: ${this.requestCount}`);
+    }
+  }
+
+  /**
+   * 📈 Get current usage statistics
+   */
+  getUsageStats(): { currentMinute: number; maxPerMinute: number; dailyTotal: number } {
+    this.cleanOldRequests();
+    return {
+      currentMinute: this.requests.length,
+      maxPerMinute: this.maxRequestsPerMinute,
+      dailyTotal: this.requestCount
+    };
+  }
+
+  /**
+   * 🔄 Reset for testing purposes
+   */
+  reset(): void {
+    this.requests = [];
+    this.requestCount = 0;
+    this.lastResetTime = Date.now();
+  }
+}
 
 export interface PFRPlayer {
   id: string;
@@ -85,6 +208,44 @@ export class ProFootballReferenceIntegration {
   private latestData: PFRResponse | null = null;
   private isUpdating = false;
   private jobs: any[] = [];
+  private rateLimiter = new SportsReferenceRateLimiter();
+  
+  // 🏢 CHAMPIONS FOR CHANGE NONPROFIT IDENTIFICATION
+  // Sports Reference approved User-Agent for nonprofit platform
+  private readonly userAgent = 'ChampionsForChange-FantasyPlatform/1.0 (Nonprofit; https://championsforchange.net; approved-by-sports-reference)';
+  
+  /**
+   * 🌐 SPORTS REFERENCE COMPLIANT HTTP REQUEST
+   * All requests to Pro Football Reference must go through this method
+   * to ensure rate limiting and proper attribution compliance
+   */
+  private async makeCompliantRequest(url: string, options: any = {}): Promise<any> {
+    // Ensure rate limit compliance
+    await this.rateLimiter.waitForSlot();
+    
+    // Record the request
+    this.rateLimiter.recordRequest();
+    
+    // Make request with proper headers
+    const response = await axios.get(url, {
+      ...options,
+      headers: {
+        'User-Agent': this.userAgent,
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Accept-Encoding': 'gzip, deflate',
+        'DNT': '1',
+        'Connection': 'keep-alive',
+        'Upgrade-Insecure-Requests': '1',
+        'Referer': 'https://championsforchange.net/',
+        ...options.headers
+      },
+      timeout: options.timeout || 15000
+    });
+    
+    console.log(`✅ [COMPLIANT REQUEST] ${url} - Status: ${response.status}`);
+    return response;
+  }
 
   private constructor() {
     this.setupScheduledUpdates();
@@ -137,6 +298,7 @@ export class ProFootballReferenceIntegration {
 
   /**
    * 🔄 Main update function - replaces all individual scrapers
+   * 🤝 SPORTS REFERENCE COMPLIANT - Maintains strict rate limiting
    */
   public async updateAllData(trigger: string = 'Manual'): Promise<PFRResponse | null> {
     if (this.isUpdating) {
@@ -149,6 +311,8 @@ export class ProFootballReferenceIntegration {
 
     try {
       console.log(`🏈 [${trigger}] Updating all NFL data from Pro Football Reference...`);
+      console.log(`📊 Data provided by Pro Football Reference (www.pro-football-reference.com)`);
+      console.log(`🤝 Operating under Sports Reference nonprofit approval`);
 
       // Get current week and season info
       const weekData = await this.getCurrentWeekData();
@@ -170,15 +334,20 @@ export class ProFootballReferenceIntegration {
       this.latestData = response;
       
       const processingTime = Date.now() - startTime;
+      const complianceReport = this.getComplianceReport();
+      
       console.log(`✅ [${trigger}] PFR integration updated successfully`);
       console.log(`📊 Found ${allPlayers.length} total players from all 32 teams`);
       console.log(`🗓️ Current Week: ${weekData.currentWeek}, ${weekData.gamesThisWeek} games`);
       console.log(`😴 Bye teams: ${weekData.byeTeams.join(', ')}`);
       console.log(`⏱️ Processing time: ${processingTime}ms`);
+      console.log(`🚦 Compliance Status: ${complianceReport.complianceLevel}`);
+      console.log(`📈 Requests today: ${complianceReport.dailyRequestCount}`);
 
       return response;
 
     } catch (error: any) {
+      this.handleComplianceError(error, `${trigger} update`);
       console.error(`❌ [${trigger}] PFR integration failed:`, error.message);
       return null;
     } finally {
@@ -193,13 +362,7 @@ export class ProFootballReferenceIntegration {
     try {
       const url = `${this.baseUrl}/years/2025/`;
       
-      const response = await axios.get(url, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (compatible; Champions4Change-PFR-Bot/1.0; +https://championsforchange.net)',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
-        },
-        timeout: 15000
-      });
+      const response = await this.makeCompliantRequest(url);
 
       const $ = cheerio.load(response.data);
       
@@ -250,7 +413,8 @@ export class ProFootballReferenceIntegration {
         lastUpdated: new Date().toISOString()
       };
 
-    } catch (error) {
+    } catch (error: any) {
+      this.handleComplianceError(error, 'getCurrentWeekData');
       console.error('❌ Error detecting current week:', error);
       // Return sensible default
       return {
@@ -271,13 +435,7 @@ export class ProFootballReferenceIntegration {
     try {
       const url = `${this.baseUrl}/years/2025/week_${week}.htm`;
       
-      const response = await axios.get(url, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (compatible; Champions4Change-PFR-Bot/1.0)',
-          'Accept': 'text/html,application/xhtml+xml'
-        },
-        timeout: 10000
-      });
+      const response = await this.makeCompliantRequest(url, { timeout: 10000 });
 
       const $ = cheerio.load(response.data);
       const allTeams = this.getAllNFLTeams();
@@ -303,7 +461,8 @@ export class ProFootballReferenceIntegration {
       
       return byeTeams;
 
-    } catch (error) {
+    } catch (error: any) {
+      this.handleComplianceError(error, `getByeTeamsForWeek(${week})`);
       console.error(`❌ Error getting bye teams for week ${week}:`, error);
       return [];
     }
@@ -332,8 +491,8 @@ export class ProFootballReferenceIntegration {
         const players = await this.getPositionPlayers(posData.position, posData.url, posData.limit);
         allPlayers.push(...players);
         
-        // Rate limiting - be respectful
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Compliance note: Rate limiting now handled by SportsReferenceRateLimiter
+        // which ensures strict adherence to 20 requests per minute limit
       }
 
       // Add team defenses
@@ -356,13 +515,7 @@ export class ProFootballReferenceIntegration {
     try {
       const fullUrl = `${this.baseUrl}${url}`;
       
-      const response = await axios.get(fullUrl, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (compatible; Champions4Change-PFR-Bot/1.0)',
-          'Accept': 'text/html,application/xhtml+xml'
-        },
-        timeout: 15000
-      });
+      const response = await this.makeCompliantRequest(fullUrl);
 
       const $ = cheerio.load(response.data);
       const players: PFRPlayer[] = [];
@@ -501,10 +654,59 @@ export class ProFootballReferenceIntegration {
   console.log(`📊 Found ${players.length} ${position} players`);
   return players;
 
-    } catch (error) {
+    } catch (error: any) {
+      this.handleComplianceError(error, `getPositionPlayers(${position})`);
       console.error(`❌ Error fetching ${position} players:`, error);
       return [];
     }
+  }
+
+  /**
+   * 🚨 Handle Sports Reference compliance errors
+   */
+  private handleComplianceError(error: any, context: string): void {
+    console.error(`❌ [SPORTS REFERENCE COMPLIANCE ERROR] ${context}:`, error.message);
+    
+    if (error.response?.status === 429) {
+      console.error('🚫 Rate limit exceeded! This violates our Sports Reference agreement.');
+      console.error('⏰ Waiting longer before next request to restore compliance...');
+    } else if (error.response?.status === 403) {
+      console.error('🔒 Access forbidden - may indicate User-Agent or compliance issue');
+    } else if (error.code === 'ECONNABORTED') {
+      console.error('⏱️ Request timeout - server may be under load');
+    }
+    
+    // Log current rate limiter status for debugging
+    const stats = this.rateLimiter.getUsageStats();
+    console.log(`📊 Current usage: ${stats.currentMinute}/${stats.maxPerMinute} requests this minute`);
+  }
+
+  /**
+   * 📊 Get compliance monitoring report
+   */
+  public getComplianceReport(): {
+    rateLimitStatus: any;
+    userAgent: string;
+    dailyRequestCount: number;
+    complianceLevel: 'EXCELLENT' | 'GOOD' | 'WARNING' | 'VIOLATION';
+  } {
+    const stats = this.rateLimiter.getUsageStats();
+    let complianceLevel: 'EXCELLENT' | 'GOOD' | 'WARNING' | 'VIOLATION' = 'EXCELLENT';
+    
+    if (stats.currentMinute >= 20) {
+      complianceLevel = 'VIOLATION';
+    } else if (stats.currentMinute >= 16) {
+      complianceLevel = 'WARNING';
+    } else if (stats.currentMinute >= 10) {
+      complianceLevel = 'GOOD';
+    }
+    
+    return {
+      rateLimitStatus: stats,
+      userAgent: this.userAgent,
+      dailyRequestCount: stats.dailyTotal,
+      complianceLevel
+    };
   }
 
   /**

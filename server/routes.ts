@@ -17,7 +17,8 @@ import { stripe } from "./nonprofitStripeConfig";
 import { registerDomainRoutes } from "./domainRoutes";
 import { registerTournamentRoutes } from "./routes/tournamentRoutes";
 import { registerMigrationRoutes } from "./routes/migrationRoutes";
-import { registerAcademicRoutes } from "./academic-routes";
+// TEMPORARY COMMENT: Academic routes causing startup issues - missing schema imports
+// import { registerAcademicRoutes } from "./academic-routes";
 import subscriptionRoutes from "./routes/subscriptionRoutes";
 import stripeWebhooks from "./routes/stripeWebhooks";
 import { tournamentSubscriptions, insertTournamentSubscriptionSchema, type InsertTournamentSubscription, insertRegistrationSubmissionSchema, insertTeamSchema, insertTeamPlayerSchema, insertMedicalHistorySchema, type InsertTeam, type InsertTeamPlayer, type InsertMedicalHistory, type Team, type TeamPlayer, type MedicalHistory, updateTeamSubscriptionSchema, type User } from "@shared/schema";
@@ -8140,9 +8141,9 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
   registerTournamentRoutes(app);
   registerMigrationRoutes(app);
 
-  // Academic Competition System routes
-  registerAcademicRoutes(app);
-  console.log('🎓 Academic Competition System API routes registered');
+  // TEMPORARY COMMENT: Academic Competition System routes - causing startup issues
+  // registerAcademicRoutes(app);
+  // console.log('🎓 Academic Competition System API routes registered');
 
   // Athletic Trainer Dashboard routes
   registerAthleticTrainerRoutes(app);
