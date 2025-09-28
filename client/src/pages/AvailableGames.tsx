@@ -3,77 +3,110 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Clock, Users, Trophy, Calendar, MapPin } from 'lucide-react';
+import { Clock, Users, Trophy, Calendar, MapPin, Star, Target, Zap } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { queryClient, apiRequest } from '@/lib/queryClient';
+import { useAuth } from '@/hooks/useAuth';
 
-interface AvailableContest {
-  contestName: string;
-  team1: string;
-  team2: string;
-  gameDescription: string;
-  gameDate: string;
-  maxEntries: number;
-  prizePool: string;
-  captainMultiplier: string;
-  flexPositions: number;
-  totalLineupSize: number;
-  lineupLockTime: string;
+interface GameTemplate {
+  id: string;
+  name: string;
+  gameType: string;
+  sport: string;
+  templateConfig: {
+    salaryCap: number;
+    rosterFormat: {
+      QB: number;
+      RB: number;
+      WR: number;
+      TE: number;
+      FLEX: number;
+      DEF: number;
+      K?: number;
+    };
+    scoringSystem: string;
+    maxEntries: number;
+    contestDuration: string;
+    slateTime?: string;
+    isPublic: boolean;
+  };
+  description: string;
+  difficulty: string;
+  estimatedParticipants: number;
+  isActive: boolean;
+}
+
+interface GameInstance {
+  id: string;
+  templateId: string;
+  commissionerId: string;
+  commissionerName: string;
+  instanceName: string;
+  registrationCode: string;
+  status: string;
+  liveConfig: GameTemplate['templateConfig'];
+  entryLimit: number;
+  currentEntries: number;
+  lockoutTime?: string;
+  createdAt: string;
 }
 
 export default function AvailableGames() {
   const { toast } = useToast();
-  const [claiming, setClaiming] = useState<string | null>(null);
+  const { user, isAuthenticated } = useAuth();
+  const [joining, setJoining] = useState<string | null>(null);
 
-  // Fetch available prime time contests
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['/api/fantasy/available-contests'],
+  // Fetch available game templates
+  const { data: templates, isLoading: templatesLoading } = useQuery({
+    queryKey: ['/api/game-templates'],
+    refetchInterval: 60000, // Refresh every 60 seconds
+  });
+
+  // Fetch available public game instances
+  const { data: gameInstances, isLoading: instancesLoading } = useQuery({
+    queryKey: ['/api/game-instances/public'],
     refetchInterval: 30000, // Refresh every 30 seconds for real-time updates
   });
 
-  // Mutation to claim a contest (add to dashboard)
-  const claimContestMutation = useMutation({
-    mutationFn: async (contestData: AvailableContest) => {
-      const response = await fetch('/api/fantasy/claim-contest', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ contestData }),
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to claim contest');
-      }
-      
-      return response.json();
+  // Mutation to join a game instance
+  const joinGameMutation = useMutation({
+    mutationFn: async (gameInstanceId: string) => {
+      return apiRequest(`/api/game-instances/${gameInstanceId}/join`, 'POST');
     },
-    onSuccess: (data: any) => {
+    onSuccess: (data: any, gameInstanceId: string) => {
       toast({
-        title: "Contest Added! 🎉",
-        description: `${data.contest.contestName} has been added to your dashboard.`,
+        title: "Successfully Joined! 🎉",
+        description: `You've joined the game and can now submit lineups.`,
       });
       
       // Invalidate queries to refresh the data
-      queryClient.invalidateQueries({ queryKey: ['/api/fantasy/available-contests'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/fantasy/showdown-contests'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/game-instances/public'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/game-instances'] });
       
-      setClaiming(null);
+      setJoining(null);
     },
     onError: (error: any) => {
       toast({
-        title: "Failed to Add Contest",
-        description: error.message || "There was an error adding the contest to your dashboard.",
+        title: "Failed to Join Game",
+        description: error.message || "There was an error joining the game.",
         variant: "destructive",
       });
-      setClaiming(null);
+      setJoining(null);
     }
   });
 
-  const handleClaimContest = async (contest: AvailableContest) => {
-    setClaiming(contest.contestName);
-    claimContestMutation.mutate(contest);
+  const handleJoinGame = async (gameInstanceId: string) => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to join games.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setJoining(gameInstanceId);
+    joinGameMutation.mutate(gameInstanceId);
   };
 
   const formatGameTime = (dateString: string) => {
@@ -106,22 +139,50 @@ export default function AvailableGames() {
     }
   };
 
-  const getContestIcon = (contestName: string) => {
-    if (contestName.includes('Monday')) return '🏈';
-    if (contestName.includes('Thursday')) return '⚡';
-    if (contestName.includes('Sunday')) return '🌟';
-    return '🏈';
+  const getGameTypeIcon = (gameType: string) => {
+    switch (gameType) {
+      case 'daily_fantasy': return <Star className="w-4 h-4" />;
+      case 'snake_draft': return <Target className="w-4 h-4" />;
+      case 'head_to_head': return <Zap className="w-4 h-4" />;
+      case 'captain_mode': return <Trophy className="w-4 h-4" />;
+      case 'best_ball': return <Calendar className="w-4 h-4" />;
+      case 'weekly_league': return <Clock className="w-4 h-4" />;
+      default: return <Star className="w-4 h-4" />;
+    }
   };
+
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case 'beginner': return 'bg-green-500/20 text-green-400 border-green-500/30';
+      case 'intermediate': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
+      case 'advanced': return 'bg-red-500/20 text-red-400 border-red-500/30';
+      default: return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+    }
+  };
+
+  const getGameTypeLabel = (gameType: string) => {
+    switch (gameType) {
+      case 'daily_fantasy': return 'Daily Fantasy';
+      case 'snake_draft': return 'Snake Draft';
+      case 'head_to_head': return 'Head-to-Head';
+      case 'captain_mode': return 'Captain Mode';
+      case 'best_ball': return 'Best Ball';
+      case 'weekly_league': return 'Weekly League';
+      default: return gameType;
+    }
+  };
+
+  const isLoading = templatesLoading || instancesLoading;
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
         <div className="container mx-auto p-6">
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-6xl mx-auto">
             <div className="mb-8">
-              <h1 className="text-3xl font-bold mb-2 text-white">Available Prime Time Games</h1>
+              <h1 className="text-3xl font-bold mb-2 text-white">Available Fantasy Games</h1>
               <p className="text-gray-200 font-medium">
-                Select from our pre-created showdown contests for Monday Night, Thursday Night, and Sunday Night Football.
+                Join open game instances from our template marketplace. Pick your favorite format and compete!
               </p>
             </div>
           
@@ -150,25 +211,9 @@ export default function AvailableGames() {
     );
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
-        <div className="container mx-auto p-6">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-3xl font-bold mb-4 text-white">Unable to Load Games</h1>
-            <p className="text-gray-200 font-medium mb-6">
-              We're having trouble loading the available contests. Please try again later.
-            </p>
-            <Button onClick={() => window.location.reload()}>
-              Retry
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const contests = (data as any)?.contests || [];
+  // Show templates and instances  
+  const allTemplates = (templates as GameTemplate[]) || [];
+  const allInstances = (gameInstances as GameInstance[]) || [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
@@ -176,109 +221,159 @@ export default function AvailableGames() {
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
             <h1 className="text-3xl font-bold mb-2 text-white" data-testid="text-page-title">
-              Available Prime Time Games
+              Available Fantasy Games
             </h1>
             <p className="text-gray-200 font-medium">
-              Select from our pre-created showdown contests for Monday Night, Thursday Night, and Sunday Night Football.
-              Once you add a contest to your dashboard, you can share the link with friends to join and compete!
+              Join open game instances or browse templates to see what's available. Pick your format and start competing!
             </p>
           </div>
 
-        {contests.length === 0 ? (
+        {/* Open Game Instances Section */}
+        {allInstances.length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold mb-4 text-white">🔥 Open Games - Join Now!</h2>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3" data-testid="grid-open-games">
+              {allInstances.map((instance: GameInstance, index: number) => {
+                const template = allTemplates.find((t: GameTemplate) => t.id === instance.templateId);
+                return (
+                  <Card key={instance.id} className="hover:shadow-lg transition-shadow duration-200 border-green-500/20">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2" data-testid={`text-instance-name-${index}`}>
+                        {template && getGameTypeIcon(template.gameType)}
+                        {instance.instanceName || template?.name || 'Unknown Game'}
+                      </CardTitle>
+                      <CardDescription data-testid={`text-instance-description-${index}`}>
+                        Commissioner: {instance.commissionerName} • {template && getGameTypeLabel(template.gameType)}
+                      </CardDescription>
+                    </CardHeader>
+                    
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <Badge className={template ? getDifficultyColor(template.difficulty) : 'bg-gray-500/20'}>
+                          {template?.difficulty || 'Unknown'}
+                        </Badge>
+                        <Badge variant="outline" className="text-green-400 border-green-500/30">
+                          {instance.status}
+                        </Badge>
+                      </div>
+                      
+                      <div className="flex items-center gap-2 text-sm text-gray-400">
+                        <Users className="h-4 w-4" />
+                        <span>{instance.currentEntries}/{instance.entryLimit || 'Unlimited'} players</span>
+                      </div>
+                      
+                      {template && (
+                        <div className="flex items-center gap-2 text-sm text-gray-400">
+                          <Trophy className="h-4 w-4" />
+                          <span>{template.templateConfig.scoringSystem.toUpperCase()} • ${template.templateConfig.salaryCap}</span>
+                        </div>
+                      )}
+                      
+                      <div className="flex items-center gap-2 text-sm text-gray-400">
+                        <Calendar className="h-4 w-4" />
+                        <span>Created {formatGameTime(instance.createdAt)}</span>
+                      </div>
+                    </CardContent>
+                    
+                    <CardFooter>
+                      <Button 
+                        onClick={() => handleJoinGame(instance.id)}
+                        disabled={joining === instance.id || !isAuthenticated}
+                        className="w-full bg-green-600 hover:bg-green-700"
+                        data-testid={`button-join-${index}`}
+                      >
+                        {joining === instance.id ? 'Joining...' : isAuthenticated ? 'Join Game' : 'Login to Join'}
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Available Templates Section */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold mb-4 text-white">🎮 Available Game Templates</h2>
+          {allTemplates.length === 0 ? (
+            <Card className="text-center p-8">
+              <CardContent>
+                <div className="mb-4">
+                  <Calendar className="mx-auto h-12 w-12 text-gray-400" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">No Templates Available</h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  There are currently no game templates available. Check back soon!
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3" data-testid="grid-available-templates">
+              {allTemplates.map((template: GameTemplate, index: number) => (
+                <Card key={template.id} className="hover:shadow-lg transition-shadow duration-200">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2" data-testid={`text-template-name-${index}`}>
+                      {getGameTypeIcon(template.gameType)}
+                      {template.name}
+                    </CardTitle>
+                    <CardDescription data-testid={`text-template-description-${index}`}>
+                      {template.description}
+                    </CardDescription>
+                  </CardHeader>
+                  
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <Badge className={getDifficultyColor(template.difficulty)}>
+                        {template.difficulty}
+                      </Badge>
+                      <Badge variant="outline">
+                        {getGameTypeLabel(template.gameType)}
+                      </Badge>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 text-sm text-gray-400">
+                      <Users className="h-4 w-4" />
+                      <span>~{template.estimatedParticipants} players</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 text-sm text-gray-400">
+                      <Trophy className="h-4 w-4" /><span className="text-sm text-gray-400">{template.templateConfig.scoringSystem.toUpperCase()}</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 text-sm text-gray-400">
+                      <Clock className="h-4 w-4" />
+                      <span>{template.templateConfig.contestDuration}</span>
+                    </div>
+                  </CardContent>
+                  
+                  <CardFooter>
+                    <Button 
+                      variant="outline" 
+                      className="w-full"
+                      data-testid={`button-view-template-${index}`}
+                    >
+                      View Template Details
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {allInstances.length === 0 && allTemplates.length === 0 && (
           <Card className="text-center p-8">
             <CardContent>
               <div className="mb-4">
                 <Calendar className="mx-auto h-12 w-12 text-gray-400" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">No Prime Time Games Available</h3>
+              <h3 className="text-xl font-semibold mb-2">No Games Available</h3>
               <p className="text-gray-600 dark:text-gray-400 mb-4">
-                There are currently no Monday Night, Thursday Night, or Sunday Night Football games ready for contests.
-                Check back soon for upcoming prime time matchups!
+                There are currently no games or templates available. Check back soon!
               </p>
-              <Badge variant="outline">
-                Prime time games are automatically created each week
-              </Badge>
             </CardContent>
           </Card>
-        ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3" data-testid="grid-available-contests">
-            {contests.map((contest: AvailableContest, index: number) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow duration-200">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2" data-testid={`text-contest-name-${index}`}>
-                    <span>{getContestIcon(contest.contestName)}</span>
-                    {contest.contestName}
-                  </CardTitle>
-                  <CardDescription data-testid={`text-game-description-${index}`}>
-                    {contest.gameDescription}
-                  </CardDescription>
-                </CardHeader>
-                
-                <CardContent className="space-y-4">
-                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                    <Clock className="h-4 w-4" />
-                    <span data-testid={`text-game-time-${index}`}>
-                      {formatGameTime(contest.gameDate)}
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                    <MapPin className="h-4 w-4" />
-                    <span data-testid={`text-lock-time-${index}`}>
-                      Lineups lock at {formatLockTime(contest.lineupLockTime)}
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                    <Users className="h-4 w-4" />
-                    <span>Max {contest.maxEntries} entries</span>
-                  </div>
-                  
-                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                    <Trophy className="h-4 w-4" />
-                    <span>{contest.prizePool}</span>
-                  </div>
-                  
-                  <div className="flex gap-2 flex-wrap">
-                    <Badge variant="secondary">
-                      Captain {contest.captainMultiplier}x
-                    </Badge>
-                    <Badge variant="outline">
-                      {contest.totalLineupSize} players
-                    </Badge>
-                  </div>
-                </CardContent>
-                
-                <CardFooter>
-                  <Button 
-                    onClick={() => handleClaimContest(contest)}
-                    disabled={claiming === contest.contestName || claimContestMutation.isPending}
-                    className="w-full"
-                    data-testid={`button-add-contest-${index}`}
-                  >
-                    {claiming === contest.contestName ? (
-                      <>Adding to Dashboard...</>
-                    ) : (
-                      <>Add to My Dashboard</>
-                    )}
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
         )}
-        
-        <div className="mt-8 p-4 bg-slate-800/50 backdrop-blur-sm rounded-lg border border-slate-700">
-          <h3 className="font-bold mb-2 text-white">How It Works:</h3>
-          <div className="text-sm text-gray-200 font-medium space-y-1">
-            <p>1. <strong className="text-white">Select a Game:</strong> Choose from Monday Night, Thursday Night, or Sunday Night Football</p>
-            <p>2. <strong className="text-white">Add to Dashboard:</strong> Click "Add to My Dashboard" to claim the contest</p>
-            <p>3. <strong className="text-white">Share with Friends:</strong> Get a shareable link to invite others to join</p>
-            <p>4. <strong className="text-white">Captain Mode:</strong> Pick 6 players (1 Captain + 5 FLEX) from both teams</p>
-            <p>5. <strong className="text-white">Compete:</strong> Captain gets {contests[0]?.captainMultiplier || '1.5'}x points, highest score wins!</p>
-          </div>
-        </div>
-        </div>
       </div>
     </div>
   );
