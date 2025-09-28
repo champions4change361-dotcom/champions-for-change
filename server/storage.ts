@@ -27,7 +27,7 @@ import {
   type EventTemplate, type InsertEventTemplate, type ScoringPolicy, type InsertScoringPolicy,
   type TournamentConfig, type DivisionPolicy, type StageConfig,
   type GameTemplate, type InsertGameTemplate, type GameInstance, type InsertGameInstance, type UserLineup, type InsertUserLineup, type PlayerPerformance, type InsertPlayerPerformance,
-  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, teams, teamPlayers, athletes, medicalHistory, healthRiskAssessments, injuryIncidents, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog, taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices, supportTeams, supportTeamMembers, supportTeamInjuries, supportTeamAiConsultations, jerseyTeamMembers, jerseyTeamPayments, tournamentSubscriptions, clientConfigurations, guestParticipants, passwordResetTokens, showdownContests, showdownEntries, showdownLeaderboards, professionalPlayers, merchandiseProducts, merchandiseOrders, eventTickets, ticketOrders, tournamentRegistrationForms, registrationSubmissions, registrationAssignmentLog, fantasyProfiles, athleticConfigs, academicConfigs, fineArtsConfigs, eventTemplates, scoringPolicies, gameTemplates, gameInstances, userLineups, playerPerformances
+  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, teams, teamPlayers, athletes, medicalHistory, healthRiskAssessments, injuryIncidents, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog, taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices, supportTeams, supportTeamMembers, supportTeamInjuries, supportTeamAiConsultations, jerseyTeamMembers, jerseyTeamPayments, tournamentSubscriptions, clientConfigurations, guestParticipants, passwordResetTokens, showdownContests, showdownEntries, showdownLeaderboards, professionalPlayers, merchandiseProducts, merchandiseOrders, eventTickets, ticketOrders, tournamentRegistrationForms, registrationSubmissions, registrationAssignmentLog, fantasyProfiles, athleticConfigs, academicConfigs, fineArtsConfigs, eventTemplates, scoringPolicies, gameTemplates, gameInstances, userLineups, playerPerformances, athleticCalendarEvents, games, practices, facilityReservations, scheduleConflicts, academicEvents, academicCompetitions, academicParticipants, academicResults, academicDistricts, academicMeets, schoolAcademicPrograms, academicTeams, academicOfficials
 } from "@shared/schema";
 
 type SportCategory = typeof sportCategories.$inferSelect;
@@ -2515,11 +2515,12 @@ export class DbStorage implements IStorage {
     }
   }
 
-  async getTournaments(userId?: string): Promise<Tournament[]> {
+  async getTournaments(user: SecureUserContext): Promise<Tournament[]> {
     try {
-      const tournamentResults = userId 
-        ? await this.db.select().from(tournaments).where(eq(tournaments.userId, userId)).orderBy(desc(tournaments.createdAt))
-        : await this.db.select().from(tournaments).orderBy(desc(tournaments.createdAt));
+      assertUserContext(user, 'getTournaments');
+      const userId = user.id;
+      
+      const tournamentResults = await this.db.select().from(tournaments).where(eq(tournaments.userId, userId)).orderBy(desc(tournaments.createdAt));
       
       // Join sport configs for ALL tournaments to maintain consistent shape
       const tournamentsWithConfigs = await Promise.all(
@@ -2559,8 +2560,11 @@ export class DbStorage implements IStorage {
     }
   }
 
-  async getDraftTournaments(userId: string): Promise<Tournament[]> {
+  async getDraftTournaments(user: SecureUserContext): Promise<Tournament[]> {
     try {
+      assertUserContext(user, 'getDraftTournaments');
+      const userId = user.id;
+      
       const result = await this.db
         .select()
         .from(tournaments)
@@ -5627,11 +5631,14 @@ export class MemStorage implements IStorage {
     return undefined;
   }
 
-  async getTournaments(): Promise<Tournament[]> {
+  async getTournaments(user: SecureUserContext): Promise<Tournament[]> {
+    assertUserContext(user, 'getTournaments');
     // Mirror DbStorage: return tournaments with sport configs for consistency
-    const tournaments = Array.from(this.tournaments.values()).sort((a, b) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
+    const tournaments = Array.from(this.tournaments.values())
+      .filter(tournament => tournament.userId === user.id)
+      .sort((a, b) => 
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
     
     // In MemStorage, sport configs are already merged in tournaments
     return tournaments;
@@ -5644,9 +5651,10 @@ export class MemStorage implements IStorage {
     return tournament;
   }
 
-  async getDraftTournaments(userId: string): Promise<Tournament[]> {
+  async getDraftTournaments(user: SecureUserContext): Promise<Tournament[]> {
+    assertUserContext(user, 'getDraftTournaments');
     return Array.from(this.tournaments.values())
-      .filter(tournament => tournament.status === 'draft' && tournament.userId === userId)
+      .filter(tournament => tournament.status === 'draft' && tournament.userId === user.id)
       .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
   }
 

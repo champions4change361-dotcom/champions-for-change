@@ -5890,6 +5890,165 @@ export const academicResults = pgTable("academic_results", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Academic Districts - UIL district organization
+export const academicDistricts = pgTable("academic_districts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  districtName: varchar("district_name").notNull(),
+  districtNumber: varchar("district_number").notNull(),
+  region: varchar("region").notNull(), // UIL region
+  classification: varchar("classification").notNull(), // 1A, 2A, 3A, 4A, 5A, 6A
+  districtDirector: varchar("district_director").references(() => users.id),
+  
+  // Geographic Info
+  state: varchar("state").default("TX"),
+  counties: jsonb("counties").$type<string[]>(),
+  
+  // Contact Information
+  directorEmail: varchar("director_email"),
+  directorPhone: varchar("director_phone"),
+  
+  // Academic Competition Details
+  competitionDates: jsonb("competition_dates").$type<{
+    district: string;
+    regional: string;
+    state: string;
+  }>(),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Academic Meets - Specific competition events
+export const academicMeets = pgTable("academic_meets", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  meetName: varchar("meet_name").notNull(),
+  districtId: varchar("district_id").references(() => academicDistricts.id),
+  hostSchoolId: varchar("host_school_id").references(() => schools.id),
+  
+  // Meet Details
+  meetType: text("meet_type", {
+    enum: ["district", "regional", "state", "invitational", "practice"]
+  }).notNull(),
+  meetDate: date("meet_date").notNull(),
+  registrationDeadline: date("registration_deadline"),
+  
+  // Location
+  venue: varchar("venue"),
+  address: text("address"),
+  
+  // Competition Configuration
+  eventsOffered: jsonb("events_offered").$type<string[]>(),
+  divisions: jsonb("divisions").$type<string[]>(), // A+, High School
+  teamLimit: integer("team_limit"),
+  participantLimit: integer("participant_limit"),
+  
+  // Meet Status
+  status: text("status", {
+    enum: ["planning", "registration_open", "registration_closed", "in_progress", "completed", "cancelled"]
+  }).default("planning"),
+  
+  // Results
+  resultsPublished: boolean("results_published").default(false),
+  resultsUrl: varchar("results_url"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// School Academic Programs - School's academic competition programs
+export const schoolAcademicPrograms = pgTable("school_academic_programs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  schoolId: varchar("school_id").notNull().references(() => schools.id),
+  academicCoachId: varchar("academic_coach_id").references(() => users.id),
+  
+  // Program Details
+  programName: varchar("program_name").default("Academic Team"),
+  eventsOffered: jsonb("events_offered").$type<string[]>(),
+  divisions: jsonb("divisions").$type<string[]>(), // A+, High School
+  
+  // Participation Info
+  currentParticipants: integer("current_participants").default(0),
+  maxParticipants: integer("max_participants"),
+  
+  // Competition History
+  districtWins: integer("district_wins").default(0),
+  regionalWins: integer("regional_wins").default(0),
+  stateWins: integer("state_wins").default(0),
+  
+  // Program Status
+  active: boolean("active").default(true),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Academic Teams - Team entries for competitions
+export const academicTeams = pgTable("academic_teams", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  schoolId: varchar("school_id").notNull().references(() => schools.id),
+  meetId: varchar("meet_id").notNull().references(() => academicMeets.id),
+  coachId: varchar("coach_id").references(() => users.id),
+  
+  // Team Details
+  teamName: varchar("team_name"), // e.g., "Varsity", "JV", "A+"
+  division: varchar("division").notNull(), // A+, High School
+  
+  // Team Members
+  teamMembers: jsonb("team_members").$type<Array<{
+    participantId: string;
+    events: string[];
+    captain?: boolean;
+  }>>(),
+  
+  // Team Results
+  teamPlacement: integer("team_placement"),
+  totalPoints: integer("total_points").default(0),
+  sweepstakes: boolean("sweepstakes").default(false),
+  
+  // Registration
+  registrationStatus: text("registration_status", {
+    enum: ["pending", "confirmed", "waitlisted", "withdrawn"]
+  }).default("pending"),
+  registrationDate: timestamp("registration_date").defaultNow(),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Academic Officials - Judges and administrators
+export const academicOfficials = pgTable("academic_officials", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  
+  // Official Details
+  officialType: text("official_type", {
+    enum: ["judge", "grader", "director", "coordinator", "timekeeper"]
+  }).notNull(),
+  
+  // Certification
+  certified: boolean("certified").default(false),
+  certificationLevel: varchar("certification_level"), // UIL certification level
+  certificationExpiry: date("certification_expiry"),
+  
+  // Specializations
+  eventsQualified: jsonb("events_qualified").$type<string[]>(),
+  preferredEvents: jsonb("preferred_events").$type<string[]>(),
+  
+  // Experience
+  yearsExperience: integer("years_experience").default(0),
+  meetsConducted: integer("meets_conducted").default(0),
+  
+  // Availability
+  available: boolean("available").default(true),
+  
+  // Contact
+  phoneNumber: varchar("phone_number"),
+  emergencyContact: varchar("emergency_contact"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // =============================================================================
 // BUDGET MANAGEMENT SYSTEM
 // =============================================================================
@@ -7044,6 +7203,36 @@ export const insertAcademicResultSchema = createInsertSchema(academicResults).om
   createdAt: true,
 });
 
+export const insertAcademicDistrictSchema = createInsertSchema(academicDistricts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAcademicMeetSchema = createInsertSchema(academicMeets).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSchoolAcademicProgramSchema = createInsertSchema(schoolAcademicPrograms).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAcademicTeamSchema = createInsertSchema(academicTeams).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAcademicOfficialSchema = createInsertSchema(academicOfficials).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Budget Management Schemas
 export const insertDistrictBudgetSchema = createInsertSchema(districtBudgets).omit({
   id: true,
@@ -7137,6 +7326,16 @@ export type AcademicParticipant = typeof academicParticipants.$inferSelect;
 export type InsertAcademicParticipant = z.infer<typeof insertAcademicParticipantSchema>;
 export type AcademicResult = typeof academicResults.$inferSelect;
 export type InsertAcademicResult = z.infer<typeof insertAcademicResultSchema>;
+export type AcademicDistrict = typeof academicDistricts.$inferSelect;
+export type InsertAcademicDistrict = z.infer<typeof insertAcademicDistrictSchema>;
+export type AcademicMeet = typeof academicMeets.$inferSelect;
+export type InsertAcademicMeet = z.infer<typeof insertAcademicMeetSchema>;
+export type SchoolAcademicProgram = typeof schoolAcademicPrograms.$inferSelect;
+export type InsertSchoolAcademicProgram = z.infer<typeof insertSchoolAcademicProgramSchema>;
+export type AcademicTeam = typeof academicTeams.$inferSelect;
+export type InsertAcademicTeam = z.infer<typeof insertAcademicTeamSchema>;
+export type AcademicOfficial = typeof academicOfficials.$inferSelect;
+export type InsertAcademicOfficial = z.infer<typeof insertAcademicOfficialSchema>;
 
 // Budget Management Types
 export type DistrictBudget = typeof districtBudgets.$inferSelect;
