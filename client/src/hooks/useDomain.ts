@@ -68,7 +68,7 @@ export function useDomain() {
         primaryColor: '#1e293b',
         features: {
           fantasyLeagues: true,   
-          ageVerification: true,  
+          ageVerification: false,  
           crossSelling: true,
           guestAccess: true,
           registration: true
@@ -86,7 +86,7 @@ export function useDomain() {
         primaryColor: '#1e293b',
         features: {
           fantasyLeagues: true,   
-          ageVerification: true,  
+          ageVerification: false,  
           crossSelling: true,
           guestAccess: true,
           registration: true

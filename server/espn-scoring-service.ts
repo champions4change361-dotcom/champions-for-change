@@ -73,7 +73,7 @@ export interface FantasyLineup {
     projectedPoints?: number;
   }[] | null;
   currentScore: string | number | null;
-  isSubmitted: boolean;
+  isSubmitted: boolean | null;
   submittedAt?: Date | string | null;
 }
 

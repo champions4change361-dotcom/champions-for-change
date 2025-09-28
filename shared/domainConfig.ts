@@ -68,14 +68,13 @@ export const DOMAIN_CONFIGS: Record<string, DomainConfig> = {
     theme: 'entertainment',
     features: {
       fantasyLeagues: true,
-      adultContent: true,
+      adultContent: false,
       donationButtons: true,
-      ageVerification: true,
+      ageVerification: false,
       gambling: false, // Still no gambling, just fantasy fun
       survivalLeagues: true,
       dailyFantasy: true,
-      professionalSports: true,
-      minimumAge: 21
+      professionalSports: true
     },
     userRoles: ['Fantasy Commissioner', 'Fantasy Participant'],
     allowedSports: ['nfl', 'nba', 'mlb', 'nhl', 'esports', 'college_sports'],
@@ -96,13 +95,12 @@ export const DOMAIN_CONFIGS: Record<string, DomainConfig> = {
     theme: 'professional',
     features: {
       fantasyLeagues: true,
-      adultContent: true,
+      adultContent: false,
       donationButtons: false,
-      ageVerification: true,
+      ageVerification: false,
       gambling: false,
       survivalLeagues: true,
-      advancedAnalytics: true,
-      minimumAge: 21
+      advancedAnalytics: true
     },
     userRoles: ['Tournament Manager', 'League Commissioner', 'Team Manager', 'Player', 'Fantasy Commissioner'],
     allowedSports: ['all_adult_sports', 'esports', 'professional_leagues'],

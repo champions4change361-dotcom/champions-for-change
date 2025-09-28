@@ -192,7 +192,7 @@ export default function AvailableGames() {
               </p>
             </div>
           
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {[1, 2, 3].map((i) => (
               <Card key={i} className="animate-pulse">
                 <CardHeader>
@@ -210,11 +210,12 @@ export default function AvailableGames() {
                 </CardFooter>
               </Card>
             ))}
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
@@ -386,6 +387,7 @@ export default function AvailableGames() {
             </CardContent>
           </Card>
         )}
+        </div>
       </div>
     </div>
   );
