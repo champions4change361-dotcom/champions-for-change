@@ -5361,6 +5361,956 @@ export type InsertFantasyProfile = z.infer<typeof insertFantasyProfileSchema>;
 export type FantasyProfile = typeof fantasyProfiles.$inferSelect;
 
 // =============================================================================
+// ATHLETIC MANAGEMENT SYSTEM - CORE MISSING FUNCTIONALITY 
+// =============================================================================
+
+// Sports Catalog - Master list of all sports offered
+export const sports = pgTable("sports", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(), // "Basketball", "Football", "Track & Field"
+  abbreviation: varchar("abbreviation"), // "BB", "FB", "TF"
+  category: text("category", {
+    enum: ["team_sport", "individual_sport", "academic_competition", "performing_arts"]
+  }).notNull(),
+  season: text("season", {
+    enum: ["fall", "winter", "spring", "summer", "year_round"]
+  }).notNull(),
+  teamSize: integer("team_size"), // Players on field/court at once
+  rosterSize: integer("roster_size"), // Total players on team
+  genderDivisions: jsonb("gender_divisions").$type<string[]>().default([]), // ["boys", "girls", "mixed"]
+  competitionLevels: jsonb("competition_levels").$type<string[]>().default([]), // ["jv", "varsity", "freshman"]
+  isUILSport: boolean("is_uil_sport").default(false),
+  description: text("description"),
+  equipmentRequired: jsonb("equipment_required").$type<string[]>().default([]),
+  facilitiesRequired: jsonb("facilities_required").$type<string[]>().default([]),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Athletic Seasons - Yearly athletic calendar periods
+export const athleticSeasons = pgTable("athletic_seasons", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  districtId: varchar("district_id").notNull().references(() => districts.id),
+  seasonName: varchar("season_name").notNull(), // "2024-2025 Fall", "2024-2025 Basketball"
+  seasonType: text("season_type", {
+    enum: ["fall", "winter", "spring", "summer", "year_round"]
+  }).notNull(),
+  academicYear: varchar("academic_year").notNull(), // "2024-2025"
+  startDate: date("start_date").notNull(),
+  endDate: date("end_date").notNull(),
+  registrationOpen: date("registration_open"),
+  registrationClose: date("registration_close"),
+  status: text("status", {
+    enum: ["planning", "registration", "active", "postseason", "completed"]
+  }).default("planning"),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// School Sports Programs - Which sports each school offers
+export const schoolSportsPrograms = pgTable("school_sports_programs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  schoolId: varchar("school_id").notNull().references(() => schools.id),
+  sportId: varchar("sport_id").notNull().references(() => sports.id),
+  seasonId: varchar("season_id").references(() => athleticSeasons.id),
+  competitionLevel: text("competition_level", {
+    enum: ["freshman", "junior_varsity", "varsity", "mixed_age", "open"]
+  }).notNull(),
+  genderDivision: text("gender_division", {
+    enum: ["boys", "girls", "coed", "mixed"]
+  }).notNull(),
+  headCoachId: varchar("head_coach_id").references(() => users.id),
+  assistantCoaches: jsonb("assistant_coaches").$type<Array<{
+    userId?: string;
+    name: string;
+    role: string;
+  }>>().default([]),
+  maxRosterSize: integer("max_roster_size"),
+  currentRosterSize: integer("current_roster_size").default(0),
+  programStatus: text("program_status", {
+    enum: ["active", "inactive", "suspended", "discontinued"]
+  }).default("active"),
+  budgetAllocated: decimal("budget_allocated", { precision: 10, scale: 2 }).default("0"),
+  homeVenueId: varchar("home_venue_id").references(() => athleticVenues.id),
+  practiceVenues: jsonb("practice_venues").$type<string[]>().default([]),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Athletes - Individual student athletes with comprehensive tracking
+export const athletes = pgTable("athletes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  schoolId: varchar("school_id").notNull().references(() => schools.id),
+  districtId: varchar("district_id").notNull().references(() => districts.id),
+  studentDataId: varchar("student_data_id").references(() => studentData.id),
+  
+  // Personal Information
+  firstName: varchar("first_name").notNull(),
+  lastName: varchar("last_name").notNull(),
+  dateOfBirth: date("date_of_birth"),
+  gender: text("gender", { enum: ["male", "female", "non_binary", "prefer_not_to_say"] }),
+  grade: integer("grade"),
+  graduationYear: integer("graduation_year"),
+  
+  // Academic Information
+  gpa: decimal("gpa", { precision: 3, scale: 2 }),
+  academicStanding: text("academic_standing", {
+    enum: ["good", "academic_watch", "probation", "ineligible"]
+  }).default("good"),
+  
+  // Physical Attributes (for sports analytics)
+  height: integer("height"), // inches
+  weight: integer("weight"), // pounds
+  dominantHand: text("dominant_hand", { enum: ["right", "left", "ambidextrous"] }),
+  
+  // Emergency Contacts
+  primaryEmergencyContact: jsonb("primary_emergency_contact").$type<{
+    name: string;
+    relationship: string;
+    phone: string;
+    email?: string;
+    address?: string;
+  }>(),
+  secondaryEmergencyContact: jsonb("secondary_emergency_contact").$type<{
+    name: string;
+    relationship: string;
+    phone: string;
+    email?: string;
+  }>(),
+  
+  // Medical Information Links
+  healthDataId: varchar("health_data_id").references(() => healthData.id),
+  medicalClearanceDate: date("medical_clearance_date"),
+  medicalClearanceExpires: date("medical_clearance_expires"),
+  
+  // Athletic Information
+  primarySports: jsonb("primary_sports").$type<string[]>().default([]), // Sport IDs
+  athleticStatus: text("athletic_status", {
+    enum: ["active", "injured", "suspended", "retired", "transferred"]
+  }).default("active"),
+  eligibilityStatus: text("eligibility_status", {
+    enum: ["eligible", "academically_ineligible", "medically_ineligible", "disciplinary_ineligible", "transfer_pending"]
+  }).default("eligible"),
+  
+  // Performance Analytics Support
+  performanceProfile: jsonb("performance_profile").$type<{
+    baselineMetrics?: Record<string, number>;
+    strengthAreas?: string[];
+    improvementAreas?: string[];
+    injuryRiskFactors?: string[];
+    lastAssessmentDate?: string;
+  }>(),
+  
+  athleticTrainerId: varchar("athletic_trainer_id").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Rosters - Linking athletes to specific sport programs
+export const rosters = pgTable("rosters", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  schoolSportsProgramId: varchar("school_sports_program_id").notNull().references(() => schoolSportsPrograms.id),
+  athleteId: varchar("athlete_id").notNull().references(() => athletes.id),
+  seasonId: varchar("season_id").notNull().references(() => athleticSeasons.id),
+  
+  // Roster Details
+  jerseyNumber: integer("jersey_number"),
+  position: varchar("position"),
+  captainRole: text("captain_role", { 
+    enum: ["captain", "co_captain", "team_leader", "none"] 
+  }).default("none"),
+  
+  // Participation Tracking
+  rosterStatus: text("roster_status", {
+    enum: ["active", "injured_reserve", "academic_hold", "suspended", "quit", "cut"]
+  }).default("active"),
+  joinDate: date("join_date"),
+  leaveDate: date("leave_date"),
+  leaveReason: text("leave_reason"),
+  
+  // Performance Metrics
+  gamesPlayed: integer("games_played").default(0),
+  gamesStarted: integer("games_started").default(0),
+  totalPractices: integer("total_practices").default(0),
+  practicesAttended: integer("practices_attended").default(0),
+  
+  // Academic Eligibility Tracking
+  gradeChecksPassed: integer("grade_checks_passed").default(0),
+  gradeChecksTotal: integer("grade_checks_total").default(0),
+  currentGPA: decimal("current_gpa", { precision: 3, scale: 2 }),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// =============================================================================
+// INJURY & HEALTH TRACKING SYSTEM
+// =============================================================================
+
+// Injury Incidents - Individual injury tracking events
+export const injuryIncidents = pgTable("injury_incidents", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  athleteId: varchar("athlete_id").notNull().references(() => athletes.id),
+  schoolId: varchar("school_id").notNull().references(() => schools.id),
+  athleticTrainerId: varchar("athletic_trainer_id").notNull().references(() => users.id),
+  
+  // Incident Details
+  incidentDate: timestamp("incident_date").notNull(),
+  incidentTime: varchar("incident_time"), // Time of day
+  activityWhenInjured: text("activity_when_injured", {
+    enum: ["practice", "game", "conditioning", "weight_training", "other_athletic", "non_athletic"]
+  }).notNull(),
+  sportId: varchar("sport_id").references(() => sports.id),
+  
+  // Injury Classification
+  injuryType: text("injury_type", {
+    enum: ["acute", "chronic", "overuse", "reinjury", "illness"]
+  }).notNull(),
+  bodyPart: text("body_part", {
+    enum: ["head", "neck", "shoulder", "arm", "elbow", "wrist", "hand", "back", "chest", "abdomen", "hip", "thigh", "knee", "shin", "ankle", "foot", "other"]
+  }).notNull(),
+  specificDiagnosis: varchar("specific_diagnosis").notNull(),
+  injurySeverity: text("injury_severity", {
+    enum: ["minor", "moderate", "severe", "catastrophic"]
+  }).notNull(),
+  
+  // Mechanism and Environment
+  mechanismOfInjury: text("mechanism_of_injury"),
+  environmentalFactors: jsonb("environmental_factors").$type<{
+    weather?: string;
+    temperature?: number;
+    surfaceType?: string;
+    equipmentInvolved?: string[];
+    timeOfDay?: string;
+  }>(),
+  
+  // Initial Assessment
+  initialAssessment: text("initial_assessment").notNull(),
+  vitals: jsonb("vitals").$type<{
+    bloodPressure?: string;
+    heartRate?: number;
+    temperature?: number;
+    oxygenSaturation?: number;
+  }>(),
+  
+  // Treatment and Return to Play
+  immediateCarePlan: text("immediate_care_plan").notNull(),
+  referralNeeded: boolean("referral_needed").default(false),
+  referralTo: varchar("referral_to"),
+  referralDate: date("referral_date"),
+  
+  estimatedReturnDate: date("estimated_return_date"),
+  actualReturnDate: date("actual_return_date"),
+  returnToPLayClearance: jsonb("return_to_play_clearance").$type<{
+    clearedBy: string;
+    clearanceDate: string;
+    restrictions?: string[];
+    followUpRequired?: boolean;
+  }>(),
+  
+  // Documentation
+  incidentPhotos: jsonb("incident_photos").$type<string[]>().default([]),
+  witnessStatements: text("witness_statements"),
+  parentNotificationDate: timestamp("parent_notification_date"),
+  insuranceNotified: boolean("insurance_notified").default(false),
+  
+  // Status Tracking
+  caseStatus: text("case_status", {
+    enum: ["active", "monitoring", "cleared", "referred", "chronic_management"]
+  }).default("active"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Injury Follow-ups - Tracking recovery progress
+export const injuryFollowUps = pgTable("injury_follow_ups", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  injuryIncidentId: varchar("injury_incident_id").notNull().references(() => injuryIncidents.id),
+  athleticTrainerId: varchar("athletic_trainer_id").notNull().references(() => users.id),
+  followUpDate: date("follow_up_date").notNull(),
+  
+  // Progress Assessment
+  painLevel: integer("pain_level"), // 0-10 scale
+  rangeOfMotion: jsonb("range_of_motion").$type<{
+    measurement: string;
+    currentValue: number;
+    targetValue: number;
+    improvementFromLast?: number;
+  }[]>(),
+  functionalTests: jsonb("functional_tests").$type<{
+    testName: string;
+    result: "pass" | "fail" | "partial";
+    notes?: string;
+  }[]>(),
+  
+  // Treatment Progress
+  treatmentCompliance: text("treatment_compliance", {
+    enum: ["excellent", "good", "fair", "poor"]
+  }),
+  currentTreatments: jsonb("current_treatments").$type<string[]>(),
+  modificationsNeeded: text("modifications_needed"),
+  
+  // Return to Play Assessment
+  activityLevel: text("activity_level", {
+    enum: ["complete_rest", "light_activity", "modified_practice", "full_practice", "game_ready"]
+  }),
+  returnToPlayProgression: jsonb("return_to_play_progression").$type<{
+    currentPhase: number;
+    totalPhases: number;
+    phaseDescription: string;
+    nextPhaseTarget: string;
+  }>(),
+  
+  clinicalNotes: text("clinical_notes").notNull(),
+  nextFollowUpDate: date("next_follow_up_date"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Health Risk Assessments - Proactive injury prevention
+export const healthRiskAssessments = pgTable("health_risk_assessments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  athleteId: varchar("athlete_id").notNull().references(() => athletes.id),
+  athleticTrainerId: varchar("athletic_trainer_id").notNull().references(() => users.id),
+  assessmentDate: date("assessment_date").notNull(),
+  assessmentType: text("assessment_type", {
+    enum: ["preseason", "mid_season", "postseason", "post_injury", "annual", "targeted"]
+  }).notNull(),
+  
+  // Risk Factor Analysis
+  injuryHistory: jsonb("injury_history").$type<{
+    previousInjuries: Array<{
+      injuryType: string;
+      date: string;
+      severity: string;
+      fullyRecovered: boolean;
+    }>;
+    familyHistory: string[];
+    surgicalHistory: string[];
+  }>(),
+  
+  movementScreen: jsonb("movement_screen").$type<{
+    deepSquat: number;
+    hurdleStep: number;
+    inlineLunge: number;
+    shoulderMobility: number;
+    legRaise: number;
+    trunkStability: number;
+    rotaryStability: number;
+    totalScore: number;
+    highRiskPatterns: string[];
+  }>(),
+  
+  strengthAssessment: jsonb("strength_assessment").$type<{
+    coreStrength: number;
+    legStrength: number;
+    shoulderStrength: number;
+    balanceScore: number;
+    asymmetries: string[];
+  }>(),
+  
+  // AI-Powered Risk Analysis
+  riskFactors: jsonb("risk_factors").$type<{
+    factorName: string;
+    severity: "low" | "moderate" | "high" | "critical";
+    description: string;
+    recommendedInterventions: string[];
+  }[]>(),
+  
+  overallRiskScore: integer("overall_risk_score"), // 0-100
+  aiPredictionModel: varchar("ai_prediction_model"), // Which AI model version used
+  
+  // Recommendations
+  recommendedInterventions: jsonb("recommended_interventions").$type<{
+    interventionType: string;
+    priority: "immediate" | "high" | "medium" | "low";
+    description: string;
+    targetDate: string;
+    assignedTo?: string;
+  }[]>(),
+  
+  followUpSchedule: jsonb("follow_up_schedule").$type<{
+    frequency: string;
+    nextAssessmentDate: string;
+    focusAreas: string[];
+  }>(),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// =============================================================================
+// ACADEMIC COMPETITIONS FRAMEWORK (UIL EVENTS)
+// =============================================================================
+
+// Academic Events - Master catalog of UIL and other academic competitions
+export const academicEvents = pgTable("academic_events", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  eventName: varchar("event_name").notNull(),
+  eventCategory: text("event_category", {
+    enum: ["uil_academic", "speech_debate", "fine_arts", "stem_competition", "other_academic"]
+  }).notNull(),
+  competitionType: text("competition_type", {
+    enum: ["individual", "team", "duo", "group"]
+  }).notNull(),
+  gradeEligibility: jsonb("grade_eligibility").$type<number[]>(), // [9,10,11,12]
+  maxParticipants: integer("max_participants"),
+  teamSize: integer("team_size"), // For team events
+  
+  // Competition Details
+  description: text("description"),
+  preparationTime: varchar("preparation_time"), // "3 months", "ongoing"
+  materialsList: jsonb("materials_list").$type<string[]>(),
+  judgeCount: integer("judge_count"),
+  
+  // Scoring System
+  scoringMethod: text("scoring_method", {
+    enum: ["points", "ranking", "time", "accuracy", "rubric", "elimination"]
+  }).notNull(),
+  maxScore: integer("max_score"),
+  passingScore: integer("passing_score"),
+  advancementCriteria: text("advancement_criteria"),
+  
+  // Official Information
+  uilEventCode: varchar("uil_event_code"), // Official UIL code if applicable
+  officialRules: text("official_rules"),
+  equipmentRequired: jsonb("equipment_required").$type<string[]>(),
+  isActive: boolean("is_active").default(true),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Academic Competitions - Specific competition instances
+export const academicCompetitions = pgTable("academic_competitions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  competitionName: varchar("competition_name").notNull(),
+  organizerId: varchar("organizer_id").notNull().references(() => users.id),
+  competitionLevel: text("competition_level", {
+    enum: ["district", "regional", "state", "national", "invitational", "practice"]
+  }).notNull(),
+  
+  // Date and Location
+  competitionDate: timestamp("competition_date").notNull(),
+  registrationDeadline: date("registration_deadline"),
+  location: varchar("location").notNull(),
+  hostSchoolId: varchar("host_school_id").references(() => schools.id),
+  
+  // Events Offered
+  events: jsonb("events").$type<Array<{
+    eventId: string;
+    divisions: string[];
+    maxEntries: number;
+    entryFee: number;
+    currentEntries: number;
+  }>>(),
+  
+  // Competition Status
+  competitionStatus: text("competition_status", {
+    enum: ["planning", "registration_open", "registration_closed", "in_progress", "completed", "cancelled"]
+  }).default("planning"),
+  
+  // Results and Advancement
+  resultsPublished: boolean("results_published").default(false),
+  advancementLevel: varchar("advancement_level"), // Where winners advance to
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Academic Participants - Students competing in academic events
+export const academicParticipants = pgTable("academic_participants", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  competitionId: varchar("competition_id").notNull().references(() => academicCompetitions.id),
+  athleteId: varchar("athlete_id").references(() => athletes.id), // Link to athlete if they exist
+  schoolId: varchar("school_id").notNull().references(() => schools.id),
+  coachId: varchar("coach_id").references(() => users.id),
+  
+  // Participant Details (if not linked to athlete)
+  participantName: varchar("participant_name").notNull(),
+  grade: integer("grade").notNull(),
+  division: varchar("division"),
+  
+  // Event Registrations
+  registeredEvents: jsonb("registered_events").$type<Array<{
+    eventId: string;
+    registrationStatus: "pending" | "confirmed" | "withdrawn";
+    seedRank?: number;
+  }>>(),
+  
+  // Competition Performance
+  overallPlacement: integer("overall_placement"),
+  totalPoints: decimal("total_points", { precision: 8, scale: 2 }),
+  qualifiedForAdvancement: boolean("qualified_for_advancement").default(false),
+  advancementDetails: jsonb("advancement_details").$type<{
+    nextCompetitionLevel: string;
+    qualificationDate: string;
+    events: string[];
+  }>(),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Academic Results - Individual event results
+export const academicResults = pgTable("academic_results", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  competitionId: varchar("competition_id").notNull().references(() => academicCompetitions.id),
+  participantId: varchar("participant_id").notNull().references(() => academicParticipants.id),
+  eventId: varchar("event_id").notNull().references(() => academicEvents.id),
+  
+  // Result Details
+  placement: integer("placement"), // 1st, 2nd, 3rd, etc.
+  score: decimal("score", { precision: 10, scale: 2 }),
+  maxPossibleScore: decimal("max_possible_score", { precision: 10, scale: 2 }),
+  percentageScore: decimal("percentage_score", { precision: 5, scale: 2 }),
+  
+  // Performance Breakdown
+  performanceBreakdown: jsonb("performance_breakdown").$type<{
+    category: string;
+    pointsEarned: number;
+    pointsPossible: number;
+    notes?: string;
+  }[]>(),
+  
+  // Recognition and Advancement
+  medal: text("medal", { enum: ["gold", "silver", "bronze", "participation", "none"] }),
+  qualifiesForAdvancement: boolean("qualifies_for_advancement").default(false),
+  specialRecognition: varchar("special_recognition"),
+  
+  // Judge Feedback
+  judgeFeedback: text("judge_feedback"),
+  areasOfStrength: jsonb("areas_of_strength").$type<string[]>(),
+  areasForImprovement: jsonb("areas_for_improvement").$type<string[]>(),
+  
+  resultTimestamp: timestamp("result_timestamp").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// =============================================================================
+// BUDGET MANAGEMENT SYSTEM
+// =============================================================================
+
+// District Budgets - Top-level district athletic funding
+export const districtBudgets = pgTable("district_budgets", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  districtId: varchar("district_id").notNull().references(() => districts.id),
+  fiscalYear: varchar("fiscal_year").notNull(), // "2024-2025"
+  budgetType: text("budget_type", {
+    enum: ["athletics", "academics", "fine_arts", "facilities", "transportation", "general"]
+  }).notNull(),
+  
+  // Budget Amounts
+  totalBudgetAllocated: decimal("total_budget_allocated", { precision: 12, scale: 2 }).notNull(),
+  totalBudgetSpent: decimal("total_budget_spent", { precision: 12, scale: 2 }).default("0"),
+  totalBudgetRemaining: decimal("total_budget_remaining", { precision: 12, scale: 2 }).default("0"),
+  
+  // Approval and Status
+  budgetStatus: text("budget_status", {
+    enum: ["draft", "proposed", "approved", "active", "closed"]
+  }).default("draft"),
+  approvedBy: varchar("approved_by").references(() => users.id),
+  approvalDate: date("approval_date"),
+  
+  // Budget Categories Breakdown
+  categoryBreakdown: jsonb("category_breakdown").$type<{
+    categoryName: string;
+    allocated: number;
+    spent: number;
+    remaining: number;
+    percentage: number;
+  }[]>().default([]),
+  
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// School Department Budgets - School-level budget allocations
+export const schoolDepartmentBudgets = pgTable("school_department_budgets", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  schoolId: varchar("school_id").notNull().references(() => schools.id),
+  districtBudgetId: varchar("district_budget_id").references(() => districtBudgets.id),
+  departmentType: text("department_type", {
+    enum: ["athletics", "band", "choir", "theatre", "academics", "facilities", "general"]
+  }).notNull(),
+  fiscalYear: varchar("fiscal_year").notNull(),
+  
+  // Allocated Amounts
+  budgetAllocated: decimal("budget_allocated", { precision: 10, scale: 2 }).notNull(),
+  budgetSpent: decimal("budget_spent", { precision: 10, scale: 2 }).default("0"),
+  budgetRemaining: decimal("budget_remaining", { precision: 10, scale: 2 }).default("0"),
+  
+  // Department Leadership
+  departmentHeadId: varchar("department_head_id").references(() => users.id),
+  budgetManagerId: varchar("budget_manager_id").references(() => users.id),
+  
+  // Spending Controls
+  spendingLimits: jsonb("spending_limits").$type<{
+    maxSinglePurchase: number;
+    requiresApprovalOver: number;
+    monthlySpendingLimit: number;
+  }>(),
+  
+  budgetStatus: text("budget_status", {
+    enum: ["active", "frozen", "overspent", "closed"]
+  }).default("active"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Sport Program Budgets - Individual sport budget allocations
+export const sportProgramBudgets = pgTable("sport_program_budgets", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  schoolSportsProgramId: varchar("school_sports_program_id").notNull().references(() => schoolSportsPrograms.id),
+  schoolDepartmentBudgetId: varchar("school_department_budget_id").references(() => schoolDepartmentBudgets.id),
+  fiscalYear: varchar("fiscal_year").notNull(),
+  
+  // Budget Allocation
+  totalAllocated: decimal("total_allocated", { precision: 10, scale: 2 }).notNull(),
+  totalSpent: decimal("total_spent", { precision: 10, scale: 2 }).default("0"),
+  totalRemaining: decimal("total_remaining", { precision: 10, scale: 2 }).default("0"),
+  
+  // Budget Categories
+  equipmentBudget: decimal("equipment_budget", { precision: 8, scale: 2 }).default("0"),
+  uniformsBudget: decimal("uniforms_budget", { precision: 8, scale: 2 }).default("0"),
+  travelBudget: decimal("travel_budget", { precision: 8, scale: 2 }).default("0"),
+  facilitiesBudget: decimal("facilities_budget", { precision: 8, scale: 2 }).default("0"),
+  officiatingBudget: decimal("officiating_budget", { precision: 8, scale: 2 }).default("0"),
+  medicalBudget: decimal("medical_budget", { precision: 8, scale: 2 }).default("0"),
+  miscellaneousBudget: decimal("miscellaneous_budget", { precision: 8, scale: 2 }).default("0"),
+  
+  // Spending Tracking
+  equipmentSpent: decimal("equipment_spent", { precision: 8, scale: 2 }).default("0"),
+  uniformsSpent: decimal("uniforms_spent", { precision: 8, scale: 2 }).default("0"),
+  travelSpent: decimal("travel_spent", { precision: 8, scale: 2 }).default("0"),
+  facilitiesSpent: decimal("facilities_spent", { precision: 8, scale: 2 }).default("0"),
+  officiatingSpent: decimal("officiating_spent", { precision: 8, scale: 2 }).default("0"),
+  medicalSpent: decimal("medical_spent", { precision: 8, scale: 2 }).default("0"),
+  miscellaneousSpent: decimal("miscellaneous_spent", { precision: 8, scale: 2 }).default("0"),
+  
+  budgetManagerId: varchar("budget_manager_id").references(() => users.id), // Usually head coach
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Expense Records - Individual purchases and expenses
+export const expenseRecords = pgTable("expense_records", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sportProgramBudgetId: varchar("sport_program_budget_id").references(() => sportProgramBudgets.id),
+  schoolDepartmentBudgetId: varchar("school_department_budget_id").references(() => schoolDepartmentBudgets.id),
+  
+  // Purchase Details
+  expenseDate: date("expense_date").notNull(),
+  vendor: varchar("vendor").notNull(),
+  description: text("description").notNull(),
+  expenseCategory: text("expense_category", {
+    enum: ["equipment", "uniforms", "travel", "facilities", "officiating", "medical", "miscellaneous"]
+  }).notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  
+  // Approval Workflow
+  requestedBy: varchar("requested_by").notNull().references(() => users.id),
+  approvedBy: varchar("approved_by").references(() => users.id),
+  approvalStatus: text("approval_status", {
+    enum: ["pending", "approved", "rejected", "paid"]
+  }).default("pending"),
+  approvalDate: date("approval_date"),
+  
+  // Payment Information
+  paymentMethod: text("payment_method", {
+    enum: ["check", "credit_card", "purchase_order", "petty_cash", "reimbursement"]
+  }),
+  purchaseOrderNumber: varchar("purchase_order_number"),
+  invoiceNumber: varchar("invoice_number"),
+  receiptAttached: boolean("receipt_attached").default(false),
+  
+  // Tracking
+  isRecurring: boolean("is_recurring").default(false),
+  recurringFrequency: varchar("recurring_frequency"), // "monthly", "quarterly", etc.
+  taxAmount: decimal("tax_amount", { precision: 8, scale: 2 }).default("0"),
+  notes: text("notes"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Budget Transfers - Moving money between categories/programs
+export const budgetTransfers = pgTable("budget_transfers", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  fromBudgetType: text("from_budget_type", {
+    enum: ["district", "school_department", "sport_program"]
+  }).notNull(),
+  fromBudgetId: varchar("from_budget_id").notNull(),
+  toBudgetType: text("to_budget_type", {
+    enum: ["district", "school_department", "sport_program"]
+  }).notNull(),
+  toBudgetId: varchar("to_budget_id").notNull(),
+  
+  transferAmount: decimal("transfer_amount", { precision: 10, scale: 2 }).notNull(),
+  transferReason: text("transfer_reason").notNull(),
+  
+  requestedBy: varchar("requested_by").notNull().references(() => users.id),
+  approvedBy: varchar("approved_by").references(() => users.id),
+  transferStatus: text("transfer_status", {
+    enum: ["pending", "approved", "rejected", "completed"]
+  }).default("pending"),
+  
+  transferDate: date("transfer_date"),
+  fiscalYear: varchar("fiscal_year").notNull(),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// =============================================================================
+// COMPREHENSIVE SCHEDULING SYSTEM
+// =============================================================================
+
+// Games/Matches - Athletic competition scheduling
+export const games = pgTable("games", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  seasonId: varchar("season_id").notNull().references(() => athleticSeasons.id),
+  homeSchoolSportsProgramId: varchar("home_school_sports_program_id").notNull().references(() => schoolSportsPrograms.id),
+  awaySchoolSportsProgramId: varchar("away_school_sports_program_id").references(() => schoolSportsPrograms.id),
+  opponentName: varchar("opponent_name"), // For non-school opponents
+  
+  // Game Details
+  gameDate: date("game_date").notNull(),
+  gameTime: varchar("game_time"), // "7:00 PM"
+  gameType: text("game_type", {
+    enum: ["regular_season", "playoff", "tournament", "scrimmage", "jamboree", "exhibition"]
+  }).notNull(),
+  competitionLevel: text("competition_level", {
+    enum: ["freshman", "junior_varsity", "varsity", "mixed"]
+  }).notNull(),
+  
+  // Location
+  venueId: varchar("venue_id").references(() => athleticVenues.id),
+  venueName: varchar("venue_name"), // For away games at other venues
+  isHomeGame: boolean("is_home_game").default(true),
+  
+  // Game Management
+  gameStatus: text("game_status", {
+    enum: ["scheduled", "confirmed", "in_progress", "completed", "cancelled", "postponed", "forfeit"]
+  }).default("scheduled"),
+  weather: varchar("weather"),
+  weatherStatus: text("weather_status", {
+    enum: ["normal", "watch", "warning", "cancelled"]
+  }).default("normal"),
+  
+  // Officiating
+  officialsNeeded: integer("officials_needed").default(3),
+  officialsConfirmed: integer("officials_confirmed").default(0),
+  officiatingCost: decimal("officiating_cost", { precision: 8, scale: 2 }),
+  
+  // Results
+  homeScore: integer("home_score"),
+  awayScore: integer("away_score"),
+  winner: text("winner", { enum: ["home", "away", "tie"] }),
+  gameLength: integer("game_length"), // minutes
+  attendance: integer("attendance"),
+  
+  // Administrative
+  transportationArranged: boolean("transportation_arranged").default(false),
+  transportationCost: decimal("transportation_cost", { precision: 8, scale: 2 }),
+  gameNotes: text("game_notes"),
+  
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Practice Sessions - Team practice scheduling
+export const practices = pgTable("practices", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  schoolSportsProgramId: varchar("school_sports_program_id").notNull().references(() => schoolSportsPrograms.id),
+  seasonId: varchar("season_id").notNull().references(() => athleticSeasons.id),
+  
+  // Practice Details
+  practiceDate: date("practice_date").notNull(),
+  startTime: varchar("start_time").notNull(), // "3:30 PM"
+  endTime: varchar("end_time").notNull(), // "5:30 PM"
+  duration: integer("duration"), // minutes
+  
+  // Location and Type
+  venueId: varchar("venue_id").references(() => athleticVenues.id),
+  practiceType: text("practice_type", {
+    enum: ["regular", "conditioning", "film_study", "scrimmage", "team_meeting", "individual_work"]
+  }).default("regular"),
+  
+  // Practice Focus
+  practiceObjectives: jsonb("practice_objectives").$type<string[]>().default([]),
+  drillsPlanned: jsonb("drills_planned").$type<{
+    drillName: string;
+    duration: number;
+    focus: string;
+  }[]>().default([]),
+  
+  // Attendance and Status
+  practiceStatus: text("practice_status", {
+    enum: ["scheduled", "in_progress", "completed", "cancelled", "moved"]
+  }).default("scheduled"),
+  attendanceRequired: boolean("attendance_required").default(true),
+  playersPresent: integer("players_present"),
+  playersAbsent: integer("players_absent"),
+  
+  // Weather and Conditions
+  weather: varchar("weather"),
+  indoorAlternativeId: varchar("indoor_alternative_id").references(() => athleticVenues.id),
+  
+  // Notes and Follow-up
+  practiceNotes: text("practice_notes"),
+  equipmentNeeded: jsonb("equipment_needed").$type<string[]>().default([]),
+  injuriesOccurred: boolean("injuries_occurred").default(false),
+  
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Facility Reservations - Venue booking system
+export const facilityReservations = pgTable("facility_reservations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  venueId: varchar("venue_id").notNull().references(() => athleticVenues.id),
+  schoolId: varchar("school_id").notNull().references(() => schools.id),
+  requestedBy: varchar("requested_by").notNull().references(() => users.id),
+  
+  // Reservation Details
+  reservationDate: date("reservation_date").notNull(),
+  startTime: varchar("start_time").notNull(),
+  endTime: varchar("end_time").notNull(),
+  duration: integer("duration"), // minutes
+  
+  // Usage Information
+  usageType: text("usage_type", {
+    enum: ["practice", "game", "meeting", "event", "tournament", "maintenance", "other"]
+  }).notNull(),
+  schoolSportsProgramId: varchar("school_sports_program_id").references(() => schoolSportsPrograms.id),
+  gameId: varchar("game_id").references(() => games.id),
+  practiceId: varchar("practice_id").references(() => practices.id),
+  
+  // Approval and Status
+  reservationStatus: text("reservation_status", {
+    enum: ["pending", "approved", "denied", "confirmed", "completed", "cancelled"]
+  }).default("pending"),
+  approvedBy: varchar("approved_by").references(() => users.id),
+  approvalDate: timestamp("approval_date"),
+  
+  // Facility Setup
+  setupRequired: jsonb("setup_required").$type<{
+    equipment: string[];
+    specialArrangements: string;
+    custodialNeeds: string[];
+  }>(),
+  estimatedAttendance: integer("estimated_attendance"),
+  
+  // Conflict Detection
+  conflictsWith: jsonb("conflicts_with").$type<string[]>().default([]), // Other reservation IDs
+  conflictResolution: text("conflict_resolution"),
+  
+  // Costs and Fees
+  facilityCost: decimal("facility_cost", { precision: 8, scale: 2 }).default("0"),
+  custodialCost: decimal("custodial_cost", { precision: 8, scale: 2 }).default("0"),
+  securityCost: decimal("security_cost", { precision: 8, scale: 2 }).default("0"),
+  
+  // Notes
+  specialRequests: text("special_requests"),
+  reservationNotes: text("reservation_notes"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Athletic Calendar Events - Comprehensive calendar system
+export const athleticCalendarEvents = pgTable("athletic_calendar_events", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  districtId: varchar("district_id").references(() => districts.id),
+  schoolId: varchar("school_id").references(() => schools.id),
+  seasonId: varchar("season_id").references(() => athleticSeasons.id),
+  
+  // Event Details
+  eventTitle: varchar("event_title").notNull(),
+  eventType: text("event_type", {
+    enum: ["game", "practice", "meeting", "tournament", "academic_competition", "deadline", "training", "other"]
+  }).notNull(),
+  eventDate: date("event_date").notNull(),
+  startTime: varchar("start_time"),
+  endTime: varchar("end_time"),
+  allDay: boolean("all_day").default(false),
+  
+  // Related Records
+  gameId: varchar("game_id").references(() => games.id),
+  practiceId: varchar("practice_id").references(() => practices.id),
+  academicCompetitionId: varchar("academic_competition_id").references(() => academicCompetitions.id),
+  
+  // Visibility and Audience
+  visibility: text("visibility", {
+    enum: ["public", "district", "school", "team", "coaching_staff", "private"]
+  }).default("school"),
+  targetAudience: jsonb("target_audience").$type<string[]>().default([]), // ["athletes", "parents", "coaches", "community"]
+  
+  // Location and Description
+  location: varchar("location"),
+  description: text("description"),
+  importanceLevel: text("importance_level", {
+    enum: ["low", "normal", "high", "critical"]
+  }).default("normal"),
+  
+  // Reminders and Notifications
+  reminderSettings: jsonb("reminder_settings").$type<{
+    sendReminder: boolean;
+    reminderDays: number[];
+    reminderMethods: string[];
+  }>(),
+  
+  // Recurrence
+  isRecurring: boolean("is_recurring").default(false),
+  recurrencePattern: varchar("recurrence_pattern"), // "weekly", "bi-weekly", etc.
+  recurrenceEndDate: date("recurrence_end_date"),
+  
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Conflict Detection and Resolution
+export const scheduleConflicts = pgTable("schedule_conflicts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  conflictType: text("conflict_type", {
+    enum: ["venue_double_booked", "coach_conflict", "athlete_conflict", "transportation_conflict", "official_conflict"]
+  }).notNull(),
+  
+  // Conflicting Events
+  event1Type: varchar("event1_type").notNull(), // "game", "practice", "reservation"
+  event1Id: varchar("event1_id").notNull(),
+  event2Type: varchar("event2_type").notNull(),
+  event2Id: varchar("event2_id").notNull(),
+  
+  // Conflict Details
+  conflictDate: date("conflict_date").notNull(),
+  conflictTimeStart: varchar("conflict_time_start"),
+  conflictTimeEnd: varchar("conflict_time_end"),
+  severity: text("severity", {
+    enum: ["minor", "major", "critical"]
+  }).default("minor"),
+  
+  // Resolution
+  conflictStatus: text("conflict_status", {
+    enum: ["detected", "acknowledged", "resolving", "resolved", "unresolvable"]
+  }).default("detected"),
+  resolutionMethod: text("resolution_method"),
+  resolutionNotes: text("resolution_notes"),
+  resolvedBy: varchar("resolved_by").references(() => users.id),
+  resolvedAt: timestamp("resolved_at"),
+  
+  detectedAt: timestamp("detected_at").defaultNow(),
+});
+
+// =============================================================================
 // FLEXIBLE TOURNAMENT CONFIGURATION SYSTEM
 // =============================================================================
 
@@ -5616,4 +6566,600 @@ export type InsertScoringPolicy = z.infer<typeof insertScoringPolicySchema>;
 
 // SPORT-SPECIFIC CONFIGURATION TABLES
 // Import and re-export sport configuration tables
+// =============================================================================
+// ATHLETIC MANAGEMENT RELATIONS
+// =============================================================================
+
+// Sports relations
+export const sportsRelations = relations(sports, ({ many }) => ({
+  schoolSportsPrograms: many(schoolSportsPrograms),
+  injuryIncidents: many(injuryIncidents),
+}));
+
+// Athletic Seasons relations
+export const athleticSeasonsRelations = relations(athleticSeasons, ({ one, many }) => ({
+  district: one(districts, {
+    fields: [athleticSeasons.districtId],
+    references: [districts.id],
+  }),
+  schoolSportsPrograms: many(schoolSportsPrograms),
+  rosters: many(rosters),
+  games: many(games),
+  practices: many(practices),
+  athleticCalendarEvents: many(athleticCalendarEvents),
+}));
+
+// School Sports Programs relations
+export const schoolSportsProgramsRelations = relations(schoolSportsPrograms, ({ one, many }) => ({
+  school: one(schools, {
+    fields: [schoolSportsPrograms.schoolId],
+    references: [schools.id],
+  }),
+  sport: one(sports, {
+    fields: [schoolSportsPrograms.sportId],
+    references: [sports.id],
+  }),
+  season: one(athleticSeasons, {
+    fields: [schoolSportsPrograms.seasonId],
+    references: [athleticSeasons.id],
+  }),
+  headCoach: one(users, {
+    fields: [schoolSportsPrograms.headCoachId],
+    references: [users.id],
+  }),
+  homeVenue: one(athleticVenues, {
+    fields: [schoolSportsPrograms.homeVenueId],
+    references: [athleticVenues.id],
+  }),
+  rosters: many(rosters),
+  sportProgramBudgets: many(sportProgramBudgets),
+  homeGames: many(games, { relationName: "homeProgram" }),
+  awayGames: many(games, { relationName: "awayProgram" }),
+  practices: many(practices),
+  facilityReservations: many(facilityReservations),
+}));
+
+// Athletes relations
+export const athletesRelations = relations(athletes, ({ one, many }) => ({
+  school: one(schools, {
+    fields: [athletes.schoolId],
+    references: [schools.id],
+  }),
+  district: one(districts, {
+    fields: [athletes.districtId],
+    references: [districts.id],
+  }),
+  studentData: one(studentData, {
+    fields: [athletes.studentDataId],
+    references: [studentData.id],
+  }),
+  healthData: one(healthData, {
+    fields: [athletes.healthDataId],
+    references: [healthData.id],
+  }),
+  athleticTrainer: one(users, {
+    fields: [athletes.athleticTrainerId],
+    references: [users.id],
+  }),
+  rosters: many(rosters),
+  injuryIncidents: many(injuryIncidents),
+  healthRiskAssessments: many(healthRiskAssessments),
+  academicParticipants: many(academicParticipants),
+}));
+
+// Rosters relations
+export const rostersRelations = relations(rosters, ({ one }) => ({
+  schoolSportsProgram: one(schoolSportsPrograms, {
+    fields: [rosters.schoolSportsProgramId],
+    references: [schoolSportsPrograms.id],
+  }),
+  athlete: one(athletes, {
+    fields: [rosters.athleteId],
+    references: [athletes.id],
+  }),
+  season: one(athleticSeasons, {
+    fields: [rosters.seasonId],
+    references: [athleticSeasons.id],
+  }),
+}));
+
+// Injury Incidents relations
+export const injuryIncidentsRelations = relations(injuryIncidents, ({ one, many }) => ({
+  athlete: one(athletes, {
+    fields: [injuryIncidents.athleteId],
+    references: [athletes.id],
+  }),
+  school: one(schools, {
+    fields: [injuryIncidents.schoolId],
+    references: [schools.id],
+  }),
+  athleticTrainer: one(users, {
+    fields: [injuryIncidents.athleticTrainerId],
+    references: [users.id],
+  }),
+  sport: one(sports, {
+    fields: [injuryIncidents.sportId],
+    references: [sports.id],
+  }),
+  followUps: many(injuryFollowUps),
+}));
+
+// Injury Follow-ups relations
+export const injuryFollowUpsRelations = relations(injuryFollowUps, ({ one }) => ({
+  injuryIncident: one(injuryIncidents, {
+    fields: [injuryFollowUps.injuryIncidentId],
+    references: [injuryIncidents.id],
+  }),
+  athleticTrainer: one(users, {
+    fields: [injuryFollowUps.athleticTrainerId],
+    references: [users.id],
+  }),
+}));
+
+// Health Risk Assessments relations
+export const healthRiskAssessmentsRelations = relations(healthRiskAssessments, ({ one }) => ({
+  athlete: one(athletes, {
+    fields: [healthRiskAssessments.athleteId],
+    references: [athletes.id],
+  }),
+  athleticTrainer: one(users, {
+    fields: [healthRiskAssessments.athleticTrainerId],
+    references: [users.id],
+  }),
+}));
+
+// Academic Events relations
+export const academicEventsRelations = relations(academicEvents, ({ many }) => ({
+  academicResults: many(academicResults),
+}));
+
+// Academic Competitions relations
+export const academicCompetitionsRelations = relations(academicCompetitions, ({ one, many }) => ({
+  organizer: one(users, {
+    fields: [academicCompetitions.organizerId],
+    references: [users.id],
+  }),
+  hostSchool: one(schools, {
+    fields: [academicCompetitions.hostSchoolId],
+    references: [schools.id],
+  }),
+  participants: many(academicParticipants),
+  results: many(academicResults),
+  athleticCalendarEvents: many(athleticCalendarEvents),
+}));
+
+// Academic Participants relations
+export const academicParticipantsRelations = relations(academicParticipants, ({ one, many }) => ({
+  competition: one(academicCompetitions, {
+    fields: [academicParticipants.competitionId],
+    references: [academicCompetitions.id],
+  }),
+  athlete: one(athletes, {
+    fields: [academicParticipants.athleteId],
+    references: [athletes.id],
+  }),
+  school: one(schools, {
+    fields: [academicParticipants.schoolId],
+    references: [schools.id],
+  }),
+  coach: one(users, {
+    fields: [academicParticipants.coachId],
+    references: [users.id],
+  }),
+  results: many(academicResults),
+}));
+
+// Academic Results relations
+export const academicResultsRelations = relations(academicResults, ({ one }) => ({
+  competition: one(academicCompetitions, {
+    fields: [academicResults.competitionId],
+    references: [academicCompetitions.id],
+  }),
+  participant: one(academicParticipants, {
+    fields: [academicResults.participantId],
+    references: [academicParticipants.id],
+  }),
+  event: one(academicEvents, {
+    fields: [academicResults.eventId],
+    references: [academicEvents.id],
+  }),
+}));
+
+// Budget Management Relations
+export const districtBudgetsRelations = relations(districtBudgets, ({ one, many }) => ({
+  district: one(districts, {
+    fields: [districtBudgets.districtId],
+    references: [districts.id],
+  }),
+  approvedBy: one(users, {
+    fields: [districtBudgets.approvedBy],
+    references: [users.id],
+  }),
+  schoolDepartmentBudgets: many(schoolDepartmentBudgets),
+}));
+
+export const schoolDepartmentBudgetsRelations = relations(schoolDepartmentBudgets, ({ one, many }) => ({
+  school: one(schools, {
+    fields: [schoolDepartmentBudgets.schoolId],
+    references: [schools.id],
+  }),
+  districtBudget: one(districtBudgets, {
+    fields: [schoolDepartmentBudgets.districtBudgetId],
+    references: [districtBudgets.id],
+  }),
+  departmentHead: one(users, {
+    fields: [schoolDepartmentBudgets.departmentHeadId],
+    references: [users.id],
+  }),
+  budgetManager: one(users, {
+    fields: [schoolDepartmentBudgets.budgetManagerId],
+    references: [users.id],
+  }),
+  sportProgramBudgets: many(sportProgramBudgets),
+  expenseRecords: many(expenseRecords),
+}));
+
+export const sportProgramBudgetsRelations = relations(sportProgramBudgets, ({ one, many }) => ({
+  schoolSportsProgram: one(schoolSportsPrograms, {
+    fields: [sportProgramBudgets.schoolSportsProgramId],
+    references: [schoolSportsPrograms.id],
+  }),
+  schoolDepartmentBudget: one(schoolDepartmentBudgets, {
+    fields: [sportProgramBudgets.schoolDepartmentBudgetId],
+    references: [schoolDepartmentBudgets.id],
+  }),
+  budgetManager: one(users, {
+    fields: [sportProgramBudgets.budgetManagerId],
+    references: [users.id],
+  }),
+  expenseRecords: many(expenseRecords),
+}));
+
+export const expenseRecordsRelations = relations(expenseRecords, ({ one }) => ({
+  sportProgramBudget: one(sportProgramBudgets, {
+    fields: [expenseRecords.sportProgramBudgetId],
+    references: [sportProgramBudgets.id],
+  }),
+  schoolDepartmentBudget: one(schoolDepartmentBudgets, {
+    fields: [expenseRecords.schoolDepartmentBudgetId],
+    references: [schoolDepartmentBudgets.id],
+  }),
+  requestedBy: one(users, {
+    fields: [expenseRecords.requestedBy],
+    references: [users.id],
+  }),
+  approvedBy: one(users, {
+    fields: [expenseRecords.approvedBy],
+    references: [users.id],
+  }),
+}));
+
+export const budgetTransfersRelations = relations(budgetTransfers, ({ one }) => ({
+  requestedBy: one(users, {
+    fields: [budgetTransfers.requestedBy],
+    references: [users.id],
+  }),
+  approvedBy: one(users, {
+    fields: [budgetTransfers.approvedBy],
+    references: [users.id],
+  }),
+}));
+
+// Scheduling System Relations
+export const gamesRelations = relations(games, ({ one, many }) => ({
+  season: one(athleticSeasons, {
+    fields: [games.seasonId],
+    references: [athleticSeasons.id],
+  }),
+  homeSchoolSportsProgram: one(schoolSportsPrograms, {
+    fields: [games.homeSchoolSportsProgramId],
+    references: [schoolSportsPrograms.id],
+    relationName: "homeProgram",
+  }),
+  awaySchoolSportsProgram: one(schoolSportsPrograms, {
+    fields: [games.awaySchoolSportsProgramId],
+    references: [schoolSportsPrograms.id],
+    relationName: "awayProgram",
+  }),
+  venue: one(athleticVenues, {
+    fields: [games.venueId],
+    references: [athleticVenues.id],
+  }),
+  createdBy: one(users, {
+    fields: [games.createdBy],
+    references: [users.id],
+  }),
+  athleticCalendarEvents: many(athleticCalendarEvents),
+  facilityReservations: many(facilityReservations),
+}));
+
+export const practicesRelations = relations(practices, ({ one, many }) => ({
+  schoolSportsProgram: one(schoolSportsPrograms, {
+    fields: [practices.schoolSportsProgramId],
+    references: [schoolSportsPrograms.id],
+  }),
+  season: one(athleticSeasons, {
+    fields: [practices.seasonId],
+    references: [athleticSeasons.id],
+  }),
+  venue: one(athleticVenues, {
+    fields: [practices.venueId],
+    references: [athleticVenues.id],
+  }),
+  indoorAlternative: one(athleticVenues, {
+    fields: [practices.indoorAlternativeId],
+    references: [athleticVenues.id],
+  }),
+  createdBy: one(users, {
+    fields: [practices.createdBy],
+    references: [users.id],
+  }),
+  athleticCalendarEvents: many(athleticCalendarEvents),
+  facilityReservations: many(facilityReservations),
+}));
+
+export const facilityReservationsRelations = relations(facilityReservations, ({ one }) => ({
+  venue: one(athleticVenues, {
+    fields: [facilityReservations.venueId],
+    references: [athleticVenues.id],
+  }),
+  school: one(schools, {
+    fields: [facilityReservations.schoolId],
+    references: [schools.id],
+  }),
+  requestedBy: one(users, {
+    fields: [facilityReservations.requestedBy],
+    references: [users.id],
+  }),
+  approvedBy: one(users, {
+    fields: [facilityReservations.approvedBy],
+    references: [users.id],
+  }),
+  schoolSportsProgram: one(schoolSportsPrograms, {
+    fields: [facilityReservations.schoolSportsProgramId],
+    references: [schoolSportsPrograms.id],
+  }),
+  game: one(games, {
+    fields: [facilityReservations.gameId],
+    references: [games.id],
+  }),
+  practice: one(practices, {
+    fields: [facilityReservations.practiceId],
+    references: [practices.id],
+  }),
+}));
+
+export const athleticCalendarEventsRelations = relations(athleticCalendarEvents, ({ one }) => ({
+  district: one(districts, {
+    fields: [athleticCalendarEvents.districtId],
+    references: [districts.id],
+  }),
+  school: one(schools, {
+    fields: [athleticCalendarEvents.schoolId],
+    references: [schools.id],
+  }),
+  season: one(athleticSeasons, {
+    fields: [athleticCalendarEvents.seasonId],
+    references: [athleticSeasons.id],
+  }),
+  game: one(games, {
+    fields: [athleticCalendarEvents.gameId],
+    references: [games.id],
+  }),
+  practice: one(practices, {
+    fields: [athleticCalendarEvents.practiceId],
+    references: [practices.id],
+  }),
+  academicCompetition: one(academicCompetitions, {
+    fields: [athleticCalendarEvents.academicCompetitionId],
+    references: [academicCompetitions.id],
+  }),
+  createdBy: one(users, {
+    fields: [athleticCalendarEvents.createdBy],
+    references: [users.id],
+  }),
+}));
+
+export const scheduleConflictsRelations = relations(scheduleConflicts, ({ one }) => ({
+  resolvedBy: one(users, {
+    fields: [scheduleConflicts.resolvedBy],
+    references: [users.id],
+  }),
+}));
+
+// =============================================================================
+// ZOD SCHEMAS FOR NEW ATHLETIC MANAGEMENT TABLES
+// =============================================================================
+
+// Athletic Management Schemas
+export const insertSportSchema = createInsertSchema(sports).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAthleticSeasonSchema = createInsertSchema(athleticSeasons).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSchoolSportsProgramSchema = createInsertSchema(schoolSportsPrograms).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAthleteSchema = createInsertSchema(athletes).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertRosterSchema = createInsertSchema(rosters).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Injury & Health Tracking Schemas
+export const insertInjuryIncidentSchema = createInsertSchema(injuryIncidents).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertInjuryFollowUpSchema = createInsertSchema(injuryFollowUps).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertHealthRiskAssessmentSchema = createInsertSchema(healthRiskAssessments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Academic Competition Schemas
+export const insertAcademicEventSchema = createInsertSchema(academicEvents).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAcademicCompetitionSchema = createInsertSchema(academicCompetitions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAcademicParticipantSchema = createInsertSchema(academicParticipants).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAcademicResultSchema = createInsertSchema(academicResults).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Budget Management Schemas
+export const insertDistrictBudgetSchema = createInsertSchema(districtBudgets).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSchoolDepartmentBudgetSchema = createInsertSchema(schoolDepartmentBudgets).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSportProgramBudgetSchema = createInsertSchema(sportProgramBudgets).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertExpenseRecordSchema = createInsertSchema(expenseRecords).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertBudgetTransferSchema = createInsertSchema(budgetTransfers).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Scheduling System Schemas
+export const insertGameSchema = createInsertSchema(games).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertPracticeSchema = createInsertSchema(practices).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertFacilityReservationSchema = createInsertSchema(facilityReservations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAthleticCalendarEventSchema = createInsertSchema(athleticCalendarEvents).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertScheduleConflictSchema = createInsertSchema(scheduleConflicts).omit({
+  id: true,
+  detectedAt: true,
+});
+
+// =============================================================================
+// TYPE EXPORTS FOR NEW ATHLETIC MANAGEMENT TABLES
+// =============================================================================
+
+// Athletic Management Types
+export type Sport = typeof sports.$inferSelect;
+export type InsertSport = z.infer<typeof insertSportSchema>;
+export type AthleticSeason = typeof athleticSeasons.$inferSelect;
+export type InsertAthleticSeason = z.infer<typeof insertAthleticSeasonSchema>;
+export type SchoolSportsProgram = typeof schoolSportsPrograms.$inferSelect;
+export type InsertSchoolSportsProgram = z.infer<typeof insertSchoolSportsProgramSchema>;
+export type Athlete = typeof athletes.$inferSelect;
+export type InsertAthlete = z.infer<typeof insertAthleteSchema>;
+export type Roster = typeof rosters.$inferSelect;
+export type InsertRoster = z.infer<typeof insertRosterSchema>;
+
+// Injury & Health Tracking Types
+export type InjuryIncident = typeof injuryIncidents.$inferSelect;
+export type InsertInjuryIncident = z.infer<typeof insertInjuryIncidentSchema>;
+export type InjuryFollowUp = typeof injuryFollowUps.$inferSelect;
+export type InsertInjuryFollowUp = z.infer<typeof insertInjuryFollowUpSchema>;
+export type HealthRiskAssessment = typeof healthRiskAssessments.$inferSelect;
+export type InsertHealthRiskAssessment = z.infer<typeof insertHealthRiskAssessmentSchema>;
+
+// Academic Competition Types
+export type AcademicEvent = typeof academicEvents.$inferSelect;
+export type InsertAcademicEvent = z.infer<typeof insertAcademicEventSchema>;
+export type AcademicCompetition = typeof academicCompetitions.$inferSelect;
+export type InsertAcademicCompetition = z.infer<typeof insertAcademicCompetitionSchema>;
+export type AcademicParticipant = typeof academicParticipants.$inferSelect;
+export type InsertAcademicParticipant = z.infer<typeof insertAcademicParticipantSchema>;
+export type AcademicResult = typeof academicResults.$inferSelect;
+export type InsertAcademicResult = z.infer<typeof insertAcademicResultSchema>;
+
+// Budget Management Types
+export type DistrictBudget = typeof districtBudgets.$inferSelect;
+export type InsertDistrictBudget = z.infer<typeof insertDistrictBudgetSchema>;
+export type SchoolDepartmentBudget = typeof schoolDepartmentBudgets.$inferSelect;
+export type InsertSchoolDepartmentBudget = z.infer<typeof insertSchoolDepartmentBudgetSchema>;
+export type SportProgramBudget = typeof sportProgramBudgets.$inferSelect;
+export type InsertSportProgramBudget = z.infer<typeof insertSportProgramBudgetSchema>;
+export type ExpenseRecord = typeof expenseRecords.$inferSelect;
+export type InsertExpenseRecord = z.infer<typeof insertExpenseRecordSchema>;
+export type BudgetTransfer = typeof budgetTransfers.$inferSelect;
+export type InsertBudgetTransfer = z.infer<typeof insertBudgetTransferSchema>;
+
+// Scheduling System Types
+export type Game = typeof games.$inferSelect;
+export type InsertGame = z.infer<typeof insertGameSchema>;
+export type Practice = typeof practices.$inferSelect;
+export type InsertPractice = z.infer<typeof insertPracticeSchema>;
+export type FacilityReservation = typeof facilityReservations.$inferSelect;
+export type InsertFacilityReservation = z.infer<typeof insertFacilityReservationSchema>;
+export type AthleticCalendarEvent = typeof athleticCalendarEvents.$inferSelect;
+export type InsertAthleticCalendarEvent = z.infer<typeof insertAthleticCalendarEventSchema>;
+export type ScheduleConflict = typeof scheduleConflicts.$inferSelect;
+export type InsertScheduleConflict = z.infer<typeof insertScheduleConflictSchema>;
+
 export * from "./sport-configs-schema";
