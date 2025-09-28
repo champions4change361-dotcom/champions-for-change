@@ -123,6 +123,12 @@ import DistrictOverview from './pages/DistrictOverview';
 import AthleticTrainerDemo from './pages/AthleticTrainerDemo';
 import SignupSelector from './pages/SignupSelector';
 import Contact from './pages/Contact';
+import AcademicDashboard from './pages/AcademicDashboard';
+import AcademicRegistration from './pages/AcademicRegistration';
+import AcademicCompetitionManagement from './pages/AcademicCompetitionManagement';
+import AcademicScoring from './pages/AcademicScoring';
+import AcademicResults from './pages/AcademicResults';
+import TeksAlignment from './pages/TeksAlignment';
 import FAQ from './pages/FAQ';
 import SmartSignup from './pages/SmartSignup';
 import { StaffOnboarding } from './components/StaffOnboarding';
@@ -348,6 +354,14 @@ function AppRouter() {
     <>
       <ChampionsBanner />
       <Switch>
+        {/* Academic Competition System */}
+        <Route path="/academic" component={AcademicDashboard} />
+        <Route path="/academic/registration" component={AcademicRegistration} />
+        <Route path="/academic/competitions/manage" component={AcademicCompetitionManagement} />
+        <Route path="/academic/scoring" component={AcademicScoring} />
+        <Route path="/academic/results" component={AcademicResults} />
+        <Route path="/academic/teks" component={TeksAlignment} />
+        
         {/* Fantasy Coaching AI - High Priority Route */}
         <Route path="/fantasy-coaching" component={FantasyCoaching} />
       

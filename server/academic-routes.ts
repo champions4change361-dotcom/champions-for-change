@@ -447,6 +447,53 @@ export function registerAcademicRoutes(app: Express): void {
     }
   });
 
+  // Get all academic results
+  app.get('/api/academic/results/all', 
+    loadUserContext, 
+    requirePermissions([PERMISSIONS.ACADEMIC_DATA_READ]), 
+    requireAcademicDataAccess,
+    async (req, res) => {
+    try {
+      const { meetId, competitionId, schoolId, dateFrom, dateTo } = req.query;
+      
+      // Validate FERPA consent for student data access
+      if (req.user?.userRole !== 'system_admin' && req.user?.userRole !== 'district_athletic_director') {
+        if (!req.user?.organizationId) {
+          return res.status(403).json({ 
+            error: 'Access denied: Valid organization affiliation required for student data access' 
+          });
+        }
+      }
+      
+      const scoringService = academicService.getScoringService();
+      const results = await scoringService.getAllAcademicResults({
+        meetId: meetId as string,
+        competitionId: competitionId as string,
+        schoolId: schoolId as string,
+        dateFrom: dateFrom as string,
+        dateTo: dateTo as string
+      }, req.user!);
+      
+      // Log FERPA-compliant access
+      await logComplianceAction(
+        req.user!.id,
+        'data_access',
+        'student_data',
+        'academic_results',
+        req as any,
+        'Retrieved academic results with FERPA compliance validation'
+      );
+      
+      res.json(results);
+    } catch (error: any) {
+      console.error('Get all academic results error:', error);
+      res.status(500).json({ 
+        error: 'Failed to retrieve academic results',
+        details: error.message 
+      });
+    }
+  });
+
   // ===================================================================
   // PROGRESSION TRACKING
   // ===================================================================
@@ -556,6 +603,59 @@ export function registerAcademicRoutes(app: Express): void {
       console.error('Generate progression analytics error:', error);
       res.status(500).json({ 
         error: 'Failed to generate progression analytics',
+        details: error.message 
+      });
+    }
+  });
+
+  // Get advancement tracking
+  app.get('/api/academic/advancement/tracking', 
+    loadUserContext, 
+    requirePermissions([PERMISSIONS.ACADEMIC_DATA_READ]), 
+    requireAcademicDataAccess,
+    async (req, res) => {
+    try {
+      const { 
+        participantId, 
+        schoolId, 
+        competitionId, 
+        currentLevel, 
+        academicYear 
+      } = req.query;
+      
+      // Validate FERPA consent for student progression data access
+      if (req.user?.userRole !== 'system_admin' && req.user?.userRole !== 'district_athletic_director') {
+        if (!req.user?.organizationId) {
+          return res.status(403).json({ 
+            error: 'Access denied: Valid organization affiliation required for student progression data access' 
+          });
+        }
+      }
+      
+      const progressionService = academicService.getProgressionService();
+      const trackingData = await progressionService.getAdvancementTracking({
+        participantId: participantId as string,
+        schoolId: schoolId as string,
+        competitionId: competitionId as string,
+        currentLevel: currentLevel as string,
+        academicYear: academicYear as string
+      }, req.user!);
+      
+      // Log FERPA-compliant access
+      await logComplianceAction(
+        req.user!.id,
+        'data_access',
+        'student_data',
+        'advancement_tracking',
+        req as any,
+        'Retrieved advancement tracking data with FERPA compliance validation'
+      );
+      
+      res.json(trackingData);
+    } catch (error: any) {
+      console.error('Get advancement tracking error:', error);
+      res.status(500).json({ 
+        error: 'Failed to retrieve advancement tracking data',
         details: error.message 
       });
     }

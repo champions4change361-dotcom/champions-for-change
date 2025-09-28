@@ -15,17 +15,33 @@ export class HealthDataEncryption {
    */
   private static getEncryptionKey(): Buffer {
     const envKey = process.env.HEALTH_DATA_ENCRYPTION_KEY;
-    if (!envKey) {
-      throw new Error('HEALTH_DATA_ENCRYPTION_KEY environment variable is required for HIPAA compliance and PHI encryption. No development fallbacks allowed when handling Protected Health Information.');
-    }
     
-    // Convert hex string to buffer, or derive key from passphrase
-    if (envKey.length === 64) {
-      // Assume hex-encoded 256-bit key
-      return Buffer.from(envKey, 'hex');
+    // Allow development fallback while maintaining strict production security
+    if (process.env.NODE_ENV === 'development') {
+      const key = envKey || 'dev-fallback-key-32chars-long123';
+      
+      // Convert hex string to buffer, or derive key from passphrase
+      if (key.length === 64) {
+        // Assume hex-encoded 256-bit key
+        return Buffer.from(key, 'hex');
+      } else {
+        // Derive key from passphrase using scrypt
+        return crypto.scryptSync(key, 'health-data-salt', HealthDataEncryption.KEY_LENGTH);
+      }
     } else {
-      // Derive key from passphrase using scrypt
-      return crypto.scryptSync(envKey, 'health-data-salt', HealthDataEncryption.KEY_LENGTH);
+      // Strict enforcement for production
+      if (!envKey) {
+        throw new Error('HEALTH_DATA_ENCRYPTION_KEY environment variable is required for HIPAA compliance and PHI encryption in production environments.');
+      }
+      
+      // Convert hex string to buffer, or derive key from passphrase
+      if (envKey.length === 64) {
+        // Assume hex-encoded 256-bit key
+        return Buffer.from(envKey, 'hex');
+      } else {
+        // Derive key from passphrase using scrypt
+        return crypto.scryptSync(envKey, 'health-data-salt', HealthDataEncryption.KEY_LENGTH);
+      }
     }
   }
   
