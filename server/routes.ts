@@ -44,6 +44,62 @@ console.log('💚 Champions for Change nonprofit mission active');
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
+  // PUBLIC GAME TEMPLATES API - NO AUTH REQUIRED (placed first to avoid middleware conflicts)
+  
+  // Get all game templates (public browsing)
+  app.get("/api/game-templates", async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const templates = await storage.getGameTemplates();
+      res.json(templates);
+    } catch (error: any) {
+      console.error("Get game templates error:", error);
+      res.status(500).json({ 
+        error: "Failed to fetch game templates",
+        details: error.message 
+      });
+    }
+  });
+
+  // Get specific game template (public access)
+  app.get("/api/game-templates/:id", async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const { id } = req.params;
+      const template = await storage.getGameTemplate(id);
+      
+      if (!template) {
+        return res.status(404).json({ error: "Game template not found" });
+      }
+      
+      res.json(template);
+    } catch (error: any) {
+      console.error("Get game template error:", error);
+      res.status(500).json({ 
+        error: "Failed to fetch game template",
+        details: error.message 
+      });
+    }
+  });
+
+  // Get public game instances (open games only)
+  app.get("/api/game-instances/public", async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const { commissionerId } = req.query;
+      const instances = await storage.getGameInstances(commissionerId as string);
+      // Filter to only show open games for public viewing
+      const openInstances = instances.filter((instance: any) => instance.status === 'open');
+      res.json(openInstances);
+    } catch (error: any) {
+      console.error("Get public game instances error:", error);
+      res.status(500).json({ 
+        error: "Failed to fetch public game instances",
+        details: error.message 
+      });
+    }
+  });
+  
   // Champions for Change Domain Redirect
   app.use((req, res, next) => {
     const hostname = req.get('host');
@@ -7495,8 +7551,8 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
     }
   });
 
-  // Get specific game template
-  app.get("/api/game-templates/:id", checkAuth, async (req, res) => {
+  // Get specific game template (public access)
+  app.get("/api/game-templates/:id", async (req, res) => {
     try {
       const { id } = req.params;
       const template = await storage.getGameTemplate(id);
@@ -7559,7 +7615,24 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
     }
   });
 
-  // Get game instances (optionally filtered by commissioner)
+  // Get public game instances (open games only)
+  app.get("/api/game-instances/public", async (req, res) => {
+    try {
+      const { commissionerId } = req.query;
+      const instances = await storage.getGameInstances(commissionerId as string);
+      // Filter to only show open games for public viewing
+      const openInstances = instances.filter((instance: any) => instance.status === 'open');
+      res.json(openInstances);
+    } catch (error: any) {
+      console.error("Get public game instances error:", error);
+      res.status(500).json({ 
+        error: "Failed to fetch public game instances",
+        details: error.message 
+      });
+    }
+  });
+
+  // Get game instances (commissioner access only)
   app.get("/api/game-instances", checkAuth, async (req, res) => {
     try {
       const { commissionerId } = req.query;
