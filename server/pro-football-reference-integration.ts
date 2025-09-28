@@ -203,8 +203,11 @@ export class ProFootballReferenceIntegration {
 
       const $ = cheerio.load(response.data);
       
-      // Extract current week from page content
-      let currentWeek = 3; // Default fallback
+      // Calculate current week based on NFL season start (September 5, 2025)
+      const nflSeasonStart = new Date('2025-09-05'); // Week 1 starts
+      const today = new Date();
+      const daysSinceStart = Math.floor((today.getTime() - nflSeasonStart.getTime()) / (1000 * 60 * 60 * 24));
+      let currentWeek = Math.max(1, Math.min(18, Math.ceil((daysSinceStart + 1) / 7))); // Dynamic calculation
       
       // Look for week indicators
       $('h2, h3, .week-nav, [class*="week"]').each((i, el) => {
@@ -251,7 +254,7 @@ export class ProFootballReferenceIntegration {
       console.error('❌ Error detecting current week:', error);
       // Return sensible default
       return {
-        currentWeek: 3,
+        currentWeek: Math.max(1, Math.min(18, Math.ceil((Date.now() - new Date('2025-09-05').getTime()) / (1000 * 60 * 60 * 24 * 7)) + 1)),
         season: 2025,
         weekType: 'regular',
         gamesThisWeek: 16,
@@ -656,7 +659,9 @@ export class ProFootballReferenceIntegration {
    * 🗓️ Get current NFL week
    */
   public getCurrentWeek(): number {
-    return this.latestData?.weekData.currentWeek || 3;
+    // Dynamic fallback based on NFL season start
+    const fallbackWeek = Math.max(1, Math.min(18, Math.ceil((Date.now() - new Date('2025-09-05').getTime()) / (1000 * 60 * 60 * 24 * 7)) + 1));
+    return this.latestData?.weekData.currentWeek || fallbackWeek;
   }
 
   /**

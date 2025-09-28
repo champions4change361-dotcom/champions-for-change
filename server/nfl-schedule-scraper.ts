@@ -127,8 +127,13 @@ export class NFLScheduleScraper {
    */
   private async scrapeNFLSchedule(): Promise<NFLWeekSchedule | null> {
     try {
-      // Target Week 3 specifically for September 21, 2025
-      const url = 'https://www.nfl.com/schedules/2025/reg3/';
+      // Dynamic week calculation based on NFL season start
+      const nflSeasonStart = new Date('2025-09-05'); // Week 1 starts September 5
+      const today = new Date();
+      const daysSinceStart = Math.floor((today.getTime() - nflSeasonStart.getTime()) / (1000 * 60 * 60 * 24));
+      const dynamicWeek = Math.max(1, Math.min(18, Math.ceil((daysSinceStart + 1) / 7)));
+      
+      const url = `https://www.nfl.com/schedules/2025/reg${dynamicWeek}/`;
       
       // Respectful scraping with proper headers
       const response = await axios.get(url, {
@@ -147,8 +152,11 @@ export class NFLScheduleScraper {
       const games: NFLGame[] = [];
       const teamsPlaying: Set<string> = new Set();
 
-      // Extract current week number from page - be more specific to avoid wrong matches
-      let currentWeek = 3; // Default to Week 3 for Sept 21, 2025
+      // Calculate current week dynamically
+      const nflSeasonStart = new Date('2025-09-05'); 
+      const today = new Date();
+      const daysSinceStart = Math.floor((today.getTime() - nflSeasonStart.getTime()) / (1000 * 60 * 60 * 24));
+      let currentWeek = Math.max(1, Math.min(18, Math.ceil((daysSinceStart + 1) / 7)));
       
       // Try multiple methods to find the correct current week
       const weekSelectors = [
@@ -374,7 +382,9 @@ export class NFLScheduleScraper {
    * 🏈 Get current NFL week
    */
   public getCurrentWeek(): number {
-    return this.latestSchedule?.currentWeek || 1;
+    // Dynamic fallback based on NFL season start
+    const fallbackWeek = Math.max(1, Math.min(18, Math.ceil((Date.now() - new Date('2025-09-05').getTime()) / (1000 * 60 * 60 * 24 * 7)) + 1));
+    return this.latestSchedule?.currentWeek || fallbackWeek;
   }
 
   /**
