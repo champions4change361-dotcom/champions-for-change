@@ -1933,14 +1933,29 @@ export class DbStorage implements IStorage {
   async createHealthRiskAssessment(assessment: InsertHealthRiskAssessment, user: SecureUserContext): Promise<HealthRiskAssessment> {
     try {
       assertUserContext(user, 'createHealthRiskAssessment');
+      
+      // Encrypt sensitive PHI fields before storage
+      const encryptedAssessment = HealthDataEncryption.encryptHealthRiskAssessment(assessment);
+      
       const assessmentWithId = {
         id: randomUUID(),
-        ...assessment,
+        ...encryptedAssessment,
         createdAt: new Date(),
         updatedAt: new Date()
       };
+      
       const result = await this.db.insert(healthRiskAssessments).values([assessmentWithId]).returning();
-      return result[0];
+      
+      // Log PHI access for HIPAA compliance
+      await HealthDataAudit.logAccess(
+        user.id,
+        assessment.athleteId,
+        'health_risk_assessment',
+        'write'
+      );
+      
+      // Return decrypted data
+      return HealthDataEncryption.decryptHealthRiskAssessment(result[0]);
     } catch (error) {
       console.error("Database error:", error);
       throw new Error("Failed to create health risk assessment");
@@ -1978,14 +1993,29 @@ export class DbStorage implements IStorage {
   async createInjuryIncident(incident: any, user: SecureUserContext): Promise<any> {
     try {
       assertUserContext(user, 'createInjuryIncident');
+      
+      // Encrypt sensitive PHI fields before storage
+      const encryptedIncident = HealthDataEncryption.encryptInjuryIncident(incident);
+      
       const incidentWithId = {
         id: randomUUID(),
-        ...incident,
+        ...encryptedIncident,
         createdAt: new Date(),
         updatedAt: new Date()
       };
+      
       const result = await this.db.insert(injuryIncidents).values([incidentWithId]).returning();
-      return result[0];
+      
+      // Log PHI access for HIPAA compliance
+      await HealthDataAudit.logAccess(
+        user.id,
+        incident.athleteId,
+        'injury_incident',
+        'write'
+      );
+      
+      // Return decrypted data for immediate use
+      return HealthDataEncryption.decryptInjuryIncident(result[0]);
     } catch (error) {
       console.error("Database error:", error);
       throw new Error("Failed to create injury incident");
@@ -1996,7 +2026,19 @@ export class DbStorage implements IStorage {
     try {
       assertUserContext(user, 'getInjuryIncident');
       const result = await this.db.select().from(injuryIncidents).where(eq(injuryIncidents.id, incidentId));
-      return result[0];
+      
+      if (!result[0]) return undefined;
+      
+      // Log PHI access for HIPAA compliance
+      await HealthDataAudit.logAccess(
+        user.id,
+        result[0].athleteId,
+        'injury_incident',
+        'read'
+      );
+      
+      // Return decrypted data
+      return HealthDataEncryption.decryptInjuryIncident(result[0]);
     } catch (error) {
       console.error("Database error:", error);
       throw new Error("Failed to get injury incident");
@@ -2017,13 +2059,29 @@ export class DbStorage implements IStorage {
   async updateInjuryIncident(incidentId: string, updates: any, user: SecureUserContext): Promise<any> {
     try {
       assertUserContext(user, 'updateInjuryIncident');
+      
+      // Filter out immutable fields and encrypt sensitive data
       const { id: _, createdAt: __, ...allowedUpdates } = updates;
+      const encryptedUpdates = HealthDataEncryption.encryptInjuryIncident(allowedUpdates);
+      
       const result = await this.db
         .update(injuryIncidents)
-        .set({ ...allowedUpdates, updatedAt: new Date() })
+        .set({ ...encryptedUpdates, updatedAt: new Date() })
         .where(eq(injuryIncidents.id, incidentId))
         .returning();
-      return result[0];
+      
+      if (!result[0]) return undefined;
+      
+      // Log PHI access for HIPAA compliance
+      await HealthDataAudit.logAccess(
+        user.id,
+        result[0].athleteId,
+        'injury_incident',
+        'write'
+      );
+      
+      // Return decrypted data
+      return HealthDataEncryption.decryptInjuryIncident(result[0]);
     } catch (error) {
       console.error("Database error:", error);
       throw new Error("Failed to update injury incident");
@@ -2031,8 +2089,10 @@ export class DbStorage implements IStorage {
   }
 
   // Medical history methods
-  async createMedicalHistory(medicalHistoryData: InsertMedicalHistory): Promise<MedicalHistory> {
+  async createMedicalHistory(medicalHistoryData: InsertMedicalHistory, user: SecureUserContext): Promise<MedicalHistory> {
     try {
+      assertUserContext(user, 'createMedicalHistory');
+      
       // Encrypt sensitive PHI fields before storage
       const encryptedData = HealthDataEncryption.encryptMedicalHistory(medicalHistoryData);
       
@@ -2045,9 +2105,9 @@ export class DbStorage implements IStorage {
       
       const result = await this.db.insert(medicalHistory).values([medicalHistoryWithId]).returning();
       
-      // Log PHI access for HIPAA compliance
+      // Log PHI access for HIPAA compliance with proper user context
       await HealthDataAudit.logAccess(
-        'system', // userId - should be passed from calling context
+        user.id,
         medicalHistoryWithId.playerId,
         'medical_history',
         'write'
@@ -2061,15 +2121,17 @@ export class DbStorage implements IStorage {
     }
   }
 
-  async getMedicalHistory(id: string): Promise<MedicalHistory | undefined> {
+  async getMedicalHistory(id: string, user: SecureUserContext): Promise<MedicalHistory | undefined> {
     try {
+      assertUserContext(user, 'getMedicalHistory');
+      
       const result = await this.db.select().from(medicalHistory).where(eq(medicalHistory.id, id));
       
       if (!result[0]) return undefined;
       
-      // Log PHI access for HIPAA compliance
+      // Log PHI access for HIPAA compliance with proper user context
       await HealthDataAudit.logAccess(
-        'system', // userId - should be passed from calling context
+        user.id,
         result[0].playerId,
         'medical_history',
         'read'
@@ -2083,15 +2145,17 @@ export class DbStorage implements IStorage {
     }
   }
 
-  async getMedicalHistoryByPlayer(playerId: string): Promise<MedicalHistory | undefined> {
+  async getMedicalHistoryByPlayer(playerId: string, user: SecureUserContext): Promise<MedicalHistory | undefined> {
     try {
+      assertUserContext(user, 'getMedicalHistoryByPlayer');
+      
       const result = await this.db.select().from(medicalHistory).where(eq(medicalHistory.playerId, playerId));
       
       if (!result[0]) return undefined;
       
-      // Log PHI access for HIPAA compliance
+      // Log PHI access for HIPAA compliance with proper user context
       await HealthDataAudit.logAccess(
-        'system', // userId - should be passed from calling context
+        user.id,
         playerId,
         'medical_history',
         'read'
@@ -2105,8 +2169,10 @@ export class DbStorage implements IStorage {
     }
   }
 
-  async updateMedicalHistory(id: string, updates: Partial<MedicalHistory>): Promise<MedicalHistory | undefined> {
+  async updateMedicalHistory(id: string, updates: Partial<MedicalHistory>, user: SecureUserContext): Promise<MedicalHistory | undefined> {
     try {
+      assertUserContext(user, 'updateMedicalHistory');
+      
       // Filter out immutable fields to prevent accidental mutation
       const { id: _, createdAt, ...allowedUpdates } = updates;
       
@@ -2125,9 +2191,9 @@ export class DbStorage implements IStorage {
       
       if (!result[0]) return undefined;
       
-      // Log PHI access for HIPAA compliance
+      // Log PHI access for HIPAA compliance with proper user context
       await HealthDataAudit.logAccess(
-        'system', // userId - should be passed from calling context
+        user.id,
         result[0].playerId,
         'medical_history',
         'write'
@@ -8705,7 +8771,7 @@ export class MemStorage implements IStorage {
   }
   
   /**
-   * Check if user has health data access based on role and training
+   * Check if user has health data access based on role and training - HIPAA/FERPA Enhanced
    */
   private hasHealthDataAccess(user: User): boolean {
     const userRole = user.userRole || user.complianceRole;
@@ -8713,9 +8779,14 @@ export class MemStorage implements IStorage {
       'district_athletic_trainer',
       'school_athletic_trainer', 
       'head_coach',
-      'athletic_training_student'
+      'assistant_coach',
+      'athletic_training_student',
+      'school_nurse',
+      'parent', // Parents can access their child's health data
+      'student' // Students can access their own health data
     ];
     
+    // Check role-based access
     if (!healthRoles.includes(userRole || '')) {
       return false;
     }
@@ -8723,6 +8794,16 @@ export class MemStorage implements IStorage {
     // Check HIPAA training for health data access
     if (!user.hipaaTrainingCompleted) {
       return false;
+    }
+    
+    // Additional HIPAA compliance checks for healthcare providers
+    if (['district_athletic_trainer', 'school_athletic_trainer', 'school_nurse'].includes(userRole || '')) {
+      return (user as any).hipaaAuthorized === true && (user as any).licenseValid === true;
+    }
+    
+    // FERPA training requirement for educational staff
+    if (['head_coach', 'assistant_coach'].includes(userRole || '')) {
+      return (user as any).ferpaTrainingCompleted === true;
     }
     
     return true;

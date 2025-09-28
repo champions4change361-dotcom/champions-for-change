@@ -16,13 +16,7 @@ export class HealthDataEncryption {
   private static getEncryptionKey(): Buffer {
     const envKey = process.env.HEALTH_DATA_ENCRYPTION_KEY;
     if (!envKey) {
-      if (process.env.NODE_ENV === 'production') {
-        throw new Error('HEALTH_DATA_ENCRYPTION_KEY environment variable is required for PHI encryption in production');
-      } else {
-        console.warn('⚠️  DEVELOPMENT: HEALTH_DATA_ENCRYPTION_KEY not set - using fallback for development only');
-        // Use a development-only key (not for production)
-        return crypto.scryptSync('development-encryption-key-not-for-production', 'health-data-salt', HealthDataEncryption.KEY_LENGTH);
-      }
+      throw new Error('HEALTH_DATA_ENCRYPTION_KEY environment variable is required for HIPAA compliance and PHI encryption. No development fallbacks allowed when handling Protected Health Information.');
     }
     
     // Convert hex string to buffer, or derive key from passphrase
@@ -128,24 +122,84 @@ export class HealthDataEncryption {
     
     const encrypted = { ...medicalHistory };
     
-    // Encrypt sensitive PHI fields
-    const phiFields = [
-      'allergies',
-      'medications',
-      'medicalConditions',
-      'emergencyContact',
-      'physicianNotes',
-      'injuryHistory',
-      'treatmentNotes',
-      'diagnosticResults',
-      'insuranceInfo'
+    // Encrypt sensitive PHI fields in medical history
+    const medicalHistoryPhiFields = [
+      'address', 'phone', 'personalPhysician', 'physicianPhone',
+      'emergencyContactName', 'emergencyContactPhoneHome', 'emergencyContactPhoneWork',
+      'q1_explanation', 'q2_explanation', 'q3_explanation', 'q4_explanation', 'q5_explanation',
+      'q6_explanation', 'q7_explanation', 'q8_explanation', 'q9_explanation', 'q10_explanation',
+      'q11_explanation', 'q12_explanation', 'q13_explanation', 'q14_explanation', 'q15_explanation',
+      'q16_explanation', 'q17_explanation', 'q18_explanation', 'q19_explanation', 'q20_explanation',
+      'q21_explanation', 'athleteSignature', 'parentSignature', 'physicianNotes'
     ];
     
-    phiFields.forEach(field => {
+    medicalHistoryPhiFields.forEach(field => {
       if (encrypted[field] && typeof encrypted[field] === 'string') {
         encrypted[field] = this.encrypt(encrypted[field]);
       }
     });
+    
+    return encrypted;
+  }
+
+  /**
+   * Encrypt injury incident object
+   */
+  static encryptInjuryIncident(injuryIncident: any): any {
+    if (!injuryIncident) return injuryIncident;
+    
+    const encrypted = { ...injuryIncident };
+    
+    // Encrypt sensitive PHI fields in injury incidents
+    const injuryPhiFields = [
+      'specificDiagnosis',
+      'initialAssessment', 
+      'immediateCarePlan',
+      'referralTo',
+      'witnessStatements'
+    ];
+    
+    injuryPhiFields.forEach(field => {
+      if (encrypted[field] && typeof encrypted[field] === 'string') {
+        encrypted[field] = this.encrypt(encrypted[field]);
+      }
+    });
+    
+    // Encrypt JSONB PHI fields
+    if (encrypted.vitals && typeof encrypted.vitals === 'object') {
+      encrypted.vitals = this.encrypt(JSON.stringify(encrypted.vitals));
+    }
+    if (encrypted.returnToPLayClearance && typeof encrypted.returnToPLayClearance === 'object') {
+      encrypted.returnToPLayClearance = this.encrypt(JSON.stringify(encrypted.returnToPLayClearance));
+    }
+    
+    return encrypted;
+  }
+
+  /**
+   * Encrypt health risk assessment object  
+   */
+  static encryptHealthRiskAssessment(assessment: any): any {
+    if (!assessment) return assessment;
+    
+    const encrypted = { ...assessment };
+    
+    // Encrypt JSONB PHI fields in health risk assessments
+    if (encrypted.injuryHistory && typeof encrypted.injuryHistory === 'object') {
+      encrypted.injuryHistory = this.encrypt(JSON.stringify(encrypted.injuryHistory));
+    }
+    if (encrypted.movementScreen && typeof encrypted.movementScreen === 'object') {
+      encrypted.movementScreen = this.encrypt(JSON.stringify(encrypted.movementScreen));
+    }
+    if (encrypted.strengthAssessment && typeof encrypted.strengthAssessment === 'object') {
+      encrypted.strengthAssessment = this.encrypt(JSON.stringify(encrypted.strengthAssessment));
+    }
+    if (encrypted.riskFactors && typeof encrypted.riskFactors === 'object') {
+      encrypted.riskFactors = this.encrypt(JSON.stringify(encrypted.riskFactors));
+    }
+    if (encrypted.recommendedInterventions && typeof encrypted.recommendedInterventions === 'object') {
+      encrypted.recommendedInterventions = this.encrypt(JSON.stringify(encrypted.recommendedInterventions));
+    }
     
     return encrypted;
   }
@@ -158,29 +212,129 @@ export class HealthDataEncryption {
     
     const decrypted = { ...encryptedMedicalHistory };
     
-    // Decrypt sensitive PHI fields
-    const phiFields = [
-      'allergies',
-      'medications',
-      'medicalConditions',
-      'emergencyContact',
-      'physicianNotes',
-      'injuryHistory',
-      'treatmentNotes',
-      'diagnosticResults',
-      'insuranceInfo'
+    // Decrypt sensitive PHI fields in medical history
+    const medicalHistoryPhiFields = [
+      'address', 'phone', 'personalPhysician', 'physicianPhone',
+      'emergencyContactName', 'emergencyContactPhoneHome', 'emergencyContactPhoneWork',
+      'q1_explanation', 'q2_explanation', 'q3_explanation', 'q4_explanation', 'q5_explanation',
+      'q6_explanation', 'q7_explanation', 'q8_explanation', 'q9_explanation', 'q10_explanation',
+      'q11_explanation', 'q12_explanation', 'q13_explanation', 'q14_explanation', 'q15_explanation',
+      'q16_explanation', 'q17_explanation', 'q18_explanation', 'q19_explanation', 'q20_explanation',
+      'q21_explanation', 'athleteSignature', 'parentSignature', 'physicianNotes'
     ];
     
-    phiFields.forEach(field => {
+    medicalHistoryPhiFields.forEach(field => {
       if (decrypted[field] && typeof decrypted[field] === 'string') {
         try {
           decrypted[field] = this.decrypt(decrypted[field]);
         } catch (error) {
-          console.error(`Failed to decrypt ${field}:`, error);
+          console.error(`Failed to decrypt medical history field ${field}:`, error);
           decrypted[field] = '[ENCRYPTED - UNABLE TO DECRYPT]';
         }
       }
     });
+    
+    return decrypted;
+  }
+
+  /**
+   * Decrypt injury incident object
+   */
+  static decryptInjuryIncident(encryptedIncident: any): any {
+    if (!encryptedIncident) return encryptedIncident;
+    
+    const decrypted = { ...encryptedIncident };
+    
+    // Decrypt sensitive PHI fields in injury incidents
+    const injuryPhiFields = [
+      'specificDiagnosis',
+      'initialAssessment', 
+      'immediateCarePlan',
+      'referralTo',
+      'witnessStatements'
+    ];
+    
+    injuryPhiFields.forEach(field => {
+      if (decrypted[field] && typeof decrypted[field] === 'string') {
+        try {
+          decrypted[field] = this.decrypt(decrypted[field]);
+        } catch (error) {
+          console.error(`Failed to decrypt injury field ${field}:`, error);
+          decrypted[field] = '[ENCRYPTED - UNABLE TO DECRYPT]';
+        }
+      }
+    });
+    
+    // Decrypt JSONB PHI fields
+    if (decrypted.vitals && typeof decrypted.vitals === 'string') {
+      try {
+        decrypted.vitals = JSON.parse(this.decrypt(decrypted.vitals));
+      } catch (error) {
+        console.error('Failed to decrypt vitals:', error);
+        decrypted.vitals = { error: 'Unable to decrypt vitals data' };
+      }
+    }
+    if (decrypted.returnToPLayClearance && typeof decrypted.returnToPLayClearance === 'string') {
+      try {
+        decrypted.returnToPLayClearance = JSON.parse(this.decrypt(decrypted.returnToPLayClearance));
+      } catch (error) {
+        console.error('Failed to decrypt return to play clearance:', error);
+        decrypted.returnToPLayClearance = { error: 'Unable to decrypt clearance data' };
+      }
+    }
+    
+    return decrypted;
+  }
+
+  /**
+   * Decrypt health risk assessment object
+   */
+  static decryptHealthRiskAssessment(encryptedAssessment: any): any {
+    if (!encryptedAssessment) return encryptedAssessment;
+    
+    const decrypted = { ...encryptedAssessment };
+    
+    // Decrypt JSONB PHI fields in health risk assessments
+    if (decrypted.injuryHistory && typeof decrypted.injuryHistory === 'string') {
+      try {
+        decrypted.injuryHistory = JSON.parse(this.decrypt(decrypted.injuryHistory));
+      } catch (error) {
+        console.error('Failed to decrypt injury history:', error);
+        decrypted.injuryHistory = { error: 'Unable to decrypt injury history' };
+      }
+    }
+    if (decrypted.movementScreen && typeof decrypted.movementScreen === 'string') {
+      try {
+        decrypted.movementScreen = JSON.parse(this.decrypt(decrypted.movementScreen));
+      } catch (error) {
+        console.error('Failed to decrypt movement screen:', error);
+        decrypted.movementScreen = { error: 'Unable to decrypt movement screen' };
+      }
+    }
+    if (decrypted.strengthAssessment && typeof decrypted.strengthAssessment === 'string') {
+      try {
+        decrypted.strengthAssessment = JSON.parse(this.decrypt(decrypted.strengthAssessment));
+      } catch (error) {
+        console.error('Failed to decrypt strength assessment:', error);
+        decrypted.strengthAssessment = { error: 'Unable to decrypt strength assessment' };
+      }
+    }
+    if (decrypted.riskFactors && typeof decrypted.riskFactors === 'string') {
+      try {
+        decrypted.riskFactors = JSON.parse(this.decrypt(decrypted.riskFactors));
+      } catch (error) {
+        console.error('Failed to decrypt risk factors:', error);
+        decrypted.riskFactors = { error: 'Unable to decrypt risk factors' };
+      }
+    }
+    if (decrypted.recommendedInterventions && typeof decrypted.recommendedInterventions === 'string') {
+      try {
+        decrypted.recommendedInterventions = JSON.parse(this.decrypt(decrypted.recommendedInterventions));
+      } catch (error) {
+        console.error('Failed to decrypt recommended interventions:', error);
+        decrypted.recommendedInterventions = { error: 'Unable to decrypt interventions' };
+      }
+    }
     
     return decrypted;
   }

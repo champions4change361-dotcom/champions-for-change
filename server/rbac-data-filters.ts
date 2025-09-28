@@ -53,46 +53,139 @@ export class RBACDataFilters {
   }
   
   /**
-   * Get health data filters based on user permissions
+   * Get health data filters based on user permissions - HIPAA/FERPA Compliant
+   * Implements "minimum necessary" access principle
    */
-  static getHealthDataFilter(user: User, targetTable: any) {
+  static getHealthDataFilter(user: User, targetTable: any, dataType: 'phi' | 'summary' | 'aggregate' = 'phi') {
     const canAccessHealthData = RBACService.canAccessHealthData(user);
     
     if (!canAccessHealthData) {
-      // No health data access
+      // Log failed access attempt for compliance audit
+      this.logFailedHealthDataAccess(user, targetTable, 'NO_HEALTH_DATA_PERMISSION');
       return sql`1 = 0`;
     }
     
-    // Combine organization filter with health data access
-    const orgFilter = this.getOrganizationFilter(user, targetTable);
-    
-    // Additional health data restrictions based on role
+    // Additional health data restrictions based on role - HIPAA "minimum necessary" principle
     const userRole = user.userRole || user.complianceRole;
     
     switch (userRole) {
+      case 'district_admin':
+      case 'superintendent':
+        // District Level: AGGREGATED STATISTICS ONLY - NO INDIVIDUAL PHI per HIPAA
+        if (dataType === 'phi') {
+          this.logFailedHealthDataAccess(user, targetTable, 'DISTRICT_LEVEL_PHI_DENIED');
+          return sql`1 = 0`; // No individual PHI access at district level
+        }
+        return this.getDistrictLevelFilter(user, targetTable);
+        
       case 'district_athletic_trainer':
+        // District athletic trainers have full health data access within their district for direct care
+        return and(
+          this.getDistrictLevelFilter(user, targetTable),
+          this.getDirectCareRelationshipFilter(user, targetTable)
+        );
+        
       case 'school_athletic_trainer':
-        // Athletic trainers have full health data access within their scope
-        return orgFilter;
+        // School athletic trainers have full health data access within their school for direct care
+        return and(
+          this.getSchoolLevelFilter(user, targetTable),
+          this.getDirectCareRelationshipFilter(user, targetTable)
+        );
         
       case 'head_coach':
       case 'assistant_coach':
-        // Coaches can only access health data for their assigned teams
+        // Coaches can only access LIMITED health info for their assigned team members
+        // Limited to injury status, return-to-play clearance, and emergency contacts
         return and(
-          orgFilter,
-          this.getCoachTeamHealthFilter(user, targetTable)
+          this.getSchoolLevelFilter(user, targetTable),
+          this.getCoachTeamHealthFilter(user, targetTable),
+          this.getCoachMinimumNecessaryFilter(targetTable, dataType)
         );
         
       case 'athletic_training_student':
-        // Students have supervised access only - must be under supervision of licensed trainer
+        // Students have supervised access only - must be under direct supervision
         return and(
-          orgFilter,
-          this.getAthleticTrainingStudentSupervisionFilter(user, targetTable)
+          this.getSchoolLevelFilter(user, targetTable),
+          this.getAthleticTrainingStudentSupervisionFilter(user, targetTable),
+          this.getStudentSupervisionFilter(user, targetTable)
+        );
+        
+      case 'parent':
+        // Parents can only access their own child's health data
+        return and(
+          this.getParentChildRelationshipFilter(user, targetTable),
+          this.getParentHealthDataFilter(user, targetTable)
+        );
+        
+      case 'student':
+        // Students can only access their own health data
+        return and(
+          eq(targetTable.studentId, user.studentId || user.id),
+          this.getStudentOwnDataFilter(user, targetTable)
         );
         
       default:
-        return orgFilter;
+        // Default to no access for undefined roles
+        this.logFailedHealthDataAccess(user, targetTable, 'UNDEFINED_ROLE_DENIED');
+        return sql`1 = 0`;
     }
+  }
+
+  /**
+   * Ensure direct care relationship exists for athletic trainers
+   */
+  static getDirectCareRelationshipFilter(user: User, targetTable: any) {
+    // Athletic trainers can only access health data for students under their direct care
+    return or(
+      eq(targetTable.athleticTrainerId, user.id),
+      inArray(targetTable.studentId, 
+        sql`(SELECT student_id FROM athletic_trainer_assignments WHERE trainer_id = ${user.id})`
+      )
+    );
+  }
+
+  /**
+   * Limit coaches to minimum necessary health information
+   */
+  static getCoachMinimumNecessaryFilter(targetTable: any, dataType: string) {
+    if (dataType === 'phi') {
+      // Coaches can only see limited health info - not full medical details
+      return and(
+        sql`${targetTable.dataClassification} IN ('emergency_contact', 'injury_status', 'return_to_play')`,
+        sql`${targetTable.allowCoachAccess} = true`
+      );
+    }
+    return sql`1 = 1`;
+  }
+
+  /**
+   * Parent-child relationship verification
+   */
+  static getParentChildRelationshipFilter(user: User, targetTable: any) {
+    return inArray(targetTable.studentId, 
+      sql`(SELECT student_id FROM parent_student_relationships WHERE parent_id = ${user.id})`
+    );
+  }
+
+  /**
+   * Log failed health data access attempts for compliance audit
+   */
+  static async logFailedHealthDataAccess(user: User, targetTable: any, reason: string) {
+    // Import here to avoid circular dependency
+    const { HealthDataAudit } = await import('./data-encryption');
+    
+    await HealthDataAudit.logAccess(
+      user.id,
+      'UNKNOWN', // No specific resource since access was denied
+      'health_data',
+      'failed_access',
+      {
+        reason,
+        tableName: targetTable._.name || 'unknown',
+        riskLevel: 'high',
+        complianceViolation: true
+      }
+    );
   }
   
   /**

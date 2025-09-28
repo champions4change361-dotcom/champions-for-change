@@ -221,20 +221,40 @@ export const fantasyProfiles = pgTable("fantasy_profiles", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// HIPAA/FERPA Compliance Audit Trail
+// Enhanced HIPAA/FERPA Compliance Audit Trail with tamper-evidence
 export const complianceAuditLog = pgTable("compliance_audit_log", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id),
   actionType: text("action_type", {
-    enum: ["data_access", "data_modification", "export", "view", "login", "permission_change"]
+    enum: ["data_access", "data_modification", "export", "view", "login", "permission_change", "failed_access", "security_violation"]
   }).notNull(),
   resourceType: text("resource_type", {
-    enum: ["student_data", "health_data", "tournament_data", "administrative_data"]
+    enum: ["student_data", "health_data", "tournament_data", "administrative_data", "phi_data", "ferpa_data"]
   }).notNull(),
   resourceId: varchar("resource_id"), // ID of the specific record accessed
   ipAddress: varchar("ip_address"),
   userAgent: text("user_agent"),
+  
+  // Enhanced audit fields for compliance
+  sessionId: varchar("session_id"), // Session tracking
+  requestMethod: varchar("request_method"), // HTTP method
+  requestPath: varchar("request_path"), // API endpoint accessed
+  responseStatus: integer("response_status"), // HTTP response code
+  dataFieldsAccessed: jsonb("data_fields_accessed").$type<string[]>(), // Specific PHI fields accessed
+  hipaaMinimumNecessary: boolean("hipaa_minimum_necessary").default(true), // Was access minimum necessary?
+  complianceRole: varchar("compliance_role"), // User's compliance role at time of access
+  organizationContext: varchar("organization_context"), // Organization scope of access
+  
+  // Tamper-evidence and integrity
+  integrityHash: varchar("integrity_hash"), // Cryptographic hash for tamper detection
+  previousLogHash: varchar("previous_log_hash"), // Chain of integrity hashes
+  auditChainValid: boolean("audit_chain_valid").default(true), // Integrity verification status
+  
   complianceNotes: text("compliance_notes"), // Additional context for audit
+  riskLevel: text("risk_level", {
+    enum: ["low", "medium", "high", "critical"]
+  }).default("low"),
+  
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -258,20 +278,38 @@ export const studentData = pgTable("student_data", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Health Data (HIPAA) Protected Information
+// Health Data (HIPAA) Protected Information - Enhanced with encryption markers
 export const healthData = pgTable("health_data", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   studentId: varchar("student_id").notNull().references(() => studentData.id),
   athleticTrainerId: varchar("athletic_trainer_id").notNull().references(() => users.id),
-  medicalConditions: text("medical_conditions"), // Encrypted field
-  medications: text("medications"), // Encrypted field
-  allergies: text("allergies"), // Encrypted field
-  injuryHistory: jsonb("injury_history"), // Encrypted field
+  
+  // PHI Fields - AES-256 encrypted at rest
+  medicalConditions: text("medical_conditions"), // ENCRYPTED PHI
+  medicalConditionsEncrypted: boolean("medical_conditions_encrypted").default(true),
+  medications: text("medications"), // ENCRYPTED PHI
+  medicationsEncrypted: boolean("medications_encrypted").default(true),
+  allergies: text("allergies"), // ENCRYPTED PHI
+  allergiesEncrypted: boolean("allergies_encrypted").default(true),
+  injuryHistory: jsonb("injury_history"), // ENCRYPTED PHI
+  injuryHistoryEncrypted: boolean("injury_history_encrypted").default(true),
+  concussionBaseline: jsonb("concussion_baseline"), // ENCRYPTED PHI
+  concussionBaselineEncrypted: boolean("concussion_baseline_encrypted").default(true),
+  
+  // Non-PHI Fields
   physicalsOnFile: boolean("physicals_on_file").default(false),
   physicalExpirationDate: date("physical_expiration_date"),
-  concussionBaseline: jsonb("concussion_baseline"), // Encrypted baseline test results
   lastMedicalUpdate: timestamp("last_medical_update"),
   hipaaAuthorizationForm: varchar("hipaa_authorization_form"), // File path to signed form
+  
+  // Compliance tracking
+  lastAccessedBy: varchar("last_accessed_by").references(() => users.id),
+  lastAccessedAt: timestamp("last_accessed_at"),
+  accessCount: integer("access_count").default(0),
+  dataClassification: text("data_classification", {
+    enum: ["phi", "confidential", "internal", "public"]
+  }).default("phi"),
+  
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
