@@ -27,13 +27,8 @@ export function useDomain() {
     const hostname = window.location.hostname;
     console.log('Domain detection - hostname:', hostname); // Debug logging
     
-    // Redirect Champions for Change domain to Trantor Tournaments
-    if (hostname === 'championsforchange.net' || hostname === 'www.championsforchange.net') {
-      console.log('🔄 Redirecting championsforchange.net to trantortournaments.org');
-      const currentPath = window.location.pathname + window.location.search + window.location.hash;
-      window.location.replace(`https://trantortournaments.org${currentPath}`);
-      return; // Don't set any config, redirect is in progress
-    }
+    // Note: Domain redirect from championsforchange.net to trantortournaments.org
+    // is handled by backend (server/routes.ts) to avoid duplicate redirects
     
     let config: DomainConfig;
 

@@ -464,7 +464,7 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     // API request - return JSON error
     return res.status(401).json({ message: "Unauthorized" });
   } else {
-    // Web page request - redirect to home page where frontend handles auth
-    return res.redirect('/');
+    // Web page request - redirect to login page to break redirect loop
+    return res.redirect('/login');
   }
 };
