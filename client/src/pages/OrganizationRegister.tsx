@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import { useLocation } from 'wouter';
 import OrganizationTypeSelection, { OrganizationType } from '@/components/OrganizationTypeSelection';
 
 const baseRegistrationSchema = z.object({
@@ -62,6 +63,36 @@ export default function OrganizationRegister() {
   const [selectedSports, setSelectedSports] = useState<string[]>([]);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
   const { toast } = useToast();
+  const [location] = useLocation();
+
+  // Map URL parameters to organization types
+  const mapUrlTypeToOrganizationType = (urlType: string): OrganizationType | null => {
+    switch (urlType) {
+      case 'fantasy':
+        return OrganizationType.FANTASY_SPORTS;
+      case 'youth':
+        return OrganizationType.YOUTH_ORGANIZATION;
+      case 'private':
+        return OrganizationType.PRIVATE_SCHOOL;
+      default:
+        return null;
+    }
+  };
+
+  // Handle URL parameters to auto-select organization type
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const typeParam = urlParams.get('type');
+    
+    if (typeParam && !selectedOrgType) {
+      const mappedType = mapUrlTypeToOrganizationType(typeParam);
+      if (mappedType) {
+        setSelectedOrgType(mappedType);
+        // Skip to step 2 if type is provided via URL
+        setStep(2);
+      }
+    }
+  }, [location, selectedOrgType]);
 
   // Dynamic schema selection based on organization type
   const getSchema = () => {
@@ -77,8 +108,11 @@ export default function OrganizationRegister() {
     }
   };
 
+  // Dynamic schema based on organization type
+  const currentSchema = selectedOrgType ? getSchema() : baseRegistrationSchema;
+  
   const form = useForm<RegistrationFormData>({
-    resolver: zodResolver(getSchema()),
+    resolver: zodResolver(currentSchema),
     defaultValues: {
       sportsInvolved: [],
       billingCycle: 'monthly',
@@ -86,7 +120,7 @@ export default function OrganizationRegister() {
     }
   });
 
-  // Update form validation when organization type changes
+  // Update form values when organization type changes
   useEffect(() => {
     if (selectedOrgType) {
       form.setValue('organizationType', selectedOrgType);
@@ -106,7 +140,7 @@ export default function OrganizationRegister() {
         ? '/api/registration/fantasy'
         : '/api/registration/organization';
         
-      return apiRequest('POST', endpoint, {
+      return apiRequest(endpoint, 'POST', {
         ...data,
         sportsInvolved: selectedSports,
         pricingTier: getPricingTier(),
@@ -157,7 +191,12 @@ export default function OrganizationRegister() {
   };
 
   const onSubmit = (data: RegistrationFormData) => {
+    console.log('Form submission triggered with data:', data);
+    console.log('Selected sports:', selectedSports);
+    console.log('Selected organization type:', selectedOrgType);
+    
     if (selectedSports.length === 0) {
+      console.log('Blocking submission: no sports selected');
       toast({
         title: "Sports Selection Required",
         description: "Please select at least one sport you're involved with.",
@@ -166,6 +205,17 @@ export default function OrganizationRegister() {
       return;
     }
     
+    if (!selectedOrgType) {
+      console.log('Blocking submission: no organization type selected');
+      toast({
+        title: "Organization Type Required",
+        description: "Please select an organization type.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    console.log('Submitting registration mutation...');
     submitMutation.mutate(data);
   };
 
@@ -491,7 +541,21 @@ export default function OrganizationRegister() {
                 </div>
 
                 <Button 
-                  type="submit" 
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    console.log('Button clicked - starting manual form submission');
+                    console.log('Form state:', form.formState);
+                    console.log('Form errors:', form.formState.errors);
+                    console.log('Selected sports:', selectedSports);
+                    console.log('Selected org type:', selectedOrgType);
+                    
+                    // Manual form validation and submission
+                    const formData = form.getValues();
+                    console.log('Form data:', formData);
+                    
+                    onSubmit(formData);
+                  }}
                   className="w-full" 
                   disabled={submitMutation.isPending}
                   data-testid="button-submit-registration"
