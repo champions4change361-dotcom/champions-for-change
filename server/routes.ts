@@ -2693,8 +2693,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('Auth user check - OAuth user:', req.user ? 'present' : 'missing');
       console.log('Auth user check - isAuthenticated():', req.isAuthenticated ? req.isAuthenticated() : 'no method');
       
-      // DEVELOPMENT MODE: Athletic Trainer test user for verification (moved first)
+      // DEVELOPMENT MODE: Athletic Trainer test user DISABLED to fix redirect loop
+      // This was automatically logging users in as "Athletic Trainer" causing auth issues
       console.log('🔍 NODE_ENV check:', process.env.NODE_ENV);
+      /*
       if (!process.env.NODE_ENV || process.env.NODE_ENV !== 'production') {
         console.log('🧪 Development mode: Returning Athletic Trainer test user');
         return res.json({
@@ -2712,6 +2714,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           subscriptionStatus: 'active'
         });
       }
+      */
       
       // Check passport authentication first (most common after login)
       if (req.isAuthenticated && req.isAuthenticated() && req.user?.claims) {
