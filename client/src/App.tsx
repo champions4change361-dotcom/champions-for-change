@@ -48,6 +48,7 @@ import TermsOfService from './pages/TermsOfService';
 import Compliance from './pages/Compliance';
 import Register from './pages/Register';
 import BusinessRegister from './pages/BusinessRegister';
+import OrganizationRegister from './pages/OrganizationRegister';
 import AdminApprovals from './pages/AdminApprovals';
 import RegistrationForm from './pages/RegistrationForm';
 import TournamentDesign from './pages/TournamentDesign';
@@ -451,7 +452,7 @@ function AppRouter() {
       
       <Route path="/grant-funding" component={GrantFunding} />
       <Route path="/nonprofit-resources" component={NonprofitResources} />
-      <Route path="/register-organization" component={() => { window.location.href = '/smart-signup?type=business'; return null; }} />
+      <Route path="/register-organization" component={OrganizationRegister} />
       
       {/* Google Ad Grants Compliant Landing Pages */}
       <Route path="/educational-athletics" component={EducationalAthletics} />

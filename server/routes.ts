@@ -22,7 +22,8 @@ import { registerAcademicRoutes } from "./academic-routes";
 import { registerBudgetRoutes } from "./budget-routes";
 import subscriptionRoutes from "./routes/subscriptionRoutes";
 import stripeWebhooks from "./routes/stripeWebhooks";
-import { tournamentSubscriptions, insertTournamentSubscriptionSchema, type InsertTournamentSubscription, insertRegistrationSubmissionSchema, insertTeamSchema, insertTeamPlayerSchema, insertMedicalHistorySchema, type InsertTeam, type InsertTeamPlayer, type InsertMedicalHistory, type Team, type TeamPlayer, type MedicalHistory, updateTeamSubscriptionSchema, type User, type FantasyLeague, type InsertFantasyLeague, type FantasyTeam, type InsertFantasyTeam, type FantasyRoster, type InsertFantasyRoster, type FantasyDraft, type InsertFantasyDraft, type FantasyMatchup, type InsertFantasyMatchup, type FantasyWaiverClaim, type InsertFantasyWaiverClaim, type FantasyTrade, type InsertFantasyTrade, type FantasyLeagueMessage, type InsertFantasyLeagueMessage, insertFantasyLeagueSchema, insertFantasyTeamSchema, insertFantasyRosterSchema, insertFantasyDraftSchema, insertFantasyMatchupSchema, insertFantasyWaiverClaimSchema, insertFantasyTradeSchema, insertFantasyLeagueMessageSchema } from "@shared/schema";
+import { tournamentSubscriptions, insertTournamentSubscriptionSchema, type InsertTournamentSubscription, insertRegistrationSubmissionSchema, insertTeamSchema, insertTeamPlayerSchema, insertMedicalHistorySchema, type InsertTeam, type InsertTeamPlayer, type InsertMedicalHistory, type Team, type TeamPlayer, type MedicalHistory, updateTeamSubscriptionSchema, type User, type FantasyLeague, type InsertFantasyLeague, type FantasyTeam, type InsertFantasyTeam, type FantasyRoster, type InsertFantasyRoster, type FantasyDraft, type InsertFantasyDraft, type FantasyMatchup, type InsertFantasyMatchup, type FantasyWaiverClaim, type InsertFantasyWaiverClaim, type FantasyTrade, type InsertFantasyTrade, type FantasyLeagueMessage, type InsertFantasyLeagueMessage, insertFantasyLeagueSchema, insertFantasyTeamSchema, insertFantasyRosterSchema, insertFantasyDraftSchema, insertFantasyMatchupSchema, insertFantasyWaiverClaimSchema, insertFantasyTradeSchema, insertFantasyLeagueMessageSchema, insertUserSchema } from "@shared/schema";
+import { z } from "zod";
 import { GameLockoutService } from "./game-lockout-service.js";
 import { registerAthleticTrainerRoutes } from "./athletic-trainer-routes";
 import districtRoutes from "./district-routes";
@@ -51,6 +52,37 @@ type ExtendedUser = User & {
 
 console.log('🏫 District athletics management platform initialized');
 console.log('💚 Champions for Change nonprofit mission active');
+
+// Validation schemas for registration endpoints
+const organizationRegistrationSchema = z.object({
+  firstName: z.string().min(2, 'First name must be at least 2 characters'),
+  lastName: z.string().min(2, 'Last name must be at least 2 characters'),
+  email: z.string().email('Please enter a valid email address'),
+  phone: z.string().optional(),
+  organizationType: z.enum(['fantasy_sports', 'youth_organization', 'private_school']),
+  organizationName: z.string().min(2, 'Organization name is required'),
+  description: z.string().optional(),
+  sportsInvolved: z.array(z.string()).min(1, 'Please select at least one sport'),
+  billingCycle: z.enum(['monthly', 'annual']).optional(),
+  organizationVerification: z.string().optional(),
+  contactTitle: z.string().optional(),
+  schoolType: z.enum(['private', 'charter']).optional(),
+  enrollmentSize: z.string().optional(),
+  pricingTier: z.string().optional(),
+  subscriptionPlan: z.string().optional()
+});
+
+const fantasyRegistrationSchema = z.object({
+  firstName: z.string().min(2, 'First name must be at least 2 characters'),
+  lastName: z.string().min(2, 'Last name must be at least 2 characters'),
+  email: z.string().email('Please enter a valid email address'),
+  phone: z.string().optional(),
+  organizationName: z.string().min(2, 'Organization/League name is required'),
+  description: z.string().optional(),
+  sportsInvolved: z.array(z.string()).default([]),
+  donationAmount: z.number().min(0).max(10000).optional(),
+  supportMessage: z.string().optional()
+});
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -2934,7 +2966,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Business Registration endpoint
   app.post("/api/registration/business", async (req, res) => {
     try {
-      console.log('Business registration request:', req.body);
+      console.log('Business registration request received for:', req.body.email?.substring(0, 3) + '***');
       
       const {
         firstName,
@@ -3588,6 +3620,360 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
       console.error('Donation creation error:', error);
       res.status(500).json({
         error: "Failed to create donation"
+      });
+    }
+  });
+
+  // Organization Registration endpoint - Enhanced three-tier registration
+  app.post("/api/registration/organization", async (req, res) => {
+    try {
+      console.log('Organization registration request received for:', req.body.email?.substring(0, 3) + '***');
+      
+      const {
+        firstName,
+        lastName,
+        email,
+        phone,
+        organizationType, // 'fantasy_sports', 'youth_organization', 'private_school'
+        organizationName,
+        description,
+        sportsInvolved,
+        billingCycle, // Only for youth organizations
+        organizationVerification,
+        contactTitle,
+        schoolType,
+        enrollmentSize,
+        pricingTier,
+        subscriptionPlan
+      } = req.body;
+
+      // Validate request using Zod schema
+      const validationResult = organizationRegistrationSchema.safeParse(req.body);
+      if (!validationResult.success) {
+        return res.status(400).json({
+          error: "Invalid registration data",
+          details: validationResult.error.errors
+        });
+      }
+
+      // Validate organization type
+      const validOrgTypes = ['fantasy_sports', 'youth_organization', 'private_school'];
+      if (!validOrgTypes.includes(organizationType)) {
+        return res.status(400).json({
+          error: "Invalid organization type. Must be fantasy_sports, youth_organization, or private_school"
+        });
+      }
+
+      const storage = await getStorage();
+      
+      // Create user record for organization registration
+      const userId = `org-user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      
+      // Determine subscription plan based on organization type and billing cycle
+      let finalSubscriptionPlan = subscriptionPlan;
+      if (organizationType === 'fantasy_sports') {
+        finalSubscriptionPlan = 'fantasy_sports_free';
+      } else if (organizationType === 'youth_organization') {
+        finalSubscriptionPlan = billingCycle === 'annual' ? 'youth_organization_annual' : 'youth_organization_monthly';
+      } else if (organizationType === 'private_school') {
+        finalSubscriptionPlan = 'private_school_annual';
+      }
+      
+      const organizationUser = await storage.upsertUser({
+        id: userId,
+        email: email,
+        firstName: firstName,
+        lastName: lastName,
+        profileImageUrl: null,
+        subscriptionPlan: finalSubscriptionPlan,
+        subscriptionStatus: organizationType === 'fantasy_sports' ? 'active' : 'pending',
+        pricingTier: pricingTier || finalSubscriptionPlan,
+        userRole: 'tournament_manager', // Default role for organization users
+        complianceRole: 'tournament_manager',
+        organizationId: `${organizationType}-${organizationName.toLowerCase().replace(/\s+/g, '-')}`,
+        organizationName: organizationName,
+        organizationType: organizationType,
+        phone: phone,
+        description: description,
+        sportsInvolved: sportsInvolved || [],
+        contactTitle: contactTitle,
+        schoolType: schoolType,
+        enrollmentSize: enrollmentSize,
+        organizationVerification: organizationVerification,
+        isWhitelabelClient: false,
+        whitelabelDomain: null,
+        accountStatus: organizationType === 'fantasy_sports' ? 'active' : 'pending_approval',
+        
+        // Set pricing-specific fields
+        annualDiscountApplied: organizationType === 'youth_organization' && billingCycle === 'annual',
+        annualDiscountPercentage: organizationType === 'youth_organization' && billingCycle === 'annual' ? "20.00" : "0",
+        annualDiscountAmount: organizationType === 'youth_organization' && billingCycle === 'annual' ? "120" : "0",
+        originalAnnualPrice: organizationType === 'youth_organization' && billingCycle === 'annual' ? "600" : "0",
+        effectiveAnnualPrice: organizationType === 'youth_organization' && billingCycle === 'annual' ? "480" : 
+                              organizationType === 'private_school' ? "2000" : "0"
+      });
+
+      console.log('✅ Organization user created:', organizationUser);
+
+      // Send welcome email
+      try {
+        const emailResult = await emailService.sendWelcomeEmail(
+          email,
+          firstName,
+          'tournament_manager',
+          organizationName
+        );
+        console.log('📧 Organization welcome email sent:', emailResult);
+      } catch (emailError) {
+        console.error('⚠️ Failed to send welcome email:', emailError);
+        // Don't fail the registration if email fails
+      }
+
+      // Create Stripe Checkout Session for non-fantasy organizations
+      let checkoutSession = null;
+      if (organizationType !== 'fantasy_sports') {
+        try {
+          // Define pricing tiers
+          const pricingMap = {
+            'youth_organization_monthly': { amount: 5000, interval: 'month' }, // $50/month
+            'youth_organization_annual': { amount: 48000, interval: 'year' }, // $480/year (20% discount)
+            'private_school_annual': { amount: 200000, interval: 'year' } // $2000/year
+          };
+
+          const pricing = pricingMap[finalSubscriptionPlan as keyof typeof pricingMap];
+          if (pricing) {
+            // Create Stripe customer
+            const customer = await stripe.customers.create({
+              email: email,
+              name: `${firstName} ${lastName}`,
+              metadata: {
+                user_id: userId,
+                organization_name: organizationName,
+                organization_type: organizationType,
+                pricing_tier: finalSubscriptionPlan
+              }
+            });
+
+            // Create Stripe price
+            const price = await stripe.prices.create({
+              product_data: {
+                name: `${organizationType === 'youth_organization' ? 'Youth Organization' : 'Private School'} Subscription`,
+                description: `Tournament management platform access for ${organizationName}`,
+                metadata: {
+                  organization_type: organizationType,
+                  tier: finalSubscriptionPlan
+                }
+              },
+              unit_amount: pricing.amount,
+              currency: 'usd',
+              recurring: {
+                interval: pricing.interval as 'month' | 'year'
+              }
+            });
+
+            // Create Checkout Session
+            checkoutSession = await stripe.checkout.sessions.create({
+              customer: customer.id,
+              payment_method_types: ['card'],
+              mode: 'subscription',
+              line_items: [{
+                price: price.id,
+                quantity: 1
+              }],
+              success_url: `${req.headers.origin || 'https://trantortournaments.org'}/registration/success?session_id={CHECKOUT_SESSION_ID}`,
+              cancel_url: `${req.headers.origin || 'https://trantortournaments.org'}/registration/cancel`,
+              metadata: {
+                user_id: userId,
+                organization_type: organizationType,
+                subscription_plan: finalSubscriptionPlan
+              }
+            });
+
+            console.log('💳 Stripe Checkout Session created:', checkoutSession.id);
+          }
+        } catch (stripeError) {
+          console.error('⚠️ Stripe Checkout Session creation failed:', stripeError);
+          // Don't fail registration if Stripe fails, but log the error
+        }
+      }
+
+      res.json({
+        success: true,
+        user: organizationUser,
+        organizationType: organizationType,
+        pricingTier: pricingTier,
+        subscriptionPlan: finalSubscriptionPlan,
+        checkoutUrl: checkoutSession?.url,
+        sessionId: checkoutSession?.id,
+        message: "Organization registration successful!",
+        nextStep: organizationType === 'fantasy_sports' ? 'dashboard' : checkoutSession?.url ? 'payment' : 'manual_setup'
+      });
+
+    } catch (error: any) {
+      console.error('❌ Organization registration error:', error);
+      res.status(500).json({
+        error: "Registration failed",
+        details: (error as Error).message
+      });
+    }
+  });
+
+  // Fantasy Sports Registration endpoint - For donation-based fantasy users
+  app.post("/api/registration/fantasy", async (req, res) => {
+    try {
+      console.log('Fantasy registration request received for:', req.body.email?.substring(0, 3) + '***');
+      
+      const {
+        firstName,
+        lastName,
+        email,
+        phone,
+        organizationName, // Fantasy league name
+        description,
+        sportsInvolved,
+        donationAmount,
+        supportMessage
+      } = req.body;
+
+      // Validate request using Zod schema
+      const validationResult = fantasyRegistrationSchema.safeParse(req.body);
+      if (!validationResult.success) {
+        return res.status(400).json({
+          error: "Invalid fantasy registration data",
+          details: validationResult.error.errors
+        });
+      }
+
+      const storage = await getStorage();
+      
+      // Create user record for fantasy registration
+      const userId = `fantasy-user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      
+      const fantasyUser = await storage.upsertUser({
+        id: userId,
+        email: email,
+        firstName: firstName,
+        lastName: lastName,
+        profileImageUrl: null,
+        subscriptionPlan: 'fantasy_sports_free',
+        subscriptionStatus: 'active', // Fantasy is immediately active
+        pricingTier: 'fantasy_sports_free',
+        userRole: 'tournament_manager',
+        complianceRole: 'tournament_manager',
+        organizationId: `fantasy-${organizationName.toLowerCase().replace(/\s+/g, '-')}`,
+        organizationName: organizationName,
+        organizationType: 'fantasy_sports',
+        phone: phone,
+        description: description,
+        sportsInvolved: sportsInvolved || [],
+        isWhitelabelClient: false,
+        whitelabelDomain: null,
+        accountStatus: 'active'
+      });
+
+      console.log('✅ Fantasy user created:', fantasyUser);
+      
+      // If there's a donation, create donation record
+      let donationRecord = null;
+      if (donationAmount && donationAmount > 0) {
+        try {
+          donationRecord = await storage.createDonation({
+            donorId: userId,
+            amount: donationAmount.toString(),
+            donationPurpose: 'general_education'
+          });
+          console.log('💝 Donation record created:', donationRecord);
+        } catch (donationError) {
+          console.error('⚠️ Failed to create donation record:', donationError);
+          // Don't fail registration if donation fails
+        }
+      }
+
+      // Send welcome email
+      try {
+        const emailResult = await emailService.sendWelcomeEmail(
+          email,
+          firstName,
+          'tournament_manager',
+          organizationName
+        );
+        console.log('📧 Fantasy welcome email sent:', emailResult);
+      } catch (emailError) {
+        console.error('⚠️ Failed to send welcome email:', emailError);
+        // Don't fail the registration if email fails
+      }
+
+      // Create Stripe Checkout Session for donations if amount > 0
+      let donationCheckoutSession = null;
+      if (donationAmount && donationAmount > 0) {
+        try {
+          // Create Stripe customer for donation
+          const customer = await stripe.customers.create({
+            email: email,
+            name: `${firstName} ${lastName}`,
+            metadata: {
+              user_id: userId,
+              organization_name: organizationName,
+              organization_type: 'fantasy_sports',
+              donation_supporter: 'true'
+            }
+          });
+
+          // Create Checkout Session for one-time donation
+          donationCheckoutSession = await stripe.checkout.sessions.create({
+            customer: customer.id,
+            payment_method_types: ['card'],
+            mode: 'payment',
+            line_items: [{
+              price_data: {
+                currency: 'usd',
+                product_data: {
+                  name: 'Champions for Change Educational Support',
+                  description: 'One-time donation to support educational trips for underprivileged students',
+                  metadata: {
+                    nonprofit: 'true',
+                    tax_deductible: 'true',
+                    ein: '81-3834471'
+                  }
+                },
+                unit_amount: Math.round(donationAmount * 100) // Convert to cents
+              },
+              quantity: 1
+            }],
+            success_url: `${req.headers.origin || 'https://trantortournaments.org'}/donation/success?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${req.headers.origin || 'https://trantortournaments.org'}/donation/cancel`,
+            metadata: {
+              user_id: userId,
+              donation_amount: donationAmount.toString(),
+              organization_type: 'fantasy_sports',
+              donation_id: donationRecord?.id || 'pending'
+            }
+          });
+
+          console.log('💝 Donation Checkout Session created:', donationCheckoutSession.id);
+        } catch (stripeError) {
+          console.error('⚠️ Donation Checkout Session creation failed:', stripeError);
+          // Don't fail registration if Stripe fails
+        }
+      }
+
+      res.json({
+        success: true,
+        user: fantasyUser,
+        donation: donationRecord,
+        organizationType: 'fantasy_sports',
+        donationCheckoutUrl: donationCheckoutSession?.url,
+        donationSessionId: donationCheckoutSession?.id,
+        message: "Fantasy sports registration successful! Welcome to the community!",
+        nextStep: donationAmount && donationAmount > 0 ? 
+          (donationCheckoutSession?.url ? 'donation_payment' : 'dashboard') : 'dashboard'
+      });
+
+    } catch (error: any) {
+      console.error('❌ Fantasy registration error:', error);
+      res.status(500).json({
+        error: "Fantasy registration failed",
+        details: (error as Error).message
       });
     }
   });
