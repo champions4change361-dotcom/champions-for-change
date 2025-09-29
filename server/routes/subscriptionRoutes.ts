@@ -358,7 +358,9 @@ router.post('/api/subscriptions/create-tier-subscription', isAuthenticated, asyn
       email, 
       organizationName, 
       organizationType,
-      billingCycle
+      billingCycle,
+      sportsInvolved,
+      description
     } = validationResult.data;
 
     const userId = req.user?.claims?.sub;
@@ -540,9 +542,9 @@ router.get('/api/subscriptions/access', isAuthenticated, async (req, res) => {
         stripeSubscriptionData = {
           subscriptionId: subscription.id,
           status: subscription.status,
-          currentPeriodStart: subscription.current_period_start,
-          currentPeriodEnd: subscription.current_period_end,
-          cancelAtPeriodEnd: subscription.cancel_at_period_end,
+          currentPeriodStart: (subscription as any).current_period_start,
+          currentPeriodEnd: (subscription as any).current_period_end,
+          cancelAtPeriodEnd: (subscription as any).cancel_at_period_end,
           amount: subscription.items.data[0]?.price?.unit_amount ? subscription.items.data[0].price.unit_amount / 100 : 0
         };
       } catch (stripeError) {
@@ -632,9 +634,9 @@ router.get('/api/subscriptions/status', isAuthenticated, async (req, res) => {
       amount,
       billingCycle: subscriptionAccess.billingCycle,
       annualDiscountApplied: subscriptionAccess.annualDiscountApplied,
-      currentPeriodStart: subscription.current_period_start,
-      currentPeriodEnd: subscription.current_period_end,
-      cancelAtPeriodEnd: subscription.cancel_at_period_end,
+      currentPeriodStart: (subscription as any).current_period_start,
+      currentPeriodEnd: (subscription as any).current_period_end,
+      cancelAtPeriodEnd: (subscription as any).cancel_at_period_end,
       message: subscription.status === 'active' 
         ? 'Subscription active - full access enabled' 
         : 'Subscription needs attention'

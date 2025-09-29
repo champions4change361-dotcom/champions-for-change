@@ -172,16 +172,16 @@ async function handleSubscriptionUpdated(subscription: any) {
   if (user?.email) {
     switch (subscription.status) {
       case 'active':
-        await sendSubscriptionReactivatedEmail(user, subscription, organizationType);
+        await sendSubscriptionReactivatedEmail(user, subscription);
         break;
       case 'past_due':
-        await sendPaymentRetryEmail(user, subscription, organizationType);
+        await sendPaymentRetryEmail(user, subscription);
         break;
       case 'canceled':
-        await sendCancellationConfirmationEmail(user, subscription, organizationType);
+        await sendCancellationConfirmationEmail(user, subscription);
         break;
       case 'unpaid':
-        await sendSubscriptionSuspendedEmail(user, subscription, organizationType);
+        await sendSubscriptionSuspendedEmail(user, subscription);
         break;
     }
   }
@@ -227,7 +227,7 @@ async function handleSubscriptionDeleted(subscription: any) {
   // Send appropriate farewell email based on organization type
   const [user] = await db.select().from(users).where(eq(users.id, userId));
   if (user?.email) {
-    await sendFarewellEmail(user, organizationType);
+    await sendFarewellEmail(user);
   }
 }
 
@@ -247,7 +247,7 @@ async function handlePaymentSucceeded(invoice: any) {
   const [user] = await db.select().from(users).where(eq(users.id, userId));
   if (user?.email) {
     // Send payment confirmation and receipt (tax deductible for fantasy donations, regular receipt for others)
-    await sendPaymentReceiptEmail(user, invoice, subscription, organizationType);
+    await sendPaymentReceiptEmail(user, invoice);
   }
 
   console.log(`✅ Payment processed for ${organizationType} subscription: ${invoice.amount_paid / 100}`);
