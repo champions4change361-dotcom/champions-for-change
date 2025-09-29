@@ -203,11 +203,13 @@ export class UnifiedWebSocketService {
         userId = request.user.id;
       }
 
-      // DEVELOPMENT MODE: Allow test user bypass for development
+      // DEVELOPMENT MODE: Athletic Trainer test user bypass DISABLED to fix redirect loop
+      /*
       if (!userId && (!process.env.NODE_ENV || process.env.NODE_ENV !== 'production')) {
         console.log('🧪 Development mode: Using Athletic Trainer test user for WebSocket auth');
         userId = 'test-athletic-trainer-2025';
       }
+      */
 
       if (!userId) {
         console.warn(`⚠️  WebSocket authentication failed: No user ID found`);

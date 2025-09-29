@@ -10,16 +10,17 @@ import type { User, InsertAthleticCalendarEvent } from '@shared/schema';
 
 const router = express.Router();
 
-// Development-only test user for verification
+// Development-only test user DISABLED to fix redirect loop
+// Athletic Trainer auto-login was causing persistent login issues
 const TEST_USER: User = {
-  id: 'test-athletic-trainer-2025',
-  email: 'athletic-trainer@example.com',
-  firstName: 'Athletic',
-  lastName: 'Trainer',
+  id: 'test-dev-user-2025',
+  email: 'dev-user@example.com',
+  firstName: 'Test',
+  lastName: 'User',
   profileImageUrl: null,
   subscriptionStatus: 'active',
-  subscriptionPlan: 'district_enterprise',
-  userRole: 'athletic_trainer',
+  subscriptionPlan: 'foundation',
+  userRole: 'coach',
   organizationId: 'test-org',
   organizationName: 'Test Organization',
   mission: null,
@@ -47,8 +48,8 @@ const TEST_USER: User = {
   hipaaTrainingDate: new Date('2025-01-01'),
   ferpaAgreementSigned: true,
   ferpaAgreementDate: new Date('2025-01-01'),
-  complianceRole: 'athletic_trainer',
-  medicalDataAccess: true,
+  complianceRole: 'coach',
+  medicalDataAccess: false,
   lastComplianceAudit: null,
   stripeCustomerId: null,
   stripeSubscriptionId: null,
