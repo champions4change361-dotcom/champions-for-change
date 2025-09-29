@@ -1,89 +1,17 @@
 import React from 'react';
 import { useDomain } from '@/hooks/useDomain';
-import { EducationPricingSection } from '@/components/pricing/EducationPricing';
-import { BusinessPricingSection } from '@/components/pricing/BusinessPricing';
-import { CoachesLoungePricingSection } from '@/components/pricing/CoachesLoungePricing';
+import PricingComparison from '@/components/pricing-comparison';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Heart, Users, Building, Trophy } from 'lucide-react';
 import { useLocation } from 'wouter';
 
 export default function Pricing() {
   const { config, isSchoolDomain, isFantasyDomain, isProDomain } = useDomain();
   const [, navigate] = useLocation();
 
-  // Check for pricing type override via URL params
+  // Check for highlighted feature via URL params
   const urlParams = new URLSearchParams(window.location.search);
-  const pricingType = urlParams.get('type');
-
-  // Debug logging
-  console.log('Pricing page - Domain config:', config);
-  console.log('Pricing page - URL params type:', pricingType);
-  console.log('Pricing page - Is school domain:', isSchoolDomain());
-  console.log('Pricing page - Is pro domain:', isProDomain());
-  console.log('Pricing page - Is fantasy domain:', isFantasyDomain());
-
-  // Show appropriate pricing based on domain context or URL override
-  const renderPricingSection = () => {
-    // Allow URL override for testing/demo purposes
-    if (pricingType === 'business') {
-      console.log('Rendering BusinessPricingSection via URL override');
-      return <BusinessPricingSection />;
-    } else if (pricingType === 'education') {
-      console.log('Rendering EducationPricingSection via URL override');
-      return <EducationPricingSection />;
-    } else if (pricingType === 'coaches') {
-      console.log('Rendering CoachesLoungePricingSection via URL override');
-      return <CoachesLoungePricingSection />;
-    }
-    
-    // Default domain-based routing
-    if (isSchoolDomain()) {
-      return (
-        <>
-          <EducationPricingSection />
-          <div className="bg-gradient-to-r from-orange-50 to-green-50 py-8 border-t border-orange-200">
-            <div className="max-w-4xl mx-auto px-4 text-center">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                Looking for Tournament Organizer Pricing?
-              </h3>
-              <p className="text-gray-600 mb-6">
-                Individual tournament organizers, coaches, and community leaders can access our specialized pricing tiers.
-              </p>
-              <div className="flex flex-wrap gap-4 justify-center">
-                <Button 
-                  className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3"
-                  onClick={() => {
-                    console.log('Bottom Tournament Organizer button clicked - navigating to /pricing?type=business');
-                    window.location.href = '/pricing?type=business';
-                  }}
-                  data-testid="button-tournament-organizer-pricing"
-                >
-                  View Tournament Organizer Plans ($39/month)
-                </Button>
-                <Button 
-                  variant="outline"
-                  onClick={() => {
-                    console.log('Bottom Coaches button clicked - navigating to /pricing?type=coaches');
-                    window.location.href = '/pricing?type=coaches';
-                  }}
-                  data-testid="button-coaches-pricing"
-                >
-                  Coaches Lounge Pricing
-                </Button>
-              </div>
-            </div>
-          </div>
-        </>
-      );
-    } else if (isProDomain()) {
-      return <BusinessPricingSection />;
-    } else if (isFantasyDomain()) {
-      return <CoachesLoungePricingSection />;
-    } else {
-      // Default to business pricing for general users
-      return <BusinessPricingSection />;
-    }
-  };
+  const highlightFeature = urlParams.get('highlight');
 
   const getBrandClass = () => {
     if (!config) return "min-h-screen bg-gradient-to-br from-blue-50 to-slate-50";
@@ -130,51 +58,43 @@ export default function Pricing() {
         </div>
       </div>
 
-      {/* Pricing Type Navigation */}
-      <div className="bg-white border-b border-gray-200 py-6">
-        <div className="max-w-6xl mx-auto px-4">
-          <h1 className="text-3xl font-bold text-center text-gray-900 mb-6">Choose Your Platform</h1>
-          <div className="flex flex-wrap justify-center gap-3">
-            <Button 
-              variant={pricingType === 'education' || (!pricingType && isSchoolDomain()) ? 'default' : 'outline'}
-              onClick={() => {
-                console.log('Education button clicked - navigating to /pricing?type=education');
-                window.location.href = '/pricing?type=education';
-              }}
-              data-testid="nav-education-pricing"
-              className="px-6 py-3"
-            >
-              Education & Schools
-            </Button>
-            <Button 
-              onClick={() => {
-                console.log('Business button clicked - navigating to /pricing?type=business');
-                window.location.href = '/pricing?type=business';
-              }}
-              data-testid="nav-business-pricing"
-              className={`px-6 py-3 ${pricingType === 'business' 
-                ? 'bg-orange-600 hover:bg-orange-700 text-white border-orange-600' 
-                : 'bg-white border-2 border-orange-600 text-orange-600 hover:bg-orange-50'}`}
-            >
-              Tournament Organizers ($39/month)
-            </Button>
-            <Button 
-              variant={pricingType === 'coaches' ? 'default' : 'outline'}
-              onClick={() => {
-                console.log('Coaches button clicked - navigating to /pricing?type=coaches');
-                window.location.href = '/pricing?type=coaches';
-              }}
-              data-testid="nav-coaches-pricing"
-              className="px-6 py-3"
-            >
-              Coaches Lounge
-            </Button>
+      {/* Organization Type Header */}
+      <div className="bg-white border-b border-gray-200 py-8">
+        <div className="max-w-6xl mx-auto px-4 text-center">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">Choose Your Organization Type</h1>
+          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+            Three distinct pricing tiers designed for different organization types and needs
+          </p>
+          
+          {/* Quick Organization Type Guide */}
+          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+              <Trophy className="h-8 w-8 text-orange-600 mx-auto mb-2" />
+              <h3 className="font-semibold text-orange-800 mb-1">Fantasy Sports</h3>
+              <p className="text-sm text-orange-700">Individual users joining fantasy leagues</p>
+            </div>
+            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+              <Users className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+              <h3 className="font-semibold text-blue-800 mb-1">Youth Organizations</h3>
+              <p className="text-sm text-blue-700">Community sports programs and leagues</p>
+            </div>
+            <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+              <Building className="h-8 w-8 text-purple-600 mx-auto mb-2" />
+              <h3 className="font-semibold text-purple-800 mb-1">Private Schools</h3>
+              <p className="text-sm text-purple-700">Private schools and charter schools</p>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Domain-specific pricing content */}
-      {renderPricingSection()}
+      {/* Three-Tier Pricing Comparison */}
+      <div className="py-16">
+        <div className="max-w-7xl mx-auto px-4">
+          <PricingComparison 
+            highlightFeature={highlightFeature || undefined}
+          />
+        </div>
+      </div>
 
       {/* FAQ Section */}
       <div className="bg-white py-16">
@@ -186,11 +106,42 @@ export default function Pricing() {
           <div className="grid md:grid-cols-2 gap-8">
             <div>
               <h3 className="font-semibold text-gray-900 mb-2">
-                Can I switch plans later?
+                How do I choose the right organization type?
               </h3>
               <p className="text-gray-600 text-sm">
-                Yes! You can upgrade or downgrade your plan at any time. 
-                Changes take effect at your next billing cycle.
+                Fantasy Sports is for individual users joining fantasy leagues. Youth Organizations 
+                is for community programs like YMCA or local leagues. Private Schools is for 
+                private educational institutions.
+              </p>
+            </div>
+            
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-2">
+                Can Youth Organizations save with annual billing?
+              </h3>
+              <p className="text-gray-600 text-sm">
+                Yes! Youth Organizations can pay $480/year instead of $50/month, 
+                saving $120 (20% discount) with annual billing.
+              </p>
+            </div>
+            
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-2">
+                Is Fantasy Sports really free?
+              </h3>
+              <p className="text-gray-600 text-sm">
+                Yes, Fantasy Sports access is completely free. Users can optionally 
+                make donations to support our Champions for Change educational programs.
+              </p>
+            </div>
+            
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-2">
+                What's included in Private Schools pricing?
+              </h3>
+              <p className="text-gray-600 text-sm">
+                Private Schools get enterprise-level features including HIPAA/FERPA compliance, 
+                unlimited athletic and academic management, priority support, and dedicated training.
               </p>
             </div>
             
@@ -199,18 +150,8 @@ export default function Pricing() {
                 What payment methods do you accept?
               </h3>
               <p className="text-gray-600 text-sm">
-                We accept all major credit cards, PayPal, and ACH transfers 
-                for enterprise accounts.
-              </p>
-            </div>
-            
-            <div>
-              <h3 className="font-semibold text-gray-900 mb-2">
-                Is there a setup fee?
-              </h3>
-              <p className="text-gray-600 text-sm">
-                No setup fees for any plan. Enterprise customers receive 
-                free implementation support and training.
+                We accept all major credit cards and PayPal. Private Schools 
+                can also use ACH transfers and receive flexible billing arrangements.
               </p>
             </div>
             
@@ -219,8 +160,8 @@ export default function Pricing() {
                 How does the educational mission work?
               </h3>
               <p className="text-gray-600 text-sm">
-                All platform revenue supports Champions for Change, funding 
-                educational trips for students in Corpus Christi, Texas.
+                All subscriptions and donations support Champions for Change, funding 
+                educational trips and opportunities for underprivileged students in Corpus Christi, Texas.
               </p>
             </div>
           </div>
@@ -231,7 +172,7 @@ export default function Pricing() {
             </p>
             <Button 
               variant="outline"
-              onClick={() => window.location.href = 'mailto:champions4change361@gmail.com'}
+              onClick={() => window.location.href = 'mailto:champions4change361@gmail.com?subject=Pricing Questions&body=Hello, I have questions about the pricing tiers and would like to learn more about which option is best for my organization.'}
               data-testid="button-contact-support"
             >
               Contact Support

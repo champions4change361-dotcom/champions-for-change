@@ -2,89 +2,109 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Check, X, Star, Crown, Zap } from 'lucide-react';
+import { Check, Users, GraduationCap, Building, Heart, Trophy, Shield, Target, CreditCard, UserCheck, Star, Crown } from 'lucide-react';
 import { Link } from 'wouter';
 
-const plans = [
+type OrganizationType = 'fantasy' | 'youth' | 'private-school';
+
+interface PricingTier {
+  id: string;
+  organizationType: OrganizationType;
+  name: string;
+  monthlyPrice?: number;
+  annualPrice?: number;
+  annualDiscount?: number;
+  displayPrice: string;
+  description: string;
+  features: string[];
+  highlight: boolean;
+  ctaText: string;
+  ctaLink: string;
+  icon: React.ReactNode;
+  badgeText?: string;
+  valueProposition: string;
+}
+
+const pricingTiers: PricingTier[] = [
   {
-    name: 'Team Starter',
-    price: '$23/month',
-    description: 'Perfect for small teams getting started',
-    features: {
-      maxTournaments: '5/month included',
-      maxTeams: '20 players',
-      advancedFormats: true,
-      customBranding: false,
-      multiStage: true,
-      dataExport: true,
-      apiAccess: false,
-      whiteLabel: false,
-      support: 'Standard',
-      perEventOption: true
-    },
+    id: 'fantasy-sports',
+    organizationType: 'fantasy',
+    name: 'Fantasy Sports',
+    displayPrice: 'Free',
+    description: 'Individual users for fantasy leagues',
+    features: [
+      'Join fantasy leagues and compete with friends',
+      'Access to all fantasy sports platforms',
+      'Community building and social features',
+      'Educational mission support through participation',
+      'Mobile-responsive fantasy management',
+      'Real-time scoring and updates',
+      'League creation and management tools',
+      'Player statistics and analytics'
+    ],
     highlight: false,
-    cta: 'Start Team Management',
-    category: 'team'
+    ctaText: 'Start Playing Fantasy Sports',
+    ctaLink: '/register-organization?type=fantasy',
+    icon: <Trophy className="h-8 w-8 text-orange-500" />,
+    badgeText: 'Free Access',
+    valueProposition: 'Support our educational mission while enjoying fantasy sports'
   },
   {
-    name: 'Team Growing',
-    price: '$39/month',
-    description: 'Most popular choice for active teams',
-    features: {
-      maxTournaments: '15/month included',
-      maxTeams: '35 players',
-      advancedFormats: true,
-      customBranding: true,
-      multiStage: true,
-      dataExport: true,
-      apiAccess: false,
-      whiteLabel: false,
-      support: 'Standard',
-      perEventOption: true
-    },
+    id: 'youth-organizations',
+    organizationType: 'youth',
+    name: 'Youth Organizations',
+    monthlyPrice: 50,
+    annualPrice: 480,
+    annualDiscount: 20,
+    displayPrice: '$50/month',
+    description: 'YMCA, Boys & Girls Clubs, Pop Warner, local leagues',
+    features: [
+      'Complete tournament and team management',
+      'Nonprofit pricing designed for community programs',
+      'Unlimited teams and participants',
+      'Event registration and payment processing',
+      'Communication tools for parents and participants',
+      'Equipment inventory management',
+      'Volunteer coordination systems',
+      'Custom branding for your organization',
+      'Mobile-responsive tournament management',
+      'Basic reporting and analytics',
+      'Standard email support'
+    ],
     highlight: true,
-    cta: 'Most Popular',
-    category: 'team'
+    ctaText: 'Start Youth Program Management',
+    ctaLink: '/register-organization?type=youth',
+    icon: <Users className="h-8 w-8 text-blue-500" />,
+    badgeText: 'Most Popular',
+    valueProposition: 'Affordable comprehensive management for community sports programs'
   },
   {
-    name: 'Team Elite',
-    price: '$63/month',
-    description: 'Complete solution for large teams',
-    features: {
-      maxTournaments: '50/month included',
-      maxTeams: 'Unlimited players',
-      advancedFormats: true,
-      customBranding: true,
-      multiStage: true,
-      dataExport: true,
-      apiAccess: true,
-      whiteLabel: false,
-      support: 'Priority',
-      perEventOption: true
-    },
+    id: 'private-schools',
+    organizationType: 'private-school',
+    name: 'Private Schools',
+    annualPrice: 2000,
+    displayPrice: '$2,000/year',
+    description: 'Private schools and private charter schools',
+    features: [
+      'Enterprise-level athletic and academic management',
+      'Full compliance with HIPAA/FERPA requirements',
+      'Comprehensive district-to-student management hierarchy',
+      'Advanced role-based access controls',
+      'Unlimited athletic and academic competitions',
+      'Professional health monitoring and injury tracking',
+      'Equipment management with audit trails',
+      'Advanced analytics and compliance reporting',
+      'Custom integrations and API access',
+      'White-label branding capabilities',
+      'Priority support with dedicated account manager',
+      'Professional training and onboarding'
+    ],
     highlight: false,
-    cta: 'Enterprise Team',
-    category: 'team'
-  },
-  {
-    name: 'Tournament Organizer',
-    price: '$39/month',
-    description: 'Unlimited tournament hosting',
-    features: {
-      maxTournaments: 'Unlimited',
-      maxTeams: 'Unlimited entries',
-      advancedFormats: true,
-      customBranding: true,
-      multiStage: true,
-      dataExport: true,
-      apiAccess: true,
-      whiteLabel: false,
-      support: 'Priority',
-      perEventOption: false
-    },
-    highlight: false,
-    cta: 'Pure Organizer',
-    category: 'organizer'
+    ctaText: 'Contact for Enterprise Setup',
+    ctaLink: '/register-organization?type=private-school',
+    icon: <Building className="h-8 w-8 text-purple-500" />,
+    badgeText: 'Enterprise',
+    valueProposition: 'Professional capabilities with full compliance and unlimited scale'
   }
 ];
 
@@ -98,283 +118,214 @@ export default function PricingComparison({ currentPlan, highlightFeature }: Pri
     return hasFeature ? (
       <Check className="h-4 w-4 text-green-500" />
     ) : (
-      <X className="h-4 w-4 text-gray-300" />
+      <Check className="h-4 w-4 text-gray-300" />
     );
   };
 
-  const getPlanIcon = (planName: string) => {
-    switch (planName) {
-      case 'Team Starter': return <Zap className="h-5 w-5" />;
-      case 'Team Growing': return <Star className="h-5 w-5" />;
-      case 'Team Elite': return <Crown className="h-5 w-5" />;
-      case 'Tournament Organizer': return <Star className="h-5 w-5" />;
-      default: return <Zap className="h-5 w-5" />;
-    }
+  const formatAnnualSavings = (tier: PricingTier) => {
+    if (!tier.monthlyPrice || !tier.annualPrice || !tier.annualDiscount) return null;
+    
+    const monthlyTotal = tier.monthlyPrice * 12;
+    const savings = monthlyTotal - tier.annualPrice;
+    return {
+      savings,
+      percentage: tier.annualDiscount
+    };
   };
-
-  // Separate plans by category for logical organization
-  const teamPlans = plans.filter(plan => plan.category === 'team');
-  const organizerPlans = plans.filter(plan => plan.category === 'organizer');
 
   return (
     <div className="space-y-12">
-      {/* Team Management Section */}
-      <div>
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Team Management Plans</h2>
-          <p className="text-gray-600">Pricing based on team size and communication needs</p>
-          <div className="inline-flex items-center bg-orange-50 text-orange-700 px-3 py-1 rounded-full text-sm mt-2">
-            <span className="mr-1">💡</span>
-            Team plans include tournaments per month. Additional hosting: +$50 per tournament.
-          </div>
-        </div>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {teamPlans.map((plan) => (
-        <Card 
-          key={plan.name}
-          className={`relative ${
-            plan.highlight ? 'border-2 border-primary shadow-lg' : ''
-          } ${
-            currentPlan === plan.name.toLowerCase().replace(' ', '-') ? 'ring-2 ring-blue-500' : ''
-          }`}
-        >
-          {plan.highlight && (
-            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-              <Badge className="bg-primary text-white">Most Popular</Badge>
-            </div>
-          )}
-          
-          {currentPlan === plan.name.toLowerCase().replace(' ', '-') && (
-            <div className="absolute -top-3 right-4">
-              <Badge className="bg-blue-500 text-white">Current Plan</Badge>
-            </div>
-          )}
-
-          <CardHeader className="text-center">
-            <div className="flex justify-center mb-2">
-              {getPlanIcon(plan.name)}
-            </div>
-            <CardTitle className="text-lg">{plan.name}</CardTitle>
-            <div className="text-2xl font-bold text-primary">{plan.price}</div>
-            <p className="text-sm text-gray-600">{plan.description}</p>
-          </CardHeader>
-
-          <CardContent className="space-y-4">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between text-sm">
-                <span>Tournament Access</span>
-                <span className="font-medium">{plan.features.maxTournaments}</span>
-              </div>
-              
-              <div className="flex items-center justify-between text-sm">
-                <span>{plan.category === 'team' ? 'Team Size' : 'Event Capacity'}</span>
-                <span className="font-medium">{plan.features.maxTeams}</span>
-              </div>
-              
-              {plan.features.perEventOption && (
-                <div className="flex items-center justify-between text-sm bg-orange-50 p-2 rounded border">
-                  <span>Unlimited Add-on</span>
-                  <span className="font-medium text-orange-600">+$50/tournament</span>
-                </div>
-              )}
-              
-              <div className={`flex items-center justify-between text-sm ${
-                highlightFeature === 'advancedFormats' ? 'bg-yellow-50 p-2 rounded' : ''
-              }`}>
-                <span>Advanced Formats</span>
-                {getFeatureIcon(plan.features.advancedFormats)}
-              </div>
-              
-              <div className={`flex items-center justify-between text-sm ${
-                highlightFeature === 'customBranding' ? 'bg-yellow-50 p-2 rounded' : ''
-              }`}>
-                <span>Custom Branding</span>
-                {getFeatureIcon(plan.features.customBranding)}
-              </div>
-              
-              <div className={`flex items-center justify-between text-sm ${
-                highlightFeature === 'multiStage' ? 'bg-yellow-50 p-2 rounded' : ''
-              }`}>
-                <span>Multi-Stage Events</span>
-                {getFeatureIcon(plan.features.multiStage)}
-              </div>
-              
-              <div className={`flex items-center justify-between text-sm ${
-                highlightFeature === 'dataExport' ? 'bg-yellow-50 p-2 rounded' : ''
-              }`}>
-                <span>Data Export</span>
-                {getFeatureIcon(plan.features.dataExport)}
-              </div>
-              
-              <div className={`flex items-center justify-between text-sm ${
-                highlightFeature === 'apiAccess' ? 'bg-yellow-50 p-2 rounded' : ''
-              }`}>
-                <span>API Access</span>
-                {getFeatureIcon(plan.features.apiAccess)}
-              </div>
-              
-              <div className={`flex items-center justify-between text-sm ${
-                highlightFeature === 'whiteLabel' ? 'bg-yellow-50 p-2 rounded' : ''
-              }`}>
-                <span>White Label</span>
-                {getFeatureIcon(plan.features.whiteLabel)}
-              </div>
-              
-              <div className="flex items-center justify-between text-sm">
-                <span>Support</span>
-                <span className="font-medium">{plan.features.support}</span>
-              </div>
-            </div>
-
-            <div className="pt-4">
-              {currentPlan === plan.name.toLowerCase().replace(' ', '-') ? (
-                <Button disabled className="w-full">
-                  Current Plan
-                </Button>
-              ) : (
-                <Link href="/pricing">
-                  <Button 
-                    className={`w-full ${plan.highlight ? 'bg-primary' : 'bg-secondary'}`}
-                    variant={plan.highlight ? 'default' : 'outline'}
-                  >
-                    {plan.cta}
-                  </Button>
-                </Link>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-          ))}
+      {/* Header Section */}
+      <div className="text-center mb-12">
+        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          Choose Your Organization Type
+        </h2>
+        <p className="text-xl text-gray-600 max-w-4xl mx-auto mb-6">
+          Three distinct pricing tiers designed for different organization types and needs
+        </p>
+        <div className="inline-flex items-center bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-medium">
+          <Heart className="h-4 w-4 mr-2" />
+          All subscriptions support Champions for Change educational programs
         </div>
       </div>
 
-      {/* Tournament Organizer Section */}
-      <div>
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Tournament Organizer Plans</h2>
-          <p className="text-gray-600">Unlimited tournament hosting without team management</p>
-          <div className="inline-flex items-center bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm mt-2">
-            <span className="mr-1">🏆</span>
-            Perfect for coaches and organizers who focus purely on tournaments
-          </div>
-        </div>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2 max-w-2xl mx-auto">
-          {organizerPlans.map((plan) => (
+      {/* Pricing Tiers */}
+      <div className="grid lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+        {pricingTiers.map((tier) => {
+          const annualSavings = formatAnnualSavings(tier);
+          
+          return (
             <Card 
-              key={plan.name}
+              key={tier.id}
               className={`relative ${
-                plan.highlight ? 'border-2 border-primary shadow-lg' : ''
+                tier.highlight ? 'border-2 border-blue-500 shadow-xl scale-105' : 'border border-gray-200'
               } ${
-                currentPlan === plan.name.toLowerCase().replace(' ', '-') ? 'ring-2 ring-blue-500' : ''
-              }`}
+                currentPlan === tier.id ? 'ring-2 ring-green-500' : ''
+              } transition-all duration-300 hover:shadow-lg`}
+              data-testid={`pricing-card-${tier.organizationType}`}
             >
-              {plan.highlight && (
+              {tier.highlight && (
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <Badge className="bg-primary text-white">Most Popular</Badge>
+                  <Badge className="bg-blue-500 text-white px-4 py-1">
+                    {tier.badgeText}
+                  </Badge>
                 </div>
               )}
               
-              {currentPlan === plan.name.toLowerCase().replace(' ', '-') && (
+              {currentPlan === tier.id && (
                 <div className="absolute -top-3 right-4">
-                  <Badge className="bg-blue-500 text-white">Current Plan</Badge>
+                  <Badge className="bg-green-500 text-white px-3 py-1">Current Plan</Badge>
                 </div>
               )}
 
-              <CardHeader className="text-center">
-                <div className="flex justify-center mb-2">
-                  {getPlanIcon(plan.name)}
+              <CardHeader className="text-center pb-4">
+                <div className="flex justify-center mb-4">
+                  {tier.icon}
                 </div>
-                <CardTitle className="text-lg">{plan.name}</CardTitle>
-                <div className="text-2xl font-bold text-primary">{plan.price}</div>
-                <p className="text-sm text-gray-600">{plan.description}</p>
-              </CardHeader>
-
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between text-sm">
-                    <span>Tournament Access</span>
-                    <span className="font-medium">{plan.features.maxTournaments}</span>
+                <CardTitle className="text-xl font-bold mb-2">{tier.name}</CardTitle>
+                
+                {/* Pricing Display */}
+                <div className="mb-4">
+                  <div className="text-3xl font-bold text-gray-900 mb-1">
+                    {tier.displayPrice}
                   </div>
                   
-                  <div className="flex items-center justify-between text-sm">
-                    <span>{plan.category === 'team' ? 'Team Size' : 'Event Capacity'}</span>
-                    <span className="font-medium">{plan.features.maxTeams}</span>
-                  </div>
-                  
-                  {plan.features.perEventOption && (
-                    <div className="flex items-center justify-between text-sm bg-orange-50 p-2 rounded border">
-                      <span>Per-event hosting</span>
-                      <span className="font-medium text-orange-600">+$50/tournament</span>
+                  {/* Annual Pricing Option for Youth Organizations */}
+                  {tier.organizationType === 'youth' && annualSavings && (
+                    <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <div className="text-lg font-semibold text-green-700">
+                        ${tier.annualPrice}/year
+                      </div>
+                      <div className="text-sm text-green-600">
+                        Save ${annualSavings.savings} ({annualSavings.percentage}% discount)
+                      </div>
                     </div>
                   )}
                   
-                  <div className={`flex items-center justify-between text-sm ${
-                    highlightFeature === 'advancedFormats' ? 'bg-yellow-50 p-2 rounded' : ''
-                  }`}>
-                    <span>Advanced Formats</span>
-                    {getFeatureIcon(plan.features.advancedFormats)}
-                  </div>
-                  
-                  <div className={`flex items-center justify-between text-sm ${
-                    highlightFeature === 'customBranding' ? 'bg-yellow-50 p-2 rounded' : ''
-                  }`}>
-                    <span>Custom Branding</span>
-                    {getFeatureIcon(plan.features.customBranding)}
-                  </div>
-                  
-                  <div className={`flex items-center justify-between text-sm ${
-                    highlightFeature === 'multiStage' ? 'bg-yellow-50 p-2 rounded' : ''
-                  }`}>
-                    <span>Multi-Stage Events</span>
-                    {getFeatureIcon(plan.features.multiStage)}
-                  </div>
-                  
-                  <div className={`flex items-center justify-between text-sm ${
-                    highlightFeature === 'dataExport' ? 'bg-yellow-50 p-2 rounded' : ''
-                  }`}>
-                    <span>Data Export</span>
-                    {getFeatureIcon(plan.features.dataExport)}
-                  </div>
-                  
-                  <div className={`flex items-center justify-between text-sm ${
-                    highlightFeature === 'apiAccess' ? 'bg-yellow-50 p-2 rounded' : ''
-                  }`}>
-                    <span>API Access</span>
-                    {getFeatureIcon(plan.features.apiAccess)}
-                  </div>
-                  
-                  <div className={`flex items-center justify-between text-sm ${
-                    highlightFeature === 'whiteLabel' ? 'bg-yellow-50 p-2 rounded' : ''
-                  }`}>
-                    <span>White Label</span>
-                    {getFeatureIcon(plan.features.whiteLabel)}
-                  </div>
-                  
-                  <div className="flex items-center justify-between text-sm">
-                    <span>Support</span>
-                    <span className="font-medium">{plan.features.support}</span>
-                  </div>
+                  {/* Annual Only for Private Schools */}
+                  {tier.organizationType === 'private-school' && (
+                    <div className="text-sm text-gray-500 mt-1">
+                      Annual billing only
+                    </div>
+                  )}
                 </div>
 
-                <div className="pt-4">
-                  {currentPlan === plan.name.toLowerCase().replace(' ', '-') ? (
-                    <Button disabled className="w-full">
+                <p className="text-sm text-gray-600 mb-4">{tier.description}</p>
+                
+                {/* Value Proposition */}
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <p className="text-sm font-medium text-gray-700">
+                    {tier.valueProposition}
+                  </p>
+                </div>
+              </CardHeader>
+
+              <CardContent className="space-y-4">
+                {/* Features List */}
+                <div className="space-y-3">
+                  {tier.features.map((feature, index) => (
+                    <div 
+                      key={index}
+                      className={`flex items-start text-sm ${
+                        highlightFeature && feature.toLowerCase().includes(highlightFeature.toLowerCase()) 
+                          ? 'bg-yellow-50 p-2 rounded border border-yellow-200' 
+                          : ''
+                      }`}
+                    >
+                      {getFeatureIcon(true)}
+                      <span className="ml-3 text-gray-700">{feature}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Call to Action */}
+                <div className="pt-6">
+                  {currentPlan === tier.id ? (
+                    <Button 
+                      disabled 
+                      className="w-full"
+                      data-testid={`button-current-plan-${tier.organizationType}`}
+                    >
                       Current Plan
                     </Button>
                   ) : (
-                    <Link href={plan.category === 'team' ? `/teams/signup?plan=${plan.name.toLowerCase().replace('team ', '').replace(' ', '')}&price=${plan.price.replace('$', '').replace('/month', '')}` : '/pricing?type=business'}>
+                    <Link href={tier.ctaLink}>
                       <Button 
-                        className={`w-full ${plan.highlight ? 'bg-primary' : 'bg-secondary'}`}
-                        variant={plan.highlight ? 'default' : 'outline'}
+                        className={`w-full ${
+                          tier.highlight 
+                            ? 'bg-blue-600 hover:bg-blue-700 text-white' 
+                            : tier.organizationType === 'fantasy'
+                              ? 'bg-orange-600 hover:bg-orange-700 text-white'
+                              : 'bg-purple-600 hover:bg-purple-700 text-white'
+                        }`}
+                        data-testid={`button-select-${tier.organizationType}`}
                       >
-                        {plan.cta}
+                        {tier.ctaText}
                       </Button>
                     </Link>
                   )}
                 </div>
               </CardContent>
             </Card>
-          ))}
+          );
+        })}
+      </div>
+
+      {/* Additional Information */}
+      <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-8 border border-green-200">
+        <div className="text-center">
+          <h3 className="text-xl font-bold text-gray-900 mb-4">
+            Questions About Organization Type Selection?
+          </h3>
+          <p className="text-gray-600 mb-6 max-w-3xl mx-auto">
+            Not sure which tier fits your organization? Our team can help you determine the best option 
+            based on your specific needs and requirements.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button 
+              variant="outline" 
+              className="border-blue-300 text-blue-700 hover:bg-blue-50"
+              onClick={() => window.location.href = 'mailto:Champions4change361@gmail.com?subject=Organization Type Selection - Pricing Inquiry&body=Hello, I need help determining which pricing tier is best for my organization. Please provide guidance on organization type selection.'}
+              data-testid="button-pricing-help"
+            >
+              <CreditCard className="h-4 w-4 mr-2" />
+              Get Pricing Help
+            </Button>
+            <Button 
+              variant="outline"
+              className="border-green-300 text-green-700 hover:bg-green-50"
+              onClick={() => window.location.href = '/register-organization'}
+              data-testid="button-start-registration"
+            >
+              <UserCheck className="h-4 w-4 mr-2" />
+              Start Organization Registration
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Educational Impact */}
+      <div className="text-center bg-white rounded-lg p-8 shadow-md border border-green-200">
+        <h3 className="text-2xl font-semibold text-gray-900 mb-4">
+          🎓 Supporting Student Education
+        </h3>
+        <p className="text-gray-600 text-lg max-w-3xl mx-auto mb-6">
+          Every subscription and donation directly supports Champions for Change, funding educational 
+          trips and opportunities for underprivileged students in Corpus Christi, Texas.
+        </p>
+        <div className="grid md:grid-cols-3 gap-6">
+          <div className="text-center">
+            <div className="text-2xl font-bold text-green-600">100%</div>
+            <div className="text-sm text-gray-600">Goes to Students</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-blue-600">501(c)(3)</div>
+            <div className="text-sm text-gray-600">Tax Deductible</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-purple-600">$15,000+</div>
+            <div className="text-sm text-gray-600">Already Funded</div>
+          </div>
         </div>
       </div>
     </div>

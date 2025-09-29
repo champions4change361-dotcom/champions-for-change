@@ -532,7 +532,7 @@ export default function OrganizationRegistration() {
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-3 w-3 text-green-600" />
-                    95% accuracy AI injury prediction system
+                    Comprehensive health monitoring system
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="h-3 w-3 text-green-600" />

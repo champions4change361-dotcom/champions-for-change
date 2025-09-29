@@ -374,84 +374,156 @@ export default function Landing() {
           </div>
         </div>
 
-        {/* Featured Donation Card - Above the fold */}
-        <div className="bg-gradient-to-br from-green-600 via-green-500 to-emerald-600 rounded-2xl border border-green-400/30 p-8 mb-12 shadow-2xl">
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-8">
-              <div className="flex items-center justify-center mb-4">
-                <Heart className="h-8 w-8 text-white mr-3" />
-                <h2 className="text-3xl md:text-4xl font-bold text-white">
-                  Support Student Education
-                </h2>
-              </div>
-              <p className="text-xl text-green-100 mb-6 leading-relaxed">
-                Your donation directly funds educational trips and opportunities for underprivileged youth
+        {/* Three-Tier Organization Selection - Above the fold */}
+        <div className="bg-gradient-to-br from-slate-800 via-slate-700 to-slate-800 rounded-2xl border border-orange-500/30 p-8 mb-12 shadow-2xl">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                Choose Your Organization Type
+              </h2>
+              <p className="text-xl text-slate-300 mb-6 leading-relaxed">
+                Three distinct pricing tiers designed for different organization types and needs
               </p>
-              
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-8">
-                <h3 className="text-xl font-bold text-white mb-4">✨ Multiple Payment Options Available</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                  <div className="bg-white/10 rounded-lg p-3">
-                    <CreditCard className="h-6 w-6 text-white mx-auto mb-2" />
-                    <div className="text-sm font-semibold text-white">Credit Cards</div>
-                    <div className="text-xs text-green-100">Visa, Mastercard, Amex</div>
+              <div className="inline-flex items-center bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-medium">
+                <Heart className="h-4 w-4 mr-2" />
+                All subscriptions support Champions for Change educational programs
+              </div>
+            </div>
+
+            {/* Three Organization Type Cards */}
+            <div className="grid lg:grid-cols-3 gap-8">
+              {/* Fantasy Sports */}
+              <div className="bg-gradient-to-br from-orange-600 to-orange-700 rounded-xl p-6 text-white border border-orange-400/30">
+                <div className="text-center">
+                  <Trophy className="h-12 w-12 text-orange-200 mx-auto mb-4" />
+                  <h3 className="text-2xl font-bold mb-2">Fantasy Sports</h3>
+                  <div className="text-4xl font-bold mb-2">Free</div>
+                  <div className="text-orange-200 mb-4">Optional donation support</div>
+                  <p className="text-orange-100 text-sm mb-6">
+                    Individual users for fantasy leagues
+                  </p>
+                  
+                  <div className="space-y-2 text-sm text-orange-100 mb-6">
+                    <div className="flex items-center"><Check className="h-4 w-4 mr-2" />Join fantasy leagues and compete</div>
+                    <div className="flex items-center"><Check className="h-4 w-4 mr-2" />Community building features</div>
+                    <div className="flex items-center"><Check className="h-4 w-4 mr-2" />Educational mission support</div>
+                    <div className="flex items-center"><Check className="h-4 w-4 mr-2" />Mobile-responsive management</div>
                   </div>
-                  <div className="bg-white/10 rounded-lg p-3">
-                    <Globe className="h-6 w-6 text-white mx-auto mb-2" />
-                    <div className="text-sm font-semibold text-white">PayPal</div>
-                    <div className="text-xs text-green-100">Secure & Fast</div>
-                  </div>
-                  <div className="bg-white/10 rounded-lg p-3">
-                    <Users className="h-6 w-6 text-white mx-auto mb-2" />
-                    <div className="text-sm font-semibold text-white">Venmo</div>
-                    <div className="text-xs text-green-100">Mobile Friendly</div>
-                  </div>
-                  <div className="bg-white/10 rounded-lg p-3">
-                    <Zap className="h-6 w-6 text-white mx-auto mb-2" />
-                    <div className="text-sm font-semibold text-white">More Options</div>
-                    <div className="text-xs text-green-100">Cash App, Klarna, Amazon Pay</div>
-                  </div>
-                </div>
-                
-                <div className="mt-6 grid md:grid-cols-3 gap-4 text-center">
-                  <div className="bg-emerald-500/30 rounded-lg p-3">
-                    <div className="text-lg font-bold text-white">100%</div>
-                    <div className="text-sm text-green-100">Goes to Students</div>
-                  </div>
-                  <div className="bg-emerald-500/30 rounded-lg p-3">
-                    <div className="text-lg font-bold text-white">501(c)(3)</div>
-                    <div className="text-sm text-green-100">Tax Deductible</div>
-                  </div>
-                  <div className="bg-emerald-500/30 rounded-lg p-3">
-                    <div className="text-lg font-bold text-white">Instant</div>
-                    <div className="text-sm text-green-100">Tax Receipt</div>
-                  </div>
+                  
+                  <Button 
+                    className="w-full bg-white text-orange-600 hover:bg-orange-50 font-bold mb-3"
+                    onClick={() => setLocation("/register-organization?type=fantasy")}
+                    data-testid="button-select-fantasy"
+                  >
+                    Start Playing Fantasy Sports
+                  </Button>
+                  <p className="text-orange-200 text-xs">Support our educational mission while enjoying fantasy sports</p>
                 </div>
               </div>
 
-              <Button 
-                size="lg" 
-                className="bg-white text-green-600 hover:bg-green-50 font-bold px-12 py-6 text-xl shadow-lg"
-                onClick={() => setLocation("/donate")}
-                data-testid="button-featured-donate"
-              >
-                <Heart className="mr-3 h-6 w-6" />
-                Donate Now - Any Amount
-              </Button>
+              {/* Youth Organizations */}
+              <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl p-6 text-white border-2 border-blue-400 relative">
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <Badge className="bg-blue-500 text-white px-4 py-1">Most Popular</Badge>
+                </div>
+                <div className="text-center">
+                  <Users className="h-12 w-12 text-blue-200 mx-auto mb-4" />
+                  <h3 className="text-2xl font-bold mb-2">Youth Organizations</h3>
+                  <div className="text-4xl font-bold mb-1">$50</div>
+                  <div className="text-lg font-medium mb-2">/month</div>
+                  <div className="bg-green-500 text-white px-3 py-1 rounded-full text-sm mb-4">
+                    $480/year (Save 20%)
+                  </div>
+                  <p className="text-blue-100 text-sm mb-6">
+                    YMCA, Boys & Girls Clubs, Pop Warner, local leagues
+                  </p>
+                  
+                  <div className="space-y-2 text-sm text-blue-100 mb-6">
+                    <div className="flex items-center"><Check className="h-4 w-4 mr-2" />Complete tournament management</div>
+                    <div className="flex items-center"><Check className="h-4 w-4 mr-2" />Nonprofit pricing for communities</div>
+                    <div className="flex items-center"><Check className="h-4 w-4 mr-2" />Unlimited teams & participants</div>
+                    <div className="flex items-center"><Check className="h-4 w-4 mr-2" />Custom branding & communication</div>
+                  </div>
+                  
+                  <Button 
+                    className="w-full bg-white text-blue-600 hover:bg-blue-50 font-bold mb-3"
+                    onClick={() => setLocation("/register-organization?type=youth")}
+                    data-testid="button-select-youth"
+                  >
+                    Start Youth Program Management
+                  </Button>
+                  <p className="text-blue-200 text-xs">Affordable comprehensive management for community sports</p>
+                </div>
+              </div>
+
+              {/* Private Schools */}
+              <div className="bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl p-6 text-white border border-purple-400/30">
+                <div className="text-center">
+                  <Building className="h-12 w-12 text-purple-200 mx-auto mb-4" />
+                  <h3 className="text-2xl font-bold mb-2">Private Schools</h3>
+                  <div className="text-4xl font-bold mb-2">$2,000</div>
+                  <div className="text-purple-200 mb-4">/year (annual only)</div>
+                  <p className="text-purple-100 text-sm mb-6">
+                    Private schools and private charter schools
+                  </p>
+                  
+                  <div className="space-y-2 text-sm text-purple-100 mb-6">
+                    <div className="flex items-center"><Check className="h-4 w-4 mr-2" />Enterprise athletic & academic mgmt</div>
+                    <div className="flex items-center"><Check className="h-4 w-4 mr-2" />HIPAA/FERPA compliance</div>
+                    <div className="flex items-center"><Check className="h-4 w-4 mr-2" />District-to-student hierarchy</div>
+                    <div className="flex items-center"><Check className="h-4 w-4 mr-2" />Priority support & training</div>
+                  </div>
+                  
+                  <Button 
+                    className="w-full bg-white text-purple-600 hover:bg-purple-50 font-bold mb-3"
+                    onClick={() => setLocation("/register-organization?type=private-school")}
+                    data-testid="button-select-private-school"
+                  >
+                    Contact for Enterprise Setup
+                  </Button>
+                  <p className="text-purple-200 text-xs">Professional capabilities with full compliance and unlimited scale</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom CTA */}
+            <div className="text-center mt-12">
+              <p className="text-slate-300 mb-6">
+                Need help choosing the right tier for your organization?
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button 
+                  variant="outline"
+                  className="border-blue-300 text-blue-400 hover:bg-blue-500/10 px-8 py-3"
+                  onClick={() => window.location.href = 'mailto:Champions4change361@gmail.com?subject=Organization Type Selection - Pricing Inquiry&body=Hello, I need help determining which pricing tier is best for my organization.'}
+                  data-testid="button-pricing-help"
+                >
+                  <CreditCard className="h-4 w-4 mr-2" />
+                  Get Pricing Help
+                </Button>
+                <Button 
+                  className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3"
+                  onClick={() => setLocation("/pricing")}
+                  data-testid="button-view-detailed-pricing"
+                >
+                  <Trophy className="h-4 w-4 mr-2" />
+                  View Detailed Pricing
+                </Button>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Donation Impact Section - Above the fold */}
+        {/* Educational Impact Section */}
         <section className="bg-gradient-to-r from-green-600 via-green-500 to-emerald-600 text-white py-12 mb-16">
           <div className="max-w-6xl mx-auto px-4 text-center">
             <div className="max-w-4xl mx-auto">
               <h2 className="text-3xl md:text-4xl font-bold mb-6">
-                Every Platform Subscription Funds Student Educational Opportunities
+                Supporting Student Education Through Sports Management
               </h2>
               <p className="text-xl text-green-100 mb-8 leading-relaxed">
-                Built by coaches who understand that sports and academics create life-changing opportunities. 
-                Your support directly funds educational trips and experiences for underprivileged student competitors.
+                Every subscription and participation supports Champions for Change, funding educational 
+                trips and opportunities for underprivileged students in Corpus Christi, Texas.
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
@@ -486,8 +558,8 @@ export default function Landing() {
                   <div className="text-sm text-green-200">Tax Deductible</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                  <div className="text-2xl font-bold text-green-100">Direct</div>
-                  <div className="text-sm text-green-200">Impact Tracking</div>
+                  <div className="text-2xl font-bold text-green-100">$15,000+</div>
+                  <div className="text-sm text-green-200">Already Funded</div>
                 </div>
               </div>
               
@@ -814,7 +886,7 @@ export default function Landing() {
                 </div>
                 <h3 className="text-lg font-bold mb-3">Health Monitoring</h3>
                 <p className="text-purple-200 text-sm">
-                  Real-time injury tracking and AI-powered health insights to keep your athlete safe
+                  Real-time health monitoring and comprehensive safety protocols to keep your athlete safe
                 </p>
               </div>
               

@@ -177,7 +177,7 @@ export default function SchoolDistrictSolutions() {
                     <CheckCircle className="w-5 h-5 text-green-500 mr-3 mt-1" />
                     <div>
                       <div className="font-medium">AI-Powered Health Monitoring</div>
-                      <div className="text-gray-600 text-sm">95% accurate injury prediction with athletic trainer coordination</div>
+                      <div className="text-gray-600 text-sm">Comprehensive health monitoring with athletic trainer coordination</div>
                     </div>
                   </div>
                   <div className="flex items-start">

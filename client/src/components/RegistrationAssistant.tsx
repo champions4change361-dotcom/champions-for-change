@@ -60,27 +60,27 @@ export default function RegistrationAssistant({ isOpen, setIsOpen }: Registratio
     if (organizationType === 'private-school') {
       if (organizationSize === 'small' || organizationSize === 'under-200') {
         return {
-          plan: 'Educational Partnership',
-          price: '$99/month',
-          features: ['Essential athletic management', 'Basic health monitoring', 'Tournament organization', 'Parent communication'],
-          reason: 'Perfect for smaller private schools with focused needs and budget consciousness.',
-          signupUrl: '/register?plan=educational&type=private-school'
+          plan: 'Private Schools',
+          price: '$2,000/year',
+          features: ['Enterprise athletic & academic management', 'HIPAA/FERPA compliance', 'District-to-student hierarchy', 'Professional health monitoring'],
+          reason: 'Enterprise-level platform for private schools with comprehensive compliance and management features.',
+          signupUrl: '/register-organization?type=private-school'
         };
       } else if (organizationSize === 'medium' || organizationSize === '200-500') {
         return {
-          plan: 'Independent School Pro',
-          price: '$199/month',
-          features: ['Full athletic management suite', 'AI injury prediction', 'Equipment management', 'Smart scheduling', 'Advanced analytics'],
-          reason: 'Comprehensive solution for mid-size private schools with multiple sports programs.',
-          signupUrl: '/register?plan=pro&type=private-school'
+          plan: 'Private Schools',
+          price: '$2,000/year',
+          features: ['Enterprise athletic & academic management', 'HIPAA/FERPA compliance', 'Equipment management', 'Smart scheduling', 'Advanced analytics'],
+          reason: 'Comprehensive enterprise solution for private schools with multiple sports programs.',
+          signupUrl: '/register-organization?type=private-school'
         };
       } else {
         return {
-          plan: 'Private School Enterprise',
-          price: '$399/month',
-          features: ['All Pro features', 'Custom branding', 'Priority support', 'Multi-sport coordination', 'Advanced compliance tools'],
-          reason: 'Enterprise-grade solution for large private institutions with complex needs.',
-          signupUrl: '/register?plan=enterprise&type=private-school'
+          plan: 'Private Schools',
+          price: '$2,000/year',
+          features: ['Enterprise athletic & academic management', 'HIPAA/FERPA compliance', 'Custom branding', 'Priority support', 'Advanced compliance tools'],
+          reason: 'Enterprise-grade solution for large private institutions with comprehensive compliance needs.',
+          signupUrl: '/register-organization?type=private-school'
         };
       }
     }
@@ -88,32 +88,32 @@ export default function RegistrationAssistant({ isOpen, setIsOpen }: Registratio
     // Community Organizations
     if (organizationType === 'nonprofit' || organizationType === 'church' || organizationType === 'community') {
       return {
-        plan: 'Tournament Organizer',
-        price: '$39/month',
-        features: ['Complete tournament management', 'AI assistance', 'Professional features', 'Community-focused tools'],
-        reason: 'Designed specifically for nonprofits and community organizations running tournaments.',
-        signupUrl: '/register?plan=organizer&type=nonprofit'
+        plan: 'Youth Organizations',
+        price: '$50/month or $480/year',
+        features: ['Complete tournament management', 'Nonprofit pricing', 'Community-focused tools', 'Custom branding'],
+        reason: 'Designed specifically for nonprofits and community organizations running tournaments with affordable pricing.',
+        signupUrl: '/register-organization?type=youth'
       };
     }
     
     // Business/Enterprise
     if (organizationType === 'business' || organizationType === 'enterprise') {
       return {
-        plan: 'Business Enterprise',
-        price: '$149/month',
-        features: ['Complete white-label platform', 'Custom branding', 'Enterprise security', 'Full API access'],
-        reason: 'Professional tournament platform for businesses and enterprise clients.',
-        signupUrl: '/register?plan=business&type=enterprise'
+        plan: 'Youth Organizations',
+        price: '$50/month or $480/year',
+        features: ['Complete tournament management', 'Professional features', 'Custom branding', 'Community support'],
+        reason: 'Professional tournament platform for businesses and organizations at nonprofit pricing.',
+        signupUrl: '/register-organization?type=youth'
       };
     }
     
     // Default recommendation
     return {
-      plan: 'Educational Partnership',
-      price: '$99/month',
-      features: ['Essential features', 'Community support', 'Basic analytics'],
-      reason: 'Great starting point for most educational organizations.',
-      signupUrl: '/register?plan=educational'
+      plan: 'Youth Organizations',
+      price: '$50/month or $480/year',
+      features: ['Essential tournament management', 'Community support', 'Basic analytics', 'Affordable pricing'],
+      reason: 'Great starting point for most community and educational organizations.',
+      signupUrl: '/register-organization?type=youth'
     };
   };
 
