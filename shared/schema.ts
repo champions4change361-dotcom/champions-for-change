@@ -25,7 +25,12 @@ export const users = pgTable("users", {
     enum: ["active", "inactive", "trialing", "past_due", "canceled", "unpaid", "pending", "pending_approval"] 
   }).default("inactive"),
   subscriptionPlan: text("subscription_plan", { 
-    enum: ["supporter", "professional", "champion", "enterprise", "district_enterprise"] 
+    enum: [
+      // Legacy plans (preserved for backward compatibility)
+      "supporter", "professional", "champion", "enterprise", "district_enterprise",
+      // New pricing tier plans
+      "fantasy_sports_free", "youth_organization_monthly", "youth_organization_annual", "private_school_annual"
+    ]
   }).default("supporter"),
   userRole: text("user_role", {
     enum: [
@@ -176,10 +181,25 @@ export const users = pgTable("users", {
   stripeSubscriptionId: varchar("stripe_subscription_id"),
   stripeConnectAccountId: varchar("stripe_connect_account_id"), // For Stripe Connect platform payments
 
+  // PRICING TIER SUPPORT FIELDS
+  pricingTier: text("pricing_tier", {
+    enum: ["fantasy_sports_free", "youth_organization_monthly", "youth_organization_annual", "private_school_annual", "legacy"]
+  }),
+  annualDiscountApplied: boolean("annual_discount_applied").default(false),
+  annualDiscountPercentage: decimal("annual_discount_percentage", { precision: 5, scale: 2 }).default("0"), // Store discount percentage (e.g., 20.00 for 20%)
+  annualDiscountAmount: decimal("annual_discount_amount", { precision: 10, scale: 2 }).default("0"), // Store discount amount in dollars
+  originalAnnualPrice: decimal("original_annual_price", { precision: 10, scale: 2 }).default("0"), // Store original price before discount
+  effectiveAnnualPrice: decimal("effective_annual_price", { precision: 10, scale: 2 }).default("0"), // Store final price after discount
+
   // BUSINESS REGISTRATION FIELDS
   phone: varchar("phone"),
   organizationType: text("organization_type", {
-    enum: ["business", "nonprofit", "sports_club", "individual", "district", "school", "club"]
+    enum: [
+      // Legacy organization types (preserved for backward compatibility)
+      "business", "nonprofit", "sports_club", "individual", "district", "school", "club",
+      // New pricing tier organization types
+      "fantasy_sports", "youth_organization", "private_school", "public_school"
+    ]
   }),
   description: text("description"),
   sportsInvolved: jsonb("sports_involved").$type<string[]>(),
@@ -3348,9 +3368,7 @@ export const fantasyPicksRelations = relations(fantasyPicks, ({ one }) => ({
   }),
 }));
 
-// Fantasy system types
-export type FantasyLeague = typeof fantasyLeagues.$inferSelect;
-export type InsertFantasyLeague = typeof fantasyLeagues.$inferInsert;
+// Fantasy system types (moved to end of file to avoid duplicates)
 export type FantasyParticipant = typeof fantasyParticipants.$inferSelect;
 export type InsertFantasyParticipant = typeof fantasyParticipants.$inferInsert;
 export type ProfessionalPlayer = typeof professionalPlayers.$inferSelect;
