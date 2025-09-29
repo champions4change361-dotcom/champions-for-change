@@ -233,20 +233,6 @@ export default function Home() {
             </div>
           </Link>
 
-          {/* Logout Button - Mobile Friendly */}
-          <div 
-            onClick={() => window.location.href = '/api/logout'}
-            className="lg:col-span-1 bg-slate-800 border border-red-500/30 rounded-xl p-6 hover:border-red-400/50 transition-all cursor-pointer group"
-            data-testid="card-logout"
-          >
-            <div className="text-center">
-              <div className="w-12 h-12 bg-red-500/20 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-red-500/30 transition-colors">
-                <LogOut className="h-6 w-6 text-red-400" />
-              </div>
-              <h3 className="text-lg font-bold text-white mb-2">Logout</h3>
-              <p className="text-sm text-slate-400">Sign out safely</p>
-            </div>
-          </div>
         </div>
 
         {/* Active Championships Board */}
