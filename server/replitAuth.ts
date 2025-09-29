@@ -430,5 +430,12 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     }
   }
   
-  return res.status(401).json({ message: "Unauthorized" });
+  // Check if this is an API request or web page request
+  if (req.path.startsWith('/api/')) {
+    // API request - return JSON error
+    return res.status(401).json({ message: "Unauthorized" });
+  } else {
+    // Web page request - redirect to login page
+    return res.redirect('/login');
+  }
 };
