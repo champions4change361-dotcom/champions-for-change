@@ -69,25 +69,30 @@ async function handleSubscriptionCreated(subscription: any) {
   console.log('🎉 New subscription created:', subscription.id);
   
   const userId = subscription.metadata?.user_id;
+  const organizationType = subscription.metadata?.organization_type || 'fantasy';
+  const subscriptionTier = subscription.metadata?.subscription_tier || 'fantasy_sports';
+  
   if (!userId) {
     console.error('No user_id found in subscription metadata');
     return;
   }
 
-  // Update user subscription status
+  console.log(`📊 Subscription type: ${organizationType}, tier: ${subscriptionTier}`);
+
+  // Update user subscription status with proper plan mapping
   await db.update(users)
     .set({
       stripeSubscriptionId: subscription.id,
       subscriptionStatus: subscription.status,
-      subscriptionPlan: 'champion',
+      subscriptionPlan: subscriptionTier,
       updatedAt: new Date()
     })
     .where(eq(users.id, userId));
 
-  // Send welcome email
+  // Send appropriate welcome email based on organization type
   const [user] = await db.select().from(users).where(eq(users.id, userId));
   if (user?.email) {
-    await sendWelcomeEmail(user);
+    await sendWelcomeEmail(user, organizationType, subscription);
   }
 }
 
@@ -206,37 +211,132 @@ async function handleTrialWillEnd(subscription: any) {
 }
 
 // Email notification functions
-async function sendWelcomeEmail(user: any) {
-  const emailContent = `
-    <h2>🎉 Welcome to Champions for Change!</h2>
-    <p>Dear ${user.firstName || 'Supporter'},</p>
+async function sendWelcomeEmail(user: any, organizationType: string = 'fantasy', subscription: any = null) {
+  let emailContent: string;
+  let subject: string;
+  
+  if (organizationType === 'fantasy') {
+    // Fantasy Sports (Donation-based) welcome email
+    emailContent = `
+      <h2>🎉 Welcome to Champions for Change!</h2>
+      <p>Dear ${user.firstName || 'Supporter'},</p>
+      
+      <p>Thank you for joining our mission to support student educational opportunities! Your monthly donation will directly fund:</p>
+      
+      <ul>
+        <li>🎓 Student educational trips and competitions</li>
+        <li>🏆 Tournament participation opportunities</li>
+        <li>📚 Academic support programs</li>
+        <li>🚌 Transportation for educational events</li>
+      </ul>
+      
+      <p><strong>Your Impact:</strong> Every dollar you contribute goes directly toward helping students access educational opportunities they might not otherwise have.</p>
+      
+      <p><strong>Platform Access:</strong> As a Champions for Change supporter, you now have unlimited access to all tournament management features.</p>
+      
+      <p><strong>Tax Deductibility:</strong> Your donations are 100% tax-deductible. We'll send you monthly receipts automatically.</p>
+      
+      <p>Ready to create your first tournament? <a href="${process.env.FRONTEND_URL}/tournament-design">Get started here</a></p>
+      
+      <p>Thank you for making a difference in students' lives!</p>
+      
+      <p>The Champions for Change Team<br>
+      <small>EIN: 81-3834471 | 501(c)(3) Nonprofit Organization</small></p>
+    `;
+    subject = '🎉 Welcome to Champions for Change - Thank You for Supporting Students!';
+  } else if (organizationType === 'youth_organization') {
+    // Youth Organization welcome email
+    const billingCycle = subscription?.metadata?.billing_cycle || 'monthly';
+    const price = billingCycle === 'annual' ? '$480/year' : '$50/month';
     
-    <p>Thank you for joining our mission to support student educational opportunities! Your monthly donation will directly fund:</p>
-    
-    <ul>
-      <li>🎓 Student educational trips and competitions</li>
-      <li>🏆 Tournament participation opportunities</li>
-      <li>📚 Academic support programs</li>
-      <li>🚌 Transportation for educational events</li>
-    </ul>
-    
-    <p><strong>Your Impact:</strong> Every dollar you contribute goes directly toward helping students access educational opportunities they might not otherwise have.</p>
-    
-    <p><strong>Platform Access:</strong> As a Champions for Change supporter, you now have unlimited access to all tournament management features.</p>
-    
-    <p><strong>Tax Deductibility:</strong> Your donations are 100% tax-deductible. We'll send you monthly receipts automatically.</p>
-    
-    <p>Ready to create your first tournament? <a href="${process.env.FRONTEND_URL}/tournament-design">Get started here</a></p>
-    
-    <p>Thank you for making a difference in students' lives!</p>
-    
-    <p>The Champions for Change Team<br>
-    <small>EIN: 81-3834471 | 501(c)(3) Nonprofit Organization</small></p>
-  `;
+    emailContent = `
+      <h2>🏆 Welcome to Champions for Change - Youth Organization Access!</h2>
+      <p>Dear ${user.firstName || 'Organization Administrator'},</p>
+      
+      <p>Congratulations! Your youth organization now has full access to our comprehensive tournament management platform.</p>
+      
+      <p><strong>Your Subscription Details:</strong></p>
+      <ul>
+        <li>📋 Plan: Youth Organization Platform Access</li>
+        <li>💰 Pricing: ${price}${billingCycle === 'annual' ? ' (20% discount applied)' : ''}</li>
+        <li>🔄 Billing: ${billingCycle}</li>
+        <li>🏢 Organization: ${subscription?.metadata?.organization_name || user.organizationName}</li>
+      </ul>
+      
+      <p><strong>What You Get:</strong></p>
+      <ul>
+        <li>🏆 Unlimited tournament creation and management</li>
+        <li>👥 Unlimited participant registration</li>
+        <li>📊 Advanced analytics and reporting</li>
+        <li>🎨 Custom organization branding</li>
+        <li>📞 Priority customer support</li>
+        <li>📱 Mobile-friendly management tools</li>
+      </ul>
+      
+      <p><strong>Get Started:</strong> <a href="${process.env.FRONTEND_URL}/dashboard">Access your dashboard</a> to create your first tournament!</p>
+      
+      <p>Perfect for YMCA, Boys & Girls Clubs, Pop Warner, and sports leagues of all sizes.</p>
+      
+      <p>Need help getting started? Our support team is here to assist you!</p>
+      
+      <p>The Champions for Change Team<br>
+      <small>EIN: 81-3834471 | Supporting Youth Organizations Nationwide</small></p>
+    `;
+    subject = '🏆 Welcome to Champions for Change - Youth Organization Access Activated!';
+  } else if (organizationType === 'private_school') {
+    // Private School welcome email
+    emailContent = `
+      <h2>🎓 Welcome to Champions for Change - Private School Enterprise Access!</h2>
+      <p>Dear ${user.firstName || 'School Administrator'},</p>
+      
+      <p>Welcome to Champions for Change! Your private school now has enterprise-level access to our comprehensive tournament and competition management platform.</p>
+      
+      <p><strong>Your Subscription Details:</strong></p>
+      <ul>
+        <li>📋 Plan: Private School Platform Access</li>
+        <li>💰 Pricing: $2,000/year</li>
+        <li>🔄 Billing: Annual</li>
+        <li>🏫 School: ${subscription?.metadata?.organization_name || user.organizationName}</li>
+      </ul>
+      
+      <p><strong>Enterprise Features Include:</strong></p>
+      <ul>
+        <li>🏆 Unlimited tournaments and competitions</li>
+        <li>👥 Unlimited student and staff access</li>
+        <li>📊 Advanced analytics and performance tracking</li>
+        <li>🎨 Custom school branding and white-label options</li>
+        <li>🔗 Custom integrations with school systems</li>
+        <li>📞 Dedicated account manager and priority support</li>
+        <li>📈 Advanced reporting and insights</li>
+        <li>🔒 Enhanced security and compliance features</li>
+      </ul>
+      
+      <p><strong>Get Started:</strong> <a href="${process.env.FRONTEND_URL}/dashboard">Access your enterprise dashboard</a> to begin setting up tournaments for your school!</p>
+      
+      <p>Your dedicated account manager will be in touch within 24 hours to help with onboarding and custom setup.</p>
+      
+      <p>The Champions for Change Team<br>
+      <small>EIN: 81-3834471 | Enterprise Solutions for Educational Excellence</small></p>
+    `;
+    subject = '🎓 Welcome to Champions for Change - Private School Enterprise Access!';
+  } else {
+    // Fallback for unknown organization types
+    emailContent = `
+      <h2>🎉 Welcome to Champions for Change!</h2>
+      <p>Dear ${user.firstName || 'User'},</p>
+      
+      <p>Thank you for joining Champions for Change! Your subscription is now active and you have access to our tournament management platform.</p>
+      
+      <p><a href="${process.env.FRONTEND_URL}/dashboard">Access your dashboard</a> to get started!</p>
+      
+      <p>The Champions for Change Team</p>
+    `;
+    subject = '🎉 Welcome to Champions for Change!';
+  }
 
   await emailService.send({
     to: user.email,
-    subject: '🎉 Welcome to Champions for Change - Thank You for Supporting Students!',
+    subject,
     html: emailContent
   });
 }

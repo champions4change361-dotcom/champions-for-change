@@ -1,4 +1,5 @@
 import type { Express } from "express";
+import express from "express";
 import { createServer, type Server } from "http";
 import { exec } from "child_process";
 import crypto from "crypto";
@@ -52,6 +53,11 @@ console.log('🏫 District athletics management platform initialized');
 console.log('💚 Champions for Change nonprofit mission active');
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  
+  // CRITICAL: Stripe webhooks MUST be registered BEFORE JSON body parsing middleware
+  // Webhooks require raw body for signature verification - this prevents security issues
+  app.use('/api/webhooks/stripe', express.raw({ type: 'application/json' }), stripeWebhooks);
+  console.log('🔗 Stripe webhook handlers registered with RAW body parsing (SECURITY CRITICAL)');
   
   // PUBLIC GAME TEMPLATES API - NO AUTH REQUIRED (placed first to avoid middleware conflicts)
   
@@ -342,7 +348,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         linkTokenUsed: false
       };
       
-      const newTeam = await storage.createTeam(teamData);
+      const newTeam = await storage.createTeam(teamData, null); // No user context for signup
       
       // Return success with team info and secure token for linking
       res.status(201).json({
@@ -387,7 +393,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const storage = await getStorage();
       
       // Get the team to verify it exists and has security fields
-      const team = await storage.getTeam(teamId);
+      const team = await storage.getTeam(teamId, null); // No user context needed for verification
       if (!team) {
         console.warn('🚨 SECURITY: Team linking attempt for non-existent team', { teamId, userId });
         return res.status(404).json({ error: 'Team not found' });
@@ -440,7 +446,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updatedTeam = await storage.updateTeam(teamId, { 
         coachId: userId,
         linkTokenUsed: true // Mark token as used to prevent reuse
-      });
+      }, { id: userId, claims: { sub: userId, email: userEmail } }); // Provide user context
 
       console.log('✅ SECURITY: Team successfully linked', { 
         teamId, userId, userEmail, teamName: team.teamName 
@@ -474,7 +480,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const storage = await getStorage();
-      const teams = await storage.getTeamsByCoach(userId);
+      const teams = await storage.getTeamsByCoach(userId, { id: userId, claims: { sub: userId } });
       res.json(teams);
     } catch (error: any) {
       console.error('Get teams error:', error);
@@ -505,7 +511,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const storage = await getStorage();
-      const newTeam = await storage.createTeam(validationResult.data);
+      const newTeam = await storage.createTeam(validationResult.data, { id: userId, claims: { sub: userId } });
       res.status(201).json(newTeam);
     } catch (error: any) {
       console.error('Create team error:', error);
@@ -525,7 +531,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const storage = await getStorage();
-      const team = await storage.getTeam(id);
+      const team = await storage.getTeam(id, { id: userId, claims: { sub: userId } });
       
       if (!team) {
         return res.status(404).json({ error: 'Team not found' });
@@ -8747,7 +8753,7 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
       }
 
       // Check if team is full
-      if (team.currentPlayers >= (team.maxPlayers || 12)) {
+      if ((team.currentPlayers || 0) >= (team.maxPlayers || 12)) {
         return res.status(400).json({ error: 'Team is full' });
       }
 
@@ -8768,7 +8774,7 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
 
       // Update team player count
       await storage.updateTeamRegistration(team.id, {
-        currentPlayers: team.currentPlayers + 1
+        currentPlayers: (team.currentPlayers || 0) + 1
       });
 
       // Send confirmation email to parent
@@ -8777,8 +8783,7 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
           parentEmail,
           parentName,
           playerName,
-          teamName: team.teamName,
-          captainName: team.captainName
+          teamName: team.teamName
         });
       } catch (emailError) {
         console.error('Failed to send player join confirmation email:', emailError);
@@ -8985,8 +8990,8 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
       }
 
       await storage.updateTeamRegistration(teamId, {
-        paymentStatus: teamPaymentStatus,
-        paidAmount: paidMembers.length * (amount / 100 / (paidFor?.length || 1)) // Rough calculation
+        paymentStatus: teamPaymentStatus as "unpaid" | "paid" | "partial",
+        paidAmount: String(paidMembers.length * (amount / 100 / (paidFor?.length || 1))) // Convert to string
       });
 
       // Send confirmation emails
@@ -8994,8 +8999,7 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
         await emailService.sendPaymentConfirmation({
           recipientEmail: paymentIntent.metadata?.billing_email || 'unknown@email.com',
           paymentAmount: amount / 100,
-          teamName: team?.teamName || 'Unknown Team',
-          paymentIntentId
+          teamName: team?.teamName || 'Unknown Team'
         });
       } catch (emailError) {
         console.error('Failed to send payment confirmation email:', emailError);
@@ -9524,7 +9528,7 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
       const teamData = insertFantasyTeamSchema.parse({
         leagueId: req.params.leagueId,
         ownerId: userId,
-        teamName: teamName || `${req.user.firstName || 'Team'}'s Team`,
+        teamName: teamName || `${req.user?.firstName || 'Team'}'s Team`,
         teamAbbreviation: teamName?.substring(0, 4).toUpperCase() || 'TEAM'
       });
 
@@ -9865,9 +9869,6 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
   app.use('/', subscriptionRoutes);
   console.log('💳 Stripe subscription management routes registered');
 
-  // Stripe webhook handlers (must use raw body for signature verification)
-  app.use('/', stripeWebhooks);
-  console.log('🔗 Stripe webhook handlers registered');
 
   // Create and return server
   const server = createServer(app);

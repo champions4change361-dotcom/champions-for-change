@@ -6,23 +6,35 @@ import { users } from '@shared/schema';
 import { eq } from 'drizzle-orm';
 import { isAuthenticated } from '../replitAuth';
 import { emailService } from '../emailService';
+import { StripeProductService } from '../stripeProductService';
 
 const router = Router();
 
-// Schema for subscription creation
-const createSubscriptionSchema = z.object({
+// Schema for legacy donation subscription creation (Fantasy Sports)
+const createDonationSubscriptionSchema = z.object({
   firstName: z.string().min(1),
   lastName: z.string().min(1),
   email: z.string().email(),
   organizationName: z.string().min(1),
   donationAmount: z.number().min(5).max(10000).default(50), // $5 to $10,000 monthly
-  customDonationAmount: z.number().optional(),
+  customDonationAmount: z.number().min(5).max(10000).optional(), // CRITICAL FIX: Same bounds as donationAmount
 });
 
-// Create Stripe subscription for Champions for Change donation
+// Schema for new tier-based subscription creation
+const createTierSubscriptionSchema = z.object({
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
+  email: z.string().email(),
+  organizationName: z.string().min(1),
+  organizationType: z.enum(['youth_organization', 'private_school']),
+  billingCycle: z.enum(['monthly', 'annual']),
+});
+
+// Create Stripe subscription for Champions for Change donation (Fantasy Sports - Tier 1)
 router.post('/api/subscriptions/create-donation-subscription', isAuthenticated, async (req, res) => {
   try {
-    const validationResult = createSubscriptionSchema.safeParse(req.body);
+    // CRITICAL SECURITY: Validate input data with proper bounds checking
+    const validationResult = createDonationSubscriptionSchema.safeParse(req.body);
     if (!validationResult.success) {
       return res.status(400).json({ 
         error: 'Invalid subscription data', 
@@ -44,8 +56,9 @@ router.post('/api/subscriptions/create-donation-subscription', isAuthenticated, 
       return res.status(401).json({ error: 'User not authenticated' });
     }
 
-    // Use custom amount if provided, otherwise use default
-    const finalAmount = customDonationAmount || donationAmount;
+    // SECURITY CRITICAL: Use custom amount if explicitly provided (including 0), otherwise use default
+    // Previous logic was vulnerable: customDonationAmount || donationAmount treats 0 as falsy
+    const finalAmount = customDonationAmount !== undefined ? customDonationAmount : donationAmount;
 
     // Get or create Stripe customer
     const [user] = await db.select().from(users).where(eq(users.id, userId));
@@ -112,6 +125,8 @@ router.post('/api/subscriptions/create-donation-subscription', isAuthenticated, 
       metadata: {
         user_id: userId,
         organization_name: organizationName,
+        organization_type: 'fantasy',
+        subscription_tier: 'fantasy_sports',
         donation_type: 'educational_support',
         nonprofit: 'true',
         tax_deductible: 'true',
@@ -124,7 +139,7 @@ router.post('/api/subscriptions/create-donation-subscription', isAuthenticated, 
       .set({
         stripeSubscriptionId: subscription.id,
         subscriptionStatus: subscription.status as "active" | "inactive" | "trialing" | "past_due" | "canceled" | "unpaid" | "pending" | "pending_approval",
-        subscriptionPlan: 'champion',
+        subscriptionPlan: 'fantasy_sports',
         updatedAt: new Date()
       })
       .where(eq(users.id, userId));
@@ -142,6 +157,136 @@ router.post('/api/subscriptions/create-donation-subscription', isAuthenticated, 
 
   } catch (error: any) {
     console.error('Subscription creation error:', error);
+    res.status(500).json({ 
+      error: 'Failed to create subscription',
+      details: error.message 
+    });
+  }
+});
+
+// Create Stripe subscription for tier-based organizations (Youth Organizations - Tier 2, Private Schools - Tier 3)
+router.post('/api/subscriptions/create-tier-subscription', isAuthenticated, async (req, res) => {
+  try {
+    const validationResult = createTierSubscriptionSchema.safeParse(req.body);
+    if (!validationResult.success) {
+      return res.status(400).json({ 
+        error: 'Invalid subscription data', 
+        details: validationResult.error.errors 
+      });
+    }
+
+    const { 
+      firstName, 
+      lastName, 
+      email, 
+      organizationName, 
+      organizationType,
+      billingCycle
+    } = validationResult.data;
+
+    const userId = req.user?.claims?.sub;
+    if (!userId) {
+      return res.status(401).json({ error: 'User not authenticated' });
+    }
+
+    // Validate billing cycle is supported for organization type
+    if (!StripeProductService.isBillingCycleSupported(organizationType, billingCycle)) {
+      return res.status(400).json({ 
+        error: `${billingCycle} billing is not supported for ${organizationType}. Private schools only support annual billing.` 
+      });
+    }
+
+    // Initialize Stripe products if not already done
+    await StripeProductService.initializeProducts();
+
+    // Get appropriate price ID for organization type and billing cycle
+    const priceId = await StripeProductService.getPriceId(organizationType, billingCycle);
+    if (!priceId) {
+      return res.status(400).json({ 
+        error: `No pricing available for ${organizationType} with ${billingCycle} billing` 
+      });
+    }
+
+    // Get or create Stripe customer
+    const [user] = await db.select().from(users).where(eq(users.id, userId));
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    let stripeCustomerId = user.stripeCustomerId;
+    
+    if (!stripeCustomerId) {
+      // Create new Stripe customer
+      const customer = await stripe.customers.create({
+        email: email,
+        name: `${firstName} ${lastName}`,
+        metadata: {
+          user_id: userId,
+          organization: organizationName,
+          organization_type: organizationType,
+          billing_cycle: billingCycle,
+          nonprofit_supporter: organizationType === 'youth_organization' ? 'true' : 'false',
+          champions_for_change: 'true'
+        }
+      });
+      stripeCustomerId = customer.id;
+
+      // Update user with Stripe customer ID
+      await db.update(users)
+        .set({ stripeCustomerId: stripeCustomerId })
+        .where(eq(users.id, userId));
+    }
+
+    // Create the subscription using predefined price
+    const subscription = await stripe.subscriptions.create({
+      customer: stripeCustomerId,
+      items: [{
+        price: priceId,
+      }],
+      payment_behavior: 'default_incomplete',
+      payment_settings: { save_default_payment_method: 'on_subscription' },
+      expand: ['latest_invoice.payment_intent'],
+      metadata: {
+        user_id: userId,
+        organization_name: organizationName,
+        organization_type: organizationType,
+        subscription_tier: organizationType,
+        billing_cycle: billingCycle,
+        nonprofit: organizationType === 'youth_organization' ? 'true' : 'false',
+        tax_deductible: 'false', // These are program fees, not donations
+        ein: '81-3834471'
+      }
+    });
+
+    // Update user with subscription details
+    await db.update(users)
+      .set({
+        stripeSubscriptionId: subscription.id,
+        subscriptionStatus: subscription.status as "active" | "inactive" | "trialing" | "past_due" | "canceled" | "unpaid" | "pending" | "pending_approval",
+        subscriptionPlan: organizationType,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
+
+    // Extract client secret for frontend
+    const clientSecret = (subscription.latest_invoice as any)?.payment_intent?.client_secret;
+
+    // Get pricing info for response
+    const pricingInfoMap = StripeProductService.getPricingInfo();
+    const pricingInfo = organizationType === 'youth_organization' ? pricingInfoMap.youthOrganization : pricingInfoMap.privateSchool;
+    
+    res.json({
+      subscriptionId: subscription.id,
+      clientSecret,
+      status: subscription.status,
+      organizationType,
+      billingCycle,
+      message: `${pricingInfo.name} subscription created successfully. Complete payment to activate your platform access.`,
+      pricing: pricingInfo.pricing
+    });
+
+  } catch (error: any) {
+    console.error('Tier subscription creation error:', error);
     res.status(500).json({ 
       error: 'Failed to create subscription',
       details: error.message 
@@ -213,8 +358,34 @@ router.patch('/api/subscriptions/update-amount', isAuthenticated, async (req, re
   try {
     const { newAmount } = req.body;
     
-    if (!newAmount || newAmount < 5 || newAmount > 10000) {
-      return res.status(400).json({ error: 'Invalid donation amount. Must be between $5 and $10,000.' });
+    // ENHANCED VALIDATION: Comprehensive input sanitization and type checking
+    if (newAmount === undefined || newAmount === null) {
+      return res.status(400).json({ 
+        error: 'Invalid subscription data', 
+        details: [{ message: 'newAmount is required', path: ['newAmount'] }]
+      });
+    }
+    
+    if (typeof newAmount !== 'number' || isNaN(newAmount) || !isFinite(newAmount)) {
+      return res.status(400).json({ 
+        error: 'Invalid subscription data', 
+        details: [{ message: 'newAmount must be a valid number', path: ['newAmount'] }]
+      });
+    }
+    
+    if (newAmount < 5 || newAmount > 10000) {
+      return res.status(400).json({ 
+        error: 'Invalid subscription data', 
+        details: [{ message: 'Donation amount must be between $5 and $10,000', path: ['newAmount'] }]
+      });
+    }
+    
+    // Validate decimal precision (max 2 decimal places for currency)
+    if (Math.round(newAmount * 100) !== newAmount * 100) {
+      return res.status(400).json({ 
+        error: 'Invalid subscription data', 
+        details: [{ message: 'Amount cannot have more than 2 decimal places', path: ['newAmount'] }]
+      });
     }
 
     const userId = req.user?.claims?.sub;
