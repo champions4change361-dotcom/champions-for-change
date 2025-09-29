@@ -379,20 +379,20 @@ export async function setupAuth(app: Express) {
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   console.log(`Auth check - isAuthenticated: ${req.isAuthenticated()}, user: ${req.user ? 'exists' : 'none'}, session user: ${req.session?.user ? 'exists' : 'none'}, cookies: ${req.cookies.user_authenticated || 'none'}`);
   
-  // DEVELOPMENT MODE: Athletic Trainer test user bypass (moved first)
-  if (!process.env.NODE_ENV || process.env.NODE_ENV !== 'production') {
-    console.log('🧪 Development mode: Setting Athletic Trainer test user for protected routes');
-    req.user = {
-      claims: {
-        sub: 'test-athletic-trainer-2025',
-        email: 'athletic-trainer@example.com',
-        first_name: 'Athletic',
-        last_name: 'Trainer',
-        profile_image_url: null
-      }
-    } as any;
-    return next();
-  }
+  // DEVELOPMENT MODE: Athletic Trainer test user bypass (DISABLED for proper logout testing)
+  // if (!process.env.NODE_ENV || process.env.NODE_ENV !== 'production') {
+  //   console.log('🧪 Development mode: Setting Athletic Trainer test user for protected routes');
+  //   req.user = {
+  //     claims: {
+  //       sub: 'test-athletic-trainer-2025',
+  //       email: 'athletic-trainer@example.com',
+  //       first_name: 'Athletic',
+  //       last_name: 'Trainer',
+  //       profile_image_url: null
+  //     }
+  //   } as any;
+  //   return next();
+  // }
   
   // Check if user is authenticated via OAuth
   if (req.isAuthenticated()) {
