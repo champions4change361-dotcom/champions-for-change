@@ -7,20 +7,36 @@ import { eq } from 'drizzle-orm';
 import { isAuthenticated } from '../replitAuth';
 import { emailService } from '../emailService';
 import { StripeProductService } from '../stripeProductService';
+import { SubscriptionAccessService, OrganizationType } from '../services/subscriptionAccessService';
+import { loadSubscriptionAccess, requireValidSubscription } from '../middleware/subscriptionMiddleware';
 
 const router = Router();
 
-// Schema for legacy donation subscription creation (Fantasy Sports)
+// Load subscription access information for all authenticated routes
+router.use(isAuthenticated, loadSubscriptionAccess);
+
+// Schema for fantasy sports donation creation (optional donations only)
 const createDonationSubscriptionSchema = z.object({
   firstName: z.string().min(1),
   lastName: z.string().min(1),
   email: z.string().email(),
   organizationName: z.string().min(1),
-  donationAmount: z.number().min(5).max(10000).default(50), // $5 to $10,000 monthly
-  customDonationAmount: z.number().min(5).max(10000).optional(), // CRITICAL FIX: Same bounds as donationAmount
+  donationAmount: z.number().min(5).max(10000).default(25), // $5 to $10,000 monthly
+  customDonationAmount: z.number().min(5).max(10000).optional(),
+  makeRecurring: z.boolean().default(false), // Optional recurring donations
 });
 
-// Schema for new tier-based subscription creation
+// Schema for fantasy sports free access setup (no payment required)
+const setupFantasyFreeAccessSchema = z.object({
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
+  email: z.string().email(),
+  organizationName: z.string().min(1),
+  sportsInvolved: z.array(z.string()).default([]),
+  description: z.string().optional(),
+});
+
+// Schema for tier-based subscription creation (youth organizations and private schools)
 const createTierSubscriptionSchema = z.object({
   firstName: z.string().min(1),
   lastName: z.string().min(1),
@@ -28,9 +44,73 @@ const createTierSubscriptionSchema = z.object({
   organizationName: z.string().min(1),
   organizationType: z.enum(['youth_organization', 'private_school']),
   billingCycle: z.enum(['monthly', 'annual']),
+  sportsInvolved: z.array(z.string()).default([]),
+  description: z.string().optional(),
 });
 
-// Create Stripe subscription for Champions for Change donation (Fantasy Sports - Tier 1)
+// Schema for organization setup validation
+const validateOrganizationSetupSchema = z.object({
+  organizationType: z.enum(['fantasy_sports', 'youth_organization', 'private_school']),
+  billingCycle: z.enum(['monthly', 'annual']).optional(),
+});
+
+// NEW: Setup free access for fantasy sports users (no payment required)
+router.post('/api/subscriptions/setup-fantasy-free', isAuthenticated, async (req, res) => {
+  try {
+    const validationResult = setupFantasyFreeAccessSchema.safeParse(req.body);
+    if (!validationResult.success) {
+      return res.status(400).json({ 
+        error: 'Invalid setup data', 
+        details: validationResult.error.errors 
+      });
+    }
+
+    const { firstName, lastName, email, organizationName, sportsInvolved, description } = validationResult.data;
+    const userId = req.user?.claims?.sub;
+    
+    if (!userId) {
+      return res.status(401).json({ error: 'User not authenticated' });
+    }
+
+    // Update user with fantasy sports configuration (no Stripe subscription required)
+    await db.update(users)
+      .set({
+        organizationType: 'fantasy_sports',
+        organizationName,
+        sportsInvolved,
+        description,
+        subscriptionPlan: 'fantasy_sports_free',
+        subscriptionStatus: 'active', // Always active for free tier
+        pricingTier: 'fantasy_sports_free',
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
+
+    // Get updated subscription access information
+    const [updatedUser] = await db.select().from(users).where(eq(users.id, userId));
+    const subscriptionAccess = SubscriptionAccessService.getSubscriptionAccess(updatedUser);
+
+    console.log('🎉 Fantasy Sports free access activated for user:', userId);
+
+    res.json({
+      success: true,
+      message: 'Fantasy Sports access activated! You now have full access to tournaments and fantasy leagues.',
+      subscriptionAccess,
+      organizationType: 'fantasy_sports',
+      isFreeTier: true,
+      features: subscriptionAccess.availableFeatures
+    });
+
+  } catch (error: any) {
+    console.error('Fantasy free setup error:', error);
+    res.status(500).json({ 
+      error: 'Failed to setup fantasy sports access',
+      details: error.message 
+    });
+  }
+});
+
+// UPDATED: Create optional donation subscription for fantasy sports users
 router.post('/api/subscriptions/create-donation-subscription', isAuthenticated, async (req, res) => {
   try {
     // CRITICAL SECURITY: Validate input data with proper bounds checking
@@ -56,9 +136,21 @@ router.post('/api/subscriptions/create-donation-subscription', isAuthenticated, 
       return res.status(401).json({ error: 'User not authenticated' });
     }
 
+    const { makeRecurring = false } = validationResult.data;
+    
     // SECURITY CRITICAL: Use custom amount if explicitly provided (including 0), otherwise use default
     // Previous logic was vulnerable: customDonationAmount || donationAmount treats 0 as falsy
     const finalAmount = customDonationAmount !== undefined ? customDonationAmount : donationAmount;
+    
+    // Validate that this is actually for a fantasy sports organization
+    const subscriptionAccess = req.subscriptionAccess;
+    if (subscriptionAccess && subscriptionAccess.organizationType !== 'fantasy_sports') {
+      return res.status(400).json({
+        error: 'Donations are only available for fantasy sports organizations.',
+        organizationType: subscriptionAccess.organizationType,
+        message: 'Please use the tier-based subscription endpoints for your organization type.'
+      });
+    }
 
     // Get or create Stripe customer
     const [user] = await db.select().from(users).where(eq(users.id, userId));
@@ -113,7 +205,36 @@ router.post('/api/subscriptions/create-donation-subscription', isAuthenticated, 
       }
     });
 
-    // Create the subscription
+    // Create the subscription (only if recurring is requested)
+    if (!makeRecurring) {
+      // Create one-time payment intent instead of subscription for non-recurring donations
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(finalAmount * 100),
+        currency: 'usd',
+        customer: stripeCustomerId,
+        description: 'Champions for Change one-time donation',
+        metadata: {
+          user_id: userId,
+          organization_name: organizationName,
+          organization_type: 'fantasy',
+          donation_type: 'one_time_educational_support',
+          donation_amount: finalAmount.toString(),
+          nonprofit: 'true',
+          tax_deductible: 'true',
+          ein: '81-3834471'
+        }
+      });
+      
+      return res.json({
+        paymentIntentId: paymentIntent.id,
+        clientSecret: paymentIntent.client_secret,
+        donationType: 'one_time',
+        donationAmount: finalAmount,
+        message: 'One-time donation setup complete. Your Fantasy Sports access remains free regardless of donation completion.'
+      });
+    }
+    
+    // Create recurring subscription for donations
     const subscription = await stripe.subscriptions.create({
       customer: stripeCustomerId,
       items: [{
@@ -126,8 +247,8 @@ router.post('/api/subscriptions/create-donation-subscription', isAuthenticated, 
         user_id: userId,
         organization_name: organizationName,
         organization_type: 'fantasy',
-        subscription_tier: 'fantasy_sports',
-        donation_type: 'educational_support',
+        subscription_tier: 'fantasy_sports_donation', // Different from free access
+        donation_type: 'recurring_educational_support',
         nonprofit: 'true',
         tax_deductible: 'true',
         ein: '81-3834471'
@@ -151,8 +272,9 @@ router.post('/api/subscriptions/create-donation-subscription', isAuthenticated, 
       subscriptionId: subscription.id,
       clientSecret,
       status: subscription.status,
-      message: 'Subscription created successfully. Complete payment to activate your Champions for Change support.',
-      donationAmount: finalAmount
+      donationType: 'recurring',
+      donationAmount: finalAmount,
+      message: 'Recurring donation subscription created. Your Fantasy Sports access remains free regardless of subscription status.'
     });
 
   } catch (error: any) {
@@ -164,7 +286,62 @@ router.post('/api/subscriptions/create-donation-subscription', isAuthenticated, 
   }
 });
 
-// Create Stripe subscription for tier-based organizations (Youth Organizations - Tier 2, Private Schools - Tier 3)
+// NEW: Validate organization setup and pricing before subscription creation
+router.post('/api/subscriptions/validate-organization-setup', isAuthenticated, async (req, res) => {
+  try {
+    const validationResult = validateOrganizationSetupSchema.safeParse(req.body);
+    if (!validationResult.success) {
+      return res.status(400).json({ 
+        error: 'Invalid organization data', 
+        details: validationResult.error.errors 
+      });
+    }
+
+    const { organizationType, billingCycle } = validationResult.data;
+    const userId = req.user?.claims?.sub;
+    
+    if (!userId) {
+      return res.status(401).json({ error: 'User not authenticated' });
+    }
+
+    // Validate billing cycle for organization type
+    if (billingCycle && !SubscriptionAccessService.isBillingCycleSupported(organizationType, billingCycle)) {
+      return res.status(400).json({
+        error: 'Invalid billing cycle for organization type',
+        organizationType,
+        billingCycle,
+        message: organizationType === 'private_school' 
+          ? 'Private schools only support annual billing ($2,000/year)'
+          : `${billingCycle} billing is not supported for ${organizationType}`
+      });
+    }
+
+    // Get pricing information
+    const pricingInfo = SubscriptionAccessService.getPricingInfo();
+    const organizationPricing = pricingInfo[organizationType as keyof typeof pricingInfo];
+
+    // Calculate annual discount if applicable
+    const discountInfo = SubscriptionAccessService.calculateAnnualDiscount(organizationType);
+
+    res.json({
+      valid: true,
+      organizationType,
+      billingCycle,
+      pricing: organizationPricing,
+      discountInfo: discountInfo.hasDiscount ? discountInfo : undefined,
+      message: `Organization setup validated for ${organizationType}`
+    });
+
+  } catch (error: any) {
+    console.error('Organization validation error:', error);
+    res.status(500).json({ 
+      error: 'Failed to validate organization setup',
+      details: error.message 
+    });
+  }
+});
+
+// UPDATED: Create Stripe subscription for tier-based organizations (Youth Organizations - Tier 2, Private Schools - Tier 3)
 router.post('/api/subscriptions/create-tier-subscription', isAuthenticated, async (req, res) => {
   try {
     const validationResult = createTierSubscriptionSchema.safeParse(req.body);
@@ -190,9 +367,12 @@ router.post('/api/subscriptions/create-tier-subscription', isAuthenticated, asyn
     }
 
     // Validate billing cycle is supported for organization type
-    if (!StripeProductService.isBillingCycleSupported(organizationType, billingCycle)) {
+    if (!SubscriptionAccessService.isBillingCycleSupported(organizationType, billingCycle)) {
       return res.status(400).json({ 
-        error: `${billingCycle} billing is not supported for ${organizationType}. Private schools only support annual billing.` 
+        error: `${billingCycle} billing is not supported for ${organizationType}. Private schools only support annual billing.`,
+        organizationType,
+        billingCycle,
+        supportedCycles: SubscriptionAccessService.getAvailablePlans(organizationType).map(p => p.billingCycleRestriction)
       });
     }
 
@@ -203,7 +383,10 @@ router.post('/api/subscriptions/create-tier-subscription', isAuthenticated, asyn
     const priceId = await StripeProductService.getPriceId(organizationType, billingCycle);
     if (!priceId) {
       return res.status(400).json({ 
-        error: `No pricing available for ${organizationType} with ${billingCycle} billing` 
+        error: `No pricing available for ${organizationType} with ${billingCycle} billing`,
+        organizationType,
+        billingCycle,
+        availablePlans: SubscriptionAccessService.getAvailablePlans(organizationType)
       });
     }
 
@@ -258,12 +441,32 @@ router.post('/api/subscriptions/create-tier-subscription', isAuthenticated, asyn
       }
     });
 
-    // Update user with subscription details
+    // Determine the correct subscription plan based on organization type and billing cycle
+    const subscriptionPlan = organizationType === 'youth_organization' 
+      ? `youth_organization_${billingCycle}`
+      : 'private_school_annual';
+    
+    // Calculate and store annual discount information if applicable
+    const discountInfo = SubscriptionAccessService.calculateAnnualDiscount(organizationType);
+    const isAnnualPlan = billingCycle === 'annual';
+    
+    // Update user with subscription details and pricing tier information
     await db.update(users)
       .set({
         stripeSubscriptionId: subscription.id,
         subscriptionStatus: subscription.status as "active" | "inactive" | "trialing" | "past_due" | "canceled" | "unpaid" | "pending" | "pending_approval",
-        subscriptionPlan: organizationType,
+        subscriptionPlan,
+        pricingTier: subscriptionPlan,
+        organizationType,
+        organizationName,
+        sportsInvolved,
+        description,
+        // Annual discount tracking
+        annualDiscountApplied: isAnnualPlan && discountInfo.hasDiscount,
+        annualDiscountPercentage: isAnnualPlan && discountInfo.hasDiscount ? discountInfo.discountPercentage.toString() : '0',
+        annualDiscountAmount: isAnnualPlan && discountInfo.hasDiscount ? (discountInfo.originalAnnualPrice - discountInfo.discountedAnnualPrice).toString() : '0',
+        originalAnnualPrice: isAnnualPlan ? discountInfo.originalAnnualPrice.toString() : '0',
+        effectiveAnnualPrice: isAnnualPlan ? discountInfo.discountedAnnualPrice.toString() : '0',
         updatedAt: new Date()
       })
       .where(eq(users.id, userId));
@@ -271,9 +474,13 @@ router.post('/api/subscriptions/create-tier-subscription', isAuthenticated, asyn
     // Extract client secret for frontend
     const clientSecret = (subscription.latest_invoice as any)?.payment_intent?.client_secret;
 
+    // Get updated user and subscription access information
+    const [updatedUser] = await db.select().from(users).where(eq(users.id, userId));
+    const subscriptionAccess = SubscriptionAccessService.getSubscriptionAccess(updatedUser);
+    
     // Get pricing info for response
-    const pricingInfoMap = StripeProductService.getPricingInfo();
-    const pricingInfo = organizationType === 'youth_organization' ? pricingInfoMap.youthOrganization : pricingInfoMap.privateSchool;
+    const pricingInfoMap = SubscriptionAccessService.getPricingInfo();
+    const pricingInfo = pricingInfoMap[organizationType as keyof typeof pricingInfoMap];
     
     res.json({
       subscriptionId: subscription.id,
@@ -281,8 +488,11 @@ router.post('/api/subscriptions/create-tier-subscription', isAuthenticated, asyn
       status: subscription.status,
       organizationType,
       billingCycle,
+      subscriptionPlan,
+      subscriptionAccess,
+      discountInfo: isAnnualPlan && discountInfo.hasDiscount ? discountInfo : undefined,
       message: `${pricingInfo.name} subscription created successfully. Complete payment to activate your platform access.`,
-      pricing: pricingInfo.pricing
+      pricing: pricingInfo
     });
 
   } catch (error: any) {
@@ -294,7 +504,73 @@ router.post('/api/subscriptions/create-tier-subscription', isAuthenticated, asyn
   }
 });
 
-// Get subscription status
+// NEW: Get comprehensive subscription access information
+router.get('/api/subscriptions/access', isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.user?.claims?.sub;
+    if (!userId) {
+      return res.status(401).json({ error: 'User not authenticated' });
+    }
+
+    const [user] = await db.select().from(users).where(eq(users.id, userId));
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Get subscription access information using the new service
+    const subscriptionAccess = SubscriptionAccessService.getSubscriptionAccess(user);
+    const pricingInfo = SubscriptionAccessService.getPricingInfo();
+    
+    // If user has a Stripe subscription, sync the status
+    let stripeSubscriptionData = null;
+    if (user.stripeSubscriptionId) {
+      try {
+        const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+        
+        // Update local database with current Stripe status
+        if (subscription.status !== user.subscriptionStatus) {
+          await db.update(users)
+            .set({
+              subscriptionStatus: subscription.status as "active" | "inactive" | "trialing" | "past_due" | "canceled" | "unpaid" | "pending" | "pending_approval",
+              updatedAt: new Date()
+            })
+            .where(eq(users.id, userId));
+        }
+        
+        stripeSubscriptionData = {
+          subscriptionId: subscription.id,
+          status: subscription.status,
+          currentPeriodStart: subscription.current_period_start,
+          currentPeriodEnd: subscription.current_period_end,
+          cancelAtPeriodEnd: subscription.cancel_at_period_end,
+          amount: subscription.items.data[0]?.price?.unit_amount ? subscription.items.data[0].price.unit_amount / 100 : 0
+        };
+      } catch (stripeError) {
+        console.warn('Failed to sync Stripe subscription status:', stripeError);
+      }
+    }
+
+    res.json({
+      subscriptionAccess,
+      pricingInfo,
+      stripeSubscription: stripeSubscriptionData,
+      message: subscriptionAccess.isFreeTier 
+        ? 'You have free access to Fantasy Sports features!'
+        : subscriptionAccess.hasValidAccess 
+          ? 'Your subscription is active and all features are available.'
+          : 'Subscription required for full access to features.'
+    });
+
+  } catch (error: any) {
+    console.error('Subscription access error:', error);
+    res.status(500).json({ 
+      error: 'Failed to get subscription access information',
+      details: error.message 
+    });
+  }
+});
+
+// UPDATED: Get subscription status (legacy compatibility)
 router.get('/api/subscriptions/status', isAuthenticated, async (req, res) => {
   try {
     const userId = req.user?.claims?.sub;
@@ -307,11 +583,29 @@ router.get('/api/subscriptions/status', isAuthenticated, async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
+    const subscriptionAccess = SubscriptionAccessService.getSubscriptionAccess(user);
+    
+    // Fantasy sports users don't need Stripe subscriptions
+    if (subscriptionAccess.isFreeTier) {
+      return res.json({
+        hasSubscription: false, // No Stripe subscription needed
+        status: 'free',
+        organizationType: 'fantasy_sports',
+        accessLevel: 'free',
+        hasValidAccess: true,
+        message: 'Fantasy Sports: Free access with optional donations'
+      });
+    }
+
+    // For paid tiers, check Stripe subscription status
     if (!user.stripeSubscriptionId) {
       return res.json({
         hasSubscription: false,
-        status: 'none',
-        message: 'No active subscription found'
+        status: 'inactive',
+        organizationType: subscriptionAccess.organizationType,
+        accessLevel: subscriptionAccess.accessLevel,
+        hasValidAccess: false,
+        message: 'Subscription required for this organization type'
       });
     }
 
@@ -326,21 +620,23 @@ router.get('/api/subscriptions/status', isAuthenticated, async (req, res) => {
       })
       .where(eq(users.id, userId));
 
-    // Get the donation amount from subscription
-    const donationAmount = subscription.items.data[0]?.price?.unit_amount 
-      ? subscription.items.data[0].price.unit_amount / 100 
-      : 50;
+    const amount = subscription.items.data[0]?.price?.unit_amount ? subscription.items.data[0].price.unit_amount / 100 : 0;
 
     res.json({
       hasSubscription: true,
       subscriptionId: subscription.id,
       status: subscription.status,
-      donationAmount,
-      currentPeriodStart: (subscription as any).current_period_start,
-      currentPeriodEnd: (subscription as any).current_period_end,
+      organizationType: subscriptionAccess.organizationType,
+      accessLevel: subscriptionAccess.accessLevel,
+      hasValidAccess: subscriptionAccess.hasValidAccess,
+      amount,
+      billingCycle: subscriptionAccess.billingCycle,
+      annualDiscountApplied: subscriptionAccess.annualDiscountApplied,
+      currentPeriodStart: subscription.current_period_start,
+      currentPeriodEnd: subscription.current_period_end,
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
       message: subscription.status === 'active' 
-        ? 'Thank you for supporting Champions for Change!' 
+        ? 'Subscription active - full access enabled' 
         : 'Subscription needs attention'
     });
 

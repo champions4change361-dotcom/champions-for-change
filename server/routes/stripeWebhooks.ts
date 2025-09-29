@@ -4,6 +4,7 @@ import { db } from '../db';
 import { users } from '@shared/schema';
 import { eq } from 'drizzle-orm';
 import { emailService } from '../emailService';
+import { SubscriptionAccessService, OrganizationType } from '../services/subscriptionAccessService';
 
 const router = Router();
 
@@ -70,21 +71,62 @@ async function handleSubscriptionCreated(subscription: any) {
   
   const userId = subscription.metadata?.user_id;
   const organizationType = subscription.metadata?.organization_type || 'fantasy';
-  const subscriptionTier = subscription.metadata?.subscription_tier || 'fantasy_sports';
+  const organizationName = subscription.metadata?.organization_name;
+  const billingCycle = subscription.metadata?.billing_cycle;
   
   if (!userId) {
     console.error('No user_id found in subscription metadata');
     return;
   }
 
-  console.log(`📊 Subscription type: ${organizationType}, tier: ${subscriptionTier}`);
+  console.log(`📊 Subscription type: ${organizationType}, billing: ${billingCycle}`);
 
-  // Update user subscription status with proper plan mapping
+  // Determine the correct subscription plan based on organization type and billing cycle
+  let subscriptionPlan: string;
+  let pricingTier: string;
+  
+  switch (organizationType) {
+    case 'fantasy':
+    case 'fantasy_sports':
+      subscriptionPlan = 'fantasy_sports_donation'; // This is for optional donations, not required access
+      pricingTier = 'fantasy_sports_free'; // User still has free access regardless
+      break;
+      
+    case 'youth_organization':
+      subscriptionPlan = billingCycle === 'annual' ? 'youth_organization_annual' : 'youth_organization_monthly';
+      pricingTier = subscriptionPlan;
+      break;
+      
+    case 'private_school':
+      subscriptionPlan = 'private_school_annual';
+      pricingTier = 'private_school_annual';
+      break;
+      
+    default:
+      console.warn(`Unknown organization type: ${organizationType}, defaulting to youth organization`);
+      subscriptionPlan = billingCycle === 'annual' ? 'youth_organization_annual' : 'youth_organization_monthly';
+      pricingTier = subscriptionPlan;
+  }
+
+  // Calculate annual discount information for youth organizations
+  const isYouthOrgAnnual = organizationType === 'youth_organization' && billingCycle === 'annual';
+  const discountInfo = isYouthOrgAnnual ? SubscriptionAccessService.calculateAnnualDiscount('youth_organization' as OrganizationType) : null;
+
+  // Update user subscription status with comprehensive pricing tier information
   await db.update(users)
     .set({
       stripeSubscriptionId: subscription.id,
       subscriptionStatus: subscription.status,
-      subscriptionPlan: subscriptionTier,
+      subscriptionPlan,
+      pricingTier,
+      organizationType: organizationType as any,
+      organizationName: organizationName || undefined,
+      // Annual discount tracking
+      annualDiscountApplied: isYouthOrgAnnual && discountInfo?.hasDiscount,
+      annualDiscountPercentage: isYouthOrgAnnual && discountInfo?.hasDiscount ? discountInfo.discountPercentage.toString() : '0',
+      annualDiscountAmount: isYouthOrgAnnual && discountInfo?.hasDiscount ? (discountInfo.originalAnnualPrice - discountInfo.discountedAnnualPrice).toString() : '0',
+      originalAnnualPrice: isYouthOrgAnnual && discountInfo ? discountInfo.originalAnnualPrice.toString() : '0',
+      effectiveAnnualPrice: isYouthOrgAnnual && discountInfo ? discountInfo.discountedAnnualPrice.toString() : '0',
       updatedAt: new Date()
     })
     .where(eq(users.id, userId));
@@ -94,6 +136,8 @@ async function handleSubscriptionCreated(subscription: any) {
   if (user?.email) {
     await sendWelcomeEmail(user, organizationType, subscription);
   }
+
+  console.log(`✅ User ${userId} subscription configured: ${subscriptionPlan} (${organizationType})`);
 }
 
 // Handle subscription updates (status changes, amount changes, etc.)
@@ -101,6 +145,8 @@ async function handleSubscriptionUpdated(subscription: any) {
   console.log('📱 Subscription updated:', subscription.id, 'Status:', subscription.status);
   
   const userId = subscription.metadata?.user_id;
+  const organizationType = subscription.metadata?.organization_type || 'fantasy';
+  
   if (!userId) {
     console.error('No user_id found in subscription metadata');
     return;
@@ -114,21 +160,28 @@ async function handleSubscriptionUpdated(subscription: any) {
     })
     .where(eq(users.id, userId));
 
-  // Send appropriate notifications based on status
+  // Get updated user information
   const [user] = await db.select().from(users).where(eq(users.id, userId));
+  
+  // Get subscription access to determine impact of status change
+  const subscriptionAccess = user ? SubscriptionAccessService.getSubscriptionAccess(user) : null;
+  
+  console.log(`📊 Subscription ${subscription.id} status: ${subscription.status} (${organizationType}), Access: ${subscriptionAccess?.hasValidAccess ? 'Valid' : 'Invalid'}`);
+
+  // Send appropriate notifications based on status and organization type
   if (user?.email) {
     switch (subscription.status) {
       case 'active':
-        await sendSubscriptionReactivatedEmail(user, subscription);
+        await sendSubscriptionReactivatedEmail(user, subscription, organizationType);
         break;
       case 'past_due':
-        await sendPaymentRetryEmail(user, subscription);
+        await sendPaymentRetryEmail(user, subscription, organizationType);
         break;
       case 'canceled':
-        await sendCancellationConfirmationEmail(user, subscription);
+        await sendCancellationConfirmationEmail(user, subscription, organizationType);
         break;
       case 'unpaid':
-        await sendSubscriptionSuspendedEmail(user, subscription);
+        await sendSubscriptionSuspendedEmail(user, subscription, organizationType);
         break;
     }
   }
@@ -139,23 +192,42 @@ async function handleSubscriptionDeleted(subscription: any) {
   console.log('❌ Subscription deleted:', subscription.id);
   
   const userId = subscription.metadata?.user_id;
+  const organizationType = subscription.metadata?.organization_type || 'fantasy';
+  
   if (!userId) {
     console.error('No user_id found in subscription metadata');
     return;
   }
 
-  // Update user to remove subscription
-  await db.update(users)
-    .set({
-      subscriptionStatus: 'canceled',
-      updatedAt: new Date()
-    })
-    .where(eq(users.id, userId));
+  // For fantasy sports, deletion of donation subscription doesn't affect access
+  if (organizationType === 'fantasy' || organizationType === 'fantasy_sports') {
+    console.log('📝 Fantasy sports donation subscription deleted - maintaining free access');
+    
+    // Clear the Stripe subscription but maintain free access
+    await db.update(users)
+      .set({
+        stripeSubscriptionId: null, // Remove Stripe subscription reference
+        subscriptionStatus: 'active', // Maintain active status for free tier
+        subscriptionPlan: 'fantasy_sports_free', // Ensure free plan is set
+        pricingTier: 'fantasy_sports_free',
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
+  } else {
+    // For paid tiers, subscription deletion affects access
+    await db.update(users)
+      .set({
+        stripeSubscriptionId: null,
+        subscriptionStatus: 'canceled',
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId));
+  }
 
-  // Send farewell email with option to re-subscribe
+  // Send appropriate farewell email based on organization type
   const [user] = await db.select().from(users).where(eq(users.id, userId));
   if (user?.email) {
-    await sendFarewellEmail(user);
+    await sendFarewellEmail(user, organizationType);
   }
 }
 
@@ -165,6 +237,7 @@ async function handlePaymentSucceeded(invoice: any) {
   
   const subscription = await stripe.subscriptions.retrieve(invoice.subscription);
   const userId = subscription.metadata?.user_id;
+  const organizationType = subscription.metadata?.organization_type || 'fantasy';
   
   if (!userId) {
     console.error('No user_id found in subscription metadata');
@@ -173,9 +246,11 @@ async function handlePaymentSucceeded(invoice: any) {
 
   const [user] = await db.select().from(users).where(eq(users.id, userId));
   if (user?.email) {
-    // Send payment confirmation and tax receipt
-    await sendPaymentReceiptEmail(user, invoice);
+    // Send payment confirmation and receipt (tax deductible for fantasy donations, regular receipt for others)
+    await sendPaymentReceiptEmail(user, invoice, subscription, organizationType);
   }
+
+  console.log(`✅ Payment processed for ${organizationType} subscription: ${invoice.amount_paid / 100}`);
 }
 
 // Handle failed payment
