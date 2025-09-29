@@ -348,6 +348,35 @@ export async function setupAuth(app: Express) {
     })(req, res, next);
   });
 
+  // DEVELOPMENT: Manual login endpoint for testing
+  app.get("/api/dev-login", async (req, res) => {
+    if (process.env.NODE_ENV === 'production') {
+      return res.status(404).json({ message: "Not found" });
+    }
+    
+    // Create a test user session for development
+    const testUser = {
+      claims: {
+        sub: 'dev-user-' + Date.now(),
+        email: req.query.email || 'developer@test.com',
+        first_name: req.query.first_name || 'Developer',
+        last_name: req.query.last_name || 'Test',
+        profile_image_url: null
+      }
+    };
+    
+    req.logIn(testUser, (err) => {
+      if (err) {
+        return res.status(500).json({ error: 'Login failed' });
+      }
+      res.json({ 
+        success: true, 
+        message: 'Development login successful',
+        user: testUser.claims
+      });
+    });
+  });
+
   app.get("/api/logout", async (req, res) => {
     req.logout(() => {
       // Clear authentication cookie
