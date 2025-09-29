@@ -123,6 +123,7 @@ import StaffRoles from './pages/StaffRoles';
 import DistrictOverview from './pages/DistrictOverview';
 import AthleticTrainerDemo from './pages/AthleticTrainerDemo';
 import SignupSelector from './pages/SignupSelector';
+import DevLogin from './pages/DevLogin';
 import Contact from './pages/Contact';
 import AcademicDashboard from './pages/AcademicDashboard';
 import AcademicRegistration from './pages/AcademicRegistration';
@@ -462,6 +463,8 @@ function AppRouter() {
       <Route path="/login" component={UnifiedLogin} />
       {/* Legacy Login Form */}
       <Route path="/legacy-login" component={Login} />
+      {/* Development Login Tool */}
+      <Route path="/dev-login" component={DevLogin} />
       {/* Password Reset Flow */}
       <Route path="/forgot-password" component={ForgotPassword} />
       <Route path="/reset-password" component={ResetPassword} />
