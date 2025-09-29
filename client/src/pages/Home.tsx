@@ -67,43 +67,43 @@ export default function Home() {
             <div className="absolute top-4 left-4 w-32 h-32 bg-yellow-400/5 rounded-full blur-3xl"></div>
             <div className="absolute bottom-4 right-4 w-40 h-40 bg-yellow-400/3 rounded-full blur-3xl"></div>
           </div>
-          <div className="relative p-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-4xl font-bold text-white mb-2">
+          <div className="relative p-4 sm:p-6 md:p-8">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+              <div className="flex-1">
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2">
                   Welcome Back, <span className="text-yellow-400">{user?.firstName || 'Champion'}</span>
                 </h2>
-                <p className="text-xl text-slate-300 mb-4">
+                <p className="text-base sm:text-lg lg:text-xl text-slate-300 mb-4">
                   {user?.organizationName === 'Champions for Change' 
                     ? 'Every tournament creates opportunities for underprivileged student competitors'
                     : `Manage tournaments and athletics for ${user?.organizationName || 'your organization'}`
                   }
                 </p>
-                <div className="flex items-center space-x-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-6 space-y-2 sm:space-y-0">
                   <div className="flex items-center space-x-2 text-yellow-400">
-                    <Award className="h-5 w-5" />
-                    <span className="font-semibold">
+                    <Award className="h-4 w-4 sm:h-5 sm:w-5" />
+                    <span className="text-sm sm:text-base font-semibold">
                       {user?.organizationName === 'Champions for Change' ? 'Supporting Education' : 'Professional Athletics'}
                     </span>
                   </div>
                   <div className="flex items-center space-x-2 text-yellow-400">
-                    <Users className="h-5 w-5" />
-                    <span className="font-semibold">Built by Coaches</span>
+                    <Users className="h-4 w-4 sm:h-5 sm:w-5" />
+                    <span className="text-sm sm:text-base font-semibold">Built by Coaches</span>
                   </div>
                 </div>
               </div>
-              <div className="text-right">
+              <div className="text-center lg:text-right flex-shrink-0">
                 {user?.organizationName === 'Champions for Change' ? (
                   <>
-                    <div className="text-5xl font-bold text-yellow-400">$2,600+</div>
-                    <div className="text-lg text-slate-300">Per Student Trip</div>
-                    <div className="text-sm text-slate-400">Costs covered first</div>
+                    <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-yellow-400">$2,600+</div>
+                    <div className="text-sm sm:text-base lg:text-lg text-slate-300">Per Student Trip</div>
+                    <div className="text-xs sm:text-sm text-slate-400">Costs covered first</div>
                   </>
                 ) : (
                   <>
-                    <div className="text-5xl font-bold text-yellow-400">{activeTournaments.length}</div>
-                    <div className="text-lg text-slate-300">Active Tournaments</div>
-                    <div className="text-sm text-slate-400">Manage your events</div>
+                    <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-yellow-400">{activeTournaments.length}</div>
+                    <div className="text-sm sm:text-base lg:text-lg text-slate-300">Active Tournaments</div>
+                    <div className="text-xs sm:text-sm text-slate-400">Manage your events</div>
                   </>
                 )}
               </div>
