@@ -54,21 +54,49 @@ export function getSession() {
     checkPeriod: sessionTtl, // prune expired entries every 24h
   });
   
-  return session({
+  const sessionMiddleware = session({
     secret: process.env.SESSION_SECRET || 'champions-for-change-secret-key',
     store: sessionStore,
     resave: false, // Don't force session save on every request
     saveUninitialized: false, // Don't save uninitialized sessions
     rolling: true, // Reset cookie maxAge on every request
     cookie: {
-      httpOnly: false, // Allow JavaScript access for mobile compatibility
-      secure: false, // Allow HTTP for development
+      httpOnly: true, // Secure cookie - prevent JavaScript access
+      secure: 'auto', // Express-session auto-detects HTTPS via trust proxy
       maxAge: sessionTtl,
-      sameSite: 'none', // Required for OAuth redirects on mobile
+      sameSite: 'lax', // Default to lax, upgraded to none for HTTPS
       path: '/', // Ensure cookie is available site-wide
     },
     name: 'replit.sid', // Use custom session name to avoid conflicts
   });
+  
+  // Wrap to dynamically adjust cookie settings based on runtime HTTPS detection
+  return (req: any, res: any, next: any) => {
+    const isHttps = req.secure || req.get('x-forwarded-proto') === 'https';
+    const hostname = req.get('host');
+    
+    // Log HTTPS detection on first request (avoid spamming logs)
+    if (!global.httpsDetectionLogged) {
+      console.log('🔐 HTTPS Detection:', {
+        isHttps,
+        hostname,
+        secure: req.secure,
+        xForwardedProto: req.get('x-forwarded-proto'),
+        cookieSettings: isHttps ? 'secure=true, sameSite=none' : 'secure=false, sameSite=lax'
+      });
+      (global as any).httpsDetectionLogged = true;
+    }
+    
+    // Run the session middleware first
+    sessionMiddleware(req, res, () => {
+      // After session is initialized, upgrade cookie settings for HTTPS
+      if (isHttps && req.session?.cookie) {
+        req.session.cookie.secure = true;
+        req.session.cookie.sameSite = 'none'; // Required for cross-site OAuth
+      }
+      next();
+    });
+  };
 }
 
 function updateUserSession(
@@ -271,11 +299,12 @@ export async function setupAuth(app: Express) {
           }
           
           // Set additional cookie for mobile compatibility
+          const isHttps = req.secure || req.get('x-forwarded-proto') === 'https';
           res.cookie('user_authenticated', 'true', {
             maxAge: 7 * 24 * 60 * 60 * 1000,
-            httpOnly: false,
-            secure: false,
-            sameSite: 'none'
+            httpOnly: true,
+            secure: isHttps,
+            sameSite: isHttps ? 'none' : 'lax'
           });
           
           // Redirect based on user type to appropriate dashboard
@@ -406,8 +435,6 @@ export async function setupAuth(app: Express) {
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
-  console.log(`Auth check - isAuthenticated: ${req.isAuthenticated()}, user: ${req.user ? 'exists' : 'none'}, session user: ${req.session?.user ? 'exists' : 'none'}, cookies: ${req.cookies.user_authenticated || 'none'}`);
-  
   // DEVELOPMENT MODE: Athletic Trainer test user bypass (DISABLED for proper logout testing)
   // if (!process.env.NODE_ENV || process.env.NODE_ENV !== 'production') {
   //   console.log('🧪 Development mode: Setting Athletic Trainer test user for protected routes');
@@ -463,8 +490,11 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
   if (req.path.startsWith('/api/')) {
     // API request - return JSON error
     return res.status(401).json({ message: "Unauthorized" });
+  } else if (req.path === '/login' || req.path.startsWith('/@vite') || req.path.startsWith('/assets') || req.path.startsWith('/src') || req.path === '/favicon.ico' || req.path.startsWith('/health')) {
+    // Allow access to login page, Vite HMR, static assets, and health checks without auth
+    return next();
   } else {
-    // Web page request - redirect to login page to break redirect loop
+    // Other web page requests - redirect to login page
     return res.redirect('/login');
   }
 };

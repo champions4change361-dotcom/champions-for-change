@@ -11,8 +11,9 @@ import { scheduleOptimizationService } from './schedule-optimization-service';
 
 const router = express.Router();
 
-// Apply authentication middleware to all routes
-router.use(isAuthenticated);
+// REMOVED: Global isAuthenticated causes redirect loops when router is mounted at root
+// Apply authentication at individual route level if needed
+// router.use(isAuthenticated);
 router.use(loadUserContext);
 
 // Validation middleware

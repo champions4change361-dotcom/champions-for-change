@@ -12,8 +12,10 @@ import { loadSubscriptionAccess, requireValidSubscription } from '../middleware/
 
 const router = Router();
 
-// Load subscription access information for all authenticated routes
-router.use(isAuthenticated, loadSubscriptionAccess);
+// Load subscription access information for authenticated routes (isAuthenticated applied per-route)
+// CRITICAL: Do not apply isAuthenticated globally here - it causes redirect loops for non-API routes
+// Each route that needs auth already has isAuthenticated middleware applied individually
+router.use(loadSubscriptionAccess);
 
 // Schema for fantasy sports donation creation (optional donations only)
 const createDonationSubscriptionSchema = z.object({
