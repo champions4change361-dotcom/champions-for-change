@@ -42,11 +42,16 @@ Mobile-first development approach validated - platform built 95% on mobile devic
 - **Storage Abstraction**: Interface-based system supporting in-memory and database implementations.
 
 ### Data Storage
-- **Primary Database**: PostgreSQL with Drizzle ORM.
-- **Database Provider**: Neon Database for serverless PostgreSQL (ACTIVE: ep-dark-lake-aeblribj.c-2.us-east-2.aws.neon.tech).
-- **Schema Management**: Drizzle Kit for migrations.
-- **Data Validation**: Zod schemas for runtime type validation.
-- **Database Status**: ✅ Connected and operational (all Supabase references removed 8/22/2025).
+- **Multi-Database Architecture**: HIPAA/FERPA compliant separation with dedicated databases for different data domains
+  - **Main Database** (DATABASE_URL): Core authentication, billing, district management, tournament operations, academic competitions, health tracking
+  - **Fantasy Database** (DATABASE_URL_FANTASY): Isolated fantasy sports data including professional players (364 NFL players from Pro Football Reference), leagues, teams, rosters, drafts - prevents cross-contamination with student health data
+- **Database Provider**: Neon Database for serverless PostgreSQL
+  - Main DB: ep-dark-lake-aeblribj.c-2.us-east-2.aws.neon.tech
+  - Fantasy DB: Separate Neon instance with dedicated connection string
+- **Schema Management**: Drizzle Kit with separate configs (drizzle.config.ts for main, drizzle.fantasy.config.ts for fantasy)
+- **Data Validation**: Zod schemas for runtime type validation
+- **Storage Layer**: Dual storage implementation - DbStorage for main database, FantasyStorage for fantasy database with soft user references (varchar IDs, no cross-DB foreign keys)
+- **Database Status**: ✅ Multi-database architecture operational (Fantasy separation completed 9/30/2025)
 
 ### Authentication and Authorization
 - **Dual Authentication System**: Replit OAuth and form-based authentication with session management.
