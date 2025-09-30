@@ -23,6 +23,7 @@ import { registerAcademicRoutes } from "./academic-routes";
 import { registerBudgetRoutes } from "./budget-routes";
 import subscriptionRoutes from "./routes/subscriptionRoutes";
 import stripeWebhooks from "./routes/stripeWebhooks";
+import consentRoutes from "./routes/consentRoutes";
 import { tournamentSubscriptions, insertTournamentSubscriptionSchema, type InsertTournamentSubscription, insertRegistrationSubmissionSchema, insertTeamSchema, insertTeamPlayerSchema, insertMedicalHistorySchema, type InsertTeam, type InsertTeamPlayer, type InsertMedicalHistory, type Team, type TeamPlayer, type MedicalHistory, updateTeamSubscriptionSchema, type User, type FantasyLeague, type InsertFantasyLeague, type FantasyTeam, type InsertFantasyTeam, type FantasyRoster, type InsertFantasyRoster, type FantasyDraft, type InsertFantasyDraft, type FantasyMatchup, type InsertFantasyMatchup, type FantasyWaiverClaim, type InsertFantasyWaiverClaim, type FantasyTrade, type InsertFantasyTrade, type FantasyLeagueMessage, type InsertFantasyLeagueMessage, insertFantasyLeagueSchema, insertFantasyTeamSchema, insertFantasyRosterSchema, insertFantasyDraftSchema, insertFantasyMatchupSchema, insertFantasyWaiverClaimSchema, insertFantasyTradeSchema, insertFantasyLeagueMessageSchema, insertUserSchema } from "@shared/schema";
 import { z } from "zod";
 import { GameLockoutService } from "./game-lockout-service.js";
@@ -8546,6 +8547,10 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
   
   registerTournamentRoutes(app);
   registerMigrationRoutes(app);
+
+  // Medical Clearance Consent routes (cross-district player verification)
+  app.use('/api', consentRoutes);
+  console.log('🏥 Medical Clearance Consent API routes registered (auth required)');
 
   // Academic Competition System routes
   registerAcademicRoutes(app);
