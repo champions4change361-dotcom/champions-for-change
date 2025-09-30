@@ -59,19 +59,35 @@ export function registerDistrictRoutes(app: Express) {
   });
 
   // School endpoints
-  app.get("/api/schools", async (req: Request, res: Response) => {
+  app.get("/api/schools", 
+    loadUserContext,
+    async (req: Request, res: Response) => {
     try {
-      const { districtId } = req.query;
-      let schools;
+      const { rbacContext } = req;
+      const { districtId: queryDistrictId } = req.query;
       
-      if (districtId) {
-        schools = await districtStorage.getSchoolsByDistrict(districtId as string);
-      } else {
-        // For now, return empty array if no district specified
-        // Could be enhanced to return all schools
-        schools = [];
+      // Derive districtId from user context instead of trusting query param
+      let districtId: string | null = queryDistrictId as string || null;
+      
+      if (!districtId && rbacContext) {
+        // Get district from user's association
+        const districtRole = rbacContext.user.userRole?.startsWith('district_');
+        const schoolRole = rbacContext.user.userRole?.startsWith('school_');
+        
+        if (districtRole) {
+          const districtAdmin = await districtStorage.getDistrictAdminByUserId(rbacContext.user.id);
+          districtId = districtAdmin?.districtId || null;
+        } else if (schoolRole) {
+          const school = await districtStorage.getSchoolByADId(rbacContext.user.id);
+          districtId = school?.districtId || null;
+        }
       }
       
+      if (!districtId) {
+        return res.json([]); // Return empty array if no district association
+      }
+      
+      const schools = await districtStorage.getSchoolsByDistrict(districtId);
       res.json(schools);
     } catch (error) {
       console.error("Error fetching schools:", error);
@@ -124,13 +140,41 @@ export function registerDistrictRoutes(app: Express) {
     async (req: Request, res: Response) => {
       try {
         const { rbacContext } = req;
+        if (!rbacContext) {
+          return res.status(401).json({ error: "Unauthorized" });
+        }
+        
         const validatedData = insertSchoolSchema.parse(req.body);
+        
+        // SECURITY: Derive districtId from user context, don't trust client input
+        let userDistrictId: string | null = null;
+        const isSchoolLevelRole = rbacContext.user.userRole?.startsWith('school_');
+        const isDistrictLevelRole = rbacContext.user.userRole?.startsWith('district_');
+        
+        if (isDistrictLevelRole) {
+          const districtAdmin = await districtStorage.getDistrictAdminByUserId(rbacContext.user.id);
+          userDistrictId = districtAdmin?.districtId || null;
+        } else if (isSchoolLevelRole) {
+          const school = await districtStorage.getSchoolByADId(rbacContext.user.id);
+          userDistrictId = school?.districtId || null;
+        }
+        
+        if (!userDistrictId) {
+          return res.status(400).json({ error: "User not associated with a district" });
+        }
+        
+        // Validate client-supplied districtId matches user's district
+        if (validatedData.districtId && validatedData.districtId !== userDistrictId) {
+          return res.status(403).json({ 
+            error: "Forbidden: Cannot create schools in other districts" 
+          });
+        }
+        
+        // Override districtId with server-derived value
+        validatedData.districtId = userDistrictId;
         
         // District AD can add any school
         // School-level staff (AD, Coordinator, etc.) can only manage feeder relationships for their own school
-        const isSchoolLevelRole = rbacContext?.user.userRole?.startsWith('school_');
-        const isDistrictLevelRole = rbacContext?.user.userRole?.startsWith('district_');
-        
         if (isSchoolLevelRole) {
           // School-level staff must be managing feeders for their own school
           if (validatedData.feedsIntoSchoolId) {
@@ -153,7 +197,7 @@ export function registerDistrictRoutes(app: Express) {
               });
             }
             
-            // Validate same district
+            // Validate same district (already guaranteed by userDistrictId)
             if (validatedData.districtId !== parentSchool.districtId) {
               return res.status(400).json({
                 error: "Feeder schools must be in the same district as the parent school"
@@ -187,8 +231,11 @@ export function registerDistrictRoutes(app: Express) {
     async (req: Request, res: Response) => {
       try {
         const { rbacContext } = req;
+        if (!rbacContext) {
+          return res.status(401).json({ error: "Unauthorized" });
+        }
+        
         const { 
-          districtId, 
           schoolName, 
           schoolType, 
           districtSchoolCode, 
@@ -199,16 +246,30 @@ export function registerDistrictRoutes(app: Express) {
         } = req.body;
 
         // Validate required fields
-        if (!districtId || !schoolName || !schoolType || !inviteeEmail) {
+        if (!schoolName || !schoolType || !inviteeEmail) {
           return res.status(400).json({ 
-            error: "Missing required fields: districtId, schoolName, schoolType, inviteeEmail" 
+            error: "Missing required fields: schoolName, schoolType, inviteeEmail" 
           });
         }
 
-        // RBAC: Only District AD or School AD (for their feeders) can send invites
-        const isSchoolLevelRole = rbacContext?.user.userRole?.startsWith('school_');
-        const isDistrictLevelRole = rbacContext?.user.userRole?.startsWith('district_');
+        // SECURITY: Derive districtId from user context, don't trust client input
+        let userDistrictId: string | null = null;
+        const isSchoolLevelRole = rbacContext.user.userRole?.startsWith('school_');
+        const isDistrictLevelRole = rbacContext.user.userRole?.startsWith('district_');
+        
+        if (isDistrictLevelRole) {
+          const districtAdmin = await districtStorage.getDistrictAdminByUserId(rbacContext.user.id);
+          userDistrictId = districtAdmin?.districtId || null;
+        } else if (isSchoolLevelRole) {
+          const school = await districtStorage.getSchoolByADId(rbacContext.user.id);
+          userDistrictId = school?.districtId || null;
+        }
 
+        if (!userDistrictId) {
+          return res.status(400).json({ error: "User not associated with a district" });
+        }
+
+        // RBAC: Only District AD or School AD (for their feeders) can send invites
         if (isSchoolLevelRole) {
           // School AD can only invite for their feeder schools
           if (!feedsIntoSchoolId) {
@@ -231,8 +292,8 @@ export function registerDistrictRoutes(app: Express) {
             });
           }
 
-          // Validate same district
-          if (districtId !== parentSchool.districtId) {
+          // Validate same district (already guaranteed by userDistrictId)
+          if (userDistrictId !== parentSchool.districtId) {
             return res.status(400).json({
               error: "Feeder school must be in the same district as parent school"
             });
@@ -248,9 +309,9 @@ export function registerDistrictRoutes(app: Express) {
         const expiresAt = new Date();
         expiresAt.setDate(expiresAt.getDate() + 7); // 7 days expiration
 
-        // Create invite
+        // Create invite using server-derived districtId
         const inviteData = insertSchoolInviteSchema.parse({
-          districtId,
+          districtId: userDistrictId,
           schoolName,
           schoolType,
           districtSchoolCode,
@@ -258,7 +319,7 @@ export function registerDistrictRoutes(app: Express) {
           inviteeEmail,
           inviteeName,
           invitedRole: invitedRole || 'school_athletic_director',
-          invitedById: rbacContext!.user.id,
+          invitedById: rbacContext.user.id,
           inviteToken,
           inviteStatus: 'pending',
           expiresAt,
@@ -267,7 +328,7 @@ export function registerDistrictRoutes(app: Express) {
         const invite = await districtStorage.createSchoolInvite(inviteData);
 
         // Get district info for email
-        const district = await districtStorage.getDistrict(districtId);
+        const district = await districtStorage.getDistrict(userDistrictId);
         if (!district) {
           return res.status(404).json({ error: "District not found" });
         }
@@ -298,6 +359,92 @@ export function registerDistrictRoutes(app: Express) {
       } catch (error) {
         console.error("Error sending school AD invite:", error);
         res.status(500).json({ error: "Failed to send school AD invite" });
+      }
+    }
+  );
+
+  // Get user's district
+  app.get("/api/user/district",
+    loadUserContext,
+    async (req: Request, res: Response) => {
+      try {
+        const { rbacContext } = req;
+        if (!rbacContext) {
+          return res.status(401).json({ error: "Unauthorized" });
+        }
+
+        // Check if user has district role
+        const districtRole = rbacContext.user.userRole?.startsWith('district_');
+        const schoolRole = rbacContext.user.userRole?.startsWith('school_');
+        
+        if (!districtRole && !schoolRole) {
+          return res.status(404).json({ error: "User is not associated with a district" });
+        }
+
+        // Get district from user's association
+        // For district roles, get from district admin table
+        // For school roles, get from school's district
+        let districtId: string | null = null;
+        
+        if (districtRole) {
+          const districtAdmin = await districtStorage.getDistrictAdminByUserId(rbacContext.user.id);
+          districtId = districtAdmin?.districtId || null;
+        } else if (schoolRole) {
+          const school = await districtStorage.getSchoolByADId(rbacContext.user.id);
+          districtId = school?.districtId || null;
+        }
+
+        if (!districtId) {
+          return res.status(404).json({ error: "District not found" });
+        }
+
+        const district = await districtStorage.getDistrict(districtId);
+        if (!district) {
+          return res.status(404).json({ error: "District not found" });
+        }
+
+        res.json(district);
+      } catch (error) {
+        console.error("Error fetching user district:", error);
+        res.status(500).json({ error: "Failed to fetch district" });
+      }
+    }
+  );
+
+  // Get school invitations for the district
+  app.get("/api/schools/invites",
+    loadUserContext,
+    requirePermissions([PERMISSIONS.SCHOOL_DATA_READ]),
+    async (req: Request, res: Response) => {
+      try {
+        const { rbacContext } = req;
+        if (!rbacContext) {
+          return res.status(401).json({ error: "Unauthorized" });
+        }
+        
+        // Get user's district ID
+        let districtId: string | null = null;
+        
+        const districtRole = rbacContext.user.userRole?.startsWith('district_');
+        const schoolRole = rbacContext.user.userRole?.startsWith('school_');
+        
+        if (districtRole) {
+          const districtAdmin = await districtStorage.getDistrictAdminByUserId(rbacContext.user.id);
+          districtId = districtAdmin?.districtId || null;
+        } else if (schoolRole) {
+          const school = await districtStorage.getSchoolByADId(rbacContext.user.id);
+          districtId = school?.districtId || null;
+        }
+
+        if (!districtId) {
+          return res.status(400).json({ error: "User is not associated with a district" });
+        }
+
+        const invites = await districtStorage.getSchoolInvitesByDistrict(districtId);
+        res.json(invites);
+      } catch (error) {
+        console.error("Error fetching school invites:", error);
+        res.status(500).json({ error: "Failed to fetch school invites" });
       }
     }
   );

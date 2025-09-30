@@ -22,9 +22,13 @@ export interface IDistrictStorage {
   createSchool(school: InsertSchool): Promise<School>;
   getSchool(id: string): Promise<School | undefined>;
   getSchoolByVLC(vlcCode: string): Promise<School | undefined>;
+  getSchoolByADId(userId: string): Promise<School | undefined>;
   getSchoolsByDistrict(districtId: string): Promise<School[]>;
   getFeederSchools(schoolId: string): Promise<School[]>;
   updateSchool(id: string, updates: Partial<School>): Promise<School | undefined>;
+  
+  // District admin helper
+  getDistrictAdminByUserId(userId: string): Promise<{ districtId: string } | undefined>;
 
   // School asset methods
   createSchoolAsset(asset: InsertSchoolAsset): Promise<SchoolAsset>;
@@ -108,8 +112,22 @@ export class DistrictDbStorage implements IDistrictStorage {
     return school || undefined;
   }
 
+  async getSchoolByADId(userId: string): Promise<School | undefined> {
+    const [school] = await db.select().from(schools).where(eq(schools.athleticDirectorId, userId));
+    return school || undefined;
+  }
+
   async getSchoolsByDistrict(districtId: string): Promise<School[]> {
     return await db.select().from(schools).where(eq(schools.districtId, districtId));
+  }
+  
+  async getDistrictAdminByUserId(userId: string): Promise<{ districtId: string } | undefined> {
+    // Query districts table to find district association
+    // Query districts where this user is listed as athleticDirectorId
+    const [district] = await db.select({ districtId: districts.id })
+      .from(districts)
+      .where(eq(districts.athleticDirectorId, userId));
+    return district || undefined;
   }
 
   async getFeederSchools(schoolId: string): Promise<School[]> {
@@ -293,8 +311,26 @@ export class DistrictMemStorage implements IDistrictStorage {
     return undefined;
   }
 
+  async getSchoolByADId(userId: string): Promise<School | undefined> {
+    for (const school of this.schools.values()) {
+      if (school.athleticDirectorId === userId) {
+        return school;
+      }
+    }
+    return undefined;
+  }
+
   async getSchoolsByDistrict(districtId: string): Promise<School[]> {
     return Array.from(this.schools.values()).filter(s => s.districtId === districtId);
+  }
+  
+  async getDistrictAdminByUserId(userId: string): Promise<{ districtId: string } | undefined> {
+    for (const district of this.districts.values()) {
+      if (district.athleticDirectorId === userId) {
+        return { districtId: district.id };
+      }
+    }
+    return undefined;
   }
 
   async getFeederSchools(schoolId: string): Promise<School[]> {

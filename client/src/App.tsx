@@ -121,6 +121,7 @@ import NonprofitAnalytics from './pages/NonprofitAnalytics';
 import StaffRegistration from './pages/StaffRegistration';
 import StaffRoles from './pages/StaffRoles';
 import DistrictOverview from './pages/DistrictOverview';
+import SchoolManagement from './pages/SchoolManagement';
 import AthleticTrainerDemo from './pages/AthleticTrainerDemo';
 import SignupSelector from './pages/SignupSelector';
 import DevLogin from './pages/DevLogin';
@@ -245,6 +246,7 @@ function AuthenticatedRoutes() {
         <Route path="/staff-onboarding" component={StaffOnboarding} />
         <Route path="/staff-roles" component={StaffRoles} />
         <Route path="/district-overview" component={DistrictOverview} />
+        <Route path="/school-management" component={SchoolManagement} />
         <Route path="/athletic-trainer-demo" component={AthleticTrainerDemo} />
         
         {/* Show Tournament Empire only for school-safe and pro domains */}
