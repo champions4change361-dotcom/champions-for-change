@@ -6130,6 +6130,60 @@ export const healthRiskAssessments = pgTable("health_risk_assessments", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Medical Clearance Consents - Cross-database verification bridge for tournament participation
+// This table lives in the District DB but enables safe verification queries from Tournament DB
+export const medicalClearanceConsents = pgTable("medical_clearance_consents", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Student Identity (District DB)
+  athleteId: varchar("athlete_id").notNull().references(() => athletes.id),
+  studentFirstName: varchar("student_first_name").notNull(),
+  studentLastName: varchar("student_last_name").notNull(),
+  dateOfBirth: date("date_of_birth").notNull(),
+  
+  // Parent/Guardian Authorization
+  parentGuardianName: varchar("parent_guardian_name").notNull(),
+  parentEmail: varchar("parent_email").notNull(),
+  parentPhone: varchar("parent_phone"),
+  consentGrantedDate: timestamp("consent_granted_date").notNull().defaultNow(),
+  consentExpiresDate: date("consent_expires_date"), // Typically end of school year or season
+  
+  // Clearance Status (verification only - no detailed health info)
+  isMedicallyCleared: boolean("is_medically_cleared").default(false),
+  clearanceDate: date("clearance_date"),
+  clearanceExpiresDate: date("clearance_expires_date"),
+  clearanceVerifiedBy: varchar("clearance_verified_by").references(() => users.id), // Athletic trainer who verified
+  
+  // Tournament Registration Context
+  // These are soft references - tournament data lives in separate DATABASE_URL_TOURNAMENT
+  authorizedTournamentIds: jsonb("authorized_tournament_ids").$type<string[]>().default([]), // Specific tournaments parent approved
+  authorizeAllTournaments: boolean("authorize_all_tournaments").default(false), // Blanket consent for all tournaments
+  
+  // Restrictions and Special Considerations (minimal info for safety)
+  hasActivityRestrictions: boolean("has_activity_restrictions").default(false),
+  restrictionSummary: text("restriction_summary"), // Brief summary only (e.g., "No contact sports", "Requires breaks")
+  emergencyContactName: varchar("emergency_contact_name"),
+  emergencyContactPhone: varchar("emergency_contact_phone"),
+  
+  // Consent Management
+  consentRevoked: boolean("consent_revoked").default(false),
+  revokedDate: timestamp("revoked_date"),
+  revokedReason: text("revoked_reason"),
+  
+  // Audit Trail
+  createdBy: varchar("created_by").references(() => users.id), // Who initiated consent (athletic trainer, coach)
+  lastVerificationDate: timestamp("last_verification_date"), // Last time clearance status was checked
+  verificationCount: integer("verification_count").default(0), // How many times status was queried
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_clearance_athlete").on(table.athleteId),
+  index("idx_clearance_parent_email").on(table.parentEmail),
+  index("idx_clearance_status").on(table.isMedicallyCleared),
+  index("idx_clearance_expires").on(table.clearanceExpiresDate),
+]);
+
 // =============================================================================
 // ACADEMIC COMPETITIONS FRAMEWORK (UIL EVENTS)
 // =============================================================================
@@ -7830,6 +7884,12 @@ export const insertHealthRiskAssessmentSchema = createInsertSchema(healthRiskAss
   updatedAt: true,
 });
 
+export const insertMedicalClearanceConsentSchema = createInsertSchema(medicalClearanceConsents).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Academic Competition Schemas
 export const insertAcademicEventSchema = createInsertSchema(academicEvents).omit({
   id: true,
@@ -8062,6 +8122,8 @@ export type InjuryFollowUp = typeof injuryFollowUps.$inferSelect;
 export type InsertInjuryFollowUp = z.infer<typeof insertInjuryFollowUpSchema>;
 export type HealthRiskAssessment = typeof healthRiskAssessments.$inferSelect;
 export type InsertHealthRiskAssessment = z.infer<typeof insertHealthRiskAssessmentSchema>;
+export type MedicalClearanceConsent = typeof medicalClearanceConsents.$inferSelect;
+export type InsertMedicalClearanceConsent = z.infer<typeof insertMedicalClearanceConsentSchema>;
 
 // Academic Competition Types
 export type AcademicEvent = typeof academicEvents.$inferSelect;
