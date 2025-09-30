@@ -1920,11 +1920,25 @@ export const insertTournamentDivisionSchema = createInsertSchema(tournamentDivis
   createdAt: true,
 });
 
+// Tournament events types and schemas
+export type EventSchool = typeof eventSchools.$inferSelect;
+export type InsertEventSchool = typeof eventSchools.$inferInsert;
+export type EventParticipant = typeof eventParticipants.$inferSelect;
+export type InsertEventParticipant = typeof eventParticipants.$inferInsert;
+export type EventAssignment = typeof eventAssignments.$inferSelect;
+export type InsertEventAssignment = typeof eventAssignments.$inferInsert;
+export type EventResult = typeof eventResults.$inferSelect;
+export type InsertEventResult = typeof eventResults.$inferInsert;
+
 // Live scoring types and schemas
 export type LiveScore = typeof liveScores.$inferSelect;
 export type InsertLiveScore = typeof liveScores.$inferInsert;
 export type ScorekeeperAssignment = typeof scorekeeperAssignments.$inferSelect;
 export type InsertScorekeeperAssignment = typeof scorekeeperAssignments.$inferInsert;
+export type ScoreUpdateLog = typeof scoreUpdateLog.$inferSelect;
+export type InsertScoreUpdateLog = typeof scoreUpdateLog.$inferInsert;
+export type LiveScoreMessage = typeof liveScoreMessages.$inferSelect;
+export type InsertLiveScoreMessage = typeof liveScoreMessages.$inferInsert;
 
 export const insertLiveScoreSchema = createInsertSchema(liveScores).omit({
   id: true,
@@ -1943,6 +1957,8 @@ export type TournamentRegistrationForm = typeof tournamentRegistrationForms.$inf
 export type InsertTournamentRegistrationForm = typeof tournamentRegistrationForms.$inferInsert;
 export type RegistrationSubmission = typeof registrationSubmissions.$inferSelect;
 export type InsertRegistrationSubmission = typeof registrationSubmissions.$inferInsert;
+export type RegistrationAssignmentLog = typeof registrationAssignmentLog.$inferSelect;
+export type InsertRegistrationAssignmentLog = typeof registrationAssignmentLog.$inferInsert;
 export type TeamRegistration = typeof teamRegistrations.$inferSelect;
 export type InsertTeamRegistration = typeof teamRegistrations.$inferInsert;
 
@@ -2005,6 +2021,10 @@ export type CorporateCompetition = typeof corporateCompetitions.$inferSelect;
 export type InsertCorporateCompetition = typeof corporateCompetitions.$inferInsert;
 export type CorporateParticipant = typeof corporateParticipants.$inferSelect;
 export type InsertCorporateParticipant = typeof corporateParticipants.$inferInsert;
+export type PerformanceMetric = typeof performanceMetrics.$inferSelect;
+export type InsertPerformanceMetric = typeof performanceMetrics.$inferInsert;
+export type CompetitionLeaderboard = typeof competitionLeaderboards.$inferSelect;
+export type InsertCompetitionLeaderboard = typeof competitionLeaderboards.$inferInsert;
 
 export const insertCompanySchema = createInsertSchema(companies).omit({
   id: true,
@@ -2029,6 +2049,10 @@ export type DiscountCode = typeof discountCodes.$inferSelect;
 export type InsertDiscountCode = typeof discountCodes.$inferInsert;
 export type PaymentPlan = typeof paymentPlans.$inferSelect;
 export type InsertPaymentPlan = typeof paymentPlans.$inferInsert;
+export type PaymentPlanEnrollment = typeof paymentPlanEnrollments.$inferSelect;
+export type InsertPaymentPlanEnrollment = typeof paymentPlanEnrollments.$inferInsert;
+export type PaymentPlanInstallment = typeof paymentPlanInstallments.$inferSelect;
+export type InsertPaymentPlanInstallment = typeof paymentPlanInstallments.$inferInsert;
 
 export const insertDiscountCodeSchema = createInsertSchema(discountCodes).omit({
   id: true,
@@ -2042,9 +2066,15 @@ export const insertPaymentPlanSchema = createInsertSchema(paymentPlans).omit({
   updatedAt: true,
 });
 
-// Tournament subscription types and schemas
+// Tournament subscription and coordination types
 export type TournamentSubscription = typeof tournamentSubscriptions.$inferSelect;
 export type InsertTournamentSubscription = typeof tournamentSubscriptions.$inferInsert;
+export type TournamentCoordinationData = typeof tournamentCoordinationData.$inferSelect;
+export type InsertTournamentCoordinationData = typeof tournamentCoordinationData.$inferInsert;
+export type TournamentOrganizerNetwork = typeof tournamentOrganizerNetwork.$inferSelect;
+export type InsertTournamentOrganizerNetwork = typeof tournamentOrganizerNetwork.$inferInsert;
+export type RegionalTournamentCircuit = typeof regionalTournamentCircuits.$inferSelect;
+export type InsertRegionalTournamentCircuit = typeof regionalTournamentCircuits.$inferInsert;
 
 export const insertTournamentSubscriptionSchema = createInsertSchema(tournamentSubscriptions).omit({
   id: true,
@@ -2052,7 +2082,11 @@ export const insertTournamentSubscriptionSchema = createInsertSchema(tournamentS
   unsubscribeToken: true,
 });
 
-// Message types and schemas
+// Email and messaging types and schemas
+export type EmailCampaign = typeof emailCampaigns.$inferSelect;
+export type InsertEmailCampaign = typeof emailCampaigns.$inferInsert;
+export type CampaignRecipient = typeof campaignRecipients.$inferSelect;
+export type InsertCampaignRecipient = typeof campaignRecipients.$inferInsert;
 export type Message = typeof messages.$inferSelect;
 export type InsertMessage = typeof messages.$inferInsert;
 export type MessageRecipient = typeof messageRecipients.$inferSelect;
