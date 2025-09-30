@@ -766,6 +766,7 @@ export const schools = pgTable("schools", {
   }).notNull(),
   vlcCode: varchar("vlc_code").notNull().unique(), // Venue Location Code for athletics
   ncessId: varchar("ncess_id"), // National Center for Education Statistics ID
+  districtSchoolCode: varchar("district_school_code"), // Internal district code for administrative systems (e.g., "0472" for School Business Plus)
   address: varchar("address").notNull(),
   city: varchar("city").notNull(),
   state: varchar("state").notNull().default("TX"),
