@@ -759,6 +759,7 @@ export const districts = pgTable("districts", {
 export const schools = pgTable("schools", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   districtId: varchar("district_id").notNull().references(() => districts.id),
+  feedsIntoSchoolId: varchar("feeds_into_school_id"), // NULL for high schools, points to parent HS for feeder schools (VLC hierarchy)
   name: varchar("name").notNull(), // "Roy Miller High School"
   abbreviation: varchar("abbreviation").notNull(), // "RMHS"
   schoolType: text("school_type", {
