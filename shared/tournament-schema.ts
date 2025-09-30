@@ -846,6 +846,112 @@ export const regionalTournamentCircuits = pgTable("regional_tournament_circuits"
   regionIdx: index("regional_tournament_circuits_region_idx").on(table.region),
 }));
 
+// Guest participant registrations - "Pay & Play or Join the Family" system
+export const guestParticipants = pgTable("guest_participants", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tournamentId: varchar("tournament_id").notNull(), // Soft reference to tournaments
+  
+  participantName: varchar("participant_name").notNull(),
+  participantEmail: varchar("participant_email").notNull(),
+  participantPhone: varchar("participant_phone"),
+  dateOfBirth: date("date_of_birth"),
+  
+  parentName: varchar("parent_name"),
+  parentEmail: varchar("parent_email"),
+  parentPhone: varchar("parent_phone"),
+  emergencyContactName: varchar("emergency_contact_name"),
+  emergencyContactPhone: varchar("emergency_contact_phone"),
+  
+  registrationType: text("registration_type", {
+    enum: ["individual", "team_member", "group_registration"]
+  }).default("individual"),
+  selectedEvents: jsonb("selected_events").$type<Array<{
+    eventId: string;
+    eventName: string;
+    fee: number;
+  }>>().default([]),
+  
+  registrationFee: decimal("registration_fee", { precision: 10, scale: 2 }).default("0"),
+  paymentStatus: text("payment_status", {
+    enum: ["unpaid", "paid", "refunded", "partial"]
+  }).default("unpaid"),
+  paymentMethod: text("payment_method", {
+    enum: ["stripe", "cash", "check", "comp"]
+  }),
+  stripePaymentIntentId: varchar("stripe_payment_intent_id"),
+  
+  registrationStatus: text("registration_status", {
+    enum: ["incomplete", "pending_approval", "approved", "checked_in", "competed", "complete"]
+  }).default("incomplete"),
+  
+  hasCreatedAccount: boolean("has_created_account").default(false),
+  linkedUserId: varchar("linked_user_id"), // Soft reference to users in main DB
+  accountCreatedAt: timestamp("account_created_at"),
+  
+  organizerId: varchar("organizer_id").notNull(), // Soft reference to users in main DB
+  
+  waiversSigned: jsonb("waivers_signed").$type<{
+    liability: boolean;
+    photo: boolean;
+    medical: boolean;
+    emergency: boolean;
+  }>().default({
+    liability: false,
+    photo: false,
+    medical: false,
+    emergency: false
+  }),
+  
+  customFormData: jsonb("custom_form_data"),
+  
+  emailUpdates: boolean("email_updates").default(true),
+  smsUpdates: boolean("sms_updates").default(false),
+  
+  registrationSource: varchar("registration_source").default("direct"),
+  notes: text("notes"),
+  organizerNotes: text("organizer_notes"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  tournamentIdx: index("guest_participants_tournament_idx").on(table.tournamentId),
+  organizerIdx: index("guest_participants_organizer_idx").on(table.organizerId),
+  emailIdx: index("guest_participants_email_idx").on(table.participantEmail),
+}));
+
+// =============================================================================
+// LEAGUES
+// =============================================================================
+
+// Coaches Lounge Leagues System  
+export const leagues = pgTable("leagues", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  type: text("type", {
+    enum: ["fantasy-sports", "gaming", "office", "custom", "general"]
+  }).notNull(),
+  commissionerId: varchar("commissioner_id").notNull(), // Soft reference to users in main DB
+  registrationCode: varchar("registration_code").unique().notNull(),
+  settings: jsonb("settings").$type<{
+    isPrivate: boolean;
+    maxParticipants: number;
+    season: string;
+    sport?: string;
+    game?: string;
+    rules: string;
+  }>(),
+  participants: jsonb("participants").$type<Array<{
+    userId: string;
+    joinedAt: string;
+    status: 'active' | 'inactive';
+  }>>().default([]),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  commissionerIdx: index("leagues_commissioner_idx").on(table.commissionerId),
+}));
+
 // =============================================================================
 // MESSAGING & COMMUNICATION SYSTEM
 // =============================================================================
@@ -1147,6 +1253,134 @@ export const competitionLeaderboards = pgTable("competition_leaderboards", {
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => ({
   competitionIdx: index("competition_leaderboards_competition_idx").on(table.competitionId),
+}));
+
+// =============================================================================
+// ANALYTICS
+// =============================================================================
+
+// Page view tracking for organizer analytics  
+export const organizerPageViews = pgTable("organizer_page_views", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizerId: varchar("organizer_id").notNull(), // Soft reference to users in main DB
+  tournamentId: varchar("tournament_id"), // Soft reference to tournaments
+  
+  pageUrl: varchar("page_url").notNull(),
+  pageTitle: varchar("page_title"),
+  pageType: varchar("page_type").notNull(),
+  
+  visitorId: varchar("visitor_id"),
+  visitorIp: varchar("visitor_ip"),
+  userAgent: text("user_agent"),
+  referrer: varchar("referrer"),
+  
+  country: varchar("country"),
+  city: varchar("city"),
+  deviceType: varchar("device_type"),
+  browserName: varchar("browser_name"),
+  
+  sessionId: varchar("session_id"),
+  sessionDuration: integer("session_duration"),
+  isNewVisitor: boolean("is_new_visitor").default(true),
+  
+  viewedAt: timestamp("viewed_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  organizerIdx: index("organizer_page_views_organizer_idx").on(table.organizerId),
+  tournamentIdx: index("organizer_page_views_tournament_idx").on(table.tournamentId),
+}));
+
+// Contact collection from tournament participants
+export const organizerContacts = pgTable("organizer_contacts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizerId: varchar("organizer_id").notNull(), // Soft reference to users in main DB
+  tournamentId: varchar("tournament_id"), // Soft reference to tournaments
+  
+  contactName: varchar("contact_name").notNull(),
+  contactEmail: varchar("contact_email").notNull(),
+  contactPhone: varchar("contact_phone"),
+  
+  contactSource: varchar("contact_source").notNull(),
+  contactRole: varchar("contact_role"),
+  
+  organizationName: varchar("organization_name"),
+  teamName: varchar("team_name"),
+  
+  emailOptIn: boolean("email_opt_in").default(false),
+  smsOptIn: boolean("sms_opt_in").default(false),
+  marketingOptIn: boolean("marketing_opt_in").default(false),
+  
+  lastEmailSent: timestamp("last_email_sent"),
+  lastEmailOpened: timestamp("last_email_opened"),
+  emailOpenCount: integer("email_open_count").default(0),
+  totalTournaments: integer("total_tournaments").default(1),
+  
+  city: varchar("city"),
+  state: varchar("state"),
+  zipCode: varchar("zip_code"),
+  
+  collectedAt: timestamp("collected_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  organizerIdx: index("organizer_contacts_organizer_idx").on(table.organizerId),
+  emailIdx: index("organizer_contacts_email_idx").on(table.contactEmail),
+}));
+
+// Organizer dashboard metrics aggregation
+export const organizerMetrics = pgTable("organizer_metrics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizerId: varchar("organizer_id").notNull(), // Soft reference to users in main DB
+  
+  metricDate: date("metric_date").notNull(),
+  
+  totalPageViews: integer("total_page_views").default(0),
+  uniqueVisitors: integer("unique_visitors").default(0),
+  newVisitors: integer("new_visitors").default(0),
+  avgSessionDuration: integer("avg_session_duration").default(0),
+  
+  totalContacts: integer("total_contacts").default(0),
+  newContactsToday: integer("new_contacts_today").default(0),
+  emailOptIns: integer("email_opt_ins").default(0),
+  smsOptIns: integer("sms_opt_ins").default(0),
+  
+  activeTournaments: integer("active_tournaments").default(0),
+  totalRegistrations: integer("total_registrations").default(0),
+  newRegistrationsToday: integer("new_registrations_today").default(0),
+  
+  topCities: jsonb("top_cities").$type<Array<{city: string, count: number}>>().default([]),
+  topStates: jsonb("top_states").$type<Array<{state: string, count: number}>>().default([]),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  organizerIdx: index("organizer_metrics_organizer_idx").on(table.organizerId),
+  dateIdx: index("organizer_metrics_date_idx").on(table.metricDate),
+}));
+
+// =============================================================================
+// OTHER
+// =============================================================================
+
+// Universal registration code system
+export const registrationCodes = pgTable("registration_codes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  code: varchar("code").unique().notNull(),
+  type: text("type", {
+    enum: ["tournament_manager", "district_admin", "business_user", "fantasy_commissioner", "gaming_commissioner"]
+  }).notNull(),
+  createdBy: varchar("created_by").notNull(), // Soft reference to users in main DB
+  organizationId: varchar("organization_id"), // Soft reference
+  leagueId: varchar("league_id"), // Soft reference
+  permissions: jsonb("permissions").$type<string[]>().notNull(),
+  maxUses: integer("max_uses").default(1),
+  currentUses: integer("current_uses").default(0),
+  expiresAt: timestamp("expires_at"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  codeIdx: index("registration_codes_code_idx").on(table.code),
+  createdByIdx: index("registration_codes_created_by_idx").on(table.createdBy),
 }));
 
 // =============================================================================
@@ -1833,4 +2067,60 @@ export const insertMessageSchema = createInsertSchema(messages).omit({
 export const insertMessageRecipientSchema = createInsertSchema(messageRecipients).omit({
   id: true,
   createdAt: true,
+});
+
+// Guest participant types and schemas
+export type GuestParticipant = typeof guestParticipants.$inferSelect;
+export type InsertGuestParticipant = typeof guestParticipants.$inferInsert;
+
+export const insertGuestParticipantSchema = createInsertSchema(guestParticipants).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// League types and schemas
+export type League = typeof leagues.$inferSelect;
+export type InsertLeague = typeof leagues.$inferInsert;
+
+export const insertLeagueSchema = createInsertSchema(leagues).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Analytics types and schemas
+export type OrganizerPageView = typeof organizerPageViews.$inferSelect;
+export type InsertOrganizerPageView = typeof organizerPageViews.$inferInsert;
+export type OrganizerContact = typeof organizerContacts.$inferSelect;
+export type InsertOrganizerContact = typeof organizerContacts.$inferInsert;
+export type OrganizerMetric = typeof organizerMetrics.$inferSelect;
+export type InsertOrganizerMetric = typeof organizerMetrics.$inferInsert;
+
+export const insertOrganizerPageViewSchema = createInsertSchema(organizerPageViews).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertOrganizerContactSchema = createInsertSchema(organizerContacts).omit({
+  id: true,
+  collectedAt: true,
+  updatedAt: true,
+});
+
+export const insertOrganizerMetricSchema = createInsertSchema(organizerMetrics).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Registration code types and schemas
+export type RegistrationCode = typeof registrationCodes.$inferSelect;
+export type InsertRegistrationCode = typeof registrationCodes.$inferInsert;
+
+export const insertRegistrationCodeSchema = createInsertSchema(registrationCodes).omit({
+  id: true,
+  currentUses: true,
+  createdAt: true,
+  updatedAt: true,
 });
