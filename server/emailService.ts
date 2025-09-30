@@ -522,6 +522,143 @@ class EmailService {
     }
   }
 
+  async sendSchoolADInvite(options: { 
+    inviteeEmail: string; 
+    inviteeName: string; 
+    schoolName: string; 
+    districtName: string;
+    inviteToken: string; 
+    invitedBy: string;
+    expiresAt: Date;
+  }) {
+    const baseUrl = process.env.REPLIT_DOMAINS?.split(',')[0] || 'https://championsforchange.net';
+    const inviteUrl = `${baseUrl}/register/school-ad?token=${options.inviteToken}`;
+    const expiresInDays = Math.ceil((options.expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+    
+    const subject = `You've been invited to join ${options.schoolName} as Athletic Director`;
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #22c55e, #3b82f6); color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0; }
+          .content { padding: 30px 20px; background: #ffffff; border: 1px solid #e5e7eb; }
+          .invite-box { background: #f0f9ff; border-left: 4px solid #3b82f6; padding: 20px; border-radius: 6px; margin: 20px 0; }
+          .cta-button { 
+            background: #22c55e; 
+            color: white; 
+            padding: 15px 30px; 
+            text-decoration: none; 
+            border-radius: 6px; 
+            display: inline-block; 
+            margin: 20px 0;
+            text-align: center;
+            font-weight: bold;
+          }
+          .footer { 
+            background: #f9fafb; 
+            padding: 20px; 
+            text-align: center; 
+            color: #6b7280; 
+            font-size: 14px; 
+            border-radius: 0 0 8px 8px;
+            border: 1px solid #e5e7eb;
+            border-top: none;
+          }
+          .expiry-notice { color: #dc2626; font-weight: bold; margin-top: 15px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>🏫 School Athletic Director Invitation</h1>
+            <p>Champions for Change Athletics Platform</p>
+          </div>
+          
+          <div class="content">
+            <h2>Hello ${options.inviteeName}!</h2>
+            
+            <p><strong>${options.invitedBy}</strong> has invited you to join <strong>${options.schoolName}</strong> as an Athletic Director.</p>
+            
+            <div class="invite-box">
+              <h3>📋 Invitation Details:</h3>
+              <ul style="margin: 10px 0; padding-left: 20px;">
+                <li><strong>School:</strong> ${options.schoolName}</li>
+                <li><strong>District:</strong> ${options.districtName}</li>
+                <li><strong>Role:</strong> School Athletic Director</li>
+                <li><strong>Invited By:</strong> ${options.invitedBy}</li>
+              </ul>
+            </div>
+            
+            <p><strong>Platform Capabilities:</strong></p>
+            <ul style="margin: 10px 0; padding-left: 20px;">
+              <li>Manage your school's athletic programs and teams</li>
+              <li>Coordinate with coaches and athletic trainers</li>
+              <li>Track student athlete health and eligibility</li>
+              <li>Schedule competitions and manage facilities</li>
+              <li>Access district-wide resources and analytics</li>
+              <li>Manage feeder school relationships (VLC hierarchy)</li>
+            </ul>
+            
+            <div style="text-align: center;">
+              <a href="${inviteUrl}" class="cta-button">Accept Invitation & Register</a>
+            </div>
+            
+            <p class="expiry-notice">⏰ This invitation expires in ${expiresInDays} days</p>
+            
+            <p style="font-size: 14px; color: #6b7280; margin-top: 20px;">
+              <strong>Need help?</strong><br>
+              Contact us at champions4change361@gmail.com or 361-300-1552
+            </p>
+          </div>
+          
+          <div class="footer">
+            <p>Champions for Change<br>
+            Athletic & Academic Management Platform<br>
+            Supporting Educational Excellence</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    try {
+      if (!this.transporter) {
+        console.log('📧 SCHOOL AD INVITE EMAIL (would be sent to:', options.inviteeEmail, ')');
+        console.log('Subject:', subject);
+        console.log('Invite URL:', inviteUrl);
+        return { success: true, method: 'console' };
+      }
+
+      const fromAddress = process.env.SENDGRID_FROM_EMAIL || '"Champions for Change" <champions4change361@gmail.com>';
+      
+      const info = await this.transporter.sendMail({
+        from: fromAddress,
+        to: options.inviteeEmail,
+        subject,
+        html,
+      });
+
+      if (process.env.SENDGRID_API_KEY) {
+        console.log(`📧 School AD invite sent to ${options.inviteeEmail} via SendGrid:`, info.messageId);
+      } else {
+        console.log(`📧 Test school AD invite sent:`, nodemailer.getTestMessageUrl(info));
+      }
+      
+      return { 
+        success: true, 
+        messageId: info.messageId,
+        previewUrl: process.env.SENDGRID_API_KEY ? null : nodemailer.getTestMessageUrl(info),
+        method: process.env.SENDGRID_API_KEY ? 'sendgrid' : 'ethereal'
+      };
+    } catch (error) {
+      console.error('Failed to send school AD invite email:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  }
+
   private generatePasswordResetEmail(resetToken: string, domain?: string) {
     const isChampions = domain?.includes('championsforchange') || false;
     const baseUrl = domain ? `https://${domain}` : 'https://trantortournaments.org';

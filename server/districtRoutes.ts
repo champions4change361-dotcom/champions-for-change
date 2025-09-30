@@ -1,9 +1,11 @@
 import type { Express, Request, Response } from "express";
 import { districtStorage } from "./districtStorage";
-import { insertDistrictSchema, insertSchoolSchema, insertSchoolAssetSchema } from "@shared/schema";
+import { insertDistrictSchema, insertSchoolSchema, insertSchoolAssetSchema, insertSchoolInviteSchema } from "@shared/schema";
 import { isAuthenticated } from "./replitAuth";
 import { loadUserContext, requirePermissions } from "./rbac-middleware";
 import { PERMISSIONS } from "./rbac-permissions";
+import { emailService } from "./emailService";
+import { randomBytes } from "crypto";
 
 export function registerDistrictRoutes(app: Express) {
   // District endpoints
@@ -174,6 +176,128 @@ export function registerDistrictRoutes(app: Express) {
       } catch (error) {
         console.error("Error creating school:", error);
         res.status(500).json({ error: "Failed to create school" });
+      }
+    }
+  );
+
+  // School AD Invitation endpoint
+  app.post("/api/schools/invite",
+    loadUserContext,
+    requirePermissions([PERMISSIONS.SCHOOL_DATA_WRITE]),
+    async (req: Request, res: Response) => {
+      try {
+        const { rbacContext } = req;
+        const { 
+          districtId, 
+          schoolName, 
+          schoolType, 
+          districtSchoolCode, 
+          feedsIntoSchoolId, 
+          inviteeEmail, 
+          inviteeName, 
+          invitedRole 
+        } = req.body;
+
+        // Validate required fields
+        if (!districtId || !schoolName || !schoolType || !inviteeEmail) {
+          return res.status(400).json({ 
+            error: "Missing required fields: districtId, schoolName, schoolType, inviteeEmail" 
+          });
+        }
+
+        // RBAC: Only District AD or School AD (for their feeders) can send invites
+        const isSchoolLevelRole = rbacContext?.user.userRole?.startsWith('school_');
+        const isDistrictLevelRole = rbacContext?.user.userRole?.startsWith('district_');
+
+        if (isSchoolLevelRole) {
+          // School AD can only invite for their feeder schools
+          if (!feedsIntoSchoolId) {
+            return res.status(403).json({
+              error: "Forbidden: School staff can only invite ADs for feeder schools"
+            });
+          }
+
+          const parentSchool = await districtStorage.getSchool(feedsIntoSchoolId);
+          if (!parentSchool || parentSchool.athleticDirectorId !== rbacContext.user.id) {
+            return res.status(403).json({
+              error: "Forbidden: You can only invite ADs for your own feeder schools"
+            });
+          }
+
+          // Validate parent is a high school
+          if (parentSchool.schoolType !== 'high') {
+            return res.status(400).json({
+              error: "Feeder schools can only feed into high schools"
+            });
+          }
+
+          // Validate same district
+          if (districtId !== parentSchool.districtId) {
+            return res.status(400).json({
+              error: "Feeder school must be in the same district as parent school"
+            });
+          }
+        } else if (!isDistrictLevelRole) {
+          return res.status(403).json({
+            error: "Forbidden: Must be a district or school administrator to send invites"
+          });
+        }
+
+        // Generate secure invite token
+        const inviteToken = randomBytes(32).toString('hex');
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + 7); // 7 days expiration
+
+        // Create invite
+        const inviteData = insertSchoolInviteSchema.parse({
+          districtId,
+          schoolName,
+          schoolType,
+          districtSchoolCode,
+          feedsIntoSchoolId,
+          inviteeEmail,
+          inviteeName,
+          invitedRole: invitedRole || 'school_athletic_director',
+          invitedById: rbacContext!.user.id,
+          inviteToken,
+          inviteStatus: 'pending',
+          expiresAt,
+        });
+
+        const invite = await districtStorage.createSchoolInvite(inviteData);
+
+        // Get district info for email
+        const district = await districtStorage.getDistrict(districtId);
+        if (!district) {
+          return res.status(404).json({ error: "District not found" });
+        }
+
+        // Send invitation email
+        const inviterName = `${rbacContext!.user.firstName || ''} ${rbacContext!.user.lastName || ''}`.trim() || 'District Administrator';
+        
+        await emailService.sendSchoolADInvite({
+          inviteeEmail,
+          inviteeName: inviteeName || inviteeEmail,
+          schoolName,
+          districtName: district.name,
+          inviteToken,
+          invitedBy: inviterName,
+          expiresAt,
+        });
+
+        res.status(201).json({
+          success: true,
+          invite: {
+            id: invite.id,
+            schoolName: invite.schoolName,
+            inviteeEmail: invite.inviteeEmail,
+            inviteStatus: invite.inviteStatus,
+            expiresAt: invite.expiresAt,
+          }
+        });
+      } catch (error) {
+        console.error("Error sending school AD invite:", error);
+        res.status(500).json({ error: "Failed to send school AD invite" });
       }
     }
   );

@@ -3,7 +3,8 @@ import {
   type School, type InsertSchool,
   type SchoolAsset, type InsertSchoolAsset,
   type AthleticVenue, type InsertAthleticVenue,
-  districts, schools, schoolAssets, athleticVenues
+  type SchoolInvite, type InsertSchoolInvite,
+  districts, schools, schoolAssets, athleticVenues, schoolInvites
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "./db";
@@ -37,6 +38,13 @@ export interface IDistrictStorage {
   createAthleticVenue(venue: InsertAthleticVenue): Promise<AthleticVenue>;
   getAthleticVenue(id: string): Promise<AthleticVenue | undefined>;
   getVenuesBySchool(schoolId: string): Promise<AthleticVenue[]>;
+
+  // School invite methods
+  createSchoolInvite(invite: InsertSchoolInvite): Promise<SchoolInvite>;
+  getSchoolInvite(id: string): Promise<SchoolInvite | undefined>;
+  getSchoolInviteByToken(token: string): Promise<SchoolInvite | undefined>;
+  getSchoolInvitesByDistrict(districtId: string): Promise<SchoolInvite[]>;
+  updateSchoolInvite(id: string, updates: Partial<SchoolInvite>): Promise<SchoolInvite | undefined>;
 }
 
 export class DistrictDbStorage implements IDistrictStorage {
@@ -179,6 +187,40 @@ export class DistrictDbStorage implements IDistrictStorage {
   async getVenuesBySchool(schoolId: string): Promise<AthleticVenue[]> {
     return await db.select().from(athleticVenues).where(eq(athleticVenues.schoolId, schoolId));
   }
+
+  // School invite methods
+  async createSchoolInvite(invite: InsertSchoolInvite): Promise<SchoolInvite> {
+    const id = randomUUID();
+    const [newInvite] = await db.insert(schoolInvites).values({
+      id,
+      ...invite,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }).returning();
+    return newInvite;
+  }
+
+  async getSchoolInvite(id: string): Promise<SchoolInvite | undefined> {
+    const [invite] = await db.select().from(schoolInvites).where(eq(schoolInvites.id, id));
+    return invite || undefined;
+  }
+
+  async getSchoolInviteByToken(token: string): Promise<SchoolInvite | undefined> {
+    const [invite] = await db.select().from(schoolInvites).where(eq(schoolInvites.inviteToken, token));
+    return invite || undefined;
+  }
+
+  async getSchoolInvitesByDistrict(districtId: string): Promise<SchoolInvite[]> {
+    return await db.select().from(schoolInvites).where(eq(schoolInvites.districtId, districtId));
+  }
+
+  async updateSchoolInvite(id: string, updates: Partial<SchoolInvite>): Promise<SchoolInvite | undefined> {
+    const [updated] = await db.update(schoolInvites)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(schoolInvites.id, id))
+      .returning();
+    return updated || undefined;
+  }
 }
 
 // In-memory fallback for development
@@ -187,6 +229,7 @@ export class DistrictMemStorage implements IDistrictStorage {
   private schools: Map<string, School> = new Map();
   private assets: Map<string, SchoolAsset> = new Map();
   private venues: Map<string, AthleticVenue> = new Map();
+  private invites: Map<string, SchoolInvite> = new Map();
 
   async createDistrict(district: InsertDistrict): Promise<District> {
     const id = randomUUID();
@@ -324,6 +367,39 @@ export class DistrictMemStorage implements IDistrictStorage {
 
   async getVenuesBySchool(schoolId: string): Promise<AthleticVenue[]> {
     return Array.from(this.venues.values()).filter(v => v.schoolId === schoolId);
+  }
+
+  // School invite methods
+  async createSchoolInvite(invite: InsertSchoolInvite): Promise<SchoolInvite> {
+    const id = randomUUID();
+    const newInvite: SchoolInvite = {
+      id,
+      ...invite,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.invites.set(id, newInvite);
+    return newInvite;
+  }
+
+  async getSchoolInvite(id: string): Promise<SchoolInvite | undefined> {
+    return this.invites.get(id);
+  }
+
+  async getSchoolInviteByToken(token: string): Promise<SchoolInvite | undefined> {
+    return Array.from(this.invites.values()).find(i => i.inviteToken === token);
+  }
+
+  async getSchoolInvitesByDistrict(districtId: string): Promise<SchoolInvite[]> {
+    return Array.from(this.invites.values()).filter(i => i.districtId === districtId);
+  }
+
+  async updateSchoolInvite(id: string, updates: Partial<SchoolInvite>): Promise<SchoolInvite | undefined> {
+    const invite = this.invites.get(id);
+    if (!invite) return undefined;
+    const updated = { ...invite, ...updates, updatedAt: new Date() };
+    this.invites.set(id, updated);
+    return updated;
   }
 }
 

@@ -807,6 +807,38 @@ export const schools = pgTable("schools", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// School AD Invitations - Track invitation status for school registration
+export const schoolInvites = pgTable("school_invites", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  districtId: varchar("district_id").notNull().references(() => districts.id),
+  schoolName: varchar("school_name").notNull(),
+  schoolType: text("school_type", {
+    enum: ["elementary", "middle", "high", "alternative", "specialty"]
+  }).notNull(),
+  districtSchoolCode: varchar("district_school_code"), // Internal district code
+  feedsIntoSchoolId: varchar("feeds_into_school_id").references(() => schools.id), // Parent school for feeders
+  
+  // Invitee information
+  inviteeEmail: varchar("invitee_email").notNull(),
+  inviteeName: varchar("invitee_name"),
+  invitedRole: text("invited_role", {
+    enum: ["school_athletic_director", "school_athletic_coordinator", "school_athletic_trainer"]
+  }).default("school_athletic_director"),
+  
+  // Invitation metadata
+  invitedById: varchar("invited_by_id").notNull().references(() => users.id),
+  inviteToken: varchar("invite_token").notNull().unique(), // Secure token for registration link
+  inviteStatus: text("invite_status", {
+    enum: ["pending", "accepted", "expired", "revoked"]
+  }).default("pending"),
+  
+  // Registration tracking
+  acceptedAt: timestamp("accepted_at"),
+  expiresAt: timestamp("expires_at").notNull(), // Invite expiration (e.g., 7 days)
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Athletic Venues and Facilities with VLC tracking
 export const athleticVenues = pgTable("athletic_venues", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -1103,6 +1135,16 @@ export const insertSchoolSchema = createInsertSchema(schools).omit({
   createdAt: true,
   updatedAt: true,
 });
+export type InsertSchool = z.infer<typeof insertSchoolSchema>;
+export type School = typeof schools.$inferSelect;
+
+export const insertSchoolInviteSchema = createInsertSchema(schoolInvites).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertSchoolInvite = z.infer<typeof insertSchoolInviteSchema>;
+export type SchoolInvite = typeof schoolInvites.$inferSelect;
 
 // Athletic Venue schema and types
 export const insertAthleticVenueSchema = createInsertSchema(athleticVenues).omit({
