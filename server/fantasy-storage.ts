@@ -575,7 +575,7 @@ export class FantasyStorage {
       .select()
       .from(fantasyWaiverClaims)
       .where(eq(fantasyWaiverClaims.teamId, teamId))
-      .orderBy(desc(fantasyWaiverClaims.claimDate));
+      .orderBy(desc(fantasyWaiverClaims.createdAt));
   }
 
   async updateFantasyWaiverClaim(id: string, updates: Partial<FantasyWaiverClaim>): Promise<FantasyWaiverClaim | undefined> {
@@ -596,12 +596,12 @@ export class FantasyStorage {
     return result;
   }
 
-  async getFantasyPicksByDraft(draftId: string): Promise<FantasyPick[]> {
+  async getFantasyPicksByLeague(leagueId: string): Promise<FantasyPick[]> {
     return await this.db
       .select()
       .from(fantasyPicks)
-      .where(eq(fantasyPicks.draftId, draftId))
-      .orderBy(asc(fantasyPicks.pickNumber));
+      .where(eq(fantasyPicks.leagueId, leagueId))
+      .orderBy(asc(fantasyPicks.pickTimestamp));
   }
 
   // =============================================================================
@@ -618,7 +618,7 @@ export class FantasyStorage {
       .select()
       .from(fantasyLeagueMessages)
       .where(eq(fantasyLeagueMessages.leagueId, leagueId))
-      .orderBy(desc(fantasyLeagueMessages.sentAt));
+      .orderBy(desc(fantasyLeagueMessages.createdAt));
   }
 
   async updateFantasyLeagueMessage(id: string, updates: Partial<FantasyLeagueMessage>): Promise<FantasyLeagueMessage | undefined> {

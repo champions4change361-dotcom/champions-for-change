@@ -84,7 +84,6 @@ import {
   type RegistrationCode,
   type Match,
   type InsertMatch,
-  type UpdateMatch,
   type TournamentDivision,
   type InsertTournamentDivision,
   tournamentDivisions,
@@ -555,7 +554,7 @@ export class TournamentStorage {
     return result;
   }
 
-  async updateMatch(id: string, updates: UpdateMatch): Promise<Match | undefined> {
+  async updateMatch(id: string, updates: Partial<Match>): Promise<Match | undefined> {
     const [result] = await this.db
       .update(matches)
       .set({ ...updates, updatedAt: new Date() })
