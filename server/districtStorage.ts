@@ -22,6 +22,7 @@ export interface IDistrictStorage {
   getSchool(id: string): Promise<School | undefined>;
   getSchoolByVLC(vlcCode: string): Promise<School | undefined>;
   getSchoolsByDistrict(districtId: string): Promise<School[]>;
+  getFeederSchools(schoolId: string): Promise<School[]>;
   updateSchool(id: string, updates: Partial<School>): Promise<School | undefined>;
 
   // School asset methods
@@ -101,6 +102,10 @@ export class DistrictDbStorage implements IDistrictStorage {
 
   async getSchoolsByDistrict(districtId: string): Promise<School[]> {
     return await db.select().from(schools).where(eq(schools.districtId, districtId));
+  }
+
+  async getFeederSchools(schoolId: string): Promise<School[]> {
+    return await db.select().from(schools).where(eq(schools.feedsIntoSchoolId, schoolId));
   }
 
   async updateSchool(id: string, updates: Partial<School>): Promise<School | undefined> {
@@ -247,6 +252,10 @@ export class DistrictMemStorage implements IDistrictStorage {
 
   async getSchoolsByDistrict(districtId: string): Promise<School[]> {
     return Array.from(this.schools.values()).filter(s => s.districtId === districtId);
+  }
+
+  async getFeederSchools(schoolId: string): Promise<School[]> {
+    return Array.from(this.schools.values()).filter(s => s.feedsIntoSchoolId === schoolId);
   }
 
   async updateSchool(id: string, updates: Partial<School>): Promise<School | undefined> {

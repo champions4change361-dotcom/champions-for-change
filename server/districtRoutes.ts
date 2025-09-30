@@ -103,6 +103,17 @@ export function registerDistrictRoutes(app: Express) {
     }
   });
 
+  app.get("/api/schools/:id/feeders", async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const feederSchools = await districtStorage.getFeederSchools(id);
+      res.json(feederSchools);
+    } catch (error) {
+      console.error("Error fetching feeder schools:", error);
+      res.status(500).json({ error: "Failed to fetch feeder schools" });
+    }
+  });
+
   app.post("/api/schools", isAuthenticated, async (req: Request, res: Response) => {
     try {
       const validatedData = insertSchoolSchema.parse(req.body);
