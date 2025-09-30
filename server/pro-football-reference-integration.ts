@@ -34,6 +34,7 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 import cron from 'node-cron';
+import { fantasyStorage } from './fantasy-storage.js';
 
 /**
  * 🚦 SPORTS REFERENCE COMPLIANCE RATE LIMITER
@@ -332,6 +333,38 @@ export class ProFootballReferenceIntegration {
       };
 
       this.latestData = response;
+      
+      // 💾 Persist players to fantasy database
+      console.log(`💾 Saving ${allPlayers.length} players to fantasy database...`);
+      let savedCount = 0;
+      for (const player of allPlayers) {
+        try {
+          await fantasyStorage.upsertProfessionalPlayer({
+            externalPlayerId: player.id,
+            dataSource: 'pfr',
+            playerName: player.playerName,
+            teamName: player.teamName,
+            teamAbbreviation: player.teamAbbreviation,
+            position: player.position,
+            sport: 'nfl',
+            salary: player.salary,
+            currentSeasonStats: {
+              passingYards: player.passingYards,
+              passingTDs: player.passingTDs,
+              rushingYards: player.rushingYards,
+              rushingTDs: player.rushingTDs,
+              receptions: player.receptions,
+              receivingYards: player.receivingYards,
+              receivingTDs: player.receivingTDs,
+            },
+            isActive: true,
+          });
+          savedCount++;
+        } catch (error: any) {
+          console.error(`❌ Failed to save player ${player.playerName}:`, error.message);
+        }
+      }
+      console.log(`✅ Saved ${savedCount}/${allPlayers.length} players to fantasy database`);
       
       const processingTime = Date.now() - startTime;
       const complianceReport = this.getComplianceReport();

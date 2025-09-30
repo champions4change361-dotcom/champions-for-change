@@ -42,12 +42,20 @@ interface MigrationResult {
   error?: string;
 }
 
-async function getTableCount(tableName: string, isFantasyDb: boolean = false): Promise<number> {
-  const query = `SELECT COUNT(*) as count FROM ${tableName}`;
-  const result = isFantasyDb
-    ? await fantasyDb.execute(query)
-    : await db.execute(query);
-  return parseInt(result.rows[0].count as string);
+async function getTableCount(tableName: string, isFantasyDb: boolean = false): Promise<number | null> {
+  try {
+    const query = `SELECT COUNT(*) as count FROM ${tableName}`;
+    const result = isFantasyDb
+      ? await fantasyDb.execute(query)
+      : await db.execute(query);
+    return parseInt(result.rows[0].count as string);
+  } catch (error: any) {
+    // If table doesn't exist, return null
+    if (error.code === '42P01') {
+      return null;
+    }
+    throw error;
+  }
 }
 
 async function migrateTable(
@@ -63,7 +71,16 @@ async function migrateTable(
 
   try {
     // Get source count
-    result.sourceCount = await getTableCount(tableName, false);
+    const sourceCount = await getTableCount(tableName, false);
+    
+    // Table doesn't exist in source DB - skip it
+    if (sourceCount === null) {
+      console.log(`⏭️  ${tableName}: Table does not exist in source DB (skipped)`);
+      result.success = true;
+      return result;
+    }
+    
+    result.sourceCount = sourceCount;
     
     if (result.sourceCount === 0) {
       console.log(`✅ ${tableName}: No data to migrate`);

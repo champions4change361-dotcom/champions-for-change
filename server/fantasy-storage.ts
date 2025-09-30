@@ -560,6 +560,87 @@ export class FantasyStorage {
       .orderBy(desc(ageVerifications.verificationDate));
     return result;
   }
+
+  // =============================================================================
+  // FANTASY WAIVER CLAIMS
+  // =============================================================================
+
+  async createFantasyWaiverClaim(data: InsertFantasyWaiverClaim): Promise<FantasyWaiverClaim> {
+    const [result] = await this.db.insert(fantasyWaiverClaims).values(data).returning();
+    return result;
+  }
+
+  async getFantasyWaiverClaimsByTeam(teamId: string): Promise<FantasyWaiverClaim[]> {
+    return await this.db
+      .select()
+      .from(fantasyWaiverClaims)
+      .where(eq(fantasyWaiverClaims.teamId, teamId))
+      .orderBy(desc(fantasyWaiverClaims.claimDate));
+  }
+
+  async updateFantasyWaiverClaim(id: string, updates: Partial<FantasyWaiverClaim>): Promise<FantasyWaiverClaim | undefined> {
+    const [result] = await this.db
+      .update(fantasyWaiverClaims)
+      .set(updates)
+      .where(eq(fantasyWaiverClaims.id, id))
+      .returning();
+    return result;
+  }
+
+  // =============================================================================
+  // FANTASY PICKS
+  // =============================================================================
+
+  async createFantasyPick(data: InsertFantasyPick): Promise<FantasyPick> {
+    const [result] = await this.db.insert(fantasyPicks).values(data).returning();
+    return result;
+  }
+
+  async getFantasyPicksByDraft(draftId: string): Promise<FantasyPick[]> {
+    return await this.db
+      .select()
+      .from(fantasyPicks)
+      .where(eq(fantasyPicks.draftId, draftId))
+      .orderBy(asc(fantasyPicks.pickNumber));
+  }
+
+  // =============================================================================
+  // FANTASY LEAGUE MESSAGES
+  // =============================================================================
+
+  async createFantasyLeagueMessage(data: InsertFantasyLeagueMessage): Promise<FantasyLeagueMessage> {
+    const [result] = await this.db.insert(fantasyLeagueMessages).values(data).returning();
+    return result;
+  }
+
+  async getFantasyLeagueMessagesByLeague(leagueId: string): Promise<FantasyLeagueMessage[]> {
+    return await this.db
+      .select()
+      .from(fantasyLeagueMessages)
+      .where(eq(fantasyLeagueMessages.leagueId, leagueId))
+      .orderBy(desc(fantasyLeagueMessages.sentAt));
+  }
+
+  async updateFantasyLeagueMessage(id: string, updates: Partial<FantasyLeagueMessage>): Promise<FantasyLeagueMessage | undefined> {
+    const [result] = await this.db
+      .update(fantasyLeagueMessages)
+      .set(updates)
+      .where(eq(fantasyLeagueMessages.id, id))
+      .returning();
+    return result;
+  }
+
+  // =============================================================================
+  // FANTASY MATCHUPS - Additional Methods
+  // =============================================================================
+
+  async getFantasyMatchupsByLeague(leagueId: string): Promise<FantasyMatchup[]> {
+    return await this.db
+      .select()
+      .from(fantasyMatchups)
+      .where(eq(fantasyMatchups.leagueId, leagueId))
+      .orderBy(desc(fantasyMatchups.week));
+  }
 }
 
 // Export singleton instance

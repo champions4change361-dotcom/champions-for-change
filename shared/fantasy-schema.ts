@@ -1,4 +1,4 @@
-import { pgTable, varchar, text, integer, decimal, boolean, timestamp, date, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, varchar, text, integer, decimal, boolean, timestamp, date, jsonb, unique, index } from "drizzle-orm/pg-core";
 import { relations, sql } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 
@@ -92,7 +92,11 @@ export const fantasyLeagues = pgTable("fantasy_leagues", {
   
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => ({
+  // Indexes for league lookups
+  commissionerIdx: index("fantasy_leagues_commissioner_idx").on(table.commissionerId),
+  sportIdx: index("fantasy_leagues_sport_idx").on(table.sport),
+}));
 
 // Fantasy Teams - Teams within fantasy leagues
 export const fantasyTeams = pgTable("fantasy_teams", {
@@ -122,13 +126,17 @@ export const fantasyTeams = pgTable("fantasy_teams", {
   
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => ({
+  // Indexes for team lookups
+  ownerIdx: index("fantasy_teams_owner_idx").on(table.ownerId),
+  leagueIdx: index("fantasy_teams_league_idx").on(table.leagueId),
+}));
 
 // Professional player database - external API integration
 export const professionalPlayers = pgTable("professional_players", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   externalPlayerId: varchar("external_player_id").notNull(), // ESPN ID, NFL ID, etc.
-  dataSource: varchar("data_source").notNull(), // espn, nfl_api, nba_api, etc.
+  dataSource: varchar("data_source").notNull(), // espn, nfl_api, nba_api, pfr, etc.
   playerName: varchar("player_name").notNull(),
   teamName: varchar("team_name").notNull(),
   teamAbbreviation: varchar("team_abbreviation"),
@@ -198,7 +206,14 @@ export const professionalPlayers = pgTable("professional_players", {
   byeWeek: integer("bye_week"), // For NFL
   lastUpdated: timestamp("last_updated").defaultNow(),
   isActive: boolean("is_active").default(true),
-});
+}, (table) => ({
+  // Unique constraint for external player IDs - prevents duplicates across data sources
+  uniqueExternalPlayer: unique().on(table.dataSource, table.externalPlayerId),
+  // Indexes for common queries
+  sportIdx: index("professional_players_sport_idx").on(table.sport),
+  teamIdx: index("professional_players_team_idx").on(table.teamAbbreviation),
+  positionIdx: index("professional_players_position_idx").on(table.position),
+}));
 
 // Fantasy Team Rosters - Player ownership tracking
 export const fantasyRosters = pgTable("fantasy_rosters", {
@@ -235,7 +250,13 @@ export const fantasyRosters = pgTable("fantasy_rosters", {
   
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => ({
+  // Unique constraint - a player can only be on a team once
+  uniqueTeamPlayer: unique().on(table.teamId, table.playerId),
+  // Indexes for common queries
+  teamIdx: index("fantasy_rosters_team_idx").on(table.teamId),
+  playerIdx: index("fantasy_rosters_player_idx").on(table.playerId),
+}));
 
 // Fantasy Drafts - Draft management and tracking
 export const fantasyDrafts = pgTable("fantasy_drafts", {

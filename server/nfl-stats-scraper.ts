@@ -8,7 +8,7 @@
 
 import axios from 'axios';
 import * as cheerio from 'cheerio';
-import { storage } from './storage';
+import { fantasyStorage } from './fantasy-storage';
 
 export interface NFLPlayerStats {
   playerId: string;
@@ -351,12 +351,33 @@ export class NFLStatsScrapingService {
    */
   async saveStatsToDatabase(stats: NFLPlayerStats[]): Promise<void> {
     try {
-      console.log('💾 [NFL Stats] Saving player statistics to database...');
+      console.log('💾 [NFL Stats] Saving player statistics to fantasy database...');
       
-      // Store stats with timestamp
-      await storage.storeNFLPlayerStats(stats);
+      // Upsert professional players in the fantasy database
+      for (const stat of stats) {
+        await fantasyStorage.upsertProfessionalPlayer({
+          externalPlayerId: stat.playerId,
+          dataSource: 'nfl_stats_scraper',
+          sport: 'football',
+          playerName: stat.name,
+          teamName: stat.team,
+          teamAbbreviation: stat.team,
+          position: stat.position,
+          currentSeasonStats: {
+            passingYards: stat.passingYards,
+            passingTDs: stat.passingTDs,
+            interceptions: stat.interceptions,
+            rushingYards: stat.rushingYards,
+            rushingTDs: stat.rushingTDs,
+            receptions: stat.receptions,
+            receivingYards: stat.receivingYards,
+            receivingTDs: stat.receivingTDs,
+            fantasyPoints: stat.fantasyPoints
+          }
+        });
+      }
       
-      console.log(`✅ [NFL Stats] Successfully saved ${stats.length} player stat records`);
+      console.log(`✅ [NFL Stats] Successfully saved ${stats.length} player stat records to fantasy database`);
       
     } catch (error) {
       console.error('❌ [NFL Stats] Error saving stats to database:', error);

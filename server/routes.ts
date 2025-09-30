@@ -10,6 +10,7 @@ import { RBACDataFilters } from "./rbac-data-filters";
 import { PERMISSIONS } from "./rbac-permissions";
 import { nightlySportsIntelligence } from './nightly-sports-intelligence';
 import { getStorage, storage } from "./storage";
+import { fantasyStorage } from "./fantasy-storage";
 import { emailService } from "./emailService";
 import supportTeamRoutes from "./supportTeamRoutes";
 import NFLDepthChartParser from './nfl-depth-chart-parser';
@@ -7808,7 +7809,7 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
       const userId = req.user?.claims?.sub || req.session?.user?.id || req.user?.id;
       const userEmail = req.user?.claims?.email || req.session?.user?.email || req.user?.email;
 
-      const fantasyProfile = await storage.getFantasyProfile(userId);
+      const fantasyProfile = await fantasyStorage.getFantasyProfileByUserId(userId);
       
       res.json({
         success: true,
@@ -7871,7 +7872,10 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + 90);
 
-      const updatedProfile = await storage.setFantasyAgeVerification(userId, verifiedAt, expiresAt);
+      const updatedProfile = await fantasyStorage.updateFantasyProfile(userId, {
+        ageVerifiedAt: verifiedAt,
+        ageVerificationExpiresAt: expiresAt
+      });
 
       res.json({
         success: true,
@@ -7896,7 +7900,9 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
       const userId = req.user?.claims?.sub || req.session?.user?.id || req.user?.id;
       const userEmail = req.user?.claims?.email || req.session?.user?.email || req.user?.email;
 
-      const updatedProfile = await storage.acceptFantasyTOS(userId);
+      const updatedProfile = await fantasyStorage.updateFantasyProfile(userId, {
+        tosAcceptedAt: new Date()
+      });
 
       res.json({
         success: true,
@@ -9839,7 +9845,6 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
   // Create a new fantasy league
   app.post("/api/fantasy/leagues", isAuthenticated, async (req, res) => {
     try {
-      const storage = await getStorage();
       const userId = req.user?.id;
       if (!userId) {
         return res.status(401).json({ error: "Authentication required" });
@@ -9853,7 +9858,7 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
         season: req.body.season || "2024-2025"
       });
 
-      const league = await storage.createFantasyLeague(leagueData);
+      const league = await fantasyStorage.createFantasyLeague(leagueData);
       res.status(201).json(league);
     } catch (error: any) {
       console.error("Create fantasy league error:", error);
@@ -9867,13 +9872,12 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
   // Get user's fantasy leagues
   app.get("/api/fantasy/leagues", isAuthenticated, async (req, res) => {
     try {
-      const storage = await getStorage();
       const userId = req.user?.id;
       if (!userId) {
         return res.status(401).json({ error: "Authentication required" });
       }
 
-      const leagues = await storage.getUserFantasyLeagues(userId);
+      const leagues = await fantasyStorage.getUserFantasyLeagues(userId);
       res.json(leagues);
     } catch (error: any) {
       console.error("Get fantasy leagues error:", error);
@@ -9884,13 +9888,12 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
   // Get specific fantasy league details
   app.get("/api/fantasy/leagues/:leagueId", isAuthenticated, async (req, res) => {
     try {
-      const storage = await getStorage();
       const userId = req.user?.id;
       if (!userId) {
         return res.status(401).json({ error: "Authentication required" });
       }
 
-      const league = await storage.getFantasyLeague(req.params.leagueId, userId);
+      const league = await fantasyStorage.getFantasyLeague(req.params.leagueId);
       if (!league) {
         return res.status(404).json({ error: "Fantasy league not found" });
       }
@@ -9905,7 +9908,6 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
   // Join a fantasy league
   app.post("/api/fantasy/leagues/:leagueId/join", isAuthenticated, async (req, res) => {
     try {
-      const storage = await getStorage();
       const userId = req.user?.id;
       if (!userId) {
         return res.status(401).json({ error: "Authentication required" });
@@ -9921,7 +9923,7 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
         teamAbbreviation: teamName?.substring(0, 4).toUpperCase() || 'TEAM'
       });
 
-      const team = await storage.joinFantasyLeague(req.params.leagueId, teamData, inviteCode);
+      const team = await fantasyStorage.createFantasyTeam(teamData);
       res.status(201).json(team);
     } catch (error: any) {
       console.error("Join fantasy league error:", error);
@@ -9935,13 +9937,12 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
   // Get league standings
   app.get("/api/fantasy/leagues/:leagueId/standings", isAuthenticated, async (req, res) => {
     try {
-      const storage = await getStorage();
       const userId = req.user?.id;
       if (!userId) {
         return res.status(401).json({ error: "Authentication required" });
       }
 
-      const standings = await storage.getFantasyLeagueStandings(req.params.leagueId, userId);
+      const standings = await fantasyStorage.getFantasyTeamsByLeague(req.params.leagueId);
       res.json(standings);
     } catch (error: any) {
       console.error("Get league standings error:", error);
@@ -9954,13 +9955,13 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
   // Get user's team in a league
   app.get("/api/fantasy/leagues/:leagueId/my-team", isAuthenticated, async (req, res) => {
     try {
-      const storage = await getStorage();
       const userId = req.user?.id;
       if (!userId) {
         return res.status(401).json({ error: "Authentication required" });
       }
 
-      const team = await storage.getUserFantasyTeam(req.params.leagueId, userId);
+      const teams = await fantasyStorage.getUserFantasyTeams(userId);
+      const team = teams.find(t => t.leagueId === req.params.leagueId);
       if (!team) {
         return res.status(404).json({ error: "No team found in this league" });
       }
@@ -9975,13 +9976,12 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
   // Get team roster
   app.get("/api/fantasy/teams/:teamId/roster", isAuthenticated, async (req, res) => {
     try {
-      const storage = await getStorage();
       const userId = req.user?.id;
       if (!userId) {
         return res.status(401).json({ error: "Authentication required" });
       }
 
-      const roster = await storage.getFantasyTeamRoster(req.params.teamId, userId);
+      const roster = await fantasyStorage.getFantasyRostersByTeam(req.params.teamId);
       res.json(roster);
     } catch (error: any) {
       console.error("Get team roster error:", error);
@@ -9992,7 +9992,6 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
   // Set weekly lineup
   app.post("/api/fantasy/teams/:teamId/lineup", isAuthenticated, async (req, res) => {
     try {
-      const storage = await getStorage();
       const userId = req.user?.id;
       if (!userId) {
         return res.status(401).json({ error: "Authentication required" });
@@ -10000,7 +9999,11 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
 
       const { week, lineup } = req.body;
       
-      const updatedLineup = await storage.setFantasyLineup(req.params.teamId, userId, week, lineup);
+      const updatedLineup = await fantasyStorage.createFantasyLineup({
+        teamId: req.params.teamId,
+        week: week,
+        lineup: lineup
+      });
       res.json(updatedLineup);
     } catch (error: any) {
       console.error("Set fantasy lineup error:", error);
@@ -10016,19 +10019,23 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
   // Start a draft
   app.post("/api/fantasy/leagues/:leagueId/draft/start", isAuthenticated, async (req, res) => {
     try {
-      const storage = await getStorage();
       const userId = req.user?.id;
       if (!userId) {
         return res.status(401).json({ error: "Authentication required" });
       }
 
       // Verify user is commissioner
-      const league = await storage.getFantasyLeague(req.params.leagueId, userId);
+      const league = await fantasyStorage.getFantasyLeague(req.params.leagueId);
       if (!league || league.commissionerId !== userId) {
         return res.status(403).json({ error: "Only the commissioner can start the draft" });
       }
 
-      const draft = await storage.startFantasyDraft(req.params.leagueId, req.body);
+      const draft = await fantasyStorage.createFantasyDraft({
+        leagueId: req.params.leagueId,
+        status: 'active',
+        currentPick: 1,
+        ...req.body
+      });
       res.json(draft);
     } catch (error: any) {
       console.error("Start fantasy draft error:", error);
@@ -10042,13 +10049,12 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
   // Get draft status
   app.get("/api/fantasy/leagues/:leagueId/draft", isAuthenticated, async (req, res) => {
     try {
-      const storage = await getStorage();
       const userId = req.user?.id;
       if (!userId) {
         return res.status(401).json({ error: "Authentication required" });
       }
 
-      const draft = await storage.getFantasyDraft(req.params.leagueId, userId);
+      const draft = await fantasyStorage.getFantasyDraftByLeague(req.params.leagueId);
       res.json(draft);
     } catch (error: any) {
       console.error("Get fantasy draft error:", error);
@@ -10059,15 +10065,20 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
   // Make a draft pick
   app.post("/api/fantasy/drafts/:draftId/pick", isAuthenticated, async (req, res) => {
     try {
-      const storage = await getStorage();
       const userId = req.user?.id;
       if (!userId) {
         return res.status(401).json({ error: "Authentication required" });
       }
 
-      const { playerId } = req.body;
+      const { playerId, teamId } = req.body;
       
-      const pick = await storage.makeFantasyDraftPick(req.params.draftId, userId, playerId);
+      const draft = await fantasyStorage.getFantasyDraft(req.params.draftId);
+      const pick = await fantasyStorage.createFantasyPick({
+        draftId: req.params.draftId,
+        teamId: teamId,
+        playerId: playerId,
+        pickNumber: draft?.currentPick || 0
+      });
       res.json(pick);
     } catch (error: any) {
       console.error("Make draft pick error:", error);
@@ -10083,7 +10094,6 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
   // Submit waiver claim
   app.post("/api/fantasy/teams/:teamId/waiver-claims", isAuthenticated, async (req, res) => {
     try {
-      const storage = await getStorage();
       const userId = req.user?.id;
       if (!userId) {
         return res.status(401).json({ error: "Authentication required" });
@@ -10094,7 +10104,7 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
         teamId: req.params.teamId
       });
 
-      const claim = await storage.submitWaiverClaim(claimData, userId);
+      const claim = await fantasyStorage.createFantasyWaiverClaim(claimData);
       res.status(201).json(claim);
     } catch (error: any) {
       console.error("Submit waiver claim error:", error);
@@ -10108,13 +10118,12 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
   // Get team's waiver claims
   app.get("/api/fantasy/teams/:teamId/waiver-claims", isAuthenticated, async (req, res) => {
     try {
-      const storage = await getStorage();
       const userId = req.user?.id;
       if (!userId) {
         return res.status(401).json({ error: "Authentication required" });
       }
 
-      const claims = await storage.getTeamWaiverClaims(req.params.teamId, userId);
+      const claims = await fantasyStorage.getFantasyWaiverClaimsByTeam(req.params.teamId);
       res.json(claims);
     } catch (error: any) {
       console.error("Get waiver claims error:", error);
@@ -10127,7 +10136,6 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
   // Propose a trade
   app.post("/api/fantasy/leagues/:leagueId/trades", isAuthenticated, async (req, res) => {
     try {
-      const storage = await getStorage();
       const userId = req.user?.id;
       if (!userId) {
         return res.status(401).json({ error: "Authentication required" });
@@ -10138,7 +10146,7 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
         leagueId: req.params.leagueId
       });
 
-      const trade = await storage.proposeFantasyTrade(tradeData, userId);
+      const trade = await fantasyStorage.createFantasyTrade(tradeData);
       res.status(201).json(trade);
     } catch (error: any) {
       console.error("Propose trade error:", error);
@@ -10152,7 +10160,6 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
   // Respond to trade proposal
   app.patch("/api/fantasy/trades/:tradeId", isAuthenticated, async (req, res) => {
     try {
-      const storage = await getStorage();
       const userId = req.user?.id;
       if (!userId) {
         return res.status(401).json({ error: "Authentication required" });
@@ -10160,7 +10167,9 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
 
       const { action } = req.body; // 'accept' or 'reject'
       
-      const trade = await storage.respondToFantasyTrade(req.params.tradeId, userId, action);
+      const trade = await fantasyStorage.updateFantasyTrade(req.params.tradeId, {
+        status: action === 'accept' ? 'accepted' : 'rejected'
+      });
       res.json(trade);
     } catch (error: any) {
       console.error("Respond to trade error:", error);
@@ -10176,13 +10185,12 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
   // Get league matchups for a week
   app.get("/api/fantasy/leagues/:leagueId/matchups/:week", isAuthenticated, async (req, res) => {
     try {
-      const storage = await getStorage();
       const userId = req.user?.id;
       if (!userId) {
         return res.status(401).json({ error: "Authentication required" });
       }
 
-      const matchups = await storage.getFantasyMatchups(req.params.leagueId, parseInt(req.params.week), userId);
+      const matchups = await fantasyStorage.getFantasyMatchupsByLeagueAndWeek(req.params.leagueId, parseInt(req.params.week));
       res.json(matchups);
     } catch (error: any) {
       console.error("Get fantasy matchups error:", error);
@@ -10193,13 +10201,13 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
   // Get live scoring updates
   app.get("/api/fantasy/leagues/:leagueId/live-scores", isAuthenticated, async (req, res) => {
     try {
-      const storage = await getStorage();
       const userId = req.user?.id;
       if (!userId) {
         return res.status(401).json({ error: "Authentication required" });
       }
 
-      const liveScores = await storage.getFantasyLiveScores(req.params.leagueId, userId);
+      const currentWeek = parseInt(req.query.week as string) || 1;
+      const liveScores = await fantasyStorage.getFantasyMatchupsByLeagueAndWeek(req.params.leagueId, currentWeek);
       res.json(liveScores);
     } catch (error: any) {
       console.error("Get live scores error:", error);
@@ -10212,7 +10220,6 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
   // Post message to league
   app.post("/api/fantasy/leagues/:leagueId/messages", isAuthenticated, async (req, res) => {
     try {
-      const storage = await getStorage();
       const userId = req.user?.id;
       if (!userId) {
         return res.status(401).json({ error: "Authentication required" });
@@ -10224,7 +10231,7 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
         senderId: userId
       });
 
-      const message = await storage.postFantasyLeagueMessage(messageData);
+      const message = await fantasyStorage.createFantasyLeagueMessage(messageData);
       res.status(201).json(message);
     } catch (error: any) {
       console.error("Post league message error:", error);
@@ -10238,13 +10245,12 @@ Questions? Contact us at champions4change361@gmail.com or 361-300-1552
   // Get league messages
   app.get("/api/fantasy/leagues/:leagueId/messages", isAuthenticated, async (req, res) => {
     try {
-      const storage = await getStorage();
       const userId = req.user?.id;
       if (!userId) {
         return res.status(401).json({ error: "Authentication required" });
       }
 
-      const messages = await storage.getFantasyLeagueMessages(req.params.leagueId, userId);
+      const messages = await fantasyStorage.getFantasyLeagueMessagesByLeague(req.params.leagueId);
       res.json(messages);
     } catch (error: any) {
       console.error("Get league messages error:", error);
