@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { storage } from "../storage";
+import { tournamentStorage } from "../tournament-storage";
 import { insertTournamentSchema, tournamentConfigSchema, type TournamentConfig, updateMatchSchema } from "@shared/schema";
 import { BracketGenerator } from "../utils/bracket-generator";
 import { TournamentService } from "../tournament-service";
@@ -231,7 +232,7 @@ export function registerTournamentRoutes(app: Express) {
       const { id } = req.params;
       
       // Use the existing service to get registration form
-      const registrationForm = await storage.getTournamentRegistrationForm(id);
+      const registrationForm = await tournamentStorage.getTournamentRegistrationForm(id);
       
       if (!registrationForm) {
         return res.status(404).json({ message: "Registration form not found" });
@@ -286,7 +287,7 @@ export function registerTournamentRoutes(app: Express) {
         console.log('No user context for public tournament matches viewing');
       }
       
-      const matches = await storage.getMatchesByTournament(id);
+      const matches = await tournamentStorage.getMatchesByTournament(id);
       
       res.json(matches);
     } catch (error) {
@@ -346,7 +347,7 @@ export function registerTournamentRoutes(app: Express) {
         return res.status(401).json({ message: "User ID required" });
       }
 
-      const drafts = await storage.getDraftTournaments(userId);
+      const drafts = await tournamentStorage.getDraftTournaments(userId);
       res.json(drafts);
     } catch (error) {
       console.error("Error fetching draft tournaments:", error);
@@ -359,7 +360,7 @@ export function registerTournamentRoutes(app: Express) {
     try {
       
       // Get tournaments that are marked as calendar visible and approved
-      const allTournaments = await storage.getTournaments();
+      const allTournaments = await tournamentStorage.getTournaments();
       
       // Filter for public calendar visibility
       const publicTournaments = allTournaments.filter((tournament: any) => 
@@ -405,14 +406,14 @@ export function registerTournamentRoutes(app: Express) {
       const user = req.secureUser;
       const { calendarRegion, calendarCity, calendarStateCode, calendarTags } = req.body;
       
-      const tournament = await storage.getTournament(id, user);
+      const tournament = await tournamentStorage.getTournament(id);
       
       if (!tournament) {
         return res.status(404).json({ message: "Tournament not found" });
       }
 
       // Update tournament with calendar submission
-      await storage.updateTournament(id, {
+      await tournamentStorage.updateTournament(id, {
         isPublicCalendarVisible: true,
         calendarApprovalStatus: 'pending',
         calendarSubmittedAt: new Date(),
@@ -420,7 +421,7 @@ export function registerTournamentRoutes(app: Express) {
         calendarCity,
         calendarStateCode,
         calendarTags: calendarTags || []
-      }, user);
+      });
 
       res.json({ message: "Tournament submitted for calendar approval" });
     } catch (error) {
@@ -444,7 +445,7 @@ export function registerTournamentRoutes(app: Express) {
       if (!['approved', 'rejected'].includes(status)) {
         return res.status(400).json({ message: "Status must be 'approved' or 'rejected'" });
       }
-      const tournament = await storage.getTournament(id);
+      const tournament = await tournamentStorage.getTournament(id);
       
       if (!tournament) {
         return res.status(404).json({ message: "Tournament not found" });
@@ -460,11 +461,11 @@ export function registerTournamentRoutes(app: Express) {
         updateData.calendarRejectionReason = rejectionReason;
       }
 
-      await storage.updateTournament(id, updateData);
+      await tournamentStorage.updateTournament(id, updateData);
 
       res.json({ 
         message: `Tournament ${status} for calendar display`,
-        tournament: await storage.getTournament(id)
+        tournament: await tournamentStorage.getTournament(id)
       });
     } catch (error) {
       console.error("Error updating tournament calendar approval:", error);
@@ -479,7 +480,7 @@ export function registerTournamentRoutes(app: Express) {
       if (!req.isAuthenticated || !req.isAuthenticated()) {
         return res.status(401).json({ message: "Authentication required" });
       }
-      const allTournaments = await storage.getTournaments();
+      const allTournaments = await tournamentStorage.getTournaments();
       
       // Filter for pending calendar submissions
       const pendingTournaments = allTournaments.filter((tournament: any) => 
@@ -499,14 +500,14 @@ export function registerTournamentRoutes(app: Express) {
     try {
       const { id } = req.params;
       
-      const tournament = await storage.getTournament(id);
+      const tournament = await tournamentStorage.getTournament(id);
       if (!tournament) {
         return res.status(404).json({ message: "Tournament not found" });
       }
 
       // Increment view count
       const currentViews = tournament.calendarViewCount || 0;
-      await storage.updateTournament(id, {
+      await tournamentStorage.updateTournament(id, {
         calendarViewCount: currentViews + 1
       });
 
@@ -527,7 +528,7 @@ export function registerTournamentRoutes(app: Express) {
 
       const { id } = req.params;
       
-      const tournament = await storage.getTournament(id);
+      const tournament = await tournamentStorage.getTournament(id);
       if (!tournament) {
         return res.status(404).json({ message: "Tournament not found" });
       }
@@ -565,8 +566,8 @@ export function registerTournamentRoutes(app: Express) {
       }
       
       const tournament = user 
-        ? await storage.getTournament(id, user)
-        : await storage.getTournamentPublic(id);
+        ? await tournamentStorage.getTournament(id)
+        : await tournamentStorage.getTournamentPublic(id);
       
       if (!tournament) {
         return res.status(404).json({ message: "Tournament not found" });
@@ -583,7 +584,7 @@ export function registerTournamentRoutes(app: Express) {
   app.get("/api/tournaments/:id/divisions", async (req, res) => {
     try {
       const { id } = req.params;
-      const tournament = await storage.getTournament(id);
+      const tournament = await tournamentStorage.getTournament(id);
       
       if (!tournament) {
         return res.status(404).json({ message: "Tournament not found" });
@@ -591,7 +592,7 @@ export function registerTournamentRoutes(app: Express) {
 
       // For bracket-based tournaments (like basketball), return divisions
       if (tournament.competitionFormat === 'bracket') {
-        const divisions = await storage.getTournamentEventsByTournament(id);
+        const divisions = await tournamentStorage.getTournamentEventsByTournament(id);
         res.json(divisions);
       } else {
         res.json([]);
@@ -606,7 +607,7 @@ export function registerTournamentRoutes(app: Express) {
   app.get("/api/tournaments/:id/events", async (req, res) => {
     try {
       const { id } = req.params;
-      const tournament = await storage.getTournament(id);
+      const tournament = await tournamentStorage.getTournament(id);
       
       if (!tournament) {
         return res.status(404).json({ message: "Tournament not found" });
@@ -614,7 +615,7 @@ export function registerTournamentRoutes(app: Express) {
 
       // For event-based tournaments (like track & field), return events
       if (tournament.competitionFormat === 'timed-competition' || tournament.competitionFormat === 'judged-performance') {
-        const events = await storage.getTournamentEventsByTournament(id);
+        const events = await tournamentStorage.getTournamentEventsByTournament(id);
         res.json(events);
       } else {
         res.json([]);
@@ -631,7 +632,7 @@ export function registerTournamentRoutes(app: Express) {
       const { id } = req.params;
       
       // Get all registration forms for this tournament
-      const registrationForms = await storage.getTournamentRegistrationFormsByTournament(id);
+      const registrationForms = await tournamentStorage.getTournamentRegistrationFormsByTournament(id);
       
       if (registrationForms.length === 0) {
         return res.json([]);
@@ -640,7 +641,7 @@ export function registerTournamentRoutes(app: Express) {
       // Get submissions for all forms of this tournament
       const allSubmissions = [];
       for (const form of registrationForms) {
-        const formSubmissions = await storage.getRegistrationSubmissionsByTournament(id);
+        const formSubmissions = await tournamentStorage.getRegistrationSubmissionsByTournament(id);
         allSubmissions.push(...formSubmissions);
       }
       

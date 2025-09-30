@@ -2,6 +2,7 @@ import { eq, and, or, desc, asc, sql as drizzleSql, inArray } from "drizzle-orm"
 import { tournamentDb } from "./tournament-db";
 import {
   tournaments,
+  matches,
   eventSchools,
   eventParticipants,
   eventAssignments,
@@ -81,6 +82,12 @@ import {
   type OrganizerContact,
   type OrganizerMetric,
   type RegistrationCode,
+  type Match,
+  type InsertMatch,
+  type UpdateMatch,
+  type TournamentDivision,
+  type InsertTournamentDivision,
+  tournamentDivisions,
   type InsertTournament,
   type InsertEventSchool,
   type InsertEventParticipant,
@@ -451,6 +458,125 @@ export class TournamentStorage {
       .select()
       .from(registrationCodes)
       .where(eq(registrationCodes.code, code));
+    return result;
+  }
+
+  // =============================================================================
+  // ADDITIONAL TOURNAMENT METHODS (for route compatibility)
+  // =============================================================================
+
+  async getTournaments(): Promise<Tournament[]> {
+    return await this.db
+      .select()
+      .from(tournaments)
+      .orderBy(desc(tournaments.createdAt));
+  }
+
+  async getDraftTournaments(userId: string): Promise<Tournament[]> {
+    return await this.db
+      .select()
+      .from(tournaments)
+      .where(and(eq(tournaments.userId, userId), eq(tournaments.status, 'draft')))
+      .orderBy(desc(tournaments.createdAt));
+  }
+
+  async getTournamentPublic(id: string): Promise<Tournament | undefined> {
+    // Public access - same as getTournament but explicitly for public routes
+    const [result] = await this.db
+      .select()
+      .from(tournaments)
+      .where(eq(tournaments.id, id));
+    return result;
+  }
+
+  async getTournamentRegistrationForm(id: string): Promise<TournamentRegistrationForm | undefined> {
+    const [result] = await this.db
+      .select()
+      .from(tournamentRegistrationForms)
+      .where(eq(tournamentRegistrationForms.id, id));
+    return result;
+  }
+
+  async getTournamentRegistrationFormsByTournament(tournamentId: string): Promise<TournamentRegistrationForm[]> {
+    return await this.db
+      .select()
+      .from(tournamentRegistrationForms)
+      .where(eq(tournamentRegistrationForms.tournamentId, tournamentId));
+  }
+
+  async updateTournamentRegistrationForm(id: string, updates: Partial<TournamentRegistrationForm>): Promise<TournamentRegistrationForm | undefined> {
+    const [result] = await this.db
+      .update(tournamentRegistrationForms)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(tournamentRegistrationForms.id, id))
+      .returning();
+    return result;
+  }
+
+  async getRegistrationSubmission(id: string): Promise<RegistrationSubmission | undefined> {
+    const [result] = await this.db
+      .select()
+      .from(registrationSubmissions)
+      .where(eq(registrationSubmissions.id, id));
+    return result;
+  }
+
+  async updateRegistrationSubmission(id: string, updates: Partial<RegistrationSubmission>): Promise<RegistrationSubmission | undefined> {
+    const [result] = await this.db
+      .update(registrationSubmissions)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(registrationSubmissions.id, id))
+      .returning();
+    return result;
+  }
+
+  // =============================================================================
+  // MATCH MANAGEMENT
+  // =============================================================================
+
+  async getMatchesByTournament(tournamentId: string): Promise<Match[]> {
+    return await this.db
+      .select()
+      .from(matches)
+      .where(eq(matches.tournamentId, tournamentId))
+      .orderBy(asc(matches.round), asc(matches.position));
+  }
+
+  async getMatch(id: string): Promise<Match | undefined> {
+    const [result] = await this.db
+      .select()
+      .from(matches)
+      .where(eq(matches.id, id));
+    return result;
+  }
+
+  async createMatch(data: InsertMatch): Promise<Match> {
+    const [result] = await this.db.insert(matches).values(data).returning();
+    return result;
+  }
+
+  async updateMatch(id: string, updates: UpdateMatch): Promise<Match | undefined> {
+    const [result] = await this.db
+      .update(matches)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(matches.id, id))
+      .returning();
+    return result;
+  }
+
+  // =============================================================================
+  // TOURNAMENT DIVISIONS/EVENTS
+  // =============================================================================
+
+  async getTournamentEventsByTournament(tournamentId: string): Promise<TournamentDivision[]> {
+    return await this.db
+      .select()
+      .from(tournamentDivisions)
+      .where(eq(tournamentDivisions.tournamentId, tournamentId));
+  }
+
+  async createTournamentDivision(data: InsertTournamentDivision): Promise<TournamentDivision> {
+    const [result] = await this.db.insert(tournamentDivisions).values(data).returning();
     return result;
   }
 }

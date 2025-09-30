@@ -2,15 +2,25 @@ import { drizzle } from 'drizzle-orm/neon-http';
 import { neon, Pool } from '@neondatabase/serverless';
 import * as schema from '../shared/tournament-schema.js';
 
-if (!process.env.DATABASE_URL_TOURNAMENT) {
-  throw new Error('DATABASE_URL_TOURNAMENT environment variable is not set');
+// Optional Tournament DB - gracefully handle missing env var during development
+const DATABASE_URL_TOURNAMENT = process.env.DATABASE_URL_TOURNAMENT;
+
+// Placeholder error function
+function throwNotConfigured(): never {
+  throw new Error('Tournament database not configured - DATABASE_URL_TOURNAMENT environment variable is required');
 }
 
-// HTTP client for Drizzle queries
-const sql = neon(process.env.DATABASE_URL_TOURNAMENT);
-export const tournamentDb = drizzle(sql, { schema });
+// Export tournament database (throws if used without env var)
+export const tournamentDb = DATABASE_URL_TOURNAMENT
+  ? drizzle(neon(DATABASE_URL_TOURNAMENT), { schema })
+  : new Proxy({} as any, { get: throwNotConfigured });
 
-// Connection pool for raw queries
-export const tournamentPool = new Pool({ connectionString: process.env.DATABASE_URL_TOURNAMENT });
+export const tournamentPool = DATABASE_URL_TOURNAMENT
+  ? new Pool({ connectionString: DATABASE_URL_TOURNAMENT })
+  : new Proxy({} as any, { get: throwNotConfigured });
 
-console.log('🏆 Tournament database connection initialized');
+if (DATABASE_URL_TOURNAMENT) {
+  console.log('🏆 Tournament database connection initialized');
+} else {
+  console.warn('⚠️  DATABASE_URL_TOURNAMENT not set - tournament database features disabled');
+}
