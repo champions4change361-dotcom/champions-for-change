@@ -2,6 +2,8 @@ import type { Express, Request, Response } from "express";
 import { districtStorage } from "./districtStorage";
 import { insertDistrictSchema, insertSchoolSchema, insertSchoolAssetSchema } from "@shared/schema";
 import { isAuthenticated } from "./replitAuth";
+import { loadUserContext, requirePermissions } from "./rbac-middleware";
+import { PERMISSIONS } from "./rbac-permissions";
 
 export function registerDistrictRoutes(app: Express) {
   // District endpoints
@@ -114,16 +116,67 @@ export function registerDistrictRoutes(app: Express) {
     }
   });
 
-  app.post("/api/schools", isAuthenticated, async (req: Request, res: Response) => {
-    try {
-      const validatedData = insertSchoolSchema.parse(req.body);
-      const school = await districtStorage.createSchool(validatedData);
-      res.status(201).json(school);
-    } catch (error) {
-      console.error("Error creating school:", error);
-      res.status(500).json({ error: "Failed to create school" });
+  app.post("/api/schools", 
+    loadUserContext,
+    requirePermissions([PERMISSIONS.SCHOOL_DATA_WRITE]),
+    async (req: Request, res: Response) => {
+      try {
+        const { rbacContext } = req;
+        const validatedData = insertSchoolSchema.parse(req.body);
+        
+        // District AD can add any school
+        // School-level staff (AD, Coordinator, etc.) can only manage feeder relationships for their own school
+        const isSchoolLevelRole = rbacContext?.user.userRole?.startsWith('school_');
+        const isDistrictLevelRole = rbacContext?.user.userRole?.startsWith('district_');
+        
+        if (isSchoolLevelRole) {
+          // School-level staff must be managing feeders for their own school
+          if (validatedData.feedsIntoSchoolId) {
+            // Verify the parent school belongs to this staff member
+            const parentSchool = await districtStorage.getSchool(validatedData.feedsIntoSchoolId);
+            if (!parentSchool) {
+              return res.status(404).json({ error: "Parent school not found" });
+            }
+            
+            if (parentSchool.athleticDirectorId !== rbacContext.user.id) {
+              return res.status(403).json({ 
+                error: "Forbidden: School staff can only add feeder schools to their own school" 
+              });
+            }
+            
+            // Validate parent school is a high school
+            if (parentSchool.schoolType !== 'high') {
+              return res.status(400).json({
+                error: "Feeder schools can only feed into high schools"
+              });
+            }
+            
+            // Validate same district
+            if (validatedData.districtId !== parentSchool.districtId) {
+              return res.status(400).json({
+                error: "Feeder schools must be in the same district as the parent school"
+              });
+            }
+          } else {
+            // School-level staff cannot create standalone schools
+            return res.status(403).json({
+              error: "Forbidden: Only District ADs can create new schools. School staff can only add feeder schools."
+            });
+          }
+        } else if (!isDistrictLevelRole) {
+          return res.status(403).json({
+            error: "Forbidden: Must be a district or school administrator to manage schools"
+          });
+        }
+        
+        const school = await districtStorage.createSchool(validatedData);
+        res.status(201).json(school);
+      } catch (error) {
+        console.error("Error creating school:", error);
+        res.status(500).json({ error: "Failed to create school" });
+      }
     }
-  });
+  );
 
   // School asset endpoints
   app.get("/api/schools/:schoolId/assets", async (req: Request, res: Response) => {
@@ -159,52 +212,133 @@ export function registerDistrictRoutes(app: Express) {
     }
   });
 
-  app.post("/api/schools/:schoolId/assets", isAuthenticated, async (req: Request, res: Response) => {
-    try {
-      const { schoolId } = req.params;
-      const user = req.user as any;
-      
-      const validatedData = insertSchoolAssetSchema.parse({
-        ...req.body,
-        schoolId,
-        uploadedById: user.claims.sub
-      });
-      
-      const asset = await districtStorage.createSchoolAsset(validatedData);
-      res.status(201).json(asset);
-    } catch (error) {
-      console.error("Error creating school asset:", error);
-      res.status(500).json({ error: "Failed to create school asset" });
-    }
-  });
-
-  app.put("/api/schools/:schoolId/assets/:assetId", isAuthenticated, async (req: Request, res: Response) => {
-    try {
-      const { assetId } = req.params;
-      const asset = await districtStorage.updateSchoolAsset(assetId, req.body);
-      if (!asset) {
-        return res.status(404).json({ error: "School asset not found" });
+  app.post("/api/schools/:schoolId/assets", 
+    loadUserContext,
+    requirePermissions([PERMISSIONS.SCHOOL_DATA_WRITE]),
+    async (req: Request, res: Response) => {
+      try {
+        const { schoolId } = req.params;
+        const { rbacContext } = req;
+        
+        // Verify user has access to this school
+        const school = await districtStorage.getSchool(schoolId);
+        if (!school) {
+          return res.status(404).json({ error: "School not found" });
+        }
+        
+        // District-level staff can access any school in their district
+        // School-level staff can only access their own school
+        const isSchoolLevelRole = rbacContext?.user.userRole?.startsWith('school_');
+        if (isSchoolLevelRole && school.athleticDirectorId !== rbacContext.user.id) {
+          return res.status(403).json({ 
+            error: "Forbidden: You can only manage assets for your own school" 
+          });
+        }
+        
+        const validatedData = insertSchoolAssetSchema.parse({
+          ...req.body,
+          schoolId,
+          uploadedById: rbacContext!.user.id
+        });
+        
+        const asset = await districtStorage.createSchoolAsset(validatedData);
+        res.status(201).json(asset);
+      } catch (error) {
+        console.error("Error creating school asset:", error);
+        res.status(500).json({ error: "Failed to create school asset" });
       }
-      res.json(asset);
-    } catch (error) {
-      console.error("Error updating school asset:", error);
-      res.status(500).json({ error: "Failed to update school asset" });
     }
-  });
+  );
 
-  app.delete("/api/schools/:schoolId/assets/:assetId", isAuthenticated, async (req: Request, res: Response) => {
-    try {
-      const { assetId } = req.params;
-      const deleted = await districtStorage.deleteSchoolAsset(assetId);
-      if (!deleted) {
-        return res.status(404).json({ error: "School asset not found" });
+  app.put("/api/schools/:schoolId/assets/:assetId", 
+    loadUserContext,
+    requirePermissions([PERMISSIONS.SCHOOL_DATA_WRITE]),
+    async (req: Request, res: Response) => {
+      try {
+        const { schoolId, assetId } = req.params;
+        const { rbacContext } = req;
+        
+        // Verify asset exists and belongs to this school
+        const existingAsset = await districtStorage.getSchoolAsset(assetId);
+        if (!existingAsset) {
+          return res.status(404).json({ error: "School asset not found" });
+        }
+        
+        if (existingAsset.schoolId !== schoolId) {
+          return res.status(403).json({ 
+            error: "Forbidden: Asset does not belong to this school" 
+          });
+        }
+        
+        // Verify user has access to this school
+        const school = await districtStorage.getSchool(schoolId);
+        if (!school) {
+          return res.status(404).json({ error: "School not found" });
+        }
+        
+        const isSchoolLevelRole = rbacContext?.user.userRole?.startsWith('school_');
+        if (isSchoolLevelRole && school.athleticDirectorId !== rbacContext.user.id) {
+          return res.status(403).json({ 
+            error: "Forbidden: You can only manage assets for your own school" 
+          });
+        }
+        
+        const asset = await districtStorage.updateSchoolAsset(assetId, req.body);
+        if (!asset) {
+          return res.status(404).json({ error: "School asset not found" });
+        }
+        res.json(asset);
+      } catch (error) {
+        console.error("Error updating school asset:", error);
+        res.status(500).json({ error: "Failed to update school asset" });
       }
-      res.status(204).send();
-    } catch (error) {
-      console.error("Error deleting school asset:", error);
-      res.status(500).json({ error: "Failed to delete school asset" });
     }
-  });
+  );
+
+  app.delete("/api/schools/:schoolId/assets/:assetId", 
+    loadUserContext,
+    requirePermissions([PERMISSIONS.SCHOOL_DATA_WRITE]),
+    async (req: Request, res: Response) => {
+      try {
+        const { schoolId, assetId } = req.params;
+        const { rbacContext } = req;
+        
+        // Verify asset exists and belongs to this school
+        const existingAsset = await districtStorage.getSchoolAsset(assetId);
+        if (!existingAsset) {
+          return res.status(404).json({ error: "School asset not found" });
+        }
+        
+        if (existingAsset.schoolId !== schoolId) {
+          return res.status(403).json({ 
+            error: "Forbidden: Asset does not belong to this school" 
+          });
+        }
+        
+        // Verify user has access to this school
+        const school = await districtStorage.getSchool(schoolId);
+        if (!school) {
+          return res.status(404).json({ error: "School not found" });
+        }
+        
+        const isSchoolLevelRole = rbacContext?.user.userRole?.startsWith('school_');
+        if (isSchoolLevelRole && school.athleticDirectorId !== rbacContext.user.id) {
+          return res.status(403).json({ 
+            error: "Forbidden: You can only manage assets for your own school" 
+          });
+        }
+        
+        const deleted = await districtStorage.deleteSchoolAsset(assetId);
+        if (!deleted) {
+          return res.status(404).json({ error: "School asset not found" });
+        }
+        res.status(204).send();
+      } catch (error) {
+        console.error("Error deleting school asset:", error);
+        res.status(500).json({ error: "Failed to delete school asset" });
+      }
+    }
+  );
 
   // Endpoint to initialize CCISD data
   app.post("/api/districts/init-ccisd", isAuthenticated, async (req: Request, res: Response) => {
