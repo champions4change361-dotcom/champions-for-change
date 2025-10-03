@@ -182,7 +182,16 @@ export default function UnifiedLogin() {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="password" className="text-slate-300">Password</Label>
+                    <div className="flex items-center justify-between mb-1">
+                      <Label htmlFor="password" className="text-slate-300">Password</Label>
+                      <a 
+                        href="/forgot-password"
+                        className="text-xs text-yellow-300 hover:text-yellow-200 underline"
+                        data-testid="link-forgot-password"
+                      >
+                        Forgot Password?
+                      </a>
+                    </div>
                     <Input
                       id="password"
                       type="password"
