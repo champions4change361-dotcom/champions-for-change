@@ -197,13 +197,13 @@ export default function Landing() {
                     <span className="hidden lg:inline">Login to Arena</span>
                   </Button>
                   <Button 
-                    onClick={() => setLocation('/smart-signup')}
+                    onClick={() => setLocation('/trial-signup')}
                     variant="outline"
                     className="border-orange-500 text-orange-400 hover:bg-orange-500/10 hover:border-orange-400 px-4 py-2 text-sm lg:px-6 lg:py-3 lg:text-base font-semibold w-full lg:w-auto"
                     data-testid="button-signup"
                   >
                     <span className="lg:hidden">Sign Up</span>
-                    <span className="hidden lg:inline">Sign Up Free</span>
+                    <span className="hidden lg:inline">Start Free Trial</span>
                   </Button>
                   <Button 
                     onClick={() => window.location.href = 'mailto:Champions4change361@gmail.com?subject=Champions for Change Platform Inquiry&body=Hello, I am interested in learning more about your tournament platform and would like to discuss how it can support our organization.'}

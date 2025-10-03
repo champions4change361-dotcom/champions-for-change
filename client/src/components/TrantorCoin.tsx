@@ -47,7 +47,7 @@ export default function TrantorCoin({
             if (redirectTo) {
               setLocation(redirectTo);
             } else {
-              setLocation('/smart-signup?fromCoin=true');
+              setLocation('/trial-signup');
             }
           }, 100);
         }

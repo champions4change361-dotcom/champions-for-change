@@ -141,11 +141,11 @@ export default function TournamentSmartPrompt({ className = "" }: TournamentSmar
           <div className="space-y-3">
             <Button
               className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold text-lg py-3"
-              onClick={() => setLocation('/smart-signup')}
+              onClick={() => setLocation('/trial-signup')}
               data-testid="smart-prompt-signup"
             >
               <UserPlus className="h-5 w-5 mr-2" />
-              Sign Up Free & Save Progress
+              Start Free Trial & Save Progress
             </Button>
             
             <Button

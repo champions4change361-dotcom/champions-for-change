@@ -61,7 +61,7 @@ export default function TournamentPreviewBanner({ className = "" }: TournamentPr
                 size="sm"
                 variant="secondary"
                 className="bg-white/20 hover:bg-white/30 text-white border-white/30"
-                onClick={() => setLocation('/smart-signup')}
+                onClick={() => setLocation('/trial-signup')}
                 data-testid="banner-signup-button"
               >
                 <UserPlus className="h-3 w-3 mr-1" />
@@ -163,7 +163,7 @@ export default function TournamentPreviewBanner({ className = "" }: TournamentPr
                 <div className="space-y-3">
                   <Button
                     className="w-full bg-white text-blue-600 hover:bg-blue-50 font-semibold"
-                    onClick={() => setLocation('/smart-signup')}
+                    onClick={() => setLocation('/trial-signup')}
                     data-testid="banner-primary-signup"
                   >
                     <UserPlus className="h-4 w-4 mr-2" />

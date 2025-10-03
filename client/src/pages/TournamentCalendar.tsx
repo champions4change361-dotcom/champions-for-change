@@ -1464,11 +1464,11 @@ export default function TournamentCalendar() {
               </CardHeader>
               <CardContent>
                 <Button
-                  onClick={() => setLocation('/smart-signup?type=individual')}
+                  onClick={() => setLocation('/trial-signup')}
                   className="bg-blue-600 hover:bg-blue-700 text-white"
                 >
                   <Trophy className="mr-2 h-4 w-4" />
-                  Create Tournament Account
+                  Start Free Trial
                 </Button>
               </CardContent>
             </Card>
