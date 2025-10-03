@@ -92,7 +92,7 @@ export default function ForgotPassword() {
                   Try Different Email
                 </Button>
                 
-                <Link href="/legacy-login">
+                <Link href="/login">
                   <Button variant="ghost" className="w-full" data-testid="button-back-to-login">
                     Back to Login
                   </Button>
@@ -109,7 +109,7 @@ export default function ForgotPassword() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full space-y-6">
         {/* Back to Login */}
-        <Link href="/legacy-login">
+        <Link href="/login">
           <Button variant="ghost" className="mb-4">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Login
@@ -166,7 +166,7 @@ export default function ForgotPassword() {
         {/* Help Text */}
         <div className="text-center text-sm text-gray-600">
           <p>Remember your password?</p>
-          <Link href="/legacy-login">
+          <Link href="/login">
             <Button variant="link" className="p-0 h-auto font-normal text-blue-600">
               Back to Login
             </Button>

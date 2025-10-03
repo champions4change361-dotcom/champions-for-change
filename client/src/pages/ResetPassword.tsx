@@ -81,7 +81,7 @@ export default function ResetPassword() {
         
         // Redirect to login after 3 seconds
         setTimeout(() => {
-          setLocation('/legacy-login');
+          setLocation('/login');
         }, 3000);
       } else {
         const error = await response.json();
@@ -132,7 +132,7 @@ export default function ResetPassword() {
                   </Button>
                 </Link>
                 
-                <Link href="/legacy-login">
+                <Link href="/login">
                   <Button variant="ghost" className="w-full" data-testid="button-back-to-login">
                     Back to Login
                   </Button>
@@ -164,7 +164,7 @@ export default function ResetPassword() {
                 You can now sign in with your new password. You'll be redirected to the login page in a moment.
               </p>
               
-              <Link href="/legacy-login">
+              <Link href="/login">
                 <Button className="w-full" data-testid="button-go-to-login">
                   Go to Login
                 </Button>
@@ -180,7 +180,7 @@ export default function ResetPassword() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full space-y-6">
         {/* Back to Login */}
-        <Link href="/legacy-login">
+        <Link href="/login">
           <Button variant="ghost" className="mb-4">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Login
