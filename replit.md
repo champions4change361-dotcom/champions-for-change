@@ -59,6 +59,10 @@ Mobile-first development approach validated - platform built 95% on mobile devic
 - **Session Management**: Express sessions with PostgreSQL session store.
 - **User Hierarchy**: Multi-tiered role-based access control (District, School, Coaching levels) enforcing HIPAA/FERPA compliance for data partitioning.
 - **Security**: CORS, secure session handling, protected routes, and comprehensive debug logging.
+- **Free Trial System**: 14-day trial signup at `/trial-signup` with no payment required. Users receive full platform access immediately upon signup. Trial tracking via `trialStartDate` and `trialEndDate` database fields. Trial status banner shows for all trial users (green for fresh trials, blue for expiring soon, orange for expired). Non-blocking after expiration - users retain access with gentle donation prompts via `TrialStatusBanner` component.
+- **Dual Signup Paths**: 
+  - **Path 1 (Free Trial)**: `/trial-signup` - Email/password signup, 14-day trial, no payment required, auto-login after signup, redirects to `/tournaments`
+  - **Path 2 (Direct Donation)**: `/donate` - Donation-only flow, creates donor records (not user accounts), no signup required, supports Champions for Change educational programs
 
 ### Core Features & Design Patterns
 - **Shared Schema**: Common TypeScript types and Zod schemas shared between frontend and backend.
