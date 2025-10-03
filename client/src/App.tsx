@@ -134,7 +134,6 @@ import AcademicScoring from './pages/AcademicScoring';
 import AcademicResults from './pages/AcademicResults';
 import TeksAlignment from './pages/TeksAlignment';
 import FAQ from './pages/FAQ';
-import SmartSignup from './pages/SmartSignup';
 import { StaffOnboarding } from './components/StaffOnboarding';
 import TournamentRegistration from './pages/TournamentRegistration';
 
@@ -428,15 +427,14 @@ function AppRouter() {
       <Route path="/business-pricing-test" component={BusinessPricingTest} />
       <Route path="/capabilities" component={Capabilities} />
       <Route path="/your-why" component={YourWhy} />
-      <Route path="/register" component={() => { window.location.href = '/smart-signup'; return null; }} />
-      <Route path="/business-register" component={() => { window.location.href = '/smart-signup?type=business'; return null; }} />
+      <Route path="/register" component={() => { window.location.href = '/trial-signup'; return null; }} />
+      <Route path="/business-register" component={() => { window.location.href = '/trial-signup'; return null; }} />
       <Route path="/admin/approvals" component={AdminApprovals} />
-      <Route path="/smart-signup" component={SmartSignup} />
       <Route path="/signup" component={SignupSelector} />
       <Route path="/tournament/design" component={TournamentDesign} />
       {/* Embed routes - public access for iframe embedding */}
       <Route path="/embed/tournament/:id" component={EmbedTournament} />
-      <Route path="/register-old" component={() => { window.location.href = '/smart-signup'; return null; }} />
+      <Route path="/register-old" component={() => { window.location.href = '/trial-signup'; return null; }} />
       
       {/* Tournament Creation requires login */}
       
