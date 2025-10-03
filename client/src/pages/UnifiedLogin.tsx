@@ -249,7 +249,7 @@ export default function UnifiedLogin() {
                 <>
                   Need to register as a team?{" "}
                   <button 
-                    onClick={() => setLocation('/smart-signup?type=participant&redirect=champions-registration')}
+                    onClick={() => setLocation('/trial-signup?redirect=champions-registration')}
                     className="text-yellow-300 hover:text-yellow-200 underline"
                   >
                     Create Team Account
@@ -257,12 +257,12 @@ export default function UnifiedLogin() {
                 </>
               ) : (
                 <>
-                  New to Trantor Tournaments?{" "}
+                  New to Champions for Change?{" "}
                   <button 
-                    onClick={() => setLocation('/smart-signup')}
+                    onClick={() => setLocation('/trial-signup')}
                     className="text-yellow-300 hover:text-yellow-200 underline"
                   >
-                    Create account
+                    Start Free Trial
                   </button>
                 </>
               )}
