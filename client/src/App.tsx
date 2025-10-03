@@ -164,6 +164,7 @@ import TournamentManagerDashboard from './pages/TournamentManagerDashboard';
 import TournamentDashboardPage from './pages/TournamentDashboardPage';
 import TournamentRegistrationPage from './pages/TournamentRegistrationPage';
 import ChampionsBanner from './components/ChampionsBanner';
+import TrialStatusBanner from './components/TrialStatusBanner';
 
 function AuthenticatedRoutes() {
   const { isFeatureEnabled, isFantasyDomain, config } = useDomain();
@@ -385,6 +386,7 @@ function AppRouter() {
   return (
     <>
       <ChampionsBanner />
+      <TrialStatusBanner />
       <Switch>
         {/* Academic Competition System */}
         <Route path="/academic" component={AcademicDashboard} />
