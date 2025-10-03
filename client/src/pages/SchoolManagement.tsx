@@ -16,29 +16,32 @@ import { z } from "zod";
 import { School, Plus, Mail, Users, Building2, ArrowRight, Clock, CheckCircle, XCircle } from "lucide-react";
 import AuthenticatedLayout from "@/components/AuthenticatedLayout";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import { insertSchoolSchema, insertSchoolInviteSchema } from "@shared/schema";
 
-const addSchoolSchema = z.object({
+const emptyStringToUndefined = z.string().transform(val => val === "" ? undefined : val);
+
+const addSchoolFormSchema = z.object({
   name: z.string().min(3, "School name must be at least 3 characters"),
   schoolType: z.enum(["high", "middle", "elementary"]),
-  feedsIntoSchoolId: z.string().optional(),
-  districtSchoolCode: z.string().optional(),
-  address: z.string().optional(),
-  city: z.string().optional(),
-  state: z.string().optional(),
-  zipCode: z.string().optional(),
+  feedsIntoSchoolId: emptyStringToUndefined.optional(),
+  districtSchoolCode: emptyStringToUndefined.optional(),
+  address: emptyStringToUndefined.optional(),
+  city: emptyStringToUndefined.optional(),
+  state: emptyStringToUndefined.optional(),
+  zipCode: emptyStringToUndefined.optional(),
 });
 
-const inviteSchoolADSchema = z.object({
+const inviteSchoolADFormSchema = z.object({
   schoolName: z.string().min(3, "School name must be at least 3 characters"),
   schoolType: z.enum(["high", "middle", "elementary"]),
-  districtSchoolCode: z.string().optional(),
+  districtSchoolCode: emptyStringToUndefined.optional(),
   inviteeEmail: z.string().email("Invalid email address"),
-  inviteeName: z.string().min(2, "Name must be at least 2 characters"),
+  inviteeName: emptyStringToUndefined.optional(),
   invitedRole: z.enum(["school_athletic_director", "school_athletic_coordinator"]).default("school_athletic_director"),
 });
 
-type AddSchoolFormData = z.infer<typeof addSchoolSchema>;
-type InviteSchoolADFormData = z.infer<typeof inviteSchoolADSchema>;
+type AddSchoolFormData = z.infer<typeof addSchoolFormSchema>;
+type InviteSchoolADFormData = z.infer<typeof inviteSchoolADFormSchema>;
 
 interface School {
   id: string;
@@ -93,7 +96,7 @@ export default function SchoolManagement() {
   });
 
   const addSchoolForm = useForm<AddSchoolFormData>({
-    resolver: zodResolver(addSchoolSchema),
+    resolver: zodResolver(addSchoolFormSchema),
     defaultValues: {
       name: "",
       schoolType: "high",
@@ -107,7 +110,7 @@ export default function SchoolManagement() {
   });
 
   const inviteForm = useForm<InviteSchoolADFormData>({
-    resolver: zodResolver(inviteSchoolADSchema),
+    resolver: zodResolver(inviteSchoolADFormSchema),
     defaultValues: {
       schoolName: "",
       schoolType: "high",
