@@ -17,7 +17,7 @@ export default function TrialStatusBanner() {
   const [, setLocation] = useLocation();
 
   const { data: user } = useQuery<User>({
-    queryKey: ['/api/user'],
+    queryKey: ['/api/auth/user'],
   });
 
   if (!user || dismissed) return null;
@@ -32,17 +32,28 @@ export default function TrialStatusBanner() {
   const isExpired = daysRemaining < 0;
   const isExpiringSoon = daysRemaining >= 0 && daysRemaining <= 3;
 
-  if (!isExpired && !isExpiringSoon) {
-    return null;
+  // Show banner for ALL trial users (not just expiring/expired)
+  let alertColor = 'bg-green-50 border-green-200';
+  let iconColor = 'text-green-600';
+  let buttonColor = 'bg-green-600 hover:bg-green-700';
+  
+  if (isExpired) {
+    alertColor = 'bg-orange-50 border-orange-200';
+    iconColor = 'text-orange-600';
+    buttonColor = 'bg-orange-600 hover:bg-orange-700';
+  } else if (isExpiringSoon) {
+    alertColor = 'bg-blue-50 border-blue-200';
+    iconColor = 'text-blue-600';
+    buttonColor = 'bg-blue-600 hover:bg-blue-700';
   }
 
   return (
-    <Alert className={`${isExpired ? 'bg-orange-50 border-orange-200' : 'bg-blue-50 border-blue-200'} relative`}>
+    <Alert className={`${alertColor} relative`} data-testid="trial-status-banner">
       <div className="flex items-center gap-3 pr-8">
         {isExpired ? (
-          <Heart className="h-5 w-5 text-orange-600" />
+          <Heart className={`h-5 w-5 ${iconColor}`} />
         ) : (
-          <Clock className="h-5 w-5 text-blue-600" />
+          <Clock className={`h-5 w-5 ${iconColor}`} />
         )}
         <div className="flex-1">
           <AlertDescription className="text-sm">
@@ -50,9 +61,13 @@ export default function TrialStatusBanner() {
               <span>
                 Your free trial has ended. <strong>No worries - you still have full access!</strong> If you're finding value in the platform, consider supporting Champions for Change with a donation to help fund educational opportunities for underprivileged students.
               </span>
-            ) : (
+            ) : isExpiringSoon ? (
               <span>
                 Your free trial ends in <strong>{daysRemaining} day{daysRemaining !== 1 ? 's' : ''}</strong>. After that, you'll still have full access! Consider supporting our educational mission if you're enjoying the platform.
+              </span>
+            ) : (
+              <span>
+                🎉 <strong>You're on a free 14-day trial!</strong> Trial ends in {daysRemaining} days. Enjoying the platform? Consider supporting Champions for Change to help fund educational trips for underprivileged students.
               </span>
             )}
           </AlertDescription>
@@ -61,7 +76,7 @@ export default function TrialStatusBanner() {
           <Button
             size="sm"
             onClick={() => setLocation('/donate')}
-            className={isExpired ? 'bg-orange-600 hover:bg-orange-700' : 'bg-blue-600 hover:bg-blue-700'}
+            className={buttonColor}
             data-testid="button-trial-donate"
           >
             <Heart className="h-4 w-4 mr-1" />

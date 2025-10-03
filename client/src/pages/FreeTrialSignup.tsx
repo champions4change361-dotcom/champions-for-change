@@ -40,15 +40,7 @@ export default function FreeTrialSignup() {
   const onSubmit = async (data: FreeTrialForm) => {
     setIsLoading(true);
     try {
-      const response = await apiRequest("/api/auth/trial-signup", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Signup failed");
-      }
+      const response = await apiRequest("/api/auth/trial-signup", "POST", data);
 
       toast({
         title: "Welcome to Champions for Change!",
