@@ -2502,6 +2502,120 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // FREE TRIAL SIGNUP - 14 days, no payment required
+  app.post('/api/auth/trial-signup', async (req, res) => {
+    try {
+      const { firstName, lastName, email, password, organizationName } = req.body;
+
+      // Validate required fields
+      if (!firstName || !lastName || !email || !password || !organizationName) {
+        return res.status(400).json({ message: 'Missing required fields' });
+      }
+
+      // Check if user already exists
+      const storage = await getStorage();
+      const existingUser = await storage.getUserByEmail(email);
+      
+      if (existingUser) {
+        return res.status(400).json({ message: 'User with this email already exists' });
+      }
+
+      // Hash password
+      const bcrypt = await import('bcrypt');
+      const passwordHash = await bcrypt.hash(password, 12);
+
+      // Generate email verification token
+      const crypto = await import('crypto');
+      const emailVerificationToken = crypto.randomBytes(32).toString('hex');
+
+      // Calculate trial dates (14 days from now)
+      const trialStartDate = new Date();
+      const trialEndDate = new Date();
+      trialEndDate.setDate(trialEndDate.getDate() + 14);
+
+      // Create user with FREE TRIAL status
+      const newUser = {
+        id: crypto.randomUUID(),
+        email: email.toLowerCase(),
+        firstName,
+        lastName,
+        passwordHash,
+        authProvider: 'email' as const,
+        emailVerified: false,
+        emailVerificationToken,
+        organizationName,
+        accountStatus: 'active' as const, // Active immediately for trial
+        subscriptionPlan: 'supporter' as any,
+        subscriptionStatus: 'trialing' as any,
+        userRole: 'tournament_manager' as any,
+        trialStartDate,
+        trialEndDate,
+      };
+
+      // Save user to database
+      await storage.upsertUser(newUser);
+
+      // Send welcome email
+      try {
+        const host = req.get('Host') || req.get('Origin') || '';
+        await emailService.sendWelcomeEmail(
+          email, 
+          firstName, 
+          'Free Trial',
+          organizationName,
+          host
+        );
+        console.log(`📧 Free trial welcome email sent to ${email}`);
+      } catch (emailError) {
+        console.error('Failed to send welcome email:', emailError);
+      }
+
+      // Create user session (login automatically after signup)
+      const userSession = {
+        id: newUser.id,
+        email: newUser.email,
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
+        organizationName: newUser.organizationName,
+        subscriptionPlan: newUser.subscriptionPlan,
+        subscriptionStatus: newUser.subscriptionStatus,
+        accountStatus: newUser.accountStatus,
+        emailVerified: newUser.emailVerified,
+        authProvider: newUser.authProvider
+      };
+
+      (req as any).session.user = userSession;
+
+      // Save session
+      await new Promise<void>((resolve, reject) => {
+        (req as any).session.save((err: any) => {
+          if (err) {
+            console.error('Session save error during trial signup:', err);
+            reject(err);
+          } else {
+            resolve();
+          }
+        });
+      });
+
+      console.log(`✅ New FREE TRIAL user registered: ${email} (14-day trial ends ${trialEndDate.toLocaleDateString()})`);
+      
+      res.status(201).json({
+        success: true,
+        message: 'Free trial started! You have 14 days of full access.',
+        user: userSession,
+        trialEndsAt: trialEndDate.toISOString()
+      });
+
+    } catch (error: any) {
+      console.error('Trial signup error:', error);
+      res.status(500).json({ 
+        message: 'Failed to create account. Please try again.',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+  });
+
   // Password reset functionality for tournament organizers
   app.post('/api/auth/forgot-password', async (req, res) => {
     try {

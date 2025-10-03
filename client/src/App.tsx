@@ -29,7 +29,7 @@ import ModularPageBuilder from './pages/ModularPageBuilder';
 import EnhancedModularBuilder from './pages/EnhancedModularBuilder';
 import AdvancedPageBuilder from './pages/AdvancedPageBuilder';
 import PageManager from './pages/PageManager';
-import TrialSignup from './pages/TrialSignup';
+import FreeTrialSignup from './pages/FreeTrialSignup';
 import DiscountDemo from './pages/DiscountDemo';
 import TournamentEmpire from './pages/TournamentEmpire';
 import FantasyTournaments from './pages/FantasyTournaments';
@@ -412,7 +412,7 @@ function AppRouter() {
       {/* Platform Selection Page */}
       <Route path="/platform-options" component={PlatformOptions} />
       
-      <Route path="/trial-signup" component={TrialSignup} />
+      <Route path="/trial-signup" component={FreeTrialSignup} />
       <Route path="/team-signup" component={TeamSignupPage} />
       <Route path="/contact" component={Contact} />
       <Route path="/faq" component={FAQ} />
