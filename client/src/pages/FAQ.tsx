@@ -612,20 +612,95 @@ export default function FAQ() {
                     <li>Martial arts, Cycling, Triathlon</li>
                     <li>Corporate team building events</li>
                   </ul>
-                  <p className="mb-4"><strong>Tournament Formats:</strong></p>
-                  <ul className="list-disc list-inside space-y-2 mb-4">
-                    <li><strong>Single Elimination:</strong> Traditional knockout brackets</li>
-                    <li><strong>Double Elimination:</strong> Losers bracket for second chances</li>
-                    <li><strong>Round Robin:</strong> Everyone plays everyone</li>
-                    <li><strong>Swiss System:</strong> Perfect for large tournaments</li>
-                    <li><strong>Hybrid Formats:</strong> Pool play + elimination</li>
-                  </ul>
+                  <p className="mb-4"><strong>We offer 16 tournament formats to fit any competition style!</strong></p>
                   <p>If you don't see your sport or format, contact us - we can typically add it quickly!</p>
                   <Button 
                     variant="link" 
                     onClick={scrollToTop}
                     className="text-blue-400 hover:text-blue-300 p-0 mt-4"
                     data-testid="back-to-top-16"
+                  >
+                    <ArrowUp className="h-4 w-4 mr-1" />
+                    Back to top
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-slate-800/50 border-slate-700">
+                <CardHeader>
+                  <CardTitle className="text-white">Which tournament format should I choose?</CardTitle>
+                </CardHeader>
+                <CardContent className="text-slate-300">
+                  <p className="mb-4"><strong>We offer 16 tournament formats - here's how to pick the right one:</strong></p>
+                  
+                  <div className="mb-6">
+                    <p className="font-bold text-yellow-400 mb-2">🏆 Bracket/Elimination Formats (Best for Quick Playoffs)</p>
+                    <ul className="list-disc list-inside space-y-2 ml-4">
+                      <li><strong>Single Elimination:</strong> Classic bracket - one loss and you're out. Fast, exciting. Great for: playoffs, championship finals, 8-32 teams.</li>
+                      <li><strong>Double Elimination:</strong> Losers get a second chance. More fair than single. Great for: competitive tournaments where skill matters, 8-64 teams.</li>
+                      <li><strong>Triple Elimination:</strong> Three losses to be eliminated. Most forgiving. Great for: skilled competitors deserving multiple chances.</li>
+                      <li><strong>Consolation Tournament:</strong> Separate bracket for eliminated teams. Great for: keeping everyone engaged, determining 3rd-8th places.</li>
+                    </ul>
+                  </div>
+
+                  <div className="mb-6">
+                    <p className="font-bold text-blue-400 mb-2">🔄 Round Robin Formats (Best for Fair Competition)</p>
+                    <ul className="list-disc list-inside space-y-2 ml-4">
+                      <li><strong>Round Robin:</strong> Everyone plays everyone once. Most fair - no bracket luck. Great for: league play, true rankings, 8-16 teams.</li>
+                      <li><strong>Swiss System:</strong> Smart pairing each round - winners face winners. Like chess tournaments. Great for: large fields 20+, competitive balance.</li>
+                      <li><strong>Pool Play + Bracket:</strong> Round robin groups first, then elimination bracket. Great for: 16-64 teams, balancing fairness with excitement.</li>
+                    </ul>
+                  </div>
+
+                  <div className="mb-6">
+                    <p className="font-bold text-green-400 mb-2">🎯 Game Guarantee Formats (Best for Youth/Travel)</p>
+                    <ul className="list-disc list-inside space-y-2 ml-4">
+                      <li><strong>Three Game Guarantee:</strong> Every team plays minimum 3 games. Great for: youth tournaments, travel events where teams expect multiple games.</li>
+                      <li><strong>Compass Draw:</strong> Multiple brackets based on win/loss record. Everyone plays 3-4+ games. Great for: ensuring max playtime regardless of performance.</li>
+                    </ul>
+                  </div>
+
+                  <div className="mb-6">
+                    <p className="font-bold text-purple-400 mb-2">📊 Individual Scoring Formats (Best for Skills/Track & Field)</p>
+                    <ul className="list-disc list-inside space-y-2 ml-4">
+                      <li><strong>Leaderboard Competition:</strong> Ranked by total points. No head-to-head needed. Great for: track & field, golf, bowling, individual performances.</li>
+                      <li><strong>Multi-Event Competition:</strong> Multiple events with combined scoring (like a decathlon). Great for: all-around competitions, academic UIL meets.</li>
+                      <li><strong>Time Trials:</strong> Individual timed runs, best time wins. Great for: racing, swimming, track events, timed challenges.</li>
+                      <li><strong>Skills Competition:</strong> Multiple skill challenges scored. Great for: all-star events, demonstration competitions.</li>
+                    </ul>
+                  </div>
+
+                  <div className="mb-6">
+                    <p className="font-bold text-orange-400 mb-2">⏰ Ongoing Formats (Best for Season-Long)</p>
+                    <ul className="list-disc list-inside space-y-2 ml-4">
+                      <li><strong>Ladder Tournament:</strong> Challenge those ranked above you to climb up. Great for: season-long competition, club rankings, flexible scheduling.</li>
+                      <li><strong>Pyramid Tournament:</strong> Like ladder but pyramid-shaped with more at bottom. Great for: large participant pools with tiered skill levels.</li>
+                    </ul>
+                  </div>
+
+                  <div className="mb-6">
+                    <p className="font-bold text-red-400 mb-2">💥 Special Formats</p>
+                    <ul className="list-disc list-inside space-y-2 ml-4">
+                      <li><strong>Battle Royale:</strong> Large field progressive elimination. Great for: 50+ participants, esports, survivor-style competitions.</li>
+                    </ul>
+                  </div>
+
+                  <p className="mb-4"><strong>Quick Decision Guide:</strong></p>
+                  <ul className="list-disc list-inside space-y-2 mb-4">
+                    <li><strong>Need fast tournament?</strong> → Single Elimination</li>
+                    <li><strong>Want most fair?</strong> → Round Robin</li>
+                    <li><strong>Large field (20+ teams)?</strong> → Swiss System or Battle Royale</li>
+                    <li><strong>Youth/travel tournament?</strong> → Three Game Guarantee or Compass Draw</li>
+                    <li><strong>Individual skills event?</strong> → Leaderboard or Multi-Event</li>
+                    <li><strong>Season-long competition?</strong> → Ladder or Pyramid</li>
+                  </ul>
+
+                  <p className="text-sm italic">Still unsure? No worries! Our tournament wizard asks simple questions about your event and recommends the best format automatically.</p>
+                  <Button 
+                    variant="link" 
+                    onClick={scrollToTop}
+                    className="text-blue-400 hover:text-blue-300 p-0 mt-4"
+                    data-testid="back-to-top-16b"
                   >
                     <ArrowUp className="h-4 w-4 mr-1" />
                     Back to top

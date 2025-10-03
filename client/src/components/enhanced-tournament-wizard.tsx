@@ -190,91 +190,140 @@ export default function EnhancedTournamentWizard({
     const participantType = form.watch("participantType");
     const scoringMethod = form.watch("scoringMethod");
     
-    // Return comprehensive tournament formats based on configuration
-    // This replaces sport-specific format selection with configuration-driven selection
+    // Return comprehensive tournament formats - ALL formats shown to avoid confusion
+    // Users can pick what they want, system adapts scoring method if needed
     return [
       {
         id: "single-elimination",
         name: "Single Elimination",
-        description: "Teams compete head-to-head, losers are eliminated",
+        description: "Classic bracket - one loss and you're out. Fast, exciting, winner-take-all format.",
         tournamentType: "single",
+        bestFor: "Quick tournaments, playoffs, championship finals",
         suitable: ["head-to-head"]
       },
       {
         id: "double-elimination", 
         name: "Double Elimination",
-        description: "Teams get a second chance in losers bracket",
+        description: "Losers get a second chance in a separate bracket. More fair than single elimination.",
         tournamentType: "double",
+        bestFor: "Competitive tournaments where one bad game shouldn't eliminate a strong team",
+        suitable: ["head-to-head"]
+      },
+      {
+        id: "triple-elimination",
+        name: "Triple Elimination",
+        description: "Teams need three losses to be eliminated. Most forgiving bracket format.",
+        tournamentType: "triple-elimination",
+        bestFor: "Long tournaments with skilled competitors who deserve multiple chances",
         suitable: ["head-to-head"]
       },
       {
         id: "round-robin",
         name: "Round Robin", 
-        description: "Everyone plays everyone, most fair format",
+        description: "Everyone plays everyone once. Most fair format - no bracket luck needed.",
         tournamentType: "round-robin",
+        bestFor: "League play, determining true rankings, small participant counts (8-16)",
         suitable: ["head-to-head", "performance-score"]
       },
       {
         id: "swiss-system",
         name: "Swiss System",
-        description: "Smart pairing based on performance, no elimination",
+        description: "Smart pairing each round - winners face winners, no elimination. Like chess tournaments.",
         tournamentType: "swiss-system", 
+        bestFor: "Large fields (20+), competitive balance, no one sits out",
         suitable: ["head-to-head", "performance-score", "points-accumulated"]
       },
       {
         id: "pool-play",
         name: "Pool Play + Bracket",
-        description: "Group stage followed by elimination bracket",
+        description: "Round robin groups first, then top teams advance to elimination bracket.",
         tournamentType: "pool-play",
+        bestFor: "Medium to large tournaments (16-64 teams), balancing fairness with excitement",
+        suitable: ["head-to-head"]
+      },
+      {
+        id: "compass-draw",
+        name: "Compass Draw",
+        description: "Every participant gets multiple matches based on win/loss record. Different 'compass' brackets for different records.",
+        tournamentType: "compass-draw",
+        bestFor: "Ensuring everyone plays 3-4+ games regardless of early performance",
+        suitable: ["head-to-head"]
+      },
+      {
+        id: "three-game-guarantee",
+        name: "Three Game Guarantee",
+        description: "Modified bracket ensuring every team plays at minimum 3 games before potential elimination.",
+        tournamentType: "game-guarantee",
+        bestFor: "Youth tournaments, travel events where teams expect multiple games",
+        suitable: ["head-to-head"]
+      },
+      {
+        id: "consolation",
+        name: "Consolation Tournament",
+        description: "Separate tournament for eliminated teams to compete for consolation prizes and additional placements.",
+        tournamentType: "double-stage",
+        bestFor: "Keeping eliminated teams engaged, determining 3rd-8th places",
+        suitable: ["head-to-head"]
+      },
+      {
+        id: "ladder-tournament",
+        name: "Ladder Tournament",
+        description: "Ongoing rankings where players can challenge those ranked above them. Climb the ladder over time.",
+        tournamentType: "ladder",
+        bestFor: "Season-long competition, club rankings, flexible scheduling",
+        suitable: ["head-to-head"]
+      },
+      {
+        id: "pyramid-tournament",
+        name: "Pyramid Tournament",
+        description: "Similar to ladder but pyramid-shaped with more players at bottom. Challenge within your tier to move up.",
+        tournamentType: "ladder",
+        bestFor: "Large participant pools with tiered skill levels",
         suitable: ["head-to-head"]
       },
       {
         id: "leaderboard",
         name: "Leaderboard Competition",
-        description: "Individual scoring, ranked by performance",
+        description: "Individual scoring ranked by total points. No head-to-head matches needed.",
         tournamentType: "point-accumulation",
+        bestFor: "Individual performances, track & field, golf, bowling, skills competitions",
         suitable: ["performance-score", "fastest-time", "greatest-distance", "points-accumulated", "judged-performance"]
       },
       {
         id: "multi-event",
         name: "Multi-Event Competition",
-        description: "Multiple events with combined scoring",
+        description: "Multiple different events with combined scoring across all events. Like a decathlon.",
         tournamentType: "multi-event-scoring",
+        bestFor: "All-around competitions, academic UIL meets, track & field meets",
         suitable: ["performance-score", "points-accumulated"]
       },
       {
         id: "time-trials",
         name: "Time Trials",
-        description: "Individual time-based competition with best attempts",
+        description: "Individual timed runs, best time wins. Participants compete against the clock, not each other directly.",
         tournamentType: "time-trials",
+        bestFor: "Racing, swimming, track events, timed skills challenges",
         suitable: ["fastest-time"]
       },
       {
         id: "battle-royale",
         name: "Battle Royale",
-        description: "Large field elimination with progressive rounds", 
+        description: "Large field progressive elimination. Field narrows each round until final winner emerges.", 
         tournamentType: "battle-royale",
+        bestFor: "Large participant pools (50+), esports, survivor-style competitions",
         suitable: ["head-to-head", "performance-score"]
       },
       {
         id: "skills-competition",
         name: "Skills Competition",
-        description: "Multiple skill-based events and challenges",
+        description: "Multiple skill challenges with scoring across different abilities or techniques.",
         tournamentType: "skills-competition",
+        bestFor: "All-star events, demonstration competitions, multi-discipline showcases",
         suitable: ["performance-score", "judged-performance"]
-      },
-      {
-        id: "ladder-tournament",
-        name: "Ladder Tournament",
-        description: "Challenge-based ranking system over time",
-        tournamentType: "ladder",
-        suitable: ["head-to-head"]
       }
-    ].filter(format => {
-      // Filter formats based on scoring method compatibility
-      if (!scoringMethod) return true;
-      return format.suitable.includes(scoringMethod);
-    });
+    ];
+    // FILTER REMOVED: All formats now display regardless of scoring method
+    // Users pick the tournament structure they want, system adapts
   };
 
   // Helper functions for configuration-driven tournaments
@@ -2119,10 +2168,10 @@ export default function EnhancedTournamentWizard({
                     🏆 Tournament Format Selection
                   </h4>
                   <p className="text-sm text-blue-700 mb-3">
-                    Choose the tournament format that works best for your <strong>{form.watch("competitionName") || "competition"}</strong> with <strong>{form.watch("participantType") === "team" ? `teams of ${form.watch("teamSize")}` : "individual competitors"}</strong>.
+                    Choose the tournament format that works best for your <strong>{form.watch("name") || "competition"}</strong> with <strong>{form.watch("participantType") === "team" ? `teams of ${form.watch("teamSize")}` : "individual competitors"}</strong>.
                   </p>
                   <div className="text-xs text-blue-600 bg-blue-100 p-2 rounded">
-                    Formats are filtered based on your scoring method: <strong>{scoringMethodOptions.find(m => m.value === form.watch("scoringMethod"))?.label}</strong>
+                    All 16 tournament formats are available. Pick the structure you want - we'll handle the rest!
                   </div>
                 </div>
 
@@ -2159,9 +2208,7 @@ export default function EnhancedTournamentWizard({
                         </div>
                         <p className="text-sm text-gray-600 mb-3">{format.description}</p>
                         <div className="text-xs text-gray-500">
-                          <span className="font-medium">Best for:</span> {format.suitable.map(s => 
-                            scoringMethodOptions.find(opt => opt.value === s)?.label
-                          ).filter(Boolean).join(", ")}
+                          <span className="font-medium">Best for:</span> {format.bestFor}
                         </div>
                       </div>
                     );
