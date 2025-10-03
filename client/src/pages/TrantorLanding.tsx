@@ -488,9 +488,7 @@ export default function TrantorLanding() {
                 </div>
                 <div className="pt-4">
                   <Button 
-onClick={() => setLocation(
-                      '/signup'
-                    )}
+                    onClick={() => setLocation('/trial-signup')}
                     className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold"
                     data-testid="button-start-monthly-trial-2"
                   >
