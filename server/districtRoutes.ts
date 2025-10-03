@@ -601,9 +601,13 @@ export function registerDistrictRoutes(app: Express) {
           return res.status(404).json({ error: "School not found" });
         }
         
+        if (!rbacContext) {
+          return res.status(401).json({ error: "Unauthorized" });
+        }
+        
         // District-level staff can access any school in their district
         // School-level staff can only access their own school
-        const isSchoolLevelRole = rbacContext?.user.userRole?.startsWith('school_');
+        const isSchoolLevelRole = rbacContext.user.userRole?.startsWith('school_');
         if (isSchoolLevelRole && school.athleticDirectorId !== rbacContext.user.id) {
           return res.status(403).json({ 
             error: "Forbidden: You can only manage assets for your own school" 
@@ -613,7 +617,7 @@ export function registerDistrictRoutes(app: Express) {
         const validatedData = insertSchoolAssetSchema.parse({
           ...req.body,
           schoolId,
-          uploadedById: rbacContext!.user.id
+          uploadedById: rbacContext.user.id
         });
         
         const asset = await districtStorage.createSchoolAsset(validatedData);
@@ -645,13 +649,17 @@ export function registerDistrictRoutes(app: Express) {
           });
         }
         
+        if (!rbacContext) {
+          return res.status(401).json({ error: "Unauthorized" });
+        }
+        
         // Verify user has access to this school
         const school = await districtStorage.getSchool(schoolId);
         if (!school) {
           return res.status(404).json({ error: "School not found" });
         }
         
-        const isSchoolLevelRole = rbacContext?.user.userRole?.startsWith('school_');
+        const isSchoolLevelRole = rbacContext.user.userRole?.startsWith('school_');
         if (isSchoolLevelRole && school.athleticDirectorId !== rbacContext.user.id) {
           return res.status(403).json({ 
             error: "Forbidden: You can only manage assets for your own school" 
@@ -690,13 +698,17 @@ export function registerDistrictRoutes(app: Express) {
           });
         }
         
+        if (!rbacContext) {
+          return res.status(401).json({ error: "Unauthorized" });
+        }
+        
         // Verify user has access to this school
         const school = await districtStorage.getSchool(schoolId);
         if (!school) {
           return res.status(404).json({ error: "School not found" });
         }
         
-        const isSchoolLevelRole = rbacContext?.user.userRole?.startsWith('school_');
+        const isSchoolLevelRole = rbacContext.user.userRole?.startsWith('school_');
         if (isSchoolLevelRole && school.athleticDirectorId !== rbacContext.user.id) {
           return res.status(403).json({ 
             error: "Forbidden: You can only manage assets for your own school" 
