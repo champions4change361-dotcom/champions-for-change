@@ -224,6 +224,110 @@ export function registerDistrictRoutes(app: Express) {
     }
   );
 
+  // Get current user's school
+  app.get("/api/user/school",
+    loadUserContext,
+    async (req: Request, res: Response) => {
+      try {
+        const { rbacContext } = req;
+        if (!rbacContext) {
+          return res.status(401).json({ error: "Unauthorized" });
+        }
+
+        const isSchoolLevelRole = rbacContext.user.userRole?.startsWith('school_');
+        if (!isSchoolLevelRole) {
+          return res.status(403).json({ error: "Only school-level staff can access this endpoint" });
+        }
+
+        const school = await districtStorage.getSchoolByADId(rbacContext.user.id);
+        if (!school) {
+          return res.status(404).json({ error: "School not found for this user" });
+        }
+
+        res.json(school);
+      } catch (error) {
+        console.error("Error fetching user school:", error);
+        res.status(500).json({ error: "Failed to fetch school" });
+      }
+    }
+  );
+
+  // Update school settings (VLC hierarchy, district code, etc.)
+  app.patch("/api/schools/:id",
+    loadUserContext,
+    requirePermissions([PERMISSIONS.SCHOOL_DATA_WRITE]),
+    async (req: Request, res: Response) => {
+      try {
+        const { id } = req.params;
+        const { rbacContext } = req;
+        if (!rbacContext) {
+          return res.status(401).json({ error: "Unauthorized" });
+        }
+
+        const school = await districtStorage.getSchool(id);
+        if (!school) {
+          return res.status(404).json({ error: "School not found" });
+        }
+
+        const isSchoolLevelRole = rbacContext.user.userRole?.startsWith('school_');
+        const isDistrictLevelRole = rbacContext.user.userRole?.startsWith('district_');
+
+        // School-level staff can only update their own school or their feeder schools
+        if (isSchoolLevelRole) {
+          const userSchool = await districtStorage.getSchoolByADId(rbacContext.user.id);
+          if (!userSchool) {
+            return res.status(403).json({ error: "User not associated with a school" });
+          }
+
+          // Check if user is updating their own school OR a feeder school
+          const isOwnSchool = school.id === userSchool.id;
+          const isFeederSchool = school.feedsIntoSchoolId === userSchool.id;
+
+          if (!isOwnSchool && !isFeederSchool) {
+            return res.status(403).json({ 
+              error: "You can only update your own school or schools that feed into your school" 
+            });
+          }
+        }
+
+        // Validate updates
+        const { feedsIntoSchoolId, districtSchoolCode } = req.body;
+
+        if (feedsIntoSchoolId !== undefined) {
+          // Validate parent school exists and is in same district
+          if (feedsIntoSchoolId) {
+            const parentSchool = await districtStorage.getSchool(feedsIntoSchoolId);
+            if (!parentSchool) {
+              return res.status(404).json({ error: "Parent school not found" });
+            }
+
+            if (parentSchool.districtId !== school.districtId) {
+              return res.status(400).json({ 
+                error: "Parent school must be in the same district" 
+              });
+            }
+
+            if (parentSchool.schoolType !== 'high') {
+              return res.status(400).json({ 
+                error: "Feeder schools can only feed into high schools" 
+              });
+            }
+          }
+        }
+
+        const updatedSchool = await districtStorage.updateSchool(id, {
+          feedsIntoSchoolId,
+          districtSchoolCode,
+        });
+
+        res.json(updatedSchool);
+      } catch (error) {
+        console.error("Error updating school:", error);
+        res.status(500).json({ error: "Failed to update school" });
+      }
+    }
+  );
+
   // School AD Invitation endpoint
   app.post("/api/schools/invite",
     loadUserContext,
