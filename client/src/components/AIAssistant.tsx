@@ -294,7 +294,7 @@ Remember: User is currently on ${pageContext.type} page.`;
       {!isOpen && (
         <Button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 rounded-full w-14 h-14 shadow-lg z-50 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+          className="fixed bottom-6 right-6 rounded-full w-14 h-14 shadow-lg z-[60] bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
           data-testid="button-open-ai-assistant"
         >
           <Sparkles className="w-6 h-6" />
@@ -302,7 +302,7 @@ Remember: User is currently on ${pageContext.type} page.`;
       )}
 
       {isOpen && (
-        <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-white dark:bg-gray-900 rounded-lg shadow-2xl flex flex-col z-50 border border-gray-200 dark:border-gray-700">
+        <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-white dark:bg-gray-900 rounded-lg shadow-2xl flex flex-col z-[60] border border-gray-200 dark:border-gray-700">
           <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 rounded-t-lg flex justify-between items-center">
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5" />
