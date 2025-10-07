@@ -4,6 +4,7 @@ import { createServer, type Server } from "http";
 import { exec } from "child_process";
 import crypto from "crypto";
 import bcrypt from "bcrypt";
+import Anthropic from "@anthropic-ai/sdk";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { loadUserContext, requireHealthDataAccess, requireBudgetDataAccess, requireAcademicDataAccess, requirePermissions, requireOrganizationAccess } from "./rbac-middleware";
 import { RBACDataFilters } from "./rbac-data-filters";
@@ -314,6 +315,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/health', (req, res) => {
     res.status(200).send('ok');
+  });
+
+  // AI Assistant Chat Endpoint - Secure backend for Claude 4.5 Sonnet
+  // Reference: blueprint:javascript_anthropic
+  // Model: claude-sonnet-4-20250514 (latest)
+  app.post('/api/ai/chat', async (req, res) => {
+    try {
+      const { messages, systemContext } = req.body;
+
+      if (!messages || !Array.isArray(messages)) {
+        return res.status(400).json({ error: 'Messages array is required' });
+      }
+
+      // Initialize Anthropic client with secure API key from environment
+      const anthropic = new Anthropic({
+        apiKey: process.env.ANTHROPIC_API_KEY,
+      });
+
+      // Build messages array with system context as first message
+      const fullMessages = systemContext 
+        ? [{ role: 'user', content: systemContext }, ...messages]
+        : messages;
+
+      // Call Claude 4.5 Sonnet
+      const response = await anthropic.messages.create({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1024,
+        messages: fullMessages
+      });
+
+      // Return the AI response
+      res.json({
+        role: 'assistant',
+        content: response.content[0].text
+      });
+
+    } catch (error: any) {
+      console.error('AI Chat Error:', error);
+      res.status(500).json({ 
+        error: 'AI service temporarily unavailable',
+        message: error.message 
+      });
+    }
   });
 
   app.get('/healthz', (req, res) => {
