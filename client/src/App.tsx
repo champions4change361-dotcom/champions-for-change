@@ -6,6 +6,7 @@ import { Switch, Route, Router } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useDomain } from "@/hooks/useDomain";
 import { useTeamLinking } from "@/hooks/useTeamLinking";
+import { PlatformSettingsProvider } from "@/contexts/PlatformSettingsContext";
 import DomainNavigation from "@/components/DomainNavigation";
 import Home from './pages/Home';
 import Landing from './pages/Landing';
@@ -353,12 +354,14 @@ function getDomainBackgroundClass(brand: string) {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Router>
-          <AppRouter />
-        </Router>
-        <Toaster />
-      </TooltipProvider>
+      <PlatformSettingsProvider>
+        <TooltipProvider>
+          <Router>
+            <AppRouter />
+          </Router>
+          <Toaster />
+        </TooltipProvider>
+      </PlatformSettingsProvider>
     </QueryClientProvider>
   );
 }
