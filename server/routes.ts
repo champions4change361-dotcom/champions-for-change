@@ -25,7 +25,8 @@ import { registerBudgetRoutes } from "./budget-routes";
 import subscriptionRoutes from "./routes/subscriptionRoutes";
 import stripeWebhooks from "./routes/stripeWebhooks";
 import consentRoutes from "./routes/consentRoutes";
-import { tournamentSubscriptions, insertTournamentSubscriptionSchema, type InsertTournamentSubscription, insertRegistrationSubmissionSchema, insertTeamSchema, insertTeamPlayerSchema, insertMedicalHistorySchema, type InsertTeam, type InsertTeamPlayer, type InsertMedicalHistory, type Team, type TeamPlayer, type MedicalHistory, updateTeamSubscriptionSchema, type User, type FantasyLeague, type InsertFantasyLeague, type FantasyTeam, type InsertFantasyTeam, type FantasyRoster, type InsertFantasyRoster, type FantasyDraft, type InsertFantasyDraft, type FantasyMatchup, type InsertFantasyMatchup, type FantasyWaiverClaim, type InsertFantasyWaiverClaim, type FantasyTrade, type InsertFantasyTrade, type FantasyLeagueMessage, type InsertFantasyLeagueMessage, insertFantasyLeagueSchema, insertFantasyTeamSchema, insertFantasyRosterSchema, insertFantasyDraftSchema, insertFantasyMatchupSchema, insertFantasyWaiverClaimSchema, insertFantasyTradeSchema, insertFantasyLeagueMessageSchema, insertUserSchema } from "@shared/schema";
+import { tournamentSubscriptions, insertTournamentSubscriptionSchema, type InsertTournamentSubscription, insertRegistrationSubmissionSchema, insertTeamSchema, insertTeamPlayerSchema, insertMedicalHistorySchema, type InsertTeam, type InsertTeamPlayer, type InsertMedicalHistory, type Team, type TeamPlayer, type MedicalHistory, updateTeamSubscriptionSchema, type User, type FantasyLeague, type InsertFantasyLeague, type FantasyTeam, type InsertFantasyTeam, type FantasyRoster, type InsertFantasyRoster, type FantasyDraft, type InsertFantasyDraft, type FantasyMatchup, type InsertFantasyMatchup, type FantasyWaiverClaim, type InsertFantasyWaiverClaim, type FantasyTrade, type InsertFantasyTrade, type FantasyLeagueMessage, type InsertFantasyLeagueMessage, insertFantasyLeagueSchema, insertFantasyTeamSchema, insertFantasyRosterSchema, insertFantasyDraftSchema, insertFantasyMatchupSchema, insertFantasyWaiverClaimSchema, insertFantasyTradeSchema, insertFantasyLeagueMessageSchema, insertUserSchema, platformSettings, users } from "@shared/schema";
+import { eq, and } from "drizzle-orm";
 import { z } from "zod";
 import { GameLockoutService } from "./game-lockout-service.js";
 import { registerAthleticTrainerRoutes } from "./athletic-trainer-routes";
@@ -357,6 +358,199 @@ export async function registerRoutes(app: Express): Promise<Server> {
         error: 'AI service temporarily unavailable',
         message: error.message 
       });
+    }
+  });
+
+  // =============================================================================
+  // PLATFORM SETTINGS - Super Admin Content Management
+  // =============================================================================
+
+  // Middleware to check if user is super admin
+  const requireSuperAdmin = (req: any, res: any, next: any) => {
+    if (!req.user?.isSuperAdmin) {
+      return res.status(403).json({ error: 'Forbidden: Super admin access required' });
+    }
+    next();
+  };
+
+  // GET all platform settings
+  app.get('/api/platform-settings', async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const db = (storage as any).db;
+      
+      const settings = await db.select().from(platformSettings).orderBy(platformSettings.category, platformSettings.settingKey);
+      res.json(settings);
+    } catch (error) {
+      console.error('Error fetching platform settings:', error);
+      res.status(500).json({ error: 'Failed to fetch platform settings' });
+    }
+  });
+
+  // GET platform settings by category
+  app.get('/api/platform-settings/category/:category', async (req, res) => {
+    try {
+      const { category } = req.params;
+      const storage = await getStorage();
+      const db = (storage as any).db;
+      
+      const settings = await db.select()
+        .from(platformSettings)
+        .where(eq(platformSettings.category, category))
+        .orderBy(platformSettings.settingKey);
+      
+      res.json(settings);
+    } catch (error) {
+      console.error('Error fetching platform settings by category:', error);
+      res.status(500).json({ error: 'Failed to fetch platform settings' });
+    }
+  });
+
+  // POST create or update platform setting (admin only)
+  app.post('/api/platform-settings', requireSuperAdmin, async (req, res) => {
+    try {
+      const storage = await getStorage();
+      const db = (storage as any).db;
+      
+      const { category, settingKey, settingValue, settingJsonValue, description, isActive } = req.body;
+      
+      if (!category || !settingKey) {
+        return res.status(400).json({ error: 'Category and settingKey are required' });
+      }
+
+      // Check if setting exists
+      const existing = await db.select()
+        .from(platformSettings)
+        .where(and(
+          eq(platformSettings.category, category),
+          eq(platformSettings.settingKey, settingKey)
+        ))
+        .limit(1);
+
+      if (existing.length > 0) {
+        // Update existing
+        const updated = await db.update(platformSettings)
+          .set({
+            settingValue,
+            settingJsonValue,
+            description,
+            isActive,
+            updatedAt: new Date()
+          })
+          .where(eq(platformSettings.id, existing[0].id))
+          .returning();
+        
+        res.json(updated[0]);
+      } else {
+        // Create new
+        const newSetting = await db.insert(platformSettings)
+          .values({
+            category,
+            settingKey,
+            settingValue,
+            settingJsonValue,
+            description,
+            isActive: isActive ?? true
+          })
+          .returning();
+        
+        res.status(201).json(newSetting[0]);
+      }
+    } catch (error) {
+      console.error('Error saving platform setting:', error);
+      res.status(500).json({ error: 'Failed to save platform setting' });
+    }
+  });
+
+  // PATCH update platform setting (admin only)
+  app.patch('/api/platform-settings/:id', requireSuperAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const storage = await getStorage();
+      const db = (storage as any).db;
+      
+      const updates = {
+        ...req.body,
+        updatedAt: new Date()
+      };
+
+      const updated = await db.update(platformSettings)
+        .set(updates)
+        .where(eq(platformSettings.id, id))
+        .returning();
+
+      if (updated.length === 0) {
+        return res.status(404).json({ error: 'Setting not found' });
+      }
+
+      res.json(updated[0]);
+    } catch (error) {
+      console.error('Error updating platform setting:', error);
+      res.status(500).json({ error: 'Failed to update platform setting' });
+    }
+  });
+
+  // DELETE platform setting (admin only)
+  app.delete('/api/platform-settings/:id', requireSuperAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const storage = await getStorage();
+      const db = (storage as any).db;
+      
+      const deleted = await db.delete(platformSettings)
+        .where(eq(platformSettings.id, id))
+        .returning();
+
+      if (deleted.length === 0) {
+        return res.status(404).json({ error: 'Setting not found' });
+      }
+
+      res.json({ success: true, deleted: deleted[0] });
+    } catch (error) {
+      console.error('Error deleting platform setting:', error);
+      res.status(500).json({ error: 'Failed to delete platform setting' });
+    }
+  });
+
+  // POST promote user to super admin (development/setup only)
+  app.post('/api/admin/promote-user', async (req, res) => {
+    try {
+      // Only allow in development
+      if (process.env.NODE_ENV !== 'development') {
+        return res.status(403).json({ error: 'This endpoint is only available in development mode' });
+      }
+
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ error: 'Email is required' });
+      }
+
+      const storage = await getStorage();
+      const db = (storage as any).db;
+      
+      const user = await db.select()
+        .from(users)
+        .where(eq(users.email, email))
+        .limit(1);
+
+      if (user.length === 0) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      const updated = await db.update(users)
+        .set({ isSuperAdmin: true })
+        .where(eq(users.email, email))
+        .returning();
+
+      res.json({ 
+        success: true, 
+        message: `User ${email} promoted to super admin`,
+        user: { id: updated[0].id, email: updated[0].email, isSuperAdmin: updated[0].isSuperAdmin }
+      });
+    } catch (error) {
+      console.error('Error promoting user to super admin:', error);
+      res.status(500).json({ error: 'Failed to promote user' });
     }
   });
 
