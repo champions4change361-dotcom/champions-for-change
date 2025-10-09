@@ -2570,9 +2570,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('Login attempt:', {
         email: email,
         passwordLength: password ? password.length : 0,
-        userType: userType,
-        emailMatch: email?.toLowerCase() === 'champions4change361@gmail.com',
-        passwordMatch: password === 'master-admin-danielthornton'
+        userType: userType
       });
       
       // Check for master admin credentials (case-insensitive email)
@@ -2592,6 +2590,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           organizationName: 'Champions for Change',
           userType: userType || 'team',
           isAdmin: true,
+          isSuperAdmin: true,
           isWhitelabelClient: true,
           whitelabelDomain: 'trantortournaments.org'
         };
@@ -2620,7 +2619,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
           redirectTo: '/role-based-dashboards'
         });
       } else {
-        res.status(401).json({ message: 'Invalid credentials' });
+        // Try regular database authentication
+        const storage = await getStorage();
+        const user = await storage.getUserByEmail(email);
+        
+        if (!user || !user.passwordHash) {
+          return res.status(401).json({ message: 'Invalid credentials' });
+        }
+        
+        // Verify password
+        const bcrypt = await import('bcrypt');
+        const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+        
+        if (!isValidPassword) {
+          return res.status(401).json({ message: 'Invalid credentials' });
+        }
+        
+        // Create user session with all fields including isSuperAdmin
+        const userSession = {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          organizationName: user.organizationName,
+          organizationType: user.organizationType,
+          subscriptionPlan: user.subscriptionPlan,
+          subscriptionStatus: user.subscriptionStatus,
+          accountStatus: user.accountStatus,
+          emailVerified: user.emailVerified,
+          authProvider: user.authProvider,
+          isSuperAdmin: user.isSuperAdmin || false,
+          userRole: user.userRole,
+          userType: userType || 'team'
+        };
+        
+        // Store in session
+        (req as any).session.user = userSession;
+        
+        // Wait for session to be saved before responding
+        await new Promise<void>((resolve, reject) => {
+          (req as any).session.save((err: any) => {
+            if (err) {
+              console.error('Session save error:', err);
+              reject(err);
+            } else {
+              console.log('Session saved successfully for user:', email);
+              resolve();
+            }
+          });
+        });
+        
+        console.log('User login successful:', email);
+        res.json({ 
+          success: true, 
+          user: userSession,
+          message: 'Login successful'
+        });
       }
     } catch (error: any) {
       console.error('Login error:', error);
@@ -2705,7 +2759,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         subscriptionStatus: newUser.subscriptionStatus,
         accountStatus: newUser.accountStatus,
         emailVerified: newUser.emailVerified,
-        authProvider: newUser.authProvider
+        authProvider: newUser.authProvider,
+        isSuperAdmin: newUser.isSuperAdmin || false
       };
 
       (req as any).session.user = userSession;
