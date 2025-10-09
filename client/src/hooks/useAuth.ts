@@ -13,6 +13,7 @@ export function useAuth() {
     user,
     isLoading: isLoading && !user, // Only show loading if we don't have cached user data
     isAuthenticated: !!user && !error,
+    isSuperAdmin: !!user?.isSuperAdmin,
     error
   };
 }
