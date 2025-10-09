@@ -227,6 +227,9 @@ export const users = pgTable("users", {
   trialStartDate: timestamp("trial_start_date"),
   trialEndDate: timestamp("trial_end_date"),
   
+  // SUPER ADMIN FLAG
+  isSuperAdmin: boolean("is_super_admin").default(false),
+  
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -8248,6 +8251,33 @@ export type FantasyTrade = typeof fantasyTrades.$inferSelect;
 export type InsertFantasyTrade = z.infer<typeof insertFantasyTradeSchema>;
 export type FantasyLeagueMessage = typeof fantasyLeagueMessages.$inferSelect;
 export type InsertFantasyLeagueMessage = z.infer<typeof insertFantasyLeagueMessageSchema>;
+
+// =============================================================================
+// PLATFORM SETTINGS - Super Admin Content Management
+// =============================================================================
+
+export const platformSettings = pgTable("platform_settings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  category: text("category", {
+    enum: ["theme", "content", "general", "media", "features"]
+  }).notNull(),
+  settingKey: varchar("setting_key").notNull(),
+  settingValue: text("setting_value"),
+  settingJsonValue: jsonb("setting_json_value"),
+  description: text("description"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertPlatformSettingSchema = createInsertSchema(platformSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type PlatformSetting = typeof platformSettings.$inferSelect;
+export type InsertPlatformSetting = z.infer<typeof insertPlatformSettingSchema>;
 
 export * from "./sport-configs-schema";
 export * from "./athleticTrainerSchema";
