@@ -382,8 +382,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     next();
   };
 
-  // GET all platform settings
-  app.get('/api/platform-settings', async (req, res) => {
+  // GET current active platform settings (public, cached)
+  app.get('/api/platform-settings/active', async (req, res) => {
+    try {
+      const { getPlatformSettings, getDefaultSettings } = await import('./services/platformSettings');
+      const settings = await getPlatformSettings();
+      
+      // Merge with defaults to ensure all required settings are present
+      const defaults = getDefaultSettings();
+      const merged = {
+        theme: { ...defaults.theme, ...settings.theme },
+        content: { ...defaults.content, ...settings.content },
+        general: { ...defaults.general, ...settings.general },
+        media: { ...defaults.media, ...settings.media }
+      };
+      
+      res.json(merged);
+    } catch (error) {
+      console.error('Error fetching active platform settings:', error);
+      res.status(500).json({ error: 'Failed to fetch platform settings' });
+    }
+  });
+
+  // GET all platform settings (admin only - includes inactive)
+  app.get('/api/platform-settings', requireSuperAdmin, async (req, res) => {
     try {
       const storage = await getStorage();
       const db = (storage as any).db;
@@ -459,6 +481,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .where(eq(platformSettings.id, existing[0].id))
           .returning();
         
+        // Invalidate cache
+        const { invalidateSettingsCache } = await import('./services/platformSettings');
+        invalidateSettingsCache();
+        
         res.json(updated[0]);
       } else {
         // Create new
@@ -472,6 +498,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             isActive: isActive ?? true
           })
           .returning();
+        
+        // Invalidate cache
+        const { invalidateSettingsCache } = await import('./services/platformSettings');
+        invalidateSettingsCache();
         
         res.status(201).json(newSetting[0]);
       }
@@ -502,6 +532,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: 'Setting not found' });
       }
 
+      // Invalidate cache
+      const { invalidateSettingsCache } = await import('./services/platformSettings');
+      invalidateSettingsCache();
+
       res.json(updated[0]);
     } catch (error) {
       console.error('Error updating platform setting:', error);
@@ -523,6 +557,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (deleted.length === 0) {
         return res.status(404).json({ error: 'Setting not found' });
       }
+
+      // Invalidate cache
+      const { invalidateSettingsCache } = await import('./services/platformSettings');
+      invalidateSettingsCache();
 
       res.json({ success: true, deleted: deleted[0] });
     } catch (error) {

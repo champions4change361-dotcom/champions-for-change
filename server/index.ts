@@ -57,6 +57,12 @@ app.use((req, res, next) => {
   }
   console.log('✅ Security check passed: AUDIT_INTEGRITY_KEY is configured');
 
+  // Initialize platform settings (load from database on startup)
+  console.log('🎨 Loading platform settings...');
+  const { loadPlatformSettings } = await import('./services/platformSettings');
+  await loadPlatformSettings();
+  console.log('✅ Platform settings loaded and cached');
+
   // Set port immediately to ensure fast binding
   const port = parseInt(process.env.PORT || '5000', 10);
   
