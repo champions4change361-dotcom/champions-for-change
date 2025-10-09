@@ -19,9 +19,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const platformConfigSchema = z.object({
   // Theme settings
-  primaryColor: z.string().regex(/^#[0-9A-F]{6}$/i, "Invalid hex color").optional(),
-  secondaryColor: z.string().regex(/^#[0-9A-F]{6}$/i, "Invalid hex color").optional(),
-  logoUrl: z.string().url().optional().or(z.literal("")),
+  primaryColor: z.union([z.string().regex(/^#[0-9A-F]{6}$/i, "Invalid hex color"), z.literal("")]).optional(),
+  secondaryColor: z.union([z.string().regex(/^#[0-9A-F]{6}$/i, "Invalid hex color"), z.literal("")]).optional(),
+  logoUrl: z.union([z.string().url(), z.literal("")]).optional(),
   
   // Content settings
   landingHeadline: z.string().optional(),
@@ -30,7 +30,7 @@ const platformConfigSchema = z.object({
   footerText: z.string().optional(),
   
   // General settings
-  supportEmail: z.string().email().optional(),
+  supportEmail: z.union([z.string().email(), z.literal("")]).optional(),
   contactPhone: z.string().optional(),
   platformName: z.string().optional(),
 });
@@ -67,7 +67,7 @@ export default function PlatformAdmin() {
 
   const saveSettingMutation = useMutation({
     mutationFn: async (data: { category: string; settingKey: string; settingValue: string; description?: string }) => {
-      return apiRequest("POST", "/api/platform-settings", data);
+      return apiRequest("/api/platform-settings", "POST", data);
     },
     onSuccess: () => {
       toast({

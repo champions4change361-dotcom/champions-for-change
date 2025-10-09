@@ -367,7 +367,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Middleware to check if user is super admin
   const requireSuperAdmin = (req: any, res: any, next: any) => {
-    if (!req.user?.isSuperAdmin) {
+    // Check both session user and OAuth user
+    const user = req.session?.user || req.user;
+    
+    if (!user?.isSuperAdmin) {
+      console.log('Super admin check failed:', {
+        hasSessionUser: !!req.session?.user,
+        hasOAuthUser: !!req.user,
+        sessionUserIsSuperAdmin: req.session?.user?.isSuperAdmin,
+        oauthUserIsSuperAdmin: req.user?.isSuperAdmin
+      });
       return res.status(403).json({ error: 'Forbidden: Super admin access required' });
     }
     next();
@@ -407,7 +416,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // POST create or update platform setting (admin only)
-  app.post('/api/platform-settings', requireSuperAdmin, async (req, res) => {
+  app.post('/api/platform-settings', (req, res, next) => {
+    console.log('🔐 Platform settings POST request:', {
+      hasSession: !!req.session,
+      sessionID: req.sessionID,
+      hasSessionUser: !!req.session?.user,
+      hasOAuthUser: !!req.user,
+      sessionUserEmail: req.session?.user?.email,
+      cookieHeader: req.headers.cookie?.substring(0, 50) + '...'
+    });
+    next();
+  }, requireSuperAdmin, async (req, res) => {
     try {
       const storage = await getStorage();
       const db = (storage as any).db;
@@ -2874,7 +2893,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         subscriptionStatus: newUser.subscriptionStatus,
         accountStatus: newUser.accountStatus,
         emailVerified: newUser.emailVerified,
-        authProvider: newUser.authProvider
+        authProvider: newUser.authProvider,
+        isSuperAdmin: newUser.isSuperAdmin || false
       };
 
       (req as any).session.user = userSession;
