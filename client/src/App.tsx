@@ -22,6 +22,7 @@ import Tournament from './pages/tournament';
 import EmbedTournament from './pages/EmbedTournament';
 import Contacts from './pages/Contacts';
 import Settings from './pages/Settings';
+import PlatformAdmin from './pages/PlatformAdmin';
 import LiveMatches from './pages/LiveMatches';
 import Championships from './pages/Championships';
 import WebpageBuilder from './pages/WebpageBuilder';
@@ -202,6 +203,7 @@ function AuthenticatedRoutes() {
         <Route path="/store" component={MerchandiseStore} />
         <Route path="/merchandise" component={MerchandiseStore} />
         <Route path="/settings" component={Settings} />
+        <Route path="/platform-admin" component={PlatformAdmin} />
         <Route path="/subscription" component={SubscriptionManagement} />
         <Route path="/live-matches" component={LiveMatches} />
         <Route path="/championships" component={Championships} />
