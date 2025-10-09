@@ -16,6 +16,7 @@ import RegistrationAssistant from "@/components/RegistrationAssistant";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { usePlatformSettings } from "@/contexts/PlatformSettingsContext";
 
 
 export default function Landing() {
@@ -24,6 +25,7 @@ export default function Landing() {
   const [tournamentEmail, setTournamentEmail] = useState('');
   const [selectedRegion, setSelectedRegion] = useState<string>('all');
   const { toast } = useToast();
+  const { settings } = usePlatformSettings();
 
   // Location detection
   const { data: userLocation, isLoading: locationLoading } = useQuery({
@@ -165,8 +167,8 @@ export default function Landing() {
                     </video>
                   </div>
                   <div>
-                    <h1 className="text-xl font-bold text-white">Champions for Change</h1>
-                    <p className="text-xs text-orange-400">Athletic & Academic Management Platform</p>
+                    <h1 className="text-xl font-bold text-white">{settings?.content?.platformName || "Champions for Change"}</h1>
+                    <p className="text-xs text-orange-400">{settings?.content?.heroSubtitle || "Athletic & Academic Management Platform"}</p>
                   </div>
                 </div>
 

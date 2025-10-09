@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { usePlatformSettings } from "@/contexts/PlatformSettingsContext";
 
 const platformConfigSchema = z.object({
   // Theme settings
@@ -40,6 +41,7 @@ type PlatformConfigFormData = z.infer<typeof platformConfigSchema>;
 export default function PlatformAdmin() {
   const { user, isSuperAdmin } = useAuth();
   const { toast } = useToast();
+  const { refreshSettings } = usePlatformSettings();
   const [activeTab, setActiveTab] = useState("theme");
 
   const form = useForm<PlatformConfigFormData>({
@@ -69,12 +71,15 @@ export default function PlatformAdmin() {
     mutationFn: async (data: { category: string; settingKey: string; settingValue: string; description?: string }) => {
       return apiRequest("/api/platform-settings", "POST", data);
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast({
         title: "Settings Saved",
         description: "Platform settings have been updated successfully."
       });
       queryClient.invalidateQueries({ queryKey: ["/api/platform-settings"] });
+      
+      // Refresh platform settings to apply changes across the platform
+      await refreshSettings();
     },
     onError: (error: any) => {
       toast({
