@@ -234,6 +234,21 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Login History - Track user login activity for admin monitoring
+export const loginHistory = pgTable("login_history", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  email: varchar("email").notNull(),
+  loginMethod: text("login_method", {
+    enum: ["email", "oauth", "replit"]
+  }).notNull(),
+  ipAddress: varchar("ip_address"),
+  userAgent: text("user_agent"),
+  success: boolean("success").default(true),
+  failureReason: text("failure_reason"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Fantasy Profile - Linked to main user accounts for 21+ fantasy sports access
 export const fantasyProfiles = pgTable("fantasy_profiles", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -2548,8 +2563,14 @@ export const upsertUserSchema = createInsertSchema(users).omit({
   updatedAt: true,
 });
 
+// Login History schemas
+export const insertLoginHistorySchema = createInsertSchema(loginHistory).omit({
+  id: true,
+  createdAt: true,
+});
 
-
+export type InsertLoginHistory = z.infer<typeof insertLoginHistorySchema>;
+export type SelectLoginHistory = typeof loginHistory.$inferSelect;
 
 // White-label schemas
 export const insertWhitelabelConfigSchema = createInsertSchema(whitelabelConfigs).omit({

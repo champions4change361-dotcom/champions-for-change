@@ -368,17 +368,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Middleware to check if user is super admin
   const requireSuperAdmin = (req: any, res: any, next: any) => {
     // Check both session user and OAuth user
-    const user = req.session?.user || req.user;
+    const sessionUser = req.session?.user;
+    const oauthUser = req.user;
+    const user = sessionUser || oauthUser;
+    
+    console.log('🔐 Super admin check:', {
+      path: req.path,
+      hasSession: !!req.session,
+      hasSessionUser: !!sessionUser,
+      hasOAuthUser: !!oauthUser,
+      sessionUserData: sessionUser ? { email: sessionUser.email, isSuperAdmin: sessionUser.isSuperAdmin } : null,
+      oauthUserData: oauthUser ? { email: oauthUser.claims?.email, isSuperAdmin: oauthUser.isSuperAdmin } : null,
+      cookies: req.cookies ? Object.keys(req.cookies) : [],
+      sessionID: req.sessionID
+    });
     
     if (!user?.isSuperAdmin) {
-      console.log('Super admin check failed:', {
-        hasSessionUser: !!req.session?.user,
-        hasOAuthUser: !!req.user,
-        sessionUserIsSuperAdmin: req.session?.user?.isSuperAdmin,
-        oauthUserIsSuperAdmin: req.user?.isSuperAdmin
-      });
+      console.log('❌ Super admin check failed - user not authorized');
       return res.status(403).json({ error: 'Forbidden: Super admin access required' });
     }
+    
+    console.log('✅ Super admin check passed');
     next();
   };
 
@@ -566,6 +576,96 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error deleting platform setting:', error);
       res.status(500).json({ error: 'Failed to delete platform setting' });
+    }
+  });
+
+  // =============================================================================
+  // USER MANAGEMENT API (Super Admin Only)
+  // =============================================================================
+
+  // GET all users with pagination and search
+  app.get('/api/admin/users', requireSuperAdmin, async (req, res) => {
+    try {
+      const { search, limit = '100', offset = '0' } = req.query;
+      const storage = await getStorage();
+      const db = (storage as any).db;
+      
+      let query = db.select().from(users);
+      
+      // Add search filter if provided
+      if (search && typeof search === 'string') {
+        query = query.where(
+          sql`(${users.email} ILIKE ${`%${search}%`} OR ${users.firstName} ILIKE ${`%${search}%`} OR ${users.lastName} ILIKE ${`%${search}%`} OR ${users.organizationName} ILIKE ${`%${search}%`})`
+        );
+      }
+      
+      const allUsers = await query
+        .orderBy(desc(users.createdAt))
+        .limit(parseInt(limit as string))
+        .offset(parseInt(offset as string));
+
+      // Get total count for pagination
+      const totalResult = await db.select({ count: sql<number>`count(*)` }).from(users);
+      const total = totalResult[0]?.count || 0;
+
+      res.json({
+        users: allUsers,
+        total,
+        limit: parseInt(limit as string),
+        offset: parseInt(offset as string)
+      });
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      res.status(500).json({ error: 'Failed to fetch users' });
+    }
+  });
+
+  // GET specific user details
+  app.get('/api/admin/users/:id', requireSuperAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const storage = await getStorage();
+      const user = await storage.getUser(id);
+
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      res.json(user);
+    } catch (error) {
+      console.error('Error fetching user:', error);
+      res.status(500).json({ error: 'Failed to fetch user' });
+    }
+  });
+
+  // GET user login history
+  app.get('/api/admin/users/:id/login-history', requireSuperAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { limit = '50' } = req.query;
+      const storage = await getStorage();
+      
+      const history = await storage.getUserLoginHistory(id, parseInt(limit as string));
+
+      res.json({ loginHistory: history });
+    } catch (error) {
+      console.error('Error fetching login history:', error);
+      res.status(500).json({ error: 'Failed to fetch login history' });
+    }
+  });
+
+  // GET recent login activity (all users)
+  app.get('/api/admin/login-activity', requireSuperAdmin, async (req, res) => {
+    try {
+      const { limit = '100' } = req.query;
+      const storage = await getStorage();
+      
+      const activity = await storage.getAllLoginHistory(parseInt(limit as string));
+
+      res.json({ activity });
+    } catch (error) {
+      console.error('Error fetching login activity:', error);
+      res.status(500).json({ error: 'Failed to fetch login activity' });
     }
   });
 
@@ -2726,6 +2826,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         });
         
+        // Record login history
+        try {
+          await storage.createLoginHistory({
+            userId: user.id,
+            loginMethod: 'email',
+            ipAddress: req.ip || req.connection.remoteAddress || null,
+            userAgent: req.get('user-agent') || null
+          });
+          console.log(`📊 Login history recorded for user: ${email}`);
+        } catch (loginHistoryError) {
+          console.error('Failed to record login history:', loginHistoryError);
+        }
+        
         console.log('User login successful:', email);
         res.json({ 
           success: true, 
@@ -2804,6 +2917,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Don't fail signup if email fails - user can resend later
       }
 
+      // Send admin notification about new signup
+      try {
+        await emailService.sendAdminNewUserNotification({
+          userEmail: email,
+          userName: `${firstName} ${lastName}`,
+          organizationName,
+          signupMethod: 'email'
+        });
+        console.log(`📧 Admin notification sent for new user: ${email}`);
+      } catch (adminEmailError) {
+        console.error('Failed to send admin notification:', adminEmailError);
+      }
+
       // Create user session (login automatically after signup)
       const userSession = {
         id: newUser.id,
@@ -2833,6 +2959,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         });
       });
+
+      // Record login history for auto-login after email signup
+      try {
+        await storage.createLoginHistory({
+          userId: newUser.id,
+          loginMethod: 'email_signup',
+          ipAddress: req.ip || req.connection.remoteAddress || null,
+          userAgent: req.get('user-agent') || null
+        });
+        console.log(`📊 Login history recorded for email signup: ${email}`);
+      } catch (loginHistoryError) {
+        console.error('Failed to record login history:', loginHistoryError);
+      }
 
       console.log(`✅ New user registered: ${email} (${organizationType})`);
       
@@ -2920,6 +3059,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error('Failed to send welcome email:', emailError);
       }
 
+      // Send admin notification about new signup
+      try {
+        await emailService.sendAdminNewUserNotification({
+          userEmail: email,
+          userName: `${firstName} ${lastName}`,
+          organizationName,
+          signupMethod: 'trial',
+          trialEndDate: trialEndDate
+        });
+        console.log(`📧 Admin notification sent for new trial user: ${email}`);
+      } catch (adminEmailError) {
+        console.error('Failed to send admin notification:', adminEmailError);
+      }
+
       // Create user session (login automatically after signup)
       const userSession = {
         id: newUser.id,
@@ -2948,6 +3101,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         });
       });
+
+      // Record login history for auto-login after trial signup
+      try {
+        await storage.createLoginHistory({
+          userId: newUser.id,
+          loginMethod: 'trial_signup',
+          ipAddress: req.ip || req.connection.remoteAddress || null,
+          userAgent: req.get('user-agent') || null
+        });
+        console.log(`📊 Login history recorded for trial signup: ${email}`);
+      } catch (loginHistoryError) {
+        console.error('Failed to record login history:', loginHistoryError);
+      }
 
       console.log(`✅ New FREE TRIAL user registered: ${email} (14-day trial ends ${trialEndDate.toLocaleDateString()})`);
       

@@ -522,6 +522,130 @@ class EmailService {
     }
   }
 
+  async sendAdminNewUserNotification(options: {
+    userEmail: string;
+    userName: string;
+    organizationName: string;
+    signupMethod: 'trial' | 'oauth' | 'email';
+    trialEndDate?: Date;
+  }) {
+    const adminEmail = process.env.ADMIN_EMAIL || 'champions4change361@gmail.com';
+    const { userEmail, userName, organizationName, signupMethod, trialEndDate } = options;
+    
+    const signupMethodLabel = signupMethod === 'trial' ? '14-Day Free Trial' : 
+                             signupMethod === 'oauth' ? 'OAuth (Replit)' : 
+                             'Email/Password';
+    
+    const trialInfo = trialEndDate ? 
+      `<li><strong>Trial Ends:</strong> ${trialEndDate.toLocaleDateString()} at ${trialEndDate.toLocaleTimeString()}</li>` : 
+      '';
+    
+    const subject = `🎉 New User Signup - ${userName}`;
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #22c55e, #3b82f6); color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0; }
+          .content { padding: 30px 20px; background: #ffffff; border: 1px solid #e5e7eb; }
+          .user-info { background: #f0fdf4; border-left: 4px solid #22c55e; padding: 20px; border-radius: 6px; margin: 20px 0; }
+          .user-info ul { margin: 10px 0; padding-left: 20px; }
+          .user-info li { margin: 8px 0; }
+          .signup-badge { 
+            background: #3b82f6; 
+            color: white; 
+            padding: 8px 16px; 
+            border-radius: 6px; 
+            display: inline-block; 
+            margin: 10px 0; 
+            font-weight: bold;
+          }
+          .footer { 
+            background: #f9fafb; 
+            padding: 20px; 
+            text-align: center; 
+            color: #6b7280; 
+            font-size: 14px; 
+            border-radius: 0 0 8px 8px;
+            border: 1px solid #e5e7eb;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>🎉 New User Signup</h1>
+            <p>Someone just joined your platform!</p>
+          </div>
+          
+          <div class="content">
+            <div class="signup-badge">${signupMethodLabel}</div>
+            
+            <div class="user-info">
+              <h3>📋 User Details:</h3>
+              <ul>
+                <li><strong>Name:</strong> ${userName}</li>
+                <li><strong>Email:</strong> ${userEmail}</li>
+                <li><strong>Organization:</strong> ${organizationName}</li>
+                <li><strong>Signup Method:</strong> ${signupMethodLabel}</li>
+                ${trialInfo}
+                <li><strong>Signup Time:</strong> ${new Date().toLocaleString()}</li>
+              </ul>
+            </div>
+            
+            <p><strong>Next Steps:</strong></p>
+            <ul>
+              <li>User account has been created and is active</li>
+              <li>View user details in Platform Admin → User Management</li>
+              <li>User can be contacted at ${userEmail}</li>
+            </ul>
+          </div>
+          
+          <div class="footer">
+            <p>Champions for Change Platform<br>
+            Admin Notification System</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    try {
+      if (!this.transporter) {
+        console.log('📧 ADMIN NOTIFICATION (would be sent to:', adminEmail, ')');
+        console.log('Subject:', subject);
+        console.log('New user:', userName, '-', userEmail);
+        return { success: true, method: 'console' };
+      }
+
+      const fromAddress = process.env.SENDGRID_FROM_EMAIL || '"Platform Admin" <champions4change361@gmail.com>';
+      
+      const info = await this.transporter.sendMail({
+        from: fromAddress,
+        to: adminEmail,
+        subject,
+        html,
+      });
+
+      if (process.env.SENDGRID_API_KEY) {
+        console.log(`📧 Admin notification sent to ${adminEmail} via SendGrid for new user: ${userName}`);
+      } else {
+        console.log(`📧 Admin notification sent about new user: ${userName}`);
+      }
+      
+      return { 
+        success: true, 
+        messageId: info.messageId,
+        method: process.env.SENDGRID_API_KEY ? 'sendgrid' : 'ethereal'
+      };
+    } catch (error) {
+      console.error('Failed to send admin notification email:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  }
+
   async sendSchoolADInvite(options: { 
     inviteeEmail: string; 
     inviteeName: string; 

@@ -129,6 +129,10 @@ async function upsertUser(
 ) {
   const userStorage = await getStorage();
   
+  // Check if user already exists to detect new signups
+  const existingUser = await userStorage.getUserByEmail(claims["email"]);
+  const isNewUser = !existingUser;
+  
   // Special handling for Daniel Thornton - Champions for Change owner
   const isOwner = claims["email"] === 'champions4change361@gmail.com' || 
                   claims["sub"] === 'champions-admin-1';
@@ -149,6 +153,22 @@ async function upsertUser(
       whitelabelDomain: 'trantortournaments.org'
     })
   });
+
+  // Send admin notification for new OAuth signups (but not for admin himself)
+  if (isNewUser && !isOwner) {
+    try {
+      const { default: emailService } = await import('./emailService');
+      await emailService.sendAdminNewUserNotification({
+        userEmail: claims["email"],
+        userName: `${claims["first_name"]} ${claims["last_name"]}`,
+        organizationName: claims["organization"] || 'No organization specified',
+        signupMethod: 'oauth'
+      });
+      console.log(`📧 Admin notification sent for new OAuth user: ${claims["email"]}`);
+    } catch (emailError) {
+      console.error('Failed to send admin notification for OAuth signup:', emailError);
+    }
+  }
 }
 
 async function setupOAuthStrategies() {
@@ -356,13 +376,30 @@ export async function setupAuth(app: Express) {
       }
       
       // Log the user in
-      req.logIn(user, (loginErr) => {
+      req.logIn(user, async (loginErr) => {
         if (loginErr) {
           console.error('Login error after OAuth:', loginErr);
           return res.redirect("/login?error=login_failed");
         }
         
         console.log('✅ OAuth authentication successful');
+        
+        // Record login history for OAuth
+        try {
+          const userStorage = await getStorage();
+          const userClaims = (user as any).claims;
+          if (userClaims?.sub) {
+            await userStorage.createLoginHistory({
+              userId: userClaims.sub,
+              loginMethod: 'oauth',
+              ipAddress: req.ip || req.connection.remoteAddress || null,
+              userAgent: req.get('user-agent') || null
+            });
+            console.log(`📊 Login history recorded for OAuth user: ${userClaims.email}`);
+          }
+        } catch (loginHistoryError) {
+          console.error('Failed to record login history:', loginHistoryError);
+        }
         
         // Check for team signup return URL in the user type parameter
         const userType = req.query.state || req.query.user_type;

@@ -37,7 +37,7 @@ import {
   type GameTemplate, type InsertGameTemplate, type GameInstance, type InsertGameInstance, type UserLineup, type InsertUserLineup, type PlayerPerformance, type InsertPlayerPerformance,
   type BudgetCategory, type InsertBudgetCategory, type BudgetItem, type InsertBudgetItem, type BudgetAllocation, type InsertBudgetAllocation, type BudgetTransaction, type InsertBudgetTransaction, type BudgetApproval, type InsertBudgetApproval, type BudgetTemplate, type InsertBudgetTemplate,
   type AthleticCalendarEvent, type InsertAthleticCalendarEvent,
-  users, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, teams, teamPlayers, athletes, medicalHistory, healthRiskAssessments, injuryIncidents, injuryFollowUps, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog, taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices, supportTeams, supportTeamMembers, supportTeamInjuries, supportTeamAiConsultations, jerseyTeamMembers, jerseyTeamPayments, tournamentSubscriptions, clientConfigurations, guestParticipants, passwordResetTokens, showdownContests, showdownEntries, showdownLeaderboards, professionalPlayers, merchandiseProducts, merchandiseOrders, eventTickets, ticketOrders, tournamentRegistrationForms, registrationSubmissions, registrationAssignmentLog, fantasyProfiles, fantasyLeagues, fantasyTeams, fantasyRosters, fantasyDrafts, fantasyMatchups, fantasyWaiverClaims, fantasyTrades, fantasyLeagueMessages, athleticConfigs, academicConfigs, fineArtsConfigs, eventTemplates, scoringPolicies, gameTemplates, gameInstances, userLineups, playerPerformances, athleticCalendarEvents, games, practices, facilityReservations, scheduleConflicts, academicEvents, academicCompetitions, academicParticipants, academicResults, academicDistricts, academicMeets, schoolAcademicPrograms, academicTeams, academicOfficials, budgetCategories, budgetItems, budgetAllocations, budgetTransactions, budgetApprovals, budgetTemplates
+  users, loginHistory, whitelabelConfigs, tournaments, matches, sportOptions, sportCategories, sportEvents, tournamentStructures, trackEvents, pages, teamRegistrations, organizations, teams, teamPlayers, athletes, medicalHistory, healthRiskAssessments, injuryIncidents, injuryFollowUps, scorekeeperAssignments, eventScores, schoolEventAssignments, coachEventAssignments, contacts, emailCampaigns, campaignRecipients, donors, donations, sportDivisionRules, registrationRequests, complianceAuditLog, taxExemptionDocuments, nonprofitSubscriptions, nonprofitInvoices, supportTeams, supportTeamMembers, supportTeamInjuries, supportTeamAiConsultations, jerseyTeamMembers, jerseyTeamPayments, tournamentSubscriptions, clientConfigurations, guestParticipants, passwordResetTokens, showdownContests, showdownEntries, showdownLeaderboards, professionalPlayers, merchandiseProducts, merchandiseOrders, eventTickets, ticketOrders, tournamentRegistrationForms, registrationSubmissions, registrationAssignmentLog, fantasyProfiles, fantasyLeagues, fantasyTeams, fantasyRosters, fantasyDrafts, fantasyMatchups, fantasyWaiverClaims, fantasyTrades, fantasyLeagueMessages, athleticConfigs, academicConfigs, fineArtsConfigs, eventTemplates, scoringPolicies, gameTemplates, gameInstances, userLineups, playerPerformances, athleticCalendarEvents, games, practices, facilityReservations, scheduleConflicts, academicEvents, academicCompetitions, academicParticipants, academicResults, academicDistricts, academicMeets, schoolAcademicPrograms, academicTeams, academicOfficials, budgetCategories, budgetItems, budgetAllocations, budgetTransactions, budgetApprovals, budgetTemplates
 } from "@shared/schema";
 
 type SportCategory = typeof sportCategories.$inferSelect;
@@ -87,6 +87,11 @@ export interface IStorage {
   upsertUser(user: UpsertUser): Promise<User>;
   updateUser(id: string, updates: Partial<User>): Promise<User | undefined>;
   updateUserStripeInfo(id: string, customerId: string, subscriptionId: string): Promise<User | undefined>;
+  
+  // Login history methods
+  createLoginHistory(loginData: any): Promise<any>;
+  getUserLoginHistory(userId: string, limit?: number): Promise<any[]>;
+  getAllLoginHistory(limit?: number): Promise<any[]>;
   
   // Fantasy profile methods
   getFantasyProfile(userId: string): Promise<FantasyProfile | undefined>;
@@ -2008,6 +2013,46 @@ export class DbStorage implements IStorage {
       }
     } catch (error) {
       console.error("Compliance audit log retrieval error:", error);
+      return [];
+    }
+  }
+
+  // Login History methods
+  async createLoginHistory(loginData: any): Promise<any> {
+    try {
+      const result = await this.db.insert(loginHistory).values(loginData).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Login history creation error:", error);
+      throw new Error("Failed to create login history");
+    }
+  }
+
+  async getUserLoginHistory(userId: string, limit: number = 50): Promise<any[]> {
+    try {
+      const result = await this.db
+        .select()
+        .from(loginHistory)
+        .where(eq(loginHistory.userId, userId))
+        .orderBy(desc(loginHistory.createdAt))
+        .limit(limit);
+      return result;
+    } catch (error) {
+      console.error("Login history retrieval error:", error);
+      return [];
+    }
+  }
+
+  async getAllLoginHistory(limit: number = 100): Promise<any[]> {
+    try {
+      const result = await this.db
+        .select()
+        .from(loginHistory)
+        .orderBy(desc(loginHistory.createdAt))
+        .limit(limit);
+      return result;
+    } catch (error) {
+      console.error("Login history retrieval error:", error);
       return [];
     }
   }

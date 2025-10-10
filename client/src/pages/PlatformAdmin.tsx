@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Save, Palette, FileText, Settings as SettingsIcon, Image as ImageIcon, AlertCircle } from "lucide-react";
+import { Save, Palette, FileText, Settings as SettingsIcon, Image as ImageIcon, AlertCircle, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
@@ -150,7 +150,7 @@ export default function PlatformAdmin() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="theme">
                 <Palette className="h-4 w-4 mr-2" />
                 Theme
@@ -166,6 +166,10 @@ export default function PlatformAdmin() {
               <TabsTrigger value="media">
                 <ImageIcon className="h-4 w-4 mr-2" />
                 Media
+              </TabsTrigger>
+              <TabsTrigger value="users">
+                <Users className="h-4 w-4 mr-2" />
+                User Management
               </TabsTrigger>
             </TabsList>
 
@@ -468,6 +472,10 @@ export default function PlatformAdmin() {
                 </CardContent>
               </Card>
             </TabsContent>
+
+            <TabsContent value="users" className="space-y-6 mt-6">
+              <UserManagement />
+            </TabsContent>
           </Tabs>
 
           <div className="flex justify-end gap-4">
@@ -482,6 +490,257 @@ export default function PlatformAdmin() {
           </div>
         </form>
       </Form>
+    </div>
+  );
+}
+
+// User Management Component
+function UserManagement() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const { toast } = useToast();
+
+  // Fetch users
+  const { data: usersData, isLoading } = useQuery({
+    queryKey: ["/api/admin/users", searchTerm],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (searchTerm) params.append("search", searchTerm);
+      params.append("limit", "100");
+      const response = await fetch(`/api/admin/users?${params}`);
+      if (!response.ok) throw new Error("Failed to fetch users");
+      return response.json();
+    }
+  });
+
+  // Fetch user login history when user is selected
+  const { data: loginHistory } = useQuery({
+    queryKey: ["/api/admin/users", selectedUser?.id, "login-history"],
+    queryFn: async () => {
+      if (!selectedUser?.id) return null;
+      const response = await fetch(`/api/admin/users/${selectedUser.id}/login-history?limit=20`);
+      if (!response.ok) throw new Error("Failed to fetch login history");
+      return response.json();
+    },
+    enabled: !!selectedUser?.id
+  });
+
+  const formatDate = (date: string | null) => {
+    if (!date) return "Never";
+    return new Date(date).toLocaleString();
+  };
+
+  const getStatusBadge = (user: any) => {
+    const status = user.accountStatus;
+    const variants: Record<string, string> = {
+      active: "bg-green-100 text-green-800",
+      pending_check_payment: "bg-yellow-100 text-yellow-800",
+      suspended: "bg-red-100 text-red-800",
+      email_unverified: "bg-gray-100 text-gray-800",
+      under_review: "bg-blue-100 text-blue-800"
+    };
+    return <Badge className={variants[status] || "bg-gray-100 text-gray-800"}>{status}</Badge>;
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>User Management</CardTitle>
+          <CardDescription>
+            View and manage platform users
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {/* Search */}
+          <div className="mb-6">
+            <Input
+              placeholder="Search by name, email, or organization..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="max-w-md"
+              data-testid="input-user-search"
+            />
+          </div>
+
+          {/* User Table */}
+          {isLoading ? (
+            <div className="text-center py-8 text-muted-foreground">Loading users...</div>
+          ) : (
+            <div className="border rounded-lg overflow-hidden">
+              <table className="w-full">
+                <thead className="bg-muted">
+                  <tr>
+                    <th className="text-left p-3 font-medium">User</th>
+                    <th className="text-left p-3 font-medium">Organization</th>
+                    <th className="text-left p-3 font-medium">Status</th>
+                    <th className="text-left p-3 font-medium">Signup Date</th>
+                    <th className="text-left p-3 font-medium">Last Login</th>
+                    <th className="text-left p-3 font-medium">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {usersData?.users?.map((user: any) => (
+                    <tr key={user.id} className="border-t hover:bg-muted/50">
+                      <td className="p-3">
+                        <div>
+                          <div className="font-medium">{user.firstName} {user.lastName}</div>
+                          <div className="text-sm text-muted-foreground">{user.email}</div>
+                        </div>
+                      </td>
+                      <td className="p-3">{user.organizationName || "-"}</td>
+                      <td className="p-3">{getStatusBadge(user)}</td>
+                      <td className="p-3 text-sm">{formatDate(user.createdAt)}</td>
+                      <td className="p-3 text-sm">{formatDate(user.lastLoginAt)}</td>
+                      <td className="p-3">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setSelectedUser(user)}
+                          data-testid={`button-view-user-${user.id}`}
+                        >
+                          View Details
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* User Details Modal */}
+          {selectedUser && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+              <Card className="max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                <CardHeader>
+                  <CardTitle>User Details</CardTitle>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="absolute top-4 right-4"
+                    onClick={() => setSelectedUser(null)}
+                  >
+                    ✕
+                  </Button>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* User Info */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <div className="text-sm text-muted-foreground">Name</div>
+                      <div className="font-medium">{selectedUser.firstName} {selectedUser.lastName}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-muted-foreground">Email</div>
+                      <div className="font-medium">{selectedUser.email}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-muted-foreground">Organization</div>
+                      <div className="font-medium">{selectedUser.organizationName || "-"}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-muted-foreground">Status</div>
+                      <div>{getStatusBadge(selectedUser)}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-muted-foreground">Subscription Plan</div>
+                      <div className="font-medium">{selectedUser.subscriptionPlan || "-"}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-muted-foreground">Auth Provider</div>
+                      <div className="font-medium">{selectedUser.authProvider || "email"}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-muted-foreground">Signup Date</div>
+                      <div className="font-medium">{formatDate(selectedUser.createdAt)}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-muted-foreground">Last Login</div>
+                      <div className="font-medium">{formatDate(selectedUser.lastLoginAt)}</div>
+                    </div>
+                  </div>
+
+                  {/* Trial Info */}
+                  {selectedUser.trialEndDate && (
+                    <div className="border rounded-lg p-4 bg-blue-50">
+                      <div className="text-sm font-medium text-blue-900">Free Trial</div>
+                      <div className="text-sm text-blue-700 mt-1">
+                        Ends: {formatDate(selectedUser.trialEndDate)}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Login History */}
+                  <div>
+                    <h3 className="font-medium mb-3">Recent Login Activity</h3>
+                    <div className="border rounded-lg overflow-hidden">
+                      <table className="w-full text-sm">
+                        <thead className="bg-muted">
+                          <tr>
+                            <th className="text-left p-2">Date/Time</th>
+                            <th className="text-left p-2">Method</th>
+                            <th className="text-left p-2">IP Address</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {loginHistory?.loginHistory?.length > 0 ? (
+                            loginHistory.loginHistory.map((log: any) => (
+                              <tr key={log.id} className="border-t">
+                                <td className="p-2">{formatDate(log.createdAt)}</td>
+                                <td className="p-2 capitalize">{log.loginMethod}</td>
+                                <td className="p-2">{log.ipAddress || "-"}</td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td colSpan={3} className="p-4 text-center text-muted-foreground">
+                                No login history available
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Users</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{usersData?.total || 0}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Active Trials</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {usersData?.users?.filter((u: any) => u.trialEndDate && new Date(u.trialEndDate) > new Date()).length || 0}
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Active Users</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {usersData?.users?.filter((u: any) => u.accountStatus === "active").length || 0}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
