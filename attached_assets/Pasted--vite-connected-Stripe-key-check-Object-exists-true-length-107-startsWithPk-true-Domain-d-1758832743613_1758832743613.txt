@@ -1,0 +1,37 @@
+[vite] connected.
+Stripe key check: 
+Object {exists: true, length: 107, startsWithPk: true}
+Domain detection - hostname: 3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev
+Domain config set: 
+Object {type: "pro", brand: "TRANTOR_TOURNAMENTS", theme: "professional", allowFantasyPromo: true, allowProPromo: false, …}
+sports is not defined
+sports is not defined
+The above error occurred in the <EnhancedTournamentWizard> component:
+
+    at EnhancedTournamentWizard (https://3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev/src/components/enhanced-tournament-wizard.tsx?t=1758832588093:141:3)
+    at main
+    at div
+    at CreateTournament (https://3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev/src/pages/CreateTournament.tsx?t=1758832588093:113:37)
+    at Route (https://3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=dfefae33:191:16)
+    at Switch (https://3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=dfefae33:247:17)
+    at AppRouter (https://3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev/src/App.tsx?t=1758832588093&v=__camrqV90RD3B2RS32oY:610:42)
+    at Router (https://3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=dfefae33:159:17)
+    at Provider (https://3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=dfefae33:38:15)
+    at TooltipProvider (https://3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=dfefae33:64:5)
+    at QueryClientProvider (https://3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=dfefae33:2805:3)
+    at App
+    at LanguageProvider (https://3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev/src/contexts/LanguageContext.tsx?v=__camrqV90RD3B2RS32oY:114:36)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+sports is not defined
+at EnhancedTournamentWizard (https://3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev/src/components/enhanced-tournament-wizard.tsx?t=1758832588093:865:25)
+at renderWithHooks (https://3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=dfefae33:11548:26)
+at mountIndeterminateComponent (https://3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=dfefae33:14926:21)
+at beginWork (https://3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=dfefae33:15914:22)
+at beginWork$1 (https://3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=dfefae33:19753:22)
+at performUnitOfWork (https://3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=dfefae33:19198:20)
+at workLoopSync (https://3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=dfefae33:19137:13)
+at renderRootSync (https://3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=dfefae33:19116:15)
+at recoverFromConcurrentError (https://3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=dfefae33:18736:28)
+at performSyncWorkOnRoot (https://3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=dfefae33:18879:28)

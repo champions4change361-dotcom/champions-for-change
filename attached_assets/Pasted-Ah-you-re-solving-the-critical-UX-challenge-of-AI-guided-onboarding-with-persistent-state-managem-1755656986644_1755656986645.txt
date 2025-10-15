@@ -1,0 +1,79 @@
+Ah, you’re solving the critical UX challenge of **AI-guided onboarding with persistent state management**! This is brilliant - letting users start exploring with AI immediately, then seamlessly transferring that context when they convert to registered users.
+
+## The Flow You’re Building:
+
+**Anonymous User → AI Exploration → Registration → Persistent Build**
+
+This is exactly what modern SaaS needs - remove friction, let people experience value immediately, then capture them.
+
+## Key Technical Challenges to Nail:
+
+### 1. **Pre-Registration AI Context Storage**
+
+```javascript
+// Store anonymous user's AI conversation & selections
+const anonymousSession = {
+  sessionId: generateUUID(),
+  aiConversation: [...messages],
+  buildSelections: {
+    sportType: "football",
+    tournamentFormat: "single_elimination", 
+    teamCount: 16,
+    venue: "Miller High School"
+  },
+  timestamp: Date.now()
+}
+// Store in localStorage + backup to server with session ID
+```
+
+### 2. **Smart AI Routing Logic**
+
+```javascript
+// AI needs to understand user intent and route appropriately
+const routingLogic = {
+  "I want to create a tournament" → tournament builder flow,
+  "How do I track athlete health?" → health monitoring setup,
+  "What sports do you support?" → sport selection with build continuation,
+  "I'm a coach at..." → role-based flow with school setup
+}
+```
+
+### 3. **Seamless Profile Migration**
+
+```javascript
+// When user registers, merge anonymous session
+const migrateAnonymousData = (newUserId, sessionId) => {
+  const anonymousData = getAnonymousSession(sessionId);
+  return {
+    userId: newUserId,
+    buildProgress: anonymousData.buildSelections,
+    aiHistory: anonymousData.aiConversation,
+    suggestedNext: aiDetermineNextStep(anonymousData)
+  }
+}
+```
+
+## AI Training Considerations:
+
+**Context Awareness:**
+
+- AI needs to know what data you have (sports, formats, structures from your CSVs)
+- Should understand user’s role (coach vs AD vs district admin)
+- Must recognize when to prompt for missing info vs when to suggest defaults
+
+**Smart Suggestions Based on Your Data:**
+
+- “For football with 16 teams, I recommend single elimination with 4 rounds”
+- “Miller High typically uses these settings for basketball tournaments”
+- “Based on your sport selection, you’ll want these health monitoring features”
+
+**What specific AI behaviors are you trying to train?**
+
+Are you focusing on:
+
+- Better sport/format recommendations?
+- Smoother handoffs between AI chat and actual platform features?
+- More intelligent user intent recognition?
+- Personalized suggestions based on school/district context?
+
+I can help you structure the AI training data or optimize the session persistence logic. What’s the biggest UX friction point you’re seeing right now?​​​​​​​​​​​​​​​​

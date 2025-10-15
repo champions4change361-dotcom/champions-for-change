@@ -1,0 +1,179 @@
+⚡
+TRANTOR TOURNAMENTS
+District Athletics Management
+Home
+Tournaments
+Tournament Empire
+Fantasy
+AI Assistant
+Back to Platform
+AI Assistant
+Champions for Change
+Logout
+AI-Powered Platform Assistant
+Chat with Your AI Assistant
+Get personalized help with tournament creation, budget management, health monitoring, and district coordination. Just ask naturally - like you're talking to a knowledgeable colleague.
+Natural Conversations
+
+Ask questions naturally, like "Help me create a track meet for 200 students"
+Smart Context
+
+Remembers your conversation and adapts recommendations to your specific needs
+Actionable Suggestions
+
+Get specific next steps and clickable suggestions to guide your workflow
+AI Assistant
+Champions for Change Platform
+Hi! I'm your AI assistant for Champions for Change. I can help you with tournament creation, budget planning, health monitoring, and district coordination.
+
+What would you like to work on today?
+Help me create a tournament
+Set up budget tracking
+Configure health monitoring
+Plan academic competitions
+I need you to build me a 26 team double elimination basketball tournament
+❌ **Could not create tournament:** [
+  {
+    "code": "invalid_type",
+    "expected": "number",
+    "received": "undefined",
+    "path": [
+      "teamSize"
+    ],
+    "message": "Required"
+  },
+  {
+    "code": "invalid_union",
+    "unionErrors": [
+      {
+        "issues": [
+          {
+            "code": "invalid_union",
+            "unionErrors": [
+              {
+                "issues": [
+                  {
+                    "code": "invalid_type",
+                    "expected": "string",
+                    "received": "undefined",
+                    "path": [
+                      "bracket"
+                    ],
+                    "message": "Required"
+                  }
+                ],
+                "name": "ZodError"
+              },
+              {
+                "issues": [
+                  {
+                    "code": "invalid_type",
+                    "expected": "number",
+                    "received": "undefined",
+                    "path": [
+                      "bracket"
+                    ],
+                    "message": "Required"
+                  }
+                ],
+                "name": "ZodError"
+              },
+              {
+                "issues": [
+                  {
+                    "code": "invalid_type",
+                    "expected": "boolean",
+                    "received": "undefined",
+                    "path": [
+                      "bracket"
+                    ],
+                    "message": "Required"
+                  }
+                ],
+                "name": "ZodError"
+              },
+              {
+                "issues": [
+                  {
+                    "code": "invalid_type",
+                    "expected": "null",
+                    "received": "undefined",
+                    "path": [
+                      "bracket"
+                    ],
+                    "message": "Required"
+                  }
+                ],
+                "name": "ZodError"
+              }
+            ],
+            "path": [
+              "bracket"
+            ],
+            "message": "Invalid input"
+          }
+        ],
+        "name": "ZodError"
+      },
+      {
+        "issues": [
+          {
+            "code": "invalid_type",
+            "expected": "object",
+            "received": "undefined",
+            "path": [
+              "bracket"
+            ],
+            "message": "Required"
+          }
+        ],
+        "name": "ZodError"
+      },
+      {
+        "issues": [
+          {
+            "code": "invalid_type",
+            "expected": "array",
+            "received": "undefined",
+            "path": [
+              "bracket"
+            ],
+            "message": "Required"
+          }
+        ],
+        "name": "ZodError"
+      }
+    ],
+    "path": [
+      "bracket"
+    ],
+    "message": "Invalid input"
+  },
+  {
+    "code": "invalid_type",
+    "expected": "string",
+    "received": "number",
+    "path": [
+      "entryFee"
+    ],
+    "message": "Expected string, received number"
+  },
+  {
+    "code": "invalid_type",
+    "expected": "date",
+    "received": "string",
+    "path": [
+      "registrationDeadline"
+    ],
+    "message": "Expected date, received string"
+  }
+]
+
+Let me help you with the setup instead. What specific tournament details would you like to configure?
+Build me a basketball tournament
+Create me a 16 team soccer tournament
+Make me a volleyball championship
+Set up a track meet
+
+Press Enter to send • Shift+Enter for new line
+Powered by Champions for Change

@@ -1,0 +1,64 @@
+[Debug] [vite] connecting... (client, line 495)
+[Debug] [vite] connected. (client, line 618)
+[Log] Domain detection - hostname: – "3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev" (useDomain.ts, line 6)
+[Log] Domain config set: – Object (useDomain.ts, line 90)
+Object
+[Log] Domain detection - hostname: – "3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev" (useDomain.ts, line 6)
+[Log] Domain config set: – Object (useDomain.ts, line 90)
+Object
+[Log] Domain detection - hostname: – "3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev" (useDomain.ts, line 6)
+[Log] Domain config set: – Object (useDomain.ts, line 90)
+Object
+[Error] Warning: validateDOMNesting(...): <a> cannot appear as a descendant of <a>.
+a
+a
+@https://3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js:337:27
+div
+div
+nav
+DomainNavigation@https://3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev/src/components/DomainNavigation.tsx:25:33
+div
+AuthenticatedRoutes@https://3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev/src/App.tsx:125:66
+Switch@https://3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js:380:27
+AppRouter@https://3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev/src/App.tsx:473:49
+Router@https://3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js:291:15
+TooltipProviderProvider@https://3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js:38:13
+TooltipProvider@https://3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js:63:43
+QueryClientProvider@https://3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js:2805:9
+App
+	printWarning (chunk-RPCDYKBN.js:521)
+	error (chunk-RPCDYKBN.js:505)
+	validateDOMNesting (chunk-RPCDYKBN.js:8256)
+	createInstance (chunk-RPCDYKBN.js:8328)
+	completeWork (chunk-RPCDYKBN.js:16290)
+	completeUnitOfWork (chunk-RPCDYKBN.js:19224)
+	performUnitOfWork (chunk-RPCDYKBN.js:19206)
+	workLoopSync (chunk-RPCDYKBN.js:19137)
+	renderRootSync (chunk-RPCDYKBN.js:19116)
+	performConcurrentWorkOnRoot (chunk-RPCDYKBN.js:18678:98)
+	workLoop (chunk-RPCDYKBN.js:197)
+	flushWork (chunk-RPCDYKBN.js:176)
+	performWorkUntilDeadline (chunk-RPCDYKBN.js:384)
+[Info] Successfully preconnected to https://api.stripe.com/
+[Log] AI Response received: – Object (ConversationalAI.tsx, line 105)
+Objectextracted_context: {sport: "track"}Objectintent: "budget_management"response: "Our Excel-style budget management system is perfect for educational programs!↵↵💰 **Budget Features:**↵• CCISD-approved budget categories↵…"success: truesuggestions: ["Transportation costs", "Equipment budgets", "Grant funding help", "District allocation"]Array (4)Object Prototype
+[Log] Adding AI message: – Object (ConversationalAI.tsx, line 116)
+Objectcontent: "Our Excel-style budget management system is perfect for educational programs!↵↵💰 **Budget Features:**↵• CCISD-approved budget categories↵…"id: "1756688793072"role: "assistant"suggestions: ["Transportation costs", "Equipment budgets", "Grant funding help", "District allocation"]Array (4)timestamp: Sun Aug 31 2025 20:06:33 GMT-0500 (Central Daylight Time) Sun Aug 31 2025 20:06:33 GMT-0500 (Central Daylight Time)Object Prototype
+[Log] New messages array: (ConversationalAI.tsx, line 119)
+Array (3)
+0
+{id: "1", role: "assistant", content: "Hi! I'm your AI assistant for Champions for Change…students\" or \"How do I set up injury monitoring?\"", timestamp: Sun Aug 31 2025 20:06:29 GMT-0500 (Central Daylight Time), suggestions: ["Help me create a tournament", "Set up budget tracking", "Configure health monitoring", "Plan academic competitions", "Manage district compliance"]}
+1
+{id: "1756688792985", role: "user", content: "Set up budget tracking", timestamp: Sun Aug 31 2025 20:06:32 GMT-0500 (Central Daylight Time)}
+2
+{id: "1756688793072", role: "assistant", content: "Our Excel-style budget management system is perfec…ts, equipment purchases, or full program budgets?", timestamp: Sun Aug 31 2025 20:06:33 GMT-0500 (Central Daylight Time), suggestions: ["Transportation costs", "Equipment budgets", "Grant funding help", "District allocation"]}
+
+Array Prototype
+> Selected Element
+< <input data-replit-metadata="client/src/components/ConversationalAI.tsx:267:12" data-component-name="Input" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm flex-1 focus:ring-green-500 focus:border-green-500" placeholder="Ask me anything about tournaments, budgets, health monitoring, or district management..." data-testid="input-ai-message" value>
+[Log] AI Response received: – {response: "I can help you create a comprehensive tournament! …t, academic competition, multi-sport event, etc.)", suggestions: ["Help me plan a track meet", "Set up basketball tournament", "Create academic competition", …], extracted_context: {sport: "basketball"}, …} (ConversationalAI.tsx, line 105)
+{response: "I can help you create a comprehensive tournament! …t, academic competition, multi-sport event, etc.)", suggestions: ["Help me plan a track meet", "Set up basketball tournament", "Create academic competition", "Configure health monitoring"], extracted_context: {sport: "basketball"}, intent: "tournament_creation", success: true}Object
+[Log] Adding AI message: – {id: "1756688819109", role: "assistant", content: "I can help you create a comprehensive tournament! …t, academic competition, multi-sport event, etc.)", …} (ConversationalAI.tsx, line 116)
+{id: "1756688819109", role: "assistant", content: "I can help you create a comprehensive tournament! …t, academic competition, multi-sport event, etc.)", timestamp: Sun Aug 31 2025 20:06:59 GMT-0500 (Central Daylight Time), suggestions: ["Help me plan a track meet", "Set up basketball tournament", "Create academic competition", "Configure health monitoring"]}Object
+[Log] New messages array: – [Object, Object, Object, …] (5) (ConversationalAI.tsx, line 119)
+[Object, Object, Object, Object, Object]Array (5)

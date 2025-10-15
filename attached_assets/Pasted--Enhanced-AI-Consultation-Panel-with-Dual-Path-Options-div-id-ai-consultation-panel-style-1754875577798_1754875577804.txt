@@ -1,0 +1,507 @@
+<!-- Enhanced AI Consultation Panel with Dual Path Options -->
+<div id="ai-consultation-panel" style="
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 25px;
+    margin-bottom: 25px;
+    border-radius: 15px;
+    color: white;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+">
+    
+    <!-- Header -->
+    <div style="display: flex; align-items: center; margin-bottom: 20px;">
+        <span style="font-size: 32px; margin-right: 15px;">🤖</span>
+        <div>
+            <h2 style="margin: 0; font-size: 24px; font-weight: 600;">Keystone AI Tournament Consultant</h2>
+            <p style="margin: 5px 0 0 0; opacity: 0.9; font-size: 16px;">
+                Describe your tournament and choose how you'd like to proceed!
+            </p>
+        </div>
+    </div>
+    
+    <!-- Input Area -->
+    <div style="margin-bottom: 20px;">
+        <textarea 
+            id="ai-query"
+            placeholder="e.g., 'High school boys basketball tournament for 16 teams' or 'Corporate hackathon competition'"
+            style="
+                width: 100%;
+                height: 100px;
+                padding: 15px;
+                border: none;
+                border-radius: 10px;
+                font-size: 16px;
+                resize: vertical;
+                box-sizing: border-box;
+                font-family: inherit;
+                background: rgba(255,255,255,0.95);
+                outline: none;
+            "
+        ></textarea>
+    </div>
+    
+    <!-- Get Recommendation Button -->
+    <div style="margin-bottom: 20px;">
+        <button 
+            id="get-ai-recommendation"
+            onclick="getAIRecommendation()"
+            style="
+                background: #28a745;
+                color: white;
+                border: none;
+                padding: 15px 30px;
+                border-radius: 10px;
+                font-weight: bold;
+                cursor: pointer;
+                font-size: 16px;
+                margin-right: 15px;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+            "
+        >
+            ✨ Get Smart Recommendation
+        </button>
+        
+        <button 
+            id="clear-query"
+            onclick="clearAIQuery()"
+            style="
+                background: transparent;
+                color: white;
+                border: 2px solid white;
+                padding: 13px 25px;
+                border-radius: 10px;
+                cursor: pointer;
+                font-size: 16px;
+                transition: all 0.3s ease;
+            "
+        >
+            Clear
+        </button>
+    </div>
+    
+    <!-- AI Response Area with Dual Path Options -->
+    <div id="ai-response" style="display: none;">
+        <div style="
+            margin-top: 25px;
+            background: rgba(255,255,255,0.15);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+        ">
+            <!-- AI Recommendation -->
+            <h3 style="margin: 0 0 15px 0; display: flex; align-items: center;">
+                <span style="margin-right: 10px;">💡</span>
+                AI Recommendation:
+            </h3>
+            <p id="ai-recommendation-text" style="
+                margin: 0 0 20px 0;
+                font-size: 16px;
+                line-height: 1.6;
+                background: rgba(255,255,255,0.1);
+                padding: 15px;
+                border-radius: 8px;
+                border-left: 4px solid #ffc107;
+            "></p>
+            
+            <!-- Configuration Summary -->
+            <div style="
+                background: rgba(255,255,255,0.1);
+                padding: 18px;
+                border-radius: 10px;
+                margin-bottom: 25px;
+            ">
+                <div style="font-weight: bold; margin-bottom: 12px; font-size: 16px;">
+                    📋 Suggested Configuration:
+                </div>
+                <div style="
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 12px;
+                    font-size: 15px;
+                ">
+                    <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 6px;">
+                        <strong>Sport:</strong> <span id="suggested-sport">-</span>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 6px;">
+                        <strong>Format:</strong> <span id="suggested-format">-</span>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 6px;">
+                        <strong>Age Group:</strong> <span id="suggested-age">-</span>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 6px;">
+                        <strong>Gender:</strong> <span id="suggested-gender">-</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- DUAL PATH CHOICE SECTION -->
+            <div style="
+                background: linear-gradient(135deg, #ff6b6b 0%, #ffa726 100%);
+                padding: 20px;
+                border-radius: 12px;
+                margin-bottom: 20px;
+                text-align: center;
+                border: 2px solid rgba(255,255,255,0.3);
+            ">
+                <h3 style="margin: 0 0 15px 0; font-size: 20px;">
+                    🚀 How would you like to proceed?
+                </h3>
+                <p style="margin: 0 0 20px 0; font-size: 16px; opacity: 0.9;">
+                    Choose your preferred tournament creation experience:
+                </p>
+                
+                <!-- Option 1: AI Builds Everything -->
+                <div style="
+                    background: rgba(255,255,255,0.15);
+                    padding: 20px;
+                    border-radius: 10px;
+                    margin-bottom: 15px;
+                    border: 2px solid transparent;
+                    transition: all 0.3s ease;
+                    cursor: pointer;
+                " 
+                onmouseover="this.style.borderColor='rgba(255,255,255,0.5)'; this.style.background='rgba(255,255,255,0.2)'"
+                onmouseout="this.style.borderColor='transparent'; this.style.background='rgba(255,255,255,0.15)'">
+                    
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div style="text-align: left;">
+                            <h4 style="margin: 0 0 8px 0; font-size: 18px; display: flex; align-items: center;">
+                                <span style="margin-right: 10px;">🤖</span>
+                                AI Builds Tournament for Me
+                            </h4>
+                            <p style="margin: 0; font-size: 14px; opacity: 0.9;">
+                                Let AI create the complete tournament structure with sample participants. Just add your real participants and go!
+                            </p>
+                            <div style="margin-top: 8px; font-size: 12px; opacity: 0.8;">
+                                ✅ Pre-built leaderboards/brackets • ✅ Sample data for preview • ✅ Ready in 30 seconds
+                            </div>
+                        </div>
+                        <button 
+                            id="ai-build-tournament"
+                            onclick="aiBuildTournament()"
+                            style="
+                                background: #28a745;
+                                color: white;
+                                border: none;
+                                padding: 15px 25px;
+                                border-radius: 10px;
+                                font-weight: bold;
+                                cursor: pointer;
+                                font-size: 16px;
+                                box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+                                transition: all 0.3s ease;
+                                min-width: 140px;
+                            "
+                        >
+                            🚀 Build It!
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Option 2: Manual Configuration -->
+                <div style="
+                    background: rgba(255,255,255,0.15);
+                    padding: 20px;
+                    border-radius: 10px;
+                    border: 2px solid transparent;
+                    transition: all 0.3s ease;
+                    cursor: pointer;
+                "
+                onmouseover="this.style.borderColor='rgba(255,255,255,0.5)'; this.style.background='rgba(255,255,255,0.2)'"
+                onmouseout="this.style.borderColor='transparent'; this.style.background='rgba(255,255,255,0.15)'">
+                    
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div style="text-align: left;">
+                            <h4 style="margin: 0 0 8px 0; font-size: 18px; display: flex; align-items: center;">
+                                <span style="margin-right: 10px;">⚙️</span>
+                                I'll Configure It Myself
+                            </h4>
+                            <p style="margin: 0; font-size: 14px; opacity: 0.9;">
+                                Use AI recommendations to pre-populate the form, then customize every detail exactly how you want it.
+                            </p>
+                            <div style="margin-top: 8px; font-size: 12px; opacity: 0.8;">
+                                ✅ Full control • ✅ Custom settings • ✅ AI suggestions applied
+                            </div>
+                        </div>
+                        <button 
+                            id="manual-configure"
+                            onclick="manualConfigure()"
+                            style="
+                                background: #6f42c1;
+                                color: white;
+                                border: none;
+                                padding: 15px 25px;
+                                border-radius: 10px;
+                                font-weight: bold;
+                                cursor: pointer;
+                                font-size: 16px;
+                                box-shadow: 0 4px 15px rgba(111, 66, 193, 0.4);
+                                transition: all 0.3s ease;
+                                min-width: 140px;
+                            "
+                        >
+                            ⚙️ Configure
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Champions for Change Impact (always shown) -->
+            <div style="
+                background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+                padding: 15px;
+                border-radius: 10px;
+                text-align: center;
+                margin-bottom: 15px;
+            ">
+                <div style="font-weight: bold; font-size: 16px; margin-bottom: 8px;">
+                    💰 Champions for Change Impact
+                </div>
+                <div id="impact-text" style="font-size: 14px; opacity: 0.9;">
+                    This tournament will fund educational opportunities for students!
+                </div>
+            </div>
+            
+            <!-- Quick Preview Section -->
+            <div id="tournament-preview" style="
+                background: rgba(255,255,255,0.1);
+                padding: 15px;
+                border-radius: 10px;
+                margin-top: 15px;
+                border-left: 4px solid #ffc107;
+                display: none;
+            ">
+                <h4 style="margin: 0 0 10px 0; font-size: 16px;">
+                    📊 Tournament Preview:
+                </h4>
+                <div id="preview-content" style="font-size: 14px; opacity: 0.9;">
+                    <!-- Dynamic preview content will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sample Queries -->
+    <div style="
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255,255,255,0.2);
+    ">
+        <div style="font-size: 14px; margin-bottom: 12px; opacity: 0.8;">
+            💡 Try these examples:
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <button onclick="setSampleQuery(this.textContent)" style="
+                background: rgba(255,255,255,0.2);
+                color: white;
+                border: none;
+                padding: 8px 15px;
+                border-radius: 20px;
+                cursor: pointer;
+                font-size: 13px;
+                transition: all 0.3s ease;
+            ">High school boys basketball tournament</button>
+            
+            <button onclick="setSampleQuery(this.textContent)" style="
+                background: rgba(255,255,255,0.2);
+                color: white;
+                border: none;
+                padding: 8px 15px;
+                border-radius: 20px;
+                cursor: pointer;
+                font-size: 13px;
+                transition: all 0.3s ease;
+            ">Corporate hackathon competition</button>
+            
+            <button onclick="setSampleQuery(this.textContent)" style="
+                background: rgba(255,255,255,0.2);
+                color: white;
+                border: none;
+                padding: 8px 15px;
+                border-radius: 20px;
+                cursor: pointer;
+                font-size: 13px;
+                transition: all 0.3s ease;
+            ">Youth swimming meet with multiple events</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Dual Path Tournament Creation JavaScript
+const REPLIT_URL = 'YOUR_REPLIT_URL_HERE'; // Update with your actual URL
+
+// Set sample query
+function setSampleQuery(text) {
+    document.getElementById('ai-query').value = text;
+}
+
+// Get AI Recommendation (existing function)
+async function getAIRecommendation() {
+    const query = document.getElementById('ai-query').value.trim();
+    
+    if (!query) {
+        alert('Please describe your tournament first!');
+        return;
+    }
+    
+    // Update UI to loading state
+    const button = document.getElementById('get-ai-recommendation');
+    const originalText = button.textContent;
+    button.textContent = '🤖 Analyzing...';
+    button.disabled = true;
+    
+    try {
+        // Simulate AI call (replace with your actual API call)
+        const mockResponse = {
+            success: true,
+            recommendation: `I recommend a Basketball tournament using Bracket + Series format for High School (9th-12th Grade) Boys' (Youth) division. Perfect for Champions for Change fundraising!`,
+            sport: 'Basketball',
+            format: 'Bracket + Series',
+            age_group: 'High School (9th-12th Grade)',
+            gender_division: "Boys' (Youth)",
+            confidence: 85
+        };
+        
+        // Display results
+        displayAIRecommendation(mockResponse);
+        
+    } catch (error) {
+        console.error('AI Error:', error);
+        alert('AI consultation failed. Please try again!');
+    }
+    
+    // Reset button
+    button.textContent = originalText;
+    button.disabled = false;
+}
+
+function displayAIRecommendation(data) {
+    // Display AI recommendation
+    document.getElementById('ai-recommendation-text').textContent = data.recommendation;
+    document.getElementById('suggested-sport').textContent = data.sport;
+    document.getElementById('suggested-format').textContent = data.format;
+    document.getElementById('suggested-age').textContent = data.age_group;
+    document.getElementById('suggested-gender').textContent = data.gender_division;
+    
+    // Update Champions for Change impact
+    const impactText = `This tournament could fund ${Math.floor(Math.random() * 3) + 2} student educational trips!`;
+    document.getElementById('impact-text').textContent = impactText;
+    
+    // Show response area
+    document.getElementById('ai-response').style.display = 'block';
+    
+    // Store suggestions globally
+    window.aiSuggestions = data;
+    
+    // Scroll to show options
+    setTimeout(() => {
+        document.getElementById('ai-response').scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'nearest' 
+        });
+    }, 300);
+}
+
+// NEW: AI Builds Tournament Automatically
+async function aiBuildTournament() {
+    if (!window.aiSuggestions) {
+        alert('Please get AI recommendations first!');
+        return;
+    }
+    
+    const button = document.getElementById('ai-build-tournament');
+    const originalText = button.textContent;
+    button.textContent = '🤖 Building...';
+    button.disabled = true;
+    
+    try {
+        // Show building progress
+        showBuildingProgress();
+        
+        // Simulate API call to build tournament
+        await new Promise(resolve => setTimeout(resolve, 2000)); // 2 second delay for effect
+        
+        // Success! Redirect to built tournament
+        alert(`🎉 Tournament Built Successfully!\n\n${window.aiSuggestions.sport} tournament is ready with:\n✅ Pre-configured ${window.aiSuggestions.format} format\n✅ Sample participants for preview\n✅ Ready for your real participants\n\nRedirecting to your tournament...`);
+        
+        // Here you would redirect to the actual tournament page
+        // window.location.href = '/tournament/' + tournamentId;
+        
+    } catch (error) {
+        alert('Failed to build tournament. Please try manual configuration.');
+    }
+    
+    button.textContent = originalText;
+    button.disabled = false;
+}
+
+// NEW: Manual Configuration with AI Pre-population
+function manualConfigure() {
+    if (!window.aiSuggestions) {
+        alert('Please get AI recommendations first!');
+        return;
+    }
+    
+    alert(`🎯 Switching to Manual Configuration!\n\nAI recommendations will be applied to the form below:\n✅ Sport: ${window.aiSuggestions.sport}\n✅ Format: ${window.aiSuggestions.format}\n✅ Age: ${window.aiSuggestions.age_group}\n✅ Gender: ${window.aiSuggestions.gender_division}\n\nScroll down to review and customize!`);
+    
+    // Auto-populate the manual form (you'll need to implement this based on your form structure)
+    populateManualForm();
+    
+    // Scroll to manual form
+    const manualForm = document.querySelector('#create-tournament') || 
+                      document.querySelector('.tournament-form') ||
+                      document.querySelector('form');
+    if (manualForm) {
+        manualForm.scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
+function populateManualForm() {
+    // This function should populate your existing tournament creation form
+    // with the AI suggestions. You'll need to adapt this to your actual form elements.
+    
+    /* Example implementation:
+    const sportDropdown = document.querySelector('[name="sport"]');
+    if (sportDropdown) {
+        for (let option of sportDropdown.options) {
+            if (option.text.includes(window.aiSuggestions.sport)) {
+                option.selected = true;
+                break;
+            }
+        }
+    }
+    */
+    
+    console.log('Populating form with AI suggestions:', window.aiSuggestions);
+}
+
+function showBuildingProgress() {
+    // Show a progress indicator
+    const previewDiv = document.getElementById('tournament-preview');
+    previewDiv.style.display = 'block';
+    previewDiv.innerHTML = `
+        <h4 style="margin: 0 0 10px 0; font-size: 16px;">
+            🔨 Building Your Tournament...
+        </h4>
+        <div style="font-size: 14px; opacity: 0.9;">
+            ⏳ Creating ${window.aiSuggestions.format} structure...<br>
+            ⏳ Setting up ${window.aiSuggestions.age_group} divisions...<br>
+            ⏳ Configuring ${window.aiSuggestions.sport} rules...<br>
+            ⏳ Adding sample participants for preview...
+        </div>
+    `;
+}
+
+// Clear function
+function clearAIQuery() {
+    document.getElementById('ai-query').value = '';
+    document.getElementById('ai-response').style.display = 'none';
+    window.aiSuggestions = null;
+}
+
+console.log('🤖 Dual-Path Tournament Creation loaded!');
+</script>

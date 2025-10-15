@@ -1,0 +1,239 @@
+# Tournament Empire - Privacy Policy & Refund Terms
+
+## 🛡️ PRIVACY POLICY
+
+### **Our Commitment**
+
+Champions for Change Tournament Platform is committed to protecting your privacy while supporting educational opportunities for students. This policy explains how we collect, use, and protect your information across our three domains.
+
+### **Domain-Specific Data Handling**
+
+#### **Educational Domain (tournaments.trantortournaments.org)**
+
+- **FERPA Compliant**: Student data protection standards
+- **School-Safe Guarantee**: Zero data sharing with entertainment domains
+- **Educational Purpose Only**: Data used solely for tournament management
+- **District Control**: Schools maintain ownership of their data
+
+#### **Business Domain (pro.trantortournaments.org)**
+
+- **Professional Standards**: Business-grade data security
+- **Limited Sharing**: Only with explicitly consented integrations
+- **Analytics Purpose**: Platform improvement and tournament insights
+- **Opt-Out Available**: Users can limit data usage
+
+#### **Coaches Lounge (coaches.trantortournaments.org)**
+
+- **Community Focus**: Data used for fantasy sports and community features
+- **Age Verification Required**: 18+ only, verified accounts
+- **Social Features**: Limited sharing for league and competition purposes
+- **No Gambling Data**: Educational fantasy sports only
+
+-----
+
+## 📊 DATA COLLECTION
+
+### **Information We Collect**
+
+- **Account Information**: Name, email, organization affiliation
+- **Tournament Data**: Scores, brackets, participant information
+- **Usage Analytics**: Platform interaction for improvement purposes
+- **Payment Information**: Processed securely through Stripe (not stored)
+- **Fantasy Data**: Player selections, league participation (Coaches Lounge only)
+
+### **Information We Don’t Collect**
+
+- **Student Personal Information**: Beyond tournament participation
+- **Financial Details**: Credit cards stored with Stripe, not us
+- **Cross-Domain Tracking**: Educational users never tracked on other domains
+- **Social Media Content**: Only public profile information with consent
+
+### **Data Sharing Policy**
+
+- **Never Sold**: We never sell user data to third parties
+- **Service Providers**: Only with essential partners (Stripe, email services)
+- **Legal Requirements**: Only when legally required
+- **Educational Mission**: All revenue supports Champions for Change
+
+-----
+
+## 💳 REFUND POLICY
+
+### **Annual Subscription Plans**
+
+#### **Champion Annual ($990/year - Save $198)**
+
+- **Free Trial**: 30 days full access, cancel anytime
+- **Refund Window**: Prorated refunds within first 60 days
+- **After 60 Days**: No refunds except exceptional circumstances
+- **Cancellation**: Can cancel to prevent next year’s renewal
+
+#### **Enterprise Annual ($3,990/year - Save $798)**
+
+- **Free Consultation**: 30-day implementation period
+- **Refund Window**: Prorated refunds within first 90 days
+- **After 90 Days**: No refunds except exceptional circumstances
+- **Contract Terms**: Annual commitment with renewal options
+
+### **Monthly Subscription Plans**
+
+#### **Champion Monthly ($99/month)**
+
+- **Free Trial**: 30 days full access
+- **No Refunds**: After trial period ends
+- **Cancel Anytime**: No future charges, immediate cancellation
+- **Fair Warning**: Clear disclosure before trial ends
+
+#### **Enterprise Monthly ($399/month)**
+
+- **Free Trial**: 30 days full access with setup support
+- **No Refunds**: After trial period ends
+- **Cancel Anytime**: 30-day notice for large implementations
+- **Migration Support**: Help transitioning to annual plans
+
+### **Tournament Credits & One-Time Purchases**
+
+#### **Tournament Credit Packages**
+
+- **Full Refunds**: Within 7 days if no tournaments created
+- **Partial Refunds**: Unused credits refundable within 30 days
+- **No Refunds**: After first tournament is created
+- **Transferable**: Credits can be used across seasons
+
+#### **Registration Fees (Paid to Organizers)**
+
+- **Organizer Policy**: Refunds handled by tournament organizers
+- **Platform Not Liable**: We facilitate payment, don’t control refunds
+- **Dispute Resolution**: Assistance with organizer communication
+- **Emergency Situations**: Platform may intervene for safety issues
+
+### **Donations to Champions for Change**
+
+- **Tax Deductible**: Eligible for tax benefits
+- **No Refunds**: Donations are final contributions
+- **Transparency**: Annual reports on student trip funding
+- **Recognition**: Optional donor recognition programs
+
+-----
+
+## 🔒 DATA SECURITY
+
+### **Technical Safeguards**
+
+- **Encryption**: All data encrypted in transit and at rest
+- **Secure Hosting**: Replit enterprise hosting with SOC 2 compliance
+- **Access Controls**: Role-based access with authentication
+- **Regular Audits**: Quarterly security reviews and updates
+
+### **Organizational Safeguards**
+
+- **Employee Training**: Regular privacy and security education
+- **Data Minimization**: Collect only necessary information
+- **Retention Policies**: Automatic deletion of expired data
+- **Breach Response**: 72-hour notification procedures
+
+### **User Controls**
+
+- **Account Access**: View and download your data anytime
+- **Deletion Rights**: Request account and data deletion
+- **Correction Rights**: Update incorrect information
+- **Portability**: Export tournament data in standard formats
+
+-----
+
+## 🤝 SOCIAL MEDIA API COMPLIANCE
+
+### **Facebook/Meta Integration**
+
+- **Limited Scope**: Only public profile information with consent
+- **No Content Scraping**: Never access private posts or messages
+- **Clear Permissions**: Explicit consent for each data type
+- **Regular Reviews**: Compliance with Facebook Developer Policies
+
+### **Twitter/X Integration**
+
+- **Public Data Only**: Publicly available profile and post information
+- **User Control**: Users can revoke access anytime
+- **Rate Limiting**: Respectful API usage within platform limits
+- **Content Policy**: No reposting without explicit permission
+
+### **ESPN API Usage**
+
+- **Sports Data Only**: Player statistics and game information
+- **No Personal Data**: No access to user ESPN accounts
+- **Educational Purpose**: Fantasy sports learning and analysis
+- **Real-Time Updates**: Live scoring and player performance data
+
+-----
+
+## 📞 CONTACT & RIGHTS
+
+### **Your Rights Under This Policy**
+
+- **Access**: Request copy of your personal data
+- **Correction**: Update inaccurate information
+- **Deletion**: Request account and data deletion
+- **Portability**: Export data in machine-readable format
+- **Object**: Opt-out of certain data processing activities
+
+### **Contact Information**
+
+**Champions for Change**
+
+- Email: privacy@trantortournaments.org
+- Phone: 361-300-1552
+- Mail: [Physical Address]
+- Response Time: 30 days maximum
+
+### **Dispute Resolution**
+
+- **Internal Review**: Privacy team investigation
+- **Educational Mediation**: For school district concerns
+- **Legal Compliance**: Cooperation with regulatory inquiries
+- **Arbitration**: Binding arbitration for unresolved disputes
+
+-----
+
+## 🔄 POLICY UPDATES
+
+### **Notification Process**
+
+- **Email Notice**: 30 days before significant changes
+- **Platform Alerts**: In-app notifications for policy updates
+- **Website Posting**: Current version always available
+- **Granular Consent**: Re-consent for expanded data usage
+
+### **Effective Dates**
+
+- **Current Version**: Effective [Date]
+- **Previous Versions**: Available upon request
+- **Change Log**: Summary of material changes
+- **Transition Periods**: Reasonable time for compliance
+
+-----
+
+## 🎓 EDUCATIONAL MISSION COMMITMENT
+
+### **Champions for Change Alignment**
+
+Every policy decision supports our educational mission:
+
+- **Student Privacy First**: Protecting student information is paramount
+- **Transparent Funding**: Clear how revenue supports educational trips
+- **Community Benefit**: Policies designed to serve schools and coaches
+- **Long-term Sustainability**: Ensuring platform serves educational mission indefinitely
+
+### **Revenue Transparency**
+
+- **Platform Subscriptions**: Fund platform development and Champions for Change
+- **Organizer Fees**: 100% to tournament organizers for their events
+- **Donations**: 100% to designated recipients (organizers or Champions for Change)
+- **Credit Purchases**: Fund platform operation and educational mission
+
+-----
+
+*This policy reflects our commitment to protecting your privacy while supporting educational opportunities for students through Champions for Change. We believe transparency and user control are essential for building trust in our educational mission.*
+
+**Last Updated**: [Date]
+**Version**: 3.0
+**Next Review**: [Date + 1 Year]

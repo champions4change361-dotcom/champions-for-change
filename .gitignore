@@ -9,7 +9,6 @@ vite.config.ts.*
 .env
 .local/
 .config/
-attached_assets/
 *.png
 *.jpg
 *.jpeg

@@ -1,0 +1,491 @@
+// 🎮 COACHES LOUNGE LANDING PAGE - CLEAR LEGAL MESSAGING
+// Sports + Gaming + Community Platform with Educational Mission
+
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { 
+  Gamepad2, 
+  Trophy, 
+  Users, 
+  Heart, 
+  Shield, 
+  GraduationCap,
+  Code,
+  Football,
+  ChevronRight,
+  AlertTriangle
+} from 'lucide-react';
+
+export function CoachesLoungeLoginPage() {
+  const [loginCode, setLoginCode] = useState('');
+  const [showDonation, setShowDonation] = useState(false);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-green-900">
+      {/* Header */}
+      <div className="bg-black/20 backdrop-blur-sm border-b border-white/10">
+        <div className="max-w-6xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-purple-600 rounded-lg">
+                <Gamepad2 className="h-8 w-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-white">Coaches Lounge</h1>
+                <p className="text-purple-200 text-sm">Where Competition Meets Community</p>
+              </div>
+            </div>
+            <Badge className="bg-green-600 text-white px-4 py-2">
+              Supporting Education
+            </Badge>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-4xl mx-auto px-4 py-12">
+        {/* Mission & Legal Clarity */}
+        <Card className="mb-8 border-yellow-200 bg-yellow-50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-yellow-900">
+              <Shield className="h-5 w-5" />
+              Important: We Are NOT a Gambling Site
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Alert className="border-blue-200 bg-blue-50">
+              <AlertTriangle className="h-4 w-4 text-blue-600" />
+              <AlertDescription className="text-blue-800">
+                <strong>Coaches Lounge is a community platform for friends and colleagues</strong>
+                <br />
+                We provide tools for organizing competitions, tracking scores, and having fun together.
+                Any rewards, prizes, or friendly wagers are agreements between commissioners and players - 
+                not facilitated by our platform.
+              </AlertDescription>
+            </Alert>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="bg-white p-4 rounded-lg border border-green-200">
+                <h4 className="flex items-center gap-2 font-semibold text-green-900 mb-2">
+                  <GraduationCap className="h-4 w-4" />
+                  Our Educational Mission
+                </h4>
+                <p className="text-green-800 text-sm mb-3">
+                  Every platform supports Champions for Change - funding educational trips 
+                  for students in Corpus Christi, Texas. Donations are voluntary but greatly appreciated!
+                </p>
+                
+                {!showDonation ? (
+                  <Button 
+                    onClick={() => setShowDonation(true)}
+                    variant="outline" 
+                    className="w-full border-green-300 text-green-700 hover:bg-green-50"
+                  >
+                    <Heart className="mr-2 h-4 w-4" />
+                    Support Student Education
+                  </Button>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      {[5, 10, 25, 50].map(amount => (
+                        <Button 
+                          key={amount}
+                          size="sm" 
+                          variant="outline"
+                          className="text-xs border-green-300 text-green-700 hover:bg-green-50"
+                        >
+                          ${amount}
+                        </Button>
+                      ))}
+                    </div>
+                    <Button size="sm" className="w-full bg-green-600 hover:bg-green-700 text-white">
+                      <Heart className="mr-2 h-3 w-3" />
+                      Donate to Champions for Change
+                    </Button>
+                    <p className="text-xs text-green-600 text-center">100% goes to student educational trips</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="bg-white p-4 rounded-lg border border-purple-200">
+                <h4 className="flex items-center gap-2 font-semibold text-purple-900 mb-2">
+                  <Users className="h-4 w-4" />
+                  What We Offer
+                </h4>
+                <ul className="text-purple-800 text-sm space-y-1">
+                  <li className="flex items-center gap-2">
+                    <Football className="h-3 w-3" />
+                    Fantasy Sports Leagues (NFL, NBA)
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Gamepad2 className="h-3 w-3" />
+                    Video Gaming Tournaments
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Code className="h-3 w-3" />
+                    Office Competitions & Challenges
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Trophy className="h-3 w-3" />
+                    Custom League Management
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Login Options */}
+        <div className="grid lg:grid-cols-2 gap-8">
+          {/* Commissioner Code Login */}
+          <Card className="bg-white/95 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-purple-600" />
+                Join Existing League
+              </CardTitle>
+              <CardDescription>
+                Enter your commissioner's registration code to join a league
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="loginCode">Commissioner Registration Code</Label>
+                <Input 
+                  id="loginCode"
+                  value={loginCode}
+                  onChange={(e) => setLoginCode(e.target.value)}
+                  placeholder="e.g., COACH2024-ABC123"
+                  className="text-center font-mono text-lg tracking-wider"
+                />
+              </div>
+              
+              <Button 
+                disabled={!loginCode}
+                className="w-full bg-purple-600 hover:bg-purple-700"
+                size="lg"
+              >
+                <ChevronRight className="mr-2 h-4 w-4" />
+                Join League
+              </Button>
+              
+              <p className="text-xs text-gray-600 text-center">
+                Don't have a code? Ask your league commissioner or create your own below.
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Create New League */}
+          <Card className="bg-white/95 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Trophy className="h-5 w-5 text-blue-600" />
+                Create New League
+              </CardTitle>
+              <CardDescription>
+                Become a commissioner and set up your own competitions
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <Button variant="outline" className="border-orange-200 text-orange-700 hover:bg-orange-50">
+                  <Football className="mr-2 h-4 w-4" />
+                  Fantasy Sports
+                </Button>
+                <Button variant="outline" className="border-green-200 text-green-700 hover:bg-green-50">
+                  <Gamepad2 className="mr-2 h-4 w-4" />
+                  Gaming League
+                </Button>
+                <Button variant="outline" className="border-blue-200 text-blue-700 hover:bg-blue-50">
+                  <Code className="mr-2 h-4 w-4" />
+                  Office Challenge
+                </Button>
+                <Button variant="outline" className="border-purple-200 text-purple-700 hover:bg-purple-50">
+                  <Trophy className="mr-2 h-4 w-4" />
+                  Custom League
+                </Button>
+              </div>
+              
+              <Button className="w-full bg-blue-600 hover:bg-blue-700" size="lg">
+                <Trophy className="mr-2 h-4 w-4" />
+                Start Commissioner Setup
+              </Button>
+              
+              <Alert>
+                <GraduationCap className="h-4 w-4" />
+                <AlertDescription className="text-xs">
+                  <strong>Free to create!</strong> Commissioners can invite unlimited players. 
+                  Optional donations support educational trips.
+                </AlertDescription>
+              </Alert>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Features Grid */}
+        <div className="mt-12 grid md:grid-cols-3 gap-6">
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20 text-white">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-orange-300">
+                <Football className="h-5 w-5" />
+                Fantasy Sports
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="text-sm space-y-1 text-gray-200">
+                <li>• NFL Survivor Pools</li>
+                <li>• NBA Fantasy Leagues</li>
+                <li>• Season-long competitions</li>
+                <li>• Live score tracking</li>
+                <li>• Custom scoring rules</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20 text-white">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-green-300">
+                <Gamepad2 className="h-5 w-5" />
+                Gaming Tournaments
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="text-sm space-y-1 text-gray-200">
+                <li>• Video game competitions</li>
+                <li>• Bracket tournaments</li>
+                <li>• Leaderboards</li>
+                <li>• Multiple game support</li>
+                <li>• Team & solo events</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/10 backdrop-blur-sm border-white/20 text-white">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-blue-300">
+                <Users className="h-5 w-5" />
+                Community Features
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="text-sm space-y-1 text-gray-200">
+                <li>• Private leagues</li>
+                <li>• Commissioner controls</li>
+                <li>• Player invitations</li>
+                <li>• Chat & messaging</li>
+                <li>• Achievement tracking</li>
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Footer Legal */}
+        <div className="mt-12 text-center">
+          <div className="bg-black/20 backdrop-blur-sm rounded-lg p-6 border border-white/10">
+            <p className="text-white/80 text-sm mb-4">
+              <strong>Legal Notice:</strong> Coaches Lounge facilitates competition organization and score tracking only. 
+              We do not process gambling transactions, hold funds, or facilitate betting. Any prizes or rewards are 
+              arranged directly between league participants.
+            </p>
+            <div className="flex justify-center gap-4 text-xs text-white/60">
+              <a href="/terms" className="hover:text-white">Terms of Service</a>
+              <a href="/privacy" className="hover:text-white">Privacy Policy</a>
+              <a href="/contact" className="hover:text-white">Contact Support</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// =============================================================================
+// UNIVERSAL REGISTRATION CODE GENERATOR SYSTEM
+// =============================================================================
+
+import { randomBytes } from 'crypto';
+
+interface RegistrationCodeData {
+  type: 'tournament_manager' | 'district_admin' | 'business_user' | 'fantasy_commissioner' | 'gaming_commissioner';
+  userId: string;
+  organizationId?: string;
+  leagueId?: string;
+  permissions: string[];
+  expiresAt?: Date;
+}
+
+export class UniversalRegistrationSystem {
+  
+  // Generate unique registration codes for all platform types
+  static generateRegistrationCode(data: RegistrationCodeData): string {
+    const prefixes = {
+      'tournament_manager': 'TM',
+      'district_admin': 'DA', 
+      'business_user': 'BU',
+      'fantasy_commissioner': 'FC',
+      'gaming_commissioner': 'GC'
+    };
+    
+    const prefix = prefixes[data.type];
+    const year = new Date().getFullYear();
+    const randomId = randomBytes(4).toString('hex').toUpperCase();
+    
+    return `${prefix}${year}-${randomId}`;
+  }
+  
+  // Validate and decode registration codes
+  static async validateRegistrationCode(code: string, storage: any) {
+    try {
+      const codeData = await storage.getRegistrationCode(code);
+      
+      if (!codeData) {
+        return { valid: false, error: 'Invalid registration code' };
+      }
+      
+      if (codeData.expiresAt && new Date() > new Date(codeData.expiresAt)) {
+        return { valid: false, error: 'Registration code has expired' };
+      }
+      
+      return {
+        valid: true,
+        type: codeData.type,
+        permissions: codeData.permissions,
+        organizationId: codeData.organizationId,
+        leagueId: codeData.leagueId
+      };
+    } catch (error) {
+      return { valid: false, error: 'Code validation failed' };
+    }
+  }
+  
+  // Create invitation links with embedded codes
+  static generateInvitationLink(code: string, baseUrl: string): string {
+    const domainMap = {
+      'TM': 'tournaments',
+      'DA': 'tournaments', 
+      'BU': 'pro',
+      'FC': 'coaches',
+      'GC': 'coaches'
+    };
+    
+    const prefix = code.substring(0, 2);
+    const subdomain = domainMap[prefix as keyof typeof domainMap] || 'coaches';
+    
+    return `https://${subdomain}.trantortournaments.org/join/${code}`;
+  }
+}
+
+// Database schema for registration codes
+export const registrationCodes = pgTable("registration_codes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  code: varchar("code").unique().notNull(), // The actual registration code
+  type: text("type", {
+    enum: ["tournament_manager", "district_admin", "business_user", "fantasy_commissioner", "gaming_commissioner"]
+  }).notNull(),
+  createdBy: varchar("created_by").notNull(), // User ID who created the code
+  organizationId: varchar("organization_id"), // Associated organization
+  leagueId: varchar("league_id"), // Associated league/tournament
+  permissions: jsonb("permissions").$type<string[]>().notNull(),
+  maxUses: integer("max_uses").default(1), // How many people can use this code
+  currentUses: integer("current_uses").default(0),
+  expiresAt: timestamp("expires_at"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// API endpoints for code management
+app.post("/api/registration-codes/generate", async (req, res) => {
+  try {
+    const { type, organizationId, leagueId, permissions, maxUses, expiresAt } = req.body;
+    const userId = req.user?.id;
+    
+    const code = UniversalRegistrationSystem.generateRegistrationCode({
+      type,
+      userId,
+      organizationId,
+      leagueId,
+      permissions
+    });
+    
+    const storage = await getStorage();
+    const codeData = await storage.createRegistrationCode({
+      code,
+      type,
+      createdBy: userId,
+      organizationId,
+      leagueId,
+      permissions,
+      maxUses: maxUses || 1,
+      expiresAt: expiresAt ? new Date(expiresAt) : null
+    });
+    
+    const invitationLink = UniversalRegistrationSystem.generateInvitationLink(code, req.headers.origin);
+    
+    res.json({
+      success: true,
+      code: code,
+      invitationLink: invitationLink,
+      expiresAt: codeData.expiresAt
+    });
+    
+  } catch (error) {
+    console.error("Code generation error:", error);
+    res.status(500).json({ success: false, message: "Failed to generate code" });
+  }
+});
+
+app.post("/api/registration-codes/validate", async (req, res) => {
+  try {
+    const { code } = req.body;
+    const storage = await getStorage();
+    
+    const validation = await UniversalRegistrationSystem.validateRegistrationCode(code, storage);
+    
+    res.json(validation);
+    
+  } catch (error) {
+    console.error("Code validation error:", error);
+    res.status(500).json({ success: false, message: "Validation failed" });
+  }
+});
+
+/*
+IMPLEMENTATION SUMMARY:
+
+1. CLEAR LEGAL MESSAGING:
+   ✅ "We are NOT a gambling site" - prominent display
+   ✅ Community platform for friends/colleagues
+   ✅ Rewards/prizes between commissioners and players
+   ✅ Educational mission clearly stated
+
+2. COACHES LOUNGE BRANDING:
+   ✅ Sports + Gaming + Community focus
+   ✅ "Where Competition Meets Community"
+   ✅ Support for NFL, NBA, eSports, office competitions
+
+3. DONATION INTEGRATION:
+   ✅ Voluntary donations to Champions for Change
+   ✅ Clear educational mission messaging
+   ✅ Optional donation button (not mandatory)
+
+4. UNIVERSAL REGISTRATION SYSTEM:
+   ✅ Tournament Managers: TM2024-ABC123
+   ✅ District Admins: DA2024-XYZ789
+   ✅ Business Users: BU2024-DEF456
+   ✅ Fantasy Commissioners: FC2024-GHI789
+   ✅ Gaming Commissioners: GC2024-JKL012
+
+5. CODE FEATURES:
+   ✅ Unique codes per platform type
+   ✅ Automatic domain routing based on code
+   ✅ Expiration dates and usage limits
+   ✅ Permission-based access control
+   ✅ Invitation link generation
+
+This creates a clear, legal, and user-friendly entry point to the Coaches Lounge while maintaining the educational mission!
+*/

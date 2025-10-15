@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Champions for Change - Athletic Safety & Tournament Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+```
+    body {
+        font-family: 'Arial', sans-serif;
+        line-height: 1.6;
+        color: #333;
+    }
+    
+    .hero {
+        background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+        color: white;
+        padding: 80px 20px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="rgba(255,255,255,0.1)"/></svg>') repeat;
+        animation: float 20s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+    }
+    
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .hero h1 {
+        font-size: 3.5rem;
+        font-weight: bold;
+        margin-bottom: 20px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .hero .subtitle {
+        font-size: 1.5rem;
+        margin-bottom: 30px;
+        opacity: 0.9;
+    }
+    
+    .safety-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 30px;
+        margin: 60px 0;
+        padding: 40px 20px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
+    }
+    
+    .stat-card {
+        text-align: center;
+        padding: 20px;
+    }
+    
+    .stat-number {
+        font-size: 3rem;
+        font-weight: bold;
+        color: #f39c12;
+        display: block;
+    }
+    
+    .stat-label {
+        font-size: 1rem;
+        margin-top: 10px;
+        opacity: 0.9;
+    }
+    
+    .cta-section {
+        margin-top: 50px;
+    }
+    
+    .cta-button {
+        background: linear-gradient(45deg, #e74c3c, #f39c12);
+        color: white;
+        padding: 18px 40px;
+        font-size: 1.2rem;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        margin: 10px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    
+    .cta-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    }
+    
+    .cta-secondary {
+        background: transparent;
+        border: 2px solid white;
+        color: white;
+    }
+    
+    .value-prop {
+        background: #f8f9fa;
+        padding: 80px 20px;
+    }
+    
+    .section-title {
+        text-align: center;
+        font-size: 2.5rem;
+        margin-bottom: 60px;
+        color: #2c3e50;
+    }
+    
+    .comparison-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 40px;
+        margin-bottom: 60px;
+    }
+    
+    .comparison-card {
+        background: white;
+        padding: 40px;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .comparison-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(45deg, #3498db, #2ecc71);
+    }
+    
+    .competitor-card::before {
+        background: linear-gradient(45deg, #e74c3c, #c0392b);
+    }
+    
+    .price-tag {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+    
+    .price-tag.our-price {
+        color: #27ae60;
+    }
+    
+    .price-tag.competitor-price {
+        color: #e74c3c;
+    }
+    
+    .features-list {
+        text-align: left;
+        margin-top: 30px;
+    }
+    
+    .features-list li {
+        padding: 8px 0;
+        list-style: none;
+        position: relative;
+        padding-left: 25px;
+    }
+    
+    .features-list li::before {
+        content: '✓';
+        position: absolute;
+        left: 0;
+        color: #27ae60;
+        font-weight: bold;
+    }
+    
+    .competitor-card .features-list li::before {
+        content: '✗';
+        color: #e74c3c;
+    }
+    
+    .nonprofit-badge {
+        background: linear-gradient(45deg, #9b59b6, #8e44ad);
+        color: white;
+        padding: 60px 20px;
+        text-align: center;
+    }
+    
+    .nonprofit-badge h2 {
+        font-size: 2.5rem;
+        margin-bottom: 30px;
+    }
+    
+    .nonprofit-text {
+        font-size: 1.3rem;
+        max-width: 800px;
+        margin: 0 auto;
+        line-height: 1.8;
+    }
+    
+    .mission-highlight {
+        background: #fff3cd;
+        border-left: 5px solid #f39c12;
+        padding: 20px;
+        margin: 30px 0;
+        border-radius: 5px;
+    }
+    
+    .roi-calculator {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 80px 20px;
+        text-align: center;
+    }
+    
+    .roi-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 30px;
+        margin-top: 50px;
+    }
+    
+    .roi-item {
+        background: rgba(255,255,255,0.1);
+        padding: 30px;
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
+    }
+    
+    .roi-amount {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #f39c12;
+    }
+    
+    @media (max-width: 768px) {
+        .hero h1 {
+            font-size: 2.5rem;
+        }
+        
+        .hero .subtitle {
+            font-size: 1.2rem;
+        }
+        
+        .safety-stats {
+            grid-template-columns: 1fr;
+        }
+        
+        .comparison-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+```
+
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>Protect Your Athletes.<br>Manage Your Tournaments.</h1>
+            <p class="subtitle">The only nonprofit platform combining professional tournament management with AI-powered athlete safety monitoring</p>
+
+```
+        <div class="safety-stats">
+            <div class="stat-card">
+                <span class="stat-number">$25,000+</span>
+                <p class="stat-label">Average cost of one preventable sports injury</p>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">$2,490</span>
+                <p class="stat-label">Annual cost of our complete safety platform</p>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">903%</span>
+                <p class="stat-label">ROI when preventing just one serious injury</p>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">100%</span>
+                <p class="stat-label">HIPAA/FERPA compliant health monitoring</p>
+            </div>
+        </div>
+        
+        <div class="cta-section">
+            <a href="#demo" class="cta-button">See Live Demo</a>
+            <a href="#pricing" class="cta-button cta-secondary">View Pricing</a>
+        </div>
+    </div>
+</section>
+
+<!-- Value Proposition Section -->
+<section class="value-prop">
+    <div class="container">
+        <h2 class="section-title">Why Athletic Directors Choose Our Platform</h2>
+        
+        <div class="comparison-grid">
+            <div class="comparison-card">
+                <h3>Champions for Change Platform</h3>
+                <div class="price-tag our-price">$2,490/year</div>
+                <p><strong>501(c)(3) Nonprofit</strong> - Mission-driven, not profit-driven</p>
+                
+                <ul class="features-list">
+                    <li>Complete tournament management</li>
+                    <li>AI-powered health monitoring</li>
+                    <li>Concussion risk assessment</li>
+                    <li>Position-specific analytics</li>
+                    <li>HIPAA/FERPA compliance</li>
+                    <li>Predictive injury prevention</li>
+                    <li>Real-time safety alerts</li>
+                    <li>Legal liability protection</li>
+                    <li>Educational program funding</li>
+                </ul>
+            </div>
+            
+            <div class="comparison-card competitor-card">
+                <h3>Corporate Competitors</h3>
+                <div class="price-tag competitor-price">$50K-$80K/year</div>
+                <p><strong>For-Profit Companies</strong> - Profit maximization focus</p>
+                
+                <ul class="features-list">
+                    <li>Basic tournament brackets</li>
+                    <li>No health monitoring</li>
+                    <li>No safety features</li>
+                    <li>No medical compliance</li>
+                    <li>No injury prevention</li>
+                    <li>No athlete protection</li>
+                    <li>No safety analytics</li>
+                    <li>No liability reduction</li>
+                    <li>No community impact</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="mission-highlight">
+            <strong>Mission Impact:</strong> Every district subscription directly funds educational opportunities for underprivileged youth in Corpus Christi, Texas. You're not just buying software - you're supporting educational equity.
+        </div>
+    </div>
+</section>
+
+<!-- Nonprofit Mission Section -->
+<section class="nonprofit-badge">
+    <div class="container">
+        <h2>🌟 Mission-Driven Advantage</h2>
+        <p class="nonprofit-text">
+            Unlike commercial competitors, this platform is built by Champions for Change, a 501(c)(3) nonprofit dedicated to funding educational opportunities for underprivileged youth. Every district subscription directly supports student trips and educational programs. 
+            <br><br>
+            <strong>Competitive Advantage:</strong> "Let them copy - they'll always be behind and can't replicate the authentic educational mission."
+        </p>
+    </div>
+</section>
+
+<!-- ROI Calculator Section -->
+<section class="roi-calculator">
+    <div class="container">
+        <h2>Calculate Your Savings & Impact</h2>
+        <p>Compare the true cost of sports injuries vs. our prevention platform:</p>
+        
+        <div class="roi-grid">
+            <div class="roi-item">
+                <h4>Concussion Treatment</h4>
+                <div class="roi-amount">$3K-$15K</div>
+                <p>per incident</p>
+            </div>
+            <div class="roi-item">
+                <h4>ACL Surgery</h4>
+                <div class="roi-amount">$20K-$50K</div>
+                <p>per athlete</p>
+            </div>
+            <div class="roi-item">
+                <h4>Heat Stroke Emergency</h4>
+                <div class="roi-amount">$10K-$100K</div>
+                <p>per incident</p>
+            </div>
+            <div class="roi-item">
+                <h4>Our Prevention Platform</h4>
+                <div class="roi-amount">$2,490</div>
+                <p>per year total</p>
+            </div>
+        </div>
+        
+        <p style="margin-top: 40px; font-size: 1.2rem;">
+            <strong>Prevent just ONE serious injury and save $22,510+ annually</strong>
+        </p>
+    </div>
+</section>
+
+<script>
+    // Add smooth scrolling for CTA buttons
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+
+    // Add intersection observer for animations
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    // Observe elements for animation
+    document.querySelectorAll('.comparison-card, .stat-card, .roi-item').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(30px)';
+        el.style.transition = 'all 0.6s ease-out';
+        observer.observe(el);
+    });
+</script>
+```
+
+</body>
+</html>

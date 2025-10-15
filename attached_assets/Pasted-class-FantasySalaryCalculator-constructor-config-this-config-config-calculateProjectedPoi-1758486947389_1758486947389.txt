@@ -1,0 +1,138 @@
+class FantasySalaryCalculator {
+constructor(config) {
+this.config = config;
+}
+
+calculateProjectedPoints(playerStats, position) {
+const scoring = this.config.pprScoring;
+let points = 0;
+
+```
+// Calculate based on position
+if (position === 'QB') {
+  points = (playerStats.passYards * scoring.passYard) +
+           (playerStats.passTDs * scoring.passTD) +
+           (playerStats.interceptions * scoring.interception) +
+           (playerStats.rushYards * scoring.rushYard) +
+           (playerStats.rushTDs * scoring.rushTD);
+} else if (position === 'RB' || position === 'WR') {
+  points = (playerStats.rushYards * scoring.rushYard) +
+           (playerStats.rushTDs * scoring.rushTD) +
+           (playerStats.recYards * scoring.recYard) +
+           (playerStats.receptions * scoring.reception) +
+           (playerStats.recTDs * scoring.recTD);
+} else if (position === 'TE') {
+  points = (playerStats.recYards * scoring.recYard) +
+           (playerStats.receptions * scoring.reception) +
+           (playerStats.recTDs * scoring.recTD);
+}
+
+return Math.round(points * 100) / 100;
+```
+
+}
+
+calculateSalary(projectedPoints, position, adjustments = {}) {
+const basePrice = projectedPoints * this.config.salaryConfig.basePricePerPoint;
+const positionMultiplier = this.config.positionMultipliers[position].scarcity;
+
+```
+let adjustedPrice = basePrice * positionMultiplier;
+
+// Apply adjustment factors
+if (adjustments.injuryStatus) {
+  adjustedPrice *= this.config.adjustmentFactors.injuryStatus[adjustments.injuryStatus];
+}
+
+if (adjustments.gameScript) {
+  const scriptMultiplier = this.config.adjustmentFactors.gameScript[adjustments.gameScript][position];
+  if (scriptMultiplier) {
+    adjustedPrice *= scriptMultiplier;
+  }
+}
+
+if (adjustments.weather) {
+  adjustedPrice *= this.config.adjustmentFactors.weather[adjustments.weather];
+}
+
+// Ownership adjustment (higher ownership = higher price)
+if (adjustments.ownershipProjection) {
+  const ownershipFactor = 1 + (adjustments.ownershipProjection - 0.15) * 0.2;
+  adjustedPrice *= ownershipFactor;
+}
+
+// Ensure within position bounds
+const minPrice = this.config.positionMultipliers[position].minPrice;
+const maxPrice = this.config.positionMultipliers[position].maxPrice;
+
+let finalSalary = Math.max(minPrice, Math.min(maxPrice, adjustedPrice));
+
+// Round to nearest 100
+return Math.round(finalSalary / 100) * 100;
+```
+
+}
+
+generateLineupSalaries(playerPool) {
+// Sort players by projected points within position
+const sortedByPosition = {};
+
+```
+playerPool.forEach(player => {
+  if (!sortedByPosition[player.position]) {
+    sortedByPosition[player.position] = [];
+  }
+  sortedByPosition[player.position].push({
+    ...player,
+    salary: this.calculateSalary(
+      player.projectedPoints, 
+      player.position, 
+      player.adjustments || {}
+    )
+  });
+});
+
+// Sort each position by salary descending
+Object.keys(sortedByPosition).forEach(pos => {
+  sortedByPosition[pos].sort((a, b) => b.salary - a.salary);
+});
+
+return sortedByPosition;
+```
+
+}
+
+validateSalaryCap(lineup) {
+const totalSalary = lineup.reduce((sum, player) => sum + player.salary, 0);
+return {
+totalSalary,
+isValid: totalSalary <= this.config.salaryConfig.totalCap,
+remaining: this.config.salaryConfig.totalCap - totalSalary
+};
+}
+}
+
+// Example usage:
+const config = /* your JSON config from above */;
+const calculator = new FantasySalaryCalculator(config);
+
+// Example player calculation
+const player = {
+name: “Josh Allen”,
+position: “QB”,
+projectedPoints: 24.5,
+adjustments: {
+injuryStatus: “healthy”,
+gameScript: “neutral”,
+weather: “clear”,
+ownershipProjection: 0.25
+}
+};
+
+const salary = calculator.calculateSalary(
+player.projectedPoints,
+player.position,
+player.adjustments
+);
+
+console.log(`${player.name} salary: $${salary}`);

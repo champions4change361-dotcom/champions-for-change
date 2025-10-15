@@ -1,0 +1,456 @@
+// 🚢 3-DOMAIN CROSS-SELLING SYSTEM - RAMMING SPEED
+// Implementation for tournaments.trantortournaments.org, fantasy.trantortournaments.org, pro.trantortournaments.org
+
+// =============================================================================
+// 1. DOMAIN DETECTION HOOK ENHANCEMENT
+// =============================================================================
+
+import { useState, useEffect } from 'react';
+
+type DomainType = 'school' | 'fantasy' | 'pro';
+
+interface DomainConfig {
+  type: DomainType;
+  brand: string;
+  theme: string;
+  allowFantasyPromo: boolean;
+  allowProPromo: boolean;
+  allowSchoolPromo: boolean;
+  primaryColor: string;
+  features: {
+    fantasyLeagues: boolean;
+    ageVerification: boolean;
+    crossSelling: boolean;
+    guestAccess: boolean;
+    registration: boolean;
+  };
+}
+
+export function useDomain() {
+  const [domainConfig, setDomainConfig] = useState<DomainConfig | null>(null);
+
+  useEffect(() => {
+    const hostname = window.location.hostname;
+    let config: DomainConfig;
+
+    if (hostname.includes('fantasy')) {
+      config = {
+        type: 'fantasy',
+        brand: 'CAPTAINS_LOUNGE',
+        theme: 'entertainment',
+        allowFantasyPromo: false, // Already on fantasy
+        allowProPromo: true,      // Can promote pro tournaments
+        allowSchoolPromo: false,  // No school content on fantasy
+        primaryColor: 'purple',
+        features: {
+          fantasyLeagues: true,
+          ageVerification: true,
+          crossSelling: true,
+          guestAccess: true,
+          registration: true
+        }
+      };
+    } else if (hostname.includes('pro')) {
+      config = {
+        type: 'pro',
+        brand: 'TOURNAMENT_PRO',
+        theme: 'professional',
+        allowFantasyPromo: true,  // KEY: Business users can see fantasy
+        allowProPromo: false,     // Already on pro
+        allowSchoolPromo: false,  // Keep business separate from schools
+        primaryColor: 'blue',
+        features: {
+          fantasyLeagues: false,  // Not directly, but can promote
+          ageVerification: false,
+          crossSelling: true,     // KEY: Enable cross-selling
+          guestAccess: true,
+          registration: true
+        }
+      };
+    } else {
+      // Default to school-safe (tournaments.trantortournaments.org)
+      config = {
+        type: 'school',
+        brand: 'SCHOLASTIC_TOURNAMENTS',
+        theme: 'educational',
+        allowFantasyPromo: false, // NEVER show fantasy to schools
+        allowProPromo: false,     // NEVER show pro to schools
+        allowSchoolPromo: false,  // Already on school domain
+        primaryColor: 'green',
+        features: {
+          fantasyLeagues: false,
+          ageVerification: false,
+          crossSelling: false,    // NO cross-selling on school domain
+          guestAccess: true,
+          registration: true
+        }
+      };
+    }
+
+    setDomainConfig(config);
+  }, []);
+
+  return {
+    config: domainConfig,
+    isSchoolDomain: () => domainConfig?.type === 'school',
+    isFantasyDomain: () => domainConfig?.type === 'fantasy',
+    isProDomain: () => domainConfig?.type === 'pro',
+    canShowFantasyPromo: () => domainConfig?.allowFantasyPromo || false,
+    canShowProPromo: () => domainConfig?.allowProPromo || false,
+    canCrossSell: () => domainConfig?.features.crossSelling || false
+  };
+}
+
+// =============================================================================
+// 2. CROSS-SELLING PROMOTION COMPONENTS
+// =============================================================================
+
+import React from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { BarChart3, Trophy, Anchor, TrendingUp, Users, Zap } from 'lucide-react';
+
+// Fantasy Promotion for Pro Domain
+export function FantasyPromotion() {
+  const { canShowFantasyPromo } = useDomain();
+  
+  if (!canShowFantasyPromo()) return null;
+
+  return (
+    <Card className="bg-gradient-to-r from-purple-50 to-indigo-50 border-purple-200 mb-6">
+      <CardHeader className="pb-4">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-purple-100 rounded-lg">
+            <Anchor className="h-6 w-6 text-purple-600" />
+          </div>
+          <div>
+            <CardTitle className="text-xl text-purple-900">
+              Captain's Lounge Fantasy Sports
+            </CardTitle>
+            <CardDescription className="text-purple-700">
+              Professional fantasy analytics for data-driven teams
+            </CardDescription>
+          </div>
+          <Badge className="bg-purple-600 text-white ml-auto">Ad-Free</Badge>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="grid md:grid-cols-2 gap-6">
+          <div>
+            <h4 className="font-semibold text-purple-900 mb-3">Perfect for Your Office:</h4>
+            <ul className="space-y-2 text-sm text-purple-800">
+              <li className="flex items-center gap-2">
+                <BarChart3 className="h-4 w-4 text-purple-600" />
+                Advanced NFL/NBA analytics dashboard
+              </li>
+              <li className="flex items-center gap-2">
+                <Users className="h-4 w-4 text-purple-600" />
+                Private office leagues & tournaments
+              </li>
+              <li className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-purple-600" />
+                Real-time scoring with ESPN integration
+              </li>
+              <li className="flex items-center gap-2">
+                <Zap className="h-4 w-4 text-purple-600" />
+                Completely ad-free experience
+              </li>
+            </ul>
+          </div>
+          <div className="flex flex-col justify-center">
+            <div className="bg-white p-4 rounded-lg border border-purple-200 mb-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-purple-900">100% Free</div>
+                <div className="text-sm text-purple-700">Donation-supported model</div>
+              </div>
+            </div>
+            <Button 
+              className="bg-purple-600 hover:bg-purple-700 text-white w-full"
+              onClick={() => window.open('https://fantasy.trantortournaments.org', '_blank')}
+            >
+              <Anchor className="mr-2 h-4 w-4" />
+              Visit Captain's Lounge
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// Pro Tournament Promotion for Fantasy Domain
+export function ProTournamentPromotion() {
+  const { canShowProPromo } = useDomain();
+  
+  if (!canShowProPromo()) return null;
+
+  return (
+    <Card className="bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200 mb-6">
+      <CardHeader className="pb-4">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-blue-100 rounded-lg">
+            <Trophy className="h-6 w-6 text-blue-600" />
+          </div>
+          <div>
+            <CardTitle className="text-xl text-blue-900">
+              Tournament Pro Platform
+            </CardTitle>
+            <CardDescription className="text-blue-700">
+              Professional tournament management for businesses & clubs
+            </CardDescription>
+          </div>
+          <Badge className="bg-blue-600 text-white ml-auto">Enterprise</Badge>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="grid md:grid-cols-2 gap-6">
+          <div>
+            <h4 className="font-semibold text-blue-900 mb-3">Business Tournaments:</h4>
+            <ul className="space-y-2 text-sm text-blue-800">
+              <li className="flex items-center gap-2">
+                <Trophy className="h-4 w-4 text-blue-600" />
+                Hackathons, coding competitions
+              </li>
+              <li className="flex items-center gap-2">
+                <Users className="h-4 w-4 text-blue-600" />
+                Corporate team building events
+              </li>
+              <li className="flex items-center gap-2">
+                <BarChart3 className="h-4 w-4 text-blue-600" />
+                Professional league management
+              </li>
+              <li className="flex items-center gap-2">
+                <Zap className="h-4 w-4 text-blue-600" />
+                Custom branding & white-label options
+              </li>
+            </ul>
+          </div>
+          <div className="flex flex-col justify-center">
+            <Button 
+              className="bg-blue-600 hover:bg-blue-700 text-white w-full"
+              onClick={() => window.open('https://pro.trantortournaments.org', '_blank')}
+            >
+              <Trophy className="mr-2 h-4 w-4" />
+              Explore Tournament Pro
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// =============================================================================
+// 3. REGISTRATION PAGE ENHANCEMENTS
+// =============================================================================
+
+// Enhanced Registration with Cross-Selling
+export function EnhancedRegistrationForm() {
+  const { config, canCrossSell, canShowFantasyPromo } = useDomain();
+  
+  return (
+    <div className="max-w-4xl mx-auto p-6">
+      {/* Cross-selling promotion at top */}
+      {canCrossSell() && canShowFantasyPromo() && (
+        <FantasyPromotion />
+      )}
+      
+      {/* Main registration form */}
+      <RegistrationForm />
+      
+      {/* Additional cross-selling at bottom */}
+      {canCrossSell() && (
+        <div className="mt-12">
+          <div className="text-center mb-6">
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              Complete Your Tournament Ecosystem
+            </h3>
+            <p className="text-gray-600">
+              Get the most out of our platform with complementary services
+            </p>
+          </div>
+          
+          {canShowFantasyPromo() && (
+            <div className="grid md:grid-cols-2 gap-6">
+              <Card className="border-purple-200">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-purple-900">
+                    <Anchor className="h-5 w-5" />
+                    Captain's Lounge Fantasy
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Add fantasy sports to your office culture with our ad-free platform
+                  </p>
+                  <Button 
+                    variant="outline" 
+                    className="w-full border-purple-200 text-purple-700 hover:bg-purple-50"
+                    onClick={() => window.open('https://fantasy.trantortournaments.org', '_blank')}
+                  >
+                    Learn More
+                  </Button>
+                </CardContent>
+              </Card>
+              
+              <Card className="border-gray-200">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-gray-900">
+                    <Trophy className="h-5 w-5" />
+                    Educational Impact
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Your subscription helps fund student educational trips in Corpus Christi
+                  </p>
+                  <div className="text-xs text-green-600 font-semibold">
+                    ✓ $15,000+ already funded for students
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// =============================================================================
+// 4. NAVBAR INTEGRATION
+// =============================================================================
+
+export function DomainAwareNavbar() {
+  const { config, isSchoolDomain, isFantasyDomain, isProDomain } = useDomain();
+  
+  if (!config) return null;
+
+  const getBrandConfig = () => {
+    switch (config.type) {
+      case 'school':
+        return {
+          title: 'Champions for Change',
+          subtitle: 'Educational Tournament Platform',
+          logo: '🎓',
+          color: 'text-green-600'
+        };
+      case 'fantasy':
+        return {
+          title: "Captain's Lounge",
+          subtitle: 'Where Fantasy Becomes Legendary',
+          logo: '⚓',
+          color: 'text-purple-600'
+        };
+      case 'pro':
+        return {
+          title: 'Tournament Pro',
+          subtitle: 'Professional Tournament Management',
+          logo: '🏆',
+          color: 'text-blue-600'
+        };
+      default:
+        return {
+          title: 'Tournament Platform',
+          subtitle: '',
+          logo: '🏆',
+          color: 'text-gray-600'
+        };
+    }
+  };
+
+  const brand = getBrandConfig();
+
+  return (
+    <nav className="bg-white shadow-sm border-b">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="flex justify-between items-center py-4">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">{brand.logo}</span>
+            <div>
+              <h1 className={`text-xl font-bold ${brand.color}`}>
+                {brand.title}
+              </h1>
+              {brand.subtitle && (
+                <p className="text-sm text-gray-600">{brand.subtitle}</p>
+              )}
+            </div>
+          </div>
+          
+          {/* Domain switcher for non-school domains */}
+          {!isSchoolDomain() && (
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="text-xs">
+                {config.type.toUpperCase()}
+              </Badge>
+              
+              {/* Quick domain links */}
+              <div className="flex gap-1">
+                {isProDomain() && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => window.open('https://fantasy.trantortournaments.org', '_blank')}
+                    className="text-purple-600 hover:text-purple-700"
+                  >
+                    <Anchor className="h-4 w-4 mr-1" />
+                    Fantasy
+                  </Button>
+                )}
+                
+                {isFantasyDomain() && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => window.open('https://pro.trantortournaments.org', '_blank')}
+                    className="text-blue-600 hover:text-blue-700"
+                  >
+                    <Trophy className="h-4 w-4 mr-1" />
+                    Pro
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </nav>
+  );
+}
+
+// =============================================================================
+// 5. USAGE INSTRUCTIONS FOR REPLIT CLAUDE
+// =============================================================================
+
+/*
+IMPLEMENTATION GUIDE FOR REPLIT CLAUDE:
+
+1. ADD DOMAIN DETECTION:
+   - Replace existing useDomain hook with enhanced version above
+   - Supports 3-way domain split with cross-selling flags
+
+2. ADD CROSS-SELLING COMPONENTS:
+   - Use FantasyPromotion on pro.trantortournaments.org
+   - Use ProTournamentPromotion on fantasy.trantortournaments.org
+   - NEVER show either on tournaments.trantortournaments.org
+
+3. ENHANCE REGISTRATION:
+   - Replace registration form with EnhancedRegistrationForm
+   - Includes tasteful cross-selling for business users
+   - Zero cross-selling on school domain
+
+4. UPDATE NAVBAR:
+   - Use DomainAwareNavbar for branded experience per domain
+   - Shows appropriate logos/colors per domain
+   - Includes domain switcher for non-school domains
+
+5. KEY BUSINESS RULES:
+   - School domain = 100% educational, zero fantasy mentions
+   - Pro domain = Business focus + tasteful fantasy promotion
+   - Fantasy domain = Fantasy focus + business tournament promotion
+
+This creates the perfect funnel: Business users discover fantasy, fantasy users discover business tournaments, schools stay completely separate and safe.
+
+RAMMING SPEED DEPLOYMENT READY! 🚢💥
+*/

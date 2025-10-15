@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grant Funding for Athletic Safety Technology - Champions for Change</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+```
+    body {
+        font-family: 'Arial', sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background: #f8f9fa;
+    }
+    
+    .header {
+        background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+        color: white;
+        padding: 60px 20px;
+        text-align: center;
+    }
+    
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+    
+    .header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+    }
+    
+    .header p {
+        font-size: 1.2rem;
+        opacity: 0.9;
+    }
+    
+    .main-content {
+        padding: 60px 20px;
+    }
+    
+    .intro-section {
+        background: white;
+        padding: 40px;
+        border-radius: 15px;
+        margin-bottom: 40px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .intro-section h2 {
+        color: #2c3e50;
+        margin-bottom: 20px;
+        font-size: 1.8rem;
+    }
+    
+    .grant-categories {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 30px;
+        margin-bottom: 60px;
+    }
+    
+    .grant-category {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        border-top: 4px solid #3498db;
+    }
+    
+    .grant-category.federal {
+        border-top-color: #e74c3c;
+    }
+    
+    .grant-category.state {
+        border-top-color: #f39c12;
+    }
+    
+    .grant-category.private {
+        border-top-color: #27ae60;
+    }
+    
+    .category-title {
+        font-size: 1.5rem;
+        color: #2c3e50;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .category-icon {
+        font-size: 1.8rem;
+    }
+    
+    .grant-item {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        border-left: 4px solid #3498db;
+    }
+    
+    .grant-name {
+        font-weight: bold;
+        font-size: 1.1rem;
+        color: #2c3e50;
+        margin-bottom: 8px;
+    }
+    
+    .grant-amount {
+        color: #27ae60;
+        font-weight: bold;
+        margin-bottom: 8px;
+    }
+    
+    .grant-deadline {
+        color: #e74c3c;
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+    }
+    
+    .grant-description {
+        font-size: 0.95rem;
+        margin-bottom: 15px;
+        line-height: 1.5;
+    }
+    
+    .grant-link {
+        display: inline-block;
+        background: #3498db;
+        color: white;
+        padding: 8px 16px;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 0.9rem;
+        transition: background 0.3s ease;
+    }
+    
+    .grant-link:hover {
+        background: #2980b9;
+    }
+    
+    .tips-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 50px;
+        border-radius: 15px;
+        margin: 40px 0;
+    }
+    
+    .tips-section h3 {
+        font-size: 1.8rem;
+        margin-bottom: 25px;
+        text-align: center;
+    }
+    
+    .tips-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 25px;
+    }
+    
+    .tip-item {
+        background: rgba(255,255,255,0.1);
+        padding: 20px;
+        border-radius: 10px;
+        backdrop-filter: blur(10px);
+    }
+    
+    .tip-title {
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #f39c12;
+    }
+    
+    .alert-box {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        color: #856404;
+        padding: 20px;
+        border-radius: 10px;
+        margin: 30px 0;
+    }
+    
+    .alert-box.success {
+        background: #d1edff;
+        border-color: #74c0fc;
+        color: #0c5460;
+    }
+    
+    .contact-section {
+        background: white;
+        padding: 40px;
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .contact-section h3 {
+        color: #2c3e50;
+        margin-bottom: 20px;
+    }
+    
+    .contact-button {
+        background: linear-gradient(45deg, #e74c3c, #f39c12);
+        color: white;
+        padding: 15px 30px;
+        text-decoration: none;
+        border-radius: 50px;
+        display: inline-block;
+        margin-top: 15px;
+        transition: transform 0.3s ease;
+    }
+    
+    .contact-button:hover {
+        transform: translateY(-2px);
+    }
+    
+    @media (max-width: 768px) {
+        .header h1 {
+            font-size: 2rem;
+        }
+        
+        .grant-categories {
+            grid-template-columns: 1fr;
+        }
+        
+        .tips-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+```
+
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>🎯 Grant Funding Opportunities</h1>
+            <p>Help your district secure funding for athletic safety technology</p>
+        </div>
+    </div>
+
+```
+<div class="main-content">
+    <div class="container">
+        <div class="intro-section">
+            <h2>Fund Your Athletic Safety Platform Through Grants</h2>
+            <p>Many school districts successfully secure grant funding for athletic safety technology, injury prevention programs, and student wellness initiatives. Our platform qualifies for multiple grant categories since it combines educational technology, student safety, and health monitoring.</p>
+            
+            <div class="alert-box success">
+                <strong>💡 Grant Strategy:</strong> Position our platform as "student athlete safety technology" rather than just tournament management. Emphasize injury prevention, health monitoring, and educational outcomes.
+            </div>
+        </div>
+
+        <div class="grant-categories">
+            <!-- Federal Grants -->
+            <div class="grant-category federal">
+                <h3 class="category-title">
+                    <span class="category-icon">🏛️</span>
+                    Federal Grants
+                </h3>
+                
+                <div class="grant-item">
+                    <div class="grant-name">CDC Injury Prevention Grants</div>
+                    <div class="grant-amount">$50,000 - $500,000</div>
+                    <div class="grant-deadline">Next Cycle: Spring 2025</div>
+                    <div class="grant-description">Funds programs that prevent sports-related injuries and promote youth safety. Perfect fit for our health monitoring features.</div>
+                    <a href="https://www.cdc.gov/injury/funding/index.html" class="grant-link" target="_blank">View Details</a>
+                </div>
+                
+                <div class="grant-item">
+                    <div class="grant-name">USDA Rural Education Achievement Grant</div>
+                    <div class="grant-amount">$25,000 - $180,000</div>
+                    <div class="grant-deadline">Next Cycle: February 2025</div>
+                    <div class="grant-description">For rural districts to improve educational services. Technology for student safety qualifies.</div>
+                    <a href="https://www.rd.usda.gov/programs-services/community-facilities/rural-education-achievement-program" class="grant-link" target="_blank">Apply Here</a>
+                </div>
+                
+                <div class="grant-item">
+                    <div class="grant-name">Department of Education Innovation Grants</div>
+                    <div class="grant-amount">$100,000 - $2,000,000</div>
+                    <div class="grant-deadline">Next Cycle: Fall 2025</div>
+                    <div class="grant-description">Educational technology innovations that improve student outcomes and safety.</div>
+                    <a href="https://www.ed.gov/grants" class="grant-link" target="_blank">Learn More</a>
+                </div>
+            </div>
+
+            <!-- State & Local Grants -->
+            <div class="grant-category state">
+                <h3 class="category-title">
+                    <span class="category-icon">🏢</span>
+                    State & Local Grants
+                </h3>
+                
+                <div class="grant-item">
+                    <div class="grant-name">Texas Education Agency Technology Grants</div>
+                    <div class="grant-amount">$10,000 - $100,000</div>
+                    <div class="grant-deadline">Rolling Applications</div>
+                    <div class="grant-description">TEA funds technology that enhances student safety and educational outcomes.</div>
+                    <a href="https://tea.texas.gov/finance-and-grants" class="grant-link" target="_blank">TEA Grants</a>
+                </div>
+                
+                <div class="grant-item">
+                    <div class="grant-name">Regional Education Service Centers</div>
+                    <div class="grant-amount">$5,000 - $50,000</div>
+                    <div class="grant-deadline">Varies by Region</div>
+                    <div class="grant-description">Local ESCs often have small grants for innovative educational programs.</div>
+                    <a href="https://www.txregionalcouncil.org/" class="grant-link" target="_blank">Find Your ESC</a>
+                </div>
+                
+                <div class="grant-item">
+                    <div class="grant-name">Texas UIL Foundation Grants</div>
+                    <div class="grant-amount">$2,500 - $25,000</div>
+                    <div class="grant-deadline">Next Cycle: January 2025</div>
+                    <div class="grant-description">Supports athletic programs and student safety initiatives in UIL member schools.</div>
+                    <a href="https://www.uil.utexas.edu/" class="grant-link" target="_blank">UIL Grants</a>
+                </div>
+            </div>
+
+            <!-- Private Foundation Grants -->
+            <div class="grant-category private">
+                <h3 class="category-title">
+                    <span class="category-icon">🤝</span>
+                    Private Foundations
+                </h3>
+                
+                <div class="grant-item">
+                    <div class="grant-name">Robert Wood Johnson Foundation</div>
+                    <div class="grant-amount">$25,000 - $200,000</div>
+                    <div class="grant-deadline">Rolling Applications</div>
+                    <div class="grant-description">Health-focused foundation supporting youth wellness and injury prevention programs.</div>
+                    <a href="https://www.rwjf.org/en/grants" class="grant-link" target="_blank">Apply Now</a>
+                </div>
+                
+                <div class="grant-item">
+                    <div class="grant-name">Nike Community Impact Fund</div>
+                    <div class="grant-amount">$10,000 - $100,000</div>
+                    <div class="grant-deadline">Next Cycle: Winter 2025</div>
+                    <div class="grant-description">Supports programs that get kids active and safe through sports.</div>
+                    <a href="https://www.nike.com/help/a/community-impact-fund" class="grant-link" target="_blank">Nike Grants</a>
+                </div>
+                
+                <div class="grant-item">
+                    <div class="grant-name">Local Community Foundations</div>
+                    <div class="grant-amount">$1,000 - $25,000</div>
+                    <div class="grant-deadline">Varies by Foundation</div>
+                    <div class="grant-description">Many local foundations support educational technology and youth safety programs.</div>
+                    <a href="https://www.cof.org/community-foundation-locator" class="grant-link" target="_blank">Find Local Foundations</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="tips-section">
+            <h3>🏆 Grant Application Success Tips</h3>
+            <div class="tips-grid">
+                <div class="tip-item">
+                    <div class="tip-title">Focus on Safety Impact</div>
+                    <p>Emphasize injury prevention, liability reduction, and student athlete welfare rather than just tournament management.</p>
+                </div>
+                <div class="tip-item">
+                    <div class="tip-title">Quantify the Need</div>
+                    <p>Include local injury statistics, medical costs, and how many students will benefit from the safety monitoring.</p>
+                </div>
+                <div class="tip-item">
+                    <div class="tip-title">Partner with Medical Professionals</div>
+                    <p>Get letters of support from sports medicine doctors, trainers, and local hospitals.</p>
+                </div>
+                <div class="tip-item">
+                    <div class="tip-title">Highlight Educational Mission</div>
+                    <p>Mention that our platform is built by a 501(c)(3) nonprofit focused on educational equity.</p>
+                </div>
+                <div class="tip-item">
+                    <div class="tip-title">Include Sustainability Plan</div>
+                    <p>Show how the program will continue after grant funding ends - our affordable pricing helps here.</p>
+                </div>
+                <div class="tip-item">
+                    <div class="tip-title">Document Everything</div>
+                    <p>Keep records of safety improvements, injury reductions, and student outcomes for future applications.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="alert-box">
+            <strong>⏰ Planning Ahead:</strong> Most educational grants have annual cycles. Start planning applications 6-12 months before you need funding. Many 2025 deadlines are in early spring (February-April).
+        </div>
+
+        <div class="contact-section">
+            <h3>Need Help with Grant Applications?</h3>
+            <p>Our team can provide documentation, impact studies, and technical specifications to support your grant applications. We want to help you secure funding for student athlete safety.</p>
+            <a href="mailto:grants@championsforchange.org" class="contact-button">Get Grant Support</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Add smooth animations when elements come into view
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    // Observe grant items for animation
+    document.querySelectorAll('.grant-item, .tip-item').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'all 0.6s ease-out';
+        observer.observe(el);
+    });
+
+    // Add tracking for external links
+    document.querySelectorAll('.grant-link').forEach(link => {
+        link.addEventListener('click', function() {
+            // Analytics tracking would go here
+            console.log('Grant link clicked:', this.href);
+        });
+    });
+</script>
+```
+
+</body>
+</html>

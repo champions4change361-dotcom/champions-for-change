@@ -1,0 +1,114 @@
+I’ll help you understand the compliance requirements for your tournament platform, especially given the health monitoring features outlined in your documents and your location in Corpus Christi, Texas.​​​​​​​​​​​​​​​​
+
+Based on my research, here’s a comprehensive overview of the compliance requirements for your tournament platform in Corpus Christi, Texas:
+
+## **FERPA Compliance Requirements**
+
+### **What FERPA Covers:**
+
+FERPA provides certain rights for parents regarding their children’s education records and protects student personally identifiable information (PII)  . For your platform:
+
+**Key Requirements:**
+
+- Educational technology vendors must adhere to data privacy laws when handling FERPA-protected information 
+- EdTech companies cannot be held directly liable for FERPA violations, but the schools they contract with can 
+- You must operate under the **“School Official Exception”** which requires:
+  - Performing an institutional service or function
+  - Having legitimate educational interest
+  - Being under direct control of the school
+  - Using records only for authorized purposes
+
+**No Reporting Agency:** FERPA is a liability standard with no certificate for compliance or assessment methodology 
+
+-----
+
+## **HIPAA Compliance Requirements**
+
+### **When HIPAA Applies:**
+
+HIPAA applies to athletic trainers and medical staff when they work for covered entities that engage in electronic healthcare transactions  . Given your health monitoring features:
+
+**Key Requirements:**
+
+- Protect the privacy of protected health information (PHI) and limit use/disclosure without patient permission 
+- Implement administrative, physical, and technical safeguards for electronic PHI (ePHI) 
+- Regular risk assessments, continuous audits, and clear policies on access and data use 
+
+**Texas-Specific:** New employees in Texas must complete HIPAA training within 90 days 
+
+**Reporting Agency:** Department of Health and Human Services Office for Civil Rights
+
+-----
+
+## **Texas State-Specific Laws**
+
+### **1. Texas Student Privacy Act (TSPA)**
+
+Passed in 1995, amended in 2017, protects student personal information used in connection with websites and online services for school purposes  
+
+**Key Prohibitions:**
+
+- Cannot use student information for targeted advertising or creating profiles unless for school purposes 
+- Cannot sell or rent student covered information 
+- Must implement reasonable security procedures to protect information from unauthorized access 
+
+### **2. Senate Bill 820 (SB 820)**
+
+Requires Texas school districts to adopt effective cybersecurity policies and designate cybersecurity coordinators 
+
+**Requirements:**
+
+- Cybersecurity coordinator must report incidents affecting student data to TEA “as soon as practicable” 
+- Must notify parents/guardians of students whose data is involved in cybersecurity incidents 
+
+### **3. Texas Data Privacy and Security Act**
+
+Effective July 1, 2024, grants Texas residents key rights over personal data, but exempts entities governed by FERPA and HIPAA 
+
+-----
+
+## **Reporting Requirements**
+
+### **Data Breach Notification:**
+
+Texas law requires businesses experiencing data breaches affecting 250+ Texans to report to the Attorney General within 30 days 
+
+### **Cybersecurity Incidents:**
+
+Government Code 2054.603 requires local governments (including school districts) to report security incidents to DIR within 48 hours 
+
+**School Districts Must Report:**
+
+- Breaches involving student information that is sensitive, protected, or confidential 
+- However, schools aren’t required to report cyberattacks to TEA unless there’s evidence student personal information was stolen 
+
+-----
+
+## **No Corpus Christi-Specific Requirements**
+
+My research found no additional local regulations specific to Corpus Christi beyond state and federal requirements. Corpus Christi ISD operates under standard Texas education laws and serves 33,387 students across 57 schools  .
+
+-----
+
+## **Compliance Recommendations for Your Platform**
+
+### **Immediate Actions:**
+
+1. **Execute Data Processing Agreements (DPAs)** with school districts
+1. **Implement Technical Safeguards:** encryption, access controls, audit logging
+1. **Create Privacy Policies** addressing FERPA, HIPAA, and TSPA requirements
+1. **Establish Incident Response Procedures** for breach notification
+
+### **Ongoing Requirements:**
+
+1. **Staff Training:** Regular privacy and security training (90 days for new hires in Texas)
+1. **Regular Audits:** Monitor compliance and update policies
+1. **Vendor Management:** Ensure any third-party services are compliant
+
+### **Key Agencies to Monitor:**
+
+- **Federal:** Department of Education (FERPA), HHS Office for Civil Rights (HIPAA)
+- **Texas:** Texas Education Agency, Texas Attorney General, Department of Information Resources
+- **Local:** No additional Corpus Christi requirements identified
+
+Your platform’s health monitoring features make HIPAA compliance particularly important, while the educational context requires strict FERPA adherence. The good news is that the Texas Data Privacy and Security Act exempts entities governed by FERPA and HIPAA , simplifying your compliance requirements.

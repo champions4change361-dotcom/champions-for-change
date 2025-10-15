@@ -1,0 +1,92 @@
+// AI Consultation Endpoints
+app.get('/api/test', (req, res) => {
+  res.json({
+    status: 'Tournament AI Service Online!',
+    message: 'Ready for intelligent tournament consultation',
+    timestamp: new Date().toISOString(),
+    sports_loaded: 65,
+    ai_ready: true
+  });
+});
+
+app.post('/api/quick-consult', (req, res) => {
+  try {
+    const { user_input } = req.body;
+    
+    if (!user_input) {
+      return res.status(400).json({
+        success: false,
+        error: 'Please provide user_input'
+      });
+    }
+    
+    // Simple AI analysis function
+    const result = analyzeTournamentQuery(user_input);
+    
+    res.json({
+      success: true,
+      recommendation: result.recommendation,
+      sport: result.sport,
+      format: result.format,
+      age_group: result.age_group,
+      gender_division: result.gender_division,
+      confidence: result.confidence
+    });
+    
+  } catch (error) {
+    console.error('AI Consultation Error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'AI consultation failed: ' + error.message
+    });
+  }
+});
+
+// Simple AI Analysis Function
+function analyzeTournamentQuery(text) {
+  const textLower = text.toLowerCase();
+  
+  // Sport detection with your comprehensive list
+  let sport = 'Basketball'; // default
+  let confidence = 50;
+  
+  // Team Sports
+  if (textLower.includes('basketball')) { sport = 'Basketball'; confidence += 30; }
+  else if (textLower.includes('soccer') || textLower.includes('football')) { sport = 'Soccer'; confidence += 30; }
+  else if (textLower.includes('volleyball')) { sport = 'Volleyball'; confidence += 30; }
+  else if (textLower.includes('baseball')) { sport = 'Baseball'; confidence += 30; }
+  else if (textLower.includes('softball')) { sport = 'Softball'; confidence += 30; }
+  else if (textLower.includes('hockey')) { sport = 'Ice Hockey'; confidence += 30; }
+  
+  // Individual Sports
+  else if (textLower.includes('swimming')) { sport = 'Swimming'; confidence += 30; }
+  else if (textLower.includes('track') || textLower.includes('field')) { sport = 'Track & Field'; confidence += 30; }
+  else if (textLower.includes('golf')) { sport = 'Golf'; confidence += 30; }
+  else if (textLower.includes('tennis')) { sport = 'Tennis'; confidence += 30; }
+  else if (textLower.includes('wrestling')) { sport = 'Wrestling'; confidence += 30; }
+  else if (textLower.includes('boxing')) { sport = 'Boxing'; confidence += 30; }
+  
+  // Esports
+  else if (textLower.includes('esports') || textLower.includes('gaming')) { sport = 'League of Legends'; confidence += 25; }
+  else if (textLower.includes('valorant')) { sport = 'Valorant'; confidence += 30; }
+  else if (textLower.includes('league of legends') || textLower.includes('lol')) { sport = 'League of Legends'; confidence += 30; }
+  else if (textLower.includes('csgo') || textLower.includes('cs:go')) { sport = 'CS:GO'; confidence += 30; }
+  else if (textLower.includes('overwatch')) { sport = 'Overwatch'; confidence += 30; }
+  else if (textLower.includes('rocket league')) { sport = 'Rocket League'; confidence += 30; }
+  else if (textLower.includes('fifa')) { sport = 'FIFA'; confidence += 30; }
+  
+  // Professional/Academic
+  else if (textLower.includes('hackathon') || textLower.includes('coding')) { sport = 'Hackathon'; confidence += 30; }
+  else if (textLower.includes('spelling bee')) { sport = 'Spelling Bee'; confidence += 30; }
+  else if (textLower.includes('math bowl')) { sport = 'Math Bowl'; confidence += 30; }
+  else if (textLower.includes('debate')) { sport = 'Debate Tournament'; confidence += 30; }
+  else if (textLower.includes('business case')) { sport = 'Business Case Competition'; confidence += 30; }
+  
+  // Creative Arts
+  else if (textLower.includes('dance')) { sport = 'Dance Competition'; confidence += 30; }
+  else if (textLower.includes('art')) { sport = 'Art Competition'; confidence += 30; }
+  else if (textLower.includes('music')) { sport = 'Music Competition'; confidence += 30; }
+  else if (textLower.includes('photography')) { sport = 'Photography Contest'; confidence += 30; }
+  
+  // Culinary
+  else if

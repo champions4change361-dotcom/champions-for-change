@@ -1,0 +1,161 @@
+Team,Position,Jersey_Number,Player_Name,Draft_Info,Jersey_Number_2,Player_Name_2,Draft_Info_2,Jersey_Number_3,Player_Name_3,Draft_Info_3,Jersey_Number_4,Player_Name_4,Draft_Info_4,Jersey_Number_5,Player_Name_5,Draft_Info_5
+Arizona Cardinals,LWR,18,Harrison Jr. Marvin,24/1,80,Fehoko Simi,U/LAC,83,Palmer Tejhaun,24/6,,,
+Arizona Cardinals,RWR,14,Wilson Michael,23/3,89,Weaver Xavier,CF24,30,Green Bryson,CF25,,,
+Arizona Cardinals,SWR,4,Dortch Greg,SF20,17,JONES ZAY,CC/Jax,82,Baccellia Andre,SF21,39,McCollum Nate,SF25,,
+Arizona Cardinals,QB,1,Murray Kyler,19/1,7,BRISSETT JACOBY,U/NE,15,Tune Clayton,23/5,,,
+Arizona Cardinals,RB,6,CONNER JAMES,U/Pit,33,Benson Trey,24/3,31,Demercado Emari,CF23,20,Dallas DeeJay,U/Sea,22,Carter Michael,W/NYJ
+Atlanta Falcons,LWR,1,Mooney Darnell,U/Atl,82,Washington Casey,24/6,80,Nash Nick,CF25,87,Sills V David,SF25,,
+Atlanta Falcons,RWR,5,London Drake,22/1,4,HODGE KHADAREL,U/Det,19,Blair Chris,SF23,36,Skinner Jr. Quincy,CF25,,
+Atlanta Falcons,SWR,34,McCloud III Ray-Ray,U/SF,14,AGNEW JAMAL,SF25,81,Drummond Dylan,SF24,,,
+Atlanta Falcons,QB,9,Penix Jr. Michael,24/1,18,COUSINS KIRK,U/Min,12,Stick Easton,U/LAC,,,
+Atlanta Falcons,RB,7,Robinson Bijan,23/1,25,Allgeier Tyler,22/5,26,Washington Jr. Carlos,CF23,38,Carter Nathan,CF25,41,Dotson Elijah,SF24
+Baltimore Ravens,LWR,10,HOPKINS DEANDRE,U/KC,81,Walker Devontez,24/4,6,MILLER ANTHONY,SF24,86,Banks Jahmal,CF25,,
+Baltimore Ravens,RWR,7,Bateman Rashod,21/1,16,Wallace Tylan,21/4,18,KIRKWOOD KEITH,U/NO,87,Guillory Xavier,CF25,,
+Baltimore Ravens,SWR,4,Flowers Zay,23/1,83,Wester LaJohntay,25/6,12,Cunningham Malik,P/NE,82,Wade Dayton,CF24,,
+Baltimore Ravens,QB,8,Jackson Lamar,18/1,15,RUSH COOPER,U/Dal,13,Leary Devin,24/6,,,
+Baltimore Ravens,RB,22,HENRY DERRICK,U/Ten,43,Hill Justice,19/4,34,Mitchell Keaton,CF23,26,Ali Rasheen,24/5,30,Johnson D'Ernest,U/Jax
+Buffalo Bills,LWR,5,Palmer Joshua,U/LAC,80,Shavers Tyrell,CF23,15,Shenault Jr. Laviska,SF25,32,Cain Deon,SF24,,
+Buffalo Bills,RWR,0,Coleman Keon,24/2,1,Samuel Curtis,U/Was,82,Wilkerson Kristian,SF25,16,DuBose Grant,U/Mia,,
+Buffalo Bills,SWR,10,Shakir Khalil,22/5,18,Moore Elijah,U/Cle,19,Hamler KJ,SF24,89,Gosnell Stephen,CF25,,
+Buffalo Bills,QB,17,Allen Josh,18/1,11,TRUBISKY MITCHELL,CC/Pit,14,WHITE MIKE,SF24,6,Buechele Shane,SF23,,
+Buffalo Bills,RB,4,Cook James,22/2,22,Davis Ray,24/4,26,Johnson Ty,SF23,20,Gore Jr. Frank,CF24,21,Young Elijah,SF25
+Carolina Panthers,LWR,4,McMillan Tetairoa,25/1,83,MOORE DAVID,U/TB,87,Tremayne Brycen,SF25,81,Luther T.J.,SF24,,
+Carolina Panthers,RWR,17,Legette Xavier,24/1,18,Coker Jalen,CF24,80,George Jacolby,CF25,88,Reed Ja'seem,SF25,,
+Carolina Panthers,SWR,19,THIELEN ADAM,CC/Min,15,Horn Jr. Jimmy,25/6,13,Renfrow Hunter,SF25,86,Hudson Kobe,CF25,,
+Carolina Panthers,QB,9,Young Bryce,23/1,14,DALTON ANDY,U/NO,16,Plummer Jack,CF24,10,Perkins Bryce,SF25,,
+Carolina Panthers,RB,30,Hubbard Chuba,21/4,5,Dowdle Rico,U/Dal,23,Etienne Trevor,25/4,3,Blackshear Raheem,P/Buf,39,Bailey Emani,SF24
+Chicago Bears,LWR,15,Odunze Rome,24/1,20,Walker Jahdae,CF25,80,Boykin Miles,SF25,,,
+Chicago Bears,RWR,2,Moore DJ,T/Car,12,Duvernay Devin,CC/Jax,10,Scott Tyler,23/4,83,Toure Samori,SF24,,
+Chicago Bears,SWR,14,Zaccheaus Olamide,U/Was,87,Burden III Luther,25/2,13,Alexander Maurice,SF25,26,Richardson JP,CF25,,
+Chicago Bears,QB,18,Williams Caleb,24/1,17,Bagent Tyson,CF23,11,KEENUM CASE,U/Hou,16,Reed Austin,CF24,,
+Chicago Bears,RB,4,Swift D'Andre,U/Phi,23,Johnson Roschon,23/4,25,Monangai Kyle,25/7,21,Homer Travis,U/Sea,38,Brown Brittain,SF25
+Cincinnati Bengals,LWR,1,Chase Ja'Marr,21/1,81,Burton Jermaine,24/3,19,Pryor Kendric,CF22,12,Owens Rashod,CF25,,
+Cincinnati Bengals,RWR,5,Higgins Tee,20/2,15,Jones Charlie,23/4,17,Burgess Cole,CF24,16,Mayes Jamoi,CF25,,
+Cincinnati Bengals,SWR,80,Iosivas Andrei,23/6,82,Tinsley Mitchell,SF25,18,Williams Isaiah,W/Det,14,Moore Jordan,CF25,,
+Cincinnati Bengals,QB,9,Burrow Joe,20/1,6,Browning Jake,SF21,4,Ridder Desmond,U/LV,10,Thorne Payton,CF25,,
+Cincinnati Bengals,RB,30,Brown Chase,23/5,34,Perine Samaje,U/KC,25,Brooks Tahj,25/6,32,Brightwell Gary,SF24,36,Milton Kendall,SF24
+Cleveland Browns,LWR,19,Tillman Cedric,23/3,16,Johnson Diontae,U/Bal,18,Bell David,22/3,83,Johnson Kisean,CF25,,
+Cleveland Browns,RWR,3,Jeudy Jerry,T/Den,81,Bond Isaiah,CF25,89,Davis Kaden,SF24,38,Cota Chase,SF25,,
+Cleveland Browns,SWR,80,Thrash Jamari,24/5,2,CARTER DEANDRE,U/Chi,84,Larvadain Gage,CF25,31,McDonald Cade,CF25,,
+Cleveland Browns,QB,15,FLACCO JOE,U/Ind,8,Pickett Kenny,T/Phi,5,Gabriel Dillon,25/3,12,Sanders Shedeur,25/5,7,Huntley Tyler,U/Mia
+Cleveland Browns,RB,34,Ford Jerome,22/5,10,Judkins Quinshon,25/2,22,Sampson Dylan,25/4,20,Strong Jr. Pierre,T/NE,39,Marshall Ahmani,CF25
+Dallas Cowboys,LWR,3,Pickens George,T/Pit,81,Mingo Jonathan,T/Car,19,Flournoy Ryan,24/6,,,
+Dallas Cowboys,RWR,1,Tolbert Jalen,22/3,83,Brooks Jalen,23/7,7,Holden Traeshon,CF25,,,
+Dallas Cowboys,SWR,88,Lamb CeeDee,20/1,9,Turpin KaVontae,SF22,16,Cropper Jalen,CF23,6,Kelly Josh,CF25,,
+Dallas Cowboys,QB,4,PRESCOTT DAK,16/4,10,Milton III Joe,T/NE,15,GRIER WILL,SF24,,,
+Dallas Cowboys,RB,33,Williams Javonte,U/Den,34,Blue Jaydon,25/5,37,Mafah Phil,25/7,27,Sanders Miles,CC/Car,42,Vaughn Deuce,23/6
+Denver Broncos,LWR,14,Sutton Courtland,18/2,13,Bryant Pat,25/3,87,Perry A.T.,SF24,80,Davis Joaquin,CF25,,
+Denver Broncos,RWR,19,Mims Jr. Marvin,23/2,5,Sherfield Sr. Trent,U/Min,81,Newton Jerjuan,CF25,,,
+Denver Broncos,SWR,11,Franklin Troy,24/4,83,Bandy Michael,U/LAC,89,Jackson Courtney,CF25,39,Rowan Kyrese,CF25,,
+Denver Broncos,QB,10,Nix Bo,24/1,8,Stidham Jarrett,U/LV,4,Ehlinger Sam,U/Ind,,,
+Denver Broncos,RB,37,Harvey RJ,25/2,27,Dobbins J.K.,U/LAC,38,McLaughlin Jaleel,CF23,28,Badie Tyler,P/Bal,25,Watson Blake,CF24
+Detroit Lions,LWR,12,PATRICK TIM,SF24,18,TeSlaa Isaac,25/3,85,Kennedy Tom,CF19,10,Bell Ronnie,SF25,,
+Detroit Lions,RWR,1,Williams Jameson,22/1,11,RAYMOND KALIF,U/Ten,86,Taylor Malik,U/NYJ,80,Keeney-James Jakobie,CF25,,
+Detroit Lions,SWR,14,St. Brown Amon-Ra,21/4,19,Lovett Dominic,25/7,83,Meeks Jackson,CF25,,,
+Detroit Lions,QB,16,GOFF JARED,T/LAR,8,Allen Kyle,U/Pit,2,Hooker Hendon,23/3,,,
+Detroit Lions,RB,0,Gibbs Jahmyr,23/1,5,Montgomery David,U/Chi,13,Reynolds Craig,SF21,33,Vaki Sione,24/4,48,Saylors Jacob,SF25
+Green Bay Packers,LWR,87,Doubs Romeo,22/4,83,Williams Savion,25/3,84,Johnson Cornelius,SF24,80,Neyor Isaiah,SF25,,
+Green Bay Packers,RWR,22,Golden Matthew,25/1,9,Watson Christian,22/2,18,Heath Malik,CF23,82,Sheppard Will,CF25,,
+Green Bay Packers,SWR,11,Reed Jayden,23/2,13,Wicks Dontayvion,23/5,6,Hardman Mecole,U/KC,81,Hicks Julian,CF24,17,Baker Kawaan,W/LV
+Green Bay Packers,QB,10,Love Jordan,20/1,2,Willis Malik,T/Ten,16,Clifford Sean,23/5,19,Elgersma Taylor,CF25,,
+Green Bay Packers,RB,8,Jacobs Josh,U/LV,31,Wilson Emanuel,SF23,32,Lloyd MarShawn,24/3,30,Brooks Chris,SF24,23,Abanikanda Israel,W/SF
+Houston Texans,LWR,12,Collins Nico,21/3,19,Hutchinson Xavier,23/6,85,Jackson Daniel,CF25,14,Cephus Quintez,SF25,11,Powell Cornell,SF25
+Houston Texans,RWR,81,Higgins Jayden,25/2,3,Dell Tank,23/3,84,WATSON JUSTIN,U/KC,15,Winfree Juwann,U/Ind,,
+Houston Texans,SWR,13,Kirk Christian,T/Jax,82,Noel Jaylin,25/3,17,Berrios Braxton,U/Mia,,,
+Houston Texans,QB,7,Stroud C.J.,23/1,10,Mills Davis,21/3,18,Mertz Graham,25/6,16,Slovis Kedon,SF24,,
+Houston Texans,RB,28,Mixon Joe,T/Cin,21,Chubb Nick,U/Cle,31,Pierce Dameon,22/4,33,OGUNBOWALE DARE,CF17,27,Marks Woody,25/4
+Indianapolis Colts,LWR,11,Pittman Jr. Michael,20/2,16,Dulin Ashton,CF19,13,TREADWELL LAQUON,SF24,8,Parker Landon,CF25,,
+Indianapolis Colts,RWR,14,Pierce Alec,22/2,10,Mitchell Adonai,24/2,9,Ajou Ajou,SF25,4,Taylor Blayne,CF25,,
+Indianapolis Colts,SWR,1,Downs Josh,23/3,6,Gould Anthony,24/5,3,Owen Coleman,CF25,43,Kahmann Tyler,CF25,,
+Indianapolis Colts,QB,17,Jones Daniel,U/Min,5,Richardson Sr. Anthony,23/1,15,Leonard Riley,25/6,12,Bean Jason,CF24,,
+Indianapolis Colts,RB,28,Taylor Jonathan,20/2,31,Goodson Tyler,SF23,21,Giddens DJ,25/5,26,Herbert Khalil,U/Cin,41,Noel Nate,SF25
+Jacksonville Jaguars,LWR,7,Thomas Jr. Brian,24/1,11,Washington Parker,23/6,17,Camper Cam,CF25,88,Lassiter Darius,CF25,,
+Jacksonville Jaguars,RWR,5,Brown Dyami,U/Was,83,Irwin Trenton,SF25,10,Pancol Eli,CF25,15,Brayboy Chandler,CF25,,
+Jacksonville Jaguars,SWR,12,Hunter Travis,25/1,81,Trammell Austin,U/LAR,13,Singer Dorian,CF25,,,
+Jacksonville Jaguars,QB,16,Lawrence Trevor,21/1,14,MULLENS NICK,U/Min,18,Wolford John,SF24,19,Henigan Seth,CF25,,
+Jacksonville Jaguars,RB,1,Etienne Jr. Travis,21/1,4,Bigsby Tank,23/3,33,Tuten Bhayshul,25/4,36,Allen Jr. LeQuint,25/7,38,Jackson Ja'Quinden,CF25
+Kansas City Chiefs,LWR,1,Worthy Xavier,24/1,9,Smith-Schuster JuJu,SF24,89,Brownlee Jason,SF24,82,Holiday Jimmy,CF25,13,Presley Hal,SF25
+Kansas City Chiefs,RWR,5,Brown Hollywood,U/Arz,11,Royals Jalen,25/4,2,Thornton Tyquan,SF24,80,Badger Elijhah,CF25,8,Smith Key'Shawn,SF25
+Kansas City Chiefs,SWR,4,Rice Rashee,23/2,81,Remigio Nikko,CF23,84,Dalena Mac,CF25,,,
+Kansas City Chiefs,QB,15,Mahomes Patrick,17/1,17,Minshew Gardner,CC/LV,14,Zappe Bailey,U/Cle,19,Oladokun Chris,SF22,,
+Kansas City Chiefs,RB,10,Pacheco Isiah,22/7,29,HUNT KAREEM,17/3,25,Mitchell Elijah,U/SF,30,Smith Brashard,25/7,39,Wiley Michael,SF25
+Los Angeles Chargers,LWR,9,Harris Tre',25/2,84,Lambert-Smith KeAndre,25/5,88,Reagor Jalen,SF24,27,Jackson JaQuae,SF25,,
+Los Angeles Chargers,RWR,13,ALLEN KEENAN,U/Chi,1,Johnston Quentin,23/1,82,Rice Brenden,24/7,38,Campbell Dalevon,CF25,,
+Los Angeles Chargers,SWR,15,McConkey Ladd,24/2,12,Davis Derius,23/4,39,Johnson Jaylen,CF24,37,Grimm Luke,CF25,,
+Los Angeles Chargers,QB,10,Herbert Justin,20/1,4,HEINICKE TAYLOR,T/Atl,5,Lance Trey,U/Dal,7,Uiagalelei DJ,CF25,,
+Los Angeles Chargers,RB,8,Hampton Omarion,25/1,22,Harris Najee,U/Pit,30,Vidal Kimani,24/6,28,Haskins Hassan,W/Ten,35,Sanders Raheim,CF25
+Los Angeles Rams,LWR,17,ADAMS DAVANTE,CC/NYJ,88,Whittington Jordan,24/6,82,Edwards Tru,CF25,,,
+Los Angeles Rams,RWR,12,Nacua Puka,23/5,15,Mumpfield Konata,25/7,81,Presley Brennan,CF25,,,
+Los Angeles Rams,SWR,5,Atwell Tutu,21/2,19,Smith Xavier,CF23,10,Covey Britain,U/Phi,,,
+Los Angeles Rams,QB,9,STAFFORD MATTHEW,T/Det,11,GAROPPOLO JIMMY,CC/LV,13,Bennett IV Stetson,23/4,4,Winn Dresser,SF25,,
+Los Angeles Rams,RB,23,Williams Kyren,22/5,22,Corum Blake,24/3,35,Hunter Jarquez,25/4,32,Schrader Cody,W/SF,20,Rivers Ronnie,SF22
+Las Vegas Raiders,LWR,10,Thornton Jr. Dont'e,25/4,17,Johnson Collin,U/Chi,88,Shorter Justin,SF24,15,Callaway Marquez,SF25,,
+Las Vegas Raiders,RWR,1,Tucker Tre,23/3,18,Bech Jack,25/2,13,DORSETT PHILLIP,SF25,85,Jackson Jr. Ketron,CF25,,
+Las Vegas Raiders,SWR,16,Meyers Jakobi,U/NE,19,Mellott Tommy,25/6,81,Bachman Alex,SF24,4,Jackson Shedrick,SF24,,
+Las Vegas Raiders,QB,7,SMITH GENO,T/Sea,12,O'Connell Aidan,23/4,5,Miller Cam,25/6,,,
+Las Vegas Raiders,RB,2,Jeanty Ashton,25/1,31,MOSTERT RAHEEM,CC/Mia,3,White Zamir,22/4,28,McCormick Sincere,CF22,23,Laube Dylan,24/6
+Miami Dolphins,LWR,17,Waddle Jaylen,21/1,82,Eskridge Dee,SF24,84,Ezukanma Erik,22/4,,,
+Miami Dolphins,RWR,10,HILL TYREEK,T/KC,18,Westbrook-Ikhine Nick,U/Ten,19,Armstrong Andrew,CF25,81,Wease Jr. Theo,CF25,,
+Miami Dolphins,SWR,6,Washington Malik,24/6,7,Washington Tahj,24/7,88,Henning AJ,CF25,,,
+Miami Dolphins,QB,1,Tagovailoa Tua,20/1,0,Wilson Zach,U/Den,14,Ewers Quinn,25/7,,,
+Miami Dolphins,RB,28,Achane De'Von,23/3,5,Wright Jaylen,24/4,31,Gordon II Ollie,25/6,16,BOONE MIKE,U/Car,48,Shampklin Aaron,SF25
+Minnesota Vikings,LWR,18,Jefferson Justin,20/1,81,Jackson Lucky,CF23,14,Jones Tim,U/Jax,89,Thomas Thayer,CF23,,
+Minnesota Vikings,RWR,13,Felton Tai,25/3,82,Jones Jeshaun,CF24,19,Fleming Dontae,CF25,,,
+Minnesota Vikings,SWR,1,Nailor Jalen,22/6,31,Price Myles,CF25,83,Bolden Silas,CF25,85,Lewis Robert,CF25,,
+Minnesota Vikings,QB,9,McCarthy J.J.,24/1,8,Howell Sam,T/Sea,12,Brosmer Max,CF25,11,Rypien Brett,SF24,,
+Minnesota Vikings,RB,33,JONES SR. AARON,CC/GB,27,Mason Jordan,T/SF,32,Chandler Ty,22/5,36,Scott Zavier,SF24,38,Stewart Tre,CF25
+New England Patriots,LWR,8,DIGGS STEFON,U/Hou,9,Boutte Kayshon,23/6,6,Baker Javon,24/4,29,Webb Jeremiah,CF25,,
+New England Patriots,RWR,13,HOLLINS MACK,U/Buf,18,Williams Kyle,25/3,84,BOURNE KENDRICK,U/SF,,,
+New England Patriots,SWR,3,Douglas DeMario,23/6,86,Chism III Efton,CF25,83,Jiles John,SF24,,,
+New England Patriots,QB,10,Maye Drake,24/1,11,DOBBS JOSHUA,U/SF,,,,,
+New England Patriots,RB,38,Stevenson Rhamondre,21/4,32,Henderson TreVeyon,25/2,4,Gibson Antonio,U/Was,39,Hasty JaMycal,W/Jax,26,Jennings Terrell,CF24
+New Orleans Saints,LWR,12,Olave Chris,22/1,15,Tipton Mason,CF24,81,Austin Jr. Kevin,SF24,,,
+New Orleans Saints,RWR,22,Shaheed Rashid,CF22,10,COOKS BRANDIN,U/Dal,84,Dixon Moochie,CF25,,,
+New Orleans Saints,SWR, ,Vele Devaughn,T/Den,11,Wilson Jr. Cedrick,U/Mia,17,Pettis Dante,SF24,89,Daniels Jr. Roderick,CF25,,
+New Orleans Saints,QB,2,Rattler Spencer,24/5,6,Shough Tyler,25/2,3,Haener Jake,23/4,,,
+New Orleans Saints,RB,41,KAMARA ALVIN,17/3,5,Miller Kendre,23/3,13,Jones Jr. Velus,U/Car,30,Neal Devin,25/6,26,Akers Cam,U/Min
+New York Giants,LWR,1,Nabers Malik,24/1,8,Collins Beaux,CF25,81,Humphrey Lil'Jordan,U/Den,9,Felton Da'Quan,CF25,,
+New York Giants,RWR,18,Slayton Darius,19/5,13,Hyatt Jalin,23/3,5,Cambre Dalen,CF25,,,
+New York Giants,SWR,17,Robinson Wan'Dale,22/2,87,Smith-Marsette Ihmir,SF24,0,Olszewski Gunner,SF23,2,Wells Jr. Juice,CF25,,
+New York Giants,QB,3,WILSON RUSSELL,U/Pit,19,WINSTON JAMEIS,U/Cle,6,Dart Jaxson,25/1,15,DeVito Tommy,CF23,,
+New York Giants,RB,29,Tracy Jr. Tyrone,24/5,26,Singletary Devin,U/Hou,44,Skattebo Cam,25/4,25,Miller Dante,SF24,20,Gray Eric,23/5
+New York Jets,LWR,5,Wilson Garrett,22/1,10,Lazard Allen,U/GB,19,Charles Irvin,CF22,39,Skinner Quentin,CF25,,
+New York Jets,RWR,83,REYNOLDS JOSH,CC/Jax,82,Smith Arian,25/4,87,Smith Brandon,SF24,,,
+New York Jets,SWR,16,Johnson Tyler,U/LAR,36,Pritchett Jamaal,CF25,3,Gipson Xavier,CF23,6,Corley Malachi,24/3,,
+New York Jets,QB,7,Fields Justin,U/Pit,2,TAYLOR TYROD,U/NYG,15,Martinez Adrian,SF24,4,Cook Brady,CF25,,
+New York Jets,RB,20,Hall Breece,22/2,0,Allen Braelon,24/4,32,Davis Isaiah,24/5,34,Nwangwu Kene,SF24,40,Edwards Donovan,CF25
+Philadelphia Eagles,LWR,11,Brown A.J.,T/Ten,41,Cooper Darius,CF25,86,Cooks Elijah,SF24,,,
+Philadelphia Eagles,RWR,2,Dotson Jahan,T/Was,80,Metchie III John,T/Hou,46,Marshall Terrace,U/LV,48,Adeyi Ife,CF25,,
+Philadelphia Eagles,SWR,6,Smith DeVonta,21/1,82,Smith Ainias,24/5,18,Williams Avery,U/Atl,45,Morin Taylor,CF25,,
+Philadelphia Eagles,QB,1,Hurts Jalen,20/2,16,McKee Tanner,23/6,14,Thompson-Robinson Dorian,T/Cle,19,McCord Kyle,25/6,,
+Philadelphia Eagles,RB,26,Barkley Saquon,U/NYG,28,Shipley Will,24/4,29,Dillon A.J.,U/GB,39,Powell ShunDerrick,CF25,34,Johnson Jr. Montrell,CF25
+Pittsburgh Steelers,LWR,4,Metcalf DK,T/Sea,13,Miller Scotty,U/Atl,82,McCutcheon Lance,SF24,,,
+Pittsburgh Steelers,RWR,10,Wilson Roman,24/3,16,WOODS ROBERT,U/Hou,11,Johnson Brandon,SF24,85,Williams Ke'Shawn,CF25,,
+Pittsburgh Steelers,SWR,19,Austin III Calvin,22/4,15,Skowronek Ben,SF24,34,Hurleman Max,CF25,,,
+Pittsburgh Steelers,QB,8,RODGERS AARON,CC/NYJ,2,RUDOLPH MASON,U/Ten,18,Howard Will,25/6,17,Thompson Skylar,SF25,,
+Pittsburgh Steelers,RB,30,Warren Jaylen,CF22,20,Johnson Kaleb,25/3,14,Gainwell Kenneth,U/Phi,35,Nichols Lew,SF25,27,Sermon Trey,U/Ind
+Seattle Seahawks,LWR,11,Smith-Njigba Jaxon,23/1,19,Bobo Jake,CF23,82,White Cody,SF23,85,Broden Tyrone,CF25,,
+Seattle Seahawks,RWR,15,Horton Tory,25/5,1,VALDES-SCANTLING MARQUEZ,U/NO,86,White III Ricky,25/7,,,
+Seattle Seahawks,SWR,10,KUPP COOPER,CC/LAR,83,Young Dareke,22/7,84,Sims Steven,U/Bal,17,Plumlee John Rhys,SF24,,
+Seattle Seahawks,QB,14,Darnold Sam,U/Min,2,Lock Drew,U/NYG,6,Milroe Jalen,25/3,,,
+Seattle Seahawks,RB,9,Walker III Kenneth,22/2,26,Charbonnet Zach,23/2,36,Holani George,CF24,22,Martinez Damien,25/7,31,Wright Jacardia,CF25
+San Francisco 49ers,LWR,11,Aiyuk Brandon,20/1,84,Gage Jr. Russell,SF24,3,CHOSEN ROBBIE,SF25,18,Hodgins Isaiah,SF25,82,Knowles Malik,SF25
+San Francisco 49ers,RWR,1,Pearsall Ricky,24/1,17,Watkins Jordan,25/4,83,Owens Terique,CF24,7,Turner Malik,SF24,,
+San Francisco 49ers,SWR,15,Jennings Jauan,20/7,19,Cowing Jacob,24/4,6,Moore Skyy,T/KC,86,Bergen Junior,25/7,,
+San Francisco 49ers,QB,13,Purdy Brock,22/7,10,Jones Mac,U/Jax,4,Rourke Kurtis,25/7,14,Bradley Carter,SF25, ,Mordecai Tanner,CF24
+San Francisco 49ers,RB,23,McCaffrey Christian,T/Car, ,Robinson Jr. Brian,T/Was,31,Guerendo Isaac,24/4,29,James Jordan,25/5,20,Wilson Jeff,U/Mia
+Tampa Bay Buccaneers,LWR,13,EVANS MIKE,14/1,81,Miller Ryan,CF23,89,Houston Dennis,SF24,18,Jarrett Rakim,CF23,,
+Tampa Bay Buccaneers,RWR,15,McMillan Jalen,24/3,83,Johnson Tez,25/7,10,Palmer Trey,23/6,85,Greene Garrett,CF25,30,Harris Jacob,SF25
+Tampa Bay Buccaneers,SWR,14,Godwin Jr. Chris,17/3,9,Egbuka Emeka,25/1,17,SHEPARD STERLING,U/NYG,19,Johnson Kameron,CF24,,
+Tampa Bay Buccaneers,QB,6,MAYFIELD BAKER,U/LAR,2,Trask Kyle,21/2,16,BRIDGEWATER TEDDY,U/Det,8,Bazelak Connor,CF25,,
+Tampa Bay Buccaneers,RB,7,Irving Bucky,24/4,1,White Rachaad,22/3,44,Tucker Sean,CF23,37,Williams Josh,CF25,49,Wright Owen,U/Bal
+Tennessee Titans,LWR,11,Jefferson Van,U/Pit,5,Ayomanor Elic,25/4,13,Proche II James,U/Cle,82,Sheffield TJ,CF25,,
+Tennessee Titans,RWR,0,RIDLEY CALVIN,U/Jax,80,Oliver Bryce,CF24,19,Jackson Jha'Quan,24/6,83,Landers Matt,SF25,,
+Tennessee Titans,SWR,4,LOCKETT TYLER,CC/Sea,17,Dike Chimere,25/4,87,Restrepo Xavier,CF25,12,Kinsey Mason,CF20,,
+Tennessee Titans,QB,1,Ward Cam,25/1,10,ALLEN BRANDON,U/SF,15,SIEMIAN TREVOR,SF24,,,
+Tennessee Titans,RB,20,Pollard Tony,U/Dal,2,Spears Tyjae,23/3,28,Mullings Kalel,25/6,36,Chestnut Julius,CF22,24,Mims Jordan,SF25
+Washington Commanders,LWR,17,McLaurin Terry,19/3,19,MOORE CHRIS,SF24,16,Brooks Ja'Corey,CF25,6,Martin Tay,SF25,,
+Washington Commanders,RWR,85,Brown Noah,SF24,11,McCaffrey Luke,24/3,12,Gallup Michael,SF25,80,Sanders Braylon,SF25,,
+Washington Commanders,SWR,1,Samuel Deebo,T/SF,83,Lane Jaylin,25/4,13,Osborn K.J.,W/NE,10,Jones Jacoby,CF25,84,CRACRAFT RIVER,SF25
+Washington Commanders,QB,5,Daniels Jayden,24/1,18,MARIOTA MARCUS,U/Phi,14,JOHNSON JOSH,U/Bal,15,Hartman Sam,CF24,,
+Washington Commanders,RB,30,EKELER AUSTIN,U/LAC,32,Croskey-Merritt Jacory,25/7,36,Rodriguez Jr. Chris,23/6,26,McNichols Jeremy,SF24,22,Allen Kazmeir,CF23

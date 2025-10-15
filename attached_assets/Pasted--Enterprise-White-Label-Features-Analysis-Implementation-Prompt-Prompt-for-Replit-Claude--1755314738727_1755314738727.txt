@@ -1,0 +1,200 @@
+# Enterprise White-Label Features Analysis & Implementation Prompt
+
+## Prompt for Replit Claude:
+
+**Analyze the current platform architecture and implement/verify the following enterprise white-label capabilities for clients paying $149/month ($1,499/year). Ensure proper partitioning between tournament organizers, enterprise clients, and fantasy platforms.**
+
+-----
+
+## 🎯 WHITE-LABEL ENTERPRISE FEATURES TO ANALYZE/IMPLEMENT:
+
+### **Tier 1: Basic White-Label (Entry Level)**
+
+**Analyze if we currently have:**
+
+- [ ] **Custom domain support** (client.theircompany.com)
+- [ ] **Basic color scheme customization** (primary/secondary colors)
+- [ ] **Logo replacement** (their branding instead of Trantor)
+- [ ] **Custom “powered by” footer** (optional Trantor attribution)
+
+### **Tier 2: Advanced White-Label (Standard)**
+
+**Analyze if we currently have:**
+
+- [ ] **Complete color palette control** (all UI elements)
+- [ ] **Custom fonts** and typography options
+- [ ] **Background customization** (images, videos, gradients)
+- [ ] **Custom favicon** and browser title
+- [ ] **Personalized email templates** (registration, notifications)
+- [ ] **Custom terms of service** and privacy policy pages
+
+### **Tier 3: Professional White-Label (Premium)**
+
+**Analyze if we currently have:**
+
+- [ ] **Complete CSS override** capabilities
+- [ ] **Custom HTML injection** points (header/footer)
+- [ ] **White-label mobile app** branding
+- [ ] **API endpoint customization** (their subdomain in API calls)
+- [ ] **Custom documentation** and help pages
+- [ ] **Branded PDF exports** and reports
+
+-----
+
+## 🏗️ TOURNAMENT WEBSITE BUILDER FEATURES:
+
+### **Core Website Building Tools**
+
+**Verify/implement these “Jersey Watch killer” features:**
+
+- [ ] **Drag-and-drop website builder** (better than Jersey Watch templates)
+- [ ] **Sport-specific backgrounds** and themes (basketball, football, etc.)
+- [ ] **Complete creative control** (no template limitations)
+- [ ] **Custom color/font freedom** (beyond basic palettes)
+- [ ] **HTML/CSS editing** without background conflicts
+
+### **Registration & Payment Integration**
+
+**Verify/implement these features:**
+
+- [ ] **Advanced registration forms** with address autocomplete
+- [ ] **Custom form field creation** for any sport/tournament type
+- [ ] **Team registration with pending states** (individual payment responsibility)
+- [ ] **Integrated payment processing** (not external Stripe links)
+- [ ] **Registration link sharing** for team coordination
+
+### **Tournament Management Integration**
+
+**Verify/implement these unified features:**
+
+- [ ] **Auto-population of brackets/leaderboards** from registrations
+- [ ] **Real-time tournament status** on website
+- [ ] **Live scoring integration** with website display
+- [ ] **Automatic bracket updates** visible on tournament website
+
+### **Integrated Merchandise System**
+
+**Verify/implement these features:**
+
+- [ ] **Native merch pages** within tournament websites
+- [ ] **Tournament-branded merchandise** auto-generation
+- [ ] **Separated accounting** (tournament fees vs merch sales)
+- [ ] **Inventory management** system
+- [ ] **One-stop shopping** experience (registration + merch)
+
+-----
+
+## 🏆 UNIFIED TOURNAMENT DASHBOARD:
+
+### **“One Dashboard to Rule Them All” Features**
+
+**Verify/implement:**
+
+- [ ] **All tournaments in one view** (no platform switching)
+- [ ] **Registration tracking** across all tournaments
+- [ ] **Revenue analytics** (registration + merchandise)
+- [ ] **Bracket/leaderboard management** in unified interface
+- [ ] **Website analytics** and engagement metrics
+- [ ] **Historical tournament archive** and performance data
+
+-----
+
+## 🎮 FANTASY PLATFORM INTEGRATION:
+
+### **Fantasy Sports AI Features**
+
+**Verify the fantasy platform has:**
+
+- [ ] **Real-time injury scouting** across web sources
+- [ ] **Advanced player analysis** (team tendencies, matchup intelligence)
+- [ ] **Daily fantasy lineup optimization** with AI suggestions
+- [ ] **Knockout pool contrarian analysis** (crowd psychology insights)
+- [ ] **Proper disclaimer system** with “Matt Ryan moment” messaging
+
+### **Fantasy Platform Partitioning**
+
+**Verify proper separation:**
+
+- [ ] **Donation-based model** (no gambling/money-making in app)
+- [ ] **Separate database tables** for fantasy vs tournament data
+- [ ] **Yahoo Sports API integration** functioning properly
+- [ ] **Gratitude donation prompts** after successful AI predictions
+- [ ] **Ad-free experience** maintained
+
+-----
+
+## 🔧 PLATFORM PARTITIONING VERIFICATION:
+
+### **Three-Portal Architecture Check**
+
+**Verify these subdomains work properly:**
+
+- [ ] **districts.trantortournaments.org** (educational platform)
+- [ ] **tournaments.trantortournaments.org** (tournament organizers)
+- [ ] **enterprise.trantortournaments.org** (business clients)
+- [ ] **Shared database** with proper route-based access control
+- [ ] **Role conflict resolution** (Athletic Directors vs Tournament Organizers)
+
+### **Database Partitioning Strategy**
+
+**Verify/implement:**
+
+- [ ] **Single database** with intelligent access controls
+- [ ] **Route-level permissions** preventing role conflicts
+- [ ] **Cross-platform data sharing** where appropriate
+- [ ] **Isolated user contexts** per subdomain
+- [ ] **Proper authentication routing** per portal type
+
+-----
+
+## 💰 ENTERPRISE PRICING TIER FEATURES:
+
+### **$149/Month Value Justification**
+
+**Ensure enterprise clients get:**
+
+- [ ] **White-label customization** options
+- [ ] **Tournament website builder** (Jersey Watch alternative)
+- [ ] **Integrated merchandise system**
+- [ ] **Unified tournament dashboard**
+- [ ] **API access** for their web teams
+- [ ] **Priority support** and consultation
+- [ ] **Advanced analytics** and reporting
+- [ ] **Mobile-compatible** white-label experience
+
+-----
+
+## 🎯 IMPLEMENTATION PRIORITY:
+
+### **Phase 1: Core White-Label (Immediate)**
+
+1. **Basic branding customization** (logo, colors, domain)
+1. **Tournament website builder** core functionality
+1. **Integrated registration/payment** system
+
+### **Phase 2: Advanced Features (Next)**
+
+1. **Merchandise integration** and accounting separation
+1. **Advanced white-label** customization options
+1. **Unified dashboard** with all tournament data
+
+### **Phase 3: Professional Grade (Future)**
+
+1. **Complete CSS override** capabilities
+1. **Mobile app** white-label branding
+1. **API customization** and documentation
+
+-----
+
+## 📊 SUCCESS METRICS:
+
+**After implementation, enterprise clients should be able to:**
+
+- ✅ **Create fully-branded tournament websites** (better than Jersey Watch)
+- ✅ **Manage all tournaments** from one dashboard (vs multiple platforms)
+- ✅ **Sell merchandise** integrated with tournament registration
+- ✅ **Auto-populate brackets** from registrations (no manual work)
+- ✅ **Maintain their brand identity** throughout the platform
+- ✅ **Access powerful tools** without platform limitations
+
+**Competitive positioning:** *“Everything Jersey Watch and Challonge do, but integrated, white-labeled, and better - all in one platform.”*

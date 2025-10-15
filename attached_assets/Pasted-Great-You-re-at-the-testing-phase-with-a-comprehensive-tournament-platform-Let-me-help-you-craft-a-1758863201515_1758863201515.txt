@@ -1,0 +1,94 @@
+Great! You’re at the testing phase with a comprehensive tournament platform. Let me help you craft a prompt for Replit’s testing autonomy that will thoroughly stress-test your system.
+
+Here’s a comprehensive testing prompt you can use:
+
+-----
+
+**COMPREHENSIVE TOURNAMENT PLATFORM TESTING PROMPT:**
+
+“Please conduct thorough end-to-end testing of this tournament platform by creating and executing the following test scenarios. For each scenario, verify functionality, edge cases, and error handling:
+
+**1. BASIC TOURNAMENT TYPES:**
+
+- Create a single elimination tournament with 16 participants, run it to completion
+- Create a double elimination tournament with 13 participants (odd number), verify loser’s bracket works correctly
+- Create a round-robin tournament with 8 participants, ensure all pairings generate correctly
+- Create a Swiss system tournament with 20 participants for 5 rounds, verify pairing algorithm prevents rematches
+
+**2. EDGE CASES & STRESS TESTS:**
+
+- Create tournaments with: 1 participant, 2 participants, 3 participants (odd), 127 participants (large odd), 128 participants (large even)
+- Test mid-tournament participant dropout/disqualification in each tournament type
+- Test late registration/adding participants after tournament starts
+- Create tournaments with identical participant names to test ID handling
+- Test simultaneous score submissions for the same match
+
+**3. GROUP STAGE → KNOCKOUT:**
+
+- Create a 16-team tournament with 4 groups of 4, then single elimination from top 2 of each group
+- Verify tiebreaker logic within groups (head-to-head, goal difference, etc.)
+- Test advancement logic to knockout stage
+
+**4. SEEDING & PAIRING LOGIC:**
+
+- Create tournaments with pre-seeded rankings (1-32) and verify bracket positions
+- Test Swiss system color balancing (if applicable)
+- Test Swiss system tiebreaker calculations (Buchholz, Sonneborn-Berger)
+- Verify bye assignment in odd-participant tournaments
+
+**5. SCORING SYSTEMS:**
+
+- Test different scoring formats: best-of-3, best-of-5, aggregate scoring, point-based
+- Submit invalid scores (negative, non-numeric, mismatched) and verify error handling
+- Test score reversal/correction functionality
+- Verify standing calculations update correctly after each result
+
+**6. ADMINISTRATIVE FEATURES:**
+
+- Test tournament cloning/templating
+- Test permission levels (organizer, referee, participant views)
+- Test tournament modification after start (format change, participant removal)
+- Test tournament cancellation and archiving
+
+**7. CONCURRENT OPERATIONS:**
+
+- Create multiple tournaments simultaneously
+- Have the same participant in multiple active tournaments
+- Submit scores for multiple matches concurrently
+- Test database transaction integrity under load
+
+**8. DATA VALIDATION & SECURITY:**
+
+- Attempt SQL injection in tournament names, participant names
+- Test XSS attempts in text fields
+- Verify authentication/authorization for admin functions
+- Test API rate limiting if applicable
+
+**9. COMPLEX SCENARIOS:**
+
+- Create a team-based Swiss tournament where individual results affect team standings
+- Create a multi-stage tournament: qualification round-robin → playoff Swiss → final single elimination
+- Test nested/hierarchical tournaments (regional qualifiers feeding into main event)
+
+**10. UI/UX & EDGE CASES:**
+
+- Test with extremely long tournament/participant names (>100 characters)
+- Test special characters in names: O’Brien, José, 选手, emoji 🎮
+- Verify mobile responsiveness of brackets and score entry
+- Test print/export functionality for brackets
+
+**REPORTING REQUIREMENTS:**
+For each test, report:
+
+- ✅ Success with any notable observations
+- ❌ Failures with exact error messages and reproduction steps
+- ⚠️ Warnings for unexpected behavior that didn’t break functionality
+- 📊 Performance metrics for tournaments with 50+ participants
+
+Focus especially on the Swiss system pairing algorithm, tiebreaker calculations, and any race conditions in concurrent score submissions. These are typically the most fragile areas.”
+
+-----
+
+This prompt should give the testing agent a comprehensive workload that covers normal operations, edge cases, and stress scenarios. You can adjust the specifics based on what features you know you’ve implemented.
+
+Would you like me to create a more focused prompt for any specific area, or help you set up automated test assertions?​​​​​​​​​​​​​​​​

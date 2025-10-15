@@ -1,0 +1,120 @@
+[Log] Domain detection - hostname: – "3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev" (useDomain.ts, line 6)
+[Log] Domain config set: (useDomain.ts, line 90)
+Object
+
+allowFantasyPromo: true
+
+allowProPromo: false
+
+allowSchoolPromo: true
+
+brand: "TRANTOR_TOURNAMENTS"
+
+features: {fantasyLeagues: true, ageVerification: true, crossSelling: true, guestAccess: true, registration: true}
+
+primaryColor: "orange"
+
+theme: "professional"
+
+type: "pro"
+
+Object Prototype
+[Log] Domain detection - hostname: – "3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev" (useDomain.ts, line 6)
+[Log] Domain config set: (useDomain.ts, line 90)
+Object
+
+allowFantasyPromo: true
+
+allowProPromo: false
+
+allowSchoolPromo: true
+
+brand: "TRANTOR_TOURNAMENTS"
+
+features: Object
+
+ageVerification: true
+
+crossSelling: true
+
+fantasyLeagues: true
+
+guestAccess: true
+
+registration: true
+
+Object Prototype
+
+primaryColor: "orange"
+
+theme: "professional"
+
+type: "pro"
+
+Object Prototype
+
+__defineGetter__(propertyName, getterFunction)
+
+__defineSetter__(propertyName, setterFunction)
+
+__lookupGetter__(propertyName)
+
+__lookupSetter__(propertyName)
+
+constructor: function()
+
+hasOwnProperty(propertyName)
+
+isPrototypeOf(property)
+
+propertyIsEnumerable(propertyName)
+
+toLocaleString()
+
+toString()
+
+valueOf()
+[Log] Domain detection - hostname: – "3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev" (useDomain.ts, line 6)
+[Log] Domain config set: (useDomain.ts, line 90)
+Object
+
+allowFantasyPromo: true
+
+allowProPromo: false
+
+allowSchoolPromo: true
+
+brand: "TRANTOR_TOURNAMENTS"
+
+features: {fantasyLeagues: true, ageVerification: true, crossSelling: true, guestAccess: true, registration: true}
+
+primaryColor: "orange"
+
+theme: "professional"
+
+type: "pro"
+
+Object Prototype
+[Log] Submit button clicked! Sports: – ["Basketball"] (1) (chunk-RPCDYKBN.js, line 3674)
+[Log] Domain detection - hostname: – "3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev" (useDomain.ts, line 6)
+[Log] Domain config set: (useDomain.ts, line 90)
+Object
+
+allowFantasyPromo: true
+
+allowProPromo: false
+
+allowSchoolPromo: true
+
+brand: "TRANTOR_TOURNAMENTS"
+
+features: {fantasyLeagues: true, ageVerification: true, crossSelling: true, guestAccess: true, registration: true}
+
+primaryColor: "orange"
+
+theme: "professional"
+
+type: "pro"
+
+Object Prototype
+[Log] Submit button clicked! Sports: – ["Basketball"] (1) (chunk-RPCDYKBN.js, line 3674)

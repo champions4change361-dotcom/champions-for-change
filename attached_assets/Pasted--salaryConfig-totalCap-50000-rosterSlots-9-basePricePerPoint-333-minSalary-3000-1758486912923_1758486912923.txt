@@ -1,0 +1,108 @@
+{
+“salaryConfig”: {
+“totalCap”: 50000,
+“rosterSlots”: 9,
+“basePricePerPoint”: 333,
+“minSalary”: 3000,
+“maxSalary”: 12000
+},
+“positionMultipliers”: {
+“QB”: {
+“scarcity”: 0.90,
+“minPrice”: 4000,
+“maxPrice”: 9000,
+“slotsNeeded”: 1
+},
+“RB”: {
+“scarcity”: 1.10,
+“minPrice”: 3500,
+“maxPrice”: 12000,
+“slotsNeeded”: 2.5
+},
+“WR”: {
+“scarcity”: 1.00,
+“minPrice”: 3000,
+“maxPrice”: 11000,
+“slotsNeeded”: 3.5
+},
+“TE”: {
+“scarcity”: 1.15,
+“minPrice”: 3000,
+“maxPrice”: 8500,
+“slotsNeeded”: 1
+},
+“DEF”: {
+“scarcity”: 0.75,
+“minPrice”: 3000,
+“maxPrice”: 5000,
+“slotsNeeded”: 1
+}
+},
+“projectionWeights”: {
+“recentGames”: 0.40,
+“seasonAverage”: 0.25,
+“matchupRating”: 0.20,
+“usageRate”: 0.10,
+“vegasImpliedPoints”: 0.05
+},
+“pprScoring”: {
+“rushYard”: 0.1,
+“rushTD”: 6,
+“recYard”: 0.1,
+“reception”: 1,
+“recTD”: 6,
+“passYard”: 0.04,
+“passTD”: 4,
+“interception”: -2,
+“fumbleLost”: -2
+},
+“calculateSalary”: “function(projectedPoints, position, ownershipProjection) { let basePrice = projectedPoints * salaryConfig.basePricePerPoint; let positionAdjusted = basePrice * positionMultipliers[position].scarcity; let ownershipAdjusted = positionAdjusted * (1 + (ownershipProjection - 0.15) * 0.2); let finalSalary = Math.max(positionMultipliers[position].minPrice, Math.min(positionMultipliers[position].maxPrice, Math.round(ownershipAdjusted / 100) * 100)); return finalSalary; }”,
+“exampleCalculations”: [
+{
+“player”: “Elite RB”,
+“projectedPoints”: 22,
+“position”: “RB”,
+“calculation”: “22 * 333 * 1.10 = $8,059”,
+“finalSalary”: 8100
+},
+{
+“player”: “Top QB”,
+“projectedPoints”: 24,
+“position”: “QB”,
+“calculation”: “24 * 333 * 0.90 = $7,193”,
+“finalSalary”: 7200
+},
+{
+“player”: “WR1”,
+“projectedPoints”: 18,
+“position”: “WR”,
+“calculation”: “18 * 333 * 1.00 = $5,994”,
+“finalSalary”: 6000
+}
+],
+“salaryDistributionTargets”: {
+“tier1”: {“range”: [8000, 12000], “slotsTypical”: 1},
+“tier2”: {“range”: [6000, 7900], “slotsTypical”: 2},
+“tier3”: {“range”: [4500, 5900], “slotsTypical”: 3},
+“tier4”: {“range”: [3000, 4400], “slotsTypical”: 3}
+},
+“adjustmentFactors”: {
+“injuryStatus”: {
+“healthy”: 1.0,
+“questionable”: 0.95,
+“doubtful”: 0.85,
+“out”: 0
+},
+“gameScript”: {
+“heavyFavorite”: {“RB”: 1.05, “QB”: 0.98, “WR”: 0.97},
+“neutral”: {“RB”: 1.0, “QB”: 1.0, “WR”: 1.0},
+“heavyUnderdog”: {“RB”: 0.95, “QB”: 1.03, “WR”: 1.05}
+},
+“weather”: {
+“clear”: 1.0,
+“rain”: 0.97,
+“wind15plus”: 0.94,
+“snow”: 0.92
+}
+}
+}

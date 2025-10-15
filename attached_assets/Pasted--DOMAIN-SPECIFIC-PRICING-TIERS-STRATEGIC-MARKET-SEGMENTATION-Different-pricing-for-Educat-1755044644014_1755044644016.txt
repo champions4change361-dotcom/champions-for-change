@@ -1,0 +1,527 @@
+// 🎯 DOMAIN-SPECIFIC PRICING TIERS - STRATEGIC MARKET SEGMENTATION
+// Different pricing for Education, Business, and Community users
+
+// =============================================================================
+// 1. EDUCATION DOMAIN PRICING (tournaments.trantortournaments.org)
+// =============================================================================
+
+import React from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Check, GraduationCap, Building, Star } from 'lucide-react';
+
+export function EducationPricingSection() {
+  const educationTiers = [
+    {
+      name: 'Foundation',
+      price: 'Free',
+      description: 'Perfect for single schools and small tournaments',
+      features: [
+        'Up to 5 tournaments per month',
+        'Basic bracket management',
+        'Score tracking & live updates',
+        'Email notifications',
+        'Registration fee collection (you keep 100%)',
+        'Tournament donation pages (you keep 100%)',
+        'Mobile-friendly interface',
+        'Community support'
+      ],
+      cta: 'Get Started Free',
+      buttonColor: 'bg-blue-600 hover:bg-blue-700',
+      note: 'Suggested $25 donation per tournament to support student educational trips',
+      icon: GraduationCap,
+      popular: false
+    },
+    {
+      name: 'District Enterprise',
+      price: '$399',
+      period: '/month',
+      description: 'Complete solution for school districts and large organizations',
+      features: [
+        'Everything in Foundation',
+        'Unlimited tournaments',
+        'Multi-school management',
+        'White-label branding with custom domain',
+        'Custom logos and color schemes',
+        'AI tournament setup assistance',
+        'Advanced analytics & reporting',
+        'Multi-organization support',
+        'Dedicated account manager',
+        'Priority phone support',
+        'Staff training & onboarding',
+        'Custom integrations available'
+      ],
+      cta: 'Contact Sales',
+      buttonColor: 'bg-green-600 hover:bg-green-700',
+      note: 'Includes implementation support and training for your entire district',
+      icon: Building,
+      popular: true
+    }
+  ];
+
+  return (
+    <section className="py-16 bg-gradient-to-br from-green-50 to-blue-50">
+      <div className="max-w-6xl mx-auto px-4">
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-semibold mb-6">
+            <GraduationCap className="h-4 w-4" />
+            Champions for Change Educational Platform
+          </div>
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            Choose Your Educational Plan
+          </h2>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Simple pricing for schools and districts. Every subscription helps fund 
+            student educational trips in Corpus Christi.
+          </p>
+        </div>
+        
+        <div className="grid lg:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          {educationTiers.map((tier) => {
+            const IconComponent = tier.icon;
+            return (
+              <Card 
+                key={tier.name} 
+                className={`relative ${tier.popular ? 'border-2 border-green-500 shadow-xl' : 'border border-gray-200'}`}
+              >
+                {tier.popular && (
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-2 rounded-full text-sm font-semibold flex items-center gap-2">
+                    <Star className="h-4 w-4" />
+                    Most Districts Choose This
+                  </div>
+                )}
+                
+                <CardHeader className="text-center pb-6">
+                  <div className="mx-auto mb-4 p-3 bg-green-100 rounded-full w-fit">
+                    <IconComponent className="h-8 w-8 text-green-600" />
+                  </div>
+                  <CardTitle className="text-2xl font-bold mb-2">{tier.name}</CardTitle>
+                  <div className="mb-4">
+                    <span className="text-4xl font-bold text-gray-900">{tier.price}</span>
+                    {tier.period && <span className="text-lg text-gray-600">{tier.period}</span>}
+                  </div>
+                  <CardDescription className="text-base">{tier.description}</CardDescription>
+                </CardHeader>
+                
+                <CardContent>
+                  <ul className="space-y-3 mb-8">
+                    {tier.features.map((feature, idx) => (
+                      <li key={idx} className="flex items-start gap-2">
+                        <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span className="text-sm text-gray-700">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  
+                  <Button className={`w-full ${tier.buttonColor} text-white`} size="lg">
+                    {tier.cta}
+                  </Button>
+                  
+                  {tier.note && (
+                    <p className="text-xs text-gray-600 text-center mt-4 italic">
+                      {tier.note}
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+        
+        <div className="text-center mt-12 bg-white rounded-lg p-6 shadow-md">
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            🎓 Educational Impact Guarantee
+          </h3>
+          <p className="text-gray-600">
+            Every subscription directly supports Champions for Change, funding educational 
+            trips for students. We've already funded over $15,000 in student opportunities!
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// =============================================================================
+// 2. BUSINESS DOMAIN PRICING (pro.trantortournaments.org)
+// =============================================================================
+
+export function BusinessPricingSection() {
+  const businessTiers = [
+    {
+      name: 'Starter',
+      price: 'Free',
+      description: 'Perfect for small office competitions and hackathons',
+      features: [
+        'Up to 5 tournaments per month',
+        'Basic bracket management',
+        'Score tracking & leaderboards',
+        'Email notifications',
+        'Registration fee collection (you keep 100%)',
+        'Team management tools',
+        'Mobile access'
+      ],
+      cta: 'Start Free',
+      buttonColor: 'bg-blue-600 hover:bg-blue-700',
+      icon: Building,
+      popular: false,
+      bestFor: 'Small teams, one-off events'
+    },
+    {
+      name: 'Professional',
+      price: '$99',
+      period: '/month',
+      description: 'Advanced features for growing businesses and regular competitions',
+      features: [
+        'Everything in Starter',
+        'Unlimited tournaments',
+        'AI tournament setup assistance',
+        'Advanced analytics & insights',
+        'Custom branding options',
+        'Priority email support',
+        'API access for integrations',
+        'Export capabilities',
+        'Multi-location support'
+      ],
+      cta: 'Upgrade to Pro',
+      buttonColor: 'bg-blue-600 hover:bg-blue-700',
+      icon: Star,
+      popular: true,
+      bestFor: 'Regular events, growing companies'
+    },
+    {
+      name: 'Enterprise',
+      price: '$199',
+      period: '/month',
+      description: 'Complete white-label solution for large organizations',
+      features: [
+        'Everything in Professional',
+        'White-label branding',
+        'Custom subdomain (yourcompany.tournaments.pro)',
+        'Dedicated account manager',
+        'Phone support',
+        'Custom integrations',
+        'Advanced user management',
+        'SSO integration',
+        'Custom reporting',
+        'Implementation support'
+      ],
+      cta: 'Contact Sales',
+      buttonColor: 'bg-purple-600 hover:bg-purple-700',
+      icon: Building,
+      popular: false,
+      bestFor: 'Large corporations, white-label needs'
+    }
+  ];
+
+  return (
+    <section className="py-16 bg-gradient-to-br from-blue-50 to-purple-50">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-semibold mb-6">
+            <Building className="h-4 w-4" />
+            Tournament Pro for Business
+          </div>
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            Professional Tournament Management
+          </h2>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Scale from office competitions to enterprise-wide tournaments. 
+            Grow with plans that match your business needs.
+          </p>
+        </div>
+        
+        <div className="grid lg:grid-cols-3 gap-8">
+          {businessTiers.map((tier) => {
+            const IconComponent = tier.icon;
+            return (
+              <Card 
+                key={tier.name} 
+                className={`relative ${tier.popular ? 'border-2 border-blue-500 shadow-xl scale-105' : 'border border-gray-200'}`}
+              >
+                {tier.popular && (
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-semibold">
+                    Most Popular
+                  </div>
+                )}
+                
+                <CardHeader className="text-center pb-6">
+                  <div className="mx-auto mb-4 p-3 bg-blue-100 rounded-full w-fit">
+                    <IconComponent className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <CardTitle className="text-xl font-bold mb-2">{tier.name}</CardTitle>
+                  <div className="mb-4">
+                    <span className="text-3xl font-bold text-gray-900">{tier.price}</span>
+                    {tier.period && <span className="text-lg text-gray-600">{tier.period}</span>}
+                  </div>
+                  <CardDescription className="text-sm mb-2">{tier.description}</CardDescription>
+                  <Badge variant="outline" className="text-xs">
+                    {tier.bestFor}
+                  </Badge>
+                </CardHeader>
+                
+                <CardContent>
+                  <ul className="space-y-2 mb-8">
+                    {tier.features.map((feature, idx) => (
+                      <li key={idx} className="flex items-start gap-2">
+                        <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span className="text-xs text-gray-700">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  
+                  <Button className={`w-full ${tier.buttonColor} text-white`} size="lg">
+                    {tier.cta}
+                  </Button>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+
+        {/* Cross-selling to Coaches Lounge */}
+        <div className="mt-16 bg-gradient-to-r from-purple-100 to-blue-100 rounded-xl p-8 border border-purple-200">
+          <div className="text-center">
+            <h3 className="text-xl font-bold text-purple-900 mb-4">
+              🎮 Add Some Fun to Your Office Culture
+            </h3>
+            <p className="text-purple-800 mb-6">
+              Looking for fantasy sports leagues or gaming tournaments for your team? 
+              Check out Coaches Lounge for ad-free fantasy leagues and gaming competitions!
+            </p>
+            <Button 
+              variant="outline" 
+              className="border-purple-300 text-purple-700 hover:bg-purple-50"
+              onClick={() => window.open('https://coaches.trantortournaments.org', '_blank')}
+            >
+              Explore Coaches Lounge
+            </Button>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// =============================================================================
+// 3. COACHES LOUNGE PRICING (coaches.trantortournaments.org)
+// =============================================================================
+
+export function CoachesLoungePricing() {
+  return (
+    <section className="py-16 bg-gradient-to-br from-purple-900 via-blue-900 to-green-900 text-white">
+      <div className="max-w-4xl mx-auto px-4 text-center">
+        <div className="mb-12">
+          <div className="inline-flex items-center gap-2 bg-purple-100 text-purple-800 px-4 py-2 rounded-full text-sm font-semibold mb-6">
+            <GraduationCap className="h-4 w-4" />
+            Community-Powered Platform
+          </div>
+          <h2 className="text-3xl font-bold mb-4">
+            Coaches Lounge is 100% Free
+          </h2>
+          <p className="text-xl text-purple-200 max-w-2xl mx-auto">
+            Fantasy sports, gaming tournaments, and community competitions. 
+            Supported by voluntary donations to Champions for Change.
+          </p>
+        </div>
+        
+        <Card className="bg-white/10 backdrop-blur-sm border-white/20 max-w-md mx-auto">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl text-white mb-4">Community Access</CardTitle>
+            <div className="text-4xl font-bold text-green-300 mb-2">Free Forever</div>
+            <CardDescription className="text-purple-200">
+              No subscriptions, no mandatory fees
+            </CardDescription>
+          </CardHeader>
+          
+          <CardContent>
+            <ul className="space-y-3 mb-8 text-left">
+              <li className="flex items-center gap-2 text-purple-100">
+                <Check className="h-4 w-4 text-green-400" />
+                Unlimited fantasy leagues
+              </li>
+              <li className="flex items-center gap-2 text-purple-100">
+                <Check className="h-4 w-4 text-green-400" />
+                Gaming tournaments
+              </li>
+              <li className="flex items-center gap-2 text-purple-100">
+                <Check className="h-4 w-4 text-green-400" />
+                Commissioner tools
+              </li>
+              <li className="flex items-center gap-2 text-purple-100">
+                <Check className="h-4 w-4 text-green-400" />
+                Live score tracking
+              </li>
+              <li className="flex items-center gap-2 text-purple-100">
+                <Check className="h-4 w-4 text-green-400" />
+                Ad-free experience
+              </li>
+            </ul>
+            
+            <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white mb-4">
+              Join Free Community
+            </Button>
+            
+            <div className="text-center">
+              <p className="text-xs text-purple-300 mb-3">
+                Optional: Support student education
+              </p>
+              <div className="flex gap-2 justify-center">
+                <Button size="sm" variant="outline" className="border-green-300 text-green-300 hover:bg-green-50/10">
+                  $5
+                </Button>
+                <Button size="sm" variant="outline" className="border-green-300 text-green-300 hover:bg-green-50/10">
+                  $10
+                </Button>
+                <Button size="sm" variant="outline" className="border-green-300 text-green-300 hover:bg-green-50/10">
+                  $25
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <div className="mt-12 bg-black/20 backdrop-blur-sm rounded-lg p-6 border border-white/10">
+          <p className="text-purple-200 text-sm">
+            <strong>How it works:</strong> Coaches Lounge is funded by voluntary donations to Champions for Change, 
+            our educational nonprofit. 100% of donations go directly to funding student educational trips in Corpus Christi, Texas.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// =============================================================================
+// 4. DOMAIN-AWARE PRICING COMPONENT
+// =============================================================================
+
+import { useDomain } from '@/hooks/useDomain';
+
+export function DomainAwarePricing() {
+  const { isSchoolDomain, isProDomain, isCoachesDomain } = useDomain();
+  
+  if (isSchoolDomain()) {
+    return <EducationPricingSection />;
+  }
+  
+  if (isProDomain()) {
+    return <BusinessPricingSection />;
+  }
+  
+  if (isCoachesDomain()) {
+    return <CoachesLoungePricing />;
+  }
+  
+  // Fallback
+  return <EducationPricingSection />;
+}
+
+// =============================================================================
+// 5. PRICING CONFIGURATION FOR BACKEND
+// =============================================================================
+
+export const DOMAIN_PRICING_CONFIG = {
+  education: {
+    domain: 'tournaments.trantortournaments.org',
+    tiers: [
+      {
+        id: 'foundation',
+        name: 'Foundation',
+        price: 0,
+        monthlyPrice: 0,
+        features: ['5_tournaments_month', 'basic_features', 'registration_fees', 'donations'],
+        stripePriceId: null,
+        suggestedDonation: 25
+      },
+      {
+        id: 'district_enterprise',
+        name: 'District Enterprise',
+        price: 399,
+        monthlyPrice: 399,
+        features: ['unlimited_tournaments', 'multi_school', 'white_label', 'ai_assistance', 'dedicated_support'],
+        stripePriceId: 'price_district_enterprise_monthly',
+        suggestedDonation: 0
+      }
+    ]
+  },
+  
+  business: {
+    domain: 'pro.trantortournaments.org',
+    tiers: [
+      {
+        id: 'starter',
+        name: 'Starter',
+        price: 0,
+        monthlyPrice: 0,
+        features: ['5_tournaments_month', 'basic_features', 'registration_fees'],
+        stripePriceId: null,
+        suggestedDonation: 0
+      },
+      {
+        id: 'professional',
+        name: 'Professional',
+        price: 99,
+        monthlyPrice: 99,
+        features: ['unlimited_tournaments', 'ai_assistance', 'analytics', 'custom_branding'],
+        stripePriceId: 'price_business_professional_monthly',
+        suggestedDonation: 0
+      },
+      {
+        id: 'enterprise',
+        name: 'Enterprise',
+        price: 199,
+        monthlyPrice: 199,
+        features: ['everything_pro', 'white_label', 'dedicated_support', 'custom_integrations'],
+        stripePriceId: 'price_business_enterprise_monthly',
+        suggestedDonation: 0
+      }
+    ]
+  },
+  
+  coaches: {
+    domain: 'coaches.trantortournaments.org',
+    tiers: [
+      {
+        id: 'community',
+        name: 'Community',
+        price: 0,
+        monthlyPrice: 0,
+        features: ['unlimited_leagues', 'fantasy_sports', 'gaming_tournaments', 'ad_free'],
+        stripePriceId: null,
+        suggestedDonation: 0,
+        voluntaryDonation: true
+      }
+    ]
+  }
+};
+
+/*
+PRICING STRATEGY SUMMARY:
+
+📚 EDUCATION DOMAIN (2 tiers):
+- Foundation: Free + $25 suggested donation
+- District Enterprise: $399/month (premium pricing for big budgets)
+
+💼 BUSINESS DOMAIN (3 tiers):
+- Starter: Free (acquisition)
+- Professional: $99/month (growth)
+- Enterprise: $199/month (retention, priced under education)
+
+🎮 COACHES LOUNGE (1 tier):
+- Community: Free with voluntary donations
+
+KEY STRATEGIC DECISIONS:
+✅ Education pays most (they have biggest budgets)
+✅ Business has growth path (free → paid)
+✅ Coaches Lounge builds community (donation-supported)
+✅ Cross-selling between business and coaches domains
+✅ Clear value propositions per audience
+
+IMPLEMENTATION FOR DRIZZLE AI:
+- Update domain-specific pricing pages
+- Configure Stripe price IDs per domain
+- Set up donation flows for education and coaches
+- Implement cross-selling promotions
+*/

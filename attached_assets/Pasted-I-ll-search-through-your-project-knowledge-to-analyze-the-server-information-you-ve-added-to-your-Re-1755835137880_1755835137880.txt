@@ -1,0 +1,85 @@
+I'll search through your project knowledge to analyze the server information you've added to your Replit account.Let me search for more specific information about your Replit configuration and any issues you might be facing.Based on my analysis of your Replit server configuration, here's a comprehensive assessment:
+
+## **Server Configuration Analysis**
+
+### **🎯 Overall Setup**
+Your Replit application appears to be a **Champions for Change tournament management platform** with sophisticated multi-domain support and authentication systems.
+
+### **🔧 Key Technical Components**
+
+**1. Multi-Domain Architecture**
+- Supports both Replit domain and custom domain (`trantortournaments.org`)
+- Smart domain detection with fallback mechanisms
+- Domain-specific OAuth strategies configured
+
+**2. Authentication System**
+- **OAuth Integration**: Using Replit's OpenID Connect
+- **Fallback Authentication**: Cookie-based auth for mobile compatibility
+- **Role-based Access**: District athletic director permissions
+- **Multi-strategy Support**: Different auth flows per domain
+
+**3. Storage & Infrastructure**
+- **Google Cloud Storage**: Object storage with ACL policies
+- **Database Integration**: Session storage with PostgreSQL support
+- **Replit Sidecar**: Leveraging Replit's internal services
+
+### **⚡ Production Readiness Features**
+
+**Health Checks & Monitoring**
+- Multiple health endpoints (`/`, `/health`, `/healthz`, `/api/health`)
+- Comprehensive error handling with graceful degradation
+- Process stability with uncaught exception handling
+
+**Performance Optimizations**
+- Vite integration for development
+- Static file serving for production
+- Memory-based session storage with MemoryStore
+
+### **🚨 Potential Issues & Recommendations**
+
+**1. Environment Variables**
+```
+⚠️ Missing or incomplete:
+- REPLIT_DOMAINS configuration
+- OPENPROVIDER_USERNAME/PASSWORD (for domain services)
+- PUBLIC_OBJECT_SEARCH_PATHS
+- PRIVATE_OBJECT_DIR
+```
+
+**2. Security Considerations**
+- OAuth is bypassed in development mode
+- Fallback authentication relies on cookies
+- Need to verify production OAuth configuration
+
+**3. Service Dependencies**
+- **Openprovider API**: Domain registration service needs credentials
+- **Google Cloud Storage**: Requires proper bucket configuration
+- **Replit Sidecar**: Dependent on Replit infrastructure
+
+### **💡 Optimization Suggestions**
+
+1. **Environment Configuration**
+   - Set up proper environment variables for all services
+   - Configure production-ready OAuth settings
+   - Add monitoring and logging configuration
+
+2. **Error Handling Enhancement**
+   - Implement more granular error recovery
+   - Add service health monitoring
+   - Improve fallback mechanisms
+
+3. **Performance Tuning**
+   - Consider Redis for session storage in production
+   - Implement caching strategies
+   - Add rate limiting for API endpoints
+
+### **🎪 Business Logic**
+Your platform appears to handle:
+- Tournament management
+- Domain registration services (with markup pricing)
+- User authentication and role management
+- File storage and access control
+
+**Overall Assessment**: Well-structured, production-ready codebase with good error handling and multi-domain support. Main focus should be on completing environment configuration and ensuring all external service credentials are properly set up.
+
+Would you like me to help you troubleshoot any specific issues or optimize particular aspects of this configuration?

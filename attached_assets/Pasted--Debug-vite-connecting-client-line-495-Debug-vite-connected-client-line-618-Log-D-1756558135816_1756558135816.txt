@@ -1,0 +1,139 @@
+[Debug] [vite] connecting... (client, line 495)
+[Debug] [vite] connected. (client, line 618)
+[Log] Domain detection - hostname: – "3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev" (useDomain.ts, line 6)
+[Log] Domain config set: (useDomain.ts, line 90)
+Object
+
+allowFantasyPromo: true
+
+allowProPromo: false
+
+allowSchoolPromo: true
+
+brand: "TRANTOR_TOURNAMENTS"
+
+features: {fantasyLeagues: true, ageVerification: true, crossSelling: true, guestAccess: true, registration: true}
+
+primaryColor: "orange"
+
+theme: "professional"
+
+type: "pro"
+
+Object Prototype
+[Log] Domain detection - hostname: – "3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev" (useDomain.ts, line 6)
+[Log] Domain config set: (useDomain.ts, line 90)
+Object
+
+allowFantasyPromo: true
+
+allowProPromo: false
+
+allowSchoolPromo: true
+
+brand: "TRANTOR_TOURNAMENTS"
+
+features: Object
+
+ageVerification: true
+
+crossSelling: true
+
+fantasyLeagues: true
+
+guestAccess: true
+
+registration: true
+
+Object Prototype
+
+primaryColor: "orange"
+
+theme: "professional"
+
+type: "pro"
+
+Object Prototype
+
+__defineGetter__(propertyName, getterFunction)
+
+__defineSetter__(propertyName, setterFunction)
+
+__lookupGetter__(propertyName)
+
+__lookupSetter__(propertyName)
+
+constructor: function()
+
+hasOwnProperty(propertyName)
+
+isPrototypeOf(property)
+
+propertyIsEnumerable(propertyName)
+
+toLocaleString()
+
+toString()
+
+valueOf()
+[Error] Failed to load resource: the server responded with a status of 401 (Unauthorized) (user, line 0)
+[Info] Successfully preconnected to https://api.stripe.com/
+> Selected Element
+< <button data-replit-metadata="client/src/pages/SmartSignup.tsx:445:18" data-component-name="Button" class="justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 text-primary-foreground h-10 py-2 bg-blue-600 hover:bg-blue-700 px-8 flex items-center" type="submit" data-testid="button-submit">…</button>
+[Debug] [vite] hot updated: /src/pages/SmartSignup.tsx (client, line 223)
+[Debug] [vite] hot updated: /src/index.css?v=OzX_J1d32WnL747OpqPZ1 (client, line 223)
+[Log] Domain detection - hostname: – "3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev" (useDomain.ts, line 6)
+[Log] Domain config set: (useDomain.ts, line 90)
+Object
+
+allowFantasyPromo: true
+
+allowProPromo: false
+
+allowSchoolPromo: true
+
+brand: "TRANTOR_TOURNAMENTS"
+
+features: {fantasyLeagues: true, ageVerification: true, crossSelling: true, guestAccess: true, registration: true}
+
+primaryColor: "orange"
+
+theme: "professional"
+
+type: "pro"
+
+Object Prototype
+[Log] Submit button clicked! Sports: – ["Basketball"] (1) (chunk-RPCDYKBN.js, line 3674)
+[Debug] [vite] hot updated: /src/pages/SmartSignup.tsx (client, line 223)
+[Debug] [vite] hot updated: /src/index.css?v=OzX_J1d32WnL747OpqPZ1 (client, line 223)
+[Log] Domain detection - hostname: – "3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev" (useDomain.ts, line 6)
+[Log] Domain config set: (useDomain.ts, line 90)
+Object
+
+allowFantasyPromo: true
+
+allowProPromo: false
+
+allowSchoolPromo: true
+
+brand: "TRANTOR_TOURNAMENTS"
+
+features: {fantasyLeagues: true, ageVerification: true, crossSelling: true, guestAccess: true, registration: true}
+
+primaryColor: "orange"
+
+theme: "professional"
+
+type: "pro"
+
+Object Prototype
+[Log] Submit button clicked! Sports: – ["Basketball"] (1) (chunk-RPCDYKBN.js, line 3674)
+[Debug] [vite] hot updated: /src/pages/SmartSignup.tsx (client, line 223)
+[Debug] [vite] hot updated: /src/index.css?v=OzX_J1d32WnL747OpqPZ1 (client, line 223)
+[Log] Domain detection - hostname: – "3ce8d4b4-2fcd-4393-838c-caa3dd6e942d-00-1izhl00aj35tk.janeway.replit.dev" (useDomain.ts, line 6)
+[Log] Domain config set: – {type: "pro", brand: "TRANTOR_TOURNAMENTS", theme: "professional", …} (useDomain.ts, line 90)
+{type: "pro", brand: "TRANTOR_TOURNAMENTS", theme: "professional", allowFantasyPromo: true, allowProPromo: false, …}Object
+[Log] Submit button clicked! Sports: – ["Basketball"] (1) (SmartSignup.tsx, line 908)
+[Log] Form errors: – {sportsInvolved: {message: "Please select at least one sport", type: "too_small", ref: undefined}} (SmartSignup.tsx, line 909)
+[Log] Form values: – {sportsInvolved: [], organizationType: "individual", firstName: "Daniel", …} (SmartSignup.tsx, line 910)
+{sportsInvolved: [], organizationType: "individual", firstName: "Daniel", lastName: "Thornton", email: "daniel.thornton@ccisd.us", …}Object

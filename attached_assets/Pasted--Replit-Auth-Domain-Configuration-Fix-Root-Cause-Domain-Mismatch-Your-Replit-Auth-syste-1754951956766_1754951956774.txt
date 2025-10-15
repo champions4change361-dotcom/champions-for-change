@@ -1,0 +1,153 @@
+# Replit Auth Domain Configuration Fix
+
+## 🚨 **Root Cause: Domain Mismatch**
+Your Replit Auth system was configured for development URLs but you're now deployed on `trantortournaments.org`. The OAuth providers are rejecting authentication because the redirect URLs don't match.
+
+## 🔧 **Solution Steps**
+
+### **Step 1: Update Replit Auth Configuration**
+
+1. **In your Replit project**, go to the **"Secrets"** tab (🔒 icon)
+2. **Find or create** these environment variables:
+   ```
+   REPLIT_AUTH_DOMAIN=trantortournaments.org
+   REPLIT_AUTH_URL=https://trantortournaments.org
+   ```
+
+### **Step 2: Check Replit Auth Integration Code**
+
+In your main server file, ensure you have:
+
+```javascript
+// Replit Auth setup for custom domain
+const { auth } = require('@replit/auth');
+
+// Configure for custom domain
+const authConfig = {
+  domain: process.env.REPLIT_AUTH_DOMAIN || 'trantortournaments.org',
+  redirectUrl: process.env.REPLIT_AUTH_URL || 'https://trantortournaments.org'
+};
+
+// Initialize with custom domain
+app.use(auth(authConfig));
+```
+
+### **Step 3: Update OAuth Provider Settings**
+
+**For each OAuth provider you're using:**
+
+#### **Google OAuth Console:**
+- Go to [Google Cloud Console](https://console.cloud.google.com/)
+- Navigate to "APIs & Services" → "Credentials" 
+- Find your OAuth 2.0 Client ID
+- **Add to Authorized redirect URIs:**
+  ```
+  https://trantortournaments.org/auth/callback
+  https://trantortournaments.org/auth/google/callback
+  ```
+
+#### **GitHub OAuth App:**
+- Go to GitHub Settings → Developer settings → OAuth Apps
+- Find your application
+- **Update Authorization callback URL:**
+  ```
+  https://trantortournaments.org/auth/callback
+  ```
+
+#### **Other Providers (X, Facebook, Apple):**
+- Similar process - update callback URLs to use `trantortournaments.org`
+
+### **Step 4: Replit Database Configuration**
+
+If using Replit Database for user storage:
+
+```javascript
+// Update database configuration for production
+const Database = require("@replit/database");
+const db = new Database();
+
+// Ensure proper domain configuration
+const dbConfig = {
+  url: process.env.REPLIT_DB_URL,
+  domain: 'trantortournaments.org'
+};
+```
+
+## 🛠️ **Alternative: Replit-Specific Fix**
+
+### **Option A: Use Replit's Built-in Domain Support**
+
+1. **In Replit project settings**, go to "Deployment"
+2. **Custom Domain section**, verify `trantortournaments.org` is properly linked
+3. **Authentication section**, update allowed domains
+
+### **Option B: Environment Variable Update**
+
+Add these to your Replit Secrets:
+
+```
+REPLIT_AUTH_ALLOWED_DOMAINS=trantortournaments.org
+REPLIT_AUTH_REDIRECT_URI=https://trantortournaments.org/auth/callback
+NODE_ENV=production
+```
+
+## 🔍 **Debug Your Current Configuration**
+
+Add this debug route to check current auth settings:
+
+```javascript
+app.get('/debug/auth-config', (req, res) => {
+  res.json({
+    current_domain: req.get('host'),
+    expected_domain: 'trantortournaments.org',
+    auth_domain: process.env.REPLIT_AUTH_DOMAIN,
+    auth_url: process.env.REPLIT_AUTH_URL,
+    environment: process.env.NODE_ENV,
+    replit_db_url: !!process.env.REPLIT_DB_URL
+  });
+});
+```
+
+Visit: `https://trantortournaments.org/debug/auth-config`
+
+## 🚀 **Quick Test Process**
+
+### **After making changes:**
+
+1. **Restart your Replit application**
+2. **Clear browser cache/cookies** for trantortournaments.org
+3. **Try SSO login again**
+4. **Check browser console** for any remaining errors
+
+### **Expected Working Flow:**
+1. Click "Continue with Google" (or other provider)
+2. See: "Replit wants to access your Google account"
+3. Choose provider and grant permission
+4. Redirect back to your dashboard
+
+## ⚡ **Most Likely Quick Fix**
+
+The fastest solution is probably:
+
+1. **Add to Replit Secrets:**
+   ```
+   REPLIT_AUTH_DOMAIN=trantortournaments.org
+   ```
+
+2. **Update Google OAuth Console** with new callback URL:
+   ```
+   https://trantortournaments.org/auth/callback
+   ```
+
+3. **Restart your Replit app**
+
+## 🎯 **If Still Having Issues**
+
+If the above doesn't work, I need to see:
+
+1. **Your current Replit Secrets** (without the actual secret values)
+2. **The auth integration code** in your main server file
+3. **Browser console errors** when attempting login
+4. **Network tab** showing the failed OAuth request
+
+Your platform is so close to being fully operational! This domain configuration issue is the last blocker before you have a fully functional tournament management system! 🏆

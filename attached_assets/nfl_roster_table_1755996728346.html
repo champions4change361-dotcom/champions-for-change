@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFL Team Rosters</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 100%;
+            overflow-x: auto;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        th {
+            background-color: #2c3e50;
+            color: white;
+            padding: 12px 8px;
+            text-align: left;
+            font-weight: bold;
+            border: 1px solid #ddd;
+        }
+        td {
+            padding: 8px;
+            border: 1px solid #ddd;
+            vertical-align: top;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        tr:hover {
+            background-color: #e8f4f8;
+        }
+        .team-name {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .position {
+            font-weight: bold;
+            color: #27ae60;
+        }
+        .player-name {
+            color: #34495e;
+        }
+        .draft-info {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+        .search-container {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .search-box {
+            padding: 10px;
+            font-size: 16px;
+            border: 2px solid #3498db;
+            border-radius: 5px;
+            width: 300px;
+        }
+        .filter-buttons {
+            margin: 10px 0;
+            text-align: center;
+        }
+        .filter-btn {
+            padding: 8px 16px;
+            margin: 0 5px;
+            border: none;
+            border-radius: 4px;
+            background-color: #3498db;
+            color: white;
+            cursor: pointer;
+        }
+        .filter-btn:hover {
+            background-color: #2980b9;
+        }
+        .filter-btn.active {
+            background-color: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>NFL Team Rosters 2025</h1>
+        
+        <div class="search-container">
+            <input type="text" id="searchBox" class="search-box" placeholder="Search by team, position, or player name..." onkeyup="filterTable()">
+        </div>
+        
+        <div class="filter-buttons">
+            <button class="filter-btn" onclick="filterByPosition('QB')">QBs</button>
+            <button class="filter-btn" onclick="filterByPosition('RB')">RBs</button>
+            <button class="filter-btn" onclick="filterByPosition('WR')">WRs</button>
+            <button class="filter-btn" onclick="filterByPosition('')">All</button>
+        </div>
+
+        <table id="rosterTable">
+            <thead>
+                <tr>
+                    <th>Team</th>
+                    <th>Position</th>
+                    <th>#</th>
+                    <th>Player 1</th>
+                    <th>Draft Info</th>
+                    <th>#</th>
+                    <th>Player 2</th>
+                    <th>Draft Info</th>
+                    <th>#</th>
+                    <th>Player 3</th>
+                    <th>Draft Info</th>
+                    <th>#</th>
+                    <th>Player 4</th>
+                    <th>Draft Info</th>
+                    <th>#</th>
+                    <th>Player 5</th>
+                    <th>Draft Info</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td class="team-name">Arizona Cardinals</td><td class="position">LWR</td><td>18</td><td class="player-name">Harrison Jr., Marvin</td><td class="draft-info">24/1</td><td>80</td><td class="player-name">Fehoko, Simi</td><td class="draft-info">U/LAC</td><td>83</td><td class="player-name">Palmer, Tejhaun</td><td class="draft-info">24/6</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td class="team-name">Arizona Cardinals</td><td class="position">RWR</td><td>14</td><td class="player-name">Wilson, Michael</td><td class="draft-info">23/3</td><td>89</td><td class="player-name">Weaver, Xavier</td><td class="draft-info">CF24</td><td>30</td><td class="player-name">Green, Bryson</td><td class="draft-info">CF25</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td class="team-name">Arizona Cardinals</td><td class="position">SWR</td><td>4</td><td class="player-name">Dortch, Greg</td><td class="draft-info">SF20</td><td>17</td><td class="player-name">JONES, ZAY</td><td class="draft-info">CC/Jax</td><td>82</td><td class="player-name">Baccellia, Andre</td><td class="draft-info">SF21</td><td>39</td><td class="player-name">McCollum, Nate</td><td class="draft-info">SF25</td><td></td><td></td><td></td></tr>
+                <tr><td class="team-name">Arizona Cardinals</td><td class="position">QB</td><td>1</td><td class="player-name">Murray, Kyler</td><td class="draft-info">19/1</td><td>7</td><td class="player-name">BRISSETT, JACOBY</td><td class="draft-info">U/NE</td><td>15</td><td class="player-name">Tune, Clayton</td><td class="draft-info">23/5</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td class="team-name">Arizona Cardinals</td><td class="position">RB</td><td>6</td><td class="player-name">CONNER, JAMES</td><td class="draft-info">U/Pit</td><td>33</td><td class="player-name">Benson, Trey</td><td class="draft-info">24/3</td><td>31</td><td class="player-name">Demercado, Emari</td><td class="draft-info">CF23</td><td>20</td><td class="player-name">Dallas, DeeJay</td><td class="draft-info">U/Sea</td><td>22</td><td class="player-name">Carter, Michael</td><td class="draft-info">W/NYJ</td></tr>
+                
+                <tr><td class="team-name">Atlanta Falcons</td><td class="position">LWR</td><td>1</td><td class="player-name">Mooney, Darnell</td><td class="draft-info">U/Atl</td><td>82</td><td class="player-name">Washington, Casey</td><td class="draft-info">24/6</td><td>80</td><td class="player-name">Nash, Nick</td><td class="draft-info">CF25</td><td>87</td><td class="player-name">Sills V, David</td><td class="draft-info">SF25</td><td></td><td></td><td></td></tr>
+                <tr><td class="team-name">Atlanta Falcons</td><td class="position">RWR</td><td>5</td><td class="player-name">London, Drake</td><td class="draft-info">22/1</td><td>4</td><td class="player-name">HODGE, KHADAREL</td><td class="draft-info">U/Det</td><td>19</td><td class="player-name">Blair, Chris</td><td class="draft-info">SF23</td><td>36</td><td class="player-name">Skinner Jr., Quincy</td><td class="draft-info">CF25</td><td></td><td></td><td></td></tr>
+                <tr><td class="team-name">Atlanta Falcons</td><td class="position">SWR</td><td>34</td><td class="player-name">McCloud III, Ray-Ray</td><td class="draft-info">U/SF</td><td>14</td><td class="player-name">AGNEW, JAMAL</td><td class="draft-info">SF25</td><td>81</td><td class="player-name">Drummond, Dylan</td><td class="draft-info">SF24</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td class="team-name">Atlanta Falcons</td><td class="position">QB</td><td>9</td><td class="player-name">Penix Jr., Michael</td><td class="draft-info">24/1</td><td>18</td><td class="player-name">COUSINS, KIRK</td><td class="draft-info">U/Min</td><td>12</td><td class="player-name">Stick, Easton</td><td class="draft-info">U/LAC</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td class="team-name">Atlanta Falcons</td><td class="position">RB</td><td>7</td><td class="player-name">Robinson, Bijan</td><td class="draft-info">23/1</td><td>25</td><td class="player-name">Allgeier, Tyler</td><td class="draft-info">22/5</td><td>26</td><td class="player-name">Washington Jr., Carlos</td><td class="draft-info">CF23</td><td>38</td><td class="player-name">Carter, Nathan</td><td class="draft-info">CF25</td><td>41</td><td class="player-name">Dotson, Elijah</td><td class="draft-info">SF24</td></tr>
+
+                <tr><td class="team-name">Baltimore Ravens</td><td class="position">LWR</td><td>10</td><td class="player-name">HOPKINS, DEANDRE</td><td class="draft-info">U/KC</td><td>81</td><td class="player-name">Walker, Devontez</td><td class="draft-info">24/4</td><td>6</td><td class="player-name">MILLER, ANTHONY</td><td class="draft-info">SF24</td><td>86</td><td class="player-name">Banks, Jahmal</td><td class="draft-info">CF25</td><td></td><td></td><td></td></tr>
+                <tr><td class="team-name">Baltimore Ravens</td><td class="position">RWR</td><td>7</td><td class="player-name">Bateman, Rashod</td><td class="draft-info">21/1</td><td>16</td><td class="player-name">Wallace, Tylan</td><td class="draft-info">21/4</td><td>18</td><td class="player-name">KIRKWOOD, KEITH</td><td class="draft-info">U/NO</td><td>87</td><td class="player-name">Guillory, Xavier</td><td class="draft-info">CF25</td><td></td><td></td><td></td></tr>
+                <tr><td class="team-name">Baltimore Ravens</td><td class="position">SWR</td><td>4</td><td class="player-name">Flowers, Zay</td><td class="draft-info">23/1</td><td>83</td><td class="player-name">Wester, LaJohntay</td><td class="draft-info">25/6</td><td>12</td><td class="player-name">Cunningham, Malik</td><td class="draft-info">P/NE</td><td>82</td><td class="player-name">Wade, Dayton</td><td class="draft-info">CF24</td><td></td><td></td><td></td></tr>
+                <tr><td class="team-name">Baltimore Ravens</td><td class="position">QB</td><td>8</td><td class="player-name">Jackson, Lamar</td><td class="draft-info">18/1</td><td>15</td><td class="player-name">RUSH, COOPER</td><td class="draft-info">U/Dal</td><td>13</td><td class="player-name">Leary, Devin</td><td class="draft-info">24/6</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td class="team-name">Baltimore Ravens</td><td class="position">RB</td><td>22</td><td class="player-name">HENRY, DERRICK</td><td class="draft-info">U/Ten</td><td>43</td><td class="player-name">Hill, Justice</td><td class="draft-info">19/4</td><td>34</td><td class="player-name">Mitchell, Keaton</td><td class="draft-info">CF23</td><td>26</td><td class="player-name">Ali, Rasheen</td><td class="draft-info">24/5</td><td>30</td><td class="player-name">Johnson, D'Ernest</td><td class="draft-info">U/Jax</td></tr>
+
+                <tr><td class="team-name">Buffalo Bills</td><td class="position">LWR</td><td>5</td><td class="player-name">Palmer, Joshua</td><td class="draft-info">U/LAC</td><td>80</td><td class="player-name">Shavers, Tyrell</td><td class="draft-info">CF23</td><td>15</td><td class="player-name">Shenault Jr., Laviska</td><td class="draft-info">SF25</td><td>32</td><td class="player-name">Cain, Deon</td><td class="draft-info">SF24</td><td></td><td></td><td></td></tr>
+                <tr><td class="team-name">Buffalo Bills</td><td class="position">RWR</td><td>0</td><td class="player-name">Coleman, Keon</td><td class="draft-info">24/2</td><td>1</td><td class="player-name">Samuel, Curtis</td><td class="draft-info">U/Was</td><td>82</td><td class="player-name">Wilkerson, Kristian</td><td class="draft-info">SF25</td><td>16</td><td class="player-name">DuBose, Grant</td><td class="draft-info">U/Mia</td><td></td><td></td><td></td></tr>
+                <tr><td class="team-name">Buffalo Bills</td><td class="position">SWR</td><td>10</td><td class="player-name">Shakir, Khalil</td><td class="draft-info">22/5</td><td>18</td><td class="player-name">Moore, Elijah</td><td class="draft-info">U/Cle</td><td>19</td><td class="player-name">Hamler, KJ</td><td class="draft-info">SF24</td><td>89</td><td class="player-name">Gosnell, Stephen</td><td class="draft-info">CF25</td><td></td><td></td><td></td></tr>
+                <tr><td class="team-name">Buffalo Bills</td><td class="position">QB</td><td>17</td><td class="player-name">Allen, Josh</td><td class="draft-info">18/1</td><td>11</td><td class="player-name">TRUBISKY, MITCHELL</td><td class="draft-info">CC/Pit</td><td>14</td><td class="player-name">WHITE, MIKE</td><td class="draft-info">SF24</td><td>6</td><td class="player-name">Buechele, Shane</td><td class="draft-info">SF23</td><td></td><td></td><td></td></tr>
+                <tr><td class="team-name">Buffalo Bills</td><td class="position">RB</td><td>4</td><td class="player-name">Cook, James</td><td class="draft-info">22/2</td><td>22</td><td class="player-name">Davis, Ray</td><td class="draft-info">24/4</td><td>26</td><td class="player-name">Johnson, Ty</td><td class="draft-info">SF23</td><td>20</td><td class="player-name">Gore Jr., Frank</td><td class="draft-info">CF24</td><td>21</td><td class="player-name">Young, Elijah</td><td class="draft-info">SF25</td></tr>
+
+                <tr><td class="team-name">Carolina Panthers</td><td class="position">LWR</td><td>4</td><td class="player-name">McMillan, Tetairoa</td><td class="draft-info">25/1</td><td>83</td><td class="player-name">MOORE, DAVID</td><td class="draft-info">U/TB</td><td>87</td><td class="player-name">Tremayne, Brycen</td><td class="draft-info">SF25</td><td>81</td><td class="player-name">Luther, T.J.</td><td class="draft-info">SF24</td><td></td><td></td><td></td></tr>
+                <tr><td class="team-name">Carolina Panthers</td><td class="position">RWR</td><td>17</td><td class="player-name">Legette, Xavier</td><td class="draft-info">24/1</td><td>18</td><td class="player-name">Coker, Jalen</td><td class="draft-info">CF24</td><td>80</td><td class="player-name">George, Jacolby</td><td class="draft-info">CF25</td><td>88</td><td class="player-name">Reed, Ja'seem</td><td class="draft-info">SF25</td><td></td><td></td><td></td></tr>
+                <tr><td class="team-name">Carolina Panthers</td><td class="position">SWR</td><td>19</td><td class="player-name">THIELEN, ADAM</td><td class="draft-info">CC/Min</td><td>15</td><td class="player-name">Horn Jr., Jimmy</td><td class="draft-info">25/6</td><td>13</td><td class="player-name">Renfrow, Hunter</td><td class="draft-info">SF25</td><td>86</td><td class="player-name">Hudson, Kobe</td><td class="draft-info">CF25</td><td></td><td></td><td></td></tr>
+                <tr><td class="team-name">Carolina Panthers</td><td class="position">QB</td><td>9</td><td class="player-name">Young, Bryce</td><td class="draft-info">23/1</td><td>14</td><td class="player-name">DALTON, ANDY</td><td class="draft-info">U/NO</td><td>16</td><td class="player-name">Plummer, Jack</td><td class="draft-info">CF24</td><td>10</td><td class="player-name">Perkins, Bryce</td><td class="draft-info">SF25</td><td></td><td></td><td></td></tr>
+                <tr><td class="team-name">Carolina Panthers</td><td class="position">RB</td><td>30</td><td class="player-name">Hubbard, Chuba</td><td class="draft-info">21/4</td><td>5</td><td class="player-name">Dowdle, Rico</td><td class="draft-info">U/Dal</td><td>23</td><td class="player-name">Etienne, Trevor</td><td class="draft-info">25/4</td><td>3</td><td class="player-name">Blackshear, Raheem</td><td class="draft-info">P/Buf</td><td>39</td><td class="player-name">Bailey, Emani</td><td class="draft-info">SF24</td></tr>
+
+                <tr><td class="team-name">Chicago Bears</td><td class="position">LWR</td><td>15</td><td class="player-name">Odunze, Rome</td><td class="draft-info">24/1</td><td>20</td><td class="player-name">Walker, Jahdae</td><td class="draft-info">CF25</td><td>80</td><td class="player-name">Boykin, Miles</td><td class="draft-info">SF25</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td class="team-name">Chicago Bears</td><td class="position">RWR</td><td>2</td><td class="player-name">Moore, DJ</td><td class="draft-info">T/Car</td><td>12</td><td class="player-name">Duvernay, Devin</td><td class="draft-info">CC/Jax</td><td>10</td><td class="player-name">Scott, Tyler</td><td class="draft-info">23/4</td><td>83</td><td class="player-name">Toure, Samori</td><td class="draft-info">SF24</td><td></td><td></td><td></td></tr>
+                <tr><td class="team-name">Chicago Bears</td><td class="position">SWR</td><td>14</td><td class="player-name">Zaccheaus, Olamide</td><td class="draft-info">U/Was</td><td>87</td><td class="player-name">Burden III, Luther</td><td class="draft-info">25/2</td><td>13</td><td class="player-name">Alexander, Maurice</td><td class="draft-info">SF25</td><td>26</td><td class="player-name">Richardson, JP</td><td class="draft-info">CF25</td><td></td><td></td><td></td></tr>
+                <tr><td class="team-name">Chicago Bears</td><td class="position">QB</td><td>18</td><td class="player-name">Williams, Caleb</td><td class="draft-info">24/1</td><td>17</td><td class="player-name">Bagent, Tyson</td><td class="draft-info">CF23</td><td>11</td><td class="player-name">KEENUM, CASE</td><td class="draft-info">U/Hou</td><td>16</td><td class="player-name">Reed, Austin</td><td class="draft-info">CF24</td><td></td><td></td><td></td></tr>
+                <tr><td class="team-name">Chicago Bears</td><td class="position">RB</td><td>4</td><td class="player-name">Swift, D'Andre</td><td class="draft-info">U/Phi</td><td>23</td><td class="player-name">Johnson, Roschon</td><td class="draft-info">23/4</td><td>25</td><td class="player-name">Monangai, Kyle</td><td class="draft-info">25/7</td><td>21</td><td class="player-name">Homer, Travis</td><td class="draft-info">U/Sea</td><td>38</td><td class="player-name">Brown, Brittain</td><td class="draft-info">SF25</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function filterTable() {
+            const input = document.getElementById('searchBox');
+            const filter = input.value.toUpperCase();
+            const table = document.getElementById('rosterTable');
+            const rows = table.getElementsByTagName('tr');
+
+            for (let i = 1; i < rows.length; i++) {
+                let row = rows[i];
+                let showRow = false;
+                
+                const cells = row.getElementsByTagName('td');
+                for (let j = 0; j < cells.length; j++) {
+                    if (cells[j].textContent.toUpperCase().indexOf(filter) > -1) {
+                        showRow = true;
+                        break;
+                    }
+                }
+                
+                row.style.display = showRow ? '' : 'none';
+            }
+        }
+
+        function filterByPosition(position) {
+            const table = document.getElementById('rosterTable');
+            const rows = table.getElementsByTagName('tr');
+            
+            // Update button states
+            const buttons = document.querySelectorAll('.filter-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            for (let i = 1; i < rows.length; i++) {
+                let row = rows[i];
+                const positionCell = row.cells[1];
+                
+                if (position === '' || positionCell.textContent.includes(position)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            }
+        }
+    </script>
+</body>
+</html>
