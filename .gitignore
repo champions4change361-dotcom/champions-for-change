@@ -7,3 +7,13 @@ vite.config.ts.*
 .config/
 .local/
 .env
+.local/
+.config/
+attached_assets/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.mp4
+*.mov
+dist/
